@@ -16,6 +16,7 @@ namespace Mindscape.Raygun4Net
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)
         .SetHttpDetails(HttpContext.Current)
+        .SetClientDetails()
         .Build();
 
       Send(message);

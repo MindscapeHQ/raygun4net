@@ -53,5 +53,12 @@ namespace Mindscape.Raygun4Net
 
       return this;
     }
+
+    public IRaygunMessageBuilder SetClientDetails()
+    {
+      _raygunMessage.Details.Client = new RaygunClientMessage();
+
+      return this;
+    }
   }
 }

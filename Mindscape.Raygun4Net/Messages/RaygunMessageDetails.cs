@@ -7,5 +7,7 @@ namespace Mindscape.Raygun4Net.Messages
     public RaygunErrorMessage Error { get; set; }
 
     public RaygunRequestMessage Request { get; set; }
+
+    public RaygunClientMessage Client { get; set; }
   }
 }
