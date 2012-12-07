@@ -41,17 +41,21 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IRaygunMessageBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaygunClient.cs" />
     <Compile Include="RaygunErrorMessageDetails.cs" />
     <Compile Include="RaygunMessage.cs" />
+    <Compile Include="RaygunMessageBuilder.cs" />
     <Compile Include="RaygunMessageDetails.cs" />
+    <Compile Include="RaygunRequestMessageDetails.cs" />
     <Compile Include="RaygunSettings.cs" />
   </ItemGroup>
   <ItemGroup>

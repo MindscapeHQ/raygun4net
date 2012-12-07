@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Web;
 
 using Newtonsoft.Json.Linq;
 
@@ -9,7 +10,13 @@ namespace Mindscape.Raygun4Net
   {
     public void Send(Exception exception)
     {
-      Send(new RaygunMessage(exception));
+      var message = RaygunMessageBuilder.New
+        .SetMachineName(Environment.MachineName)
+        .SetExceptionDetails(exception)
+        .SetHttpDetails(HttpContext.Current)
+        .Build();
+
+      Send(message);
     }
 
     public void Send(RaygunMessage raygunMessage)

@@ -4,14 +4,10 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunMessage
   {
-    public RaygunMessage(Exception exception)
+    public RaygunMessage()
     {
       OccurredOn = DateTime.UtcNow;
-      Details = new RaygunMessageDetails
-                  {
-                    MachineName = Environment.MachineName, 
-                    Error = new RaygunErrorMessageDetails(exception)
-                  };
+      Details = new RaygunMessageDetails();
     }
 
     public DateTime OccurredOn { get; set; }

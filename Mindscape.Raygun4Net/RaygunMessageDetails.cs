@@ -5,5 +5,7 @@ namespace Mindscape.Raygun4Net
     public string MachineName { get; set; }
 
     public RaygunErrorMessageDetails Error { get; set; }
+
+    public RaygunRequestMessageDetails Request { get; set; }
   }
 }
