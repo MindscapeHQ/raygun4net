@@ -2,6 +2,8 @@
 using System.Net;
 using System.Web;
 
+using Mindscape.Raygun4Net.Messages;
+
 using Newtonsoft.Json.Linq;
 
 namespace Mindscape.Raygun4Net

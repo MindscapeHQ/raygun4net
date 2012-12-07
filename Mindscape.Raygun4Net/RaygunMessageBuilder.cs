@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Web;
 
+using Mindscape.Raygun4Net.Messages;
+
 namespace Mindscape.Raygun4Net
 {
   public class RaygunMessageBuilder : IRaygunMessageBuilder
@@ -36,7 +38,7 @@ namespace Mindscape.Raygun4Net
     {
       if (exception != null)
       {
-        _raygunMessage.Details.Error = new RaygunErrorMessageDetails(exception);
+        _raygunMessage.Details.Error = new RaygunErrorMessage(exception);
       }
 
       return this;
@@ -46,7 +48,7 @@ namespace Mindscape.Raygun4Net
     {
       if (context != null)
       {
-        _raygunMessage.Details.Request = new RaygunRequestMessageDetails(context);
+        _raygunMessage.Details.Request = new RaygunRequestMessage(context);
       }
 
       return this;

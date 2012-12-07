@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Web;
 
-namespace Mindscape.Raygun4Net
+namespace Mindscape.Raygun4Net.Messages
 {
-  public class RaygunRequestMessageDetails
+  public class RaygunRequestMessage
   {
-    public RaygunRequestMessageDetails(HttpContext httpContext)
+    public RaygunRequestMessage(HttpContext httpContext)
     {
       HostName = httpContext.Request.Url.Host;
       Url = httpContext.Request.Url.AbsolutePath;

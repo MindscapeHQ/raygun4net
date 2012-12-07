@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 
-namespace Mindscape.Raygun4Net
+namespace Mindscape.Raygun4Net.Messages
 {
-  public class RaygunErrorMessageDetails
+  public class RaygunErrorMessage
   {
-    public RaygunErrorMessageDetails(Exception exception)
+    public RaygunErrorMessage(Exception exception)
     {
       var exceptionType = exception.GetType();
 
