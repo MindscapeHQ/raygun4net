@@ -1,6 +1,6 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Web;
 
 namespace Mindscape.Raygun4Net.Messages
@@ -13,17 +13,16 @@ namespace Mindscape.Raygun4Net.Messages
       Url = httpContext.Request.Url.AbsolutePath;
       HttpMethod = httpContext.Request.RequestType;
       IPAddress = httpContext.Request.UserHostAddress;
-      RetrieveQueryString(httpContext.Request.QueryString);
+      Data = ToDictionary(httpContext.Request.ServerVariables);
+      QueryString = ToDictionary(httpContext.Request.QueryString);
+      Headers = ToDictionary(httpContext.Request.Headers);
     }
 
-    private void RetrieveQueryString(NameValueCollection nameValueCollection)
+    private static IDictionary ToDictionary(NameValueCollection nameValueCollection)
     {
-      QueryString = new Dictionary<string, string>();
+      var keys = nameValueCollection.AllKeys;
 
-      foreach (string key in nameValueCollection.Keys)
-      {
-        QueryString.Add(key, nameValueCollection[key]);
-      }
+      return keys.ToDictionary(s => s, s => nameValueCollection[s]);
     }
 
     public string HostName { get; set; }
@@ -35,5 +34,9 @@ namespace Mindscape.Raygun4Net.Messages
     public string IPAddress { get; set; }
 
     public IDictionary QueryString { get; set; }
+
+    public IDictionary Headers { get; set; }
+
+    public IDictionary Data { get; set; }
   }
 }
