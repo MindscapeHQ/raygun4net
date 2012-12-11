@@ -1,4 +1,4 @@
-raygun4net
+Raygun4Net
 ==========
 
 Raygun.io Plugin for .NET Framework
