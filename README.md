@@ -18,7 +18,7 @@ Add a section to configSections:
 Add the Raygun settings configuration block from above:
 
 ```
-<RaygunSettings apikey="" />
+<RaygunSettings apikey="{{apikey for your application}}" />
 ```
 
 You can then either use the RaygunClient class directly to pass exceptions to Raygun or there is an HttpModule you can add.
