@@ -4,6 +4,7 @@ using System.Web;
 
 using Mindscape.Raygun4Net.Messages;
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Mindscape.Raygun4Net
@@ -28,7 +29,7 @@ namespace Mindscape.Raygun4Net
       {
         client.Headers.Add("X-ApiKey", RaygunSettings.Settings.ApiKey);
 
-        client.UploadString(RaygunSettings.Settings.ApiEndpoint, JObject.FromObject(raygunMessage).ToString());
+        client.UploadString(RaygunSettings.Settings.ApiEndpoint, JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling =  MissingMemberHandling.Ignore }).ToString());
       }
     }
   }
