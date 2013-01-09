@@ -38,12 +38,7 @@ namespace Mindscape.Raygun4Net
     {
       if (exception != null)
       {
-        _raygunMessage.Details.Error = RaygunErrorMessageBuilder.New
-                                   .SetClassName(exception)
-                                   .SetData(exception)
-                                   .SetMessage(exception)
-                                   .SetStackTrace(exception)
-                                   .Build();
+        _raygunMessage.Details.Error = new RaygunErrorMessage(exception);
       }
 
       return this;

@@ -48,7 +48,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IRaygunErrorMessageBuilder.cs" />
     <Compile Include="IRaygunMessageBuilder.cs" />
     <Compile Include="Messages\RaygunClientMessage.cs" />
     <Compile Include="Messages\RaygunErrorStackTraceLineMessage.cs" />
@@ -56,7 +55,6 @@
     <Compile Include="RaygunClient.cs" />
     <Compile Include="Messages\RaygunErrorMessage.cs" />
     <Compile Include="Messages\RaygunMessage.cs" />
-    <Compile Include="RaygunErrorMessageBuilder.cs" />
     <Compile Include="RaygunHttpModule.cs" />
     <Compile Include="RaygunMessageBuilder.cs" />
     <Compile Include="Messages\RaygunMessageDetails.cs" />
