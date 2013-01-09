@@ -29,7 +29,14 @@ namespace Mindscape.Raygun4Net
       {
         client.Headers.Add("X-ApiKey", RaygunSettings.Settings.ApiKey);
 
-        client.UploadString(RaygunSettings.Settings.ApiEndpoint, JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling =  MissingMemberHandling.Ignore }).ToString());
+        try
+        {
+          client.UploadString(RaygunSettings.Settings.ApiEndpoint, JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString());
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+        }
       }
     }
   }
