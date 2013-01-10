@@ -32,14 +32,21 @@ namespace Mindscape.Raygun4Net
 
     public void Send(Exception exception)
     {
-      var message = RaygunMessageBuilder.New
+      if (string.IsNullOrEmpty(_apiKey))
+      {
+        System.Diagnostics.Trace.WriteLine("ApiKey has not been provided, exception will not be logged");
+      }
+      else
+      {
+        var message = RaygunMessageBuilder.New
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)
         .SetHttpDetails(HttpContext.Current)
         .SetClientDetails()
         .Build();
 
-      Send(message);
+        Send(message);
+      }
     }
 
     public void Send(RaygunMessage raygunMessage)
