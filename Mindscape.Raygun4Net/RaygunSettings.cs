@@ -7,11 +7,14 @@ namespace Mindscape.Raygun4Net
   {
     private static readonly RaygunSettings settings = ConfigurationManager.GetSection("RaygunSettings") as RaygunSettings;
 
+    private const string DefaultApiEndPoint = "https://api.raygun.io/entries";
+
     public static RaygunSettings Settings
     {
       get
       {
-        return settings;
+        // If no configuration setting is provided then return the default values
+        return settings ?? new RaygunSettings { ApiKey = "", ApiEndpoint = new Uri(DefaultApiEndPoint) };
       }
     }
 
@@ -23,7 +26,7 @@ namespace Mindscape.Raygun4Net
       set { this["apikey"] = value; }
     }
 
-    [ConfigurationProperty("endpoint", IsRequired = false, DefaultValue = "https://api.raygun.io/entries")]
+    [ConfigurationProperty("endpoint", IsRequired = false, DefaultValue = DefaultApiEndPoint)]
     public Uri ApiEndpoint
     {
       get { return (Uri)this["endpoint"]; }
