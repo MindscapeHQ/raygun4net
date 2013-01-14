@@ -12,6 +12,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{9EB26D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.Tests", "Mindscape.Raygun4Net.Tests\Mindscape.Raygun4Net.Tests.csproj", "{30696896-9463-441E-9789-C79F6BF7B793}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.WinRT", "Mindscape.Raygun4Net.WinRT\Mindscape.Raygun4Net.WinRT.csproj", "{AFA22CC1-26B1-48DD-BC78-C6DDE0CF51B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.Web", "Mindscape.Raygun4Net.Web\Mindscape.Raygun4Net.Web.csproj", "{A13D3BD4-AF17-4EB0-A054-932F4180D02E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +30,14 @@ Global
 		{30696896-9463-441E-9789-C79F6BF7B793}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{30696896-9463-441E-9789-C79F6BF7B793}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{30696896-9463-441E-9789-C79F6BF7B793}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFA22CC1-26B1-48DD-BC78-C6DDE0CF51B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFA22CC1-26B1-48DD-BC78-C6DDE0CF51B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFA22CC1-26B1-48DD-BC78-C6DDE0CF51B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFA22CC1-26B1-48DD-BC78-C6DDE0CF51B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A13D3BD4-AF17-4EB0-A054-932F4180D02E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A13D3BD4-AF17-4EB0-A054-932F4180D02E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A13D3BD4-AF17-4EB0-A054-932F4180D02E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A13D3BD4-AF17-4EB0-A054-932F4180D02E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Web;
-
 using Mindscape.Raygun4Net.Messages;
 
-namespace Mindscape.Raygun4Net
+namespace Mindscape.Raygun4Net.Web
 {
-  public class RaygunMessageBuilder : IRaygunMessageBuilder
+  public class RaygunMessageBuilder : IRaygunMessageBuilder, IRaygunHttpMessageBuilder
   {
     public static RaygunMessageBuilder New 
     {
@@ -44,7 +43,7 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
-    public IRaygunMessageBuilder SetHttpDetails(HttpContext context)
+    public IRaygunMessageBuilder SetHttpDetails(HttpContext context)    
     {
       if (context != null)
       {

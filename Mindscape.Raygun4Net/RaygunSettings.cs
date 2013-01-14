@@ -3,7 +3,7 @@ using System.Configuration;
 
 namespace Mindscape.Raygun4Net
 {
-  internal class RaygunSettings : ConfigurationSection
+  public class RaygunSettings : ConfigurationSection
   {
     private static readonly RaygunSettings settings = ConfigurationManager.GetSection("RaygunSettings") as RaygunSettings;
 
