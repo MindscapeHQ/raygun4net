@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 
-namespace Mindscape.Raygun4Net.Web
+namespace Mindscape.Raygun4Net
 {
   public interface IRaygunHttpMessageBuilder
   {

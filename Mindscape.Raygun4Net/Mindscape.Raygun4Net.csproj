@@ -35,7 +35,8 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net35\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -48,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IRaygunHttpMessageBuilder.cs" />
     <Compile Include="IRaygunMessageBuilder.cs" />
     <Compile Include="Messages\RaygunClientMessage.cs" />
     <Compile Include="Messages\RaygunErrorStackTraceLineMessage.cs" />
@@ -57,6 +59,8 @@
     <Compile Include="Messages\RaygunMessageDetails.cs" />
     <Compile Include="Messages\RaygunRequestMessage.cs" />
     <Compile Include="RaygunClient.cs" />
+    <Compile Include="RaygunHttpModule.cs" />
+    <Compile Include="RaygunMessageBuilder.cs" />
     <Compile Include="RaygunSettings.cs" />
   </ItemGroup>
   <ItemGroup>

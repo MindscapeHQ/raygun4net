@@ -44,11 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IRaygunHttpMessageBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RaygunHttpClient.cs" />
-    <Compile Include="RaygunHttpModule.cs" />
-    <Compile Include="RaygunMessageBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net\Mindscape.Raygun4Net.csproj">

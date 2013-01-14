@@ -2,7 +2,7 @@
 using System.Web;
 using Mindscape.Raygun4Net.Messages;
 
-namespace Mindscape.Raygun4Net.Web
+namespace Mindscape.Raygun4Net
 {
   public class RaygunMessageBuilder : IRaygunMessageBuilder, IRaygunHttpMessageBuilder
   {

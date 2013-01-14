@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Web;
 
-namespace Mindscape.Raygun4Net.Web
+namespace Mindscape.Raygun4Net
 {
   public class RaygunHttpModule : IHttpModule
   {
@@ -20,7 +20,7 @@ namespace Mindscape.Raygun4Net.Web
 
       var exception = application.Server.GetLastError();
 
-      var raygunClient = new RaygunHttpClient();
+      var raygunClient = new RaygunClient();
 
       raygunClient.Send(exception);
     }
