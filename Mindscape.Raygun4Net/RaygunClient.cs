@@ -46,6 +46,8 @@ namespace Mindscape.Raygun4Net
       {
 #if !WINRT
         System.Diagnostics.Trace.WriteLine("ApiKey has not been provided, exception will not be logged");
+#else
+        System.Diagnostics.Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
 #endif
       }
       else
@@ -69,10 +71,9 @@ namespace Mindscape.Raygun4Net
         Send(message);
       }
     }
-
+#if !WINRT
     public void Send(RaygunMessage raygunMessage)
     {
-#if !WINRT
       using (var client = new WebClient())
       {
         client.Headers.Add("X-ApiKey", _apiKey);
@@ -85,8 +86,12 @@ namespace Mindscape.Raygun4Net
         {
           System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
         }
-      }      
+      }    
+    }
 #else
+    public async void Send(RaygunMessage raygunMessage)
+    {
+
       HttpClientHandler handler = new HttpClientHandler();
       handler.UseDefaultCredentials = true;
 
@@ -100,21 +105,47 @@ namespace Mindscape.Raygun4Net
 
         try
         {
-          Task.Run(async () => PostMessageAsync(client, httpContent, RaygunSettings.Settings.ApiEndpoint));
+          await PostMessageAsync(client, httpContent, RaygunSettings.Settings.ApiEndpoint);
         }
         catch (Exception ex)
         {
           System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
         }
       }
-#endif
+
     }
 
-#if WINRT
-    private async void PostMessageAsync(HttpClient client, HttpContent httpContent, Uri uri)
+    private async Task PostMessageAsync(HttpClient client, HttpContent httpContent, Uri uri)
     {
-      await client.PostAsync(uri, httpContent);
+      HttpResponseMessage response;
+      response = client.PostAsync(uri, httpContent).Result;
       client.Dispose();
+    }
+
+    public void Wrap(Action func)
+    {      
+      try
+      {
+        func();
+      }
+      catch (Exception ex)
+      {
+        Send(ex);
+        throw;
+      }
+    }
+
+    public TResult Wrap<TResult>(Func<TResult> func)
+    {
+      try
+      {
+        return func();
+      }
+      catch (Exception ex)
+      {
+        Send(ex);
+        throw;
+      }
     }
 #endif
   }
