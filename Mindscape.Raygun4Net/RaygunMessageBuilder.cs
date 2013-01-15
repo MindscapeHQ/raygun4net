@@ -1,10 +1,12 @@
 ﻿using System;
+#if !WINRT
 using System.Web;
+#endif
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
 {
-  public class RaygunMessageBuilder : IRaygunMessageBuilder, IRaygunHttpMessageBuilder
+  public class RaygunMessageBuilder : IRaygunMessageBuilder
   {
     public static RaygunMessageBuilder New 
     {
@@ -42,7 +44,7 @@ namespace Mindscape.Raygun4Net
 
       return this;
     }
-
+#if !WINRT
     public IRaygunMessageBuilder SetHttpDetails(HttpContext context)    
     {
       if (context != null)
@@ -52,7 +54,7 @@ namespace Mindscape.Raygun4Net
 
       return this;
     }
-
+#endif
     public IRaygunMessageBuilder SetClientDetails()
     {
       _raygunMessage.Details.Client = new RaygunClientMessage();

@@ -99,12 +99,25 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
+      <Link>IRaygunMessageBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunMessage.cs">
+      <Link>RaygunMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunMessageDetails.cs">
+      <Link>RaygunMessageDetails.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\RaygunClient.cs">
       <Link>RaygunClient.cs</Link>
     </Compile>
-    <Compile Include="IRaygunWinrtMessageBuilder.cs" />
+    <Compile Include="..\Mindscape.Raygun4Net\RaygunMessageBuilder.cs">
+      <Link>RaygunMessageBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\RaygunSettings.cs">
+      <Link>RaygunSettings.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RaygunWinrtClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Mindscape.Raygun4Net">

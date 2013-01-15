@@ -1,9 +1,18 @@
 ﻿using System;
 using System.Net;
 using Mindscape.Raygun4Net.Messages;
+#if !WINRT
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-#if !WINRT
+#endif
+#if WINRT
+using System.Threading.Tasks;
+using System.Net.Http.Headers;
+using System.Net.Http;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Windows.Networking.Connectivity;
+#else
 using System.Web;
 #endif
 
@@ -11,9 +20,7 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunClient
   {
-    private readonly string _apiKey;
-
-    public RaygunMessage Result { get; set; }
+    private readonly string _apiKey;    
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -31,7 +38,7 @@ namespace Mindscape.Raygun4Net
     public RaygunClient()
       : this(RaygunSettings.Settings.ApiKey)
     {
-    }
+    }    
 
     public void Send(Exception exception)
     {
@@ -52,9 +59,8 @@ namespace Mindscape.Raygun4Net
                                       .SetClientDetails()
                                       .Build();
 #else
-        var message = RaygunMessageBuilder.New
-              .SetHttpDetails(HttpContext.Current)
-              .SetMachineName(Environment.MachineName)
+        var message = RaygunMessageBuilder.New              
+              .SetMachineName(NetworkInformation.GetHostNames()[0].DisplayName)
               .SetExceptionDetails(exception)
               .SetClientDetails()
               .Build(); 
@@ -79,9 +85,45 @@ namespace Mindscape.Raygun4Net
         {
           System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
         }
-      }
-      Result = raygunMessage;
+      }      
+#else
+      HttpClientHandler handler = new HttpClientHandler();
+      handler.UseDefaultCredentials = true;
+
+      var client = new HttpClient(handler);
+      {                
+        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("raygun4net-winrt", "1.0.0"));        
+
+        HttpContent httpContent = new StringContent(JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString());
+        httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-raygun-message");
+        httpContent.Headers.Add("X-ApiKey", _apiKey);         
+
+        try
+        {
+          Task.Run(async () => PostMessageAsync(client, httpContent, RaygunSettings.Settings.ApiEndpoint));
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));          
+        }
+      }      
 #endif
     }
-  }
+
+#if WINRT
+    private async void PostMessageAsync(HttpClient client, HttpContent httpContent, Uri uri)
+    {
+      HttpResponseMessage response;
+      try
+      {        
+        response = await client.PostAsync(uri, httpContent);
+        client.Dispose();
+      }
+      catch (Exception e)
+      {
+        throw;
+      }      
+    }
+#endif
+  }  
 }
