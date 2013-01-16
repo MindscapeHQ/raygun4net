@@ -35,6 +35,13 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
+    public IRaygunMessageBuilder SetEnvironmentDetails()
+    {
+      _raygunMessage.Details.Environment = new RaygunEnvironmentMessage();
+
+      return this;
+    }
+
     public IRaygunMessageBuilder SetExceptionDetails(Exception exception)
     {
       if (exception != null)
@@ -44,6 +51,14 @@ namespace Mindscape.Raygun4Net
 
       return this;
     }
+
+    public IRaygunMessageBuilder SetClientDetails()
+    {
+      _raygunMessage.Details.Client = new RaygunClientMessage();
+
+      return this;
+    }
+
 #if !WINRT
     public IRaygunMessageBuilder SetHttpDetails(HttpContext context)    
     {
@@ -54,12 +69,6 @@ namespace Mindscape.Raygun4Net
 
       return this;
     }
-#endif
-    public IRaygunMessageBuilder SetClientDetails()
-    {
-      _raygunMessage.Details.Client = new RaygunClientMessage();
-
-      return this;
-    }
+#endif    
   }
 }

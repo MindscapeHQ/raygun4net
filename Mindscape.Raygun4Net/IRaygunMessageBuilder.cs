@@ -16,5 +16,7 @@ namespace Mindscape.Raygun4Net
     IRaygunMessageBuilder SetExceptionDetails(Exception exception);
 
     IRaygunMessageBuilder SetClientDetails();
+
+    IRaygunMessageBuilder SetEnvironmentDetails();
   }
 }

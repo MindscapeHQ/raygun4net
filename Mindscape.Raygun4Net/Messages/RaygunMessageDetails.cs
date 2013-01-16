@@ -9,6 +9,8 @@ namespace Mindscape.Raygun4Net.Messages
     public RaygunRequestMessage Request { get; set; }
 #endif
 
+    public RaygunEnvironmentMessage Environment { get; set; }
+
     public RaygunClientMessage Client { get; set; }
   }
 }

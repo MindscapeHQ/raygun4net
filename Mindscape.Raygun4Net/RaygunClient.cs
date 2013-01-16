@@ -55,17 +55,19 @@ namespace Mindscape.Raygun4Net
 
 #if !WINRT
         var message = RaygunMessageBuilder.New
-                                      .SetHttpDetails(HttpContext.Current)
-                                      .SetMachineName(Environment.MachineName)
-                                      .SetExceptionDetails(exception)
-                                      .SetClientDetails()
-                                      .Build();
+          .SetHttpDetails(HttpContext.Current)                                                                  
+          .SetEnvironmentDetails()                                      
+          .SetMachineName(Environment.MachineName)                                      
+          .SetExceptionDetails(exception)
+          .SetClientDetails()                                      
+          .Build();
 #else
         var message = RaygunMessageBuilder.New
-              .SetMachineName(NetworkInformation.GetHostNames()[0].DisplayName)
-              .SetExceptionDetails(exception)
-              .SetClientDetails()
-              .Build();
+          .SetEnvironmentDetails()
+          .SetMachineName(NetworkInformation.GetHostNames()[0].DisplayName)
+          .SetExceptionDetails(exception)
+          .SetClientDetails()              
+          .Build();
 #endif
 
         Send(message);
@@ -86,7 +88,7 @@ namespace Mindscape.Raygun4Net
         {
           System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
         }
-      }    
+      }
     }
 #else
     public async void Send(RaygunMessage raygunMessage)
