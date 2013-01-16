@@ -41,7 +41,7 @@ task Test -depends Compile {
 task Merge -depends Compile {
     Push-Location -Path $build_dir
 
-    exec { ilmerge.exe /out:"$release_dir\$merged_assemlby_name" $assemblies_to_merge }
+    exec { ilmerge.exe /internalize /out:"$release_dir\$merged_assemlby_name" $assemblies_to_merge }
 
     Pop-Location
 }
