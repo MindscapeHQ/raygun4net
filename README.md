@@ -29,7 +29,7 @@ You can then either use the RaygunClient class directly to pass exceptions to Ra
 </modules>
 ```
 
-## WinRT
+### WinRT
 Reference the "Mindscape.Raygun4Net.WinRT.dll" instead.
 
 You can create an instance of RaygunClient, passing your API key in the constructor, then subscribing to the UnhandledException event to pick up XAML exceptions, for instance in App.xaml:
