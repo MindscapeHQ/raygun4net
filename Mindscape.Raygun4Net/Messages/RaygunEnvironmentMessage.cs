@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 #if !WINRT
 using System.Windows.Forms;
@@ -20,12 +21,12 @@ namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunEnvironmentMessage
   {
-    private List<double> _diskSpaceFree;
+    private List<double> _diskSpaceFree = new List<double>();
 
     public RaygunEnvironmentMessage()
     {
       ProcessorCount = Environment.ProcessorCount;
-      
+
 #if !WINRT
       OSVersion = Environment.OSVersion.VersionString;
       Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
@@ -43,26 +44,21 @@ namespace Mindscape.Raygun4Net.Messages
       GetDiskSpace();
       //GetCpu();
 #else
-      PackageVersion = string.Format("{0}.{1}", Package.Current.Id.Version.Major, Package.Current.Id.Version.Minor);
-      Cpu = Package.Current.Id.Architecture.ToString();
       //WindowBoundsHeight = Windows.UI.Xaml.Window.Current.Bounds.Height;
       //WindowBoundsWidth = Windows.UI.Xaml.Window.Current.Bounds.Width;
+      PackageVersion = string.Format("{0}.{1}", Package.Current.Id.Version.Major, Package.Current.Id.Version.Minor);
+      Cpu = Package.Current.Id.Architecture.ToString();      
       ResolutionScale = DisplayProperties.ResolutionScale.ToString();
       CurrentOrientation = DisplayProperties.CurrentOrientation.ToString();
       Location = Windows.System.UserProfile.GlobalizationPreferences.HomeGeographicRegion;
-      //DeviceInformation deviceInformation = DeviceInformation.CreateFromIdAsync("97FADB10-4E33-40AE-359C-8BEF029DBDD0").GetResults();
-      //Cpus = deviceInformation.Name;
       
-      //PnpObjectCollection col = GetDevices().Result;
-
-      //foreach (PnpObject device in col)
-      //{
-      //  System.Diagnostics.Debug.WriteLine(device.Properties["0"]);
-      //}
+      SYSTEM_INFO systemInfo = new SYSTEM_INFO();
+      RaygunSystemInfoWrapper.GetNativeSystemInfo(ref systemInfo);
+      Architecture = systemInfo.wProcessorArchitecture.ToString();
 #endif
     }
 
-#if !WINRT
+#if !WINRT    
     private void GetCpu()
     {
       // This introduces a ~0.5s delay into message creation so is disabled above, but produces nicer cpu names
@@ -91,7 +87,7 @@ namespace Mindscape.Raygun4Net.Messages
         }
       }      
     }
-#else
+#else    
     private async Task<PnpObjectCollection> GetDevices()
     {
       string[] properties =
@@ -100,7 +96,7 @@ namespace Mindscape.Raygun4Net.Messages
           "System.Devices.ContainerId"
         };
 
-      return await PnpObject.FindAllAsync(PnpObjectType.Device, properties);      
+      return await PnpObject.FindAllAsync(PnpObjectType.Device, properties);
     }
 #endif
 
@@ -136,13 +132,11 @@ namespace Mindscape.Raygun4Net.Messages
     {
       get
       {
-        if (_diskSpaceFree == null)
-        {
-          _diskSpaceFree = new List<double>();
-        }
         return _diskSpaceFree;
       }
       set { _diskSpaceFree = value; }
     }
+
+    public string DeviceName { get; private set; }
   }
 }
