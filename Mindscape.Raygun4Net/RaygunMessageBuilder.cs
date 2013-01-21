@@ -1,6 +1,7 @@
 ﻿using System;
+#if !WINRT
 using System.Web;
-
+#endif
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
@@ -34,21 +35,18 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
+    public IRaygunMessageBuilder SetEnvironmentDetails()
+    {
+      _raygunMessage.Details.Environment = new RaygunEnvironmentMessage();
+
+      return this;
+    }
+
     public IRaygunMessageBuilder SetExceptionDetails(Exception exception)
     {
       if (exception != null)
       {
         _raygunMessage.Details.Error = new RaygunErrorMessage(exception);
-      }
-
-      return this;
-    }
-
-    public IRaygunMessageBuilder SetHttpDetails(HttpContext context)
-    {
-      if (context != null)
-      {
-        _raygunMessage.Details.Request = new RaygunRequestMessage(context);
       }
 
       return this;
@@ -60,5 +58,17 @@ namespace Mindscape.Raygun4Net
 
       return this;
     }
+
+#if !WINRT
+    public IRaygunMessageBuilder SetHttpDetails(HttpContext context)    
+    {
+      if (context != null)
+      {
+        _raygunMessage.Details.Request = new RaygunRequestMessage(context);
+      }
+
+      return this;
+    }
+#endif    
   }
 }
