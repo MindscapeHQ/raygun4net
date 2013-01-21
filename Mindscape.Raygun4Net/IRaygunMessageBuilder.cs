@@ -1,5 +1,7 @@
 ﻿using System;
+#if !WINRT
 using System.Web;
+#endif
 
 using Mindscape.Raygun4Net.Messages;
 
@@ -13,8 +15,8 @@ namespace Mindscape.Raygun4Net
 
     IRaygunMessageBuilder SetExceptionDetails(Exception exception);
 
-    IRaygunMessageBuilder SetHttpDetails(HttpContext context);
-
     IRaygunMessageBuilder SetClientDetails();
+
+    IRaygunMessageBuilder SetEnvironmentDetails();
   }
 }
