@@ -102,8 +102,17 @@
     <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
       <Link>IRaygunMessageBuilder.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunClientMessage.cs">
+      <Link>RaygunClientMessage.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunEnvironmentMessage.cs">
       <Link>RaygunEnvironmentMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorMessage.cs">
+      <Link>RaygunErrorMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorStackTraceLineMessage.cs">
+      <Link>RaygunErrorStackTraceLineMessage.cs</Link>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunMessage.cs">
       <Link>RaygunMessage.cs</Link>

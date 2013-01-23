@@ -35,8 +35,9 @@ namespace Mindscape.Raygun4Net.Messages
     }
 
     private RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
-    {
+    {      
       var lines = new List<RaygunErrorStackTraceLineMessage>();
+#if !WINRT
       var stackTrace = new StackTrace(exception, true);
       var frames = stackTrace.GetFrames();
 
@@ -79,7 +80,7 @@ namespace Mindscape.Raygun4Net.Messages
           lines.Add(line);
         }
       }
-
+#endif
       return lines.ToArray();
     }
 
@@ -120,7 +121,7 @@ namespace Mindscape.Raygun4Net.Messages
         stringBuilder.Append(str2 + " " + parameters[index2].Name);
       }
       stringBuilder.Append(")");
-
+      
       return stringBuilder.ToString();
     }
   }
