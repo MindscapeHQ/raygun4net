@@ -9,6 +9,9 @@ Installation & Usage
 
 Reference the "Mindscape.Raygun4Net.dll"
 
+Nuget can fetch the dependencies automatically when building for the first time. You may need to turn this option on (Tools -> Options -> Package Manager -> Allow Nuget to download missing packages during build).
+
+### ASP.NET
 Add a section to configSections:
 
 ```
@@ -29,12 +32,16 @@ You can then either use the RaygunClient class directly to pass exceptions to Ra
 </modules>
 ```
 
+### WinForms/WPF/Other .NET applications
+
+Create an instance of RaygunClient (passing your API key in the constructor) then inside an Unhandled Exception event handler make a call to Send, passing the exception.
+
 ### WinRT
 Reference the "Mindscape.Raygun4Net.WinRT.dll" instead.
 
-You can create an instance of RaygunClient, passing your API key in the constructor, then subscribing to the UnhandledException event to pick up XAML exceptions, for instance in App.xaml:
+Create a RaygunClient instance as above, then add a handler to the UnhandledException event to pick up exceptions from the UI thread. Note that for WinRT you are required to pass the whole UnhandledExceptionEventArgs object to Send(). For instance in App.xaml:
 
-```
+```csharp
 public App()
 {
 ...
@@ -43,7 +50,7 @@ UnhandledException += App_UnhandledException;
 
 void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
 {
-  _raygunClient.Send(e.Exception);
+  _raygunClient.Send(e);
 }
 ```
 
