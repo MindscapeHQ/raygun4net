@@ -83,15 +83,20 @@ namespace Mindscape.Raygun4Net.Messages
         }
       }
 #else
-      var line = new RaygunErrorStackTraceLineMessage
+      string[] delim = { "\r\n" };
+      string stackTrace = exception.Data["Message"] as string;      
+      if (stackTrace != null)
       {
-          LineNumber = -1,
-          MethodName = exception.Data["Message"] as string,
-          ClassName = "CLASSNAME",
-          FileName = "FILENAME"
-      };
+        var frames = stackTrace.Split(delim, StringSplitOptions.RemoveEmptyEntries);
 
-      lines.Add(line);
+        foreach (string line in frames)
+        {
+          lines.Add(new RaygunErrorStackTraceLineMessage()
+            {
+              ClassName = line
+            });
+        }
+      }
 #endif
       return lines.ToArray();
     }
