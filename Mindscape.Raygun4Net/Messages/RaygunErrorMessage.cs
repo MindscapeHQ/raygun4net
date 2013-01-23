@@ -37,6 +37,8 @@ namespace Mindscape.Raygun4Net.Messages
     private RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
     {      
       var lines = new List<RaygunErrorStackTraceLineMessage>();
+
+      
 #if !WINRT
       var stackTrace = new StackTrace(exception, true);
       var frames = stackTrace.GetFrames();
@@ -80,6 +82,16 @@ namespace Mindscape.Raygun4Net.Messages
           lines.Add(line);
         }
       }
+#else
+      var line = new RaygunErrorStackTraceLineMessage
+      {
+          LineNumber = -1,
+          MethodName = exception.Data["Message"] as string,
+          ClassName = "CLASSNAME",
+          FileName = "FILENAME"
+      };
+
+      lines.Add(line);
 #endif
       return lines.ToArray();
     }
