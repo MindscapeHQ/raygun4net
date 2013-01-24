@@ -17,12 +17,17 @@ namespace Mindscape.Raygun4Net
     private void SendError(object sender, EventArgs e)
     {
       var application = (HttpApplication)sender;
+      new RaygunClient().Send(Unwrap(application.Server.GetLastError()));
+    }
 
-      var exception = application.Server.GetLastError();
+    private Exception Unwrap(Exception exception)
+    {
+      if (exception is HttpUnhandledException)
+      {
+        return exception.GetBaseException();
+      }
 
-      var raygunClient = new RaygunClient();
-
-      raygunClient.Send(exception);
+      return exception;
     }
   }
 }
