@@ -118,7 +118,9 @@ namespace Mindscape.Raygun4Net
 
     }
 
+#pragma warning disable 1998
     private async Task PostMessageAsync(HttpClient client, HttpContent httpContent, Uri uri)
+#pragma warning restore 1998
     {
       HttpResponseMessage response;
       response = client.PostAsync(uri, httpContent).Result;
