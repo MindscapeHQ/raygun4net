@@ -28,8 +28,13 @@ You can then either create a new instance of the RaygunClient class and call Sen
 
 ```
 protected void Application_Error()
-{      
-  new RaygunClient().Send(Server.GetLastError());
+{
+  var exception = Server.GetLastError();
+  if(exception is HttpUnhandledException) //unwrap exception so we get useful data logged.
+  {
+  	exception = exception.GetBaseException();
+  }
+  new RaygunClient().Send(exception);
 }
 ```
 
