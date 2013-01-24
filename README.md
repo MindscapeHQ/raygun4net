@@ -24,7 +24,16 @@ Add the Raygun settings configuration block from above:
 <RaygunSettings apikey="{{apikey for your application}}" />
 ```
 
-You can then either use the RaygunClient class directly to pass exceptions to Raygun or there is an HttpModule you can add.
+You can then either create a new instance of the RaygunClient class and call Send(Exception) e.g.
+
+```
+protected void Application_Error()
+{      
+  new RaygunClient().Send(Server.GetLastError());
+}
+```
+
+Or there is an HttpModule you can add.
 
 For system.web:
 
