@@ -26,6 +26,16 @@ Add the Raygun settings configuration block from above:
 
 You can then either use the RaygunClient class directly to pass exceptions to Raygun or there is an HttpModule you can add.
 
+For system.web:
+
+```
+<httpModules>
+  <add name="RaygunErrorModule" type="Mindscape.Raygun4Net.RaygunHttpModule"/>
+</httpModules>
+```
+
+For system.webServer:
+
 ```
 <modules>
   <add name="RaygunErrorModule" type="Mindscape.Raygun4Net.RaygunHttpModule"/>
