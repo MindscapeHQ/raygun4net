@@ -15,6 +15,7 @@ using Windows.Networking.Connectivity;
 using Windows.UI.Xaml;
 #else
 using System.Web;
+using System.Threading;
 #endif
 
 namespace Mindscape.Raygun4Net
@@ -156,8 +157,19 @@ namespace Mindscape.Raygun4Net
 
     public void Send(Exception exception)
     {
-      if (ValidateApiKey())
-      {
+      var message = BuildMessage(exception);
+
+      Send(message);
+    }
+
+    public void SendInBackground(Exception exception) 
+    {
+        var message = BuildMessage(exception);
+
+        ThreadPool.QueueUserWorkItem(c => Send(message));
+    }
+
+    internal RaygunMessage BuildMessage(Exception exception) {
         var message = RaygunMessageBuilder.New
           .SetHttpDetails(HttpContext.Current)
           .SetEnvironmentDetails()
@@ -165,24 +177,25 @@ namespace Mindscape.Raygun4Net
           .SetExceptionDetails(exception)
           .SetClientDetails()
           .Build();
-
-        Send(message);
-      }
+        return message;
     }
 
     public void Send(RaygunMessage raygunMessage)
     {
-      using (var client = new WebClient())
-      {
-        client.Headers.Add("X-ApiKey", _apiKey);
+      if (ValidateApiKey()) 
+      { 
+        using (var client = new WebClient())
+        {
+          client.Headers.Add("X-ApiKey", _apiKey);
 
-        try
-        {
-          client.UploadString(RaygunSettings.Settings.ApiEndpoint, JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString());
-        }
-        catch (Exception ex)
-        {
-          System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+          try
+          {
+              client.UploadString(RaygunSettings.Settings.ApiEndpoint, JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString());
+          }
+          catch (Exception ex)
+          {
+              System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+          }
         }
       }
     }
