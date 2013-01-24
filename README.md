@@ -56,6 +56,12 @@ void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
 
 Then inside catch blocks place a call to Send, or use the Wrap helper method, passing your code you want to execute. This will send (and throw) the exception in the case that one occurs.
 
+#### Limitations of WinRT UnhandledException event and Wrap() workarounds
+
+The options available in WinRT for catching unhandled exceptions at this point in time are more limited compared to the options in the more mature .NET framework. The UnhandledException event will be raised when invalid XAML is parsed, in addition to other runtime exceptions that happen on the main UI thread. While many errors will be picked up this way and therefore be able to be sent to Raygun, others will be missed by this exception handler. In particular asynchronous code or Tasks that execute on background threads will not have their exceptions caught.
+
+A workaround for this issue is provided with the Wrap() method. These allow you to pass the code you want to execute to an instance of the Raygun client - it will simply call it surrounded by a try-catch block. If the method you pass in does result in an exception being thrown this will be transmitted to Raygun, and the exception will be again be thrown. Two overloads are available; one for methods that return void and another for methods that return an object.
+
 ## Troubleshooting
 
 If the solution fails to build due to missing dependencies (Newtonsoft etc), in Visual Studio 2012 ensure you have the NuGet extension installed and that the Tools -> Options -> Package Manager -> 'Allow Nuget to download missing packages during build' box is checked. Then, go to the directory that you cloned this repository into and run build.bat.
