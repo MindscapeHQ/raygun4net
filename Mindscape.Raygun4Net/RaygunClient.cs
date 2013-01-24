@@ -162,39 +162,42 @@ namespace Mindscape.Raygun4Net
       Send(message);
     }
 
-    public void SendInBackground(Exception exception) 
+    public void SendInBackground(Exception exception)
     {
-        var message = BuildMessage(exception);
+      var message = BuildMessage(exception);
 
-        ThreadPool.QueueUserWorkItem(c => Send(message));
+      ThreadPool.QueueUserWorkItem(c => Send(message));
     }
 
-    internal RaygunMessage BuildMessage(Exception exception) {
-        var message = RaygunMessageBuilder.New
-          .SetHttpDetails(HttpContext.Current)
-          .SetEnvironmentDetails()
-          .SetMachineName(Environment.MachineName)
-          .SetExceptionDetails(exception)
-          .SetClientDetails()
-          .Build();
-        return message;
+    internal RaygunMessage BuildMessage(Exception exception)
+    {
+      var message = RaygunMessageBuilder.New
+        .SetHttpDetails(HttpContext.Current)
+        .SetEnvironmentDetails()
+        .SetMachineName(Environment.MachineName)
+        .SetExceptionDetails(exception)
+        .SetClientDetails()
+        .Build();
+      return message;
     }
 
     public void Send(RaygunMessage raygunMessage)
     {
-      if (ValidateApiKey()) 
-      { 
+      if (ValidateApiKey())
+      {
         using (var client = new WebClient())
         {
           client.Headers.Add("X-ApiKey", _apiKey);
+          client.Encoding = System.Text.Encoding.UTF8;
 
           try
           {
-              client.UploadString(RaygunSettings.Settings.ApiEndpoint, JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString());
+            var message = JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString();
+            client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
           }
           catch (Exception ex)
           {
-              System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+            System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
           }
         }
       }
