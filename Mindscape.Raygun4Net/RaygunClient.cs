@@ -15,6 +15,7 @@ using Windows.Networking.Connectivity;
 using Windows.UI.Xaml;
 #else
 using System.Web;
+using System.Threading;
 #endif
 
 namespace Mindscape.Raygun4Net
@@ -158,6 +159,22 @@ namespace Mindscape.Raygun4Net
     {
       if (ValidateApiKey())
       {
+        var message = BuildMessage(exception);
+
+        Send(message);
+      }
+    }
+
+    public void SendInBackground(Exception exception) 
+    {
+        if (ValidateApiKey()) 
+        {
+            var message = BuildMessage(exception);
+            ThreadPool.QueueUserWorkItem(c => Send(message));
+        }
+    }
+
+    internal RaygunMessage BuildMessage(Exception exception) {
         var message = RaygunMessageBuilder.New
           .SetHttpDetails(HttpContext.Current)
           .SetEnvironmentDetails()
@@ -165,9 +182,7 @@ namespace Mindscape.Raygun4Net
           .SetExceptionDetails(exception)
           .SetClientDetails()
           .Build();
-
-        Send(message);
-      }
+        return message;
     }
 
     public void Send(RaygunMessage raygunMessage)
