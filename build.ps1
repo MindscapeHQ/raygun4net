@@ -4,6 +4,7 @@ properties {
     $rayguntests_project =  "$root/Mindscape.Raygun4Net.Tests/Mindscape.Raygun4Net.Tests.csproj"
     $raygunwinrt_project =  "$root/Mindscape.Raygun4Net.WinRT/Mindscape.Raygun4Net.WinRT.csproj"
     $nugetspec =            "$root/Mindscape.Raygun4Net.nuspec"
+    $nugetpackage =         "Mindscape.Raygun4Net.1.0.nupkg"
     $configuration =        "Debug"
     $build_dir =            "$root\build\"
     $release_dir =          "$root\release\"
@@ -64,6 +65,14 @@ task Package -depends Merge {
     Copy-Item $root\README.md .\readme.txt
 
     exec { nuget pack $nugetspec }
+
+    Pop-Location
+}
+
+task PushNugetPackage -depends Package {
+    Push-Location -Path $release_dir    
+
+    exec { nuget push "$release_dir$nugetpackage" }
 
     Pop-Location
 }
