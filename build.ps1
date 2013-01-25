@@ -3,19 +3,21 @@ properties {
     $raygun_project =       "$root/Mindscape.Raygun4Net/Mindscape.Raygun4Net.csproj"
     $rayguntests_project =  "$root/Mindscape.Raygun4Net.Tests/Mindscape.Raygun4Net.Tests.csproj"
     $raygunwinrt_project =  "$root/Mindscape.Raygun4Net.WinRT/Mindscape.Raygun4Net.WinRT.csproj"
+    $nugetspec =            "$root/Mindscape.Raygun4Net.nuspec"
     $configuration =        "Debug"
     $build_dir =            "$root\build\"
     $release_dir =          "$root\release\"
     $nunit_dir =            "$root\packages\NUnit.Runners.2.6.2\tools\"
     $tools_dir =            "$root\tools"
-    $env:Path +=            ";$nunit_dir;$tools_dir"
+    $nuget_dir =            "$root\.nuget"
+    $env:Path +=            ";$nunit_dir;$tools_dir;$nuget_dir"
     $assemblies_to_merge =  "Mindscape.Raygun4Net.dll", `
                             "Newtonsoft.Json.dll"
     $merged_assemlby_name = "Mindscape.Raygun4Net.dll"
     $windowsversion =       (Get-WmiObject Win32_OperatingSystem).Version
 }
 
-task default -depends Merge
+task default -depends Package
 
 task Clean {
     remove-item -force -recurse $build_dir -ErrorAction SilentlyContinue | Out-Null
@@ -52,6 +54,16 @@ task Merge -depends Compile {
     Push-Location -Path $build_dir
 
     exec { ilmerge.exe /internalize /out:"$release_dir\$merged_assemlby_name" $assemblies_to_merge }
+
+    Pop-Location
+}
+
+task Package -depends Merge {
+    Push-Location -Path $release_dir
+
+    Copy-Item $root\README.md .\readme.txt
+
+    exec { nuget pack $nugetspec }
 
     Pop-Location
 }
