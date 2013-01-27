@@ -29,8 +29,7 @@ namespace Mindscape.Raygun4Net.Messages
 
 #if !WINRT
       OSVersion = Environment.OSVersion.VersionString;
-      Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
-      Cpu = Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER");
+      Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");      
       WindowBoundsWidth = SystemInformation.VirtualScreen.Height;
       WindowBoundsHeight = SystemInformation.VirtualScreen.Width;      
       ComputerInfo info = new ComputerInfo();
@@ -41,8 +40,14 @@ namespace Mindscape.Raygun4Net.Messages
 
       Location = CultureInfo.CurrentCulture.DisplayName;
       OSVersion = info.OSVersion;
-      GetDiskSpace();
-      //GetCpu();
+      GetDiskSpace();      
+
+      if (string.IsNullOrEmpty(Properties.Environment.Default.Cpu))
+      {
+        Properties.Environment.Default.Cpu = GetCpu();
+        Properties.Environment.Default.Save();
+      }
+      Cpu = Properties.Environment.Default.Cpu;
 #else
       //WindowBoundsHeight = Windows.UI.Xaml.Window.Current.Bounds.Height;
       //WindowBoundsWidth = Windows.UI.Xaml.Window.Current.Bounds.Width;
@@ -59,22 +64,23 @@ namespace Mindscape.Raygun4Net.Messages
     }
 
 #if !WINRT    
-    private void GetCpu()
+    private string GetCpu()
     {
-      // This introduces a ~0.5s delay into message creation so is disabled above, but produces nicer cpu names
-      // (ie. Intel Core i5-3570k @ 3.40ghz)
       ManagementClass wmiManagementProcessorClass = new ManagementClass("Win32_Processor");
-      ManagementObjectCollection wmiProcessorCollection = wmiManagementProcessorClass.GetInstances();      
+      ManagementObjectCollection wmiProcessorCollection = wmiManagementProcessorClass.GetInstances();           
+
       foreach (ManagementObject wmiProcessorObject in wmiProcessorCollection)
       {
         try
         {
-          Cpu = wmiProcessorObject.Properties["Name"].Value.ToString();
+          var name = wmiProcessorObject.Properties["Name"].Value.ToString();
+          return name;
         }
         catch (ManagementException)
-        {          
+        {
         }
       }
+      return Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER");
     }
 
     private void GetDiskSpace()
