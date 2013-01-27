@@ -19,6 +19,10 @@ namespace Mindscape.Raygun4Net.Messages
 
     public RaygunErrorStackTraceLineMessage[] StackTrace { get; set; }
 
+    public RaygunErrorMessage()
+    {
+    }
+
     public RaygunErrorMessage(Exception exception)
     {
       var exceptionType = exception.GetType();
