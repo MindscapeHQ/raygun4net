@@ -18,5 +18,7 @@ namespace Mindscape.Raygun4Net
     IRaygunMessageBuilder SetClientDetails();
 
     IRaygunMessageBuilder SetEnvironmentDetails();
+
+    IRaygunMessageBuilder SetVersion();
   }
 }

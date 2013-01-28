@@ -67,6 +67,7 @@ namespace Mindscape.Raygun4Net
           .SetMachineName(NetworkInformation.GetHostNames()[0].DisplayName)
           .SetExceptionDetails(exception)
           .SetClientDetails()
+          .SetVersion()
           .Build();
 
         Send(message);
@@ -87,6 +88,7 @@ namespace Mindscape.Raygun4Net
           .SetMachineName(NetworkInformation.GetHostNames()[0].DisplayName)
           .SetExceptionDetails(exception)
           .SetClientDetails()
+          .SetVersion()
           .Build();
 
         Send(message);
@@ -156,9 +158,14 @@ namespace Mindscape.Raygun4Net
 #else
 
     public void Send(Exception exception)
+    {      
+      Send(BuildMessage(exception));
+    }
+
+    public void Send(Exception exception, string version)
     {
       var message = BuildMessage(exception);
-
+      message.Details.Version = version;
       Send(message);
     }
 
@@ -177,9 +184,10 @@ namespace Mindscape.Raygun4Net
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)
         .SetClientDetails()
-        .Build();
+        .SetVersion()
+        .Build();      
       return message;
-    }
+    }    
 
     public void Send(RaygunMessage raygunMessage)
     {
