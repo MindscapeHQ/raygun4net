@@ -62,8 +62,6 @@ task Merge -depends Compile {
 task Package -depends Merge {
     Push-Location -Path $release_dir
 
-    Copy-Item $root\README.md .\readme.txt
-
     exec { nuget pack $nugetspec }
 
     Pop-Location
