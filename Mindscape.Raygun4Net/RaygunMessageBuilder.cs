@@ -1,11 +1,12 @@
 ﻿using System;
+using Mindscape.Raygun4Net.Messages;
+using System.Collections.Generic;
 #if !WINRT
 using System.Reflection;
 using System.Web;
 #else
 using Windows.ApplicationModel;
 #endif
-using Mindscape.Raygun4Net.Messages;
 
 
 namespace Mindscape.Raygun4Net
@@ -88,6 +89,13 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 #endif
-      
+
+
+
+    public IRaygunMessageBuilder SetTags(List<string> tags )
+    {
+      _raygunMessage.Details.Tags = tags;
+      return this;
+    }
   }
 }
