@@ -1,7 +1,7 @@
 Raygun4Net
 ==========
 
-Raygun.io Plugin for .NET Framework
+Raygun.io Provider for .NET Framework
 
 
 Installation & Usage
@@ -81,6 +81,14 @@ Then inside catch blocks place a call to Send, or use the Wrap helper method, pa
 The options available in WinRT for catching unhandled exceptions at this point in time are more limited compared to the options in the more mature .NET framework. The UnhandledException event will be raised when invalid XAML is parsed, in addition to other runtime exceptions that happen on the main UI thread. While many errors will be picked up this way and therefore be able to be sent to Raygun, others will be missed by this exception handler. In particular asynchronous code or Tasks that execute on background threads will not have their exceptions caught.
 
 A workaround for this issue is provided with the Wrap() method. These allow you to pass the code you want to execute to an instance of the Raygun client - it will simply call it surrounded by a try-catch block. If the method you pass in does result in an exception being thrown this will be transmitted to Raygun, and the exception will be again be thrown. Two overloads are available; one for methods that return void and another for methods that return an object.
+
+## Version numbering and tags
+
+* If you are plugging this provider into a classic .NET application, the version number that will be transmitted will be the AssemblyVersion. There is also an overload of Send() available where you can provide a different version if you wish (in the format x.x.x.x where x is a postive integer).
+
+* If you are using WinRT, the transmitted version number will be that of the Windows Store package, set in in Package.appxmanifest (under Packaging).
+
+* You can also set an arbitrary number of tags (as an array of strings), i.e. for tagging builds. This is optional and will be transmitted in addition to the version number above.
 
 ## Troubleshooting
 
