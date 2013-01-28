@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using Mindscape.Raygun4Net.Messages;
 #if !WINRT
@@ -53,6 +54,12 @@ namespace Mindscape.Raygun4Net
     }
 
 #if WINRT
+    /// <summary>
+    /// A collection of string tags that represent custom data about the version of the program
+    /// that caused the message to be sent.
+    /// </summary>
+    public List<string> Tags { get; set; }    
+
     public void Send(UnhandledExceptionEventArgs unhandledExceptionEventArgs)
     {
       if (ValidateApiKey())
@@ -68,7 +75,7 @@ namespace Mindscape.Raygun4Net
           .SetExceptionDetails(exception)
           .SetClientDetails()
           .SetVersion()
-          .Build();
+          .Build();        
 
         Send(message);
       }
@@ -97,6 +104,10 @@ namespace Mindscape.Raygun4Net
 
     public async void Send(RaygunMessage raygunMessage)
     {
+      if (Tags != null)
+      {
+        raygunMessage.Details.Tags = Tags;
+      }
 
       HttpClientHandler handler = new HttpClientHandler();
       handler.UseDefaultCredentials = true;
@@ -162,12 +173,20 @@ namespace Mindscape.Raygun4Net
       Send(BuildMessage(exception));
     }
 
-    public void Send(Exception exception, string version)
+    public void Send(Exception exception, List<string> tags)
     {
       var message = BuildMessage(exception);
-      message.Details.Version = version;
+      message.Details.Tags = tags;
       Send(message);
     }
+
+    public void Send(Exception exception, List<string> tags, string version)
+    {
+      var message = BuildMessage(exception);
+      message.Details.Tags = tags;
+      message.Details.Version = version;
+      Send(message);
+    }    
 
     public void SendInBackground(Exception exception)
     {

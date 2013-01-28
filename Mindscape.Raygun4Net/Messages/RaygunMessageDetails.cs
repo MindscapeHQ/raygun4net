@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunMessageDetails
@@ -13,6 +15,8 @@ namespace Mindscape.Raygun4Net.Messages
 
     public RaygunEnvironmentMessage Environment { get; set; }
 
-    public RaygunClientMessage Client { get; set; }    
+    public RaygunClientMessage Client { get; set; }
+
+    public List<string> Tags { get; set; }
   }
 }
