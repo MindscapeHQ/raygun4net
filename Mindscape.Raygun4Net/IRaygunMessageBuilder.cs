@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 #if !WINRT
 using System.Web;
 #endif
@@ -20,5 +21,7 @@ namespace Mindscape.Raygun4Net
     IRaygunMessageBuilder SetEnvironmentDetails();
 
     IRaygunMessageBuilder SetVersion();
+
+    IRaygunMessageBuilder SetUserCustomData(IDictionary userCustomData);
   }
 }
