@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Runtime.InteropServices;
 using Mindscape.Raygun4Net.Messages;
 #if !WINRT
 using Newtonsoft.Json;
@@ -54,21 +53,31 @@ namespace Mindscape.Raygun4Net
       return true;
     }
 
-#if WINRT    
+#if WINRT
     /// <summary>
-    /// Sends the exception from an UnhandledException event to Raygun.io, optionally with a list of tags
-    /// for identification.
+    /// A collection of string tags that represent custom data about the version of the program
+    /// that caused the message to be sent.
     /// </summary>
-    /// <param name="unhandledExceptionEventArgs">The event args from UnhandledException, containing the thrown exception and its message.</param>
-    /// <param name="tags">An optional list of strings to identify the message to be transmitted.</param>
-    public void Send(UnhandledExceptionEventArgs unhandledExceptionEventArgs, [Optional] List<string> tags)
+    public List<string> Tags { get; set; }    
+
+    public void Send(UnhandledExceptionEventArgs unhandledExceptionEventArgs)
     {
       if (ValidateApiKey())
-      {        
+      {
+        //var exception = new Exception(unhandledExceptionEventArgs.Message, unhandledExceptionEventArgs.Exception);
+
         var exception = unhandledExceptionEventArgs.Exception;
         exception.Data.Add("Message", unhandledExceptionEventArgs.Message);
+                 
+        var message = RaygunMessageBuilder.New
+          .SetEnvironmentDetails()
+          .SetMachineName(NetworkInformation.GetHostNames()[0].DisplayName)
+          .SetExceptionDetails(exception)
+          .SetClientDetails()
+          .SetVersion()
+          .Build();        
 
-        Send(CreateMessage(exception, tags));
+        Send(message);
       }
     }
 
@@ -77,17 +86,29 @@ namespace Mindscape.Raygun4Net
     /// as the object contains little useful information besides the exception name and description
     /// </summary>
     /// <param name="exception">The exception thrown by the wrapped method</param>
-    /// <param name="tags">A list of string tags relating to the message to identify it</param>
-    private void Send(Exception exception, [Optional] List<string> tags)
+    private void Send(Exception exception)
     {
       if (ValidateApiKey())
-      {
-        Send(CreateMessage(exception, tags));
+      {        
+        var message = RaygunMessageBuilder.New
+          .SetEnvironmentDetails()
+          .SetMachineName(NetworkInformation.GetHostNames()[0].DisplayName)
+          .SetExceptionDetails(exception)
+          .SetClientDetails()
+          .SetVersion()
+          .Build();
+
+        Send(message);
       }
     }
 
     public async void Send(RaygunMessage raygunMessage)
     {
+      if (Tags != null)
+      {
+        raygunMessage.Details.Tags = Tags;
+      }
+
       HttpClientHandler handler = new HttpClientHandler();
       handler.UseDefaultCredentials = true;
 
@@ -108,23 +129,7 @@ namespace Mindscape.Raygun4Net
           System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
         }
       }
-    }
 
-    private RaygunMessage CreateMessage(Exception exception, [Optional] List<string> tags)
-    {
-      var message = RaygunMessageBuilder.New
-          .SetEnvironmentDetails()
-          .SetMachineName(NetworkInformation.GetHostNames()[0].DisplayName)
-          .SetExceptionDetails(exception)
-          .SetClientDetails()
-          .SetVersion()          
-          .Build();
-
-      if (tags != null)
-      {
-        message.Details.Tags = tags;
-      }
-      return message;
     }
 
 #pragma warning disable 1998
@@ -136,7 +141,7 @@ namespace Mindscape.Raygun4Net
       client.Dispose();
     }
 
-    public void Wrap(Action func, [Optional] List<string> tags)
+    public void Wrap(Action func)
     {
       try
       {
@@ -149,7 +154,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    public TResult Wrap<TResult>(Func<TResult> func, [Optional] List<string> tags)
+    public TResult Wrap<TResult>(Func<TResult> func)
     {
       try
       {

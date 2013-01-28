@@ -2,7 +2,7 @@
 #if !WINRT
 using System.Web;
 #endif
-using System.Collections.Generic;
+
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
@@ -20,7 +20,5 @@ namespace Mindscape.Raygun4Net
     IRaygunMessageBuilder SetEnvironmentDetails();
 
     IRaygunMessageBuilder SetVersion();
-
-    IRaygunMessageBuilder SetTags(List<string> tags);
   }
 }
