@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Web;
 
@@ -17,14 +18,21 @@ namespace Mindscape.Raygun4Net.Messages
       QueryString = ToDictionary(httpContext.Request.QueryString);
       Headers = ToDictionary(httpContext.Request.Headers);
       if (httpContext.Request.UrlReferrer != null) Referrer = httpContext.Request.UrlReferrer.ToString();
-      UserAgent = httpContext.Request.UserAgent;
-      Form = GetFormData(httpContext.Request.Form);
-    }
+      UserAgent = httpContext.Request.UserAgent;      
+      Form = httpContext.Request.Form.ToString().Substring(0, 256);
 
-    private NameValueCollection GetFormData(NameValueCollection nvc)
-    {
-      //int count;
-   
+      if (httpContext.Request.Headers["Content-Type"] != "text/html" && httpContext.Request.Headers["Content-Type"]
+        != "application/x-www-form-urlencoded" && HttpMethod != "GET")
+      {
+        int length = 4096;        
+        string temp = new StreamReader(httpContext.Request.InputStream).ReadToEnd();
+        if (length > temp.Length)
+        {
+          length = temp.Length;
+        }
+        
+        RawData = temp.Substring(0, length);
+      }
     }
 
     private static IDictionary ToDictionary(NameValueCollection nameValueCollection)
@@ -32,7 +40,7 @@ namespace Mindscape.Raygun4Net.Messages
       var keys = nameValueCollection.AllKeys;
 
       return keys.ToDictionary(s => s, s => nameValueCollection[s]);
-    }
+    }    
 
     public string HostName { get; set; }
 
@@ -52,7 +60,7 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string Referrer { get; set; }
 
-    public NameValueCollection Form { get; set; }
+    public string Form { get; set; }
 
     public string RawData { get; set; }
 
