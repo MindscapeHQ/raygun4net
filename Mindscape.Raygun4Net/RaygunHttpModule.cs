@@ -6,7 +6,7 @@ namespace Mindscape.Raygun4Net
   public class RaygunHttpModule : IHttpModule
   {
     public void Init(HttpApplication context)
-    {     
+    {
       context.Error += SendError;
     }
 
