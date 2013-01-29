@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Net;
 using System.Runtime.InteropServices;
 using Mindscape.Raygun4Net.Messages;
@@ -261,10 +262,11 @@ namespace Mindscape.Raygun4Net
         {
           client.Headers.Add("X-ApiKey", _apiKey);
           client.Encoding = System.Text.Encoding.UTF8;
-
+          raygunMessage.Details.Tags = new List<string>(){"a"};
+          raygunMessage.Details.UserCustomData = new ListDictionary(){{1, "a"}, {2, "b"}};
           try
           {
-            var message = JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString();
+             var message = JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString();
             client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
           }
           catch (Exception ex)
