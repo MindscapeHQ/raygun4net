@@ -72,7 +72,7 @@ task Package -depends Merge {
 task PushNugetPackage -depends Package {
     Push-Location -Path $release_dir    
 
-    exec { nuget push "$release_dir$nugetpackage" }
+    exec { nuget push "$release_dir*.nupkg" }
 
     Pop-Location
 }
