@@ -262,8 +262,7 @@ namespace Mindscape.Raygun4Net
         {
           client.Headers.Add("X-ApiKey", _apiKey);
           client.Encoding = System.Text.Encoding.UTF8;
-          raygunMessage.Details.Tags = new List<string>(){"a"};
-          raygunMessage.Details.UserCustomData = new ListDictionary(){{1, "a"}, {2, "b"}};
+
           try
           {
              var message = JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString();

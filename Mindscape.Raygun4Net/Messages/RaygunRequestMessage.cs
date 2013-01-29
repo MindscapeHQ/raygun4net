@@ -16,6 +16,15 @@ namespace Mindscape.Raygun4Net.Messages
       Data = ToDictionary(httpContext.Request.ServerVariables);
       QueryString = ToDictionary(httpContext.Request.QueryString);
       Headers = ToDictionary(httpContext.Request.Headers);
+      if (httpContext.Request.UrlReferrer != null) Referrer = httpContext.Request.UrlReferrer.ToString();
+      UserAgent = httpContext.Request.UserAgent;
+      Form = GetFormData(httpContext.Request.Form);
+    }
+
+    private NameValueCollection GetFormData(NameValueCollection nvc)
+    {
+      //int count;
+   
     }
 
     private static IDictionary ToDictionary(NameValueCollection nameValueCollection)
@@ -38,5 +47,14 @@ namespace Mindscape.Raygun4Net.Messages
     public IDictionary Headers { get; set; }
 
     public IDictionary Data { get; set; }
+
+    public string UserAgent { get; set; }
+
+    public string Referrer { get; set; }
+
+    public NameValueCollection Form { get; set; }
+
+    public string RawData { get; set; }
+
   }
 }
