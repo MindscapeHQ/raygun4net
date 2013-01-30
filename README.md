@@ -1,7 +1,7 @@
 Raygun4Net
 ==========
 
-Raygun.io Provider for .NET Framework
+[Raygun.io](http://raygun.io) Provider for .NET Framework
 
 
 Installation & Usage
