@@ -204,23 +204,22 @@ namespace Mindscape.Raygun4Net
 
     public void Send(RaygunMessage raygunMessage)
     {
-      if (ValidateApiKey())
+      if (ValidateApiKey()) 
       {
-        using (var client = new WebClient())
-        {
-          client.Headers.Add("X-ApiKey", _apiKey);
-          client.Encoding = System.Text.Encoding.UTF8;
+        var client = new WebClient();
 
-          try
+        client.UploadStringCompleted += (o,e) => 
+        {
+          if(e.Error != null)
           {
-            var message = JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString();
-            client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
+            System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", e.Error.Message));
           }
-          catch (Exception ex)
-          {
-            System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
-          }
-        }
+          client.Dispose();
+        };
+
+        client.Headers.Add("X-ApiKey", _apiKey);
+
+        client.UploadStringAsync(RaygunSettings.Settings.ApiEndpoint, JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString());
       }
     }
 #endif
