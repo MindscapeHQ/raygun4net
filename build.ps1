@@ -18,7 +18,7 @@ properties {
     $windowsversion =       (Get-WmiObject Win32_OperatingSystem).Version
 }
 
-task default -depends Package
+task default -depends Package, Merge
 
 task Clean {
     remove-item -force -recurse $build_dir -ErrorAction SilentlyContinue | Out-Null
@@ -34,7 +34,7 @@ task Compile -depends Init {
 
     exec { msbuild "$raygun_project" /m /p:OutDir=$build_dir /p:Configuration=$configuration }
     exec { msbuild "$rayguntests_project" /m /p:OutDir=$build_dir /p:Configuration=$configuration }
-    
+
     if($windowsversion -ge 6.2) { #if we're using Windows 8 or better
         echo "building winrt version for $windowsversion"
         exec { msbuild "$raygunwinrt_project" /m /p:OutDir=$build_dir /p:Configuration=$configuration }
@@ -59,18 +59,12 @@ task Merge -depends Compile {
     Pop-Location
 }
 
-task Package -depends Merge {
-    Copy-Item readme.txt $release_dir/readme.txt
-
-    Push-Location -Path $release_dir
-
-    exec { nuget pack $nugetspec }
-
-    Pop-Location
+task Package -depends Test {
+    exec { nuget pack $nugetspec -OutputDirectory $release_dir }
 }
 
 task PushNugetPackage -depends Package {
-    Push-Location -Path $release_dir    
+    Push-Location -Path $release_dir
 
     exec { nuget push "$release_dir*.nupkg" }
 
