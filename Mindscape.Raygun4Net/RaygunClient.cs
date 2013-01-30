@@ -189,6 +189,22 @@ namespace Mindscape.Raygun4Net
       ThreadPool.QueueUserWorkItem(c => Send(message));
     }
 
+    public void SendInBackground(Exception exception, List<string> tags)
+    {
+        var message = BuildMessage(exception);
+        message.Details.Tags = tags;
+        ThreadPool.QueueUserWorkItem(c => Send(message));
+    }
+
+    public void SendInBackground(Exception exception, List<string> tags, string version)
+    {
+        var message = BuildMessage(exception);
+        message.Details.Tags = tags;
+        message.Details.Version = version;
+        ThreadPool.QueueUserWorkItem(c => Send(message));
+    }    
+
+
     internal RaygunMessage BuildMessage(Exception exception)
     {
       var message = RaygunMessageBuilder.New
@@ -200,7 +216,12 @@ namespace Mindscape.Raygun4Net
         .SetVersion()
         .Build();      
       return message;
-    }    
+    }
+
+    public void SendInBackground(RaygunMessage raygunMessage)
+    {
+        ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+    }
 
     public void Send(RaygunMessage raygunMessage)
     {
