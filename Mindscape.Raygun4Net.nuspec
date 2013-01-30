@@ -10,10 +10,16 @@
         <description>Raygun.io Provider for .NET Framework</description>
         <iconUrl>https://app.raygun.io/Content/Images/apple-touch-icon.png</iconUrl>
         <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
+        <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
+        <dependencies>
+            <dependency id="Newtonsoft.Json" version="4.5.6" />
+        </dependencies>
     </metadata>
     <files>
-        <file src="release\Mindscape.Raygun4Net.dll" target="lib\net35\Mindscape.Raygun4Net.dll" />
-        <file src="release\Mindscape.Raygun4Net.pdb" target="lib\net35\Mindscape.Raygun4Net.pdb" />
-        <file src="release\readme.txt" />
+        <file src="build\Mindscape.Raygun4Net.dll" target="lib\net35\Mindscape.Raygun4Net.dll" />
+        <file src="build\Mindscape.Raygun4Net.pdb" target="lib\net35\Mindscape.Raygun4Net.pdb" />
+        <file src="build\Mindscape.Raygun4Net.WinRT\Mindscape.Raygun4Net.WinRT.dll" target="lib\windows8\Mindscape.Raygun4Net.WinRT.dll" />
+        <file src="build\Mindscape.Raygun4Net.WinRT\Mindscape.Raygun4Net.WinRT.pdb" target="lib\windows8\Mindscape.Raygun4Net.WinRT.pdb" />
+        <file src="readme.txt" />
     </files>
 </package>
