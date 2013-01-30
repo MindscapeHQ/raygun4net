@@ -7,9 +7,9 @@ Raygun4Net
 Installation & Usage
 ====================
 
-Building from source requires the Nuget VS2012 extension. Nuget will fetch the dependencies automatically - you will need to enable this option if it isn't already (Tools -> Options -> Package Manager -> Allow Nuget to download missing packages during build).
+* The easiest way to install this provider is by grabbing the NuGet package. Ensure the NuGet Visual Studio extension is installed, right-click on your project -> Manage Nuget Packages -> Online -> search for 'Mindscape.Raygun4Net', then install it.
 
-In your project, add a reference to "Mindscape.Raygun4Net.dll"
+* For Visual Studio 2008 (without NuGet) you can clone this repository, run build.bat, then add project references to **Mindscape.Raygun4Net.dll** and **Newtonsoft.Json.dll**.
 
 ### ASP.NET
 Add a section to configSections:
