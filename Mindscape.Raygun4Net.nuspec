@@ -11,9 +11,4 @@
         <iconUrl>https://app.raygun.io/Content/Images/apple-touch-icon.png</iconUrl>
         <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
     </metadata>
-    <files>
-        <file src="release\Mindscape.Raygun4Net.dll" target="lib\net35\Mindscape.Raygun4Net.dll" />
-        <file src="release\Mindscape.Raygun4Net.pdb" target="lib\net35\Mindscape.Raygun4Net.pdb" />
-        <file src="release\readme.txt" />
-    </files>
 </package>
