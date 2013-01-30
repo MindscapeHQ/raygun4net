@@ -63,7 +63,7 @@ task Merge -depends Compile {
 
     Push-Location -Path "Mindscape.Raygun4Net.WinRT"
 
-    exec { ilmerge.exe /internalize /out:"${release_dir}/lib/winrt45/${merged_assemlby_name}" $winrt_assemblies }
+    exec { ilmerge.exe /internalize /out:"${release_dir}/lib/windows8/${merged_assemlby_name}" $winrt_assemblies }
 
     Pop-Location
 
