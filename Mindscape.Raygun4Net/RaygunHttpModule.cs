@@ -17,7 +17,7 @@ namespace Mindscape.Raygun4Net
     private void SendError(object sender, EventArgs e)
     {
       var application = (HttpApplication)sender;
-      new RaygunClient().SendInBackground(Unwrap(application.Server.GetLastError()));
+      new RaygunClient().SendAsync(Unwrap(application.Server.GetLastError()));
     }
 
     private Exception Unwrap(Exception exception)

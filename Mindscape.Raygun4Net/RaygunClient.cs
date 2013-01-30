@@ -162,14 +162,14 @@ namespace Mindscape.Raygun4Net
       Send(message);
     }
 
-    public void SendInBackground(Exception exception)
+    public void SendAsync(Exception exception)
     {
       var message = BuildMessage(exception);
 
-      ThreadPool.QueueUserWorkItem(c => Send(message));
+      SendAsync(message);
     }
 
-    internal RaygunMessage BuildMessage(Exception exception)
+    public RaygunMessage BuildMessage(Exception exception)
     {
       var message = RaygunMessageBuilder.New
         .SetHttpDetails(HttpContext.Current)
@@ -181,25 +181,44 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 
-    public void Send(RaygunMessage raygunMessage)
+    public void Send(RaygunMessage raygunMessage) 
     {
-      if (ValidateApiKey())
+      if (ValidateApiKey()) 
       {
-        using (var client = new WebClient())
+        using (var client = new WebClient()) 
         {
-          client.Headers.Add("X-ApiKey", _apiKey);
-          client.Encoding = System.Text.Encoding.UTF8;
+          try 
+          {
+            client.Headers.Add("X-ApiKey", _apiKey);
 
-          try
+            client.UploadString(RaygunSettings.Settings.ApiEndpoint, JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString());
+          } 
+          catch (Exception e) 
           {
-            var message = JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString();
-            client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
-          }
-          catch (Exception ex)
-          {
-            System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+            System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", e.Message));
           }
         }
+      }
+    }
+
+    public void SendAsync(RaygunMessage raygunMessage)
+    {
+      if (ValidateApiKey()) 
+      {
+        var client = new WebClient();
+
+        client.UploadStringCompleted += (o,e) => 
+        {
+          if(e.Error != null)
+          {
+            System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", e.Error.Message));
+          }
+          client.Dispose();
+        };
+
+        client.Headers.Add("X-ApiKey", _apiKey);
+
+        client.UploadStringAsync(RaygunSettings.Settings.ApiEndpoint, JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString());
       }
     }
 #endif
