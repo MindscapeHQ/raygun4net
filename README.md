@@ -4,12 +4,15 @@ Raygun4Net
 [Raygun.io](http://raygun.io) Provider for .NET Framework
 
 
-Installation & Usage
+Installation
 ====================
 
-* The easiest way to install this provider is by grabbing the NuGet package. Ensure the NuGet Visual Studio extension is installed, right-click on your project -> Manage Nuget Packages -> Online -> search for 'Mindscape.Raygun4Net', then install it.
+* The easiest way to install this provider is by grabbing the NuGet package. Ensure the NuGet Visual Studio extension is installed, right-click on your project -> Manage Nuget Packages -> Online -> search for **Mindscape.Raygun4Net**, then install it.
 
 * For Visual Studio 2008 (without NuGet) you can clone this repository, run build.bat, then add project references to **Mindscape.Raygun4Net.dll** and **Newtonsoft.Json.dll**.
+
+Usage
+====================
 
 ### ASP.NET
 Add a section to configSections:
