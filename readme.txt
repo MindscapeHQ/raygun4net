@@ -39,7 +39,7 @@ WinForms/WPF/Other .NET applications
 ====================
 Create an instance of RaygunClient (passing your API key in the constructor) then inside an Unhandled Exception (or unobserved task exception) event handler make a call to Send, passing the ExceptionObject available in the handler's EventArgs (with a cast).
 
-### WinRT
+WinRT
 Reference the "Mindscape.Raygun4Net.WinRT.dll" instead.
 
 Create a RaygunClient instance as above, then add a handler to the UnhandledException event to pick up exceptions from the UI thread. Note that for WinRT you are required to pass the whole UnhandledExceptionEventArgs object to Send(). For instance in App.xaml:
