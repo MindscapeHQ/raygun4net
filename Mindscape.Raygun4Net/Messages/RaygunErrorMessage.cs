@@ -2,8 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.IO;
 
 namespace Mindscape.Raygun4Net.Messages
 {
@@ -75,12 +77,18 @@ namespace Mindscape.Raygun4Net.Messages
                        ? method.ReflectedType.FullName
                        : "(unknown)";
 
+          var code = default(string[]);
+
+          if (File.Exists(file))
+            code = File.ReadAllLines(file).Skip(lineNumber - 3).Take(5).ToArray();
+
           var line = new RaygunErrorStackTraceLineMessage
           {
             FileName = file,
             LineNumber = lineNumber,
             MethodName = methodName,
-            ClassName = className
+            ClassName = className,
+            Code = code
           };
 
           lines.Add(line);

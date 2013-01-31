@@ -9,5 +9,7 @@
     public string FileName { get; set; }
 
     public string MethodName { get; set; }
+
+    public string[] Code { get; set; }
   }
 }
