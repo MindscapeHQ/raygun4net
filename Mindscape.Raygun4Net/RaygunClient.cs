@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Net;
 using System.Runtime.InteropServices;
 using Mindscape.Raygun4Net.Messages;
@@ -61,14 +63,15 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="unhandledExceptionEventArgs">The event args from UnhandledException, containing the thrown exception and its message.</param>
     /// <param name="tags">An optional list of strings to identify the message to be transmitted.</param>
-    public void Send(UnhandledExceptionEventArgs unhandledExceptionEventArgs, [Optional] List<string> tags)
+    /// <param name="userCustomData">A key-value collection of custom data that is to be sent along with the message</param>
+    public void Send(UnhandledExceptionEventArgs unhandledExceptionEventArgs, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
     {
       if (ValidateApiKey())
       {
         var exception = unhandledExceptionEventArgs.Exception;
         exception.Data.Add("Message", unhandledExceptionEventArgs.Message);
 
-        Send(CreateMessage(exception, tags));
+        Send(CreateMessage(exception, tags, userCustomData));
       }
     }
 
@@ -78,18 +81,18 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="exception">The exception thrown by the wrapped method</param>
     /// <param name="tags">A list of string tags relating to the message to identify it</param>
-    private void Send(Exception exception, [Optional] List<string> tags)
+    /// <param name="userCustomData">A key-value collection of custom data that is to be sent along with the message</param>
+    private void Send(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
     {
       if (ValidateApiKey())
       {
-        Send(CreateMessage(exception, tags));
+        Send(CreateMessage(exception, tags, userCustomData));
       }
     }
 
     public async void Send(RaygunMessage raygunMessage)
     {
-      HttpClientHandler handler = new HttpClientHandler();
-      handler.UseDefaultCredentials = true;
+      HttpClientHandler handler = new HttpClientHandler {UseDefaultCredentials = true};
 
       var client = new HttpClient(handler);
       {
@@ -110,7 +113,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private RaygunMessage CreateMessage(Exception exception, [Optional] List<string> tags)
+    private RaygunMessage CreateMessage(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
     {
       var message = RaygunMessageBuilder.New
           .SetEnvironmentDetails()
@@ -123,6 +126,10 @@ namespace Mindscape.Raygun4Net
       if (tags != null)
       {
         message.Details.Tags = tags;
+      }
+      if (userCustomData != null)
+      {
+        message.Details.UserCustomData = userCustomData;
       }
       return message;
     }
@@ -162,26 +169,66 @@ namespace Mindscape.Raygun4Net
       }
     }
 #else    
+    /// <summary>
+    /// Transmits an exception to Raygun.io synchronously, using the version number of the originating assembly.
+    /// </summary>
+    /// <param name="exception">The exception to deliver</param>
     public void Send(Exception exception)
     {      
       Send(BuildMessage(exception));
     }
 
-    public void Send(Exception exception, List<string> tags)
+    /// <summary>
+    /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
+    /// with the message for identification. This uses the version number of the originating assembly.
+    /// </summary>
+    /// <param name="exception">The exception to deliver</param>
+    /// <param name="tags">A list of strings associated with the message</param>
+    public void Send(Exception exception, IList<string> tags)
     {
       var message = BuildMessage(exception);
       message.Details.Tags = tags;
+      Send(message);
+    }       
+    
+    /// <summary>
+    /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
+    /// with the message for identification, as well as sending a key-value collection of custom data.
+    /// This uses the version number of the originating assembly.
+    /// </summary>
+    /// <param name="exception">The exception to deliver</param>
+    /// <param name="tags">A list of strings associated with the message</param>
+    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload</param>
+    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
+    {
+      var message = BuildMessage(exception);
+      message.Details.Tags = tags;      
+      message.Details.UserCustomData = userCustomData;
       Send(message);
     }
 
-    public void Send(Exception exception, List<string> tags, string version)
+    /// <summary>
+    /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
+    /// with the message for identification, as well as sending a key-value collection of custom data.
+    /// This specifies a custom version identification number.
+    /// </summary>
+    /// <param name="exception">The exception to deliver</param>
+    /// <param name="tags">A list of strings associated with the message</param>
+    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload</param>
+    /// <param name="version">A custom version identifiction, associated with a particular build of your project.</param>
+    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
     {
       var message = BuildMessage(exception);
       message.Details.Tags = tags;
+      message.Details.UserCustomData = userCustomData;
       message.Details.Version = version;
       Send(message);
-    }    
+    } 
 
+    /// <summary>
+    /// Asynchronously transmits a message to Raygun.io.
+    /// </summary>
+    /// <param name="exception"></param>
     public void SendInBackground(Exception exception)
     {
       var message = BuildMessage(exception);
@@ -223,6 +270,11 @@ namespace Mindscape.Raygun4Net
         ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
 
+    /// <summary>
+    /// Posts a RaygunMessage to the Raygun.io api endpoint.
+    /// </summary>
+    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
+    /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void Send(RaygunMessage raygunMessage)
     {
       if (ValidateApiKey())
@@ -234,7 +286,7 @@ namespace Mindscape.Raygun4Net
 
           try
           {
-            var message = JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString();
+             var message = JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString();
             client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
           }
           catch (Exception ex)
