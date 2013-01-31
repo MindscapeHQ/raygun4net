@@ -1,8 +1,7 @@
 properties {
     $root =                 $psake.build_script_dir
-    $raygun_project =       "$root/Mindscape.Raygun4Net/Mindscape.Raygun4Net.csproj"
-    $rayguntests_project =  "$root/Mindscape.Raygun4Net.Tests/Mindscape.Raygun4Net.Tests.csproj"
-    $raygunwinrt_project =  "$root/Mindscape.Raygun4Net.WinRT/Mindscape.Raygun4Net.WinRT.csproj"
+    $solution_file =        "$root/Mindscape.Raygun4Net.sln"
+    $winrt_solution_file =  "$root/Mindscape.Raygun4Net.WinRT.sln"
     $nugetspec =            "$root/Mindscape.Raygun4Net.nuspec"
     $nugetpackage =         "Mindscape.Raygun4Net.1.0.nupkg"
     $configuration =        "Debug"
@@ -15,10 +14,9 @@ properties {
     $assemblies_to_merge =  "Mindscape.Raygun4Net.dll", `
                             "Newtonsoft.Json.dll"
     $merged_assemlby_name = "Mindscape.Raygun4Net.dll"
-    $windowsversion =       (Get-WmiObject Win32_OperatingSystem).Version
 }
 
-task default -depends Package, Merge
+task default -depends Merge
 
 task Clean {
     remove-item -force -recurse $build_dir -ErrorAction SilentlyContinue | Out-Null
@@ -31,14 +29,11 @@ task Init -depends Clean {
 }
 
 task Compile -depends Init {
+    exec { msbuild "$solution_file" /m /p:OutDir=$build_dir /p:Configuration=$configuration }
+}
 
-    exec { msbuild "$raygun_project" /m /p:OutDir=$build_dir /p:Configuration=$configuration }
-    exec { msbuild "$rayguntests_project" /m /p:OutDir=$build_dir /p:Configuration=$configuration }
-
-    if($windowsversion -ge 6.2) { #if we're using Windows 8 or better
-        echo "building winrt version for $windowsversion"
-        exec { msbuild "$raygunwinrt_project" /m /p:OutDir=$build_dir /p:Configuration=$configuration }
-    }
+task CompileWinRT -depends Init {
+    exec { msbuild "$winrt_solution_file" /m /p:OutDir=$build_dir /p:Configuration=$configuration }
 }
 
 task Test -depends Compile {
@@ -59,7 +54,7 @@ task Merge -depends Compile {
     Pop-Location
 }
 
-task Package -depends Test {
+task Package -depends Compile, CompileWinRT {
     exec { nuget pack $nugetspec -OutputDirectory $release_dir }
 }
 
