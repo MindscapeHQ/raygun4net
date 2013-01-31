@@ -1,12 +1,5 @@
 Raygun4Net - Raygun.io Provider for .NET Framework
-
-====================
-Installation & Usage
-====================
-
-Building from source requires the Nuget VS2012 extension. Nuget will fetch the dependencies automatically - you will need to enable this option if it isn't already (Tools -> Options -> Package Manager -> Allow Nuget to download missing packages during build).
-
-In your project, add a reference to "Mindscape.Raygun4Net.dll"
+===================
 
 
 ASP.NET
