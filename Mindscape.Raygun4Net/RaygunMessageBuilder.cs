@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 #if !WINRT
 using System.Reflection;
 using System.Web;
@@ -63,6 +64,12 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
+    public IRaygunMessageBuilder SetUserCustomData(IDictionary userCustomData)
+    {
+      _raygunMessage.Details.UserCustomData = userCustomData;
+      return this;
+    }
+
 #if !WINRT
     public IRaygunMessageBuilder SetHttpDetails(HttpContext context)    
     {
@@ -76,9 +83,17 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetVersion()
     {
-      _raygunMessage.Details.Version = Assembly.GetEntryAssembly().GetName().Version.ToString();
+      if (HttpContext.Current == null)
+      {
+        _raygunMessage.Details.Version = Assembly.GetEntryAssembly().GetName().Version.ToString();
+      }
+      else
+      {
+        _raygunMessage.Details.Version = "Not supplied";
+      }
       return this;
-    }
+    }    
+
 #else
     public IRaygunMessageBuilder SetVersion()
     {
@@ -87,7 +102,6 @@ namespace Mindscape.Raygun4Net
                                                      version.Build);
       return this;
     }
-#endif
-      
+#endif    
   }
 }

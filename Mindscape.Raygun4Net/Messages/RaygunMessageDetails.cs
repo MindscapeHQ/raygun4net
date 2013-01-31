@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Mindscape.Raygun4Net.Messages
@@ -9,14 +10,17 @@ namespace Mindscape.Raygun4Net.Messages
     public string Version { get; set; }
 
     public RaygunErrorMessage Error { get; set; }
-#if !WINRT
-    public RaygunRequestMessage Request { get; set; }
-#endif
 
     public RaygunEnvironmentMessage Environment { get; set; }
 
     public RaygunClientMessage Client { get; set; }
 
-    public List<string> Tags { get; set; }
+    public IList<string> Tags { get; set; }
+
+    public IDictionary UserCustomData { get; set; }
+
+#if !WINRT
+    public RaygunRequestMessage Request { get; set; }
+#endif
   }
 }

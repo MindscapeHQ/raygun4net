@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 #if !WINRT
+using System.Web;
 using System.Windows.Forms;
 using System.Management;
 using Microsoft.VisualBasic.Devices;
@@ -40,14 +41,21 @@ namespace Mindscape.Raygun4Net.Messages
 
       Location = CultureInfo.CurrentCulture.DisplayName;
       OSVersion = info.OSVersion;
-      GetDiskSpace();      
-
-      if (string.IsNullOrEmpty(Properties.Environment.Default.Cpu))
+      GetDiskSpace();  
+    
+      if (HttpContext.Current == null)
       {
-        Properties.Environment.Default.Cpu = GetCpu();
-        Properties.Environment.Default.Save();
+        if (string.IsNullOrEmpty(Properties.Environment.Default.Cpu))
+        {
+          Properties.Environment.Default.Cpu = GetCpu();
+          Properties.Environment.Default.Save();
+        }
+        Cpu = Properties.Environment.Default.Cpu;
+      }      
+      else
+      {
+        Cpu = null;
       }
-      Cpu = Properties.Environment.Default.Cpu;
 #else
       //WindowBoundsHeight = Windows.UI.Xaml.Window.Current.Bounds.Height;
       //WindowBoundsWidth = Windows.UI.Xaml.Window.Current.Bounds.Width;
