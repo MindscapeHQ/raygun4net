@@ -83,9 +83,10 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetVersion()
     {
-      if (HttpContext.Current == null)
+      var entryAssembly = Assembly.GetEntryAssembly();
+      if (entryAssembly != null)
       {
-        _raygunMessage.Details.Version = Assembly.GetEntryAssembly().GetName().Version.ToString();
+        _raygunMessage.Details.Version = entryAssembly.GetName().Version.ToString();
       }
       else
       {
