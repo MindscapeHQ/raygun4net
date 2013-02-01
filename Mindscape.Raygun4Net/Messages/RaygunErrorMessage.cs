@@ -79,8 +79,10 @@ namespace Mindscape.Raygun4Net.Messages
 
           var code = default(string[]);
 
+          var codeStartLineNumber = lineNumber < 3 ? 0 : lineNumber - 3;
+
           if (File.Exists(file))
-            code = File.ReadAllLines(file).Skip(lineNumber - 3).Take(5).ToArray();
+            code = File.ReadAllLines(file).Skip(codeStartLineNumber).Take(5).ToArray();
 
           var line = new RaygunErrorStackTraceLineMessage
           {
