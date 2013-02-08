@@ -41,24 +41,12 @@ namespace Mindscape.Raygun4Net.Messages
 
       Location = CultureInfo.CurrentCulture.DisplayName;
       OSVersion = info.OSVersion;
-      GetDiskSpace();  
-    
-      if (HttpContext.Current == null)
-      {
-        if (string.IsNullOrEmpty(Properties.Environment.Default.Cpu))
-        {
-          Properties.Environment.Default.Cpu = GetCpu();
-          Properties.Environment.Default.Save();
-        }
-        Cpu = Properties.Environment.Default.Cpu;
-      }      
-      else
-      {
-        Cpu = null;
-      }
+      GetDiskSpace();
+      
+      Cpu = GetCpu();
 #else
-      //WindowBoundsHeight = Windows.UI.Xaml.Window.Current.Bounds.Height;
-      //WindowBoundsWidth = Windows.UI.Xaml.Window.Current.Bounds.Width;
+  //WindowBoundsHeight = Windows.UI.Xaml.Window.Current.Bounds.Height;
+  //WindowBoundsWidth = Windows.UI.Xaml.Window.Current.Bounds.Width;
       PackageVersion = string.Format("{0}.{1}", Package.Current.Id.Version.Major, Package.Current.Id.Version.Minor);
       Cpu = Package.Current.Id.Architecture.ToString();      
       ResolutionScale = DisplayProperties.ResolutionScale.ToString();
