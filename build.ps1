@@ -4,7 +4,7 @@ properties {
     $winrt_solution_file =  "$root/Mindscape.Raygun4Net.WinRT.sln"
     $nugetspec =            "$root/Mindscape.Raygun4Net.nuspec"
     $nugetpackage =         "Mindscape.Raygun4Net.1.0.nupkg"
-    $configuration =        "Debug"
+    $configuration =        "Release"
     $build_dir =            "$root\build\"
     $release_dir =          "$root\release\"
     $nunit_dir =            "$root\packages\NUnit.Runners.2.6.2\tools\"
