@@ -30,19 +30,19 @@ namespace Mindscape.Raygun4Net.Messages
 
 #if !WINRT
       OSVersion = Environment.OSVersion.VersionString;
-      Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");      
+      Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
       WindowBoundsWidth = SystemInformation.VirtualScreen.Height;
-      WindowBoundsHeight = SystemInformation.VirtualScreen.Width;      
+      WindowBoundsHeight = SystemInformation.VirtualScreen.Width;
       ComputerInfo info = new ComputerInfo();
-      TotalPhysicalMemory = (ulong)info.TotalPhysicalMemory / 0x100000; // in MB
-      AvailablePhysicalMemory = (ulong)info.AvailablePhysicalMemory / 0x100000;
-      TotalVirtualMemory = info.TotalVirtualMemory / 0x100000;
-      AvailableVirtualMemory = info.AvailableVirtualMemory / 0x100000;
+      TotalPhysicalMemory = (ulong) info.TotalPhysicalMemory/0x100000; // in MB
+      AvailablePhysicalMemory = (ulong) info.AvailablePhysicalMemory/0x100000;
+      TotalVirtualMemory = info.TotalVirtualMemory/0x100000;
+      AvailableVirtualMemory = info.AvailableVirtualMemory/0x100000;
 
-      Location = CultureInfo.CurrentCulture.DisplayName;
+      Locale = CultureInfo.CurrentCulture.DisplayName;
       OSVersion = info.OSVersion;
       GetDiskSpace();
-      
+
       Cpu = GetCpu();
 #else
   //WindowBoundsHeight = Windows.UI.Xaml.Window.Current.Bounds.Height;
@@ -59,11 +59,11 @@ namespace Mindscape.Raygun4Net.Messages
 #endif
     }
 
-#if !WINRT    
+#if !WINRT
     private string GetCpu()
     {
       ManagementClass wmiManagementProcessorClass = new ManagementClass("Win32_Processor");
-      ManagementObjectCollection wmiProcessorCollection = wmiManagementProcessorClass.GetInstances();           
+      ManagementObjectCollection wmiProcessorCollection = wmiManagementProcessorClass.GetInstances();
 
       foreach (ManagementObject wmiProcessorObject in wmiProcessorCollection)
       {
@@ -85,9 +85,9 @@ namespace Mindscape.Raygun4Net.Messages
       {
         if (drive.IsReady)
         {
-          DiskSpaceFree.Add((double)drive.AvailableFreeSpace / 0x40000000); // in GB
+          DiskSpaceFree.Add((double) drive.AvailableFreeSpace/0x40000000); // in GB
         }
-      }      
+      }
     }
 #else    
     private async Task<PnpObjectCollection> GetDevices()
@@ -120,25 +120,27 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string Architecture { get; private set; }
 
+    [Obsolete("Use Locale instead")]
     public string Location { get; private set; }
 
     public ulong TotalPhysicalMemory { get; private set; }
 
     public ulong AvailablePhysicalMemory { get; private set; }
 
-    public ulong TotalVirtualMemory { get; set; }
+    public ulong TotalVirtualMemory { get; private set; }
 
-    public ulong AvailableVirtualMemory { get; set; }
+    public ulong AvailableVirtualMemory { get; private set; }
 
     public List<double> DiskSpaceFree
     {
-      get
-      {
-        return _diskSpaceFree;
-      }
+      get { return _diskSpaceFree; }
       set { _diskSpaceFree = value; }
     }
 
     public string DeviceName { get; private set; }
-  }
+
+    // Refactored properties
+
+    public string Locale { get; private set; }
+}
 }
