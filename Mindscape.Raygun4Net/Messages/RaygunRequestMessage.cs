@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
@@ -58,8 +60,23 @@ namespace Mindscape.Raygun4Net.Messages
     private static IDictionary ToDictionary(NameValueCollection nameValueCollection)
     {
       var keys = nameValueCollection.AllKeys;
+      var dictionary = new Dictionary<string, string>();
+    
+      foreach (string key in keys)
+      {
+        try
+        {
+          dictionary.Add(key, nameValueCollection[key]);
+        }
+        catch (HttpRequestValidationException e)
+        {          
+          // If changing QueryString to be of type string in future, will need to account for possible
+          // illegal values - in this case it is contained at the end of e.Message along with an error message
+          dictionary.Add(key, e.Message);          
+        }
+      }
 
-      return keys.ToDictionary(s => s, s => nameValueCollection[s]);
+      return dictionary;
     }
 
     public string HostName { get; set; }
