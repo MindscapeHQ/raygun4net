@@ -6,15 +6,11 @@ using System.Net;
 using System.Runtime.InteropServices;
 using Mindscape.Raygun4Net.Messages;
 #if !WINRT
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 #endif
 #if WINRT
 using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using System.Net.Http;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Windows.Networking.Connectivity;
 using Windows.UI.Xaml;
 #else
@@ -98,7 +94,8 @@ namespace Mindscape.Raygun4Net
       {
         client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("raygun4net-winrt", "1.0.0"));
 
-        HttpContent httpContent = new StringContent(JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString());
+        HttpContent httpContent = new StringContent(SimpleJson.SerializeObject(raygunMessage));
+        //HttpContent httpContent = new StringContent(JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString());
         httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-raygun-message");
         httpContent.Headers.Add("X-ApiKey", _apiKey);
 
@@ -285,8 +282,8 @@ namespace Mindscape.Raygun4Net
           client.Encoding = System.Text.Encoding.UTF8;
 
           try
-          {
-             var message = JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString();
+          {            
+            var message = SimpleJson.SerializeObject(raygunMessage);
             client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
           }
           catch (Exception ex)

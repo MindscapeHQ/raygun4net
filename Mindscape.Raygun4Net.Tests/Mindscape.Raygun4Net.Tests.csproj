@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RaygunClientJsonTests.cs" />
     <Compile Include="RaygunErrorMessageExceptionTests.cs" />
     <Compile Include="RaygunErrorMessageInnerExceptionTests.cs" />
   </ItemGroup>
