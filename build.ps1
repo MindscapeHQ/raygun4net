@@ -11,12 +11,9 @@ properties {
     $tools_dir =            "$root\tools"
     $nuget_dir =            "$root\.nuget"
     $env:Path +=            ";$nunit_dir;$tools_dir;$nuget_dir"
-    $assemblies_to_merge =  "Mindscape.Raygun4Net.dll", `
-                            "Newtonsoft.Json.dll"
-    $merged_assemlby_name = "Mindscape.Raygun4Net.dll"
 }
 
-task default -depends Merge
+task default -depends Compile
 
 task Clean {
     remove-item -force -recurse $build_dir -ErrorAction SilentlyContinue | Out-Null
@@ -42,14 +39,6 @@ task Test -depends Compile {
     Push-Location -Path $build_dir
 
     exec { nunit-console.exe $test_assemblies }
-
-    Pop-Location
-}
-
-task Merge -depends Compile {
-    Push-Location -Path $build_dir
-
-    exec { ilmerge.exe /internalize /out:"$release_dir\$merged_assemlby_name" $assemblies_to_merge }
 
     Pop-Location
 }
