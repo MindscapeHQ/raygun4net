@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
 #if !WINRT
 using System.Web;
@@ -29,21 +30,29 @@ namespace Mindscape.Raygun4Net.Messages
       ProcessorCount = Environment.ProcessorCount;
 
 #if !WINRT
-      OSVersion = Environment.OSVersion.VersionString;
-      Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
-      WindowBoundsWidth = SystemInformation.VirtualScreen.Height;
-      WindowBoundsHeight = SystemInformation.VirtualScreen.Width;
-      ComputerInfo info = new ComputerInfo();
-      TotalPhysicalMemory = (ulong) info.TotalPhysicalMemory/0x100000; // in MB
-      AvailablePhysicalMemory = (ulong) info.AvailablePhysicalMemory/0x100000;
-      TotalVirtualMemory = info.TotalVirtualMemory/0x100000;
-      AvailableVirtualMemory = info.AvailableVirtualMemory/0x100000;
+      try
+      {        
+        WindowBoundsWidth = SystemInformation.VirtualScreen.Height;
+        WindowBoundsHeight = SystemInformation.VirtualScreen.Width;
+        ComputerInfo info = new ComputerInfo();
+        Locale = CultureInfo.CurrentCulture.DisplayName;
+        OSVersion = info.OSVersion;
 
-      Locale = CultureInfo.CurrentCulture.DisplayName;
-      OSVersion = info.OSVersion;
-      GetDiskSpace();
-
-      Cpu = GetCpu();
+        Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
+        TotalPhysicalMemory = (ulong)info.TotalPhysicalMemory / 0x100000; // in MB
+        AvailablePhysicalMemory = (ulong)info.AvailablePhysicalMemory / 0x100000;
+        TotalVirtualMemory = info.TotalVirtualMemory / 0x100000;
+        AvailableVirtualMemory = info.AvailableVirtualMemory / 0x100000;
+        GetDiskSpace();
+        Cpu = GetCpu();
+      }
+      catch (SecurityException)
+      {
+        // Medium trust will cause this to fault. Since testing for the trust level
+        // requires throwing an exception anyway it doesn't seem like a net win to be testing
+        // for the trust level over just dealing to this exception
+      }
+      
 #else
   //WindowBoundsHeight = Windows.UI.Xaml.Window.Current.Bounds.Height;
   //WindowBoundsWidth = Windows.UI.Xaml.Window.Current.Bounds.Width;
