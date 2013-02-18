@@ -73,9 +73,17 @@ namespace Mindscape.Raygun4Net.Messages
           // If changing QueryString to be of type string in future, will need to account for possible
           // illegal values - in this case it is contained at the end of e.Message along with an error message
           
-          int firstInstance = e.Message.IndexOf('\"');  
-          dictionary.Add(key, e.Message.Substring(firstInstance + 1, e.Message.LastIndexOf('\"') - firstInstance));
-          
+          int firstInstance = e.Message.IndexOf('\"');
+          int lastInstance = e.Message.LastIndexOf('\"');
+
+          if (firstInstance != -1 && lastInstance != -1)
+          {
+              dictionary.Add(key, e.Message.Substring(firstInstance + 1, lastInstance - firstInstance - 1));  
+          }
+          else
+          {
+            dictionary.Add(key, string.Empty);
+          }                    
         }
       }
 
