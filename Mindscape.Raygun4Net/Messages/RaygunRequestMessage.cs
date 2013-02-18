@@ -72,35 +72,10 @@ namespace Mindscape.Raygun4Net.Messages
         {
           // If changing QueryString to be of type string in future, will need to account for possible
           // illegal values - in this case it is contained at the end of e.Message along with an error message
-
-          int index = 0, firstInstance = 0;
-          StringReader stringReader = new StringReader(e.Message);
           
-          while (true)
-          {
-            int character = stringReader.Read();
-
-            if (index == e.Message.Length - 1)
-            {
-              dictionary.Add(key, e.Message);
-              break;
-            }
-
-            if (firstInstance == 0)
-            {
-              if (character == 34) // Quote mark
-              {
-                firstInstance = index;
-              }
-            }
-            else
-            {              
-              dictionary.Add(key, e.Message.Substring(firstInstance + 1, e.Message.LastIndexOf('\"') - firstInstance));
-              break;
-            }
-
-            index++;
-          }          
+          int firstInstance = e.Message.IndexOf('\"');  
+          dictionary.Add(key, e.Message.Substring(firstInstance + 1, e.Message.LastIndexOf('\"') - firstInstance));
+          
         }
       }
 
