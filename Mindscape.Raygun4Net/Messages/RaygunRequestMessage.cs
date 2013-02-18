@@ -28,7 +28,7 @@ namespace Mindscape.Raygun4Net.Messages
 
         if (s.Length <= 256 && value.Length <= 256)
         {
-          Form.Add(s, httpContext.Request.Form[s]); 
+          Form.Add(s, httpContext.Request.Form[s]);
         }
 
         if (s.Length > 256)
@@ -44,15 +44,15 @@ namespace Mindscape.Raygun4Net.Messages
       }
 
       var contentType = httpContext.Request.Headers["Content-Type"];
-      if (contentType != "text/html" && contentType != "application/x-www-form-urlencoded" && httpContext.Request.RequestType != "GET")        
+      if (contentType != "text/html" && contentType != "application/x-www-form-urlencoded" && httpContext.Request.RequestType != "GET")
       {
-        int length = 4096;        
+        int length = 4096;
         string temp = new StreamReader(httpContext.Request.InputStream).ReadToEnd();
         if (length > temp.Length)
         {
           length = temp.Length;
         }
-        
+
         RawData = temp.Substring(0, length);
       }
     }
@@ -61,7 +61,7 @@ namespace Mindscape.Raygun4Net.Messages
     {
       var keys = nameValueCollection.AllKeys;
       var dictionary = new Dictionary<string, string>();
-    
+
       foreach (string key in keys)
       {
         try
@@ -69,10 +69,21 @@ namespace Mindscape.Raygun4Net.Messages
           dictionary.Add(key, nameValueCollection[key]);
         }
         catch (HttpRequestValidationException e)
-        {          
+        {
           // If changing QueryString to be of type string in future, will need to account for possible
           // illegal values - in this case it is contained at the end of e.Message along with an error message
-          dictionary.Add(key, e.Message);          
+          
+          int firstInstance = e.Message.IndexOf('\"');
+          int lastInstance = e.Message.LastIndexOf('\"');
+
+          if (firstInstance != -1 && lastInstance != -1)
+          {
+              dictionary.Add(key, e.Message.Substring(firstInstance + 1, lastInstance - firstInstance - 1));  
+          }
+          else
+          {
+            dictionary.Add(key, string.Empty);
+          }                    
         }
       }
 
@@ -87,7 +98,7 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string IPAddress { get; set; }
 
-    public IDictionary QueryString { get; set; }    
+    public IDictionary QueryString { get; set; }
 
     public IDictionary Data { get; set; }
 
