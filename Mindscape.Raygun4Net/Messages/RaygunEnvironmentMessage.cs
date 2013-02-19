@@ -30,29 +30,30 @@ namespace Mindscape.Raygun4Net.Messages
       ProcessorCount = Environment.ProcessorCount;
 
 #if !WINRT
-      try
-      {        
-        WindowBoundsWidth = SystemInformation.VirtualScreen.Height;
-        WindowBoundsHeight = SystemInformation.VirtualScreen.Width;
-        ComputerInfo info = new ComputerInfo();
-        Locale = CultureInfo.CurrentCulture.DisplayName;
-        OSVersion = info.OSVersion;
 
-        Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
-        TotalPhysicalMemory = (ulong)info.TotalPhysicalMemory / 0x100000; // in MB
-        AvailablePhysicalMemory = (ulong)info.AvailablePhysicalMemory / 0x100000;
-        TotalVirtualMemory = info.TotalVirtualMemory / 0x100000;
-        AvailableVirtualMemory = info.AvailableVirtualMemory / 0x100000;
-        GetDiskSpace();
-        Cpu = GetCpu();
-      }
-      catch (SecurityException)
+      WindowBoundsWidth = SystemInformation.VirtualScreen.Height;
+      WindowBoundsHeight = SystemInformation.VirtualScreen.Width;
+      ComputerInfo info = new ComputerInfo();
+      Locale = CultureInfo.CurrentCulture.DisplayName;
+      OSVersion = info.OSVersion;
+
+      if (!RaygunSettings.Settings.MediumTrust)
       {
-        // Medium trust will cause this to fault. Since testing for the trust level
-        // requires throwing an exception anyway it doesn't seem like a net win to be testing
-        // for the trust level over just dealing to this exception
+        try
+        {
+          Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
+          TotalPhysicalMemory = (ulong) info.TotalPhysicalMemory/0x100000; // in MB
+          AvailablePhysicalMemory = (ulong) info.AvailablePhysicalMemory/0x100000;
+          TotalVirtualMemory = info.TotalVirtualMemory/0x100000;
+          AvailableVirtualMemory = info.AvailableVirtualMemory/0x100000;
+          GetDiskSpace();
+          Cpu = GetCpu();
+        }
+        catch (SecurityException)
+        {
+          System.Diagnostics.Trace.WriteLine("RaygunClient error: couldn't access environment variables. If you are running in Medium Trust, in web.config in RaygunSettings set mediumtrust=\"true\"");
+        }
       }
-      
 #else
   //WindowBoundsHeight = Windows.UI.Xaml.Window.Current.Bounds.Height;
   //WindowBoundsWidth = Windows.UI.Xaml.Window.Current.Bounds.Width;
@@ -94,7 +95,7 @@ namespace Mindscape.Raygun4Net.Messages
       {
         if (drive.IsReady)
         {
-          DiskSpaceFree.Add((double) drive.AvailableFreeSpace/0x40000000); // in GB
+          DiskSpaceFree.Add((double)drive.AvailableFreeSpace / 0x40000000); // in GB
         }
       }
     }
@@ -151,5 +152,5 @@ namespace Mindscape.Raygun4Net.Messages
     // Refactored properties
 
     public string Locale { get; private set; }
-}
+  }
 }
