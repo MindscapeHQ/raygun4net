@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
 #if !WINRT
 using System.Web;
@@ -29,21 +30,30 @@ namespace Mindscape.Raygun4Net.Messages
       ProcessorCount = Environment.ProcessorCount;
 
 #if !WINRT
-      OSVersion = Environment.OSVersion.VersionString;
-      Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
+
       WindowBoundsWidth = SystemInformation.VirtualScreen.Height;
       WindowBoundsHeight = SystemInformation.VirtualScreen.Width;
       ComputerInfo info = new ComputerInfo();
-      TotalPhysicalMemory = (ulong) info.TotalPhysicalMemory/0x100000; // in MB
-      AvailablePhysicalMemory = (ulong) info.AvailablePhysicalMemory/0x100000;
-      TotalVirtualMemory = info.TotalVirtualMemory/0x100000;
-      AvailableVirtualMemory = info.AvailableVirtualMemory/0x100000;
-
       Locale = CultureInfo.CurrentCulture.DisplayName;
       OSVersion = info.OSVersion;
-      GetDiskSpace();
 
-      Cpu = GetCpu();
+      if (!RaygunSettings.Settings.MediumTrust)
+      {
+        try
+        {
+          Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
+          TotalPhysicalMemory = (ulong) info.TotalPhysicalMemory/0x100000; // in MB
+          AvailablePhysicalMemory = (ulong) info.AvailablePhysicalMemory/0x100000;
+          TotalVirtualMemory = info.TotalVirtualMemory/0x100000;
+          AvailableVirtualMemory = info.AvailableVirtualMemory/0x100000;
+          GetDiskSpace();
+          Cpu = GetCpu();
+        }
+        catch (SecurityException)
+        {
+          System.Diagnostics.Trace.WriteLine("RaygunClient error: couldn't access environment variables. If you are running in Medium Trust, in web.config in RaygunSettings set mediumtrust=\"true\"");
+        }
+      }
 #else
   //WindowBoundsHeight = Windows.UI.Xaml.Window.Current.Bounds.Height;
   //WindowBoundsWidth = Windows.UI.Xaml.Window.Current.Bounds.Width;
@@ -85,7 +95,7 @@ namespace Mindscape.Raygun4Net.Messages
       {
         if (drive.IsReady)
         {
-          DiskSpaceFree.Add((double) drive.AvailableFreeSpace/0x40000000); // in GB
+          DiskSpaceFree.Add((double)drive.AvailableFreeSpace / 0x40000000); // in GB
         }
       }
     }
@@ -142,5 +152,5 @@ namespace Mindscape.Raygun4Net.Messages
     // Refactored properties
 
     public string Locale { get; private set; }
-}
+  }
 }
