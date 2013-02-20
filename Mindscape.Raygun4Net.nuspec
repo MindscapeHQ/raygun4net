@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>Mindscape.Raygun4Net</id>
-        <version>1.0.2</version>
+        <version>1.0.3</version>
         <title />
         <authors>Mindscape</authors>
         <owners />
@@ -11,9 +11,6 @@
         <iconUrl>https://app.raygun.io/Content/Images/apple-touch-icon.png</iconUrl>
         <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
         <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
-        <dependencies>
-            <dependency id="Newtonsoft.Json" version="4.5.6" />
-        </dependencies>
     </metadata>
     <files>
         <file src="build\Mindscape.Raygun4Net.dll" target="lib\net35\Mindscape.Raygun4Net.dll" />
