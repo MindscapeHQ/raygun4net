@@ -14,7 +14,7 @@ namespace Mindscape.Raygun4Net
       get
       {
         // If no configuration setting is provided then return the default values
-        return settings ?? new RaygunSettings { ApiKey = "", ApiEndpoint = new Uri(DefaultApiEndPoint) };
+        return settings ?? new RaygunSettings { ApiKey = "", ApiEndpoint = new Uri(DefaultApiEndPoint), MediumTrust = false };
       }
     }
 
@@ -32,6 +32,13 @@ namespace Mindscape.Raygun4Net
       get { return (Uri)this["endpoint"]; }
       set { this["endpoint"] = value; }
     }
+
+    [ConfigurationProperty("mediumTrust", IsRequired = false, DefaultValue = false)]
+    public bool MediumTrust
+    {
+      get { return (bool)this["mediumTrust"]; }
+      set { this["mediumTrust"] = value; }
+    }    
   }
 }
 #else
