@@ -26,7 +26,7 @@ Add a section to configSections:
 Add the Raygun settings configuration block from above:
 
 ```
-<RaygunSettings apikey="{{apikey for your application}}" />
+<RaygunSettings apikey="API_KEY_FOR_YOUR_APPLICATION" />
 ```
 
 You can then either create a new instance of the RaygunClient class and call Send(Exception) e.g.
