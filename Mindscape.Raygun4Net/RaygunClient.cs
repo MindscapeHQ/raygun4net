@@ -95,7 +95,6 @@ namespace Mindscape.Raygun4Net
         client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("raygun4net-winrt", "1.0.0"));
 
         HttpContent httpContent = new StringContent(SimpleJson.SerializeObject(raygunMessage));
-        //HttpContent httpContent = new StringContent(JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString());
         httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-raygun-message");
         httpContent.Headers.Add("X-ApiKey", _apiKey);
 
@@ -106,6 +105,11 @@ namespace Mindscape.Raygun4Net
         catch (Exception ex)
         {
           System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+
+          if (RaygunSettings.Settings.ThrowOnError)
+          {
+            throw;
+          }
         }
       }
     }
@@ -165,7 +169,7 @@ namespace Mindscape.Raygun4Net
         throw;
       }
     }
-#else    
+#else
     /// <summary>
     /// Transmits an exception to Raygun.io synchronously, using the version number of the originating assembly.
     /// </summary>
@@ -287,8 +291,13 @@ namespace Mindscape.Raygun4Net
             client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
           }
           catch (Exception ex)
-          {
+          {            
             System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+
+            if (RaygunSettings.Settings.ThrowOnError)
+            {
+              throw;
+            }
           }
         }
       }
