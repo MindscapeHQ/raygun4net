@@ -19,7 +19,7 @@ namespace Mindscape.Raygun4Net.Messages
 
     public IDictionary UserCustomData { get; set; }
 
-#if !WINRT
+#if !WINRT && !SILVERLIGHT
     public RaygunRequestMessage Request { get; set; }
 #endif
   }

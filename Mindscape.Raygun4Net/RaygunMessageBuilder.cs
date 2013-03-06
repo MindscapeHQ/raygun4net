@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
-#if !WINRT
+#if WINRT
+using Windows.ApplicationModel;
+#elif SILVERLIGHT
+
+#else
 using System.Reflection;
 using System.Web;
-#else
-using Windows.ApplicationModel;
 #endif
 using Mindscape.Raygun4Net.Messages;
 
@@ -70,8 +72,24 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
-#if !WINRT
-    public IRaygunMessageBuilder SetHttpDetails(HttpContext context)    
+#if WINRT
+    public IRaygunMessageBuilder SetVersion()
+    {
+      PackageVersion version = Package.Current.Id.Version;
+      _raygunMessage.Details.Version = string.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Revision,
+                                                     version.Build);
+      return this;
+    }
+#elif SILVERLIGHT
+    public IRaygunMessageBuilder SetVersion()
+    {
+      //PackageVersion version = Package.Current.Id.Version;
+      //_raygunMessage.Details.Version = string.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Revision,
+      //                                               version.Build);
+      return this;
+    }
+#else
+    public IRaygunMessageBuilder SetHttpDetails(HttpContext context)
     {
       if (context != null)
       {
@@ -93,16 +111,7 @@ namespace Mindscape.Raygun4Net
         _raygunMessage.Details.Version = "Not supplied";
       }
       return this;
-    }    
-
-#else
-    public IRaygunMessageBuilder SetVersion()
-    {
-      PackageVersion version = Package.Current.Id.Version;
-      _raygunMessage.Details.Version = string.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Revision,
-                                                     version.Build);
-      return this;
     }
-#endif    
+#endif
   }
 }

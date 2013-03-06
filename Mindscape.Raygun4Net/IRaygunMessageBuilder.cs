@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections;
-#if !WINRT
+#if !WINRT && !SILVERLIGHT
 using System.Web;
 #endif
 
