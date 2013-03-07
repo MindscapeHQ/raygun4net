@@ -19,6 +19,7 @@ using System.IO;
 using System.Threading;
 using Microsoft.Phone.Info;
 using System.Windows.Threading;
+using System.IO.IsolatedStorage;
 #else
 using System.Web;
 using System.Threading;
@@ -177,20 +178,100 @@ namespace Mindscape.Raygun4Net
       }
     }
 #elif SILVERLIGHT
+
+    /// <summary>
+    /// Sends a message ro the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
+    /// </summary>
+    /// <param name="args">The <see cref="ApplicationUnhandledExceptionEventArgs"/> containing the exception information.</param>
     public void Send(ApplicationUnhandledExceptionEventArgs args)
+    {
+      Send(args, null, null);
+    }
+
+    /// <summary>
+    /// Sends a message ro the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
+    /// </summary>
+    /// <param name="args">The <see cref="ApplicationUnhandledExceptionEventArgs"/> containing the exception information.</param>
+    /// <param name="tags">A list of tags to send with the message.</param>
+    public void Send(ApplicationUnhandledExceptionEventArgs args, IList<string> tags)
+    {
+      Send(args, tags, null);
+    }
+
+    /// <summary>
+    /// Sends a message ro the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
+    /// </summary>
+    /// <param name="args">The <see cref="ApplicationUnhandledExceptionEventArgs"/> containing the exception information.</param>
+    /// <param name="userCustomData">Custom data to send with the message.</param>
+    public void Send(ApplicationUnhandledExceptionEventArgs args, IDictionary userCustomData)
+    {
+      Send(args, null, userCustomData);
+    }
+
+    /// <summary>
+    /// Sends a message ro the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
+    /// </summary>
+    /// <param name="args">The <see cref="ApplicationUnhandledExceptionEventArgs"/> containing the exception information.</param>
+    /// <param name="tags">A list of tags to send with the message.</param>
+    /// <param name="userCustomData">Custom data to send with the message.</param>
+    public void Send(ApplicationUnhandledExceptionEventArgs args, IList<string> tags, IDictionary userCustomData)
+    {
+      Send(CreateMessage(args.ExceptionObject, tags, userCustomData));
+    }
+
+    /// <summary>
+    /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>.
+    /// </summary>
+    /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
+    public void Send(Exception exception)
+    {
+      Send(exception, null, null);
+    }
+
+    /// <summary>
+    /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>.
+    /// </summary>
+    /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
+    /// <param name="tags">A list of tags to send with the message.</param>
+    public void Send(Exception exception, IList<string> tags)
+    {
+      Send(exception, tags, null);
+    }
+
+    /// <summary>
+    /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>.
+    /// </summary>
+    /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
+    /// <param name="userCustomData">Custom data to send with the message.</param>
+    public void Send(Exception exception, IDictionary userCustomData)
+    {
+      Send(exception, null, userCustomData);
+    }
+
+    /// <summary>
+    /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>.
+    /// </summary>
+    /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
+    /// <param name="tags">A list of tags to send with the message.</param>
+    /// <param name="userCustomData">Custom data to send with the message.</param>
+    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       if (ValidateApiKey())
       {
-        var exception = args.ExceptionObject;
         exception.Data.Add("Message", exception.Message);
 
-        Send(CreateMessage(exception, null, null));
+        Send(CreateMessage(exception, tags, userCustomData));
       }
     }
 
     private string _message;
     private bool _running;
 
+    /// <summary>
+    /// Posts a RaygunMessage to the Raygun.io api endpoint.
+    /// </summary>
+    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
+    /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void Send(RaygunMessage raygunMessage)
     {
       if (ValidateApiKey())
@@ -200,6 +281,8 @@ namespace Mindscape.Raygun4Net
           if (NetworkInterface.NetworkInterfaceType != NetworkInterfaceType.None)
           {
             _message = SimpleJson.SerializeObject(raygunMessage);
+
+            _running = true;
 
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(RaygunSettings.Settings.ApiEndpoint);
             httpWebRequest.ContentType = "application/x-raygun-message";
@@ -211,14 +294,22 @@ namespace Mindscape.Raygun4Net
 
             while (_running)
             {
-              Thread.Sleep(1000);
+              Thread.Sleep(10);
             }
 
             try
             {
+              _running = true;
               httpWebRequest.BeginGetResponse(ResponseReady, httpWebRequest);
-
-              Thread.Sleep(2000);
+              for (int i = 0; i < 100; i++)
+              {
+                if (!_running)
+                {
+                  break;
+                }
+                Thread.Sleep(10);
+              }
+              _running = false;
             }
             catch (Exception ex)
             {
@@ -227,7 +318,25 @@ namespace Mindscape.Raygun4Net
           }
           else
           {
-            throw new InvalidOperationException("No internet connection!");
+            //throw new InvalidOperationException("No internet connection!");
+            try
+            {
+              using (IsolatedStorageFile myIsolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
+              {
+                using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream("RaygunErrorMessage.txt", FileMode.Create, myIsolatedStorage))
+                {
+                  using (StreamWriter writer = new StreamWriter(isoStream))
+                  {
+                    writer.Write(_message);
+                    writer.Flush();
+                  }
+                }
+              }
+            }
+            catch
+            {
+              
+            }
           }
         }
         catch (Exception ex)
@@ -263,6 +372,12 @@ namespace Mindscape.Raygun4Net
 
     private void ResponseReady(IAsyncResult asyncResult)
     {
+      Deployment.Current.Dispatcher.BeginInvoke(Ready);
+    }
+
+    private void Ready()
+    {
+      _running = false;
     }
 
     private RaygunMessage CreateMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
