@@ -18,6 +18,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using Microsoft.Phone.Info;
+using System.Windows.Threading;
 #else
 using System.Web;
 using System.Threading;
@@ -187,35 +188,24 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private WebClient _client;
     private string _message;
     private bool _running;
-    private bool _running2;
-
-    private ManualResetEvent _manualReset = new ManualResetEvent(false);
 
     public void Send(RaygunMessage raygunMessage)
     {
       if (ValidateApiKey())
       {
-        //_client = new WebClient();
-        //_client.Headers["X-ApiKey"] =  _apiKey;
-        //_client.Headers[HttpRequestHeader.ContentType] = "application/x-raygun-message";
-        //_client.Encoding = System.Text.Encoding.UTF8;
-        //_client.UploadStringCompleted += ClientOnUploadStringCompleted;
-        //_client.UploadProgressChanged += ClientOnUploadProgressChanged;
-
         try
         {
           if (NetworkInterface.NetworkInterfaceType != NetworkInterfaceType.None)
           {
             _message = SimpleJson.SerializeObject(raygunMessage);
-            //_client.Headers[HttpRequestHeader.ContentLength] = _message.Length.ToString();
 
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(RaygunSettings.Settings.ApiEndpoint);
             httpWebRequest.ContentType = "application/x-raygun-message";
             httpWebRequest.Method = "POST";
             httpWebRequest.Headers["X-Apikey"] = _apiKey;
+            httpWebRequest.AllowReadStreamBuffering = false;
             _running = true;
             httpWebRequest.BeginGetRequestStream(RequestReady, httpWebRequest);
 
@@ -224,44 +214,16 @@ namespace Mindscape.Raygun4Net
               Thread.Sleep(1000);
             }
 
-            _running = true;
             try
             {
               httpWebRequest.BeginGetResponse(ResponseReady, httpWebRequest);
-              while (_running)
-              {
-                Thread.Sleep(1000);
-              }
+
+              Thread.Sleep(2000);
             }
             catch (Exception ex)
             {
               Debug.WriteLine("Error Logging Exception to Raygun.io " + ex.Message);
             }
-
-            /*_running = true;
-            Thread thread = new Thread(PostMessageAsync);
-            thread.Start();
-            //PostMessageAsync();
-            //WaitHandle.WaitAny(new WaitHandle[] {new ManualResetEvent(false) });
-            int count = 0;
-            while (_client.IsBusy)
-            {
-              _manualReset.WaitOne();
-            }
-            /*while (_running)
-            {
-              Debug.WriteLine(_client.IsBusy);
-              Debug.WriteLine(thread.IsAlive);
-              Debug.WriteLine(thread.IsBackground);
-              Debug.WriteLine(thread.ThreadState);
-              Debug.WriteLine("");
-              Thread.Sleep(1000);
-              count++;
-              if (count > 10)
-              {
-                //break;
-              }
-            }*/
           }
           else
           {
@@ -273,121 +235,34 @@ namespace Mindscape.Raygun4Net
           Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
         }
       }
-
-      
-      /*
-      wc.UploadStringAsync();
-
-      var httpWebRequest = (HttpWebRequest)WebRequest.Create(RaygunSettings.Settings.ApiEndpoint);
-      httpWebRequest.ContentType = "application/x-raygun-message";
-      httpWebRequest.Method = "POST";
-      httpWebRequest.
-      using (var stream = await Task)
-
-      HttpClientHandler handler = new HttpClientHandler { UseDefaultCredentials = true };
-
-      var client = new HttpClient(handler);
-      {
-        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("raygun4net-winrt", "1.0.0"));
-
-        HttpContent httpContent = new StringContent(SimpleJson.SerializeObject(raygunMessage));
-        //HttpContent httpContent = new StringContent(JObject.FromObject(raygunMessage, new JsonSerializer { MissingMemberHandling = MissingMemberHandling.Ignore }).ToString());
-        httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-raygun-message");
-        httpContent.Headers.Add("X-ApiKey", _apiKey);
-
-        try
-        {
-          await PostMessageAsync(client, httpContent, RaygunSettings.Settings.ApiEndpoint);
-        }
-        catch (Exception ex)
-        {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
-        }
-      }*/
     }
 
     private void RequestReady(IAsyncResult asyncResult)
     {
       HttpWebRequest request = asyncResult.AsyncState as HttpWebRequest;
 
-      using (Stream stream = request.EndGetRequestStream(asyncResult))
+      if (request != null)
       {
-        using (StreamWriter writer = new StreamWriter(stream))
+        using (Stream stream = request.EndGetRequestStream(asyncResult))
         {
-          writer.Write(_message);
-          writer.Flush();
-          writer.Close();
+          using (StreamWriter writer = new StreamWriter(stream))
+          {
+            writer.Write(_message);
+            writer.Flush();
+            writer.Close();
+          }
         }
+      }
+      else
+      {
+        throw new InvalidOperationException("The HttpWebRequest was unexpectedly null.");
       }
 
       _running = false;
-
-      _running2 = true;
-      while (_running2)
-      {
-        Thread.Sleep(1000);
-      }
     }
 
     private void ResponseReady(IAsyncResult asyncResult)
     {
-      HttpWebRequest request = asyncResult.AsyncState as HttpWebRequest;
-      HttpWebResponse response = null;
-
-      try
-      {
-        response = (HttpWebResponse)request.EndGetResponse(asyncResult);
-
-        string result = string.Empty;
-        using (Stream responseStream = response.GetResponseStream())
-        {
-          using (StreamReader reader = new StreamReader(responseStream))
-          {
-            result = reader.ReadToEnd();
-          }
-        }
-
-        /*if (DownloadStringCompleted != null)
-        {
-          System.Windows.Deployment.Current.Dispatcher.BeginInvoke(delegate()
-          {
-            DownloadStringCompleted(this, new DownloadStringCompletedEventArgs(result));
-          });
-        }*/
-      }
-      catch
-      {
-        /*if (DownloadStringCompleted != null)
-        {
-          System.Windows.Deployment.Current.Dispatcher.BeginInvoke(delegate()
-          {
-            DownloadStringCompleted(this, new DownloadStringCompletedEventArgs(new Exception("Error getting HTTP web response.")));
-          });
-        }*/
-      }
-      _running = false;
-      _running2 = false;
-    }
-
-    private void PostMessageAsync()
-    {
-      _client.UploadStringAsync(RaygunSettings.Settings.ApiEndpoint, "POST", _message);
-      //_manualReset.WaitOne();
-      /*while (_client.IsBusy)
-      {
-        Thread.Sleep(1000);
-      }*/
-    }
-
-    private void ClientOnUploadProgressChanged(object sender, UploadProgressChangedEventArgs uploadProgressChangedEventArgs)
-    {
-      Debug.WriteLine(string.Format("Progress: {0} ", uploadProgressChangedEventArgs.ProgressPercentage));
-    }
-
-    private void ClientOnUploadStringCompleted(object sender, UploadStringCompletedEventArgs uploadStringCompletedEventArgs)
-    {
-      _manualReset.Set();
-      _running = false;
     }
 
     private RaygunMessage CreateMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
