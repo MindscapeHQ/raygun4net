@@ -12,7 +12,7 @@ using Windows.ApplicationModel;
 using Windows.Devices.Enumeration;
 using Windows.Graphics.Display;
 using Windows.Devices.Enumeration.Pnp;
-#elif SILVERLIGHT
+#elif WINDOWS_PHONE
 using Microsoft.Phone.Info;
 using System.Windows;
 using Microsoft.Phone.Controls;
@@ -46,7 +46,7 @@ namespace Mindscape.Raygun4Net.Messages
       SYSTEM_INFO systemInfo = new SYSTEM_INFO();
       RaygunSystemInfoWrapper.GetNativeSystemInfo(ref systemInfo);
       Architecture = systemInfo.wProcessorArchitecture.ToString();
-#elif SILVERLIGHT
+#elif WINDOWS_PHONE
       Locale = CultureInfo.CurrentCulture.DisplayName;
       OSVersion = Environment.OSVersion.Platform + " " + Environment.OSVersion.Version;
       object deviceName;
@@ -106,7 +106,7 @@ namespace Mindscape.Raygun4Net.Messages
 
       return await PnpObject.FindAllAsync(PnpObjectType.Device, properties);
     }
-#elif SILVERLIGHT
+#elif WINDOWS_PHONE
 
 #else
     private string GetCpu()

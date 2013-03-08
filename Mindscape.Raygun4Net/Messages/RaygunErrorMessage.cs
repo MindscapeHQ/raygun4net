@@ -57,7 +57,7 @@ namespace Mindscape.Raygun4Net.Messages
             });
         }
       }
-#elif SILVERLIGHT
+#elif WINDOWS_PHONE
       if (exception.StackTrace != null)
       {
         char[] delim = {'\r', '\n'};

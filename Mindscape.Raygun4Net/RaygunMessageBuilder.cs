@@ -2,7 +2,7 @@
 using System.Collections;
 #if WINRT
 using Windows.ApplicationModel;
-#elif SILVERLIGHT
+#elif WINDOWS_PHONE
 
 #else
 using System.Reflection;
@@ -80,7 +80,7 @@ namespace Mindscape.Raygun4Net
                                                      version.Build);
       return this;
     }
-#elif SILVERLIGHT
+#elif WINDOWS_PHONE
     public IRaygunMessageBuilder SetVersion()
     {
       //PackageVersion version = Package.Current.Id.Version;

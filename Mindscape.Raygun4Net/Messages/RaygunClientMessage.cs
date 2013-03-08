@@ -9,7 +9,7 @@ namespace Mindscape.Raygun4Net.Messages
       Name = "Raygun4Net";
 #if WINRT
       Version = typeof (RaygunClient).GetTypeInfo().Assembly.GetName().Version.ToString();
-#elif SILVERLIGHT
+#elif WINDOWS_PHONE
       Version = Assembly.GetExecutingAssembly().FullName;
 #else
       Version = Assembly.GetAssembly(typeof(RaygunClient)).GetName().Version.ToString();

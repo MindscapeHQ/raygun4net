@@ -11,7 +11,7 @@ using System.Net.Http.Headers;
 using System.Net.Http;
 using Windows.Networking.Connectivity;
 using Windows.UI.Xaml;
-#elif SILVERLIGHT
+#elif WINDOWS_PHONE
 using System.Windows;
 using System.Diagnostics;
 using System.IO;
@@ -40,7 +40,7 @@ namespace Mindscape.Raygun4Net
     {
       _apiKey = apiKey;
 
-#if SILVERLIGHT
+#if WINDOWS_PHONE
       Deployment.Current.Dispatcher.BeginInvoke(SendStoredMessages);
 #endif
     }
@@ -181,7 +181,7 @@ namespace Mindscape.Raygun4Net
         throw;
       }
     }
-#elif SILVERLIGHT
+#elif WINDOWS_PHONE
 
     /// <summary>
     /// Sends a message ro the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.

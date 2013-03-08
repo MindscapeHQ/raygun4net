@@ -24,7 +24,7 @@ namespace Mindscape.Raygun4Net
     public Uri ApiEndpoint { get; set; }
   }
 }
-#elif SILVERLIGHT
+#elif WINDOWS_PHONE
 namespace Mindscape.Raygun4Net
 {
   public class RaygunSettings
