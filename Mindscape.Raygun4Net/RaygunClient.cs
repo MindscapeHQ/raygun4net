@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using System.Runtime.InteropServices;
-using Microsoft.Phone.Net.NetworkInformation;
 using Mindscape.Raygun4Net.Messages;
 #if WINRT
 using System.Threading.Tasks;
@@ -18,9 +17,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using Microsoft.Phone.Info;
-using System.Windows.Threading;
 using System.IO.IsolatedStorage;
 using System.Text;
+using Microsoft.Phone.Net.NetworkInformation;
 #else
 using System.Web;
 using System.Threading;
