@@ -20,6 +20,7 @@ using System.Threading;
 using Microsoft.Phone.Info;
 using System.Windows.Threading;
 using System.IO.IsolatedStorage;
+using System.Text;
 #else
 using System.Web;
 using System.Threading;
@@ -39,6 +40,10 @@ namespace Mindscape.Raygun4Net
     public RaygunClient(string apiKey)
     {
       _apiKey = apiKey;
+
+#if SILVERLIGHT
+      Deployment.Current.Dispatcher.BeginInvoke(SendStoredMessages);
+#endif
     }
 
     /// <summary>
@@ -264,7 +269,6 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private string _message;
     private bool _running;
 
     /// <summary>
@@ -278,71 +282,147 @@ namespace Mindscape.Raygun4Net
       {
         try
         {
+          string message = SimpleJson.SerializeObject(raygunMessage);
           if (NetworkInterface.NetworkInterfaceType != NetworkInterfaceType.None)
           {
-            _message = SimpleJson.SerializeObject(raygunMessage);
-
-            _running = true;
-
-            var httpWebRequest = (HttpWebRequest)WebRequest.Create(RaygunSettings.Settings.ApiEndpoint);
-            httpWebRequest.ContentType = "application/x-raygun-message";
-            httpWebRequest.Method = "POST";
-            httpWebRequest.Headers["X-Apikey"] = _apiKey;
-            httpWebRequest.AllowReadStreamBuffering = false;
-            _running = true;
-            httpWebRequest.BeginGetRequestStream(RequestReady, httpWebRequest);
-
-            while (_running)
-            {
-              Thread.Sleep(10);
-            }
-
-            try
-            {
-              _running = true;
-              httpWebRequest.BeginGetResponse(ResponseReady, httpWebRequest);
-              for (int i = 0; i < 100; i++)
-              {
-                if (!_running)
-                {
-                  break;
-                }
-                Thread.Sleep(10);
-              }
-              _running = false;
-            }
-            catch (Exception ex)
-            {
-              Debug.WriteLine("Error Logging Exception to Raygun.io " + ex.Message);
-            }
+            SendMessage(message, true);
           }
           else
           {
-            //throw new InvalidOperationException("No internet connection!");
-            try
-            {
-              using (IsolatedStorageFile myIsolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
-              {
-                using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream("RaygunErrorMessage.txt", FileMode.Create, myIsolatedStorage))
-                {
-                  using (StreamWriter writer = new StreamWriter(isoStream))
-                  {
-                    writer.Write(_message);
-                    writer.Flush();
-                  }
-                }
-              }
-            }
-            catch
-            {
-              
-            }
+            SaveMessage(message);
           }
         }
         catch (Exception ex)
         {
           Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
         }
+      }
+    }
+
+    private void SendStoredMessages()
+    {
+      if (NetworkInterface.NetworkInterfaceType != NetworkInterfaceType.None)
+      {
+        try
+        {
+          using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
+          {
+            if (isolatedStorage.DirectoryExists("RaygunIO"))
+            {
+              string[] fileNames = isolatedStorage.GetFileNames("RaygunIO\\*.txt");
+              foreach (string name in fileNames)
+              {
+                IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile("RaygunIO\\" + name, FileMode.Open);
+                using (StreamReader reader = new StreamReader(isoFileStream))
+                {
+                  string text = reader.ReadToEnd();
+                  SendMessage(text, false);
+                }
+                isolatedStorage.DeleteFile("RaygunIO\\" + name);
+              }
+              isolatedStorage.DeleteDirectory("RaygunIO");
+            }
+          }
+        }
+        catch (Exception ex)
+        {
+          Debug.WriteLine(string.Format("Error sending stored messages to Raygun.io {0}", ex.Message));
+        }
+      }
+    }
+
+    private readonly Queue<string> _messageQueue = new Queue<string>();
+
+    private void SendMessage(string message, bool wait)
+    {
+      _running = true;
+
+      var httpWebRequest = (HttpWebRequest)WebRequest.Create(RaygunSettings.Settings.ApiEndpoint);
+      httpWebRequest.ContentType = "application/x-raygun-message";
+      httpWebRequest.Method = "POST";
+      httpWebRequest.Headers["X-Apikey"] = _apiKey;
+      httpWebRequest.AllowReadStreamBuffering = false;
+      _messageQueue.Enqueue(message);
+      _running = true;
+      httpWebRequest.BeginGetRequestStream(RequestReady, httpWebRequest);
+
+      while (_running)
+      {
+        Thread.Sleep(10);
+      }
+
+      try
+      {
+        _running = true;
+        httpWebRequest.BeginGetResponse(ResponseReady, httpWebRequest);
+        if (wait)
+        {
+          for (int i = 0; i < 100; i++)
+          {
+            if (!_running)
+            {
+              break;
+            }
+            Thread.Sleep(10);
+          }
+        }
+        _running = false;
+      }
+      catch (Exception ex)
+      {
+        Debug.WriteLine("Error Logging Exception to Raygun.io " + ex.Message);
+      }
+    }
+
+    private void SaveMessage(string message)
+    {
+      try
+      {
+        using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
+        {
+          if (!isolatedStorage.DirectoryExists("RaygunIO"))
+          {
+            isolatedStorage.CreateDirectory("RaygunIO");
+          }
+          int number = 1;
+          while (true)
+          {
+            bool exists = isolatedStorage.FileExists("RaygunIO\\RaygunErrorMessage" + number + ".txt");
+            if (!exists)
+            {
+              string nextFileName = "RaygunIO\\RaygunErrorMessage" + (number + 1) + ".txt";
+              exists = isolatedStorage.FileExists(nextFileName);
+              if (exists)
+              {
+                isolatedStorage.DeleteFile(nextFileName);
+              }
+              break;
+            }
+            number++;
+          }
+          if (number == 11)
+          {
+            string firstFileName = "RaygunIO\\RaygunErrorMessage1.txt";
+            if (isolatedStorage.FileExists(firstFileName))
+            {
+              isolatedStorage.DeleteFile(firstFileName);
+            }
+          }
+          using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream("RaygunIO\\RaygunErrorMessage" + number + ".txt", FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage))
+          {
+            using (StreamWriter writer = new StreamWriter(isoStream, Encoding.Unicode))
+            {
+              writer.Write(message);
+              writer.Flush();
+              writer.Close();
+            }
+          }
+          Debug.WriteLine("Saved message: " + "RaygunIO\\RaygunErrorMessage" + number + ".txt");
+        }
+      }
+      catch (Exception ex)
+      {
+        Debug.WriteLine(string.Format("Error saving message to isolated storage {0}", ex.Message));
       }
     }
 
@@ -356,7 +436,8 @@ namespace Mindscape.Raygun4Net
         {
           using (StreamWriter writer = new StreamWriter(stream))
           {
-            writer.Write(_message);
+            string message = _messageQueue.Dequeue();
+            writer.Write(message);
             writer.Flush();
             writer.Close();
           }
