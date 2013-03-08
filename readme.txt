@@ -75,7 +75,7 @@ not have their exceptions caught.
 A workaround for this issue is provided with the Wrap() method. These allow you to pass the code you want
 to execute to an instance of the Raygun client - it will simply call it surrounded by a try-catch block.
 If the method you pass in does result in an exception being thrown this will be transmitted to Raygun, and
-the exception will be again be thrown. Two overloads are available; one for methods that return void and
+the exception will again be thrown. Two overloads are available; one for methods that return void and
 another for methods that return an object.
 
 ====================
