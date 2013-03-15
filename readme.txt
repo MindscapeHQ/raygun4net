@@ -46,7 +46,7 @@ Reference the "Mindscape.Raygun4Net.WinRT.dll" instead.
 
 Create a RaygunClient instance as above, then add a handler to the UnhandledException event to pick up
 exceptions from the UI thread. Note that for WinRT you are required to pass the whole UnhandledExceptionEventArgs
-object to Send(). For instance in App.xaml:
+object to Send(). For instance in App.xaml.cs:
 
 public App()
 {
