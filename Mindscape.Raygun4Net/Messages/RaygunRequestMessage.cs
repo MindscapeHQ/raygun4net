@@ -43,17 +43,23 @@ namespace Mindscape.Raygun4Net.Messages
         Form.Add(name, value);
       }
 
-      var contentType = httpContext.Request.Headers["Content-Type"];
-      if (contentType != "text/html" && contentType != "application/x-www-form-urlencoded" && httpContext.Request.RequestType != "GET")
+      try
       {
-        int length = 4096;
-        string temp = new StreamReader(httpContext.Request.InputStream).ReadToEnd();
-        if (length > temp.Length)
+        var contentType = httpContext.Request.Headers["Content-Type"];
+        if (contentType != "text/html" && contentType != "application/x-www-form-urlencoded" && httpContext.Request.RequestType != "GET")
         {
-          length = temp.Length;
-        }
+          int length = 4096;
+          string temp = new StreamReader(httpContext.Request.InputStream).ReadToEnd();
+          if (length > temp.Length)
+          {
+            length = temp.Length;
+          }
 
-        RawData = temp.Substring(0, length);
+          RawData = temp.Substring(0, length);
+        }
+      }
+      catch (HttpException)
+      {
       }
     }
 
