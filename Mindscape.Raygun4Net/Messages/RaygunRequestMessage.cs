@@ -3,53 +3,50 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
 using System.Web;
 
 namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunRequestMessage
   {
-    public RaygunRequestMessage(HttpContext httpContext)
+    public RaygunRequestMessage(HttpContext context)
     {
-      HostName = httpContext.Request.Url.Host;
-      Url = httpContext.Request.Url.AbsolutePath;
-      HttpMethod = httpContext.Request.RequestType;
-      IPAddress = httpContext.Request.UserHostAddress;
-      Data = ToDictionary(httpContext.Request.ServerVariables);
-      QueryString = ToDictionary(httpContext.Request.QueryString);
-      Headers = ToDictionary(httpContext.Request.Headers);
+      HostName = context.Request.Url.Host;
+      Url = context.Request.Url.AbsolutePath;
+      HttpMethod = context.Request.RequestType;
+      IPAddress = context.Request.UserHostAddress;
+      Data = ToDictionary(context.Request.ServerVariables);
+      QueryString = ToDictionary(context.Request.QueryString);
+      Headers = ToDictionary(context.Request.Headers);
       Form = new NameValueCollection();
 
-      foreach (string s in httpContext.Request.Form)
+      foreach (string s in context.Request.Form)
       {
-        string name = s;
-        string value = httpContext.Request.Form[s];
+        if (String.IsNullOrEmpty(s)) continue;
 
-        if (s.Length <= 256 && value.Length <= 256)
-        {
-          Form.Add(s, httpContext.Request.Form[s]);
-        }
+        string name = s;
+        string value = context.Request.Form[s];        
 
         if (s.Length > 256)
         {
           name = s.Substring(0, 256);
         }
+
         if (value.Length > 256)
         {
           value = value.Substring(0, 256);
         }
-        Form.Remove(s);
+
         Form.Add(name, value);
       }
 
       try
       {
-        var contentType = httpContext.Request.Headers["Content-Type"];
-        if (contentType != "text/html" && contentType != "application/x-www-form-urlencoded" && httpContext.Request.RequestType != "GET")
+        var contentType = context.Request.Headers["Content-Type"];
+        if (contentType != "text/html" && contentType != "application/x-www-form-urlencoded" && context.Request.RequestType != "GET")
         {
           int length = 4096;
-          string temp = new StreamReader(httpContext.Request.InputStream).ReadToEnd();
+          string temp = new StreamReader(context.Request.InputStream).ReadToEnd();
           if (length > temp.Length)
           {
             length = temp.Length;
