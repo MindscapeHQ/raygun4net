@@ -334,6 +334,24 @@ namespace Mindscape.Raygun4Net
 
     private void SendMessage(string message, bool wait)
     {
+      SendMessageCore(message);
+
+      if (wait)
+      {
+        for (int i = 0; i < 1000; i++)
+        {
+          if (!_running)
+          {
+            break;
+          }
+          Thread.Sleep(10);
+        }
+      }
+      _running = false;
+    }
+
+    private void SendMessageCore(string message)
+    {
       _running = true;
 
       var httpWebRequest = (HttpWebRequest)WebRequest.Create(RaygunSettings.Settings.ApiEndpoint);
@@ -354,18 +372,6 @@ namespace Mindscape.Raygun4Net
       {
         _running = true;
         httpWebRequest.BeginGetResponse(ResponseReady, httpWebRequest);
-        if (wait)
-        {
-          for (int i = 0; i < 100; i++)
-          {
-            if (!_running)
-            {
-              break;
-            }
-            Thread.Sleep(10);
-          }
-        }
-        _running = false;
       }
       catch (Exception ex)
       {
@@ -452,7 +458,8 @@ namespace Mindscape.Raygun4Net
 
     private void ResponseReady(IAsyncResult asyncResult)
     {
-      Deployment.Current.Dispatcher.BeginInvoke(Ready);
+      _running = false;
+      //Deployment.Current.Dispatcher.BeginInvoke(Ready);
     }
 
     private void Ready()

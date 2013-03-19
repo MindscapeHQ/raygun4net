@@ -42,6 +42,7 @@ Create an instance of RaygunClient (passing your API key in the constructor) the
 the handler's EventArgs (with a cast).
 
 WinRT
+====================
 Reference the "Mindscape.Raygun4Net.WinRT.dll" instead.
 
 Create a RaygunClient instance as above, then add a handler to the UnhandledException event to pick up
@@ -62,7 +63,6 @@ void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
 Then inside catch blocks place a call to Send, or use the Wrap helper method, passing your code you
 want to execute. This will send (and throw) the exception in the case that one occurs.
 
-
 Limitations of WinRT UnhandledException event and Wrap() workarounds
 ====================
 The options available in WinRT for catching unhandled exceptions at this point in time are more limited
@@ -77,6 +77,17 @@ to execute to an instance of the Raygun client - it will simply call it surround
 If the method you pass in does result in an exception being thrown this will be transmitted to Raygun, and
 the exception will again be thrown. Two overloads are available; one for methods that return void and
 another for methods that return an object.
+
+WP7.1 and WP8
+====================
+Reference the "Mindscape.Raygun4Net.WindowsPhone.dll" instead.
+
+Create a RaygunClient instance and pass in your API key in the constructor. In the UnhandledException event handler of App.xaml.cs, use the RaygunClient to send the arguments.
+
+private void Application_UnhandledException(object sender, ApplicationUnhandledExceptionEventArgs e)
+{
+  _client.Send(e);
+}
 
 ====================
 Troubleshooting
