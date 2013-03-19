@@ -71,6 +71,8 @@ namespace Mindscape.Raygun4Net
     public string ApiKey { get; set; }
 
     public Uri ApiEndpoint { get; set; }
+
+    public bool ThrowOnError { get; set; }
   }
 }
 #endif
