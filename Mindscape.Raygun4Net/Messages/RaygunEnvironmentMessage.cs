@@ -35,6 +35,11 @@ namespace Mindscape.Raygun4Net.Messages
       WindowBoundsHeight = SystemInformation.VirtualScreen.Width;
       ComputerInfo info = new ComputerInfo();
       Locale = CultureInfo.CurrentCulture.DisplayName;
+
+      DateTime now = DateTime.Now;
+      LocalTime = String.Format("{0:yyyy-MM-ddTHH:mm:ss}", now);
+      TimeZoneInfo timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(System.TimeZone.CurrentTimeZone.StandardName);
+      TimeZone = timeZoneInfo.DisplayName;
       OSVersion = info.OSVersion;
 
       if (!RaygunSettings.Settings.MediumTrust)
@@ -148,6 +153,10 @@ namespace Mindscape.Raygun4Net.Messages
     }
 
     public string DeviceName { get; private set; }
+
+    public string LocalTime { get; private set; }
+
+    public string TimeZone { get; private set; }
 
     // Refactored properties
 
