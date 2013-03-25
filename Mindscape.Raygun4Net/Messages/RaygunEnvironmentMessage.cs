@@ -37,9 +37,8 @@ namespace Mindscape.Raygun4Net.Messages
       Locale = CultureInfo.CurrentCulture.DisplayName;
 
       DateTime now = DateTime.Now;
-      LocalTime = String.Format("{0:yyyy-MM-ddTHH:mm:ss}", now);
-      TimeZoneInfo timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(System.TimeZone.CurrentTimeZone.StandardName);
-      TimeZone = timeZoneInfo.DisplayName;
+      UtcOffset = TimeZone.CurrentTimeZone.GetUtcOffset(now).TotalHours;
+
       OSVersion = info.OSVersion;
 
       if (!RaygunSettings.Settings.MediumTrust)
@@ -154,9 +153,7 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string DeviceName { get; private set; }
 
-    public string LocalTime { get; private set; }
-
-    public string TimeZone { get; private set; }
+    public double UtcOffset { get; private set; }
 
     // Refactored properties
 
