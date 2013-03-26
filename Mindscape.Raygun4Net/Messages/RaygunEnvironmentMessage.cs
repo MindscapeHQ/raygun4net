@@ -35,6 +35,10 @@ namespace Mindscape.Raygun4Net.Messages
       WindowBoundsHeight = SystemInformation.VirtualScreen.Width;
       ComputerInfo info = new ComputerInfo();
       Locale = CultureInfo.CurrentCulture.DisplayName;
+
+      DateTime now = DateTime.Now;
+      UtcOffset = TimeZone.CurrentTimeZone.GetUtcOffset(now).TotalHours;
+
       OSVersion = info.OSVersion;
 
       if (!RaygunSettings.Settings.MediumTrust)
@@ -63,6 +67,9 @@ namespace Mindscape.Raygun4Net.Messages
       CurrentOrientation = DisplayProperties.CurrentOrientation.ToString();
       Location = Windows.System.UserProfile.GlobalizationPreferences.HomeGeographicRegion;
       
+      DateTime now = DateTime.Now;
+      UtcOffset = TimeZoneInfo.Local.GetUtcOffset(now).TotalHours;
+
       SYSTEM_INFO systemInfo = new SYSTEM_INFO();
       RaygunSystemInfoWrapper.GetNativeSystemInfo(ref systemInfo);
       Architecture = systemInfo.wProcessorArchitecture.ToString();
@@ -148,6 +155,8 @@ namespace Mindscape.Raygun4Net.Messages
     }
 
     public string DeviceName { get; private set; }
+
+    public double UtcOffset { get; private set; }
 
     // Refactored properties
 
