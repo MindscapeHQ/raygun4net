@@ -67,6 +67,9 @@ namespace Mindscape.Raygun4Net.Messages
       CurrentOrientation = DisplayProperties.CurrentOrientation.ToString();
       Location = Windows.System.UserProfile.GlobalizationPreferences.HomeGeographicRegion;
       
+      DateTime now = DateTime.Now;
+      UtcOffset = TimeZoneInfo.Local.GetUtcOffset(now).TotalHours;
+
       SYSTEM_INFO systemInfo = new SYSTEM_INFO();
       RaygunSystemInfoWrapper.GetNativeSystemInfo(ref systemInfo);
       Architecture = systemInfo.wProcessorArchitecture.ToString();
