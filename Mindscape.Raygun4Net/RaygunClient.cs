@@ -16,6 +16,7 @@ using Windows.UI.Xaml;
 #else
 using System.Web;
 using System.Threading;
+using System.Reflection;
 #endif
 
 namespace Mindscape.Raygun4Net
@@ -175,7 +176,8 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="exception">The exception to deliver</param>
     public void Send(Exception exception)
-    {      
+    {
+      exception = StripTargetInvocationException(exception);
       Send(BuildMessage(exception));
     }
 
@@ -187,10 +189,11 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message</param>
     public void Send(Exception exception, IList<string> tags)
     {
+      exception = StripTargetInvocationException(exception);
       var message = BuildMessage(exception);
       message.Details.Tags = tags;
       Send(message);
-    }       
+    }
     
     /// <summary>
     /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
@@ -202,6 +205,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
+      exception = StripTargetInvocationException(exception);
       var message = BuildMessage(exception);
       message.Details.Tags = tags;      
       message.Details.UserCustomData = userCustomData;
@@ -219,12 +223,22 @@ namespace Mindscape.Raygun4Net
     /// <param name="version">A custom version identifiction, associated with a particular build of your project.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
     {
+      exception = StripTargetInvocationException(exception);
       var message = BuildMessage(exception);
       message.Details.Tags = tags;
       message.Details.UserCustomData = userCustomData;
       message.Details.Version = version;
       Send(message);
-    } 
+    }
+
+    private Exception StripTargetInvocationException(Exception exception)
+    {
+      if (exception is TargetInvocationException && exception.InnerException != null)
+      {
+        return exception.InnerException;
+      }
+      return exception;
+    }
 
     /// <summary>
     /// Asynchronously transmits a message to Raygun.io.
