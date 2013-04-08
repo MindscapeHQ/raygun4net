@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Mindscape.Raygun4Net.Messages;
 #if WINRT
@@ -20,6 +21,8 @@ using Microsoft.Phone.Info;
 using System.IO.IsolatedStorage;
 using System.Text;
 using Microsoft.Phone.Net.NetworkInformation;
+using Mindscape.Raygun4Net.WindowsPhone;
+
 #else
 using System.Web;
 using System.Threading;
@@ -183,6 +186,21 @@ namespace Mindscape.Raygun4Net
     }
 #elif WINDOWS_PHONE
 
+    private bool IsCalledFromApplicationUnhandledExceptionHandler()
+    {
+      StackTrace trace = new StackTrace();
+      if (trace.FrameCount > 3)
+      {
+        StackFrame frame = trace.GetFrame(2);
+        ParameterInfo[] parameters = frame.GetMethod().GetParameters();
+        if (parameters.Length == 2 && parameters[1].ParameterType == typeof (ApplicationUnhandledExceptionEventArgs))
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
     /// <summary>
     /// Sends a message ro the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
     /// </summary>
@@ -220,7 +238,12 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public void Send(ApplicationUnhandledExceptionEventArgs args, IList<string> tags, IDictionary userCustomData)
     {
-      Send(CreateMessage(args.ExceptionObject, tags, userCustomData));
+      if (!(args.ExceptionObject is ExitException))
+      {
+        bool handled = args.Handled;
+        args.Handled = true;
+        Send(CreateMessage(args.ExceptionObject, tags, userCustomData), false, !handled);
+      }
     }
 
     /// <summary>
@@ -229,7 +252,8 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     public void Send(Exception exception)
     {
-      Send(exception, null, null);
+      bool calledFromUnhandled = IsCalledFromApplicationUnhandledExceptionHandler();
+      Send(exception, null, null, calledFromUnhandled);
     }
 
     /// <summary>
@@ -239,7 +263,8 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of tags to send with the message.</param>
     public void Send(Exception exception, IList<string> tags)
     {
-      Send(exception, tags, null);
+      bool calledFromUnhandled = IsCalledFromApplicationUnhandledExceptionHandler();
+      Send(exception, tags, null, calledFromUnhandled);
     }
 
     /// <summary>
@@ -249,7 +274,8 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public void Send(Exception exception, IDictionary userCustomData)
     {
-      Send(exception, null, userCustomData);
+      bool calledFromUnhandled = IsCalledFromApplicationUnhandledExceptionHandler();
+      Send(exception, null, userCustomData, calledFromUnhandled);
     }
 
     /// <summary>
@@ -260,11 +286,16 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      if (ValidateApiKey())
-      {
-        exception.Data.Add("Message", exception.Message);
+      bool calledFromUnhandled = IsCalledFromApplicationUnhandledExceptionHandler();
+      Send(exception, tags, userCustomData, calledFromUnhandled);
+    }
 
-        Send(CreateMessage(exception, tags, userCustomData));
+    private void Send(Exception exception, IList<string> tags, IDictionary userCustomData, bool calledFromUnhandled)
+    {
+      if (!(exception is ExitException))
+      {
+        exception.Data.Add("Message", exception.Message); // TODO is this needed?
+        Send(CreateMessage(exception, tags, userCustomData), calledFromUnhandled, false);
       }
     }
 
@@ -277,14 +308,20 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void Send(RaygunMessage raygunMessage)
     {
-      if (ValidateApiKey())
+      bool calledFromUnhandled = IsCalledFromApplicationUnhandledExceptionHandler();
+      Send(raygunMessage, calledFromUnhandled, false);
+    }
+
+    private void Send(RaygunMessage raygunMessage, bool wait, bool exit)
+    {
+      if (ValidateApiKey() && !_exit)
       {
         try
         {
           string message = SimpleJson.SerializeObject(raygunMessage);
           if (NetworkInterface.NetworkInterfaceType != NetworkInterfaceType.None)
           {
-            SendMessage(message, true);
+            SendMessage(message, wait, exit);
           }
           else
           {
@@ -315,7 +352,7 @@ namespace Mindscape.Raygun4Net
                 using (StreamReader reader = new StreamReader(isoFileStream))
                 {
                   string text = reader.ReadToEnd();
-                  SendMessage(text, false);
+                  SendMessage(text, false, false);
                 }
                 isolatedStorage.DeleteFile("RaygunIO\\" + name);
               }
@@ -332,29 +369,14 @@ namespace Mindscape.Raygun4Net
 
     private readonly Queue<string> _messageQueue = new Queue<string>();
 
-    private void SendMessage(string message, bool wait)
-    {
-      SendMessageCore(message);
+    private bool _exit;
 
-      if (wait)
-      {
-        for (int i = 0; i < 1000; i++)
-        {
-          if (!_running)
-          {
-            break;
-          }
-          Thread.Sleep(10);
-        }
-      }
-      _running = false;
-    }
-
-    private void SendMessageCore(string message)
+    private void SendMessage(string message, bool wait, bool exit)
     {
       _running = true;
+      _exit = exit;
 
-      var httpWebRequest = (HttpWebRequest)WebRequest.Create(RaygunSettings.Settings.ApiEndpoint);
+      HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(RaygunSettings.Settings.ApiEndpoint);
       httpWebRequest.ContentType = "application/x-raygun-message";
       httpWebRequest.Method = "POST";
       httpWebRequest.Headers["X-Apikey"] = _apiKey;
@@ -377,6 +399,12 @@ namespace Mindscape.Raygun4Net
       {
         Debug.WriteLine("Error Logging Exception to Raygun.io " + ex.Message);
       }
+
+      if (wait)
+      {
+        Thread.Sleep(3000);
+      }
+      _running = false;
     }
 
     private void SaveMessage(string message)
@@ -459,12 +487,10 @@ namespace Mindscape.Raygun4Net
     private void ResponseReady(IAsyncResult asyncResult)
     {
       _running = false;
-      //Deployment.Current.Dispatcher.BeginInvoke(Ready);
-    }
-
-    private void Ready()
-    {
-      _running = false;
+      if (_exit)
+      {
+        throw new ExitException();
+      }
     }
 
     private RaygunMessage CreateMessage(Exception exception, IList<string> tags, IDictionary userCustomData)

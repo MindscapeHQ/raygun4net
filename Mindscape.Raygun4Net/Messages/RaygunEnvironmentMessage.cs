@@ -39,7 +39,7 @@ namespace Mindscape.Raygun4Net.Messages
       ResolutionScale = DisplayProperties.ResolutionScale.ToString();
       CurrentOrientation = DisplayProperties.CurrentOrientation.ToString();
       Location = Windows.System.UserProfile.GlobalizationPreferences.HomeGeographicRegion;
-      
+
       DateTime now = DateTime.Now;
       UtcOffset = TimeZoneInfo.Local.GetUtcOffset(now).TotalHours;
 
