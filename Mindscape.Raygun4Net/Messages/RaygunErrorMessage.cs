@@ -42,8 +42,37 @@ namespace Mindscape.Raygun4Net.Messages
     {      
       var lines = new List<RaygunErrorStackTraceLineMessage>();
 
-      
-#if !WINRT
+#if WINRT
+      string[] delim = { "\r\n" };
+      string stackTrace = exception.Data["Message"] as string;      
+      if (stackTrace != null)
+      {
+        var frames = stackTrace.Split(delim, StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (string line in frames)
+        {
+          lines.Add(new RaygunErrorStackTraceLineMessage()
+            {
+              ClassName = line
+            });
+        }
+      }
+#elif WINDOWS_PHONE
+      if (exception.StackTrace != null)
+      {
+        char[] delim = {'\r', '\n'};
+        var frames = exception.StackTrace.Split(delim);
+        foreach (string line in frames)
+        {
+          if (!"".Equals(line))
+          {
+            RaygunErrorStackTraceLineMessage stackTraceLineMessage = new RaygunErrorStackTraceLineMessage();
+            stackTraceLineMessage.ClassName = line;
+            lines.Add(stackTraceLineMessage);
+          }
+        }
+      }
+#else
       var stackTrace = new StackTrace(exception, true);
       var frames = stackTrace.GetFrames();
 
@@ -84,21 +113,6 @@ namespace Mindscape.Raygun4Net.Messages
           };
 
           lines.Add(line);
-        }
-      }
-#else
-      string[] delim = { "\r\n" };
-      string stackTrace = exception.Data["Message"] as string;      
-      if (stackTrace != null)
-      {
-        var frames = stackTrace.Split(delim, StringSplitOptions.RemoveEmptyEntries);
-
-        foreach (string line in frames)
-        {
-          lines.Add(new RaygunErrorStackTraceLineMessage()
-            {
-              ClassName = line
-            });
         }
       }
 #endif

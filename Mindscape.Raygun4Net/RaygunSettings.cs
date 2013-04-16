@@ -1,5 +1,55 @@
 ﻿using System;
-#if !WINRT
+#if WINRT
+using Windows.Storage;
+
+namespace Mindscape.Raygun4Net
+{
+  public class RaygunSettings
+  {
+    private static readonly RaygunSettings settings = ApplicationData.Current.LocalSettings.Values["RaygunSettings"] as RaygunSettings;
+
+    private const string DefaultApiEndPoint = "https://api.raygun.io/entries";
+
+    public static RaygunSettings Settings
+    {
+      get
+      {
+        // If no configuration setting is provided then return the default values
+        return settings ?? new RaygunSettings { ApiKey = "", ApiEndpoint = new Uri(DefaultApiEndPoint) };
+      }
+    }
+
+    public string ApiKey { get; set; }
+
+    public Uri ApiEndpoint { get; set; }
+
+    public bool ThrowOnError { get; set; }
+  }
+}
+#elif WINDOWS_PHONE
+namespace Mindscape.Raygun4Net
+{
+  public class RaygunSettings
+  {
+    private static readonly RaygunSettings settings = null; //ApplicationData.Current.LocalSettings.Values["RaygunSettings"] as RaygunSettings;
+
+    private const string DefaultApiEndPoint = "https://api.raygun.io/entries";
+
+    public static RaygunSettings Settings
+    {
+      get
+      {
+        // If no configuration setting is provided then return the default values
+        return settings ?? new RaygunSettings { ApiKey = "", ApiEndpoint = new Uri(DefaultApiEndPoint) };
+      }
+    }
+
+    public string ApiKey { get; set; }
+
+    public Uri ApiEndpoint { get; set; }
+  }
+}
+#else
 using System.Configuration;
 namespace Mindscape.Raygun4Net
 {
@@ -46,33 +96,6 @@ namespace Mindscape.Raygun4Net
       get { return (bool)this["throwOnError"]; }
       set { this["throwOnError"] = value; }
     } 
-  }
-}
-#else
-using Windows.Storage;
-
-namespace Mindscape.Raygun4Net
-{
-  public class RaygunSettings
-  {
-    private static readonly RaygunSettings settings = ApplicationData.Current.LocalSettings.Values["RaygunSettings"] as RaygunSettings;
-
-    private const string DefaultApiEndPoint = "https://api.raygun.io/entries";
-
-    public static RaygunSettings Settings
-    {
-      get
-      {
-        // If no configuration setting is provided then return the default values
-        return settings ?? new RaygunSettings { ApiKey = "", ApiEndpoint = new Uri(DefaultApiEndPoint) };
-      }
-    }    
-
-    public string ApiKey { get; set; }
-
-    public Uri ApiEndpoint { get; set; }
-
-    public bool ThrowOnError { get; set; }
   }
 }
 #endif
