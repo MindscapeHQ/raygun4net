@@ -1,19 +1,20 @@
 properties {
-    $root =                 $psake.build_script_dir
-    $solution_file =        "$root/Mindscape.Raygun4Net.sln"
-    $winrt_solution_file =  "$root/Mindscape.Raygun4Net.WinRT.sln"
-    $nugetspec =            "$root/Mindscape.Raygun4Net.nuspec"
-    $nugetpackage =         "Mindscape.Raygun4Net.1.0.nupkg"
-    $configuration =        "Release"
-    $build_dir =            "$root\build\"
-    $release_dir =          "$root\release\"
-    $nunit_dir =            "$root\packages\NUnit.Runners.2.6.2\tools\"
-    $tools_dir =            "$root\tools"
-    $nuget_dir =            "$root\.nuget"
-    $env:Path +=            ";$nunit_dir;$tools_dir;$nuget_dir"
+    $root =                        $psake.build_script_dir
+    $solution_file =               "$root/Mindscape.Raygun4Net.sln"
+    $winrt_solution_file =         "$root/Mindscape.Raygun4Net.WinRT.sln"
+    $windows_phone_solution_file = "$root/Mindscape.Raygun4Net.WindowsPhone.sln"
+    $nugetspec =                   "$root/Mindscape.Raygun4Net.nuspec"
+    $nugetpackage =                "Mindscape.Raygun4Net.1.0.nupkg"
+    $configuration =               "Release"
+    $build_dir =                   "$root\build\"
+    $release_dir =                 "$root\release\"
+    $nunit_dir =                   "$root\packages\NUnit.Runners.2.6.2\tools\"
+    $tools_dir =                   "$root\tools"
+    $nuget_dir =                   "$root\.nuget"
+    $env:Path +=                   ";$nunit_dir;$tools_dir;$nuget_dir"
 }
 
-task default -depends Compile
+task default -depends Package
 
 task Clean {
     remove-item -force -recurse $build_dir -ErrorAction SilentlyContinue | Out-Null
@@ -33,6 +34,10 @@ task CompileWinRT -depends Init {
     exec { msbuild "$winrt_solution_file" /m /p:OutDir=$build_dir /p:Configuration=$configuration }
 }
 
+task CompileWindowsPhone -depends Init {
+    exec { msbuild "$windows_phone_solution_file" /m /p:OutDir=$build_dir /p:Configuration=$Configuration }
+}
+
 task Test -depends Compile {
     $test_assemblies = Get-ChildItem $build_dir -Include *Tests.dll -Name
 
@@ -43,7 +48,7 @@ task Test -depends Compile {
     Pop-Location
 }
 
-task Package -depends Compile, CompileWinRT {
+task Package -depends Compile, CompileWinRT, CompileWindowsPhone {
     exec { nuget pack $nugetspec -OutputDirectory $release_dir }
 }
 
