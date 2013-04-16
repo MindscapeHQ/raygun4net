@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using Mindscape.Raygun4Net.Messages;
 #if WINRT
@@ -22,7 +21,7 @@ using System.IO.IsolatedStorage;
 using System.Text;
 using Microsoft.Phone.Net.NetworkInformation;
 using Mindscape.Raygun4Net.WindowsPhone;
-
+using System.Reflection;
 #else
 using System.Web;
 using System.Threading;
