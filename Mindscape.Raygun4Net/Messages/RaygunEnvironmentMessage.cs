@@ -56,6 +56,9 @@ namespace Mindscape.Raygun4Net.Messages
       WindowBoundsWidth = Application.Current.RootVisual.RenderSize.Width;
       WindowBoundsHeight = Application.Current.RootVisual.RenderSize.Height;
 
+      DateTime now = DateTime.Now;
+      UtcOffset = TimeZoneInfo.Local.GetUtcOffset(now).TotalHours;
+
       PhoneApplicationFrame frame = Application.Current.RootVisual as PhoneApplicationFrame;
       if (frame != null)
       {
