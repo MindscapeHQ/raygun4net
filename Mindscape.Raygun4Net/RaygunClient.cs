@@ -22,6 +22,9 @@ using System.Text;
 using Microsoft.Phone.Net.NetworkInformation;
 using Mindscape.Raygun4Net.WindowsPhone;
 using System.Reflection;
+#elif ANDROID
+using System.Threading;
+using System.Reflection;
 #else
 using System.Web;
 using System.Threading;
@@ -636,7 +639,52 @@ namespace Mindscape.Raygun4Net
       ThreadPool.QueueUserWorkItem(c => Send(message));
     }
 
+    public void SendInBackground(RaygunMessage raygunMessage)
+    {
+      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+    }
+#endif
 
+#if ANDROID
+    internal RaygunMessage BuildMessage(Exception exception)
+    {
+      var message = RaygunMessageBuilder.New
+        .SetEnvironmentDetails()
+        .SetMachineName(Environment.MachineName)
+        .SetExceptionDetails(exception)
+        .SetClientDetails()
+        .SetVersion()
+        .Build();
+      return message;
+    }
+
+    /// <summary>
+    /// Posts a RaygunMessage to the Raygun.io api endpoint.
+    /// </summary>
+    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
+    /// set to a valid DateTime and as much of the Details property as is available.</param>
+    public void Send(RaygunMessage raygunMessage)
+    {
+      if (ValidateApiKey())
+      {
+        using (var client = new WebClient())
+        {
+          client.Headers.Add("X-ApiKey", _apiKey);
+          client.Encoding = System.Text.Encoding.UTF8;
+
+          //try
+          {
+            var message = SimpleJson.SerializeObject(raygunMessage);
+            client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
+          }
+          //catch (Exception ex)
+          {
+            //System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+          }
+        }
+      }
+    }
+#elif !WINRT && !WINDOWS_PHONE
     internal RaygunMessage BuildMessage(Exception exception)
     {
       var message = RaygunMessageBuilder.New
@@ -648,11 +696,6 @@ namespace Mindscape.Raygun4Net
         .SetVersion()
         .Build();
       return message;
-    }
-
-    public void SendInBackground(RaygunMessage raygunMessage)
-    {
-      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
 
     /// <summary>

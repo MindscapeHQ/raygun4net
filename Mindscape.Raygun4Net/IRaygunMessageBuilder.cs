@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections;
-#if !WINRT && !WINDOWS_PHONE
+#if !WINRT && !WINDOWS_PHONE && !ANDROID
 using System.Web;
 #endif
 

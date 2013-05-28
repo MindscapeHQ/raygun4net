@@ -16,6 +16,8 @@ using Windows.Devices.Enumeration.Pnp;
 using Microsoft.Phone.Info;
 using System.Windows;
 using Microsoft.Phone.Controls;
+#elif ANDROID
+
 #else
 using System.Web;
 using System.Windows.Forms;
@@ -67,6 +69,22 @@ namespace Mindscape.Raygun4Net.Messages
 
       //ProcessorCount = Environment.ProcessorCount;
       // TODO: finish other values
+#elif ANDROID
+      OSVersion = Android.OS.Build.VERSION.Sdk;
+
+      Locale = CultureInfo.CurrentCulture.DisplayName;
+      //PackageVersion = RaygunClient.PackageVersion;
+
+
+      //need a context to work out the screensize :(
+      //			WindowBoundsWidth = SystemInformation.VirtualScreen.Height;
+      //			WindowBoundsHeight = SystemInformation.VirtualScreen.Width;
+
+      Architecture = Android.OS.Build.CpuAbi;
+      DeviceName = string.Format("{0} / {1} / {2}",
+                                  Android.OS.Build.Model,
+                                  Android.OS.Build.Brand,
+                                  Android.OS.Build.Manufacturer);
 #else
       WindowBoundsWidth = SystemInformation.VirtualScreen.Height;
       WindowBoundsHeight = SystemInformation.VirtualScreen.Width;
@@ -110,6 +128,8 @@ namespace Mindscape.Raygun4Net.Messages
       return await PnpObject.FindAllAsync(PnpObjectType.Device, properties);
     }
 #elif WINDOWS_PHONE
+
+#elif ANDROID
 
 #else
     private string GetCpu()
