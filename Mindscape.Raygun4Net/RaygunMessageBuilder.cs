@@ -93,10 +93,9 @@ namespace Mindscape.Raygun4Net
 #elif ANDROID
     public IRaygunMessageBuilder SetVersion()
     {
-      var entryAssembly = Assembly.GetEntryAssembly();
-      if (entryAssembly != null)
+      if (_raygunMessage.Details.Environment.PackageVersion != null)
       {
-        _raygunMessage.Details.Version = entryAssembly.GetName().Version.ToString();
+        _raygunMessage.Details.Version = _raygunMessage.Details.Environment.PackageVersion;
       }
       else
       {

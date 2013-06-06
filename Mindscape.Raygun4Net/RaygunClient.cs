@@ -25,6 +25,9 @@ using System.Reflection;
 #elif ANDROID
 using System.Threading;
 using System.Reflection;
+using Android.Content;
+using Android.Views;
+using Android.Runtime;
 #else
 using System.Web;
 using System.Threading;
@@ -49,6 +52,14 @@ namespace Mindscape.Raygun4Net
       Deployment.Current.Dispatcher.BeginInvoke(SendStoredMessages);
 #endif
     }
+
+#if ANDROID
+    public RaygunClient(string apiKey, Context context)
+    {
+      _apiKey = apiKey;
+      Context = context;
+    }
+#endif
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -646,8 +657,11 @@ namespace Mindscape.Raygun4Net
 #endif
 
 #if ANDROID
+    internal static Context Context { get; private set; }
+
     internal RaygunMessage BuildMessage(Exception exception)
     {
+      JNIEnv.ExceptionClear();
       var message = RaygunMessageBuilder.New
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
@@ -672,14 +686,14 @@ namespace Mindscape.Raygun4Net
           client.Headers.Add("X-ApiKey", _apiKey);
           client.Encoding = System.Text.Encoding.UTF8;
 
-          //try
+          try
           {
             var message = SimpleJson.SerializeObject(raygunMessage);
             client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
           }
-          //catch (Exception ex)
+          catch (Exception ex)
           {
-            //System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+            System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
           }
         }
       }

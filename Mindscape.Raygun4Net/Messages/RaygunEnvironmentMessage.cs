@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -17,7 +18,12 @@ using Microsoft.Phone.Info;
 using System.Windows;
 using Microsoft.Phone.Controls;
 #elif ANDROID
-
+using Android.OS;
+using Android.Content.Res;
+using Android.Content;
+using Android.Views;
+using Android.App;
+using Android.Content.PM;
 #else
 using System.Web;
 using System.Windows.Forms;
@@ -70,21 +76,65 @@ namespace Mindscape.Raygun4Net.Messages
       //ProcessorCount = Environment.ProcessorCount;
       // TODO: finish other values
 #elif ANDROID
-      OSVersion = Android.OS.Build.VERSION.Sdk;
+      try
+      {
+        Java.Util.TimeZone tz = Java.Util.TimeZone.Default;
+        Java.Util.Date now = new Java.Util.Date();
+        UtcOffset = tz.GetOffset(now.Time) / 3600000.0;
 
-      Locale = CultureInfo.CurrentCulture.DisplayName;
-      //PackageVersion = RaygunClient.PackageVersion;
+        OSVersion = Android.OS.Build.VERSION.Sdk;
 
+        Locale = CultureInfo.CurrentCulture.DisplayName;
 
-      //need a context to work out the screensize :(
-      //			WindowBoundsWidth = SystemInformation.VirtualScreen.Height;
-      //			WindowBoundsHeight = SystemInformation.VirtualScreen.Width;
+        var metrics = Resources.System.DisplayMetrics;
+        WindowBoundsWidth = metrics.WidthPixels;
+        WindowBoundsHeight = metrics.HeightPixels;
 
-      Architecture = Android.OS.Build.CpuAbi;
-      DeviceName = string.Format("{0} / {1} / {2}",
-                                  Android.OS.Build.Model,
-                                  Android.OS.Build.Brand,
-                                  Android.OS.Build.Manufacturer);
+        if (RaygunClient.Context != null)
+        {
+          PackageManager manager = RaygunClient.Context.PackageManager;
+          PackageInfo info = manager.GetPackageInfo(RaygunClient.Context.PackageName, 0);
+          PackageVersion = info.VersionCode + " / " + info.VersionName;
+
+          Activity activity = RaygunClient.Context as Activity;
+          if (activity != null)
+          {
+            Display display = activity.WindowManager.DefaultDisplay;
+            if (display != null)
+            {
+              switch (display.Rotation)
+              {
+                case SurfaceOrientation.Rotation0:
+                  CurrentOrientation = "Portrait";
+                  break;
+                case SurfaceOrientation.Rotation180:
+                  CurrentOrientation = "Upside down";
+                  break;
+                case SurfaceOrientation.Rotation270:
+                  CurrentOrientation = "Landscape right";
+                  break;
+                case SurfaceOrientation.Rotation90:
+                  CurrentOrientation = "Landscape left";
+                  break;
+              }
+            }
+          }
+        }
+
+        Java.Lang.Runtime runtime = Java.Lang.Runtime.GetRuntime();
+        TotalPhysicalMemory = (ulong)runtime.TotalMemory();
+        AvailablePhysicalMemory = (ulong)runtime.FreeMemory();
+        ProcessorCount = runtime.AvailableProcessors();
+        Architecture = Android.OS.Build.CpuAbi;
+        DeviceName = string.Format("{0} / {1} / {2}",
+                                    Android.OS.Build.Model,
+                                    Android.OS.Build.Brand,
+                                    Android.OS.Build.Manufacturer);
+      }
+      catch (Exception e)
+      {
+        System.Diagnostics.Debug.WriteLine("Failed to log device information.");
+      }
 #else
       WindowBoundsWidth = SystemInformation.VirtualScreen.Height;
       WindowBoundsHeight = SystemInformation.VirtualScreen.Width;
@@ -181,12 +231,9 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string Architecture { get; private set; }
 
+#if !ANDROID
     [Obsolete("Use Locale instead")]
     public string Location { get; private set; }
-
-    public ulong TotalPhysicalMemory { get; private set; }
-
-    public ulong AvailablePhysicalMemory { get; private set; }
 
     public ulong TotalVirtualMemory { get; private set; }
 
@@ -197,6 +244,10 @@ namespace Mindscape.Raygun4Net.Messages
       get { return _diskSpaceFree; }
       set { _diskSpaceFree = value; }
     }
+#endif
+    public ulong TotalPhysicalMemory { get; private set; }
+
+    public ulong AvailablePhysicalMemory { get; private set; }
 
     public string DeviceName { get; private set; }
 
