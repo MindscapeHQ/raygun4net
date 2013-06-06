@@ -1,0 +1,6 @@
+<configuration>
+  <configSections>
+    <section name="RaygunSettings" type="Mindscape.Raygun4Net.RaygunSettings, Mindscape.Raygun4Net" />
+  </configSections>
+  <RaygunSettings apikey="YOUR_APP_API_KEY" />
+</configuration>

@@ -13,10 +13,15 @@
         <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
     </metadata>
     <files>
+	    <!-- .NET -->
         <file src="build\Mindscape.Raygun4Net.dll" target="lib\net35\Mindscape.Raygun4Net.dll" />
         <file src="build\Mindscape.Raygun4Net.pdb" target="lib\net35\Mindscape.Raygun4Net.pdb" />
+		<file src="web.config.transform" target="content\net35\web.config.transform" />
+		<file src="app.config.transform" target="content\net35\app.config.transform" />
+		<!-- WinRT -->
         <file src="build\Mindscape.Raygun4Net.WinRT\Mindscape.Raygun4Net.WinRT.dll" target="lib\windows8\Mindscape.Raygun4Net.WinRT.dll" />
         <file src="build\Mindscape.Raygun4Net.WinRT\Mindscape.Raygun4Net.WinRT.pdb" target="lib\windows8\Mindscape.Raygun4Net.WinRT.pdb" />
+		<!-- Windows Phone -->
         <file src="build\Mindscape.Raygun4Net.WindowsPhone.dll" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.dll" />
         <file src="build\Mindscape.Raygun4Net.WindowsPhone.pdb" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.pdb" />
         <file src="readme.txt" />
