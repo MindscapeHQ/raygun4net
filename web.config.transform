@@ -2,5 +2,15 @@
   <configSections>
     <section name="RaygunSettings" type="Mindscape.Raygun4Net.RaygunSettings, Mindscape.Raygun4Net" />
   </configSections>
+  <system.web>
+    <httpModules>
+      <add name="RaygunErrorModule" type="Mindscape.Raygun4Net.RaygunHttpModule" />
+    </httpModules>
+  </system.web>
+  <system.webServer>
+    <modules>
+      <add name="RaygunErrorModule" type="Mindscape.Raygun4Net.RaygunHttpModule" />
+    </modules>
+  </system.webServer>
   <RaygunSettings apikey="YOUR_APP_API_KEY" />
 </configuration>
