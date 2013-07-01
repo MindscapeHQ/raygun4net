@@ -6,6 +6,8 @@ using Windows.ApplicationModel;
 
 #elif ANDROID
 using System.Reflection;
+#elif IOS
+using System.Reflection;
 #else
 using System.Reflection;
 using System.Web;
@@ -101,6 +103,12 @@ namespace Mindscape.Raygun4Net
       {
         _raygunMessage.Details.Version = "Not supplied";
       }
+      return this;
+    }
+#elif IOS
+    public IRaygunMessageBuilder SetVersion()
+    {
+
       return this;
     }
 #else

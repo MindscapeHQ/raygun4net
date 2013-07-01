@@ -24,6 +24,8 @@ using Android.Content;
 using Android.Views;
 using Android.App;
 using Android.Content.PM;
+#elif IOS
+
 #else
 using System.Web;
 using System.Windows.Forms;
@@ -135,6 +137,8 @@ namespace Mindscape.Raygun4Net.Messages
       {
         System.Diagnostics.Debug.WriteLine("Failed to log device information.");
       }
+#elif IOS
+
 #else
       WindowBoundsWidth = SystemInformation.VirtualScreen.Height;
       WindowBoundsHeight = SystemInformation.VirtualScreen.Width;
@@ -180,6 +184,8 @@ namespace Mindscape.Raygun4Net.Messages
 #elif WINDOWS_PHONE
 
 #elif ANDROID
+
+#elif IOS
 
 #else
     private string GetCpu()

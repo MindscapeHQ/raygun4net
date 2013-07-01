@@ -49,7 +49,7 @@ namespace Mindscape.Raygun4Net
     public Uri ApiEndpoint { get; set; }
   }
 }
-#elif ANDROID
+#elif ANDROID || IOS
 namespace Mindscape.Raygun4Net
 {
   public class RaygunSettings
