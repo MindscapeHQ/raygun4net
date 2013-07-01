@@ -108,7 +108,14 @@ namespace Mindscape.Raygun4Net
 #elif IOS
     public IRaygunMessageBuilder SetVersion()
     {
-
+      if (_raygunMessage.Details.Environment.PackageVersion != null)
+      {
+        _raygunMessage.Details.Version = _raygunMessage.Details.Environment.PackageVersion;
+      }
+      else
+      {
+        _raygunMessage.Details.Version = "Not supplied";
+      }
       return this;
     }
 #else

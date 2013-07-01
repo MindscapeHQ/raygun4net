@@ -25,7 +25,8 @@ using Android.Views;
 using Android.App;
 using Android.Content.PM;
 #elif IOS
-
+using MonoTouch.UIKit;
+using MonoTouch.Foundation;
 #else
 using System.Web;
 using System.Windows.Forms;
@@ -138,7 +139,20 @@ namespace Mindscape.Raygun4Net.Messages
         System.Diagnostics.Debug.WriteLine("Failed to log device information.");
       }
 #elif IOS
+      OSVersion = UIDevice.CurrentDevice.SystemVersion;
+      Architecture = UIDevice.CurrentDevice.SystemName;
 
+      Locale = CultureInfo.CurrentCulture.DisplayName;
+
+      WindowBoundsWidth = UIScreen.MainScreen.Bounds.Width;
+      WindowBoundsHeight = UIScreen.MainScreen.Bounds.Height;
+
+      TotalPhysicalMemory = GetIntSysCtl(TotalPhysicalMemoryPropertyName);
+      AvailablePhysicalMemory = GetIntSysCtl(AvailablePhysicalMemoryPropertyName);
+      ProcessorCount = (int)GetIntSysCtl(ProcessiorCountPropertyName);
+      Cpu = GetStringSysCtl(CpuPropertyName);
+      DeviceName = Environment.MachineName;
+      PackageVersion = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString();
 #else
       WindowBoundsWidth = SystemInformation.VirtualScreen.Height;
       WindowBoundsHeight = SystemInformation.VirtualScreen.Width;
@@ -186,7 +200,85 @@ namespace Mindscape.Raygun4Net.Messages
 #elif ANDROID
 
 #elif IOS
+    private const string CpuPropertyName = "hw.machine";
+    private const string TotalPhysicalMemoryPropertyName = "hw.physmem";
+    private const string AvailablePhysicalMemoryPropertyName = "hw.usermem";
+    private const string ProcessiorCountPropertyName = "hw.ncpu";
 
+    [DllImport(global::MonoTouch.Constants.SystemLibrary)]
+    private static extern int sysctlbyname( [MarshalAs(UnmanagedType.LPStr)] string property,
+                                            IntPtr output,
+                                            IntPtr oldLen,
+                                            IntPtr newp,
+                                            uint newlen);
+
+    private static uint GetIntSysCtl(string propertyName)
+    {
+      // get the length of the string that will be returned
+      var pLen = Marshal.AllocHGlobal(sizeof(int));
+      sysctlbyname(propertyName, IntPtr.Zero, pLen, IntPtr.Zero, 0);
+
+      var length = Marshal.ReadInt32(pLen);
+
+      // check to see if we got a length
+      if (length == 0)
+      {
+        Marshal.FreeHGlobal(pLen);
+        return 0;
+      }
+
+      // get the hardware string
+      var pStr = Marshal.AllocHGlobal(length);
+      sysctlbyname(propertyName, pStr, pLen, IntPtr.Zero, 0);
+
+      // convert the native string into a C# integer
+
+      var memoryCount = Marshal.ReadInt32(pStr);
+      uint memoryVal = (uint)memoryCount;
+
+      if (memoryCount < 0)
+      {
+        memoryVal = (uint)((uint)int.MaxValue + (-memoryCount));
+      }
+
+      var ret = memoryVal;
+
+      // cleanup
+      Marshal.FreeHGlobal(pLen);
+      Marshal.FreeHGlobal(pStr);
+
+      return ret;
+    }
+
+    private static string GetStringSysCtl(string propertyName)
+    {
+      // get the length of the string that will be returned
+      var pLen = Marshal.AllocHGlobal (sizeof(int));
+      sysctlbyname (propertyName, IntPtr.Zero, pLen, IntPtr.Zero, 0);
+
+      var length = Marshal.ReadInt32 (pLen);
+
+      // check to see if we got a length
+      if (length == 0) {
+        Marshal.FreeHGlobal (pLen);
+        return "Unknown";
+      }
+
+      // get the hardware string
+      var pStr = Marshal.AllocHGlobal (length);
+      sysctlbyname (propertyName, pStr, pLen, IntPtr.Zero, 0);
+
+      // convert the native string into a C# string
+      var hardwareStr = Marshal.PtrToStringAnsi (pStr);
+
+      var ret = hardwareStr;
+
+      // cleanup
+      Marshal.FreeHGlobal (pLen);
+      Marshal.FreeHGlobal (pStr);
+
+      return ret;
+    }
 #else
     private string GetCpu()
     {
@@ -237,7 +329,7 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string Architecture { get; private set; }
 
-#if !ANDROID
+#if !ANDROID && !IOS
     [Obsolete("Use Locale instead")]
     public string Location { get; private set; }
 
