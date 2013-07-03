@@ -28,6 +28,7 @@ using System.Reflection;
 using Android.Content;
 using Android.Views;
 using Android.Runtime;
+using Android.App;
 #elif IOS
 using System.Threading;
 using System.Reflection;
@@ -43,6 +44,13 @@ namespace Mindscape.Raygun4Net
   {
     private readonly string _apiKey;
 
+#if ANDROID
+    public RaygunClient(string apiKey, Activity activity)
+    {
+      _apiKey = apiKey;
+      Activity = activity;
+    }
+#else
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
     /// </summary>
@@ -56,14 +64,6 @@ namespace Mindscape.Raygun4Net
 #endif
     }
 
-#if ANDROID
-    public RaygunClient(string apiKey, Context context)
-    {
-      _apiKey = apiKey;
-      Context = context;
-    }
-#endif
-
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
     /// Uses the ApiKey specified in the config file.
@@ -72,6 +72,7 @@ namespace Mindscape.Raygun4Net
       : this(RaygunSettings.Settings.ApiKey)
     {
     }
+#endif
 
     private bool ValidateApiKey()
     {
@@ -660,7 +661,7 @@ namespace Mindscape.Raygun4Net
 #endif
 
 #if ANDROID
-    internal static Context Context { get; private set; }
+    internal static Activity Activity { get; private set; }
 
     internal RaygunMessage BuildMessage(Exception exception)
     {

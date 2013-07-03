@@ -93,33 +93,29 @@ namespace Mindscape.Raygun4Net.Messages
         WindowBoundsWidth = metrics.WidthPixels;
         WindowBoundsHeight = metrics.HeightPixels;
 
-        if (RaygunClient.Context != null)
+        if (RaygunClient.Activity != null)
         {
-          PackageManager manager = RaygunClient.Context.PackageManager;
-          PackageInfo info = manager.GetPackageInfo(RaygunClient.Context.PackageName, 0);
+          PackageManager manager = RaygunClient.Activity.PackageManager;
+          PackageInfo info = manager.GetPackageInfo(RaygunClient.Activity.PackageName, 0);
           PackageVersion = info.VersionCode + " / " + info.VersionName;
 
-          Activity activity = RaygunClient.Context as Activity;
-          if (activity != null)
+          Display display = RaygunClient.Activity.WindowManager.DefaultDisplay;
+          if (display != null)
           {
-            Display display = activity.WindowManager.DefaultDisplay;
-            if (display != null)
+            switch (display.Rotation)
             {
-              switch (display.Rotation)
-              {
-                case SurfaceOrientation.Rotation0:
-                  CurrentOrientation = "Rotation 0 (Portrait)";
-                  break;
-                case SurfaceOrientation.Rotation180:
-                  CurrentOrientation = "Rotation 180 (Upside down)";
-                  break;
-                case SurfaceOrientation.Rotation270:
-                  CurrentOrientation = "Rotation 270 (Landscape right)";
-                  break;
-                case SurfaceOrientation.Rotation90:
-                  CurrentOrientation = "Rotation 90 (Landscape left)";
-                  break;
-              }
+              case SurfaceOrientation.Rotation0:
+                CurrentOrientation = "Rotation 0 (Portrait)";
+                break;
+              case SurfaceOrientation.Rotation180:
+                CurrentOrientation = "Rotation 180 (Upside down)";
+                break;
+              case SurfaceOrientation.Rotation270:
+                CurrentOrientation = "Rotation 270 (Landscape right)";
+                break;
+              case SurfaceOrientation.Rotation90:
+                CurrentOrientation = "Rotation 90 (Landscape left)";
+                break;
             }
           }
         }
