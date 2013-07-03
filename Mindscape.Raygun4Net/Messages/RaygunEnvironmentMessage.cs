@@ -108,16 +108,16 @@ namespace Mindscape.Raygun4Net.Messages
               switch (display.Rotation)
               {
                 case SurfaceOrientation.Rotation0:
-                  CurrentOrientation = "Portrait";
+                  CurrentOrientation = "Rotation 0 (Portrait)";
                   break;
                 case SurfaceOrientation.Rotation180:
-                  CurrentOrientation = "Upside down";
+                  CurrentOrientation = "Rotation 180 (Upside down)";
                   break;
                 case SurfaceOrientation.Rotation270:
-                  CurrentOrientation = "Landscape right";
+                  CurrentOrientation = "Rotation 270 (Landscape right)";
                   break;
                 case SurfaceOrientation.Rotation90:
-                  CurrentOrientation = "Landscape left";
+                  CurrentOrientation = "Rotation 90 (Landscape left)";
                   break;
               }
             }

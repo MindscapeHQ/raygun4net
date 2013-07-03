@@ -14,7 +14,6 @@ using System.Web;
 #endif
 using Mindscape.Raygun4Net.Messages;
 
-
 namespace Mindscape.Raygun4Net
 {
   public class RaygunMessageBuilder : IRaygunMessageBuilder
@@ -92,20 +91,7 @@ namespace Mindscape.Raygun4Net
       //                                               version.Build);
       return this;
     }
-#elif ANDROID
-    public IRaygunMessageBuilder SetVersion()
-    {
-      if (_raygunMessage.Details.Environment.PackageVersion != null)
-      {
-        _raygunMessage.Details.Version = _raygunMessage.Details.Environment.PackageVersion;
-      }
-      else
-      {
-        _raygunMessage.Details.Version = "Not supplied";
-      }
-      return this;
-    }
-#elif IOS
+#elif ANDROID || IOS
     public IRaygunMessageBuilder SetVersion()
     {
       if (_raygunMessage.Details.Environment.PackageVersion != null)
