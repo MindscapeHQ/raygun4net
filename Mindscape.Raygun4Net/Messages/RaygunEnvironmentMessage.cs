@@ -134,7 +134,7 @@ namespace Mindscape.Raygun4Net.Messages
                                     Android.OS.Build.Brand,
                                     Android.OS.Build.Manufacturer);
       }
-      catch (Exception e)
+      catch (Exception)
       {
         System.Diagnostics.Debug.WriteLine("Failed to log device information.");
       }
