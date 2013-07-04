@@ -29,6 +29,10 @@ using Android.Content;
 using Android.Views;
 using Android.Runtime;
 using Android.App;
+using Android.Net;
+using Java.IO;
+using Android.OS;
+using System.Text;
 #elif IOS
 using System.Threading;
 using System.Reflection;
@@ -49,6 +53,7 @@ namespace Mindscape.Raygun4Net
     {
       _apiKey = apiKey;
       Activity = activity;
+      ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
 #else
     /// <summary>
@@ -668,7 +673,7 @@ namespace Mindscape.Raygun4Net
       JNIEnv.ExceptionClear();
       var message = RaygunMessageBuilder.New
         .SetEnvironmentDetails()
-        .SetMachineName(Environment.MachineName)
+        //.SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)
         .SetClientDetails()
         .SetVersion()
@@ -685,20 +690,194 @@ namespace Mindscape.Raygun4Net
     {
       if (ValidateApiKey())
       {
-        using (var client = new WebClient())
+        if (HasInternetConnection)
         {
-          client.Headers.Add("X-ApiKey", _apiKey);
-          client.Encoding = System.Text.Encoding.UTF8;
+          using (var client = new WebClient())
+          {
+            client.Headers.Add("X-ApiKey", _apiKey);
+            client.Encoding = System.Text.Encoding.UTF8;
 
+            try
+            {
+              var message = SimpleJson.SerializeObject(raygunMessage);
+              client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
+            }
+            catch (Exception ex)
+            {
+              System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+            }
+          }
+        }
+        else
+        {
           try
           {
             var message = SimpleJson.SerializeObject(raygunMessage);
-            client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
+            SaveMessage(message);
           }
           catch (Exception ex)
           {
-            System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+            System.Diagnostics.Debug.WriteLine(string.Format("Error saving Exception to device {0}", ex.Message));
           }
+        }
+      }
+    }
+
+    private void SendMessage(string message)
+    {
+      using (var client = new WebClient())
+      {
+        client.Headers.Add("X-ApiKey", _apiKey);
+        client.Encoding = System.Text.Encoding.UTF8;
+
+        try
+        {
+          client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+        }
+      }
+    }
+
+    private bool HasInternetConnection
+    {
+      get
+      {
+        if (Activity != null)
+        {
+          ConnectivityManager connectivityManager = (ConnectivityManager)Activity.GetSystemService(Context.ConnectivityService);
+          if (connectivityManager != null)
+          {
+            NetworkInfo networkInfo = connectivityManager.ActiveNetworkInfo;
+            return networkInfo != null && networkInfo.IsConnected;
+          }
+        }
+        return false;
+      }
+    }
+
+    private void SaveMessage(string message)
+    {
+      try
+      {
+        using (File dir = Activity.GetDir("RaygunIO", FileCreationMode.Private))
+        {
+          int number = 1;
+          string[] files = dir.List();
+          while (true)
+          {
+            bool exists = FileExists(files, "RaygunErrorMessage" + number + ".txt");
+            if (!exists)
+            {
+              string nextFileName = "RaygunErrorMessage" + (number + 1) + ".txt";
+              exists = FileExists(files, nextFileName);
+              if (exists)
+              {
+                DeleteFile(dir, nextFileName);
+              }
+              break;
+            }
+            number++;
+          }
+          if (number == 11)
+          {
+            string firstFileName = "RaygunErrorMessage1.txt";
+            if (FileExists(files, firstFileName))
+            {
+              DeleteFile(dir, firstFileName);
+            }
+          }
+
+          using (File file = new File(dir, "RaygunErrorMessage" + number + ".txt"))
+          {
+            using (FileOutputStream stream = new FileOutputStream(file))
+            {
+              stream.Write(Encoding.ASCII.GetBytes(message));
+              stream.Flush();
+              stream.Close();
+            }
+          }
+          System.Diagnostics.Debug.WriteLine("Saved message: " + "RaygunErrorMessage" + number + ".txt");
+          System.Diagnostics.Debug.WriteLine("File Count: " + dir.List().Length);
+        }
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Debug.WriteLine(string.Format("Error saving message to isolated storage {0}", ex.Message));
+      }
+    }
+
+    private void SendStoredMessages()
+    {
+      if (HasInternetConnection)
+      {
+        try
+        {
+          using (File dir = Activity.GetDir("RaygunIO", FileCreationMode.Private))
+          {
+            File[] files = dir.ListFiles();
+            foreach (File file in files)
+            {
+              if (file.Name.StartsWith("RaygunErrorMessage"))
+              {
+                using (FileInputStream stream = new FileInputStream(file))
+                {
+                  using (InputStreamInvoker isi = new InputStreamInvoker(stream))
+                  {
+                    using (InputStreamReader streamReader = new Java.IO.InputStreamReader(isi))
+                    {
+                      using (BufferedReader bufferedReader = new BufferedReader(streamReader))
+                      {
+                        StringBuilder stringBuilder = new StringBuilder();
+                        string line;
+                        while ((line = bufferedReader.ReadLine()) != null)
+                        {
+                          stringBuilder.Append(line);
+                        }
+                        SendMessage(stringBuilder.ToString());
+                      }
+                    }
+                  }
+                }
+                file.Delete();
+              }
+            }
+            if (dir.List().Length == 0)
+            {
+              dir.Delete();
+            }
+          }
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Debug.WriteLine(string.Format("Error sending stored messages to Raygun.io {0}", ex.Message));
+        }
+      }
+    }
+
+    private bool FileExists(string[] files, string fileName)
+    {
+      foreach (string str in files)
+      {
+        if (fileName.Equals(str))
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    private void DeleteFile(File dir, string fileName)
+    {
+      File[] files = dir.ListFiles();
+      foreach (File file in files)
+      {
+        if (fileName.Equals(file.Name))
+        {
+          file.Delete();
+          return;
         }
       }
     }
