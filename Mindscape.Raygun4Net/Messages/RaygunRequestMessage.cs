@@ -25,7 +25,17 @@ namespace Mindscape.Raygun4Net.Messages
         if (String.IsNullOrEmpty(s)) continue;
 
         string name = s;
-        string value = context.Request.Form[s];        
+
+        var value = "";
+
+        try
+        {
+          value = context.Request.Form[s];
+        }
+        catch (HttpRequestValidationException)
+        {
+          value = "Unable to retrieve";
+        }
 
         if (s.Length > 256)
         {
