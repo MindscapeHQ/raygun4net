@@ -48,14 +48,6 @@ namespace Mindscape.Raygun4Net
   {
     private readonly string _apiKey;
 
-#if ANDROID
-    public RaygunClient(string apiKey, Activity activity)
-    {
-      _apiKey = apiKey;
-      Activity = activity;
-      ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
-    }
-#else
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
     /// </summary>
@@ -66,9 +58,12 @@ namespace Mindscape.Raygun4Net
 
 #if WINDOWS_PHONE
       Deployment.Current.Dispatcher.BeginInvoke(SendStoredMessages);
+#elif ANDROID
+      ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
 #endif
     }
 
+#if !ANDROID && !IOS
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
     /// Uses the ApiKey specified in the config file.
@@ -666,7 +661,10 @@ namespace Mindscape.Raygun4Net
 #endif
 
 #if ANDROID
-    internal static Activity Activity { get; private set; }
+    internal static Context Context
+    {
+      get { return Application.Context; }
+    }
 
     internal RaygunMessage BuildMessage(Exception exception)
     {
@@ -745,9 +743,9 @@ namespace Mindscape.Raygun4Net
     {
       get
       {
-        if (Activity != null)
+        if (Context != null)
         {
-          ConnectivityManager connectivityManager = (ConnectivityManager)Activity.GetSystemService(Context.ConnectivityService);
+          ConnectivityManager connectivityManager = (ConnectivityManager)Context.GetSystemService(Context.ConnectivityService);
           if (connectivityManager != null)
           {
             NetworkInfo networkInfo = connectivityManager.ActiveNetworkInfo;
@@ -762,45 +760,48 @@ namespace Mindscape.Raygun4Net
     {
       try
       {
-        using (File dir = Activity.GetDir("RaygunIO", FileCreationMode.Private))
+        if (Context != null)
         {
-          int number = 1;
-          string[] files = dir.List();
-          while (true)
+          using (File dir = Context.GetDir("RaygunIO", FileCreationMode.Private))
           {
-            bool exists = FileExists(files, "RaygunErrorMessage" + number + ".txt");
-            if (!exists)
+            int number = 1;
+            string[] files = dir.List();
+            while (true)
             {
-              string nextFileName = "RaygunErrorMessage" + (number + 1) + ".txt";
-              exists = FileExists(files, nextFileName);
-              if (exists)
+              bool exists = FileExists(files, "RaygunErrorMessage" + number + ".txt");
+              if (!exists)
               {
-                DeleteFile(dir, nextFileName);
+                string nextFileName = "RaygunErrorMessage" + (number + 1) + ".txt";
+                exists = FileExists(files, nextFileName);
+                if (exists)
+                {
+                  DeleteFile(dir, nextFileName);
+                }
+                break;
               }
-              break;
+              number++;
             }
-            number++;
-          }
-          if (number == 11)
-          {
-            string firstFileName = "RaygunErrorMessage1.txt";
-            if (FileExists(files, firstFileName))
+            if (number == 11)
             {
-              DeleteFile(dir, firstFileName);
+              string firstFileName = "RaygunErrorMessage1.txt";
+              if (FileExists(files, firstFileName))
+              {
+                DeleteFile(dir, firstFileName);
+              }
             }
-          }
 
-          using (File file = new File(dir, "RaygunErrorMessage" + number + ".txt"))
-          {
-            using (FileOutputStream stream = new FileOutputStream(file))
+            using (File file = new File(dir, "RaygunErrorMessage" + number + ".txt"))
             {
-              stream.Write(Encoding.ASCII.GetBytes(message));
-              stream.Flush();
-              stream.Close();
+              using (FileOutputStream stream = new FileOutputStream(file))
+              {
+                stream.Write(Encoding.ASCII.GetBytes(message));
+                stream.Flush();
+                stream.Close();
+              }
             }
+            System.Diagnostics.Debug.WriteLine("Saved message: " + "RaygunErrorMessage" + number + ".txt");
+            System.Diagnostics.Debug.WriteLine("File Count: " + dir.List().Length);
           }
-          System.Diagnostics.Debug.WriteLine("Saved message: " + "RaygunErrorMessage" + number + ".txt");
-          System.Diagnostics.Debug.WriteLine("File Count: " + dir.List().Length);
         }
       }
       catch (Exception ex)
@@ -815,7 +816,7 @@ namespace Mindscape.Raygun4Net
       {
         try
         {
-          using (File dir = Activity.GetDir("RaygunIO", FileCreationMode.Private))
+          using (File dir = Context.GetDir("RaygunIO", FileCreationMode.Private))
           {
             File[] files = dir.ListFiles();
             foreach (File file in files)
@@ -836,6 +837,7 @@ namespace Mindscape.Raygun4Net
                         {
                           stringBuilder.Append(line);
                         }
+                        System.Diagnostics.Debug.WriteLine("Sent " + file.Name);
                         SendMessage(stringBuilder.ToString());
                       }
                     }
@@ -846,6 +848,10 @@ namespace Mindscape.Raygun4Net
             }
             if (dir.List().Length == 0)
             {
+              if(files.Length > 0)
+              {
+                System.Diagnostics.Debug.WriteLine("Successfully sent all pending messages");
+              }
               dir.Delete();
             }
           }

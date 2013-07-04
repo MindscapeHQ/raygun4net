@@ -24,6 +24,7 @@ using Android.Content;
 using Android.Views;
 using Android.App;
 using Android.Content.PM;
+using Android.Runtime;
 #elif IOS
 using MonoTouch.UIKit;
 using MonoTouch.Foundation;
@@ -93,29 +94,34 @@ namespace Mindscape.Raygun4Net.Messages
         WindowBoundsWidth = metrics.WidthPixels;
         WindowBoundsHeight = metrics.HeightPixels;
 
-        if (RaygunClient.Activity != null)
+        Context context = RaygunClient.Context;
+        if (context != null)
         {
-          PackageManager manager = RaygunClient.Activity.PackageManager;
-          PackageInfo info = manager.GetPackageInfo(RaygunClient.Activity.PackageName, 0);
+          PackageManager manager = context.PackageManager;
+          PackageInfo info = manager.GetPackageInfo(context.PackageName, 0);
           PackageVersion = info.VersionCode + " / " + info.VersionName;
 
-          Display display = RaygunClient.Activity.WindowManager.DefaultDisplay;
-          if (display != null)
+          IWindowManager windowManager = context.GetSystemService(Context.WindowService).JavaCast<IWindowManager>();
+          if (windowManager != null)
           {
-            switch (display.Rotation)
+            Display display = windowManager.DefaultDisplay;
+            if (display != null)
             {
-              case SurfaceOrientation.Rotation0:
-                CurrentOrientation = "Rotation 0 (Portrait)";
-                break;
-              case SurfaceOrientation.Rotation180:
-                CurrentOrientation = "Rotation 180 (Upside down)";
-                break;
-              case SurfaceOrientation.Rotation270:
-                CurrentOrientation = "Rotation 270 (Landscape right)";
-                break;
-              case SurfaceOrientation.Rotation90:
-                CurrentOrientation = "Rotation 90 (Landscape left)";
-                break;
+              switch (display.Rotation)
+              {
+                case SurfaceOrientation.Rotation0:
+                  CurrentOrientation = "Rotation 0 (Portrait)";
+                  break;
+                case SurfaceOrientation.Rotation180:
+                  CurrentOrientation = "Rotation 180 (Upside down)";
+                  break;
+                case SurfaceOrientation.Rotation270:
+                  CurrentOrientation = "Rotation 270 (Landscape right)";
+                  break;
+                case SurfaceOrientation.Rotation90:
+                  CurrentOrientation = "Rotation 90 (Landscape left)";
+                  break;
+              }
             }
           }
         }
@@ -130,9 +136,9 @@ namespace Mindscape.Raygun4Net.Messages
                                     Android.OS.Build.Brand,
                                     Android.OS.Build.Manufacturer);
       }
-      catch (Exception)
+      catch (Exception ex)
       {
-        System.Diagnostics.Debug.WriteLine("Failed to log device information.");
+        System.Diagnostics.Debug.WriteLine(string.Format("Error getting environment info {0}", ex.Message));
       }
 #elif IOS
       OSVersion = UIDevice.CurrentDevice.SystemVersion;
