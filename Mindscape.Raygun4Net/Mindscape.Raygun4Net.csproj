@@ -49,6 +49,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\AssemblyVersionInfo.cs">
+      <Link>Properties\AssemblyVersionInfo.cs</Link>
+    </Compile>
     <Compile Include="IRaygunHttpMessageBuilder.cs" />
     <Compile Include="IRaygunMessageBuilder.cs" />
     <Compile Include="Messages\RaygunClientMessage.cs" />
