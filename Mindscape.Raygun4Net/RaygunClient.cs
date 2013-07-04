@@ -33,6 +33,7 @@ using Android.Net;
 using Java.IO;
 using Android.OS;
 using System.Text;
+using System.Threading.Tasks;
 #elif IOS
 using System.Threading;
 using System.Reflection;
@@ -661,6 +662,45 @@ namespace Mindscape.Raygun4Net
 #endif
 
 #if ANDROID
+    private static RaygunClient _client;
+    /// <summary>
+    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    /// <param name="apiKey">Your app api key.</param>
+    public static void Attach(string apiKey)
+    {
+      Detach();
+      _client = new RaygunClient(apiKey);
+      AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+      TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+    }
+
+    /// <summary>
+    /// Detaches Raygun from listening to unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    public static void Detach()
+    {
+      AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
+      TaskScheduler.UnobservedTaskException -= TaskScheduler_UnobservedTaskException;
+    }
+
+    private static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+    {
+      if (e.Exception != null)
+      {
+        _client.Send(e.Exception as Exception);
+      }
+    }
+
+    private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+      if (e.ExceptionObject is Exception)
+      {
+        System.Diagnostics.Debug.WriteLine("Caught unhandled exception.");
+        _client.Send(e.ExceptionObject as Exception);
+      }
+    }
+
     internal static Context Context
     {
       get { return Application.Context; }
@@ -699,6 +739,7 @@ namespace Mindscape.Raygun4Net
             {
               var message = SimpleJson.SerializeObject(raygunMessage);
               client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
+              System.Diagnostics.Debug.WriteLine("Sending message to Raygun.io");
             }
             catch (Exception ex)
             {
