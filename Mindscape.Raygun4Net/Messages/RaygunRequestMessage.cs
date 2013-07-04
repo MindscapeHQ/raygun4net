@@ -18,37 +18,7 @@ namespace Mindscape.Raygun4Net.Messages
       Data = ToDictionary(context.Request.ServerVariables);
       QueryString = ToDictionary(context.Request.QueryString);
       Headers = ToDictionary(context.Request.Headers);
-      Form = new NameValueCollection();
-
-      foreach (string s in context.Request.Form)
-      {
-        if (String.IsNullOrEmpty(s)) continue;
-
-        string name = s;
-
-        var value = "";
-
-        try
-        {
-          value = context.Request.Form[s];
-        }
-        catch (HttpRequestValidationException)
-        {
-          value = "Unable to retrieve";
-        }
-
-        if (s.Length > 256)
-        {
-          name = s.Substring(0, 256);
-        }
-
-        if (value.Length > 256)
-        {
-          value = value.Substring(0, 256);
-        }
-
-        Form.Add(name, value);
-      }
+      Form = ToDictionary(context.Request.Form, true);
 
       try
       {
@@ -70,7 +40,7 @@ namespace Mindscape.Raygun4Net.Messages
       }
     }
 
-    private static IDictionary ToDictionary(NameValueCollection nameValueCollection)
+    private static IDictionary ToDictionary(NameValueCollection nameValueCollection, bool truncateValues = false)
     {
       var keys = nameValueCollection.AllKeys;
       var dictionary = new Dictionary<string, string>();
@@ -79,7 +49,23 @@ namespace Mindscape.Raygun4Net.Messages
       {
         try
         {
-          dictionary.Add(key, nameValueCollection[key]);
+          var keyToSend = key;
+          var valueToSend = nameValueCollection[key];
+
+          if (truncateValues)
+          {
+            if (keyToSend.Length > 256)
+            {
+              keyToSend = keyToSend.Substring(0, 256);
+            }
+
+            if (valueToSend.Length > 256)
+            {
+              valueToSend = valueToSend.Substring(0, 256);
+            }
+          }
+
+          dictionary.Add(keyToSend, valueToSend);
         }
         catch (HttpRequestValidationException e)
         {
@@ -96,7 +82,7 @@ namespace Mindscape.Raygun4Net.Messages
           else
           {
             dictionary.Add(key, string.Empty);
-          }                    
+          }
         }
       }
 
@@ -115,7 +101,7 @@ namespace Mindscape.Raygun4Net.Messages
 
     public IDictionary Data { get; set; }
 
-    public NameValueCollection Form { get; set; }
+    public IDictionary Form { get; set; }
 
     public string RawData { get; set; }
 
