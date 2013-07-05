@@ -37,6 +37,7 @@ using System.Threading.Tasks;
 #elif IOS
 using System.Threading;
 using System.Reflection;
+using MonoTouch.UIKit;
 #else
 using System.Web;
 using System.Threading;
@@ -933,11 +934,11 @@ namespace Mindscape.Raygun4Net
 		{
 			var message = RaygunMessageBuilder.New
 				.SetEnvironmentDetails()
-					.SetMachineName(Environment.MachineName)
-					.SetExceptionDetails(exception)
-					.SetClientDetails()
-					.SetVersion()
-					.Build();
+        .SetMachineName(UIDevice.CurrentDevice.Name)
+			  .SetExceptionDetails(exception)
+				.SetClientDetails()
+				.SetVersion()
+				.Build();
 			return message;
 		}
 
@@ -949,19 +950,23 @@ namespace Mindscape.Raygun4Net
 		public void Send(RaygunMessage raygunMessage)
 		{
 			if (ValidateApiKey ()) {
-				using (var client = new WebClient()) {
+				using (var client = new WebClient())
+        {
 					client.Headers.Add ("X-ApiKey", _apiKey);
 					client.Encoding = System.Text.Encoding.UTF8;
 
-					try {
+					try
+          {
 						var message = SimpleJson.SerializeObject (raygunMessage);
 						client.UploadString (RaygunSettings.Settings.ApiEndpoint, message);
-					} catch (Exception ex) {
+					}
+          catch (Exception ex)
+          {
 						System.Diagnostics.Debug.WriteLine (string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
 					}
 				}
 			}
-		}
+    }
 #elif !WINRT && !WINDOWS_PHONE
     internal RaygunMessage BuildMessage(Exception exception)
     {

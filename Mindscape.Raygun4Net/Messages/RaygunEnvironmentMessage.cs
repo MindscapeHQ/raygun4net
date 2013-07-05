@@ -39,7 +39,9 @@ namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunEnvironmentMessage
   {
+#if !ANDROID && !IOS
     private List<double> _diskSpaceFree = new List<double>();
+#endif
 
     public RaygunEnvironmentMessage()
     {
@@ -141,19 +143,24 @@ namespace Mindscape.Raygun4Net.Messages
         System.Diagnostics.Debug.WriteLine(string.Format("Error getting environment info {0}", ex.Message));
       }
 #elif IOS
-      OSVersion = UIDevice.CurrentDevice.SystemVersion;
-      Architecture = UIDevice.CurrentDevice.SystemName;
+      UtcOffset = NSTimeZone.LocalTimeZone.GetSecondsFromGMT / 3600.0;
+
+      OSVersion = UIDevice.CurrentDevice.SystemName + " " + UIDevice.CurrentDevice.SystemVersion;
+      Architecture =  GetStringSysCtl(ArchitecturePropertyName);
+      Model = UIDevice.CurrentDevice.Model;
+      ProcessorCount = (int)GetIntSysCtl(ProcessiorCountPropertyName);
 
       Locale = CultureInfo.CurrentCulture.DisplayName;
 
       WindowBoundsWidth = UIScreen.MainScreen.Bounds.Width;
       WindowBoundsHeight = UIScreen.MainScreen.Bounds.Height;
 
-      TotalPhysicalMemory = GetIntSysCtl(TotalPhysicalMemoryPropertyName);
-      AvailablePhysicalMemory = GetIntSysCtl(AvailablePhysicalMemoryPropertyName);
-      ProcessorCount = (int)GetIntSysCtl(ProcessiorCountPropertyName);
-      Cpu = GetStringSysCtl(CpuPropertyName);
-      DeviceName = Environment.MachineName;
+      CurrentOrientation = UIDevice.CurrentDevice.Orientation.ToString();
+
+      TotalPhysicalMemory = GetIntSysCtl(TotalPhysicalMemoryPropertyName) / 0x100000; // in MB
+      AvailablePhysicalMemory = GetIntSysCtl(AvailablePhysicalMemoryPropertyName) / 0x100000;
+
+      DeviceName = UIDevice.CurrentDevice.Name;
       PackageVersion = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString();
 #else
       WindowBoundsWidth = SystemInformation.VirtualScreen.Height;
@@ -202,10 +209,10 @@ namespace Mindscape.Raygun4Net.Messages
 #elif ANDROID
 
 #elif IOS
-    private const string CpuPropertyName = "hw.machine";
     private const string TotalPhysicalMemoryPropertyName = "hw.physmem";
     private const string AvailablePhysicalMemoryPropertyName = "hw.usermem";
     private const string ProcessiorCountPropertyName = "hw.ncpu";
+    private const string ArchitecturePropertyName = "hw.machine";
 
     [DllImport(global::MonoTouch.Constants.SystemLibrary)]
     private static extern int sysctlbyname( [MarshalAs(UnmanagedType.LPStr)] string property,
@@ -223,7 +230,7 @@ namespace Mindscape.Raygun4Net.Messages
       var length = Marshal.ReadInt32(pLen);
 
       // check to see if we got a length
-      if (length == 0)
+      if (length <= 0)
       {
         Marshal.FreeHGlobal(pLen);
         return 0;
@@ -261,7 +268,7 @@ namespace Mindscape.Raygun4Net.Messages
       var length = Marshal.ReadInt32 (pLen);
 
       // check to see if we got a length
-      if (length == 0) {
+      if (length <= 0) {
         Marshal.FreeHGlobal (pLen);
         return "Unknown";
       }
@@ -325,7 +332,9 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string CurrentOrientation { get; private set; }
 
+#if !IOS
     public string Cpu { get; private set; }
+#endif
 
     public string PackageVersion { get; private set; }
 
@@ -344,6 +353,8 @@ namespace Mindscape.Raygun4Net.Messages
       get { return _diskSpaceFree; }
       set { _diskSpaceFree = value; }
     }
+#else
+    public string Model { get; private set; }
 #endif
     public ulong TotalPhysicalMemory { get; private set; }
 
