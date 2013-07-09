@@ -25,6 +25,7 @@ using Android.Views;
 using Android.App;
 using Android.Content.PM;
 using Android.Runtime;
+using Android.Bluetooth;
 #elif IOS
 using MonoTouch.UIKit;
 using MonoTouch.Foundation;
@@ -128,15 +129,15 @@ namespace Mindscape.Raygun4Net.Messages
           }
         }
 
+        DeviceName = RaygunClient.DeviceName;
+
         Java.Lang.Runtime runtime = Java.Lang.Runtime.GetRuntime();
         TotalPhysicalMemory = (ulong)runtime.TotalMemory();
         AvailablePhysicalMemory = (ulong)runtime.FreeMemory();
+
         ProcessorCount = runtime.AvailableProcessors();
         Architecture = Android.OS.Build.CpuAbi;
-        DeviceName = string.Format("{0} / {1} / {2}",
-                                    Android.OS.Build.Model,
-                                    Android.OS.Build.Brand,
-                                    Android.OS.Build.Manufacturer);
+        Model = string.Format("{0} / {1} / {2}", Android.OS.Build.Model, Android.OS.Build.Brand, Android.OS.Build.Manufacturer);
       }
       catch (Exception ex)
       {
@@ -332,7 +333,7 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string CurrentOrientation { get; private set; }
 
-#if !IOS
+#if !ANDROID && !IOS
     public string Cpu { get; private set; }
 #endif
 

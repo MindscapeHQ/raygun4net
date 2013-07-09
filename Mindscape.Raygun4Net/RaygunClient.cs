@@ -34,6 +34,7 @@ using Java.IO;
 using Android.OS;
 using System.Text;
 using System.Threading.Tasks;
+using Android.Bluetooth;
 #elif IOS
 using System.Threading;
 using System.Reflection;
@@ -711,12 +712,21 @@ namespace Mindscape.Raygun4Net
       get { return Application.Context; }
     }
 
+    internal static string DeviceName
+    {
+      get
+      {
+        BluetoothAdapter adapter = BluetoothAdapter.DefaultAdapter;
+        return adapter == null ? "Unknown" : adapter.Name;
+      }
+    }
+
     internal RaygunMessage BuildMessage(Exception exception)
     {
       JNIEnv.ExceptionClear();
       var message = RaygunMessageBuilder.New
         .SetEnvironmentDetails()
-        //.SetMachineName(Environment.MachineName)
+        .SetMachineName(DeviceName)
         .SetExceptionDetails(exception)
         .SetClientDetails()
         .SetVersion()
