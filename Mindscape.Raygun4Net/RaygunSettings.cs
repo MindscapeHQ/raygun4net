@@ -61,12 +61,9 @@ namespace Mindscape.Raygun4Net
     {
       get
       {
-        // If no configuration setting is provided then return the default values
-        return settings ?? (settings = new RaygunSettings { ApiKey = "", ApiEndpoint = new Uri(DefaultApiEndPoint) });
+        return settings ?? (settings = new RaygunSettings { ApiEndpoint = new Uri(DefaultApiEndPoint) });
       }
     }
-
-    public string ApiKey { get; set; }
 
     public Uri ApiEndpoint { get; set; }
   }
