@@ -6,6 +6,10 @@ Where is my app API key?
 When you create a new application on your Raygun.io dashboard, your app API key is displayed at the top of the instructions page.
 You can also find the API key by clicking the "Application Settings" button in the side bar of the Raygun.io dashboard.
 
+Namespace
+====================
+The main classes can be found in the Mindscape.Raygun4Net namespace.
+
 Usage
 ====================
 
@@ -116,9 +120,14 @@ RaygunClient.Attach("YOUR_APP_API_KEY");
 
 Xamarin for iOS
 ====================
+In the main entry point of the application, use the static RaygunClient.Attach method using your app API key.
 
+static void Main (string[] args)
+{
+  RaygunClient.Attach("YOUR_APP_API_KEY");
 
-RaygunClient.Attach("YOUR_APP_API_KEY");
+  UIApplication.Main (args, null, "AppDelegate");
+}
 
 ====================
 Troubleshooting
