@@ -37,6 +37,7 @@ using System.Threading.Tasks;
 using Android.Bluetooth;
 #elif IOS
 using System.Threading;
+using System.Threading.Tasks;
 using System.Reflection;
 using MonoTouch.UIKit;
 using MonoTouch.SystemConfiguration;
@@ -667,8 +668,10 @@ namespace Mindscape.Raygun4Net
     }
 #endif
 
-#if ANDROID
+#if ANDROID || IOS
+
     private static RaygunClient _client;
+
     /// <summary>
     /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
     /// </summary>
@@ -707,6 +710,9 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+#endif
+
+#if ANDROID
     internal static Context Context
     {
       get { return Application.Context; }
