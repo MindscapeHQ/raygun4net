@@ -539,7 +539,15 @@ namespace Mindscape.Raygun4Net
       message.Details.Tags = tags;
       Send(message);
     }
-    
+
+    public void Send(Exception exception, IList<string> tags, string version)
+    {
+      var message = BuildMessage(exception);
+      message.Details.Tags = tags;
+      message.Details.Version = version;
+      Send(message);
+    }
+
     /// <summary>
     /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
     /// with the message for identification, as well as sending a key-value collection of custom data.
@@ -596,16 +604,33 @@ namespace Mindscape.Raygun4Net
       ThreadPool.QueueUserWorkItem(c => Send(message));
     }
 
-    public void SendInBackground(Exception exception, List<string> tags)
+    public void SendInBackground(Exception exception, IList<string> tags)
     {
       var message = BuildMessage(exception);
       message.Details.Tags = tags;
       ThreadPool.QueueUserWorkItem(c => Send(message));
     }
 
-    public void SendInBackground(Exception exception, List<string> tags, string version)
+    public void SendInBackground(Exception exception, IList<string> tags, string version)
     {
       var message = BuildMessage(exception);
+      message.Details.Tags = tags;
+      message.Details.Version = version;
+      ThreadPool.QueueUserWorkItem(c => Send(message));
+    }
+
+    public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
+    {
+      var message = BuildMessage(exception);
+      message.Details.UserCustomData = userCustomData;
+      message.Details.Tags = tags;
+      ThreadPool.QueueUserWorkItem(c => Send(message));
+    }
+
+    public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
+    {
+      var message = BuildMessage(exception);
+      message.Details.UserCustomData = userCustomData;
       message.Details.Tags = tags;
       message.Details.Version = version;
       ThreadPool.QueueUserWorkItem(c => Send(message));
