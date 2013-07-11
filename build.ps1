@@ -1,18 +1,18 @@
 properties {
     $root =                        $psake.build_script_dir
-    $solution_file =               "$root/Mindscape.Raygun4Net.sln"
-    $winrt_solution_file =         "$root/Mindscape.Raygun4Net.WinRT.sln"
-    $windows_phone_solution_file = "$root/Mindscape.Raygun4Net.WindowsPhone.sln"
-	$xamarin_solution_file =       "$root/Mindscape.Raygun4Net.Xamarin.sln"
-    $nugetspec =                   "$root/Mindscape.Raygun4Net.nuspec"
-    $nugetpackage =                "Mindscape.Raygun4Net.1.0.nupkg"
-    $configuration =               "Release"
-    $build_dir =                   "$root\build\"
-    $release_dir =                 "$root\release\"
-    $nunit_dir =                   "$root\packages\NUnit.Runners.2.6.2\tools\"
-    $tools_dir =                   "$root\tools"
-    $nuget_dir =                   "$root\.nuget"
-    $env:Path +=                   ";$nunit_dir;$tools_dir;$nuget_dir"
+    $solution_file =                 "$root/Mindscape.Raygun4Net.sln"
+    $winrt_solution_file =           "$root/Mindscape.Raygun4Net.WinRT.sln"
+    $windows_phone_solution_file =   "$root/Mindscape.Raygun4Net.WindowsPhone.sln"
+	$xamarin_android_solution_file = "$root/Mindscape.Raygun4Net.Xamarin.Android.sln"
+    $nugetspec =                     "$root/Mindscape.Raygun4Net.nuspec"
+    $nugetpackage =                  "Mindscape.Raygun4Net.1.0.nupkg"
+    $configuration =                 "Release"
+    $build_dir =                     "$root\build\"
+    $release_dir =                   "$root\release\"
+    $nunit_dir =                     "$root\packages\NUnit.Runners.2.6.2\tools\"
+    $tools_dir =                     "$root\tools"
+    $nuget_dir =                     "$root\.nuget"
+    $env:Path +=                     ";$nunit_dir;$tools_dir;$nuget_dir"
 }
 
 task default -depends Package
@@ -39,8 +39,8 @@ task CompileWindowsPhone -depends Init {
     exec { msbuild "$windows_phone_solution_file" /m /p:OutDir=$build_dir /p:Configuration=$Configuration }
 }
 
-task CompileXamarin -depends Init {
-    exec { msbuild "$xamarin_solution_file" /m /p:OutDir=$build_dir /p:Configuration=$Configuration }
+task CompileXamarinAndroid -depends Init {
+    exec { msbuild "$xamarin_android_solution_file" /m /p:OutDir=$build_dir /p:Configuration=$Configuration }
 }
 
 task Test -depends Compile {
@@ -53,7 +53,7 @@ task Test -depends Compile {
     Pop-Location
 }
 
-task Package -depends Compile, CompileWinRT, CompileWindowsPhone, CompileXamarin {
+task Package -depends Compile, CompileWinRT, CompileWindowsPhone, CompileXamarinAndroid {
     exec { nuget pack $nugetspec -OutputDirectory $release_dir }
 }
 
