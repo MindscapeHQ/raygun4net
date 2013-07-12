@@ -33,6 +33,11 @@ When sending exceptions to the Raygun.io service, an app API key is required to 
 
 When you create a new application on your Raygun.io dashboard, your app API key is displayed at the top of the instructions page. You can also find the API key by clicking the "Application Settings" button in the side bar of the Raygun.io dashboard.
 
+Sample
+====================
+
+Because of the API key requirement mentioned above, in order to run the sample you'll need to replace YOUR_APP_API_KEY in MainActivity to be an api key you've generated in your Raygun.io dashboard.
+
 Namespace
 ====================
 The main classes can be found in the Mindscape.Raygun4Net namespace.
