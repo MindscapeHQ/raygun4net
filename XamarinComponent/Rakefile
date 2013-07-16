@@ -20,7 +20,7 @@ task :default => "xpkg/xpkg.exe" do
 	line = <<-END
 	mono xpkg/xamarin-component.exe create-manually #{COMPONENT} \
 		--name="Raygun4Net" \
-		--summary="Track exceptions in your Android and iOS applications." \
+		--summary="Send exception messages in your Android and iOS applications to your Raygun.io dashboard." \
 		--publisher="Mindscape" \
 		--website="http://raygun.io/" \
 		--details="Details.md" \
@@ -29,6 +29,7 @@ task :default => "xpkg/xpkg.exe" do
 		--icon="icons/raygun4net_128x128.png" \
 		--icon="icons/raygun4net_512x512.png" \
 		--library="android":"../build/Mindscape.Raygun4Net.Xamarin.Android.dll" \
+		--library="ios":"../build/Mindscape.Raygun4Net.Xamarin.iOS.dll" \
 		--sample="Android Sample. Demonstrates how to use the RaygunClient in an Android application.":"samples/Raygun.Android.Sample/Raygun.Android.Sample.sln"
 		END
 	puts "* Creating #{COMPONENT}..."
