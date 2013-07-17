@@ -7,7 +7,6 @@ namespace Raygun.iOS.Sample
   public class MyViewController : UIViewController
   {
     UIButton button;
-    int numClicks = 0;
     float buttonWidth = 200;
     float buttonHeight = 50;
 

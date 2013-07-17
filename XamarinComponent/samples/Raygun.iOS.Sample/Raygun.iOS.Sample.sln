@@ -36,7 +36,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = Raugun.iOS.Sample\Raugun.iOS.Sample.csproj
+		StartupItem = Raygun.iOS.Sample\Raygun.iOS.Sample.csproj
 		Policies = $0
 		$0.TextStylePolicy = $1
 		$1.FileWidth = 120
