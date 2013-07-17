@@ -5,7 +5,7 @@ using System.Linq;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 
-namespace Raugun.iOS.Sample
+namespace Raygun.iOS.Sample
 {
   [Register("AppDelegate")]
   public partial class AppDelegate : UIApplicationDelegate

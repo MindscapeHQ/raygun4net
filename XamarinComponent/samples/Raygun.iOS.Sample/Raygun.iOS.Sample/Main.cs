@@ -7,7 +7,7 @@ using MonoTouch.UIKit;
 
 using Mindscape.Raygun4Net;
 
-namespace Raugun.iOS.Sample
+namespace Raygun.iOS.Sample
 {
   public class Application
   {

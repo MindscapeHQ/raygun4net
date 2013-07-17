@@ -2,7 +2,7 @@ using System;
 using MonoTouch.UIKit;
 using System.Drawing;
 
-namespace Raugun.iOS.Sample
+namespace Raygun.iOS.Sample
 {
   public class MyViewController : UIViewController
   {

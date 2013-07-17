@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raugun.iOS.Sample", "Raugun.iOS.Sample\Raugun.iOS.Sample.csproj", "{3139C8CF-2E7D-4F78-8F17-021219213D6A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raygun.iOS.Sample", "Raygun.iOS.Sample\Raygun.iOS.Sample.csproj", "{3139C8CF-2E7D-4F78-8F17-021219213D6A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +32,9 @@ Global
 		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.Release|iPhoneSimulator.ActiveCfg = Release|iPhoneSimulator
 		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.Release|iPhoneSimulator.Build.0 = Release|iPhoneSimulator
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Raugun.iOS.Sample\Raugun.iOS.Sample.csproj
 		Policies = $0
@@ -42,8 +45,5 @@ Global
 		$1.inheritsSet = VisualStudio
 		$1.inheritsScope = text/plain
 		$1.scope = text/plain
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

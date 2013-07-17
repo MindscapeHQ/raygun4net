@@ -41,8 +41,9 @@
     <AndroidLinkMode>SdkOnly</AndroidLinkMode>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Mindscape.Raygun4Net.Xamarin.Android">
-      <HintPath>..\..\..\..\Mindscape.Raygun4Net.Xamarin.Android\bin\Release\Mindscape.Raygun4Net.Xamarin.Android.dll</HintPath>
+    <Reference Include="Mindscape.Raygun4Net.Xamarin.Android, Version=1.0.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\Mindscape.Raygun4Net.Xamarin.Android.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Android" />
     <Reference Include="mscorlib" />
