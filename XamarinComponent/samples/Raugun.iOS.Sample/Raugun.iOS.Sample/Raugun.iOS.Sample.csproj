@@ -80,6 +80,9 @@
     <CodesignKey>iPhone Distribution</CodesignKey>
     <AssemblyName>Raugun.iOS.Sample</AssemblyName>
   </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyName>RauguniOSSample</AssemblyName>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />

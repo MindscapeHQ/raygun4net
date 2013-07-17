@@ -134,7 +134,7 @@ namespace Mindscape.Raygun4Net.Messages
         Java.Lang.Runtime runtime = Java.Lang.Runtime.GetRuntime();
         TotalPhysicalMemory = (ulong)runtime.TotalMemory();
         AvailablePhysicalMemory = (ulong)runtime.FreeMemory();
-
+        
         ProcessorCount = runtime.AvailableProcessors();
         Architecture = Android.OS.Build.CpuAbi;
         Model = string.Format("{0} / {1} / {2}", Android.OS.Build.Model, Android.OS.Build.Brand, Android.OS.Build.Manufacturer);
@@ -158,8 +158,8 @@ namespace Mindscape.Raygun4Net.Messages
 
       CurrentOrientation = UIDevice.CurrentDevice.Orientation.ToString();
 
-      TotalPhysicalMemory = GetIntSysCtl(TotalPhysicalMemoryPropertyName) / 0x100000; // in MB
-      AvailablePhysicalMemory = GetIntSysCtl(AvailablePhysicalMemoryPropertyName) / 0x100000;
+      TotalPhysicalMemory = GetIntSysCtl(TotalPhysicalMemoryPropertyName);
+      AvailablePhysicalMemory = GetIntSysCtl(AvailablePhysicalMemoryPropertyName);
 
       DeviceName = UIDevice.CurrentDevice.Name;
       PackageVersion = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString();
