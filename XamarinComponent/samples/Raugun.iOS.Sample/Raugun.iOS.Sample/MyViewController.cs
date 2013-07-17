@@ -31,11 +31,11 @@ namespace Raugun.iOS.Sample
           buttonWidth,
           buttonHeight);
 
-      button.SetTitle("Click me", UIControlState.Normal);
+      button.SetTitle("Crash", UIControlState.Normal);
 
       button.TouchUpInside += (object sender, EventArgs e) =>
       {
-        button.SetTitle(String.Format("clicked {0} times", numClicks++), UIControlState.Normal);
+        throw new Exception("Something has gone horribly wrong");
       };
 
       button.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleTopMargin |
