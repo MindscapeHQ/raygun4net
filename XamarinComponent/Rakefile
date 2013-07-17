@@ -20,7 +20,7 @@ task :default => "xpkg/xpkg.exe" do
 	line = <<-END
 	mono xpkg/xamarin-component.exe create-manually #{COMPONENT} \
 		--name="Raygun4Net" \
-		--summary="Send exception messages in your Android and iOS applications to your Raygun.io dashboard." \
+		--summary="Send exception messages in your Android and iOS applications to the Raygun.io cloud service." \
 		--publisher="Mindscape" \
 		--website="http://raygun.io/" \
 		--details="Details.md" \

@@ -33,10 +33,10 @@ When sending exceptions to the Raygun.io service, an app API key is required to 
 
 When you create a new application on your Raygun.io dashboard, your app API key is displayed at the top of the instructions page. You can also find the API key by clicking the "Application Settings" button in the side bar of the Raygun.io dashboard.
 
-Sample
+Samples
 ====================
 
-Because of the API key requirement mentioned above, in order to run the sample you'll need to replace YOUR_APP_API_KEY in MainActivity to be an api key you've generated in your Raygun.io dashboard.
+Because of the API key requirement mentioned above, in order to run the samples you'll need to replace YOUR_APP_API_KEY in MainActivity (for Android) and Main.cs (for iOS) to be an api key you've generated in your Raygun.io dashboard.
 
 Namespace
 ====================
