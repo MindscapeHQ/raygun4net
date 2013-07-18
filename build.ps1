@@ -54,7 +54,7 @@ task Test -depends Compile {
 }
 
 task Package -depends Compile, CompileWinRT, CompileWindowsPhone, CompileXamarinAndroid {
-    exec { nuget pack $nugetspec -OutputDirectory $release_dir }
+    
 }
 
 task PushNugetPackage -depends Package {
