@@ -92,13 +92,14 @@
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Mindscape.Raygun4Net.Xamarin.iOS, Version=1.0.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\ios\Mindscape.Raygun4Net.Xamarin.iOS.dll</HintPath>
+    </Reference>
     <Reference Include="monotouch" />
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
-    <Reference Include="Mindscape.Raygun4Net.Xamarin.iOS">
-      <HintPath>lib\Mindscape.Raygun4Net.Xamarin.iOS.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.MonoTouch.CSharp.targets" />
 </Project>
