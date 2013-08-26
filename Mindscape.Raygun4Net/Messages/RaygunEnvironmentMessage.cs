@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -16,6 +17,18 @@ using Windows.Devices.Enumeration.Pnp;
 using Microsoft.Phone.Info;
 using System.Windows;
 using Microsoft.Phone.Controls;
+#elif ANDROID
+using Android.OS;
+using Android.Content.Res;
+using Android.Content;
+using Android.Views;
+using Android.App;
+using Android.Content.PM;
+using Android.Runtime;
+using Android.Bluetooth;
+#elif IOS
+using MonoTouch.UIKit;
+using MonoTouch.Foundation;
 #else
 using System.Web;
 using System.Windows.Forms;
@@ -27,7 +40,9 @@ namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunEnvironmentMessage
   {
+#if !ANDROID && !IOS
     private List<double> _diskSpaceFree = new List<double>();
+#endif
 
     public RaygunEnvironmentMessage()
     {
@@ -67,6 +82,87 @@ namespace Mindscape.Raygun4Net.Messages
 
       //ProcessorCount = Environment.ProcessorCount;
       // TODO: finish other values
+#elif ANDROID
+      try
+      {
+        Java.Util.TimeZone tz = Java.Util.TimeZone.Default;
+        Java.Util.Date now = new Java.Util.Date();
+        UtcOffset = tz.GetOffset(now.Time) / 3600000.0;
+
+        OSVersion = Android.OS.Build.VERSION.Sdk;
+
+        Locale = CultureInfo.CurrentCulture.DisplayName;
+
+        var metrics = Resources.System.DisplayMetrics;
+        WindowBoundsWidth = metrics.WidthPixels;
+        WindowBoundsHeight = metrics.HeightPixels;
+
+        Context context = RaygunClient.Context;
+        if (context != null)
+        {
+          PackageManager manager = context.PackageManager;
+          PackageInfo info = manager.GetPackageInfo(context.PackageName, 0);
+          PackageVersion = info.VersionCode + " / " + info.VersionName;
+
+          IWindowManager windowManager = context.GetSystemService(Context.WindowService).JavaCast<IWindowManager>();
+          if (windowManager != null)
+          {
+            Display display = windowManager.DefaultDisplay;
+            if (display != null)
+            {
+              switch (display.Rotation)
+              {
+                case SurfaceOrientation.Rotation0:
+                  CurrentOrientation = "Rotation 0 (Portrait)";
+                  break;
+                case SurfaceOrientation.Rotation180:
+                  CurrentOrientation = "Rotation 180 (Upside down)";
+                  break;
+                case SurfaceOrientation.Rotation270:
+                  CurrentOrientation = "Rotation 270 (Landscape right)";
+                  break;
+                case SurfaceOrientation.Rotation90:
+                  CurrentOrientation = "Rotation 90 (Landscape left)";
+                  break;
+              }
+            }
+          }
+        }
+
+        DeviceName = RaygunClient.DeviceName;
+
+        Java.Lang.Runtime runtime = Java.Lang.Runtime.GetRuntime();
+        TotalPhysicalMemory = (ulong)runtime.TotalMemory();
+        AvailablePhysicalMemory = (ulong)runtime.FreeMemory();
+        
+        ProcessorCount = runtime.AvailableProcessors();
+        Architecture = Android.OS.Build.CpuAbi;
+        Model = string.Format("{0} / {1} / {2}", Android.OS.Build.Model, Android.OS.Build.Brand, Android.OS.Build.Manufacturer);
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Debug.WriteLine(string.Format("Error getting environment info {0}", ex.Message));
+      }
+#elif IOS
+      UtcOffset = NSTimeZone.LocalTimeZone.GetSecondsFromGMT / 3600.0;
+
+      OSVersion = UIDevice.CurrentDevice.SystemName + " " + UIDevice.CurrentDevice.SystemVersion;
+      Architecture =  GetStringSysCtl(ArchitecturePropertyName);
+      Model = UIDevice.CurrentDevice.Model;
+      ProcessorCount = (int)GetIntSysCtl(ProcessiorCountPropertyName);
+
+      Locale = CultureInfo.CurrentCulture.DisplayName;
+
+      WindowBoundsWidth = UIScreen.MainScreen.Bounds.Width;
+      WindowBoundsHeight = UIScreen.MainScreen.Bounds.Height;
+
+      CurrentOrientation = UIDevice.CurrentDevice.Orientation.ToString();
+
+      TotalPhysicalMemory = GetIntSysCtl(TotalPhysicalMemoryPropertyName);
+      AvailablePhysicalMemory = GetIntSysCtl(AvailablePhysicalMemoryPropertyName);
+
+      DeviceName = UIDevice.CurrentDevice.Name;
+      PackageVersion = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString();
 #else
       WindowBoundsWidth = SystemInformation.VirtualScreen.Height;
       WindowBoundsHeight = SystemInformation.VirtualScreen.Width;
@@ -111,6 +207,88 @@ namespace Mindscape.Raygun4Net.Messages
     }
 #elif WINDOWS_PHONE
 
+#elif ANDROID
+
+#elif IOS
+    private const string TotalPhysicalMemoryPropertyName = "hw.physmem";
+    private const string AvailablePhysicalMemoryPropertyName = "hw.usermem";
+    private const string ProcessiorCountPropertyName = "hw.ncpu";
+    private const string ArchitecturePropertyName = "hw.machine";
+
+    [DllImport(global::MonoTouch.Constants.SystemLibrary)]
+    private static extern int sysctlbyname( [MarshalAs(UnmanagedType.LPStr)] string property,
+                                            IntPtr output,
+                                            IntPtr oldLen,
+                                            IntPtr newp,
+                                            uint newlen);
+
+    private static uint GetIntSysCtl(string propertyName)
+    {
+      // get the length of the string that will be returned
+      var pLen = Marshal.AllocHGlobal(sizeof(int));
+      sysctlbyname(propertyName, IntPtr.Zero, pLen, IntPtr.Zero, 0);
+
+      var length = Marshal.ReadInt32(pLen);
+
+      // check to see if we got a length
+      if (length <= 0)
+      {
+        Marshal.FreeHGlobal(pLen);
+        return 0;
+      }
+
+      // get the hardware string
+      var pStr = Marshal.AllocHGlobal(length);
+      sysctlbyname(propertyName, pStr, pLen, IntPtr.Zero, 0);
+
+      // convert the native string into a C# integer
+
+      var memoryCount = Marshal.ReadInt32(pStr);
+      uint memoryVal = (uint)memoryCount;
+
+      if (memoryCount < 0)
+      {
+        memoryVal = (uint)((uint)int.MaxValue + (-memoryCount));
+      }
+
+      var ret = memoryVal;
+
+      // cleanup
+      Marshal.FreeHGlobal(pLen);
+      Marshal.FreeHGlobal(pStr);
+
+      return ret;
+    }
+
+    private static string GetStringSysCtl(string propertyName)
+    {
+      // get the length of the string that will be returned
+      var pLen = Marshal.AllocHGlobal (sizeof(int));
+      sysctlbyname (propertyName, IntPtr.Zero, pLen, IntPtr.Zero, 0);
+
+      var length = Marshal.ReadInt32 (pLen);
+
+      // check to see if we got a length
+      if (length <= 0) {
+        Marshal.FreeHGlobal (pLen);
+        return "Unknown";
+      }
+
+      // get the hardware string
+      var pStr = Marshal.AllocHGlobal (length);
+      sysctlbyname (propertyName, pStr, pLen, IntPtr.Zero, 0);
+
+      // convert the native string into a C# string
+      var hardwareStr = Marshal.PtrToStringAnsi (pStr);
+
+      var ret = hardwareStr;
+
+      // cleanup
+      Marshal.FreeHGlobal (pLen);
+      Marshal.FreeHGlobal (pStr);
+
+      return ret;
+    }
 #else
     private string GetCpu()
     {
@@ -155,18 +333,17 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string CurrentOrientation { get; private set; }
 
+#if !ANDROID && !IOS
     public string Cpu { get; private set; }
+#endif
 
     public string PackageVersion { get; private set; }
 
     public string Architecture { get; private set; }
 
+#if !ANDROID && !IOS
     [Obsolete("Use Locale instead")]
     public string Location { get; private set; }
-
-    public ulong TotalPhysicalMemory { get; private set; }
-
-    public ulong AvailablePhysicalMemory { get; private set; }
 
     public ulong TotalVirtualMemory { get; private set; }
 
@@ -177,6 +354,12 @@ namespace Mindscape.Raygun4Net.Messages
       get { return _diskSpaceFree; }
       set { _diskSpaceFree = value; }
     }
+#else
+    public string Model { get; private set; }
+#endif
+    public ulong TotalPhysicalMemory { get; private set; }
+
+    public ulong AvailablePhysicalMemory { get; private set; }
 
     public string DeviceName { get; private set; }
 

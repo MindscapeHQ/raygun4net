@@ -1,6 +1,20 @@
 Raygun4Net - Raygun.io Provider for .NET Framework
 ===================
 
+Where is my app API key?
+====================
+When you create a new application on your Raygun.io dashboard, your app API key is displayed at the top of the instructions page.
+You can also find the API key by clicking the "Application Settings" button in the side bar of the Raygun.io dashboard.
+
+Namespace
+====================
+The main classes can be found in the Mindscape.Raygun4Net namespace.
+
+Usage
+====================
+
+The Raygun4Net provider includes support for many .NET frameworks.
+Scroll down to find information about using Raygun for your type of application.
 
 ASP.NET
 ====================
@@ -37,31 +51,40 @@ For system.webServer:
 
 WinForms/WPF/Other .NET applications
 ====================
-Create an instance of RaygunClient (passing your API key in the constructor) then inside an Unhandled Exception
-(or unobserved task exception) event handler make a call to Send, passing the ExceptionObject available in
-the handler's EventArgs (with a cast).
+Create an instance of RaygunClient by passing your app API key in the constructor.
+Attach an event handler to the DispatcherUnhandledException event of your application.
+In the event handler, use the RaygunClient.Send method to send the Exception.
 
-WinRT
-====================
-Reference the "Mindscape.Raygun4Net.WinRT.dll" instead.
-
-Create a RaygunClient instance as above, then add a handler to the UnhandledException event to pick up
-exceptions from the UI thread. Note that for WinRT you are required to pass the whole UnhandledExceptionEventArgs
-object to Send(). For instance in App.xaml.cs:
+private RaygunClient _client = new RaygunClient("YOUR_APP_API_KEY");
 
 public App()
 {
-...
-UnhandledException += App_UnhandledException;
+  DispatcherUnhandledException += OnDispatcherUnhandledException;
+}
+
+void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+{
+  _client.Send(e.Exception);
+}
+
+
+WinRT
+====================
+Create a RaygunClient instance and pass in your app API key into the constructor, then add a handler to the UnhandledException event to pick up
+exceptions from the UI thread. Note that for WinRT you are required to pass the whole UnhandledExceptionEventArgs
+object to Send().
+
+private RaygunClient _client = new RaygunClient("YOUR_APP_API_KEY");
+
+public App()
+{
+  UnhandledException += App_UnhandledException;
 }
 
 void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
 {
-  _raygunClient.Send(e);
+  _client.Send(e);
 }
-
-Then inside catch blocks place a call to Send, or use the Wrap helper method, passing your code you
-want to execute. This will send (and throw) the exception in the case that one occurs.
 
 Limitations of WinRT UnhandledException event and Wrap() workarounds
 ====================
@@ -80,13 +103,30 @@ another for methods that return an object.
 
 WP7.1 and WP8
 ====================
-Reference the "Mindscape.Raygun4Net.WindowsPhone.dll" instead.
+Create a RaygunClient instance and pass in your app API key into the constructor. In the UnhandledException event handler of App.xaml.cs, use the RaygunClient to send the arguments.
 
-Create a RaygunClient instance and pass in your API key in the constructor. In the UnhandledException event handler of App.xaml.cs, use the RaygunClient to send the arguments.
+private RaygunClient _client = new RaygunClient("YOUR_APP_API_KEY");
 
 private void Application_UnhandledException(object sender, ApplicationUnhandledExceptionEventArgs e)
 {
   _client.Send(e);
+}
+
+Xamarin for Android
+====================
+In the main/entry Activity of your application, use the static RaygunClient.Attach method using your app API key.
+
+RaygunClient.Attach("YOUR_APP_API_KEY");
+
+Xamarin for iOS
+====================
+In the main entry point of the application, use the static RaygunClient.Attach method using your app API key.
+
+static void Main (string[] args)
+{
+  RaygunClient.Attach("YOUR_APP_API_KEY");
+
+  UIApplication.Main (args, null, "AppDelegate");
 }
 
 ====================

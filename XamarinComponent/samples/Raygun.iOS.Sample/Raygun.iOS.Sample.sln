@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raygun.iOS.Sample", "Raygun.iOS.Sample\Raygun.iOS.Sample.csproj", "{3139C8CF-2E7D-4F78-8F17-021219213D6A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Ad-Hoc|iPhone = Ad-Hoc|iPhone
+		Ad-Hoc|iPhoneSimulator = Ad-Hoc|iPhoneSimulator
+		AppStore|iPhone = AppStore|iPhone
+		AppStore|iPhoneSimulator = AppStore|iPhoneSimulator
+		Debug|iPhone = Debug|iPhone
+		Debug|iPhoneSimulator = Debug|iPhoneSimulator
+		Release|iPhone = Release|iPhone
+		Release|iPhoneSimulator = Release|iPhoneSimulator
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.Ad-Hoc|iPhone.ActiveCfg = Ad-Hoc|iPhone
+		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.Ad-Hoc|iPhone.Build.0 = Ad-Hoc|iPhone
+		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.Ad-Hoc|iPhoneSimulator.ActiveCfg = Ad-Hoc|iPhoneSimulator
+		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.Ad-Hoc|iPhoneSimulator.Build.0 = Ad-Hoc|iPhoneSimulator
+		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.AppStore|iPhone.ActiveCfg = AppStore|iPhone
+		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.AppStore|iPhone.Build.0 = AppStore|iPhone
+		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.AppStore|iPhoneSimulator.ActiveCfg = AppStore|iPhoneSimulator
+		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.AppStore|iPhoneSimulator.Build.0 = AppStore|iPhoneSimulator
+		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.Debug|iPhone.ActiveCfg = Debug|iPhone
+		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.Debug|iPhone.Build.0 = Debug|iPhone
+		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.Debug|iPhoneSimulator.ActiveCfg = Debug|iPhoneSimulator
+		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.Debug|iPhoneSimulator.Build.0 = Debug|iPhoneSimulator
+		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.Release|iPhone.ActiveCfg = Release|iPhone
+		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.Release|iPhone.Build.0 = Release|iPhone
+		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.Release|iPhoneSimulator.ActiveCfg = Release|iPhoneSimulator
+		{3139C8CF-2E7D-4F78-8F17-021219213D6A}.Release|iPhoneSimulator.Build.0 = Release|iPhoneSimulator
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Raygun.iOS.Sample\Raygun.iOS.Sample.csproj
+		Policies = $0
+		$0.TextStylePolicy = $1
+		$1.FileWidth = 120
+		$1.TabWidth = 2
+		$1.IndentWidth = 2
+		$1.inheritsSet = VisualStudio
+		$1.inheritsScope = text/plain
+		$1.scope = text/plain
+	EndGlobalSection
+EndGlobal

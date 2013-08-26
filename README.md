@@ -13,6 +13,17 @@ Installation
 
 * If you have issues trying to install the package into a WinRT project, see the troubleshooting section below.
 
+Where is my app API key?
+====================
+
+When sending exceptions to the Raygun.io service, an app API key is required to map the messages to your application.
+
+When you create a new application on your Raygun.io dashboard, your app API key is displayed at the top of the instructions page. You can also find the API key by clicking the "Application Settings" button in the side bar of the Raygun.io dashboard.
+
+Namespace
+====================
+The main classes can be found in the Mindscape.Raygun4Net namespace.
+
 Usage
 ====================
 
@@ -59,18 +70,30 @@ For system.webServer:
 
 ### WinForms/WPF/Other .NET applications
 
-Create an instance of RaygunClient (passing your API key in the constructor) then inside an Unhandled Exception (or unobserved task exception) event handler make a call to Send, passing the ExceptionObject available in the handler's EventArgs (with a cast).
+Create an instance of RaygunClient by passing your app API key in the constructor. Attach an event handler to the DispatcherUnhandledException event of your application. In the event handler, use the RaygunClient.Send method to send the Exception.
+
+```csharp
+private RaygunClient _client = new RaygunClient("YOUR_APP_API_KEY");
+
+public App()
+{
+  DispatcherUnhandledException += OnDispatcherUnhandledException;
+}
+
+void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+{
+  _client.Send(e.Exception);
+}
+```
 
 ### WinRT
-Reference the "Mindscape.Raygun4Net.WinRT.dll" instead.
 
-Create a RaygunClient instance as above, then add a handler to the UnhandledException event to pick up exceptions from the UI thread. Note that for WinRT you are required to pass the whole UnhandledExceptionEventArgs object to Send(). For instance in App.xaml:
+Create a RaygunClient instance and pass in your app API key into the constructor. Then add a handler to the UnhandledException event to pick up exceptions from the UI thread. Note that for WinRT you are required to pass the whole UnhandledExceptionEventArgs object to Send().
 
 ```csharp
 public App()
 {
-...
-UnhandledException += App_UnhandledException;
+  UnhandledException += App_UnhandledException;
 }
 
 void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -79,16 +102,48 @@ void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
 }
 ```
 
-Then inside catch blocks place a call to Send, or use the Wrap helper method, passing your code you want to execute. This will send (and throw) the exception in the case that one occurs.
-
 #### Limitations of WinRT UnhandledException event and Wrap() workarounds
 
 The options available in WinRT for catching unhandled exceptions at this point in time are more limited compared to the options in the more mature .NET framework. The UnhandledException event will be raised when invalid XAML is parsed, in addition to other runtime exceptions that happen on the main UI thread. While many errors will be picked up this way and therefore be able to be sent to Raygun, others will be missed by this exception handler. In particular asynchronous code or Tasks that execute on background threads will not have their exceptions caught.
 
-A workaround for this issue is provided with the Wrap() method. These allow you to pass the code you want to execute to an instance of the Raygun client - it will simply call it surrounded by a try-catch block. If the method you pass in does result in an exception being thrown this will be transmitted to Raygun, and the exception will be again be thrown. Two overloads are available; one for methods that return void and another for methods that return an object.
+A workaround for this issue is provided with the Wrap() method. These allow you to pass the code you want to execute to an instance of the Raygun client - it will simply call it surrounded by a try-catch block. If the method you pass in does result in an exception being thrown this will be transmitted to Raygun, and the exception will again be thrown. Two overloads are available; one for methods that return void and another for methods that return an object.
 
 #### Fody
 Another option is to use the [Fody](https://github.com/Fody/Fody) library, and its [AsyncErrorHandling](https://github.com/Fody/AsyncErrorHandling) extension. This will automatically catch async exceptions and pass them to a handler of your choice (which would send to Raygun as above). See the [installation instructions here](https://github.com/Fody/Fody/wiki/SampleUsage), then check out the [sample project](https://github.com/Fody/FodyAddinSamples/tree/master/AsyncErrorHandlerWithRaygun) for how to use. 
+
+### Windows Phone 7.1 and 8
+
+Create a RaygunClient instance and pass in your app API key into the constructor. In the UnhandledException event handler of App.xaml.cs, use the RaygunClient to send the arguments.
+
+```csharp
+private RaygunClient _client = new RaygunClient("YOUR_APP_API_KEY");
+
+private void Application_UnhandledException(object sender, ApplicationUnhandledExceptionEventArgs e)
+{
+  _client.Send(e);
+}
+```
+
+### Xamarin for Android
+
+In the main/entry Activity of your application, use the static RaygunClient.Attach method using your app API key.
+
+```csharp
+RaygunClient.Attach("YOUR_APP_API_KEY");
+```
+
+### Xamarin for iOS
+
+In the main entry point of the application, use the static RaygunClient.Attach method using your app API key.
+
+```csharp
+static void Main (string[] args)
+{
+  RaygunClient.Attach("YOUR_APP_API_KEY");
+
+  UIApplication.Main (args, null, "AppDelegate");
+}
+```
 
 ## Version numbering and tags
 

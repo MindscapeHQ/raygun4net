@@ -1,17 +1,17 @@
 properties {
     $root =                        $psake.build_script_dir
-    $solution_file =               "$root/Mindscape.Raygun4Net.sln"
-    $winrt_solution_file =         "$root/Mindscape.Raygun4Net.WinRT.sln"
-    $windows_phone_solution_file = "$root/Mindscape.Raygun4Net.WindowsPhone.sln"
-    $nugetspec =                   "$root/Mindscape.Raygun4Net.nuspec"
-    $nugetpackage =                "Mindscape.Raygun4Net.1.0.nupkg"
-    $configuration =               "Release"
-    $build_dir =                   "$root\build\"
-    $release_dir =                 "$root\release\"
-    $nunit_dir =                   "$root\packages\NUnit.Runners.2.6.2\tools\"
-    $tools_dir =                   "$root\tools"
-    $nuget_dir =                   "$root\.nuget"
-    $env:Path +=                   ";$nunit_dir;$tools_dir;$nuget_dir"
+    $solution_file =                 "$root/Mindscape.Raygun4Net.sln"
+    $winrt_solution_file =           "$root/Mindscape.Raygun4Net.WinRT.sln"
+    $windows_phone_solution_file =   "$root/Mindscape.Raygun4Net.WindowsPhone.sln"
+    $nugetspec =                     "$root/Mindscape.Raygun4Net.nuspec"
+    $nugetpackage =                  "Mindscape.Raygun4Net.1.0.nupkg"
+    $configuration =                 "Release"
+    $build_dir =                     "$root\build\"
+    $release_dir =                   "$root\release\"
+    $nunit_dir =                     "$root\packages\NUnit.Runners.2.6.2\tools\"
+    $tools_dir =                     "$root\tools"
+    $nuget_dir =                     "$root\.nuget"
+    $env:Path +=                     ";$nunit_dir;$tools_dir;$nuget_dir"
 }
 
 task default -depends Package
@@ -49,7 +49,7 @@ task Test -depends Compile {
 }
 
 task Package -depends Compile, CompileWinRT, CompileWindowsPhone {
-    exec { nuget pack $nugetspec -OutputDirectory $release_dir }
+    
 }
 
 task PushNugetPackage -depends Package {

@@ -4,12 +4,15 @@ using System.Collections;
 using Windows.ApplicationModel;
 #elif WINDOWS_PHONE
 
+#elif ANDROID
+using System.Reflection;
+#elif IOS
+using System.Reflection;
 #else
 using System.Reflection;
 using System.Web;
 #endif
 using Mindscape.Raygun4Net.Messages;
-
 
 namespace Mindscape.Raygun4Net
 {
@@ -86,6 +89,19 @@ namespace Mindscape.Raygun4Net
       //PackageVersion version = Package.Current.Id.Version;
       //_raygunMessage.Details.Version = string.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Revision,
       //                                               version.Build);
+      return this;
+    }
+#elif ANDROID || IOS
+    public IRaygunMessageBuilder SetVersion()
+    {
+      if (_raygunMessage.Details.Environment.PackageVersion != null)
+      {
+        _raygunMessage.Details.Version = _raygunMessage.Details.Environment.PackageVersion;
+      }
+      else
+      {
+        _raygunMessage.Details.Version = "Not supplied";
+      }
       return this;
     }
 #else
