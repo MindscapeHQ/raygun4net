@@ -3,7 +3,6 @@ properties {
     $solution_file =                 "$root/Mindscape.Raygun4Net.sln"
     $winrt_solution_file =           "$root/Mindscape.Raygun4Net.WinRT.sln"
     $windows_phone_solution_file =   "$root/Mindscape.Raygun4Net.WindowsPhone.sln"
-	$xamarin_android_solution_file = "$root/Mindscape.Raygun4Net.Xamarin.Android.sln"
     $nugetspec =                     "$root/Mindscape.Raygun4Net.nuspec"
     $nugetpackage =                  "Mindscape.Raygun4Net.1.0.nupkg"
     $configuration =                 "Release"
@@ -39,10 +38,6 @@ task CompileWindowsPhone -depends Init {
     exec { msbuild "$windows_phone_solution_file" /m /p:OutDir=$build_dir /p:Configuration=$Configuration }
 }
 
-task CompileXamarinAndroid -depends Init {
-    exec { msbuild "$xamarin_android_solution_file" /m /p:OutDir=$build_dir /p:Configuration=$Configuration }
-}
-
 task Test -depends Compile {
     $test_assemblies = Get-ChildItem $build_dir -Include *Tests.dll -Name
 
@@ -53,7 +48,7 @@ task Test -depends Compile {
     Pop-Location
 }
 
-task Package -depends Compile, CompileWinRT, CompileWindowsPhone, CompileXamarinAndroid {
+task Package -depends Compile, CompileWinRT, CompileWindowsPhone {
     
 }
 
