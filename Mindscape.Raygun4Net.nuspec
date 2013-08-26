@@ -2,13 +2,13 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata minClientVersion="2.5">
         <id>Mindscape.Raygun4Net</id>
-        <version>1.0.7</version>
+        <version>1.0.8</version>
         <title />
         <authors>Mindscape</authors>
         <owners />
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>Raygun.io Provider for .NET Framework</description>
-        <iconUrl>https://app.raygun.io/Content/Images/apple-touch-icon.png</iconUrl>
+        <description>Raygun.io Provider for .NET Framework + WinRT, Windows Phone and Xamarin</description>
+        <iconUrl>https://app.raygun.io/Content/Images/nuget-icon.png</iconUrl>
         <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
         <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
     </metadata>
