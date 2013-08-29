@@ -112,13 +112,12 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// To be called by Wrap() - little point in allowing users to send exceptions in WinRT
-    /// as the object contains little useful information besides the exception name and description
+    /// Sends the exception to Raygun.io, optionally with a list of tags for identification.
     /// </summary>
     /// <param name="exception">The exception thrown by the wrapped method</param>
     /// <param name="tags">A list of string tags relating to the message to identify it</param>
     /// <param name="userCustomData">A key-value collection of custom data that is to be sent along with the message</param>
-    private void Send(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
+    public void Send(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
     {
       if (ValidateApiKey())
       {

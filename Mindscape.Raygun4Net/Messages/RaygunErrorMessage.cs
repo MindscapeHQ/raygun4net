@@ -44,7 +44,7 @@ namespace Mindscape.Raygun4Net.Messages
 
 #if WINRT
       string[] delim = { "\r\n" };
-      string stackTrace = exception.Data["Message"] as string;      
+      string stackTrace = exception.StackTrace ?? exception.Data["Message"] as string;      
       if (stackTrace != null)
       {
         var frames = stackTrace.Split(delim, StringSplitOptions.RemoveEmptyEntries);
