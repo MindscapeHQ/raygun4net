@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
+using System.Linq;
 using System.Web;
 
 namespace Mindscape.Raygun4Net.Messages
@@ -42,7 +43,7 @@ namespace Mindscape.Raygun4Net.Messages
 
     private static IDictionary ToDictionary(NameValueCollection nameValueCollection, bool truncateValues = false)
     {
-      var keys = nameValueCollection.AllKeys;
+      var keys = nameValueCollection.AllKeys.Where(k => k != null);
       var dictionary = new Dictionary<string, string>();
 
       foreach (string key in keys)
@@ -59,7 +60,7 @@ namespace Mindscape.Raygun4Net.Messages
               keyToSend = keyToSend.Substring(0, 256);
             }
 
-            if (valueToSend.Length > 256)
+            if (valueToSend != null && valueToSend.Length > 256)
             {
               valueToSend = valueToSend.Substring(0, 256);
             }
