@@ -41,6 +41,7 @@ using System.Threading.Tasks;
 using System.Reflection;
 using MonoTouch.UIKit;
 using MonoTouch.SystemConfiguration;
+using MonoTouch.Foundation;
 using System.IO.IsolatedStorage;
 using System.IO;
 using System.Text;
@@ -696,17 +697,30 @@ namespace Mindscape.Raygun4Net
     {
       if (e.Exception != null)
       {
-        _client.Send(e.Exception as Exception);
+#if IOS
+        new NSObject ().InvokeOnMainThread (() => {
+          _client.Send (StripAggregateException(e.Exception));
+        });
+#else
+        _client.Send (StripAggregateException(e.Exception));
+#endif
       }
     }
 
     private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-      if (e.ExceptionObject is Exception)
-      {
-        System.Diagnostics.Debug.WriteLine("Caught unhandled exception.");
-        _client.Send(e.ExceptionObject as Exception);
+      if (e.ExceptionObject is Exception) {
+        _client.Send (e.ExceptionObject as Exception);
       }
+    }
+
+    private static Exception StripAggregateException(Exception exception)
+    {
+      if (exception is AggregateException && exception.InnerException != null)
+      {
+        return StripAggregateException (exception.InnerException);
+      }
+      return exception;
     }
 
 #endif
