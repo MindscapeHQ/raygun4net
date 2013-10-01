@@ -697,13 +697,7 @@ namespace Mindscape.Raygun4Net
     {
       if (e.Exception != null)
       {
-#if IOS
-        new NSObject ().InvokeOnMainThread (() => {
-          _client.Send (StripAggregateException(e.Exception));
-        });
-#else
         _client.Send (StripAggregateException(e.Exception));
-#endif
       }
     }
 
