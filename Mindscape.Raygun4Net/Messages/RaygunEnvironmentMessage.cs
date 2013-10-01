@@ -153,8 +153,10 @@ namespace Mindscape.Raygun4Net.Messages
 
       Locale = CultureInfo.CurrentCulture.DisplayName;
 
+      UIApplication.SharedApplication.InvokeOnMainThread(() => {
       WindowBoundsWidth = UIScreen.MainScreen.Bounds.Width;
       WindowBoundsHeight = UIScreen.MainScreen.Bounds.Height;
+      });
 
       CurrentOrientation = UIDevice.CurrentDevice.Orientation.ToString();
 
