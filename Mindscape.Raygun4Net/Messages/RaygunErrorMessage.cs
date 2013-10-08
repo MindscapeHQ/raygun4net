@@ -5,6 +5,11 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 
+#if IOS
+using MonoTouch.Foundation;
+using MonoTouch.ObjCRuntime;
+#endif
+
 namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunErrorMessage
@@ -27,9 +32,22 @@ namespace Mindscape.Raygun4Net.Messages
     {
       var exceptionType = exception.GetType();
 
+#if IOS
+      MonoTouchException mex = exception as MonoTouchException;
+      if(mex != null && mex.NSException != null)
+      {
+        Message = string.Format("{0}: {1}", mex.NSException.Name, mex.NSException.Reason);
+        ClassName = mex.NSException.Name;
+      }
+      else{
+#endif
       Message = string.Format("{0}: {1}", exceptionType.Name, exception.Message);
-      StackTrace = BuildStackTrace(exception);
       ClassName = exceptionType.FullName;
+#if IOS
+      }
+#endif
+
+      StackTrace = BuildStackTrace(exception);
       Data = exception.Data;
 
       if (exception.InnerException != null)
@@ -73,6 +91,19 @@ namespace Mindscape.Raygun4Net.Messages
         }
       }
 #else
+#if IOS
+      MonoTouchException mex = exception as MonoTouchException;
+      if (mex != null && mex.NSException != null)
+      {
+        var ptr = Messaging.intptr_objc_msgSend (mex.NSException.Handle, Selector.GetHandle ("callStackSymbols"));
+        var arr = NSArray.StringArrayFromHandle (ptr);
+        foreach( var line in arr)
+        {
+          lines.Add(new RaygunErrorStackTraceLineMessage{ FileName = line});
+        }
+        return lines.ToArray();
+      }
+#endif
       var stackTrace = new StackTrace(exception, true);
       var frames = stackTrace.GetFrames();
 
