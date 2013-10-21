@@ -88,6 +88,12 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
+    public IRaygunMessageBuilder SetUser(string user)
+    {
+      _raygunMessage.Details.User = new RaygunIdentifierMessage(user);
+      return this;
+    }
+
 #if WINRT
     public IRaygunMessageBuilder SetVersion()
     {

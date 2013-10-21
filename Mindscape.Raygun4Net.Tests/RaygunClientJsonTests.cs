@@ -10,12 +10,15 @@ namespace Mindscape.Raygun4Net.Tests
   [TestFixture]
   public class RaygunClientJsonTests
   {
-    private RaygunClient raygunClient;    
 
-    [SetUp]
-    public void SetUp()
+    [Test]
+    public void MessageWithUser()
     {
-      raygunClient = new RaygunClient();       
+      var msg = RaygunMessageBuilder.New
+                          .SetUser("test")
+                          .Build();
+
+      Equals("test", msg.Details.User);
     }
   }
 }

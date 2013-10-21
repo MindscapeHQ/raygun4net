@@ -57,6 +57,8 @@ namespace Mindscape.Raygun4Net
   {
     private readonly string _apiKey;
 
+    public string User { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
     /// </summary>
@@ -529,6 +531,7 @@ namespace Mindscape.Raygun4Net
           .SetExceptionDetails(exception)
           .SetClientDetails()
           .SetVersion()
+          .SetUser(User)
           .Build();
 
       if (tags != null)
@@ -1151,6 +1154,7 @@ namespace Mindscape.Raygun4Net
         .SetExceptionDetails(exception)
         .SetClientDetails()
         .SetVersion()
+        .SetUser(User)
         .Build();
       return message;
     }

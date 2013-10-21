@@ -23,5 +23,7 @@ namespace Mindscape.Raygun4Net
     IRaygunMessageBuilder SetVersion();
 
     IRaygunMessageBuilder SetUserCustomData(IDictionary userCustomData);
+
+    IRaygunMessageBuilder SetUser(string user);
   }
 }

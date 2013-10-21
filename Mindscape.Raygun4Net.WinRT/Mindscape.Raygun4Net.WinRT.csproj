@@ -119,6 +119,9 @@
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorStackTraceLineMessage.cs">
       <Link>RaygunErrorStackTraceLineMessage.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunIdentifierMessage.cs">
+      <Link>RaygunIdentifierMessage.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunMessage.cs">
       <Link>RaygunMessage.cs</Link>
     </Compile>
