@@ -107,12 +107,21 @@ namespace Mindscape.Raygun4Net
 #else
     public IRaygunMessageBuilder SetHttpDetails(HttpContext context)
     {
-      if (context != null)
-      {
-        _raygunMessage.Details.Request = new RaygunRequestMessage(context);
-      }
+	    if(context != null)
+	    {
+		    HttpRequest request;
+		    try
+		    {
+			    request = context.Request;
+		    }
+		    catch (HttpException)
+		    {
+			    return this;
+		    }
+		    _raygunMessage.Details.Request = new RaygunRequestMessage(request);
+	    }
 
-      return this;
+	    return this;
     }
 
     public IRaygunMessageBuilder SetVersion()

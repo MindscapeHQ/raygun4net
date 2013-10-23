@@ -10,24 +10,24 @@ namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunRequestMessage
   {
-    public RaygunRequestMessage(HttpContext context)
+    public RaygunRequestMessage(HttpRequest	request)
     {
-      HostName = context.Request.Url.Host;
-      Url = context.Request.Url.AbsolutePath;
-      HttpMethod = context.Request.RequestType;
-      IPAddress = context.Request.UserHostAddress;
-      Data = ToDictionary(context.Request.ServerVariables);
-      QueryString = ToDictionary(context.Request.QueryString);
-      Headers = ToDictionary(context.Request.Headers);
-      Form = ToDictionary(context.Request.Form, true);
+      HostName = request.Url.Host;
+      Url = request.Url.AbsolutePath;
+      HttpMethod = request.RequestType;
+      IPAddress = request.UserHostAddress;
+      Data = ToDictionary(request.ServerVariables);
+      QueryString = ToDictionary(request.QueryString);
+      Headers = ToDictionary(request.Headers);
+      Form = ToDictionary(request.Form, true);
 
       try
       {
-        var contentType = context.Request.Headers["Content-Type"];
-        if (contentType != "text/html" && contentType != "application/x-www-form-urlencoded" && context.Request.RequestType != "GET")
+        var contentType = request.Headers["Content-Type"];
+        if (contentType != "text/html" && contentType != "application/x-www-form-urlencoded" && request.RequestType != "GET")
         {
           int length = 4096;
-          string temp = new StreamReader(context.Request.InputStream).ReadToEnd();
+          string temp = new StreamReader(request.InputStream).ReadToEnd();
           if (length > temp.Length)
           {
             length = temp.Length;
