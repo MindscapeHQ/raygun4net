@@ -114,7 +114,15 @@ namespace Mindscape.Raygun4Net
     {
       get { return (bool)this["throwOnError"]; }
       set { this["throwOnError"] = value; }
-    } 
+    }
+
+    [ConfigurationProperty("excludeHttpStatusCodes", IsRequired = false, DefaultValue = "")]
+    [RegexStringValidator(@"^(\d+(,\s?\d+)*)?$")]
+    public string ExcludeHttpStatusCodesList
+    {
+      get { return (string)this["excludeHttpStatusCodes"]; }
+      set { this["excludeHttpStatusCodes"] = value; }
+    }
   }
 }
 #endif
