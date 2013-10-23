@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Web;
 
 namespace Mindscape.Raygun4Net
@@ -16,8 +17,16 @@ namespace Mindscape.Raygun4Net
 
     private void SendError(object sender, EventArgs e)
     {
-      var application = (HttpApplication)sender;
-      new RaygunClient().SendInBackground(Unwrap(application.Server.GetLastError()));
+		var application = (HttpApplication)sender;
+	    var lastError = application.Server.GetLastError();
+	    
+		if(RaygunSettings.Settings.Exclude404NotFound)
+		{
+			if (lastError is HttpException && ((HttpException) lastError).GetHttpCode() == (int)HttpStatusCode.NotFound)
+				return;
+		}
+
+	    new RaygunClient().SendInBackground(Unwrap(lastError));
     }
 
     private Exception Unwrap(Exception exception)

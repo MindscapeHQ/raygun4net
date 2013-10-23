@@ -114,7 +114,14 @@ namespace Mindscape.Raygun4Net
     {
       get { return (bool)this["throwOnError"]; }
       set { this["throwOnError"] = value; }
-    } 
+    }
+
+	[ConfigurationProperty("exclude404NotFound", IsRequired = false, DefaultValue = false)]
+	public bool Exclude404NotFound
+	{
+		get { return (bool)this["exclude404NotFound"]; }
+		set { this["exclude404NotFound"] = value; }
+	} 
   }
 }
 #endif
