@@ -52,14 +52,14 @@ namespace Mindscape.Raygun4Net
       {
         _raygunMessage.Details.Environment = new RaygunEnvironmentMessage();
       }
-      catch (Exception)
+      catch (Exception ex)
       {
         // Different environments can fail to load the environment details.
         // For now if they fail to load for whatever reason then just
         // swallow the exception. A good addition would be to handle
         // these cases and load them correctly depending on where its running.
         // see http://raygun.io/forums/thread/3655
-        Trace.WriteLine("Failed to fetch the environment details");
+        Trace.WriteLine(string.Format("Failed to fetch the environment details: {0}", ex.Message));
       }
 
       return this;
