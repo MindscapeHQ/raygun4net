@@ -9,6 +9,7 @@ using System.Reflection;
 #elif IOS
 using System.Reflection;
 #else
+using System.Diagnostics;
 using System.Reflection;
 using System.Web;
 #endif
@@ -47,7 +48,19 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetEnvironmentDetails()
     {
-      _raygunMessage.Details.Environment = new RaygunEnvironmentMessage();
+      try
+      {
+        _raygunMessage.Details.Environment = new RaygunEnvironmentMessage();
+      }
+      catch (Exception ex)
+      {
+        // Different environments can fail to load the environment details.
+        // For now if they fail to load for whatever reason then just
+        // swallow the exception. A good addition would be to handle
+        // these cases and load them correctly depending on where its running.
+        // see http://raygun.io/forums/thread/3655
+        Trace.WriteLine(string.Format("Failed to fetch the environment details: {0}", ex.Message));
+      }
 
       return this;
     }
