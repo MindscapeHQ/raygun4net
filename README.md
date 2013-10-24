@@ -68,6 +68,14 @@ For system.webServer:
 </modules>
 ```
 
+####Additional ASP.NET configuration options
+
+If using the HTTP module then you can exclude errors by their HTTP status code by providing a comma separated list of status codes to ignore in the configuration. For example if you wanted to exclude errors that return the [I'm a teapot](http://tools.ietf.org/html/rfc2324) response code, you could use the configuration below.
+
+```
+<RaygunSettings apikey="API_KEY_FOR_YOUR_APPLICATION" excludeHttpStatusCodes="418" />
+``` 
+
 ### WinForms/WPF/Other .NET applications
 
 Create an instance of RaygunClient by passing your app API key in the constructor. Attach an event handler to the DispatcherUnhandledException event of your application. In the event handler, use the RaygunClient.Send method to send the Exception.
