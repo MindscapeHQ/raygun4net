@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics;
+
+
 #if WINRT
 using Windows.ApplicationModel;
 #elif WINDOWS_PHONE
@@ -9,7 +12,6 @@ using System.Reflection;
 #elif IOS
 using System.Reflection;
 #else
-using System.Diagnostics;
 using System.Reflection;
 using System.Web;
 #endif
@@ -59,7 +61,9 @@ namespace Mindscape.Raygun4Net
         // swallow the exception. A good addition would be to handle
         // these cases and load them correctly depending on where its running.
         // see http://raygun.io/forums/thread/3655
+#if (!WINRT && !WINDOWS_PHONE)
         Trace.WriteLine(string.Format("Failed to fetch the environment details: {0}", ex.Message));
+#endif
       }
 
       return this;
@@ -85,6 +89,12 @@ namespace Mindscape.Raygun4Net
     public IRaygunMessageBuilder SetUserCustomData(IDictionary userCustomData)
     {
       _raygunMessage.Details.UserCustomData = userCustomData;
+      return this;
+    }
+
+    public IRaygunMessageBuilder SetUser(string user)
+    {
+      _raygunMessage.Details.User = new RaygunIdentifierMessage(user);
       return this;
     }
 

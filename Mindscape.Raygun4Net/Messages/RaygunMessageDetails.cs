@@ -19,6 +19,8 @@ namespace Mindscape.Raygun4Net.Messages
 
     public IDictionary UserCustomData { get; set; }
 
+    public RaygunIdentifierMessage User { get; set; }
+
 #if !WINRT && !WINDOWS_PHONE && !ANDROID && !IOS
     public RaygunRequestMessage Request { get; set; }
 #endif

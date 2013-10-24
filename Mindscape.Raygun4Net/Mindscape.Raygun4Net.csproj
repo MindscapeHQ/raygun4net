@@ -57,6 +57,7 @@
     <Compile Include="Messages\RaygunClientMessage.cs" />
     <Compile Include="Messages\RaygunEnvironmentMessage.cs" />
     <Compile Include="Messages\RaygunErrorStackTraceLineMessage.cs" />
+    <Compile Include="Messages\RaygunIdentifierMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Messages\RaygunErrorMessage.cs" />
     <Compile Include="Messages\RaygunMessage.cs" />
