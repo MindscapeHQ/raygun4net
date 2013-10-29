@@ -68,17 +68,19 @@ namespace Mindscape.Raygun4Net.Messages
       DeviceExtendedProperties.TryGetValue("DeviceName", out deviceName);
       DeviceName = deviceName.ToString();
 
-      WindowBoundsWidth = Application.Current.RootVisual.RenderSize.Width;
-      WindowBoundsHeight = Application.Current.RootVisual.RenderSize.Height;
-
       DateTime now = DateTime.Now;
       UtcOffset = TimeZoneInfo.Local.GetUtcOffset(now).TotalHours;
 
-      PhoneApplicationFrame frame = Application.Current.RootVisual as PhoneApplicationFrame;
-      if (frame != null)
-      {
-        CurrentOrientation = frame.Orientation.ToString();
-      }
+      Deployment.Current.Dispatcher.BeginInvoke(() =>
+        {
+          WindowBoundsWidth = Application.Current.RootVisual.RenderSize.Width;
+          WindowBoundsHeight = Application.Current.RootVisual.RenderSize.Height;
+          PhoneApplicationFrame frame = Application.Current.RootVisual as PhoneApplicationFrame;
+          if (frame != null)
+          {
+            CurrentOrientation = frame.Orientation.ToString();
+          }
+        });
 
       //ProcessorCount = Environment.ProcessorCount;
       // TODO: finish other values
