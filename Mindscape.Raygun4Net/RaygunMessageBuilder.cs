@@ -61,7 +61,9 @@ namespace Mindscape.Raygun4Net
         // swallow the exception. A good addition would be to handle
         // these cases and load them correctly depending on where its running.
         // see http://raygun.io/forums/thread/3655
-#if (!WINRT && !WINDOWS_PHONE)
+#if ANDROID || WINDOWS_PHONE
+        Debug.WriteLine(string.Format("Failed to fetch the environment details: {0}", ex.Message));
+#elif !WINRT
         Trace.WriteLine(string.Format("Failed to fetch the environment details: {0}", ex.Message));
 #endif
       }
