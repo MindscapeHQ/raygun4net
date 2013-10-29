@@ -56,14 +56,17 @@ namespace Mindscape.Raygun4Net
   public class RaygunClient
   {
     private readonly string _apiKey;
-    private string _contextId;
     private List<RaygunEvent> _eventQueue = new List<RaygunEvent>();
     private object _eventQueueLock = new object();
+
+    [ThreadStatic]
+    private static RaygunClient _current;
 
     /// <summary>
     /// Gets or sets the user identity string.
     /// </summary>
     public string User { get; set; }
+    public string Context { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -72,13 +75,39 @@ namespace Mindscape.Raygun4Net
     public RaygunClient(string apiKey)
     {
       _apiKey = apiKey;
-      _contextId = GenerateUniqueContextIdentifier();
+      Context = GenerateUniqueContextIdentifier();
 
 #if WINDOWS_PHONE
       Deployment.Current.Dispatcher.BeginInvoke(SendStoredMessages);
 #elif ANDROID || IOS
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
 #endif
+    }
+
+    public static RaygunClient Current
+    {
+      get
+      {
+        if (HttpContext.Current != null)
+        {
+          var current = HttpContext.Current.Items["RaygunClient"] as RaygunClient;
+
+          if (current == null)
+          {
+            current = new RaygunClient();
+            HttpContext.Current.Items["RaygunClient"] = current;
+          }
+
+          return current;
+        }
+
+        if (_current == null)
+        {
+          _current = new RaygunClient();
+        }
+
+        return _current;
+      }
     }
 
     private string GenerateUniqueContextIdentifier()
@@ -94,7 +123,7 @@ namespace Mindscape.Raygun4Net
     public RaygunClient()
       : this(RaygunSettings.Settings.ApiKey)
     {
-      _contextId = GenerateUniqueContextIdentifier();
+      Context = GenerateUniqueContextIdentifier();
     }
 #endif
 
@@ -1256,11 +1285,11 @@ namespace Mindscape.Raygun4Net
       var raygunEvent = new RaygunEvent()
       {
         Name = "session-start",
-        ContextId = _contextId,
+        ContextId = Context,
         EventTime = DateTime.UtcNow
       };
 
-      raygunEvent.Parameters.Add("rg_contextid", _contextId);
+      raygunEvent.Parameters.Add("rg_contextid", Context);
       raygunEvent.Parameters.Add("rg_userid", User);
 
       Enqueue(raygunEvent);
@@ -1271,15 +1300,14 @@ namespace Mindscape.Raygun4Net
       var raygunEvent = new RaygunEvent()
       {
         Name = "session-end",
-        ContextId = _contextId,
+        ContextId = Context,
         EventTime = DateTime.UtcNow
       };
 
-      raygunEvent.Parameters.Add("rg_contextid", _contextId);
+      raygunEvent.Parameters.Add("rg_contextid", Context);
       raygunEvent.Parameters.Add("rg_userid", User);
 
-      Enqueue(raygunEvent);
-      SendEvents();
+      Enqueue(raygunEvent);      
     }
 
     public void Raise(string eventName)
@@ -1287,7 +1315,7 @@ namespace Mindscape.Raygun4Net
       Enqueue(new RaygunEvent() 
       { 
         Name = eventName,
-        ContextId = _contextId,
+        ContextId = Context,
         EventTime = DateTime.UtcNow        
       });
     }

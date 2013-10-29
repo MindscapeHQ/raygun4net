@@ -7,45 +7,35 @@ namespace Mindscape.Raygun4Net
   public class RaygunHttpModule : IHttpModule
   {
     private bool ExcludeErrorsBasedOnHttpStatusCode { get; set; }    
-    private int[] HttpStatusCodesToExclude { get; set; }
-
-    private RaygunClient GetCurrent(HttpApplication application)
-    {
-      var current = application.Context.Items["RaygunClient"] as RaygunClient;
-
-      if (current == null)
-      {
-        current = new RaygunClient();
-        application.Context.Items["RaygunClient"] = current;
-      }
-
-      return current;
-    }
+    private int[] HttpStatusCodesToExclude { get; set; }    
 
     public void Init(HttpApplication context)
     {
       context.Error += SendError;
       context.BeginRequest += BeginRequest;
       context.EndRequest += EndRequest;
+      context.AuthenticateRequest += AuthenticateRequest;
+      
       HttpStatusCodesToExclude = string.IsNullOrEmpty(RaygunSettings.Settings.ExcludeHttpStatusCodesList) ? new int[0] : RaygunSettings.Settings.ExcludeHttpStatusCodesList.Split(',').Select(int.Parse).ToArray();
       ExcludeErrorsBasedOnHttpStatusCode = HttpStatusCodesToExclude.Any();
     }
 
-    void EndRequest(object sender, EventArgs e)
+    void AuthenticateRequest(object sender, EventArgs e)
     {
-      throw new NotImplementedException();
+      RaygunClient.Current.User = HttpContext.Current.User.Identity.Name;
     }
 
     void BeginRequest(object sender, EventArgs e)
     {
-      var application = (HttpApplication)sender;
-      
-      if (application != null)
-      {
-        GetCurrent(application);
-      }
+      RaygunClient.Current.Start();
+      RaygunClient.Current.Context = HttpContext.Current.Session.SessionID;
     }
 
+    void EndRequest(object sender, EventArgs e)
+    {
+      RaygunClient.Current.Stop();
+      RaygunClient.Current.SendEvents();
+    }
 
     public void Dispose()
     {
