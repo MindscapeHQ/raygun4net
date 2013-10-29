@@ -56,6 +56,9 @@ namespace Mindscape.Raygun4Net
   public class RaygunClient
   {
     private readonly string _apiKey;
+    private string _contextId;
+    private List<RaygunEvent> _eventQueue = new List<RaygunEvent>();
+    private object _eventQueueLock = new object();
 
     /// <summary>
     /// Gets or sets the user identity string.
@@ -69,12 +72,18 @@ namespace Mindscape.Raygun4Net
     public RaygunClient(string apiKey)
     {
       _apiKey = apiKey;
+      _contextId = GenerateUniqueContextIdentifier();
 
 #if WINDOWS_PHONE
       Deployment.Current.Dispatcher.BeginInvoke(SendStoredMessages);
 #elif ANDROID || IOS
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
 #endif
+    }
+
+    private string GenerateUniqueContextIdentifier()
+    {
+      return Guid.NewGuid().ToString();
     }
 
 #if !ANDROID && !IOS
@@ -85,6 +94,7 @@ namespace Mindscape.Raygun4Net
     public RaygunClient()
       : this(RaygunSettings.Settings.ApiKey)
     {
+      _contextId = GenerateUniqueContextIdentifier();
     }
 #endif
 
@@ -673,6 +683,11 @@ namespace Mindscape.Raygun4Net
     {
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
+
+    public void SendInBackground(List<RaygunEvent> events)
+    {
+      ThreadPool.QueueUserWorkItem(c => Send(events));
+    }
 #endif
 
 #if ANDROID || IOS
@@ -1203,11 +1218,101 @@ namespace Mindscape.Raygun4Net
           try
           {            
             var message = SimpleJson.SerializeObject(raygunMessage);
-            client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
+            client.UploadString(String.Concat(RaygunSettings.Settings.ApiEndpoint, "/entries"), message);
           }
           catch (Exception ex)
           {            
             System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+
+            if (RaygunSettings.Settings.ThrowOnError)
+            {
+              throw;
+            }
+          }
+        }
+      }
+    }
+
+    public void SendEvents()
+    {
+      List<RaygunEvent> batch;
+
+      lock (_eventQueueLock)
+      {
+        batch = new List<RaygunEvent>(_eventQueue);
+        _eventQueue.Clear();
+      }
+
+      Send(batch);
+    }
+
+    public void Enqueue(RaygunEvent raygunEvent)
+    {
+
+    }
+
+    public void Start()
+    {
+      var raygunEvent = new RaygunEvent()
+      {
+        Name = "session-start",
+        ContextId = _contextId,
+        EventTime = DateTime.UtcNow
+      };
+
+      raygunEvent.Parameters.Add("rg_contextid", _contextId);
+      raygunEvent.Parameters.Add("rg_userid", User);
+
+      Enqueue(raygunEvent);
+    }
+
+    public void Stop()
+    {
+      var raygunEvent = new RaygunEvent()
+      {
+        Name = "session-end",
+        ContextId = _contextId,
+        EventTime = DateTime.UtcNow
+      };
+
+      raygunEvent.Parameters.Add("rg_contextid", _contextId);
+      raygunEvent.Parameters.Add("rg_userid", User);
+
+      Enqueue(raygunEvent);
+      SendEvents();
+    }
+
+    public void Raise(string eventName)
+    {
+      Enqueue(new RaygunEvent() 
+      { 
+        Name = eventName,
+        ContextId = _contextId,
+        EventTime = DateTime.UtcNow        
+      });
+    }
+
+    /// <summary>
+    /// Posts a set of RaygunEvent instances to the Raygun.io api endpoint.
+    /// </summary>
+    /// <param name="raygunEvent">The set of RaygunEvents to send.</param>
+    public void Send(List<RaygunEvent> events)
+    {
+      if (ValidateApiKey())
+      {
+        using (var client = new WebClient())
+        {
+          client.Headers.Add("X-ApiKey", _apiKey);
+          client.Encoding = System.Text.Encoding.UTF8;
+
+          try
+          {
+            var message = SimpleJson.SerializeObject(events);
+            client.UploadString(String.Concat(RaygunSettings.Settings.ApiEndpoint, "/events"), message);
+          }
+          catch (Exception ex)
+          {
+            System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Events to Raygun.io {0}", ex.Message));
 
             if (RaygunSettings.Settings.ThrowOnError)
             {
