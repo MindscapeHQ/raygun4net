@@ -7,6 +7,11 @@ namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunEvent
   {
+    public RaygunEvent()
+    {
+      Parameters = new Dictionary<string, string>();
+    }
+
     public string Name { get; set; }
     public string ContextId { get; set; }
     public string Source { get; set; }

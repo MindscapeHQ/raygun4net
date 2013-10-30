@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Web;
+using System.Web.SessionState;
 
 namespace Mindscape.Raygun4Net
 {
@@ -12,29 +14,60 @@ namespace Mindscape.Raygun4Net
     public void Init(HttpApplication context)
     {
       context.Error += SendError;
-      context.BeginRequest += BeginRequest;
-      context.EndRequest += EndRequest;
       context.AuthenticateRequest += AuthenticateRequest;
-      
+      context.PostAcquireRequestState += PostAcquireRequestState;
+
+      var sessionModule = context.Modules["Session"] as SessionStateModule;
+      sessionModule.Start += BeginSession;
+      sessionModule.End += EndSession;
+
+      new Thread(new ThreadStart(SendEvents)).Start();
+
       HttpStatusCodesToExclude = string.IsNullOrEmpty(RaygunSettings.Settings.ExcludeHttpStatusCodesList) ? new int[0] : RaygunSettings.Settings.ExcludeHttpStatusCodesList.Split(',').Select(int.Parse).ToArray();
       ExcludeErrorsBasedOnHttpStatusCode = HttpStatusCodesToExclude.Any();
     }
 
+
+    void SendEvents()
+    {
+      while (true)
+      {
+        try
+        {
+          RaygunClient.Current.SendEvents();
+          Thread.Sleep(new TimeSpan(0, 1, 0));
+        }
+        catch (Exception ex)
+        {
+          RaygunClient.Current.Send(ex);
+        }
+      }
+    }
+
+    void PostAcquireRequestState(object sender, EventArgs e)
+    {
+      if (HttpContext.Current != null && HttpContext.Current.Session != null)
+      {
+        RaygunClient.Current.Context = HttpContext.Current.Session.SessionID;
+      }
+    }
+
     void AuthenticateRequest(object sender, EventArgs e)
     {
-      RaygunClient.Current.User = HttpContext.Current.User.Identity.Name;
+      if (HttpContext.Current.User != null && HttpContext.Current.User.Identity.IsAuthenticated)
+      {
+        RaygunClient.Current.User = HttpContext.Current.User.Identity.Name;
+      }
     }
 
-    void BeginRequest(object sender, EventArgs e)
+    void BeginSession(object sender, EventArgs e)
     {
-      RaygunClient.Current.Start();
-      RaygunClient.Current.Context = HttpContext.Current.Session.SessionID;
+      RaygunClient.Current.StartSession();      
     }
 
-    void EndRequest(object sender, EventArgs e)
+    void EndSession(object sender, EventArgs e)
     {
-      RaygunClient.Current.Stop();
-      RaygunClient.Current.SendEvents();
+      RaygunClient.Current.EndSession();
     }
 
     public void Dispose()

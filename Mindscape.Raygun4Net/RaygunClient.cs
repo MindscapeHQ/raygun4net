@@ -56,8 +56,9 @@ namespace Mindscape.Raygun4Net
   public class RaygunClient
   {
     private readonly string _apiKey;
-    private List<RaygunEvent> _eventQueue = new List<RaygunEvent>();
-    private object _eventQueueLock = new object();
+
+    private static List<RaygunEvent> _eventQueue = new List<RaygunEvent>();
+    private static object _eventQueueLock = new object();
 
     [ThreadStatic]
     private static RaygunClient _current;
@@ -1264,6 +1265,16 @@ namespace Mindscape.Raygun4Net
 
     public void SendEvents()
     {
+      SendEventsInternal(false);
+    }
+
+    public void SendEventsInBackground()
+    {
+      SendEventsInternal(true);
+    }
+
+    private void SendEventsInternal(bool inBackground)
+    {
       List<RaygunEvent> batch;
 
       lock (_eventQueueLock)
@@ -1272,15 +1283,27 @@ namespace Mindscape.Raygun4Net
         _eventQueue.Clear();
       }
 
-      Send(batch);
+      if (batch.Count == 0) return;
+
+      if (inBackground)
+      {
+        SendInBackground(batch);
+      }
+      else
+      {
+        Send(batch);
+      }
     }
 
     public void Enqueue(RaygunEvent raygunEvent)
     {
-
+      lock (_eventQueueLock)
+      {
+        _eventQueue.Add(raygunEvent);
+      }
     }
 
-    public void Start()
+    public void StartSession()
     {
       var raygunEvent = new RaygunEvent()
       {
@@ -1295,7 +1318,7 @@ namespace Mindscape.Raygun4Net
       Enqueue(raygunEvent);
     }
 
-    public void Stop()
+    public void EndSession()
     {
       var raygunEvent = new RaygunEvent()
       {
