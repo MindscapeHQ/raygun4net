@@ -16,6 +16,8 @@ namespace Mindscape.Raygun4Net
       context.Error += SendError;
       context.AuthenticateRequest += AuthenticateRequest;
       context.PostAcquireRequestState += PostAcquireRequestState;
+      context.BeginRequest += BeginRequest;
+      context.EndRequest += EndRequest;
 
       var sessionModule = context.Modules["Session"] as SessionStateModule;
       sessionModule.Start += BeginSession;
@@ -25,8 +27,25 @@ namespace Mindscape.Raygun4Net
 
       HttpStatusCodesToExclude = string.IsNullOrEmpty(RaygunSettings.Settings.ExcludeHttpStatusCodesList) ? new int[0] : RaygunSettings.Settings.ExcludeHttpStatusCodesList.Split(',').Select(int.Parse).ToArray();
       ExcludeErrorsBasedOnHttpStatusCode = HttpStatusCodesToExclude.Any();
+    }    
+
+    private void BeginRequest(object sender, EventArgs e)
+    {
+      if (HttpContext.Current != null && HttpContext.Current.Request != null)
+      {
+        RaygunClient.Current.Source = 
+          String.IsNullOrEmpty(HttpContext.Current.Request.ServerVariables["X_FORWARDED_FOR"]) ?
+                    HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"] :
+                    HttpContext.Current.Request.ServerVariables["X_FORWARDED_FOR"];
+      }
+
+      RaygunClient.Current.Raise("request-start");
     }
 
+    private void EndRequest(object sender, EventArgs e)
+    {
+      RaygunClient.Current.Raise("request-end");
+    }
 
     void SendEvents()
     {
@@ -62,12 +81,12 @@ namespace Mindscape.Raygun4Net
 
     void BeginSession(object sender, EventArgs e)
     {
-      RaygunClient.Current.StartSession();      
+      RaygunClient.Current.Raise("session-start");
     }
 
     void EndSession(object sender, EventArgs e)
     {
-      RaygunClient.Current.EndSession();
+      RaygunClient.Current.Raise("session-end");
     }
 
     public void Dispose()

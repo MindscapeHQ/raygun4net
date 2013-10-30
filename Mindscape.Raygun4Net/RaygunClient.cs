@@ -68,6 +68,7 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     public string User { get; set; }
     public string Context { get; set; }
+    public string Source { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -1295,7 +1296,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    public void Enqueue(RaygunEvent raygunEvent)
+    private void Enqueue(RaygunEvent raygunEvent)
     {
       lock (_eventQueueLock)
       {
@@ -1303,43 +1304,61 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    public void StartSession()
+    public void Raise(string eventName)
     {
-      var raygunEvent = new RaygunEvent()
-      {
-        Name = "session-start",
-        ContextId = Context,
-        EventTime = DateTime.UtcNow
-      };
+      Raise(eventName, null);
+    }
 
-      raygunEvent.Parameters.Add("rg_contextid", Context);
-      raygunEvent.Parameters.Add("rg_userid", User);
+    public void Raise(RaygunEvent raygunEvent)
+    {
+      if (raygunEvent == null) return;
+
+      if (raygunEvent.Parameters == null)
+      {
+        raygunEvent.Parameters = new Dictionary<string, string>();
+      }
+
+      if (!raygunEvent.Parameters.ContainsKey("rg_contextid"))
+      {
+        raygunEvent.Parameters.Add("rg_contextid", Context);
+      }
+
+      if (!raygunEvent.Parameters.ContainsKey("rg_userid"))
+      {
+        raygunEvent.Parameters.Add("rg_userid", User);
+      }
 
       Enqueue(raygunEvent);
     }
 
-    public void EndSession()
+    public void Raise(string eventName, object parameters)
     {
-      var raygunEvent = new RaygunEvent()
+      var parameterDictionary = new Dictionary<string, string>();
+
+      parameterDictionary.Add("rg_contextid", Context);
+      parameterDictionary.Add("rg_userid", User);
+
+      if (parameters != null)
       {
-        Name = "session-end",
-        ContextId = Context,
-        EventTime = DateTime.UtcNow
-      };
+        foreach (var propertyInfo in parameters.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
+        {
+          try
+          {
+            parameterDictionary.Add(propertyInfo.Name, propertyInfo.GetValue(parameters, null).ToString());
+          }
+          catch (ArgumentException)
+          {
+          }
+        }
+      }
 
-      raygunEvent.Parameters.Add("rg_contextid", Context);
-      raygunEvent.Parameters.Add("rg_userid", User);
-
-      Enqueue(raygunEvent);      
-    }
-
-    public void Raise(string eventName)
-    {
-      Enqueue(new RaygunEvent() 
-      { 
+      Enqueue(new RaygunEvent()
+      {
         Name = eventName,
         ContextId = Context,
-        EventTime = DateTime.UtcNow        
+        EventTime = DateTime.UtcNow,
+        Source = Source,
+        Parameters = parameterDictionary
       });
     }
 
