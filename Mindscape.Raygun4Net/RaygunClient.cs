@@ -164,6 +164,7 @@ namespace Mindscape.Raygun4Net
           .SetExceptionDetails(exception)
           .SetClientDetails()
           .SetVersion()
+          .SetUser(User)
           .Build();
 
       if (tags != null)
@@ -688,6 +689,19 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
+    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    /// <param name="apiKey">Your app api key.</param>
+    /// <param name="user">An identity string for tracking affected users.</param>
+    public static void Attach(string apiKey, string user)
+    {
+      Detach();
+      _client = new RaygunClient(apiKey) { User = user };
+      AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+      TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+    }
+
+    /// <summary>
     /// Detaches Raygun from listening to unhandled exceptions and unobserved task exceptions.
     /// </summary>
     public static void Detach()
@@ -746,6 +760,7 @@ namespace Mindscape.Raygun4Net
         .SetExceptionDetails(exception)
         .SetClientDetails()
         .SetVersion()
+        .SetUser(User)
         .Build();
       return message;
     }
@@ -968,6 +983,7 @@ namespace Mindscape.Raygun4Net
 			  .SetExceptionDetails(exception)
 				.SetClientDetails()
 				.SetVersion()
+        .SetUser(User)
 				.Build();
 			return message;
 		}
