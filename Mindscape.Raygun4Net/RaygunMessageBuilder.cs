@@ -96,7 +96,10 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetUser(string user)
     {
-      _raygunMessage.Details.User = new RaygunIdentifierMessage(user);
+      if (user != null && user.Length > 0)
+      {
+        _raygunMessage.Details.User = new RaygunIdentifierMessage(user);
+      }
       return this;
     }
 
