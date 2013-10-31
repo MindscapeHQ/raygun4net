@@ -4,6 +4,7 @@ Usage
 ### Android
 
 To send all unhandled exceptions in your application, use the static RaygunClient.Attach method using your app API key. The best place to put this is in the main/entry Activity of your application.
+There is also an overload for the Attach method that lets you pass in a user-identity string which is useful for tracking affected users in your Raygun.io dashboard.
 
 ```csharp
 RaygunClient.Attach("YOUR_APP_API_KEY");
@@ -12,6 +13,7 @@ RaygunClient.Attach("YOUR_APP_API_KEY");
 ### iOS
 
 In the main entry point of the application, use the static RaygunClient.Attach method using your app API key. This will send all unhandled exceptions in your application.
+There is also an overload for the Attach method that lets you pass in a user-identity string which is useful for tracking affected users in your Raygun.io dashboard.
 
 ```csharp
 static void Main (string[] args)
@@ -24,7 +26,7 @@ static void Main (string[] args)
 
 ### Android & IOS
 
-You can also send handled exceptions by creating a new instance of the RaygunClient (using your API key) and call one of the Send methods. There are various overloads for the Send method that allow you to optionally send tags, custom data and an alternate version number.
+At any point after calling the Attach method, you can use RaygunClient.SharedClient to get the static instance. This can be used for manually sending messages or changing options such as the User identity string. There are various overloads for the Send method that allow you to optionally send tags, custom data and an alternate version number.
 
 Where is my app API key?
 ====================

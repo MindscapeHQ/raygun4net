@@ -57,6 +57,9 @@ namespace Mindscape.Raygun4Net
   {
     private readonly string _apiKey;
 
+    /// <summary>
+    /// Gets or sets the user identity string.
+    /// </summary>
     public string User { get; set; }
 
     /// <summary>
@@ -164,6 +167,7 @@ namespace Mindscape.Raygun4Net
           .SetExceptionDetails(exception)
           .SetClientDetails()
           .SetVersion()
+          .SetUser(User)
           .Build();
 
       if (tags != null)
@@ -676,6 +680,14 @@ namespace Mindscape.Raygun4Net
     private static RaygunClient _client;
 
     /// <summary>
+    /// Gets the <see cref="RaygunClient"/> created by the Attach method.
+    /// </summary>
+    public static RaygunClient SharedClient
+    {
+      get { return _client; }
+    }
+
+    /// <summary>
     /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
     /// </summary>
     /// <param name="apiKey">Your app api key.</param>
@@ -683,6 +695,19 @@ namespace Mindscape.Raygun4Net
     {
       Detach();
       _client = new RaygunClient(apiKey);
+      AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+      TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+    }
+
+    /// <summary>
+    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    /// <param name="apiKey">Your app api key.</param>
+    /// <param name="user">An identity string for tracking affected users.</param>
+    public static void Attach(string apiKey, string user)
+    {
+      Detach();
+      _client = new RaygunClient(apiKey) { User = user };
       AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
     }
@@ -746,6 +771,7 @@ namespace Mindscape.Raygun4Net
         .SetExceptionDetails(exception)
         .SetClientDetails()
         .SetVersion()
+        .SetUser(User)
         .Build();
       return message;
     }
@@ -968,6 +994,7 @@ namespace Mindscape.Raygun4Net
 			  .SetExceptionDetails(exception)
 				.SetClientDetails()
 				.SetVersion()
+        .SetUser(User)
 				.Build();
 			return message;
 		}

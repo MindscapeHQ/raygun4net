@@ -135,14 +135,18 @@ private void Application_UnhandledException(object sender, ApplicationUnhandledE
 ### Xamarin for Android
 
 In the main/entry Activity of your application, use the static RaygunClient.Attach method using your app API key.
+There is also an overload for the Attach method that lets you pass in a user-identity string which is useful for tracking affected users in your Raygun.io dashboard.
 
 ```csharp
 RaygunClient.Attach("YOUR_APP_API_KEY");
 ```
 
+At any point after calling the Attach method, you can use RaygunClient.SharedClient to get the static instance. This can be used for manually sending messages or changing options such as the User identity string.
+
 ### Xamarin for iOS
 
 In the main entry point of the application, use the static RaygunClient.Attach method using your app API key.
+There is also an overload for the Attach method that lets you pass in a user-identity string which is useful for tracking affected users in your Raygun.io dashboard.
 
 ```csharp
 static void Main (string[] args)
@@ -152,6 +156,8 @@ static void Main (string[] args)
   UIApplication.Main (args, null, "AppDelegate");
 }
 ```
+
+At any point after calling the Attach method, you can use RaygunClient.SharedClient to get the static instance. This can be used for manually sending messages or changing options such as the User identity string.
 
 ## Version numbering and tags
 
