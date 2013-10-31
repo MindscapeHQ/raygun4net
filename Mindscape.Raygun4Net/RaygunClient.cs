@@ -57,6 +57,9 @@ namespace Mindscape.Raygun4Net
   {
     private readonly string _apiKey;
 
+    /// <summary>
+    /// Gets or sets the user identity string.
+    /// </summary>
     public string User { get; set; }
 
     /// <summary>
@@ -675,6 +678,14 @@ namespace Mindscape.Raygun4Net
 #if ANDROID || IOS
 
     private static RaygunClient _client;
+
+    /// <summary>
+    /// Gets the <see cref="RaygunClient"/> created by the Attach method.
+    /// </summary>
+    public static RaygunClient SharedClient
+    {
+      get { return _client; }
+    }
 
     /// <summary>
     /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.

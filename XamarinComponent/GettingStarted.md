@@ -26,7 +26,7 @@ static void Main (string[] args)
 
 ### Android & IOS
 
-You can also send handled exceptions by creating a new instance of the RaygunClient (using your API key) and call one of the Send methods. There are various overloads for the Send method that allow you to optionally send tags, custom data and an alternate version number.
+At any point after calling the Attach method, you can use RaygunClient.SharedClient to get the static instance. This can be used for manually sending messages or changing options such as the User identity string. There are various overloads for the Send method that allow you to optionally send tags, custom data and an alternate version number.
 
 Where is my app API key?
 ====================
