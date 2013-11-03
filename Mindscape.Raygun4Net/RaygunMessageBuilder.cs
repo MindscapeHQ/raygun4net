@@ -78,6 +78,12 @@ namespace Mindscape.Raygun4Net
         _raygunMessage.Details.Error = new RaygunErrorMessage(exception);
       }
 
+      HttpException error = exception as HttpException;
+      if (error != null)
+      {
+        _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = error.GetHttpCode() };
+      }
+
       return this;
     }
 
@@ -147,12 +153,6 @@ namespace Mindscape.Raygun4Net
           return this;
         }
         _raygunMessage.Details.Request = new RaygunRequestMessage(request);
-
-        HttpException error = context.Error as HttpException;
-        if (error != null)
-        {
-          _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = error.GetHttpCode() };
-        }
       }
 
       return this;
