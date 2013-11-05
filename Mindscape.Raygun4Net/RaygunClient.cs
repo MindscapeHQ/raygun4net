@@ -1201,12 +1201,12 @@ namespace Mindscape.Raygun4Net
           client.Encoding = System.Text.Encoding.UTF8;
 
           try
-          {            
+          {
             var message = SimpleJson.SerializeObject(raygunMessage);
             client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
           }
           catch (Exception ex)
-          {            
+          {
             System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
 
             if (RaygunSettings.Settings.ThrowOnError)

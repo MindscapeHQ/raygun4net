@@ -78,6 +78,12 @@ namespace Mindscape.Raygun4Net
         _raygunMessage.Details.Error = new RaygunErrorMessage(exception);
       }
 
+      HttpException error = exception as HttpException;
+      if (error != null)
+      {
+        _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = error.GetHttpCode() };
+      }
+
       return this;
     }
 
@@ -135,21 +141,21 @@ namespace Mindscape.Raygun4Net
 #else
     public IRaygunMessageBuilder SetHttpDetails(HttpContext context)
     {
-	    if(context != null)
-	    {
-		    HttpRequest request;
-		    try
-		    {
-			    request = context.Request;
-		    }
-		    catch (HttpException)
-		    {
-			    return this;
-		    }
-		    _raygunMessage.Details.Request = new RaygunRequestMessage(request);
-	    }
+      if (context != null)
+      {
+        HttpRequest request;
+        try
+        {
+          request = context.Request;
+        }
+        catch (HttpException)
+        {
+          return this;
+        }
+        _raygunMessage.Details.Request = new RaygunRequestMessage(request);
+      }
 
-	    return this;
+      return this;
     }
 
     public IRaygunMessageBuilder SetVersion()
