@@ -78,11 +78,13 @@ namespace Mindscape.Raygun4Net
         _raygunMessage.Details.Error = new RaygunErrorMessage(exception);
       }
 
+#if !WINRT && !WINDOWS_PHONE && !ANDROID && !IOS
       HttpException error = exception as HttpException;
       if (error != null)
       {
         _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = error.GetHttpCode() };
       }
+#endif
 
       return this;
     }
