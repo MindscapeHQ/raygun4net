@@ -682,7 +682,7 @@ namespace Mindscape.Raygun4Net
     /// <summary>
     /// Gets the <see cref="RaygunClient"/> created by the Attach method.
     /// </summary>
-    public static RaygunClient SharedClient
+    public static RaygunClient Current
     {
       get { return _client; }
     }
