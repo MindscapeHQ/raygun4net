@@ -70,6 +70,7 @@ namespace Mindscape.Raygun4Net
 }
 #else
 using System.Configuration;
+
 namespace Mindscape.Raygun4Net
 {
   public class RaygunSettings : ConfigurationSection
@@ -122,6 +123,13 @@ namespace Mindscape.Raygun4Net
     {
       get { return (string)this["excludeHttpStatusCodes"]; }
       set { this["excludeHttpStatusCodes"] = value; }
+    }
+
+    [ConfigurationProperty("excludeFormParameters", IsRequired = false, DefaultValue = false)]
+    public bool ExcludeFormParameters
+    {
+        get { return (bool)this["excludeFormParameters"]; }
+        set { this["excludeFormParameters"] = value; }
     }
   }
 }
