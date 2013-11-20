@@ -123,7 +123,7 @@ If the method you pass in does result in an exception being thrown this will be 
 the exception will again be thrown. Two overloads are available; one for methods that return void and
 another for methods that return an object.
 
-Windows Phone 7.1 and above
+Windows Phone 7.1 and 8
 ====================
 Create a RaygunClient instance and pass in your app API key into the constructor. In the UnhandledException event handler of App.xaml.cs, use the RaygunClient to send the arguments.
 
