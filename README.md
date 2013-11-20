@@ -27,6 +27,8 @@ The main classes can be found in the Mindscape.Raygun4Net namespace.
 Usage
 ====================
 
+The Raygun4Net provider includes support for many .NET frameworks. Scroll down to find information about using Raygun for your type of application.
+
 ### ASP.NET
 Add a section to configSections:
 
@@ -37,7 +39,7 @@ Add a section to configSections:
 Add the Raygun settings configuration block from above:
 
 ```
-<RaygunSettings apikey="API_KEY_FOR_YOUR_APPLICATION" />
+<RaygunSettings apikey="YOUR_APP_API_KEY" />
 ```
 
 You can then either create a new instance of the RaygunClient class and call Send(Exception) e.g.
@@ -73,10 +75,10 @@ For system.webServer:
 If using the HTTP module then you can exclude errors by their HTTP status code by providing a comma separated list of status codes to ignore in the configuration. For example if you wanted to exclude errors that return the [I'm a teapot](http://tools.ietf.org/html/rfc2324) response code, you could use the configuration below.
 
 ```
-<RaygunSettings apikey="API_KEY_FOR_YOUR_APPLICATION" excludeHttpStatusCodes="418" />
+<RaygunSettings apikey="YOUR_APP_API_KEY" excludeHttpStatusCodes="418" />
 ``` 
 
-### WinForms/WPF/Other .NET applications
+### WPF
 
 Create an instance of RaygunClient by passing your app API key in the constructor. Attach an event handler to the DispatcherUnhandledException event of your application. In the event handler, use the RaygunClient.Send method to send the Exception.
 
@@ -91,6 +93,30 @@ public App()
 void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
 {
   _client.Send(e.Exception);
+}
+```
+
+### WinForms
+
+Create an instance of RaygunClient by passing your app API key in the constructor. Attach an event handler to the Application.ThreadException event BEFORE calling Application.Run(...). In the event handler, use the RaygunClient.Send method to send the Exception.
+
+```csharp
+private static readonly RaygunClient _raygunClient = new RaygunClient("YOUR_APP_API_KEY");
+    
+[STAThread]
+static void Main()
+{
+  Application.EnableVisualStyles();
+  Application.SetCompatibleTextRenderingDefault(false);
+
+  Application.ThreadException += new ThreadExceptionEventHandler(Application_ThreadException);
+
+  Application.Run(new Form1());
+}
+
+private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
+{
+  _raygunClient.Send(e.Exception);
 }
 ```
 
@@ -119,7 +145,7 @@ A workaround for this issue is provided with the Wrap() method. These allow you 
 #### Fody
 Another option is to use the [Fody](https://github.com/Fody/Fody) library, and its [AsyncErrorHandling](https://github.com/Fody/AsyncErrorHandling) extension. This will automatically catch async exceptions and pass them to a handler of your choice (which would send to Raygun as above). See the [installation instructions here](https://github.com/Fody/Fody/wiki/SampleUsage), then check out the [sample project](https://github.com/Fody/FodyAddinSamples/tree/master/AsyncErrorHandlerWithRaygun) for how to use. 
 
-### Windows Phone 7.1 and 8
+### Windows Phone 7.1 and above
 
 Create a RaygunClient instance and pass in your app API key into the constructor. In the UnhandledException event handler of App.xaml.cs, use the RaygunClient to send the arguments.
 

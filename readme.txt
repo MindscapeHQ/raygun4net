@@ -24,7 +24,7 @@ Add a section to configSections:
 
 Add the Raygun settings configuration block from above:
 
-<RaygunSettings apikey="{{apikey for your application}}" />
+<RaygunSettings apikey="YOUR_APP_API_KEY" />
 
 You can then either create a new instance of the RaygunClient class and call Send(Exception) e.g.
 
@@ -48,8 +48,7 @@ For system.webServer:
   <add name="RaygunErrorModule" type="Mindscape.Raygun4Net.RaygunHttpModule"/>
 </modules>
 
-
-WinForms/WPF/Other .NET applications
+WPF
 ====================
 Create an instance of RaygunClient by passing your app API key in the constructor.
 Attach an event handler to the DispatcherUnhandledException event of your application.
@@ -67,6 +66,29 @@ void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionE
   _client.Send(e.Exception);
 }
 
+WinForms
+====================
+Create an instance of RaygunClient by passing your app API key in the constructor.
+Attach an event handler to the Application.ThreadException event BEFORE calling Application.Run(...).
+In the event handler, use the RaygunClient.Send method to send the Exception.
+
+private static readonly RaygunClient _raygunClient = new RaygunClient("YOUR_APP_API_KEY");
+    
+[STAThread]
+static void Main()
+{
+  Application.EnableVisualStyles();
+  Application.SetCompatibleTextRenderingDefault(false);
+
+  Application.ThreadException += new ThreadExceptionEventHandler(Application_ThreadException);
+
+  Application.Run(new Form1());
+}
+
+private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
+{
+  _raygunClient.Send(e.Exception);
+}
 
 WinRT
 ====================
@@ -101,7 +123,7 @@ If the method you pass in does result in an exception being thrown this will be 
 the exception will again be thrown. Two overloads are available; one for methods that return void and
 another for methods that return an object.
 
-WP7.1 and WP8
+Windows Phone 7.1 and above
 ====================
 Create a RaygunClient instance and pass in your app API key into the constructor. In the UnhandledException event handler of App.xaml.cs, use the RaygunClient to send the arguments.
 
