@@ -1099,6 +1099,7 @@ namespace Mindscape.Raygun4Net
                 {
                   string text = reader.ReadToEnd();
                   bool success = SendMessage(text);
+                  // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
                   if(!success)
                   {
                     return;
