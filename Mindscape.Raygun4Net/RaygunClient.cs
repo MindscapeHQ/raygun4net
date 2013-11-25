@@ -801,6 +801,15 @@ namespace Mindscape.Raygun4Net
             catch (Exception ex)
             {
               System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+              try
+              {
+                SaveMessage(SimpleJson.SerializeObject(raygunMessage));
+                System.Diagnostics.Debug.WriteLine("Exception has been saved to the device to try again later.");
+              }
+              catch (Exception e)
+              {
+                System.Diagnostics.Debug.WriteLine(string.Format("Error saving Exception to device {0}", e.Message));
+              }
             }
           }
         }
@@ -819,7 +828,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private void SendMessage(string message)
+    private bool SendMessage(string message)
     {
       using (var client = new WebClient())
       {
@@ -833,8 +842,10 @@ namespace Mindscape.Raygun4Net
         catch (Exception ex)
         {
           System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+          return false;
         }
       }
+      return true;
     }
 
     private bool HasInternetConnection
@@ -935,8 +946,13 @@ namespace Mindscape.Raygun4Net
                         {
                           stringBuilder.Append(line);
                         }
+                        bool success = SendMessage(stringBuilder.ToString());
+                        // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
+                        if (!success)
+                        {
+                          return;
+                        }
                         System.Diagnostics.Debug.WriteLine("Sent " + file.Name);
-                        SendMessage(stringBuilder.ToString());
                       }
                     }
                   }
