@@ -986,63 +986,60 @@ namespace Mindscape.Raygun4Net
       }
     }
 #elif IOS
-		internal RaygunMessage BuildMessage(Exception exception)
-		{
-			var message = RaygunMessageBuilder.New
-				.SetEnvironmentDetails()
-        .SetMachineName(UIDevice.CurrentDevice.Name)
-			  .SetExceptionDetails(exception)
-				.SetClientDetails()
-				.SetVersion()
-        .SetUser(User)
-				.Build();
-			return message;
-		}
-
-		/// <summary>
-		/// Posts a RaygunMessage to the Raygun.io api endpoint.
-		/// </summary>
-		/// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
-		/// set to a valid DateTime and as much of the Details property as is available.</param>
-		public void Send(RaygunMessage raygunMessage)
-		{
-			if (ValidateApiKey ())
-      {
-        if (HasInternetConnection)
-        {
-          SendStoredMessages ();
-  				using (var client = new WebClient())
-          {
-  					client.Headers.Add ("X-ApiKey", _apiKey);
-  					client.Encoding = System.Text.Encoding.UTF8;
-
-  					try
-            {
-  						var message = SimpleJson.SerializeObject (raygunMessage);
-  						client.UploadString (RaygunSettings.Settings.ApiEndpoint, message);
-  					}
-            catch (Exception ex)
-            {
-  						System.Diagnostics.Debug.WriteLine (string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
-  					}
-  				}
-        }
-        else
-        {
-          try
-          {
-            var message = SimpleJson.SerializeObject(raygunMessage);
-            SaveMessage(message);
-          }
-          catch (Exception ex)
-          {
-            System.Diagnostics.Debug.WriteLine(string.Format("Error saving Exception to device {0}", ex.Message));
-          }
-        }
-			}
+	internal RaygunMessage BuildMessage(Exception exception)
+    {
+      var message = RaygunMessageBuilder.New
+        .SetEnvironmentDetails ()
+        .SetMachineName (UIDevice.CurrentDevice.Name)
+	    .SetExceptionDetails (exception)
+		.SetClientDetails ()
+		.SetVersion ()
+        .SetUser (User)
+		.Build ();
+      return message;
     }
 
-    private void SendMessage(string message)
+	/// <summary>
+	/// Posts a RaygunMessage to the Raygun.io api endpoint.
+	/// </summary>
+	/// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
+	/// set to a valid DateTime and as much of the Details property as is available.</param>
+	public void Send(RaygunMessage raygunMessage)
+    {
+      if (ValidateApiKey ()) {
+        if (HasInternetConnection) {
+          SendStoredMessages ();
+          using (var client = new WebClient()) {
+            client.Headers.Add ("X-ApiKey", _apiKey);
+            client.Encoding = System.Text.Encoding.UTF8;
+
+            try {
+              var message = SimpleJson.SerializeObject (raygunMessage);
+              client.UploadString (RaygunSettings.Settings.ApiEndpoint, message);
+            } catch (Exception ex) {
+              System.Diagnostics.Debug.WriteLine (string.Format ("Error Logging Exception to Raygun.io {0}", ex.Message));
+              try{
+                SaveMessage (SimpleJson.SerializeObject (raygunMessage));
+                System.Diagnostics.Debug.WriteLine ("Exception has been saved to the device to try again later.");
+              }
+              catch (Exception e)
+              {
+                System.Diagnostics.Debug.WriteLine (string.Format ("Error saving Exception to device {0}", e.Message));
+              }
+            }
+          }
+        } else {
+          try {
+            var message = SimpleJson.SerializeObject (raygunMessage);
+            SaveMessage (message);
+          } catch (Exception ex) {
+            System.Diagnostics.Debug.WriteLine (string.Format ("Error saving Exception to device {0}", ex.Message));
+          }
+        }
+      }
+    }
+
+    private bool SendMessage(string message)
     {
       using (var client = new WebClient())
       {
@@ -1056,8 +1053,10 @@ namespace Mindscape.Raygun4Net
         catch (Exception ex)
         {
           System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+          return false;
         }
       }
+      return true;
     }
 
     private bool HasInternetConnection
@@ -1099,7 +1098,11 @@ namespace Mindscape.Raygun4Net
                 using (StreamReader reader = new StreamReader(isoFileStream))
                 {
                   string text = reader.ReadToEnd();
-                  SendMessage(text);
+                  bool success = SendMessage(text);
+                  if(!success)
+                  {
+                    return;
+                  }
                   System.Diagnostics.Debug.WriteLine("Sent " + name);
                 }
                 isolatedStorage.DeleteFile(name);
