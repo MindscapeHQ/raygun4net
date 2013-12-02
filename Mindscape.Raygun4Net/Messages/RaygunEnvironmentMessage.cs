@@ -34,6 +34,7 @@ using System.Web;
 using System.Windows.Forms;
 using System.Management;
 using Microsoft.VisualBasic.Devices;
+using System.Security.Permissions;
 #endif
 
 namespace Mindscape.Raygun4Net.Messages
@@ -178,7 +179,9 @@ namespace Mindscape.Raygun4Net.Messages
 
       OSVersion = info.OSVersion;
 
-      if (!RaygunSettings.Settings.MediumTrust)
+      bool mediumTrust = RaygunSettings.Settings.MediumTrust || !HasUnrestrictedFeatureSet;
+
+      if (!mediumTrust)
       {
         try
         {
@@ -323,6 +326,42 @@ namespace Mindscape.Raygun4Net.Messages
         }
       }
     }
+
+    private static volatile bool _unrestrictedFeatureSet = false;
+    private static volatile bool _determinedUnrestrictedFeatureSet = false;
+    private static readonly object _threadLock = new object();
+
+    private static bool HasUnrestrictedFeatureSet
+    {
+      get
+      {
+        if (!_determinedUnrestrictedFeatureSet)
+        {
+          lock (_threadLock)
+          {
+            if (!_determinedUnrestrictedFeatureSet)
+            {
+              // This seems to crash if not in full trust:
+              //_unrestrictedFeatureSet = AppDomain.CurrentDomain.ApplicationTrust == null;// || AppDomain.CurrentDomain.ApplicationTrust.DefaultGrantSet.PermissionSet.IsUnrestricted();
+              try
+              {
+                // See if we're running in full trust:
+                new PermissionSet(PermissionState.Unrestricted).Demand();
+                _unrestrictedFeatureSet = true;
+              }
+              catch (SecurityException)
+              {
+                _unrestrictedFeatureSet = false;
+              }
+
+              _determinedUnrestrictedFeatureSet = true;
+            }
+          }
+        }
+        return _unrestrictedFeatureSet;
+      }
+    }
+
 #endif
 
     public int ProcessorCount { get; private set; }
