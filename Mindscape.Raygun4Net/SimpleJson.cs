@@ -1080,6 +1080,7 @@ namespace Mindscape.Raygun4Net
     {
       builder.Append("\"");
       char[] charArray = aString.ToCharArray();
+      char[] hexSeqBuffer = new char[4];
       for (int i = 0; i < charArray.Length; i++)
       {
         char c = charArray[i];
@@ -1097,11 +1098,30 @@ namespace Mindscape.Raygun4Net
           builder.Append("\\r");
         else if (c == '\t')
           builder.Append("\\t");
+        else if (char.IsControl(c))
+        {
+          IntToHex(c, hexSeqBuffer);
+          builder.Append("\\u");
+          builder.Append(hexSeqBuffer);
+        }
         else
           builder.Append(c);
       }
       builder.Append("\"");
       return true;
+    }
+
+    static void IntToHex(int intValue, char[] hex)
+    {
+      for (int i = 0; i < 4; i++)
+      {
+        int num = intValue % 16;
+        if (num < 10)
+          hex[3 - i] = (char)('0' + num);
+        else
+          hex[3 - i] = (char)('A' + (num - 10));
+        intValue >>= 4;
+      }
     }
 
     static bool SerializeNumber(object number, StringBuilder builder)
