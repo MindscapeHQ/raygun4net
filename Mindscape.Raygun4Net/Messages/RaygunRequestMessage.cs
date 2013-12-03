@@ -19,7 +19,7 @@ namespace Mindscape.Raygun4Net.Messages
       Data = ToDictionary(request.ServerVariables);
       QueryString = ToDictionary(request.QueryString);
       Headers = ToDictionary(request.Headers);
-      Form = ToDictionary(request.Form, true);
+      Form = RaygunSettings.Settings.ExcludeFormParameters ? new Dictionary<string,string>() : ToDictionary(request.Form, true);
 
       try
       {
