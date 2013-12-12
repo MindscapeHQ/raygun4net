@@ -72,11 +72,13 @@ namespace Mindscape.Raygun4Net
     {
       _apiKey = apiKey;
 
+#if !WINRT && !WINDOWS_PHONE
       _wrapperExceptions = new List<Type>()
       {
         typeof (TargetInvocationException),
         typeof (HttpUnhandledException)
       };
+#endif
 
 #if WINDOWS_PHONE
       Deployment.Current.Dispatcher.BeginInvoke(SendStoredMessages);
