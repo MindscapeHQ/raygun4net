@@ -71,13 +71,11 @@ namespace Mindscape.Raygun4Net
     public RaygunClient(string apiKey)
     {
       _apiKey = apiKey;
+      _wrapperExceptions = new List<Type>();
 
-#if !WINRT && !WINDOWS_PHONE
-      _wrapperExceptions = new List<Type>()
-      {
-        typeof (TargetInvocationException),
-        typeof (HttpUnhandledException)
-      };
+#if !WINRT && !WINDOWS_PHONE && !ANDROID && !IOS
+      _wrapperExceptions.Add(typeof (TargetInvocationException));
+      _wrapperExceptions.Add(typeof (HttpUnhandledException));
 #endif
 
 #if WINDOWS_PHONE
