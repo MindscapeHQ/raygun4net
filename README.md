@@ -72,11 +72,34 @@ For system.webServer:
 
 ####Additional ASP.NET configuration options
 
+**Exclude errors by HTTP status code**
+
 If using the HTTP module then you can exclude errors by their HTTP status code by providing a comma separated list of status codes to ignore in the configuration. For example if you wanted to exclude errors that return the [I'm a teapot](http://tools.ietf.org/html/rfc2324) response code, you could use the configuration below.
 
 ```
 <RaygunSettings apikey="YOUR_APP_API_KEY" excludeHttpStatusCodes="418" />
-``` 
+```
+
+**Remove sensitive form data**
+
+If you have sensitive user data being sent in a POST request that you wish to prevent being transmitted to Raygun, you can provide a list of possible keys (Names) to remove:
+
+```csharp
+raygunClient.IgnoreFormDataNames(new List<string>() { "SensitiveKey1", "SomeCreditCardData"});
+```
+
+When an error occurs and is passed in to Raygun4Net, if any of the keys specified are present in request.Form, they will not be transmitted to the Raygun API.
+
+**Remove wrapper exceptions (available for all desktop .NET apps too)**
+
+If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by providing a list:
+
+```csharp
+raygunClient.AddWrapperExceptions(new List<Type>() { typeof(TargetInvocationException) });
+```
+
+In this case, if a TargetInvocationException occurs, it will be removed and replaced with the actual InnerException that was the cause. Note that HttpUnhandledException and the above TargetInvocationException are already defined; you do not have to add these manually. This method is provided if you have your own common wrapper exceptions, or a framework is throwing exceptions using its own wrapper.
+
 
 ### WPF
 
@@ -102,7 +125,7 @@ Create an instance of RaygunClient by passing your app API key in the constructo
 
 ```csharp
 private static readonly RaygunClient _raygunClient = new RaygunClient("YOUR_APP_API_KEY");
-    
+
 [STAThread]
 static void Main()
 {
@@ -143,7 +166,7 @@ The options available in WinRT for catching unhandled exceptions at this point i
 A workaround for this issue is provided with the Wrap() method. These allow you to pass the code you want to execute to an instance of the Raygun client - it will simply call it surrounded by a try-catch block. If the method you pass in does result in an exception being thrown this will be transmitted to Raygun, and the exception will again be thrown. Two overloads are available; one for methods that return void and another for methods that return an object.
 
 #### Fody
-Another option is to use the [Fody](https://github.com/Fody/Fody) library, and its [AsyncErrorHandling](https://github.com/Fody/AsyncErrorHandling) extension. This will automatically catch async exceptions and pass them to a handler of your choice (which would send to Raygun as above). See the [installation instructions here](https://github.com/Fody/Fody/wiki/SampleUsage), then check out the [sample project](https://github.com/Fody/FodyAddinSamples/tree/master/AsyncErrorHandlerWithRaygun) for how to use. 
+Another option is to use the [Fody](https://github.com/Fody/Fody) library, and its [AsyncErrorHandling](https://github.com/Fody/AsyncErrorHandling) extension. This will automatically catch async exceptions and pass them to a handler of your choice (which would send to Raygun as above). See the [installation instructions here](https://github.com/Fody/Fody/wiki/SampleUsage), then check out the [sample project](https://github.com/Fody/FodyAddinSamples/tree/master/AsyncErrorHandlerWithRaygun) for how to use.
 
 ### Windows Phone 7.1 and 8
 
@@ -185,6 +208,12 @@ static void Main (string[] args)
 
 At any point after calling the Attach method, you can use RaygunClient.SharedClient to get the static instance. This can be used for manually sending messages or changing options such as the User identity string.
 
+## Unique (affected) user tracking
+
+There is a property named *User* on RaygunClient which you can set to be the current user's ID or email address. This allows you to see the count of affected users for each error in the Raygun dashboard. If you provide an email address, and the user has an associated Gravatar, you will see their avatar in the error instance page.
+
+This feature is optional if you wish to disable it for privacy concerns.
+
 ## Version numbering and tags
 
 * If you are plugging this provider into a classic .NET application, the version number that will be transmitted will be the AssemblyVersion. There is also an overload of Send() available where you can provide a different version if you wish (in the format x.x.x.x where x is a postive integer).
@@ -192,6 +221,10 @@ At any point after calling the Attach method, you can use RaygunClient.SharedCli
 * If you are using WinRT, the transmitted version number will be that of the Windows Store package, set in in Package.appxmanifest (under Packaging).
 
 * You can also set an arbitrary number of tags (as an array of strings), i.e. for tagging builds. This is optional and will be transmitted in addition to the version number above.
+
+#### Custom data
+
+Providing additional name-value custom data is also available as an overload on Send().
 
 ## Troubleshooting
 
