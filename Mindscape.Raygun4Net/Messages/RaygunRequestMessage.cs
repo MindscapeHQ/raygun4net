@@ -10,7 +10,7 @@ namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunRequestMessage
   {
-    public RaygunRequestMessage(HttpRequest	request)
+    public RaygunRequestMessage(HttpRequest	request, List<string> ignoredFormNames)
     {
       HostName = request.Url.Host;
       Url = request.Url.AbsolutePath;
@@ -19,7 +19,27 @@ namespace Mindscape.Raygun4Net.Messages
       Data = ToDictionary(request.ServerVariables);
       QueryString = ToDictionary(request.QueryString);
       Headers = ToDictionary(request.Headers);
-      Form = ToDictionary(request.Form, true);
+
+      if (ignoredFormNames != null)
+      {
+        Form = new Dictionary<string, string>();
+
+        var form = ToDictionary(request.Form, true);
+
+        if (form != null)
+        {
+          var subtraction = request.Form.AllKeys.Except(ignoredFormNames);
+
+          foreach (var key in subtraction)
+          {
+            Form.Add(key, form[key]);
+          }
+        }
+      }
+      else
+      {
+        Form = ToDictionary(request.Form);
+      }
 
       try
       {
