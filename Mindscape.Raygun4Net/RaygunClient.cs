@@ -58,6 +58,7 @@ namespace Mindscape.Raygun4Net
   {
     private readonly string _apiKey;
     private static List<Type> _wrapperExceptions;
+    private List<string> _ignoredFormNames; 
 
     /// <summary>
     /// Gets or sets the user identity string.
@@ -95,17 +96,6 @@ namespace Mindscape.Raygun4Net
     {
     }
 #endif
-
-    public void AddWrapperExceptions(IEnumerable<Type> wrapperExceptions)
-    {
-      foreach (Type wrapper in wrapperExceptions)
-      {
-        if (!_wrapperExceptions.Contains(wrapper))
-        {
-          _wrapperExceptions.Add(wrapper);
-        }
-      }
-    }
 
     private bool ValidateApiKey()
     {
@@ -568,6 +558,44 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 #else
+    /// <summary>
+    /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
+    /// This can be used when a wrapper exception, e.g. TargetInvocationException or HttpUnhandledException,
+    /// contains the actual exception as the InnerException. The message and stack trace of the inner exception will then
+    /// be used by Raygun for grouping and display. The above two do not need to be added manually,
+    /// but if you have other wrapper exceptions that you want stripped you can pass them in here.
+    /// </summary>
+    /// <param name="wrapperExceptions">An enumerable list of exception types that you want removed and replaced with their inner exception.</param>
+    public void AddWrapperExceptions(IEnumerable<Type> wrapperExceptions)
+    {
+      foreach (Type wrapper in wrapperExceptions)
+      {
+        if (!_wrapperExceptions.Contains(wrapper))
+        {
+          _wrapperExceptions.Add(wrapper);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Adds a list of keys to ignore when attaching the Form data of an HTTP POST request. This allows
+    /// you to remove sensitive data from the transmitted copy of the Form on the HttpRequest by specifying the keys you want removed.
+    /// This method is only effective in a web context.
+    /// </summary>
+    /// <param name="names">An enumerable list of keys (Names) to be stripped from the copy of the Form NameValueCollection when sending to Raygun</param>
+    public void IgnoreFormDataNames(IEnumerable<string> names)
+    {
+      if (_ignoredFormNames == null)
+      {
+        _ignoredFormNames = new List<string>();
+      }
+
+      foreach (string name in names)
+      {
+        _ignoredFormNames.Add(name);
+      }
+    }
+
     /// <summary>
     /// Transmits an exception to Raygun.io synchronously, using the version number of the originating assembly.
     /// </summary>
@@ -1215,7 +1243,7 @@ namespace Mindscape.Raygun4Net
     internal RaygunMessage BuildMessage(Exception exception)
     {
       var message = RaygunMessageBuilder.New
-        .SetHttpDetails(HttpContext.Current)
+        .SetHttpDetails(HttpContext.Current, _ignoredFormNames)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 
@@ -139,7 +140,7 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 #else
-    public IRaygunMessageBuilder SetHttpDetails(HttpContext context)
+    public IRaygunMessageBuilder SetHttpDetails(HttpContext context, List<string> ignoredFormNames = null)
     {
       if (context != null)
       {
@@ -152,7 +153,7 @@ namespace Mindscape.Raygun4Net
         {
           return this;
         }
-        _raygunMessage.Details.Request = new RaygunRequestMessage(request);
+        _raygunMessage.Details.Request = new RaygunRequestMessage(request, ignoredFormNames);
       }
 
       return this;
