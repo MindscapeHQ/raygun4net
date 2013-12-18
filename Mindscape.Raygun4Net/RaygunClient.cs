@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using Mindscape.Raygun4Net.Messages;
@@ -56,6 +57,7 @@ namespace Mindscape.Raygun4Net
   public class RaygunClient
   {
     private readonly string _apiKey;
+    private static List<Type> _wrapperExceptions;
 
     /// <summary>
     /// Gets or sets the user identity string.
@@ -69,6 +71,12 @@ namespace Mindscape.Raygun4Net
     public RaygunClient(string apiKey)
     {
       _apiKey = apiKey;
+      _wrapperExceptions = new List<Type>();
+
+#if !WINRT && !WINDOWS_PHONE && !ANDROID && !IOS
+      _wrapperExceptions.Add(typeof (TargetInvocationException));
+      _wrapperExceptions.Add(typeof (HttpUnhandledException));
+#endif
 
 #if WINDOWS_PHONE
       Deployment.Current.Dispatcher.BeginInvoke(SendStoredMessages);
@@ -87,6 +95,17 @@ namespace Mindscape.Raygun4Net
     {
     }
 #endif
+
+    public void AddWrapperExceptions(IEnumerable<Type> wrapperExceptions)
+    {
+      foreach (Type wrapper in wrapperExceptions)
+      {
+        if (!_wrapperExceptions.Contains(wrapper))
+        {
+          _wrapperExceptions.Add(wrapper);
+        }
+      }
+    }
 
     private bool ValidateApiKey()
     {
@@ -555,7 +574,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver</param>
     public void Send(Exception exception)
     {
-      exception = StripTargetInvocationException(exception);
+      exception = StripWrapperExceptions(exception);
       Send(BuildMessage(exception));
     }
 
@@ -567,7 +586,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message</param>
     public void Send(Exception exception, IList<string> tags)
     {
-      exception = StripTargetInvocationException(exception);
+      exception = StripWrapperExceptions(exception);
       var message = BuildMessage(exception);
       message.Details.Tags = tags;
       Send(message);
@@ -591,7 +610,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      exception = StripTargetInvocationException(exception);
+      exception = StripWrapperExceptions(exception);
       var message = BuildMessage(exception);
       message.Details.Tags = tags;      
       message.Details.UserCustomData = userCustomData;
@@ -609,7 +628,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="version">A custom version identifiction, associated with a particular build of your project.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
     {
-      exception = StripTargetInvocationException(exception);
+      exception = StripWrapperExceptions(exception);
       var message = BuildMessage(exception);
       message.Details.Tags = tags;
       message.Details.UserCustomData = userCustomData;
@@ -617,12 +636,13 @@ namespace Mindscape.Raygun4Net
       Send(message);
     }
 
-    private Exception StripTargetInvocationException(Exception exception)
+    private static Exception StripWrapperExceptions(Exception exception)
     {
-      if (exception is TargetInvocationException && exception.InnerException != null)
+      if (_wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {
-        return exception.InnerException;
+        return StripWrapperExceptions(exception.InnerException);
       }
+
       return exception;
     }
 
