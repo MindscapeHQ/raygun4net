@@ -43,7 +43,17 @@ namespace Mindscape.Raygun4Net.Messages
 
     private static IDictionary ToDictionary(NameValueCollection nameValueCollection, IEnumerable<string> ignoreFields, bool truncateValues = false)
     {
-      var keys = nameValueCollection.AllKeys.Where(k => k != null).Except(ignoreFields);
+      IEnumerable<string> keys;
+
+      try
+      {
+        keys = nameValueCollection.AllKeys.Where(k => k != null).Except(ignoreFields);
+      }
+      catch (HttpRequestValidationException)
+      {
+        return new Dictionary<string, string> { { "Values", "Not able to be retrieved" } };
+      }
+
       var dictionary = new Dictionary<string, string>();
 
       foreach (string key in keys)
