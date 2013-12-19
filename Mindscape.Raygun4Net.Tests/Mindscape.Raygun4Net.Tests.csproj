@@ -37,6 +37,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
@@ -47,6 +48,7 @@
     <Compile Include="RaygunClientJsonTests.cs" />
     <Compile Include="RaygunErrorMessageExceptionTests.cs" />
     <Compile Include="RaygunErrorMessageInnerExceptionTests.cs" />
+    <Compile Include="RaygunRequestMessageTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
