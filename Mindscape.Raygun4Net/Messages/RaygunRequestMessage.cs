@@ -16,30 +16,10 @@ namespace Mindscape.Raygun4Net.Messages
       Url = request.Url.AbsolutePath;
       HttpMethod = request.RequestType;
       IPAddress = request.UserHostAddress;
-      Data = ToDictionary(request.ServerVariables);
-      QueryString = ToDictionary(request.QueryString);
-      Headers = ToDictionary(request.Headers);
-
-      if (ignoredFormNames != null)
-      {
-        Form = new Dictionary<string, string>();
-
-        var form = ToDictionary(request.Form, true);
-
-        if (form != null)
-        {
-          var subtraction = request.Form.AllKeys.Except(ignoredFormNames);
-
-          foreach (var key in subtraction)
-          {
-            Form.Add(key, form[key]);
-          }
-        }
-      }
-      else
-      {
-        Form = ToDictionary(request.Form);
-      }
+      Data = ToDictionary(request.ServerVariables, Enumerable.Empty<string>());
+      QueryString = ToDictionary(request.QueryString, Enumerable.Empty<string>());
+      Headers = ToDictionary(request.Headers, Enumerable.Empty<string>());
+      Form = ToDictionary(request.Form, ignoredFormNames ?? Enumerable.Empty<string>(), true);
 
       try
       {
@@ -61,9 +41,19 @@ namespace Mindscape.Raygun4Net.Messages
       }
     }
 
-    private static IDictionary ToDictionary(NameValueCollection nameValueCollection, bool truncateValues = false)
+    private static IDictionary ToDictionary(NameValueCollection nameValueCollection, IEnumerable<string> ignoreFields, bool truncateValues = false)
     {
-      var keys = nameValueCollection.AllKeys.Where(k => k != null);
+      IEnumerable<string> keys;
+
+      try
+      {
+        keys = nameValueCollection.AllKeys.Where(k => k != null).Except(ignoreFields);
+      }
+      catch (HttpRequestValidationException)
+      {
+        return new Dictionary<string, string> { { "Values", "Not able to be retrieved" } };
+      }
+
       var dictionary = new Dictionary<string, string>();
 
       foreach (string key in keys)
@@ -98,7 +88,7 @@ namespace Mindscape.Raygun4Net.Messages
 
           if (firstInstance != -1 && lastInstance != -1)
           {
-              dictionary.Add(key, e.Message.Substring(firstInstance + 1, lastInstance - firstInstance - 1));  
+            dictionary.Add(key, e.Message.Substring(firstInstance + 1, lastInstance - firstInstance - 1));
           }
           else
           {
