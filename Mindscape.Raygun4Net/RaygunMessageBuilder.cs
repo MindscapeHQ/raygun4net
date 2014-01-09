@@ -7,7 +7,7 @@ using System.Diagnostics;
 #if WINRT
 using Windows.ApplicationModel;
 #elif WINDOWS_PHONE
-
+using System.Text.RegularExpressions;
 #elif ANDROID
 using System.Reflection;
 #elif IOS
@@ -120,10 +120,30 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 #elif WINDOWS_PHONE
+    private System.Reflection.Assembly _callingAssembly;
+
+    public IRaygunMessageBuilder SetCallingAssembly(System.Reflection.Assembly callingAssembly)
+    {
+      _callingAssembly = callingAssembly;
+      return this;
+    }
+
     public IRaygunMessageBuilder SetVersion()
     {
-      //PackageVersion version = Package.Current.Id.Version;
-      //_raygunMessage.Details.Version = string.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, version.Revision);
+      if (_callingAssembly != null)
+      {
+        string fullName = _callingAssembly.FullName;
+        if (!String.IsNullOrEmpty(fullName))
+        {
+          Regex versionRegex = new Regex("(?<=Version=)[^,]+(?! )");
+          Match match = versionRegex.Match(fullName);
+          if (match.Success)
+          {
+            _raygunMessage.Details.Version = match.Value;
+          }
+        }
+      }
+
       return this;
     }
 #elif ANDROID || IOS
