@@ -81,9 +81,6 @@
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunMessageDetails.cs">
       <Link>Messages\RaygunMessageDetails.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\RaygunClient.cs">
-      <Link>RaygunClient.cs</Link>
-    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\RaygunMessageBuilder.cs">
       <Link>RaygunMessageBuilder.cs</Link>
     </Compile>
@@ -95,6 +92,7 @@
     </Compile>
     <Compile Include="ExitException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RaygunClient.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />
