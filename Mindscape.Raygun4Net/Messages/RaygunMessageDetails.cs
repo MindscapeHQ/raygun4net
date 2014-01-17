@@ -21,10 +21,8 @@ namespace Mindscape.Raygun4Net.Messages
 
     public RaygunIdentifierMessage User { get; set; }
 
-#if !WINRT && !WINDOWS_PHONE && !ANDROID && !IOS
     public RaygunRequestMessage Request { get; set; }
 
     public RaygunResponseMessage Response { get; set; }
-#endif
   }
 }

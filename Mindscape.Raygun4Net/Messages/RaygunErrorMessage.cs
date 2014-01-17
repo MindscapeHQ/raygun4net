@@ -5,11 +5,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 
-#if IOS
-using MonoTouch.Foundation;
-using MonoTouch.ObjCRuntime;
-#endif
-
 namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunErrorMessage
@@ -32,20 +27,8 @@ namespace Mindscape.Raygun4Net.Messages
     {
       var exceptionType = exception.GetType();
 
-#if IOS
-      MonoTouchException mex = exception as MonoTouchException;
-      if(mex != null && mex.NSException != null)
-      {
-        Message = string.Format("{0}: {1}", mex.NSException.Name, mex.NSException.Reason);
-        ClassName = mex.NSException.Name;
-      }
-      else{
-#endif
       Message = string.Format("{0}: {1}", exceptionType.Name, exception.Message);
       ClassName = exceptionType.FullName;
-#if IOS
-      }
-#endif
 
       StackTrace = BuildStackTrace(exception);
       Data = exception.Data;
@@ -60,144 +43,6 @@ namespace Mindscape.Raygun4Net.Messages
     {      
       var lines = new List<RaygunErrorStackTraceLineMessage>();
 
-#if WINRT
-      string[] delim = { "\r\n" };
-      string stackTrace = exception.StackTrace ?? exception.Data["Message"] as string;      
-      if (stackTrace != null)
-      {
-        var frames = stackTrace.Split(delim, StringSplitOptions.RemoveEmptyEntries);
-
-        foreach (string line in frames)
-        {
-          lines.Add(new RaygunErrorStackTraceLineMessage()
-            {
-              ClassName = line
-            });
-        }
-      }
-#elif WINDOWS_PHONE
-      if (exception.StackTrace != null)
-      {
-        char[] delim = {'\r', '\n'};
-        var frames = exception.StackTrace.Split(delim);
-        foreach (string line in frames)
-        {
-          if (!"".Equals(line))
-          {
-            RaygunErrorStackTraceLineMessage stackTraceLineMessage = new RaygunErrorStackTraceLineMessage();
-            stackTraceLineMessage.ClassName = line;
-            lines.Add(stackTraceLineMessage);
-          }
-        }
-      }
-#else
-#if IOS
-      MonoTouchException mex = exception as MonoTouchException;
-      if (mex != null && mex.NSException != null)
-      {
-        var ptr = Messaging.intptr_objc_msgSend (mex.NSException.Handle, Selector.GetHandle ("callStackSymbols"));
-        var arr = NSArray.StringArrayFromHandle (ptr);
-        foreach( var line in arr)
-        {
-          lines.Add(new RaygunErrorStackTraceLineMessage{ FileName = line});
-        }
-        return lines.ToArray();
-      }
-      string stackTraceStr = exception.StackTrace;
-      if (stackTraceStr == null)
-      {
-        var line = new RaygunErrorStackTraceLineMessage { FileName = "none", LineNumber = 0 };
-        lines.Add(line);
-        return lines.ToArray();
-      }
-      try
-      {
-        string[] stackTraceLines = stackTraceStr.Split('\n');
-        foreach (string stackTraceLine in stackTraceLines)
-        {
-          int lineNumber = 0;
-          string fileName = null;
-          string methodName = null;
-          string className = null;
-          string stackTraceLn = stackTraceLine;
-          // Line number
-          int index = stackTraceLine.LastIndexOf(":");
-          if (index > 0)
-          {
-            bool success = int.TryParse(stackTraceLn.Substring(index + 1), out lineNumber);
-            if(success)
-            {
-              stackTraceLn = stackTraceLn.Substring(0, index);
-              // File name
-              index = stackTraceLn.LastIndexOf("] in ");
-              if (index > 0)
-              {
-                fileName = stackTraceLn.Substring(index + 5);
-                stackTraceLn = stackTraceLn.Substring(0, index);
-                // Method name
-                index = stackTraceLn.LastIndexOf("(");
-                if (index > 0)
-                {
-                  index = stackTraceLn.LastIndexOf(".", index);
-                  if (index > 0)
-                  {
-                    int endIndex = stackTraceLn.IndexOf("[0x");
-                    if (endIndex < 0)
-                    {
-                      endIndex = stackTraceLn.Length;
-                    }
-                    methodName = stackTraceLn.Substring(index + 1, endIndex - index - 1).Trim();
-                    methodName = methodName.Replace(" (", "(");
-                    stackTraceLn = stackTraceLn.Substring(0, index);
-                  }
-                }
-                // Class name
-                index = stackTraceLn.IndexOf("at ");
-                if (index >= 0)
-                {
-                  className = stackTraceLn.Substring(index + 3);
-                }
-              }
-              else
-              {
-                fileName = stackTraceLn;
-              }
-            }
-            else
-            {
-              index = stackTraceLn.IndexOf("at ");
-              if(index >= 0)
-              {
-                index += 3;
-              }
-              else
-              {
-                index = 0;
-              }
-              fileName = stackTraceLn.Substring(index);
-            }
-          }
-          else
-          {
-            fileName = stackTraceLn;
-          }
-          var line = new RaygunErrorStackTraceLineMessage
-          {
-            FileName = fileName,
-            LineNumber = lineNumber,
-            MethodName = methodName,
-            ClassName = className
-          };
-
-          lines.Add(line);
-        }
-        if(lines.Count > 0)
-        {
-          return lines.ToArray();
-        }
-      }
-      catch {}
-#endif
       var stackTrace = new StackTrace(exception, true);
       var frames = stackTrace.GetFrames();
 
@@ -240,7 +85,7 @@ namespace Mindscape.Raygun4Net.Messages
           lines.Add(line);
         }
       }
-#endif
+
       return lines.ToArray();
     }
 

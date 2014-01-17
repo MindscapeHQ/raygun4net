@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections;
-#if !WINRT && !WINDOWS_PHONE && !ANDROID && !IOS
-using System.Web;
-#endif
 
 using Mindscape.Raygun4Net.Messages;
 
