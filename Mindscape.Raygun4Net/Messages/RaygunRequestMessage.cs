@@ -16,7 +16,7 @@ namespace Mindscape.Raygun4Net.Messages
       Url = request.Url.AbsolutePath;
       HttpMethod = request.RequestType;
       IPAddress = request.UserHostAddress;
-      Data = ToDictionary(request.ServerVariables, Enumerable.Empty<string>());
+      Data = ToDictionary(request.ServerVariables, ignoredFormNames ?? Enumerable.Empty<string>());
       QueryString = ToDictionary(request.QueryString, Enumerable.Empty<string>());
       Headers = ToDictionary(request.Headers, ignoredFormNames ?? Enumerable.Empty<string>());
       Form = ToDictionary(request.Form, ignoredFormNames ?? Enumerable.Empty<string>(), true);
