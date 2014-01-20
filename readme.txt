@@ -57,15 +57,19 @@ If using the HTTP module then you can exclude errors by their HTTP status code b
 
 <RaygunSettings apikey="YOUR_APP_API_KEY" excludeHttpStatusCodes="418" />
 
-Remove sensitive form data
+Remove sensitive request data
 
-If you have sensitive user data being sent in a POST request that you wish to prevent being transmitted to Raygun, you can provide a list of possible keys (Names) to remove:
-
+If you have sensitive data in an HTTP request that you wish to prevent being transmitted to Raygun, you can provide a list of possible keys (Names) to remove:
 
 raygunClient.IgnoreFormDataNames(new List<string>() { "SensitiveKey1", "SomeCreditCardData"});
 
-
 When an error occurs and is passed in to Raygun4Net, if any of the keys specified are present in request.Form, they will not be transmitted to the Raygun API.
+
+Sensitive keys are removed from the following transmitted properties:
+
+  * HttpRequest.Headers
+  * HttpRequest.Form
+  * HttpRequest.ServerVariables
 
 Remove wrapper exceptions (available for all desktop .NET apps too)
 
