@@ -19,11 +19,6 @@ namespace Mindscape.Raygun4Net
     private List<string> _ignoredFormNames;
 
     /// <summary>
-    /// Gets or sets the user identity string.
-    /// </summary>
-    public string User { get; set; }
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
     /// </summary>
     /// <param name="apiKey">The API key.</param>
@@ -53,66 +48,68 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
+    /// Gets or sets the user identity string.
+    /// </summary>
+    public string User { get; set; }
+
+    /// <summary>
     /// Sends the exception from an UnhandledException event to Raygun.io, optionally with a list of tags
     /// for identification.
     /// </summary>
     /// <param name="unhandledExceptionEventArgs">The event args from UnhandledException, containing the thrown exception and its message.</param>
     /// <param name="tags">An optional list of strings to identify the message to be transmitted.</param>
-    /// <param name="userCustomData">A key-value collection of custom data that is to be sent along with the message</param>
+    /// <param name="userCustomData">A key-value collection of custom data that is to be sent along with the message.</param>
     public void Send(UnhandledExceptionEventArgs unhandledExceptionEventArgs, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
     {
-      if (ValidateApiKey())
-      {
-        var exception = unhandledExceptionEventArgs.Exception;
-        exception.Data.Add("Message", unhandledExceptionEventArgs.Message);
+      var exception = unhandledExceptionEventArgs.Exception;
+      exception.Data.Add("Message", unhandledExceptionEventArgs.Message);
 
-        Send(CreateMessage(exception, tags, userCustomData));
-      }
+      Send(BuildMessage(exception, tags, userCustomData));
     }
 
     /// <summary>
     /// Sends the exception to Raygun.io, optionally with a list of tags for identification.
     /// </summary>
     /// <param name="exception">The exception thrown by the wrapped method</param>
-    /// <param name="tags">A list of string tags relating to the message to identify it</param>
-    /// <param name="userCustomData">A key-value collection of custom data that is to be sent along with the message</param>
+    /// <param name="tags">A list of string tags relating to the message to identify it.</param>
+    /// <param name="userCustomData">A key-value collection of custom data that is to be sent along with the message.</param>
     public void Send(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
     {
-      if (ValidateApiKey())
-      {
-        Send(CreateMessage(exception, tags, userCustomData));
-      }
+      Send(BuildMessage(exception, tags, userCustomData));
     }
 
     public async void Send(RaygunMessage raygunMessage)
     {
-      HttpClientHandler handler = new HttpClientHandler { UseDefaultCredentials = true };
-
-      var client = new HttpClient(handler);
+      if (ValidateApiKey())
       {
-        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("raygun4net-winrt", "1.0.0"));
+        HttpClientHandler handler = new HttpClientHandler {UseDefaultCredentials = true};
 
-        HttpContent httpContent = new StringContent(SimpleJson.SerializeObject(raygunMessage));
-        httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-raygun-message");
-        httpContent.Headers.Add("X-ApiKey", _apiKey);
-
-        try
+        var client = new HttpClient(handler);
         {
-          await PostMessageAsync(client, httpContent, RaygunSettings.Settings.ApiEndpoint);
-        }
-        catch (Exception ex)
-        {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+          client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("raygun4net-winrt", "1.0.0"));
 
-          if (RaygunSettings.Settings.ThrowOnError)
+          HttpContent httpContent = new StringContent(SimpleJson.SerializeObject(raygunMessage));
+          httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-raygun-message");
+          httpContent.Headers.Add("X-ApiKey", _apiKey);
+
+          try
           {
-            throw;
+            await PostMessageAsync(client, httpContent, RaygunSettings.Settings.ApiEndpoint);
+          }
+          catch (Exception ex)
+          {
+            System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+
+            if (RaygunSettings.Settings.ThrowOnError)
+            {
+              throw;
+            }
           }
         }
       }
     }
 
-    private RaygunMessage CreateMessage(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
+    private RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       var message = RaygunMessageBuilder.New
           .SetEnvironmentDetails()
@@ -120,17 +117,11 @@ namespace Mindscape.Raygun4Net
           .SetExceptionDetails(exception)
           .SetClientDetails()
           .SetVersion()
+          .SetTags(tags)
+          .SetUserCustomData(userCustomData)
           .SetUser(User)
           .Build();
 
-      if (tags != null)
-      {
-        message.Details.Tags = tags;
-      }
-      if (userCustomData != null)
-      {
-        message.Details.UserCustomData = userCustomData;
-      }
       return message;
     }
 
