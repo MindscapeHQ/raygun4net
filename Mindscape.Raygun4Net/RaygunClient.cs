@@ -28,8 +28,8 @@ namespace Mindscape.Raygun4Net
       _apiKey = apiKey;
       _wrapperExceptions = new List<Type>();
 
-      _wrapperExceptions.Add(typeof (TargetInvocationException));
-      _wrapperExceptions.Add(typeof (HttpUnhandledException));
+      _wrapperExceptions.Add(typeof(TargetInvocationException));
+      _wrapperExceptions.Add(typeof(HttpUnhandledException));
     }
 
     /// <summary>
