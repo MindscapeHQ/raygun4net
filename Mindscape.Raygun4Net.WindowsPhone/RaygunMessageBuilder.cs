@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-using System.Text.RegularExpressions;
 using Mindscape.Raygun4Net.Messages;
+using System.Reflection;
 
 namespace Mindscape.Raygun4Net
 {
@@ -18,6 +18,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    private Assembly _callingAssembly;
     private readonly RaygunMessage _raygunMessage;
 
     private RaygunMessageBuilder()
@@ -33,7 +34,6 @@ namespace Mindscape.Raygun4Net
     public IRaygunMessageBuilder SetMachineName(string machineName)
     {
       _raygunMessage.Details.MachineName = machineName;
-
       return this;
     }
 
@@ -62,14 +62,12 @@ namespace Mindscape.Raygun4Net
       {
         _raygunMessage.Details.Error = new RaygunErrorMessage(exception);
       }
-
       return this;
     }
 
     public IRaygunMessageBuilder SetClientDetails()
     {
       _raygunMessage.Details.Client = new RaygunClientMessage();
-
       return this;
     }
 
@@ -88,9 +86,7 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
-    private System.Reflection.Assembly _callingAssembly;
-
-    public IRaygunMessageBuilder SetCallingAssembly(System.Reflection.Assembly callingAssembly)
+    public IRaygunMessageBuilder SetCallingAssembly(Assembly callingAssembly)
     {
       _callingAssembly = callingAssembly;
       return this;
@@ -100,18 +96,8 @@ namespace Mindscape.Raygun4Net
     {
       if (_callingAssembly != null)
       {
-        string fullName = _callingAssembly.FullName;
-        if (!String.IsNullOrEmpty(fullName))
-        {
-          Regex versionRegex = new Regex("(?<=Version=)[^,]+(?! )");
-          Match match = versionRegex.Match(fullName);
-          if (match.Success)
-          {
-            _raygunMessage.Details.Version = match.Value;
-          }
-        }
+        _raygunMessage.Details.Version = new AssemblyName(_callingAssembly.FullName).Version.ToString();
       }
-
       return this;
     }
   }
