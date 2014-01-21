@@ -7,7 +7,7 @@ namespace Mindscape.Raygun4Net.Messages
     public RaygunClientMessage()
     {
       Name = "Raygun4Net";
-      Version = Assembly.GetExecutingAssembly().FullName;
+      Version = new AssemblyName(Assembly.GetExecutingAssembly().FullName).Version.ToString();
       ClientUrl = @"https://github.com/MindscapeHQ/raygun4net";
     }
 
