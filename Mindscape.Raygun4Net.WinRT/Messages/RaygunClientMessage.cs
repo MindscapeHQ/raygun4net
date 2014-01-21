@@ -6,7 +6,7 @@ namespace Mindscape.Raygun4Net.Messages
   {
     public RaygunClientMessage()
     {
-      Name = "Raygun4Net";
+      Name = "Raygun4Net.WinRT";
       Version = typeof(RaygunClient).GetTypeInfo().Assembly.GetName().Version.ToString();
       ClientUrl = @"https://github.com/MindscapeHQ/raygun4net";
     }
