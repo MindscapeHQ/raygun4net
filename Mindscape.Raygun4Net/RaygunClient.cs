@@ -20,11 +20,6 @@ namespace Mindscape.Raygun4Net
     private List<string> _ignoredFormNames; 
 
     /// <summary>
-    /// Gets or sets the user identity string.
-    /// </summary>
-    public string User { get; set; }
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
     /// </summary>
     /// <param name="apiKey">The API key.</param>
@@ -55,6 +50,11 @@ namespace Mindscape.Raygun4Net
       }
       return true;
     }
+
+    /// <summary>
+    /// Gets or sets the user identity string.
+    /// </summary>
+    public string User { get; set; }
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
@@ -95,126 +95,49 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Transmits an exception to Raygun.io synchronously, using the version number of the originating assembly.
+    /// Transmits an exception to Raygun.io synchronously.
     /// </summary>
-    /// <param name="exception">The exception to deliver</param>
-    public void Send(Exception exception)
-    {
-      exception = StripWrapperExceptions(exception);
-      Send(BuildMessage(exception));
-    }
-
-    /// <summary>
-    /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
-    /// with the message for identification. This uses the version number of the originating assembly.
-    /// </summary>
-    /// <param name="exception">The exception to deliver</param>
-    /// <param name="tags">A list of strings associated with the message</param>
-    public void Send(Exception exception, IList<string> tags)
-    {
-      exception = StripWrapperExceptions(exception);
-      var message = BuildMessage(exception);
-      message.Details.Tags = tags;
-      Send(message);
-    }
-
-    public void Send(Exception exception, IList<string> tags, string version)
-    {
-      var message = BuildMessage(exception);
-      message.Details.Tags = tags;
-      message.Details.Version = version;
-      Send(message);
-    }
-
-    /// <summary>
-    /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
-    /// with the message for identification, as well as sending a key-value collection of custom data.
-    /// This uses the version number of the originating assembly.
-    /// </summary>
-    /// <param name="exception">The exception to deliver</param>
-    /// <param name="tags">A list of strings associated with the message</param>
-    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload</param>
-    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
-    {
-      exception = StripWrapperExceptions(exception);
-      var message = BuildMessage(exception);
-      message.Details.Tags = tags;      
-      message.Details.UserCustomData = userCustomData;
-      Send(message);
-    }
-
-    /// <summary>
-    /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
-    /// with the message for identification, as well as sending a key-value collection of custom data.
-    /// This specifies a custom version identification number.
-    /// </summary>
-    /// <param name="exception">The exception to deliver</param>
-    /// <param name="tags">A list of strings associated with the message</param>
-    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload</param>
-    /// <param name="version">A custom version identifiction, associated with a particular build of your project.</param>
-    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
+    /// <param name="exception">The exception to deliver.</param>
+    /// <param name="tags">An optional list of strings associated with the message.</param>
+    /// <param name="userCustomData">An optional key-value collection of custom data that will be added to the payload.</param>
+    /// <param name="version">An optional custom version identifiction, associated with a particular build of your project.</param>
+    public void Send(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData, [Optional] string version)
     {
       exception = StripWrapperExceptions(exception);
       var message = BuildMessage(exception);
       message.Details.Tags = tags;
       message.Details.UserCustomData = userCustomData;
-      message.Details.Version = version;
-      Send(message);
-    }
-
-    private static Exception StripWrapperExceptions(Exception exception)
-    {
-      if (_wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
+      if (version != null)
       {
-        return StripWrapperExceptions(exception.InnerException);
+        message.Details.Version = version;
       }
-
-      return exception;
+      Send(message);
     }
 
     /// <summary>
     /// Asynchronously transmits a message to Raygun.io.
     /// </summary>
-    /// <param name="exception"></param>
-    public void SendInBackground(Exception exception)
-    {
-      var message = BuildMessage(exception);
-
-      ThreadPool.QueueUserWorkItem(c => Send(message));
-    }
-
-    public void SendInBackground(Exception exception, IList<string> tags)
-    {
-      var message = BuildMessage(exception);
-      message.Details.Tags = tags;
-      ThreadPool.QueueUserWorkItem(c => Send(message));
-    }
-
-    public void SendInBackground(Exception exception, IList<string> tags, string version)
-    {
-      var message = BuildMessage(exception);
-      message.Details.Tags = tags;
-      message.Details.Version = version;
-      ThreadPool.QueueUserWorkItem(c => Send(message));
-    }
-
-    public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
+    /// <param name="exception">The exception to deliver.</param>
+    /// <param name="tags">An optional list of strings associated with the message.</param>
+    /// <param name="userCustomData">An optional key-value collection of custom data that will be added to the payload.</param>
+    /// <param name="version">An optional custom version identifiction, associated with a particular build of your project.</param>
+    public void SendInBackground(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData, [Optional] string version)
     {
       var message = BuildMessage(exception);
       message.Details.UserCustomData = userCustomData;
       message.Details.Tags = tags;
+      if (version != null)
+      {
+        message.Details.Version = version;
+      }
       ThreadPool.QueueUserWorkItem(c => Send(message));
     }
 
-    public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
-    {
-      var message = BuildMessage(exception);
-      message.Details.UserCustomData = userCustomData;
-      message.Details.Tags = tags;
-      message.Details.Version = version;
-      ThreadPool.QueueUserWorkItem(c => Send(message));
-    }
-
+    /// <summary>
+    /// Asynchronously posts a RaygunMessage to the Raygun.io api endpoint.
+    /// </summary>
+    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
+    /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void SendInBackground(RaygunMessage raygunMessage)
     {
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
@@ -232,6 +155,16 @@ namespace Mindscape.Raygun4Net
         .SetUser(User)
         .Build();
       return message;
+    }
+
+    private static Exception StripWrapperExceptions(Exception exception)
+    {
+      if (_wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
+      {
+        return StripWrapperExceptions(exception.InnerException);
+      }
+
+      return exception;
     }
 
     /// <summary>

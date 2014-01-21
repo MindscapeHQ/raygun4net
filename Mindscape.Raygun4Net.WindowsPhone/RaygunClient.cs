@@ -88,7 +88,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Sends a message ro the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
+    /// Sends a message to the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
     /// </summary>
     /// <param name="args">The <see cref="ApplicationUnhandledExceptionEventArgs"/> containing the exception information.</param>
     public void Send(ApplicationUnhandledExceptionEventArgs args)
@@ -98,7 +98,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Sends a message ro the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
+    /// Sends a message to the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
     /// </summary>
     /// <param name="args">The <see cref="ApplicationUnhandledExceptionEventArgs"/> containing the exception information.</param>
     /// <param name="tags">A list of tags to send with the message.</param>
@@ -109,7 +109,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Sends a message ro the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
+    /// Sends a message to the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
     /// </summary>
     /// <param name="args">The <see cref="ApplicationUnhandledExceptionEventArgs"/> containing the exception information.</param>
     /// <param name="userCustomData">Custom data to send with the message.</param>
@@ -120,7 +120,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Sends a message ro the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
+    /// Sends a message to the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
     /// </summary>
     /// <param name="args">The <see cref="ApplicationUnhandledExceptionEventArgs"/> containing the exception information.</param>
     /// <param name="tags">A list of tags to send with the message.</param>
@@ -137,7 +137,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Sends a message ro the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
+    /// Sends a message to the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
     /// </summary>
     /// <param name="args">The <see cref="ApplicationUnhandledExceptionEventArgs"/> containing the exception information.</param>
     /// <param name="tags">A list of tags to send with the message.</param>
