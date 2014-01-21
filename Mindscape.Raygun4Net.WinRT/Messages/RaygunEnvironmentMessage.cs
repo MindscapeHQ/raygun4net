@@ -20,7 +20,7 @@ namespace Mindscape.Raygun4Net.Messages
       Cpu = Package.Current.Id.Architecture.ToString();
       ResolutionScale = DisplayProperties.ResolutionScale.ToString();
       CurrentOrientation = DisplayProperties.CurrentOrientation.ToString();
-      Location = Windows.System.UserProfile.GlobalizationPreferences.HomeGeographicRegion;
+      Locale = Windows.System.UserProfile.GlobalizationPreferences.HomeGeographicRegion;
 
       DateTime now = DateTime.Now;
       UtcOffset = TimeZoneInfo.Local.GetUtcOffset(now).TotalHours;
@@ -59,9 +59,6 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string Architecture { get; private set; }
 
-    [Obsolete("Use Locale instead")]
-    public string Location { get; private set; }
-
     public ulong TotalVirtualMemory { get; private set; }
 
     public ulong AvailableVirtualMemory { get; private set; }
@@ -79,8 +76,6 @@ namespace Mindscape.Raygun4Net.Messages
     public string DeviceName { get; private set; }
 
     public double UtcOffset { get; private set; }
-
-    // Refactored properties
 
     public string Locale { get; private set; }
   }
