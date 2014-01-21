@@ -132,27 +132,7 @@ namespace Mindscape.Raygun4Net
       {
         bool handled = args.Handled;
         args.Handled = true;
-        Send(CreateMessage(args.ExceptionObject, tags, userCustomData), false, !handled);
-      }
-    }
-
-    /// <summary>
-    /// Sends a message to the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
-    /// </summary>
-    /// <param name="args">The <see cref="ApplicationUnhandledExceptionEventArgs"/> containing the exception information.</param>
-    /// <param name="tags">A list of tags to send with the message.</param>
-    /// <param name="userCustomData">Custom data to send with the message.</param>
-    /// <paramref name="version">The version of the running application.</paramref>
-    public void Send(ApplicationUnhandledExceptionEventArgs args, IList<string> tags, IDictionary userCustomData, string version)
-    {
-      SetCallingAssembly(Assembly.GetCallingAssembly());
-      if (!(args.ExceptionObject is ExitException))
-      {
-        bool handled = args.Handled;
-        args.Handled = true;
-        RaygunMessage message = CreateMessage(args.ExceptionObject, tags, userCustomData);
-        message.Details.Version = version;
-        Send(message, false, !handled);
+        Send(BuildMessage(args.ExceptionObject, tags, userCustomData), false, !handled);
       }
     }
 
@@ -204,37 +184,12 @@ namespace Mindscape.Raygun4Net
       Send(exception, tags, userCustomData, calledFromUnhandled);
     }
 
-    /// <summary>
-    /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>.
-    /// </summary>
-    /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
-    /// <param name="tags">A list of tags to send with the message.</param>
-    /// <param name="userCustomData">Custom data to send with the message.</param>
-    /// <param name="version">The version of the running application.</param>
-    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
-    {
-      SetCallingAssembly(Assembly.GetCallingAssembly());
-      bool calledFromUnhandled = IsCalledFromApplicationUnhandledExceptionHandler();
-      Send(exception, tags, userCustomData, version, calledFromUnhandled);
-    }
-
-    private void Send(Exception exception, IList<string> tags, IDictionary userCustomData, string version, bool calledFromUnhandled)
-    {
-      if (!(exception is ExitException))
-      {
-        exception.Data.Add("Message", exception.Message); // TODO is this needed?
-        RaygunMessage message = CreateMessage(exception, tags, userCustomData);
-        message.Details.Version = version;
-        Send(message, calledFromUnhandled, false);
-      }
-    }
-
     private void Send(Exception exception, IList<string> tags, IDictionary userCustomData, bool calledFromUnhandled)
     {
       if (!(exception is ExitException))
       {
         exception.Data.Add("Message", exception.Message); // TODO is this needed?
-        Send(CreateMessage(exception, tags, userCustomData), calledFromUnhandled, false);
+        Send(BuildMessage(exception, tags, userCustomData), calledFromUnhandled, false);
       }
     }
 
@@ -433,7 +388,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private RaygunMessage CreateMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    private RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       object deviceName;
       DeviceExtendedProperties.TryGetValue("DeviceName", out deviceName);
@@ -445,17 +400,11 @@ namespace Mindscape.Raygun4Net
           .SetExceptionDetails(exception)
           .SetClientDetails()
           .SetVersion()
+          .SetTags(tags)
+          .SetUserCustomData(userCustomData)
           .SetUser(User)
           .Build();
 
-      if (tags != null)
-      {
-        message.Details.Tags = tags;
-      }
-      if (userCustomData != null)
-      {
-        message.Details.UserCustomData = userCustomData;
-      }
       return message;
     }
   }

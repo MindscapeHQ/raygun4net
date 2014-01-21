@@ -77,6 +77,12 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
+    public IRaygunMessageBuilder SetTags(IList<string> tags)
+    {
+      _raygunMessage.Details.Tags = tags;
+      return this;
+    }
+
     public IRaygunMessageBuilder SetUser(string user)
     {
       if (user != null && user.Length > 0)
