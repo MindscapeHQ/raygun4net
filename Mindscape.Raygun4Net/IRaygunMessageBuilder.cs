@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections;
-
+using System.Collections.Generic;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
@@ -20,6 +20,8 @@ namespace Mindscape.Raygun4Net
     IRaygunMessageBuilder SetVersion();
 
     IRaygunMessageBuilder SetUserCustomData(IDictionary userCustomData);
+
+    IRaygunMessageBuilder SetTags(IList<string> tags);
 
     IRaygunMessageBuilder SetUser(string user);
   }

@@ -100,8 +100,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver</param>
     public void Send(Exception exception)
     {
-      exception = StripWrapperExceptions(exception);
-      Send(BuildMessage(exception));
+      Send(exception, null, (IDictionary)null);
     }
 
     /// <summary>
@@ -112,18 +111,12 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message</param>
     public void Send(Exception exception, IList<string> tags)
     {
-      exception = StripWrapperExceptions(exception);
-      var message = BuildMessage(exception);
-      message.Details.Tags = tags;
-      Send(message);
+      Send(exception, tags, (IDictionary)null);
     }
 
     public void Send(Exception exception, IList<string> tags, string version)
     {
-      var message = BuildMessage(exception);
-      message.Details.Tags = tags;
-      message.Details.Version = version;
-      Send(message);
+      Send(exception, tags, null, version);
     }
 
     /// <summary>
@@ -136,11 +129,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      exception = StripWrapperExceptions(exception);
-      var message = BuildMessage(exception);
-      message.Details.Tags = tags;      
-      message.Details.UserCustomData = userCustomData;
-      Send(message);
+      Send(BuildMessage(exception, tags, userCustomData));
     }
 
     /// <summary>
@@ -154,14 +143,8 @@ namespace Mindscape.Raygun4Net
     /// <param name="version">A custom version identifiction, associated with a particular build of your project.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
     {
-      exception = StripWrapperExceptions(exception);
-      var message = BuildMessage(exception);
-      message.Details.Tags = tags;
-      message.Details.UserCustomData = userCustomData;
-      if (version != null)
-      {
-        message.Details.Version = version;
-      }
+      var message = BuildMessage(exception, tags, userCustomData);
+      message.Details.Version = version;
       Send(message);
     }
 
@@ -171,41 +154,29 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception"></param>
     public void SendInBackground(Exception exception)
     {
-      var message = BuildMessage(exception);
-
-      ThreadPool.QueueUserWorkItem(c => Send(message));
+      SendInBackground(exception, null, (IDictionary)null);
     }
 
     public void SendInBackground(Exception exception, IList<string> tags)
     {
-      var message = BuildMessage(exception);
-      message.Details.Tags = tags;
-      ThreadPool.QueueUserWorkItem(c => Send(message));
+      SendInBackground(exception, tags, (IDictionary)null);
     }
 
     public void SendInBackground(Exception exception, IList<string> tags, string version)
     {
-      var message = BuildMessage(exception);
-      message.Details.Tags = tags;
-      message.Details.Version = version;
-      ThreadPool.QueueUserWorkItem(c => Send(message));
+      SendInBackground(exception, tags, null, version);
     }
 
     public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      var message = BuildMessage(exception);
-      message.Details.UserCustomData = userCustomData;
-      message.Details.Tags = tags;
-      ThreadPool.QueueUserWorkItem(c => Send(message));
+      SendInBackground(BuildMessage(exception, tags, userCustomData));
     }
 
     public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
     {
-      var message = BuildMessage(exception);
-      message.Details.UserCustomData = userCustomData;
-      message.Details.Tags = tags;
+      var message = BuildMessage(exception, tags, userCustomData);
       message.Details.Version = version;
-      ThreadPool.QueueUserWorkItem(c => Send(message));
+      SendInBackground(message);
     }
 
     public void SendInBackground(RaygunMessage raygunMessage)
@@ -213,8 +184,10 @@ namespace Mindscape.Raygun4Net
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
 
-    internal RaygunMessage BuildMessage(Exception exception)
+    internal RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
+      exception = StripWrapperExceptions(exception);
+
       var message = RaygunMessageBuilder.New
         .SetHttpDetails(HttpContext.Current, _ignoredFormNames)
         .SetEnvironmentDetails()
@@ -222,6 +195,8 @@ namespace Mindscape.Raygun4Net
         .SetExceptionDetails(exception)
         .SetClientDetails()
         .SetVersion()
+        .SetTags(tags)
+        .SetUserCustomData(userCustomData)
         .SetUser(User)
         .Build();
       return message;

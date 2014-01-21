@@ -6,24 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using Mindscape.Raygun4Net.Messages;
-#if WINRT
-using System.Threading.Tasks;
-using System.Net.Http.Headers;
-using System.Net.Http;
-using Windows.Networking.Connectivity;
-using Windows.UI.Xaml;
-#elif WINDOWS_PHONE
-using System.Windows;
-using System.Diagnostics;
-using System.IO;
-using System.Threading;
-using Microsoft.Phone.Info;
-using System.IO.IsolatedStorage;
-using System.Text;
-using Microsoft.Phone.Net.NetworkInformation;
-using Mindscape.Raygun4Net.WindowsPhone;
-using System.Reflection;
-#elif ANDROID
+
 using System.Threading;
 using System.Reflection;
 using Android.Content;
@@ -36,21 +19,6 @@ using Android.OS;
 using System.Text;
 using System.Threading.Tasks;
 using Android.Bluetooth;
-#elif IOS
-using System.Threading;
-using System.Threading.Tasks;
-using System.Reflection;
-using MonoTouch.UIKit;
-using MonoTouch.SystemConfiguration;
-using MonoTouch.Foundation;
-using System.IO.IsolatedStorage;
-using System.IO;
-using System.Text;
-#else
-using System.Web;
-using System.Threading;
-using System.Reflection;
-#endif
 
 namespace Mindscape.Raygun4Net
 {
