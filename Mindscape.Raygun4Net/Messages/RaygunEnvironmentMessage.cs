@@ -136,9 +136,6 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string Architecture { get; private set; }
 
-    [Obsolete("Use Locale instead")]
-    public string Location { get; private set; }
-
     public ulong TotalVirtualMemory { get; private set; }
 
     public ulong AvailableVirtualMemory { get; private set; }
@@ -156,8 +153,6 @@ namespace Mindscape.Raygun4Net.Messages
     public string DeviceName { get; private set; }
 
     public double UtcOffset { get; private set; }
-
-    // Refactored properties
 
     public string Locale { get; private set; }
   }
