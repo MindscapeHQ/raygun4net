@@ -26,11 +26,6 @@ namespace Mindscape.Raygun4Net
     private List<string> _ignoredFormNames;
 
     /// <summary>
-    /// Gets or sets the user identity string.
-    /// </summary>
-    public string User { get; set; }
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
     /// </summary>
     /// <param name="apiKey">The API key.</param>
@@ -51,6 +46,16 @@ namespace Mindscape.Raygun4Net
       }
       return true;
     }
+
+    /// <summary>
+    /// Gets or sets the user identity string.
+    /// </summary>
+    public string User { get; set; }
+
+    /// <summary>
+    /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
+    /// </summary>
+    public string ApplicationVersion { get; set; }
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
@@ -93,7 +98,7 @@ namespace Mindscape.Raygun4Net
     /// <summary>
     /// Transmits an exception to Raygun.io synchronously, using the version number of the originating assembly.
     /// </summary>
-    /// <param name="exception">The exception to deliver</param>
+    /// <param name="exception">The exception to deliver.</param>
     public void Send(Exception exception)
     {
       Send(exception, null, (IDictionary)null);
@@ -103,16 +108,11 @@ namespace Mindscape.Raygun4Net
     /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
     /// with the message for identification. This uses the version number of the originating assembly.
     /// </summary>
-    /// <param name="exception">The exception to deliver</param>
-    /// <param name="tags">A list of strings associated with the message</param>
+    /// <param name="exception">The exception to deliver.</param>
+    /// <param name="tags">A list of strings associated with the message.</param>
     public void Send(Exception exception, IList<string> tags)
     {
       Send(exception, tags, (IDictionary)null);
-    }
-
-    public void Send(Exception exception, IList<string> tags, string version)
-    {
-      Send(exception, tags, null, version);
     }
 
     /// <summary>
@@ -120,71 +120,49 @@ namespace Mindscape.Raygun4Net
     /// with the message for identification, as well as sending a key-value collection of custom data.
     /// This uses the version number of the originating assembly.
     /// </summary>
-    /// <param name="exception">The exception to deliver</param>
-    /// <param name="tags">A list of strings associated with the message</param>
-    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload</param>
+    /// <param name="exception">The exception to deliver.</param>
+    /// <param name="tags">A list of strings associated with the message.</param>
+    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       Send(BuildMessage(exception, tags, userCustomData));
     }
-
-    /// <summary>
-    /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
-    /// with the message for identification, as well as sending a key-value collection of custom data.
-    /// This specifies a custom version identification number.
-    /// </summary>
-    /// <param name="exception">The exception to deliver</param>
-    /// <param name="tags">A list of strings associated with the message</param>
-    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload</param>
-    /// <param name="version">A custom version identifiction, associated with a particular build of your project.</param>
-    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
-    {
-      var message = BuildMessage(exception, tags, userCustomData);
-      message.Details.Version = version;
-      Send(message);
-    }
-
-    private static Exception StripWrapperExceptions(Exception exception)
-    {
-      if (_wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
-      {
-        return StripWrapperExceptions(exception.InnerException);
-      }
-
-      return exception;
-    }
-
+    
     /// <summary>
     /// Asynchronously transmits a message to Raygun.io.
     /// </summary>
-    /// <param name="exception"></param>
+    /// <param name="exception">The exception to deliver.</param>
     public void SendInBackground(Exception exception)
     {
       SendInBackground(exception, null, (IDictionary)null);
     }
 
+    /// <summary>
+    /// Asynchronously transmits a message to Raygun.io.
+    /// </summary>
+    /// <param name="exception">The exception to deliver.</param>
+    /// <param name="tags">A list of strings associated with the message.</param>
     public void SendInBackground(Exception exception, IList<string> tags)
     {
       SendInBackground(exception, tags, (IDictionary)null);
     }
 
-    public void SendInBackground(Exception exception, IList<string> tags, string version)
-    {
-      SendInBackground(exception, tags, null, version);
-    }
-
+    /// <summary>
+    /// Asynchronously transmits a message to Raygun.io.
+    /// </summary>
+    /// <param name="exception">The exception to deliver.</param>
+    /// <param name="tags">A list of strings associated with the message.</param>
+    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       SendInBackground(BuildMessage(exception, tags, userCustomData));
     }
-
-    public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
-    {
-      var message = BuildMessage(exception, tags, userCustomData);
-      message.Details.Version = version;
-      SendInBackground(message);
-    }
-
+    
+    /// <summary>
+    /// Asynchronously transmits a message to Raygun.io.
+    /// </summary>
+    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
+    /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void SendInBackground(RaygunMessage raygunMessage)
     {
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
@@ -268,13 +246,23 @@ namespace Mindscape.Raygun4Net
         .SetMachineName(UIDevice.CurrentDevice.Name)
         .SetExceptionDetails(exception)
         .SetClientDetails()
-        .SetVersion()
+        .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
         .SetUser(User)
         .Build();
 
       return message;
+    }
+
+    private static Exception StripWrapperExceptions(Exception exception)
+    {
+      if (_wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
+      {
+        return StripWrapperExceptions(exception.InnerException);
+      }
+
+      return exception;
     }
 
     /// <summary>
@@ -464,6 +452,50 @@ namespace Mindscape.Raygun4Net
       {
         System.Diagnostics.Debug.WriteLine(string.Format("Error saving message to isolated storage {0}", ex.Message));
       }
+    }
+
+    /// <summary>
+    /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
+    /// Then use a Send method that does not accept a version.
+    /// </summary>
+    [Obsolete("Set the ApplicationVersion property instead, and then call a different Send method.")]
+    public void Send(Exception exception, IList<string> tags, string version)
+    {
+      Send(exception, tags, null, version);
+    }
+
+    /// <summary>
+    /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
+    /// Then use a Send method that does not accept a version.
+    /// </summary>
+    [Obsolete("Set the ApplicationVersion property instead, and then call a different Send method.")]
+    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
+    {
+      var message = BuildMessage(exception, tags, userCustomData);
+      message.Details.Version = version;
+      Send(message);
+    }
+
+    /// <summary>
+    /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
+    /// Then use a Send method that does not accept a version.
+    /// </summary>
+    [Obsolete("Set the ApplicationVersion property instead, and then call a different Send method.")]
+    public void SendInBackground(Exception exception, IList<string> tags, string version)
+    {
+      SendInBackground(exception, tags, null, version);
+    }
+
+    /// <summary>
+    /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
+    /// Then use a Send method that does not accept a version.
+    /// </summary>
+    [Obsolete("Set the ApplicationVersion property instead, and then call a different Send method.")]
+    public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
+    {
+      var message = BuildMessage(exception, tags, userCustomData);
+      message.Details.Version = version;
+      SendInBackground(message);
     }
   }
 }

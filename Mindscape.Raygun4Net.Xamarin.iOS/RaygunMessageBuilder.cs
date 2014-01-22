@@ -91,9 +91,13 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
-    public IRaygunMessageBuilder SetVersion()
+    public IRaygunMessageBuilder SetVersion(string version)
     {
-      if (_raygunMessage.Details.Environment.PackageVersion != null)
+      if (!String.IsNullOrWhiteSpace(version))
+      {
+        _raygunMessage.Details.Version = version;
+      }
+      else if (!String.IsNullOrWhiteSpace(_raygunMessage.Details.Environment.PackageVersion))
       {
         _raygunMessage.Details.Version = _raygunMessage.Details.Environment.PackageVersion;
       }
