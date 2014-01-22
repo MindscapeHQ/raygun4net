@@ -49,7 +49,7 @@ namespace Mindscape.Raygun4Net
         // swallow the exception. A good addition would be to handle
         // these cases and load them correctly depending on where its running.
         // see http://raygun.io/forums/thread/3655
-        Debug.WriteLine(string.Format("Failed to fetch the environment details: {0}", ex.Message));
+        Debug.WriteLine("Failed to fetch the environment details: {0}", ex.Message);
       }
 
       return this;
@@ -85,17 +85,24 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetUser(string user)
     {
-      if (user != null && user.Length > 0)
+      if (!String.IsNullOrEmpty(user))
       {
         _raygunMessage.Details.User = new RaygunIdentifierMessage(user);
       }
       return this;
     }
 
-    public IRaygunMessageBuilder SetVersion()
+    public IRaygunMessageBuilder SetVersion(string version)
     {
-      PackageVersion version = Package.Current.Id.Version;
-      _raygunMessage.Details.Version = string.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, version.Revision);
+      if (!String.IsNullOrWhiteSpace(version))
+      {
+        _raygunMessage.Details.Version = version;
+      }
+      else
+      {
+        PackageVersion v = Package.Current.Id.Version;
+        _raygunMessage.Details.Version = String.Format("{0}.{1}.{2}.{3}", v.Major, v.Minor, v.Build, v.Revision);
+      }
       return this;
     }
   }

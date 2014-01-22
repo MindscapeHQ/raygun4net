@@ -53,6 +53,11 @@ namespace Mindscape.Raygun4Net
     public string User { get; set; }
 
     /// <summary>
+    /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
+    /// </summary>
+    public string ApplicationVersion { get; set; }
+
+    /// <summary>
     /// Sends the exception from an UnhandledException event to Raygun.io, optionally with a list of tags
     /// for identification.
     /// </summary>
@@ -70,7 +75,7 @@ namespace Mindscape.Raygun4Net
     /// <summary>
     /// Sends the exception to Raygun.io, optionally with a list of tags for identification.
     /// </summary>
-    /// <param name="exception">The exception thrown by the wrapped method</param>
+    /// <param name="exception">The exception thrown by the wrapped method.</param>
     /// <param name="tags">A list of string tags relating to the message to identify it.</param>
     /// <param name="userCustomData">A key-value collection of custom data that is to be sent along with the message.</param>
     public void Send(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
@@ -98,7 +103,7 @@ namespace Mindscape.Raygun4Net
           }
           catch (Exception ex)
           {
-            System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+            System.Diagnostics.Debug.WriteLine("Error Logging Exception to Raygun.io {0}", ex.Message);
 
             if (RaygunSettings.Settings.ThrowOnError)
             {
@@ -116,7 +121,7 @@ namespace Mindscape.Raygun4Net
           .SetMachineName(NetworkInformation.GetHostNames()[0].DisplayName)
           .SetExceptionDetails(exception)
           .SetClientDetails()
-          .SetVersion()
+          .SetVersion(ApplicationVersion)
           .SetTags(tags)
           .SetUserCustomData(userCustomData)
           .SetUser(User)
@@ -142,7 +147,7 @@ namespace Mindscape.Raygun4Net
       }
       catch (Exception ex)
       {
-        Send(ex);
+        Send(ex, tags);
         throw;
       }
     }
@@ -155,7 +160,7 @@ namespace Mindscape.Raygun4Net
       }
       catch (Exception ex)
       {
-        Send(ex);
+        Send(ex, tags);
         throw;
       }
     }
