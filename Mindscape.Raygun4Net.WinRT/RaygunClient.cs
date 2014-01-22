@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Mindscape.Raygun4Net.Messages;
 
@@ -9,6 +10,7 @@ using System.Net.Http.Headers;
 using System.Net.Http;
 using Windows.Networking.Connectivity;
 using Windows.UI.Xaml;
+using System.Reflection;
 
 namespace Mindscape.Raygun4Net
 {
@@ -16,7 +18,6 @@ namespace Mindscape.Raygun4Net
   {
     private readonly string _apiKey;
     private static List<Type> _wrapperExceptions;
-    private List<string> _ignoredFormNames;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -26,6 +27,7 @@ namespace Mindscape.Raygun4Net
     {
       _apiKey = apiKey;
       _wrapperExceptions = new List<Type>();
+      _wrapperExceptions.Add(typeof(TargetInvocationException));
     }
 
     /// <summary>
@@ -58,6 +60,25 @@ namespace Mindscape.Raygun4Net
     public string ApplicationVersion { get; set; }
 
     /// <summary>
+    /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
+    /// This can be used when a wrapper exception, e.g. TargetInvocationException,
+    /// contains the actual exception as the InnerException. The message and stack trace of the inner exception will then
+    /// be used by Raygun for grouping and display. TargetInvocationException is added for you,
+    /// but if you have other wrapper exceptions that you want stripped you can pass them in here.
+    /// </summary>
+    /// <param name="wrapperExceptions">An enumerable list of exception types that you want removed and replaced with their inner exception.</param>
+    public void AddWrapperExceptions(IEnumerable<Type> wrapperExceptions)
+    {
+      foreach (Type wrapper in wrapperExceptions)
+      {
+        if (!_wrapperExceptions.Contains(wrapper))
+        {
+          _wrapperExceptions.Add(wrapper);
+        }
+      }
+    }
+
+    /// <summary>
     /// Sends the exception from an UnhandledException event to Raygun.io, optionally with a list of tags
     /// for identification.
     /// </summary>
@@ -67,7 +88,7 @@ namespace Mindscape.Raygun4Net
     public void Send(UnhandledExceptionEventArgs unhandledExceptionEventArgs, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
     {
       var exception = unhandledExceptionEventArgs.Exception;
-      exception.Data.Add("Message", unhandledExceptionEventArgs.Message);
+      exception.Data.Add("Message", unhandledExceptionEventArgs.Message); // TODO: is this needed?
 
       Send(BuildMessage(exception, tags, userCustomData));
     }
@@ -116,6 +137,8 @@ namespace Mindscape.Raygun4Net
 
     private RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
+      exception = StripWrapperExceptions(exception);
+
       var message = RaygunMessageBuilder.New
           .SetEnvironmentDetails()
           .SetMachineName(NetworkInformation.GetHostNames()[0].DisplayName)
@@ -128,6 +151,16 @@ namespace Mindscape.Raygun4Net
           .Build();
 
       return message;
+    }
+
+    private static Exception StripWrapperExceptions(Exception exception)
+    {
+      if (_wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
+      {
+        return StripWrapperExceptions(exception.InnerException);
+      }
+
+      return exception;
     }
 
 #pragma warning disable 1998
