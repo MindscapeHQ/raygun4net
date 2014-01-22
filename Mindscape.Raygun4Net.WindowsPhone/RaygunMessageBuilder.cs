@@ -18,7 +18,6 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private Assembly _callingAssembly;
     private readonly RaygunMessage _raygunMessage;
 
     private RaygunMessageBuilder()
@@ -92,18 +91,9 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
-    public IRaygunMessageBuilder SetCallingAssembly(Assembly callingAssembly)
+    public IRaygunMessageBuilder SetVersion(string Version)
     {
-      _callingAssembly = callingAssembly;
-      return this;
-    }
-
-    public IRaygunMessageBuilder SetVersion()
-    {
-      if (_callingAssembly != null)
-      {
-        _raygunMessage.Details.Version = new AssemblyName(_callingAssembly.FullName).Version.ToString();
-      }
+      _raygunMessage.Details.Version = Version;
       return this;
     }
   }

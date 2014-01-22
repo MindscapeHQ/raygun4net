@@ -23,13 +23,12 @@ namespace Mindscape.Raygun4Net
   public class RaygunClient
   {
     private readonly string _apiKey;
+    private Assembly _callingAssembly;
+    private readonly Queue<string> _messageQueue = new Queue<string>();
+    private bool _exit;
+    private bool _running;
     private static List<Type> _wrapperExceptions;
     private List<string> _ignoredFormNames;
-
-    /// <summary>
-    /// Gets or sets the user identity string.
-    /// </summary>
-    public string User { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -62,6 +61,16 @@ namespace Mindscape.Raygun4Net
       return true;
     }
 
+    /// <summary>
+    /// Gets or sets the user identity string.
+    /// </summary>
+    public string User { get; set; }
+
+    /// <summary>
+    /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
+    /// </summary>
+    public string ApplicationVersion { get; set; }
+
     private bool IsCalledFromApplicationUnhandledExceptionHandler()
     {
       StackTrace trace = new StackTrace();
@@ -76,8 +85,6 @@ namespace Mindscape.Raygun4Net
       }
       return false;
     }
-
-    private Assembly _callingAssembly;
 
     private void SetCallingAssembly(Assembly assembly)
     {
@@ -193,8 +200,6 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private bool _running;
-
     /// <summary>
     /// Posts a RaygunMessage to the Raygun.io api endpoint.
     /// </summary>
@@ -261,10 +266,6 @@ namespace Mindscape.Raygun4Net
         }
       }
     }
-
-    private readonly Queue<string> _messageQueue = new Queue<string>();
-
-    private bool _exit;
 
     private void SendMessage(string message, bool wait, bool exit)
     {
@@ -393,13 +394,18 @@ namespace Mindscape.Raygun4Net
       object deviceName;
       DeviceExtendedProperties.TryGetValue("DeviceName", out deviceName);
 
+      string version = _callingAssembly != null ? new AssemblyName(_callingAssembly.FullName).Version.ToString() : "Not supplied";
+      if (!String.IsNullOrWhiteSpace(ApplicationVersion))
+      {
+        version = ApplicationVersion;
+      }
+
       var message = RaygunMessageBuilder.New
-          .SetCallingAssembly(_callingAssembly)
           .SetEnvironmentDetails()
           .SetMachineName(deviceName.ToString())
           .SetExceptionDetails(exception)
           .SetClientDetails()
-          .SetVersion()
+          .SetVersion(version)
           .SetTags(tags)
           .SetUserCustomData(userCustomData)
           .SetUser(User)
