@@ -195,7 +195,6 @@ namespace Mindscape.Raygun4Net
     {
       if (!(exception is ExitException))
       {
-        exception.Data.Add("Message", exception.Message); // TODO is this needed?
         Send(BuildMessage(exception, tags, userCustomData), calledFromUnhandled, false);
       }
     }
