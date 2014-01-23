@@ -46,60 +46,39 @@ namespace Mindscape.Raygun4Net.Messages
       if (exception.StackTrace != null)
       {
         char[] delim = { '\r', '\n' };
-        var frames = exception.StackTrace.Split(delim);
+        var frames = exception.StackTrace.Split(delim, StringSplitOptions.RemoveEmptyEntries);
         foreach (string line in frames)
         {
-          if (!"".Equals(line))
+          // Trim the stack trace line
+          string stackTraceLine = line.Trim();
+          if (stackTraceLine.StartsWith("at "))
           {
-            RaygunErrorStackTraceLineMessage stackTraceLineMessage = new RaygunErrorStackTraceLineMessage();
-            stackTraceLineMessage.ClassName = line;
-            lines.Add(stackTraceLineMessage);
+            stackTraceLine = stackTraceLine.Substring(3);
           }
+
+          string className = stackTraceLine;
+          string methodName = "";
+
+          // Extract the method name and class name if possible:
+          int index = stackTraceLine.IndexOf("(");
+          if (index > 0)
+          {
+            index = stackTraceLine.LastIndexOf(".");
+            if (index > 0)
+            {
+              className = stackTraceLine.Substring(0, index);
+              methodName = stackTraceLine.Substring(index + 1);
+            }
+          }
+
+          RaygunErrorStackTraceLineMessage stackTraceLineMessage = new RaygunErrorStackTraceLineMessage();
+          stackTraceLineMessage.ClassName = className;
+          stackTraceLineMessage.MethodName = methodName;
+          lines.Add(stackTraceLineMessage);
         }
       }
 
       return lines.ToArray();
-    }
-
-    private string GenerateMethodName(MethodBase method)
-    {
-      var stringBuilder = new StringBuilder();
-
-      stringBuilder.Append(method.Name);
-
-      if (method is MethodInfo && method.IsGenericMethod)
-      {
-        Type[] genericArguments = method.GetGenericArguments();
-        stringBuilder.Append("[");
-        int index2 = 0;
-        bool flag2 = true;
-        for (; index2 < genericArguments.Length; ++index2)
-        {
-          if (!flag2)
-            stringBuilder.Append(",");
-          else
-            flag2 = false;
-          stringBuilder.Append(genericArguments[index2].Name);
-        }
-        stringBuilder.Append("]");
-      }
-      stringBuilder.Append("(");
-      ParameterInfo[] parameters = method.GetParameters();
-      bool flag3 = true;
-      for (int index2 = 0; index2 < parameters.Length; ++index2)
-      {
-        if (!flag3)
-          stringBuilder.Append(", ");
-        else
-          flag3 = false;
-        string str2 = "<UnknownType>";
-        if (parameters[index2].ParameterType != null)
-          str2 = parameters[index2].ParameterType.Name;
-        stringBuilder.Append(str2 + " " + parameters[index2].Name);
-      }
-      stringBuilder.Append(")");
-
-      return stringBuilder.ToString();
     }
   }
 }
