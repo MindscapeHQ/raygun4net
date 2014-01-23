@@ -39,6 +39,7 @@ namespace Mindscape.Raygun4Net
       _wrapperExceptions = new List<Type>();
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
+      SetCallingAssembly(Assembly.GetCallingAssembly());
       Deployment.Current.Dispatcher.BeginInvoke(SendStoredMessages);
     }
 
@@ -49,6 +50,7 @@ namespace Mindscape.Raygun4Net
     public RaygunClient()
       : this(RaygunSettings.Settings.ApiKey)
     {
+      SetCallingAssembly(Assembly.GetCallingAssembly());
     }
 
     private bool ValidateApiKey()
@@ -108,6 +110,7 @@ namespace Mindscape.Raygun4Net
     {
       Detach();
       _client = new RaygunClient(apiKey);
+      _client.SetCallingAssembly(Assembly.GetCallingAssembly());
       if (Application.Current != null)
       {
         Application.Current.UnhandledException += Current_UnhandledException;
@@ -162,7 +165,6 @@ namespace Mindscape.Raygun4Net
     /// <param name="args">The <see cref="ApplicationUnhandledExceptionEventArgs"/> containing the exception information.</param>
     public void Send(ApplicationUnhandledExceptionEventArgs args)
     {
-      SetCallingAssembly(Assembly.GetCallingAssembly());
       Send(args, null, null);
     }
 
@@ -173,7 +175,6 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of tags to send with the message.</param>
     public void Send(ApplicationUnhandledExceptionEventArgs args, IList<string> tags)
     {
-      SetCallingAssembly(Assembly.GetCallingAssembly());
       Send(args, tags, null);
     }
 
@@ -184,7 +185,6 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public void Send(ApplicationUnhandledExceptionEventArgs args, IDictionary userCustomData)
     {
-      SetCallingAssembly(Assembly.GetCallingAssembly());
       Send(args, null, userCustomData);
     }
 
@@ -196,7 +196,6 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public void Send(ApplicationUnhandledExceptionEventArgs args, IList<string> tags, IDictionary userCustomData)
     {
-      SetCallingAssembly(Assembly.GetCallingAssembly());
       if (!(args.ExceptionObject is ExitException))
       {
         bool handled = args.Handled;
@@ -211,7 +210,6 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     public void Send(Exception exception)
     {
-      SetCallingAssembly(Assembly.GetCallingAssembly());
       bool calledFromUnhandled = IsCalledFromApplicationUnhandledExceptionHandler();
       Send(exception, null, null, calledFromUnhandled);
     }
@@ -223,7 +221,6 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of tags to send with the message.</param>
     public void Send(Exception exception, IList<string> tags)
     {
-      SetCallingAssembly(Assembly.GetCallingAssembly());
       bool calledFromUnhandled = IsCalledFromApplicationUnhandledExceptionHandler();
       Send(exception, tags, null, calledFromUnhandled);
     }
@@ -235,7 +232,6 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public void Send(Exception exception, IDictionary userCustomData)
     {
-      SetCallingAssembly(Assembly.GetCallingAssembly());
       bool calledFromUnhandled = IsCalledFromApplicationUnhandledExceptionHandler();
       Send(exception, null, userCustomData, calledFromUnhandled);
     }
@@ -248,7 +244,6 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      SetCallingAssembly(Assembly.GetCallingAssembly());
       bool calledFromUnhandled = IsCalledFromApplicationUnhandledExceptionHandler();
       Send(exception, tags, userCustomData, calledFromUnhandled);
     }
@@ -268,7 +263,6 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void Send(RaygunMessage raygunMessage)
     {
-      SetCallingAssembly(Assembly.GetCallingAssembly());
       bool calledFromUnhandled = IsCalledFromApplicationUnhandledExceptionHandler();
       Send(raygunMessage, calledFromUnhandled, false);
     }
