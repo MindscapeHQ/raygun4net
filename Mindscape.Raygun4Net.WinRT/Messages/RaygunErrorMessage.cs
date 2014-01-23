@@ -50,10 +50,48 @@ namespace Mindscape.Raygun4Net.Messages
 
         foreach (string line in frames)
         {
-          lines.Add(new RaygunErrorStackTraceLineMessage()
+          // Trim the stack trace line
+          string stackTraceLine = line.Trim();
+          if (stackTraceLine.StartsWith("at "))
           {
-            ClassName = line
-          });
+            stackTraceLine = stackTraceLine.Substring(3);
+          }
+
+          int lineNumber = 0;
+          string className = stackTraceLine;
+          string methodName = null;
+          string fileName = null;
+
+          int index = stackTraceLine.LastIndexOf(":line ");
+          if (index > 0)
+          {
+            string number = stackTraceLine.Substring(index + 6);
+            Int32.TryParse(number, out lineNumber);
+            stackTraceLine = stackTraceLine.Substring(0, index);
+          }
+          index = stackTraceLine.LastIndexOf(") in ");
+          if (index > 0)
+          {
+            fileName = stackTraceLine.Substring(index + 5);
+            stackTraceLine = stackTraceLine.Substring(0, index);
+          }
+          index = stackTraceLine.IndexOf("(");
+          if (index > 0)
+          {
+            index = stackTraceLine.LastIndexOf(".", index);
+            if (index > 0)
+            {
+              className = stackTraceLine.Substring(0, index);
+              methodName = stackTraceLine.Substring(index + 1);
+            }
+          }
+
+          RaygunErrorStackTraceLineMessage stackTraceLineMessage = new RaygunErrorStackTraceLineMessage();
+          stackTraceLineMessage.ClassName = className;
+          stackTraceLineMessage.MethodName = methodName;
+          stackTraceLineMessage.FileName = fileName;
+          stackTraceLineMessage.LineNumber = lineNumber;
+          lines.Add(stackTraceLineMessage);
         }
       }
 

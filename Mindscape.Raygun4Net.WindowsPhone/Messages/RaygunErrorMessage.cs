@@ -57,13 +57,13 @@ namespace Mindscape.Raygun4Net.Messages
           }
 
           string className = stackTraceLine;
-          string methodName = "";
+          string methodName = null;
 
           // Extract the method name and class name if possible:
           int index = stackTraceLine.IndexOf("(");
           if (index > 0)
           {
-            index = stackTraceLine.LastIndexOf(".");
+            index = stackTraceLine.LastIndexOf(".", index);
             if (index > 0)
             {
               className = stackTraceLine.Substring(0, index);
