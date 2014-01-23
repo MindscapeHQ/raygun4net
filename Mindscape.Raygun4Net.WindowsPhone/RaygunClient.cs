@@ -90,6 +90,49 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    private static RaygunClient _client;
+
+    /// <summary>
+    /// Gets the <see cref="RaygunClient"/> created by the Attach method.
+    /// </summary>
+    public static RaygunClient Current
+    {
+      get { return _client; }
+    }
+
+    /// <summary>
+    /// Causes Raygun to listen to and send all unhandled exceptions.
+    /// </summary>
+    /// <param name="apiKey">Your app api key.</param>
+    public static void Attach(string apiKey)
+    {
+      Detach();
+      _client = new RaygunClient(apiKey);
+      if (Application.Current != null)
+      {
+        Application.Current.UnhandledException += Current_UnhandledException;
+      }
+    }
+
+    /// <summary>
+    /// Detaches Raygun from listening to unhandled exceptions.
+    /// </summary>
+    public static void Detach()
+    {
+      if (Application.Current != null)
+      {
+        Application.Current.UnhandledException -= Current_UnhandledException;
+      }
+    }
+
+    private static void Current_UnhandledException(object sender, ApplicationUnhandledExceptionEventArgs e)
+    {
+      if (e.ExceptionObject is Exception)
+      {
+        _client.Send(e.ExceptionObject);
+      }
+    }
+
     private bool IsCalledFromApplicationUnhandledExceptionHandler()
     {
       StackTrace trace = new StackTrace();
