@@ -29,7 +29,7 @@ namespace Mindscape.Raygun4Net.Messages
       DateTime now = DateTime.Now;
       UtcOffset = TimeZoneInfo.Local.GetUtcOffset(now).TotalHours;
 
-      Deployment.Current.Dispatcher.BeginInvoke(() =>
+      if (Application.Current != null && Application.Current.RootVisual != null)
       {
         WindowBoundsWidth = Application.Current.RootVisual.RenderSize.Width;
         WindowBoundsHeight = Application.Current.RootVisual.RenderSize.Height;
@@ -38,13 +38,12 @@ namespace Mindscape.Raygun4Net.Messages
         {
           CurrentOrientation = frame.Orientation.ToString();
         }
-      });
+      }
 
-      //ProcessorCount = Environment.ProcessorCount;
+      //TotalVirtualMemory = (ulong)DeviceStatus.DeviceTotalMemory;
+      //object totalMemory = DeviceExtendedProperties.GetValue("ApplicationWorkingSetLimit");
       // TODO: finish other values
     }
-
-    public int ProcessorCount { get; private set; }
 
     public string OSVersion { get; private set; }
 
