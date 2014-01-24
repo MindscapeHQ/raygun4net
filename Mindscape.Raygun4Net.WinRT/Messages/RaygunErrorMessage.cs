@@ -1,23 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
 
 namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunErrorMessage
   {
-    public RaygunErrorMessage InnerError { get; set; }
-
-    public IDictionary Data { get; set; }
-
-    public string ClassName { get; set; }
-
-    public string Message { get; set; }
-
-    public RaygunErrorStackTraceLineMessage[] StackTrace { get; set; }
-
     public RaygunErrorMessage()
     {
     }
@@ -38,7 +26,7 @@ namespace Mindscape.Raygun4Net.Messages
       }
     }
 
-    private RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
+    private static RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
     {
       var lines = new List<RaygunErrorStackTraceLineMessage>();
 
@@ -62,23 +50,23 @@ namespace Mindscape.Raygun4Net.Messages
           string methodName = null;
           string fileName = null;
 
-          int index = stackTraceLine.LastIndexOf(":line ");
+          int index = stackTraceLine.LastIndexOf(":line ", StringComparison.Ordinal);
           if (index > 0)
           {
             string number = stackTraceLine.Substring(index + 6);
             Int32.TryParse(number, out lineNumber);
             stackTraceLine = stackTraceLine.Substring(0, index);
           }
-          index = stackTraceLine.LastIndexOf(") in ");
+          index = stackTraceLine.LastIndexOf(") in ", StringComparison.Ordinal);
           if (index > 0)
           {
             fileName = stackTraceLine.Substring(index + 5);
-            stackTraceLine = stackTraceLine.Substring(0, index);
+            stackTraceLine = stackTraceLine.Substring(0, index + 1);
           }
-          index = stackTraceLine.IndexOf("(");
+          index = stackTraceLine.IndexOf("(", StringComparison.Ordinal);
           if (index > 0)
           {
-            index = stackTraceLine.LastIndexOf(".", index);
+            index = stackTraceLine.LastIndexOf(".", index, StringComparison.Ordinal);
             if (index > 0)
             {
               className = stackTraceLine.Substring(0, index);
@@ -98,45 +86,14 @@ namespace Mindscape.Raygun4Net.Messages
       return lines.ToArray();
     }
 
-    private string GenerateMethodName(MethodBase method)
-    {
-      var stringBuilder = new StringBuilder();
+    public RaygunErrorMessage InnerError { get; set; }
 
-      stringBuilder.Append(method.Name);
+    public IDictionary Data { get; set; }
 
-      if (method is MethodInfo && method.IsGenericMethod)
-      {
-        Type[] genericArguments = method.GetGenericArguments();
-        stringBuilder.Append("[");
-        int index2 = 0;
-        bool flag2 = true;
-        for (; index2 < genericArguments.Length; ++index2)
-        {
-          if (!flag2)
-            stringBuilder.Append(",");
-          else
-            flag2 = false;
-          stringBuilder.Append(genericArguments[index2].Name);
-        }
-        stringBuilder.Append("]");
-      }
-      stringBuilder.Append("(");
-      ParameterInfo[] parameters = method.GetParameters();
-      bool flag3 = true;
-      for (int index2 = 0; index2 < parameters.Length; ++index2)
-      {
-        if (!flag3)
-          stringBuilder.Append(", ");
-        else
-          flag3 = false;
-        string str2 = "<UnknownType>";
-        if (parameters[index2].ParameterType != null)
-          str2 = parameters[index2].ParameterType.Name;
-        stringBuilder.Append(str2 + " " + parameters[index2].Name);
-      }
-      stringBuilder.Append(")");
+    public string ClassName { get; set; }
 
-      return stringBuilder.ToString();
-    }
+    public string Message { get; set; }
+
+    public RaygunErrorStackTraceLineMessage[] StackTrace { get; set; }
   }
 }
