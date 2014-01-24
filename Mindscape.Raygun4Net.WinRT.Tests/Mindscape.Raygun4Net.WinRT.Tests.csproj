@@ -105,15 +105,18 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Mindscape.Raygun4Net.WinRT">
-      <HintPath>..\Mindscape.Raygun4Net.WinRT\bin\Release\Mindscape.Raygun4Net.WinRT.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mindscape.Raygun4Net.WinRT\Mindscape.Raygun4Net.WinRT.csproj">
+      <Project>{c1af3d16-5c0d-4721-9572-9acba989f816}</Project>
+      <Name>Mindscape.Raygun4Net.WinRT</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '11.0' ">
     <VisualStudioVersion>11.0</VisualStudioVersion>
