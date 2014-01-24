@@ -135,7 +135,7 @@ namespace Mindscape.Raygun4Net
     /// <summary>
     /// Asynchronously transmits a message to Raygun.io.
     /// </summary>
-    /// <param name="exception"></param>
+    /// <param name="exception">The exception to deliver.</param>
     public void SendInBackground(Exception exception)
     {
       SendInBackground(exception, null, (IDictionary)null);

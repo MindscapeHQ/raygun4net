@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Mindscape.Raygun4Net.Tests")]
+[assembly: AssemblyTitle("Mindscape.Raygun4Net.Xamarin.Android.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Mindscape")]
-[assembly: AssemblyProduct("Mindscape.Raygun4Net.Tests")]
-[assembly: AssemblyCopyright("Copyright © Mindscape 2012-2014")]
+[assembly: AssemblyProduct("Mindscape.Raygun4Net.Xamarin.Android.Tests")]
+[assembly: AssemblyCopyright("Copyright © Mindscape 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("fd1d565f-38ab-469a-b930-2b005b3d4b79")]
+[assembly: Guid("91da23ad-7b97-4022-a895-732fb6805088")]
 
 // Version information for an assembly consists of the following four values:
 //

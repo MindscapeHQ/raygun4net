@@ -34,7 +34,6 @@ namespace Mindscape.Raygun4Net
     public IRaygunMessageBuilder SetMachineName(string machineName)
     {
       _raygunMessage.Details.MachineName = machineName;
-
       return this;
     }
 

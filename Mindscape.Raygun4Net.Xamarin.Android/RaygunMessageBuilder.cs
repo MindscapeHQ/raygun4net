@@ -33,7 +33,6 @@ namespace Mindscape.Raygun4Net
     public IRaygunMessageBuilder SetMachineName(string machineName)
     {
       _raygunMessage.Details.MachineName = machineName;
-
       return this;
     }
 
@@ -69,7 +68,6 @@ namespace Mindscape.Raygun4Net
     public IRaygunMessageBuilder SetClientDetails()
     {
       _raygunMessage.Details.Client = new RaygunClientMessage();
-
       return this;
     }
 
