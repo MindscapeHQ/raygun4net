@@ -32,6 +32,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Mindscape.Raygun4Net.Xamarin.Android, Version=1.1.10.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Mindscape.Raygun4Net.Xamarin.Android\bin\Release\Mindscape.Raygun4Net.Xamarin.Android.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
@@ -49,12 +53,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Mindscape.Raygun4Net.Xamarin.Android\Mindscape.Raygun4Net.Xamarin.Android.csproj">
-      <Project>{52ec8831-b9a8-4c73-8aca-01ad3a7ae912}</Project>
-      <Name>Mindscape.Raygun4Net.Xamarin.Android</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
