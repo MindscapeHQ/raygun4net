@@ -8,7 +8,15 @@ properties {
 
 task default -depends Package
 
-task Package {
+task Clean {
+    remove-item -force -recurse $release_dir -ErrorAction SilentlyContinue | Out-Null
+}
+
+task Init -depends Clean {
+    new-item $release_dir -itemType directory | Out-Null
+}
+
+task Package -depends Init {
     exec { nuget pack $nugetspec -OutputDirectory $release_dir }
 }
 
