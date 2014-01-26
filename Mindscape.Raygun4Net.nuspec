@@ -23,8 +23,8 @@
 		<file src="build\Mindscape.Raygun4Net.Xamarin.iOS.dll" target="lib\MonoTouch4.0\Mindscape.Raygun4Net.Xamarin.iOS.dll" />
 		<file src="build\Mindscape.Raygun4Net.Xamarin.iOS.dll" target="lib\MonoTouch\Mindscape.Raygun4Net.Xamarin.iOS.dll" />
 		<!-- WinRT -->
-		<file src="build\Mindscape.Raygun4Net.WinRT\Mindscape.Raygun4Net.WinRT.dll" target="lib\windows8\Mindscape.Raygun4Net.WinRT.dll" />
-		<file src="build\Mindscape.Raygun4Net.WinRT\Mindscape.Raygun4Net.WinRT.pdb" target="lib\windows8\Mindscape.Raygun4Net.WinRT.pdb" />
+		<file src="build\Mindscape.Raygun4Net.WinRT.dll" target="lib\windows8\Mindscape.Raygun4Net.WinRT.dll" />
+		<file src="build\Mindscape.Raygun4Net.WinRT.pdb" target="lib\windows8\Mindscape.Raygun4Net.WinRT.pdb" />
 		<!-- Windows Phone -->
 		<file src="build\Mindscape.Raygun4Net.WindowsPhone.dll" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.dll" />
 		<file src="build\Mindscape.Raygun4Net.WindowsPhone.pdb" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.pdb" />
