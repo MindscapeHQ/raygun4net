@@ -11,6 +11,7 @@ using System.Text;
 using Microsoft.Phone.Info;
 using System.Windows;
 using Microsoft.Phone.Controls;
+using System.IO.IsolatedStorage;
 
 namespace Mindscape.Raygun4Net.Messages
 {
@@ -40,9 +41,37 @@ namespace Mindscape.Raygun4Net.Messages
         }
       }
 
-      //TotalVirtualMemory = (ulong)DeviceStatus.DeviceTotalMemory;
-      //object totalMemory = DeviceExtendedProperties.GetValue("ApplicationWorkingSetLimit");
-      // TODO: finish other values
+      try
+      {
+        ApplicationCurrentMemoryUsage = DeviceStatus.ApplicationCurrentMemoryUsage;
+        ApplicationMemoryUsageLimit = DeviceStatus.ApplicationMemoryUsageLimit;
+        ApplicationPeakMemoryUsage = DeviceStatus.ApplicationPeakMemoryUsage;
+        DeviceTotalMemory = DeviceStatus.DeviceTotalMemory;
+      }
+      catch (Exception e)
+      {
+        Debug.WriteLine("Faild to get device memory information: {0}", e.Message);
+      }
+
+      try
+      {
+        DeviceFirmwareVersion = DeviceStatus.DeviceFirmwareVersion;
+        DeviceHardwareVersion = DeviceStatus.DeviceHardwareVersion;
+        DeviceManufacturer = DeviceStatus.DeviceManufacturer;
+      }
+      catch (Exception e)
+      {
+        Debug.WriteLine("Failed to get device information: {0}", e.Message);
+      }
+
+      try
+      {
+        IsolatedStorageAvailableFreeSpace = IsolatedStorageFile.GetUserStoreForApplication().AvailableFreeSpace;
+      }
+      catch (Exception e)
+      {
+        Debug.WriteLine("Failed to get isolated storage memory: {0}", e.Message);
+      }
     }
 
     public string OSVersion { get; private set; }
@@ -61,24 +90,45 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string Architecture { get; private set; }
 
-    public ulong TotalVirtualMemory { get; private set; }
+    public long IsolatedStorageAvailableFreeSpace { get; private set; }
 
-    public ulong AvailableVirtualMemory { get; private set; }
+    public long ApplicationCurrentMemoryUsage { get; private set; }
 
-    public List<double> DiskSpaceFree
-    {
-      get { return _diskSpaceFree; }
-      set { _diskSpaceFree = value; }
-    }
+    public long ApplicationMemoryUsageLimit { get; private set; }
 
-    public ulong TotalPhysicalMemory { get; private set; }
+    public long ApplicationPeakMemoryUsage { get; private set; }
 
-    public ulong AvailablePhysicalMemory { get; private set; }
+    public long DeviceTotalMemory { get; private set; }
+
+    public string DeviceFirmwareVersion { get; private set; }
+
+    public string DeviceHardwareVersion { get; private set; }
+
+    public string DeviceManufacturer { get; private set; }
 
     public string DeviceName { get; private set; }
 
     public double UtcOffset { get; private set; }
 
     public string Locale { get; private set; }
+
+    [Obsolete("This is never used")]
+    public ulong TotalVirtualMemory { get; private set; }
+
+    [Obsolete("This is never used")]
+    public ulong AvailableVirtualMemory { get; private set; }
+
+    [Obsolete("This is never used")]
+    public List<double> DiskSpaceFree
+    {
+      get { return _diskSpaceFree; }
+      set { _diskSpaceFree = value; }
+    }
+
+    [Obsolete("This is never used")]
+    public ulong TotalPhysicalMemory { get; private set; }
+
+    [Obsolete("This is never used")]
+    public ulong AvailablePhysicalMemory { get; private set; }
   }
 }
