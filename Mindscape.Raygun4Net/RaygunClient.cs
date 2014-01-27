@@ -41,7 +41,7 @@ namespace Mindscape.Raygun4Net
     {
     }
 
-    private bool ValidateApiKey()
+    protected bool ValidateApiKey()
     {
       if (string.IsNullOrEmpty(_apiKey))
       {
@@ -172,7 +172,7 @@ namespace Mindscape.Raygun4Net
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
 
-    internal RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       exception = StripWrapperExceptions(exception);
 
