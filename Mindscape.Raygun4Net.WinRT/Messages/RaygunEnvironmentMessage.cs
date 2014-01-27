@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.Graphics.Display;
-using Windows.Devices.Enumeration.Pnp;
+using Windows.UI.ViewManagement;
 
 namespace Mindscape.Raygun4Net.Messages
 {
@@ -14,8 +13,8 @@ namespace Mindscape.Raygun4Net.Messages
 
     public RaygunEnvironmentMessage()
     {
-      //WindowBoundsHeight = Windows.UI.Xaml.Window.Current.Bounds.Height;
-      //WindowBoundsWidth = Windows.UI.Xaml.Window.Current.Bounds.Width;
+      WindowBoundsHeight = Windows.UI.Xaml.Window.Current.Bounds.Height;
+      WindowBoundsWidth = Windows.UI.Xaml.Window.Current.Bounds.Width;
       PackageVersion = string.Format("{0}.{1}", Package.Current.Id.Version.Major, Package.Current.Id.Version.Minor);
       Cpu = Package.Current.Id.Architecture.ToString();
       ResolutionScale = DisplayProperties.ResolutionScale.ToString();
@@ -27,18 +26,9 @@ namespace Mindscape.Raygun4Net.Messages
 
       SYSTEM_INFO systemInfo = new SYSTEM_INFO();
       RaygunSystemInfoWrapper.GetNativeSystemInfo(ref systemInfo);
-      Architecture = systemInfo.wProcessorArchitecture.ToString();
-    }
-
-    private async Task<PnpObjectCollection> GetDevices()
-    {
-      string[] properties =
-        {
-          "System.ItemNameDisplay",
-          "System.Devices.ContainerId"
-        };
-
-      return await PnpObject.FindAllAsync(PnpObjectType.Device, properties);
+      Architecture = ((PROCESSOR_ARCHITECTURE)systemInfo.wProcessorArchitecture).ToString();
+      ProcessorCount = (int)systemInfo.dwNumberOfProcessors;
+      ViewState = ApplicationView.Value.ToString();
     }
 
     public int ProcessorCount { get; private set; }
@@ -52,6 +42,8 @@ namespace Mindscape.Raygun4Net.Messages
     public string ResolutionScale { get; private set; }
 
     public string CurrentOrientation { get; private set; }
+
+    public string ViewState { get; private set; }
 
     public string Cpu { get; private set; }
 

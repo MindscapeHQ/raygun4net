@@ -11,14 +11,14 @@ namespace Mindscape.Raygun4Net.Messages
 
   public struct SYSTEM_INFO
   {
-    public PROCESSOR_ARCHITECTURE wProcessorArchitecture;
-    public PROCESSOR_TYPE dwProcessorType;
+    public short wProcessorArchitecture;
     private ushort wReserved;
     private uint dwPageSize;
     public IntPtr lpMinimumApplicationAddress;
     public IntPtr lpMaximumApplicationAddress;
     public IntPtr dwActiveProcessorMask;
     public uint dwNumberOfProcessors;
+    public uint dwProcessorType;
     public uint dwAllocationGranularity;
     public ushort wProcessorLevel;
     public ushort wProcessorRevision;
