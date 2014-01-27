@@ -4,7 +4,6 @@ properties {
 	$build_dir =   "$root\build\"
     $release_dir = "$root\release\"
 	$nuget_dir =   "$root\.nuget"
-	$folder =      "$root\release\"
     $env:Path +=   ";$nuget_dir"
 }
 
@@ -50,7 +49,7 @@ task Zip -depends Package {
 	copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.Android.pdb $versionfolder
 	copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.iOS.dll $versionfolder
 	
-    $zipFullName = $folder + $version + ".zip"
+    $zipFullName = $release_dir + $version + ".zip"
     Get-ChildItem $outerfolder | Add-Zip $zipFullName
 }
 

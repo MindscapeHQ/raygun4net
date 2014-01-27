@@ -34,5 +34,13 @@ namespace Mindscape.Raygun4Net.Xamarin.Android.Tests
       RaygunMessage message = _builder.Build();
       Assert.AreEqual("Custom Version", message.Details.Version);
     }
+
+    [Test]
+    public void SetVersion_Null()
+    {
+      _builder.SetVersion(null);
+      RaygunMessage message = _builder.Build();
+      Assert.AreEqual("Not supplied", message.Details.Version);
+    }
   }
 }

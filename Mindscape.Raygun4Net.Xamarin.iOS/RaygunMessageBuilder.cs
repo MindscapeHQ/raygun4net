@@ -97,7 +97,7 @@ namespace Mindscape.Raygun4Net
       {
         _raygunMessage.Details.Version = version;
       }
-      else if (!String.IsNullOrWhiteSpace(_raygunMessage.Details.Environment.PackageVersion))
+      else if (_raygunMessage.Details.Environment != null && !String.IsNullOrWhiteSpace(_raygunMessage.Details.Environment.PackageVersion))
       {
         _raygunMessage.Details.Version = _raygunMessage.Details.Environment.PackageVersion;
       }
