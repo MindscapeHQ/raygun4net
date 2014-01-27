@@ -128,7 +128,7 @@ namespace Mindscape.Raygun4Net
     public void Send(UnhandledExceptionEventArgs unhandledExceptionEventArgs, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
     {
       var exception = unhandledExceptionEventArgs.Exception;
-      exception.Data.Add("Message", unhandledExceptionEventArgs.Message); // TODO: is this needed?
+      exception.Data.Add("Message", unhandledExceptionEventArgs.Message);
 
       Send(BuildMessage(exception, tags, userCustomData));
     }
