@@ -100,8 +100,15 @@ namespace Mindscape.Raygun4Net
       }
       else
       {
-        PackageVersion v = Package.Current.Id.Version;
-        _raygunMessage.Details.Version = String.Format("{0}.{1}.{2}.{3}", v.Major, v.Minor, v.Build, v.Revision);
+        try
+        {
+          PackageVersion v = Package.Current.Id.Version;
+          _raygunMessage.Details.Version = String.Format("{0}.{1}.{2}.{3}", v.Major, v.Minor, v.Build, v.Revision);
+        }
+        catch
+        {
+          _raygunMessage.Details.Version = "Not Provided";
+        }
       }
       return this;
     }
