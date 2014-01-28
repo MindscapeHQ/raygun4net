@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-
+using System.Net;
 using System.Reflection;
 using System.Web;
 using Mindscape.Raygun4Net.Messages;
@@ -66,7 +66,27 @@ namespace Mindscape.Raygun4Net
       HttpException error = exception as HttpException;
       if (error != null)
       {
-        _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = error.GetHttpCode() };
+        int code = error.GetHttpCode();
+        string description = null;
+        if (Enum.IsDefined(typeof(HttpStatusCode), code))
+        {
+          description = ((HttpStatusCode)code).ToString();
+        }
+        _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = code, StatusDescription = description };
+      }
+
+      WebException webError = exception as WebException;
+      if (webError != null)
+      {
+        if (webError.Status == WebExceptionStatus.ProtocolError)
+        {
+          HttpWebResponse response = (HttpWebResponse)webError.Response;
+          _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = (int)response.StatusCode, StatusDescription = response.StatusDescription };
+        }
+        else
+        {
+          _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusDescription = webError.Status.ToString() };
+        }
       }
 
       return this;

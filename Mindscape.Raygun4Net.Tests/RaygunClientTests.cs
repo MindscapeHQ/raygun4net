@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -133,6 +134,50 @@ namespace Mindscape.Raygun4Net.Tests
     {
       FakeRaygunClient client = new FakeRaygunClient("MY_API_KEY");
       Assert.IsTrue(client.Validate());
+    }
+
+    // Tags and user custom data tests
+
+    [Test]
+    public void TagsAreNullByDefault()
+    {
+      RaygunMessage message = _client.CreateMessage(_exception);
+      Assert.IsNull(message.Details.Tags);
+    }
+
+    [Test]
+    public void Tags()
+    {
+      IList<string> tags = new List<string>();
+      tags.Add("Very Important");
+      tags.Add("WPF");
+
+      RaygunMessage message = _client.CreateMessage(_exception, tags);
+      Assert.IsNotNull(message.Details.Tags);
+      Assert.AreEqual(2, message.Details.Tags.Count);
+      Assert.Contains("Very Important", (ICollection)message.Details.Tags);
+      Assert.Contains("WPF", (ICollection)message.Details.Tags);
+    }
+
+    [Test]
+    public void UserCustomDataIsNullByDefault()
+    {
+      RaygunMessage message = _client.CreateMessage(_exception);
+      Assert.IsNull(message.Details.UserCustomData);
+    }
+
+    [Test]
+    public void UserCustomData()
+    {
+      IDictionary data = new Dictionary<string, string>();
+      data.Add("x", "42");
+      data.Add("obj", "NULL");
+
+      RaygunMessage message = _client.CreateMessage(_exception, null, data);
+      Assert.IsNotNull(message.Details.UserCustomData);
+      Assert.AreEqual(2, message.Details.UserCustomData.Count);
+      Assert.AreEqual("42", message.Details.UserCustomData["x"]);
+      Assert.AreEqual("NULL", message.Details.UserCustomData["obj"]);
     }
   }
 }
