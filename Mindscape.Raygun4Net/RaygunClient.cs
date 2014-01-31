@@ -94,6 +94,11 @@ namespace Mindscape.Raygun4Net
     public RaygunClient()
       : this(RaygunSettings.Settings.ApiKey)
     {
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormDataNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreFormDataNames.Split(',');
+        IgnoreFormDataNames(ignoredNames);
+      }
     }
 #endif
 
