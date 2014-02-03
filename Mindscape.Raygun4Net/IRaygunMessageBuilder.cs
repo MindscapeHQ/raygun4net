@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections;
-#if !WINRT && !WINDOWS_PHONE && !ANDROID && !IOS
-using System.Web;
-#endif
-
+using System.Collections.Generic;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
@@ -20,9 +17,11 @@ namespace Mindscape.Raygun4Net
 
     IRaygunMessageBuilder SetEnvironmentDetails();
 
-    IRaygunMessageBuilder SetVersion();
+    IRaygunMessageBuilder SetVersion(string version);
 
     IRaygunMessageBuilder SetUserCustomData(IDictionary userCustomData);
+
+    IRaygunMessageBuilder SetTags(IList<string> tags);
 
     IRaygunMessageBuilder SetUser(string user);
   }

@@ -32,8 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
+    <Reference Include="nunit.framework, Version=2.6.3.13283, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -44,20 +45,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\FakeRaygunClient.cs" />
+    <Compile Include="Model\WrapperException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RaygunClientJsonTests.cs" />
+    <Compile Include="RaygunClientTests.cs" />
     <Compile Include="RaygunErrorMessageExceptionTests.cs" />
     <Compile Include="RaygunErrorMessageInnerExceptionTests.cs" />
+    <Compile Include="RaygunMessageBuilderTests.cs" />
     <Compile Include="RaygunRequestMessageTests.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net\Mindscape.Raygun4Net.csproj">
       <Project>{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}</Project>
       <Name>Mindscape.Raygun4Net</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

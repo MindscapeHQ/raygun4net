@@ -71,7 +71,7 @@ Sensitive keys are removed from the following transmitted properties:
   * HttpRequest.Form
   * HttpRequest.ServerVariables
 
-Remove wrapper exceptions (available for all desktop .NET apps too)
+Remove wrapper exceptions (available in all .NET Raygun providers)
 
 If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by providing a list:
 
@@ -123,21 +123,14 @@ private static void Application_ThreadException(object sender, ThreadExceptionEv
 
 WinRT
 ====================
-Create a RaygunClient instance and pass in your app API key into the constructor, then add a handler to the UnhandledException event to pick up
-exceptions from the UI thread. Note that for WinRT you are required to pass the whole UnhandledExceptionEventArgs
-object to Send().
-
-private RaygunClient _client = new RaygunClient("YOUR_APP_API_KEY");
+In the App.xaml.cs constructor (or any main entry point to your application), call the static RaygunClient.Attach method using your API key.
 
 public App()
 {
-  UnhandledException += App_UnhandledException;
+  RaygunClient.Attach("YOUR_APP_API_KEY");
 }
 
-void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-{
-  _client.Send(e);
-}
+At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages (via the Send methods) or changing options such as the User identity string.
 
 Limitations of WinRT UnhandledException event and Wrap() workarounds
 ====================
@@ -155,15 +148,12 @@ the exception will again be thrown. Two overloads are available; one for methods
 another for methods that return an object.
 
 Windows Phone 7.1 and 8
-====================
-Create a RaygunClient instance and pass in your app API key into the constructor. In the UnhandledException event handler of App.xaml.cs, use the RaygunClient to send the arguments.
+=======================
+In the App.xaml.cs constructor (or any main entry point to your application), call the static RaygunClient.Attach method using your API key.
 
-private RaygunClient _client = new RaygunClient("YOUR_APP_API_KEY");
+RaygunClient.Attach("YOUR_APP_API_KEY");
 
-private void Application_UnhandledException(object sender, ApplicationUnhandledExceptionEventArgs e)
-{
-  _client.Send(e);
-}
+At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages (via the Send methods) or changing options such as the User identity string.
 
 Xamarin for Android
 ====================
@@ -172,7 +162,7 @@ There is also an overload for the Attach method that lets you pass in a user-ide
 
 RaygunClient.Attach("YOUR_APP_API_KEY");
 
-At any point after calling the Attach method, you can use RaygunClient.SharedClient to get the static instance. This can be used for manually sending messages or changing options such as the User identity string.
+At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages or changing options such as the User identity string.
 
 Xamarin for iOS
 ====================
@@ -186,7 +176,7 @@ static void Main (string[] args)
   UIApplication.Main (args, null, "AppDelegate");
 }
 
-At any point after calling the Attach method, you can use RaygunClient.SharedClient to get the static instance. This can be used for manually sending messages or changing options such as the User identity string.
+At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages or changing options such as the User identity string.
 
 Unique (affected) user tracking
 ================================
@@ -198,13 +188,17 @@ This feature is optional if you wish to disable it for privacy concerns.
 Version numbering and tags
 ==========================
 
-* If you are plugging this provider into a classic .NET application, the version number that will be transmitted will be the AssemblyVersion. There is also an overload of Send() available where you can provide a different version if you wish (in the format x.x.x.x where x is a postive integer).
+* If you are plugging this provider into a classic .NET application, the version number that will be transmitted will be the AssemblyVersion. If you need to provide your own custom version value, you can do so by setting the ApplicationVersion property of the RaygunClient (in the format x.x.x.x where x is a postive integer).
 
 * If you are using WinRT, the transmitted version number will be that of the Windows Store package, set in in Package.appxmanifest (under Packaging).
 
 * You can also set an arbitrary number of tags (as an array of strings), i.e. for tagging builds. This is optional and will be transmitted in addition to the version number above.
 
-* Providing additional name-value custom data is also available as an overload on Send().
+Custom data
+===========
+
+Providing additional name-value custom data is also available as an overload on Send().
+
 
 ====================
 Troubleshooting

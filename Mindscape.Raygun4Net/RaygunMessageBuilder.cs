@@ -2,20 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-
-
-#if WINRT
-using Windows.ApplicationModel;
-#elif WINDOWS_PHONE
-using System.Text.RegularExpressions;
-#elif ANDROID
-using System.Reflection;
-#elif IOS
-using System.Reflection;
-#else
+using System.Net;
 using System.Reflection;
 using System.Web;
-#endif
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
@@ -45,7 +34,6 @@ namespace Mindscape.Raygun4Net
     public IRaygunMessageBuilder SetMachineName(string machineName)
     {
       _raygunMessage.Details.MachineName = machineName;
-
       return this;
     }
 
@@ -62,11 +50,7 @@ namespace Mindscape.Raygun4Net
         // swallow the exception. A good addition would be to handle
         // these cases and load them correctly depending on where its running.
         // see http://raygun.io/forums/thread/3655
-#if ANDROID || WINDOWS_PHONE
-        Debug.WriteLine(string.Format("Failed to fetch the environment details: {0}", ex.Message));
-#elif !WINRT
         Trace.WriteLine(string.Format("Failed to fetch the environment details: {0}", ex.Message));
-#endif
       }
 
       return this;
@@ -79,13 +63,31 @@ namespace Mindscape.Raygun4Net
         _raygunMessage.Details.Error = new RaygunErrorMessage(exception);
       }
 
-#if !WINRT && !WINDOWS_PHONE && !ANDROID && !IOS
       HttpException error = exception as HttpException;
       if (error != null)
       {
-        _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = error.GetHttpCode() };
+        int code = error.GetHttpCode();
+        string description = null;
+        if (Enum.IsDefined(typeof(HttpStatusCode), code))
+        {
+          description = ((HttpStatusCode)code).ToString();
+        }
+        _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = code, StatusDescription = description };
       }
-#endif
+
+      WebException webError = exception as WebException;
+      if (webError != null)
+      {
+        if (webError.Status == WebExceptionStatus.ProtocolError)
+        {
+          HttpWebResponse response = (HttpWebResponse)webError.Response;
+          _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = (int)response.StatusCode, StatusDescription = response.StatusDescription };
+        }
+        else
+        {
+          _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusDescription = webError.Status.ToString() };
+        }
+      }
 
       return this;
     }
@@ -93,13 +95,18 @@ namespace Mindscape.Raygun4Net
     public IRaygunMessageBuilder SetClientDetails()
     {
       _raygunMessage.Details.Client = new RaygunClientMessage();
-
       return this;
     }
 
     public IRaygunMessageBuilder SetUserCustomData(IDictionary userCustomData)
     {
       _raygunMessage.Details.UserCustomData = userCustomData;
+      return this;
+    }
+
+    public IRaygunMessageBuilder SetTags(IList<string> tags)
+    {
+      _raygunMessage.Details.Tags = tags;
       return this;
     }
 
@@ -112,54 +119,6 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
-#if WINRT
-    public IRaygunMessageBuilder SetVersion()
-    {
-      PackageVersion version = Package.Current.Id.Version;
-      _raygunMessage.Details.Version = string.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, version.Revision);
-      return this;
-    }
-#elif WINDOWS_PHONE
-    private System.Reflection.Assembly _callingAssembly;
-
-    public IRaygunMessageBuilder SetCallingAssembly(System.Reflection.Assembly callingAssembly)
-    {
-      _callingAssembly = callingAssembly;
-      return this;
-    }
-
-    public IRaygunMessageBuilder SetVersion()
-    {
-      if (_callingAssembly != null)
-      {
-        string fullName = _callingAssembly.FullName;
-        if (!String.IsNullOrEmpty(fullName))
-        {
-          Regex versionRegex = new Regex("(?<=Version=)[^,]+(?! )");
-          Match match = versionRegex.Match(fullName);
-          if (match.Success)
-          {
-            _raygunMessage.Details.Version = match.Value;
-          }
-        }
-      }
-
-      return this;
-    }
-#elif ANDROID || IOS
-    public IRaygunMessageBuilder SetVersion()
-    {
-      if (_raygunMessage.Details.Environment.PackageVersion != null)
-      {
-        _raygunMessage.Details.Version = _raygunMessage.Details.Environment.PackageVersion;
-      }
-      else
-      {
-        _raygunMessage.Details.Version = "Not supplied";
-      }
-      return this;
-    }
-#else
     public IRaygunMessageBuilder SetHttpDetails(HttpContext context, List<string> ignoredFormNames = null)
     {
       if (context != null)
@@ -179,19 +138,25 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
-    public IRaygunMessageBuilder SetVersion()
+    public IRaygunMessageBuilder SetVersion(string version)
     {
-      var entryAssembly = Assembly.GetEntryAssembly();
-      if (entryAssembly != null)
+      if (!String.IsNullOrEmpty(version))
       {
-        _raygunMessage.Details.Version = entryAssembly.GetName().Version.ToString();
+        _raygunMessage.Details.Version = version;
       }
       else
       {
-        _raygunMessage.Details.Version = "Not supplied";
+        var entryAssembly = Assembly.GetEntryAssembly();
+        if (entryAssembly != null)
+        {
+          _raygunMessage.Details.Version = entryAssembly.GetName().Version.ToString();
+        }
+        else
+        {
+          _raygunMessage.Details.Version = "Not supplied";
+        }
       }
       return this;
     }
-#endif
   }
 }

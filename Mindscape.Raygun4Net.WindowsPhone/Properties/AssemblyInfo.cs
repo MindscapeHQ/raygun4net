@@ -9,9 +9,9 @@ using System.Resources;
 [assembly: AssemblyTitle("Mindscape.Raygun4Net.WindowsPhone")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Mindscape")]
 [assembly: AssemblyProduct("Mindscape.Raygun4Net.WindowsPhone")]
-[assembly: AssemblyCopyright("Copyright ©  2013")]
+[assembly: AssemblyCopyright("Copyright © Mindscape 2013-2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
