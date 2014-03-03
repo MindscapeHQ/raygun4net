@@ -31,6 +31,7 @@ namespace Mindscape.Raygun4Net.Messages
       UtcOffset = TimeZone.CurrentTimeZone.GetUtcOffset(now).TotalHours;
 
       OSVersion = info.OSVersion;
+      ProcessorCount = Environment.ProcessorCount;
 
       bool mediumTrust = RaygunSettings.Settings.MediumTrust || !HasUnrestrictedFeatureSet;
 
