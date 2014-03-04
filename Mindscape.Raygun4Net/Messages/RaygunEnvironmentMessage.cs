@@ -31,7 +31,6 @@ namespace Mindscape.Raygun4Net.Messages
       UtcOffset = TimeZone.CurrentTimeZone.GetUtcOffset(now).TotalHours;
 
       OSVersion = info.OSVersion;
-      ProcessorCount = Environment.ProcessorCount;
 
       bool mediumTrust = RaygunSettings.Settings.MediumTrust || !HasUnrestrictedFeatureSet;
 
@@ -39,6 +38,9 @@ namespace Mindscape.Raygun4Net.Messages
       {
         try
         {
+          // ProcessorCount cannot run in medium trust under net35, once we have
+          // moved to net40 minimum we can move this out of here
+          ProcessorCount = Environment.ProcessorCount;
           Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
           TotalPhysicalMemory = (ulong)info.TotalPhysicalMemory / 0x100000; // in MB
           AvailablePhysicalMemory = (ulong)info.AvailablePhysicalMemory / 0x100000;
