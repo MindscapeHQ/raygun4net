@@ -30,7 +30,7 @@ namespace Mindscape.Raygun4Net.Messages
       DateTime now = DateTime.Now;
       UtcOffset = TimeZone.CurrentTimeZone.GetUtcOffset(now).TotalHours;
 
-      OSVersion = info.OSVersion;
+      OSVersion = GetOSVersion();
 
       bool mediumTrust = RaygunSettings.Settings.MediumTrust || !HasUnrestrictedFeatureSet;
 
@@ -73,6 +73,25 @@ namespace Mindscape.Raygun4Net.Messages
         }
       }
       return Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER");
+    }
+
+    private string GetOSVersion()
+    {
+      ManagementClass wmiManagementOperatingSystemClass = new ManagementClass("Win32_OperatingSystem");
+      ManagementObjectCollection wmiOperatingSystemCollection = wmiManagementOperatingSystemClass.GetInstances();
+
+      foreach (ManagementObject wmiOperatingSystemObject in wmiOperatingSystemCollection)
+      {
+        try
+        {
+          var version = wmiOperatingSystemObject.Properties["Version"].Value.ToString();
+          return version;
+        }
+        catch (ManagementException)
+        {
+        }
+      }
+      return Environment.OSVersion.Version.ToString(3);
     }
 
     private void GetDiskSpace()
