@@ -63,32 +63,6 @@ namespace Mindscape.Raygun4Net
         _raygunMessage.Details.Error = new RaygunErrorMessage(exception);
       }
 
-      HttpException error = exception as HttpException;
-      if (error != null)
-      {
-        int code = error.GetHttpCode();
-        string description = null;
-        if (Enum.IsDefined(typeof(HttpStatusCode), code))
-        {
-          description = ((HttpStatusCode)code).ToString();
-        }
-        _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = code, StatusDescription = description };
-      }
-
-      WebException webError = exception as WebException;
-      if (webError != null)
-      {
-        if (webError.Status == WebExceptionStatus.ProtocolError)
-        {
-          HttpWebResponse response = (HttpWebResponse)webError.Response;
-          _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = (int)response.StatusCode, StatusDescription = response.StatusDescription };
-        }
-        else
-        {
-          _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusDescription = webError.Status.ToString() };
-        }
-      }
-
       return this;
     }
 
@@ -124,15 +98,18 @@ namespace Mindscape.Raygun4Net
       if (context != null)
       {
         HttpRequest request;
+        HttpResponse response;
         try
         {
           request = context.Request;
+          response = context.Response;
         }
         catch (HttpException)
         {
           return this;
         }
         _raygunMessage.Details.Request = new RaygunRequestMessage(request, ignoredFormNames);
+        _raygunMessage.Details.Response = new RaygunResponseMessage(response);
       }
 
       return this;
