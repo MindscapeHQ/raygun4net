@@ -63,6 +63,8 @@ namespace Mindscape.Raygun4Net
         _raygunMessage.Details.Error = new RaygunErrorMessage(exception);
       }
 
+      _raygunMessage.Details.Response = new RaygunResponseMessage(exception);
+
       return this;
     }
 
@@ -95,21 +97,27 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetHttpDetails(HttpContext context, List<string> ignoredFormNames = null)
     {
+      return SetHttpDetails(context, null, ignoredFormNames);
+    }
+
+    public IRaygunMessageBuilder SetHttpDetails(HttpContext context, Exception exception, List<string> ignoredFormNames = null)
+    {
       if (context != null)
       {
         HttpRequest request;
-        HttpResponse response;
         try
         {
           request = context.Request;
-          response = context.Response;
         }
         catch (HttpException)
         {
           return this;
         }
         _raygunMessage.Details.Request = new RaygunRequestMessage(request, ignoredFormNames);
-        _raygunMessage.Details.Response = new RaygunResponseMessage(response);
+        if (exception != null)
+        {
+          _raygunMessage.Details.Response = new RaygunResponseMessage(exception);
+        }
       }
 
       return this;

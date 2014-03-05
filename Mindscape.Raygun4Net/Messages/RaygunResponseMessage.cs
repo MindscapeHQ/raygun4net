@@ -8,10 +8,11 @@ namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunResponseMessage
   {
-    public RaygunResponseMessage(HttpResponse response)
+    public RaygunResponseMessage(Exception exception)
     {
-      StatusCode = response.StatusCode;
-      StatusDescription = response.StatusDescription;
+      var httpException = new HttpException(null, exception);
+
+      StatusCode = httpException.GetHttpCode();
     }
 
     public int StatusCode { get; set; }

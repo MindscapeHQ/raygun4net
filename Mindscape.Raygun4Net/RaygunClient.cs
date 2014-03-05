@@ -177,7 +177,7 @@ namespace Mindscape.Raygun4Net
       exception = StripWrapperExceptions(exception);
 
       var message = RaygunMessageBuilder.New
-        .SetHttpDetails(HttpContext.Current, _ignoredFormNames)
+        .SetHttpDetails(HttpContext.Current, exception, _ignoredFormNames)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)
