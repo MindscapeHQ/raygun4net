@@ -48,6 +48,7 @@ namespace Mindscape.Raygun4Net.Messages
           AvailableVirtualMemory = info.AvailableVirtualMemory / 0x100000;
           GetDiskSpace();
           Cpu = GetCpu();
+          OSVersion = GetOSVersion();
         }
         catch (SecurityException)
         {
@@ -73,6 +74,25 @@ namespace Mindscape.Raygun4Net.Messages
         }
       }
       return Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER");
+    }
+
+    private string GetOSVersion()
+    {
+      ManagementClass wmiManagementOperatingSystemClass = new ManagementClass("Win32_OperatingSystem");
+      ManagementObjectCollection wmiOperatingSystemCollection = wmiManagementOperatingSystemClass.GetInstances();
+
+      foreach (ManagementObject wmiOperatingSystemObject in wmiOperatingSystemCollection)
+      {
+        try
+        {
+          var version = wmiOperatingSystemObject.Properties["Version"].Value.ToString();
+          return version;
+        }
+        catch (ManagementException)
+        {
+        }
+      }
+      return Environment.OSVersion.Version.ToString(3);
     }
 
     private void GetDiskSpace()
