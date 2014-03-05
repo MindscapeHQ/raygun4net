@@ -30,7 +30,7 @@ namespace Mindscape.Raygun4Net.Messages
       DateTime now = DateTime.Now;
       UtcOffset = TimeZone.CurrentTimeZone.GetUtcOffset(now).TotalHours;
 
-      OSVersion = GetOSVersion();
+      OSVersion = info.OSVersion;
 
       bool mediumTrust = RaygunSettings.Settings.MediumTrust || !HasUnrestrictedFeatureSet;
 
@@ -48,6 +48,7 @@ namespace Mindscape.Raygun4Net.Messages
           AvailableVirtualMemory = info.AvailableVirtualMemory / 0x100000;
           GetDiskSpace();
           Cpu = GetCpu();
+          OSVersion = GetOSVersion();
         }
         catch (SecurityException)
         {
