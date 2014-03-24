@@ -218,15 +218,6 @@ namespace Mindscape.Raygun4Net
       get { return Application.Context; }
     }
 
-    internal static string DeviceName
-    {
-      get
-      {
-        BluetoothAdapter adapter = BluetoothAdapter.DefaultAdapter;
-        return adapter == null ? "Unknown" : adapter.Name;
-      }
-    }
-
     internal RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       exception = StripWrapperExceptions(exception);
@@ -234,7 +225,7 @@ namespace Mindscape.Raygun4Net
       JNIEnv.ExceptionClear();
       var message = RaygunMessageBuilder.New
         .SetEnvironmentDetails()
-        .SetMachineName(DeviceName)
+        .SetMachineName("Unknown")
         .SetExceptionDetails(exception)
         .SetClientDetails()
         .SetVersion(ApplicationVersion)
