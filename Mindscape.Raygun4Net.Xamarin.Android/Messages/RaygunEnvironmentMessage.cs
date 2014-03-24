@@ -69,7 +69,7 @@ namespace Mindscape.Raygun4Net.Messages
           }
         }
 
-        DeviceName = RaygunClient.DeviceName;
+        DeviceName = "Unknown";
 
         Java.Lang.Runtime runtime = Java.Lang.Runtime.GetRuntime();
         TotalPhysicalMemory = (ulong)runtime.TotalMemory();
