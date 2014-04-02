@@ -63,6 +63,10 @@ namespace Mindscape.Raygun4Net.Messages
               if (index > 0)
               {
                 fileName = stackTraceLn.Substring(index + 5);
+                if ("<filename unknown>".Equals(fileName))
+                {
+                  fileName = null;
+                }
                 stackTraceLn = stackTraceLn.Substring(0, index);
                 // Method name
                 index = stackTraceLn.LastIndexOf("(");
