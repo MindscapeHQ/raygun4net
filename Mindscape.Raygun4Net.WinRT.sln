@@ -15,6 +15,10 @@ Global
 		Release|ARM = Release|ARM
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
+		Sign|Any CPU = Sign|Any CPU
+		Sign|ARM = Sign|ARM
+		Sign|x64 = Sign|x64
+		Sign|x86 = Sign|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C1AF3D16-5C0D-4721-9572-9ACBA989F816}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{C1AF3D16-5C0D-4721-9572-9ACBA989F816}.Release|x64.Build.0 = Release|x64
 		{C1AF3D16-5C0D-4721-9572-9ACBA989F816}.Release|x86.ActiveCfg = Release|x86
 		{C1AF3D16-5C0D-4721-9572-9ACBA989F816}.Release|x86.Build.0 = Release|x86
+		{C1AF3D16-5C0D-4721-9572-9ACBA989F816}.Sign|Any CPU.ActiveCfg = Sign|Any CPU
+		{C1AF3D16-5C0D-4721-9572-9ACBA989F816}.Sign|Any CPU.Build.0 = Sign|Any CPU
+		{C1AF3D16-5C0D-4721-9572-9ACBA989F816}.Sign|ARM.ActiveCfg = Sign|ARM
+		{C1AF3D16-5C0D-4721-9572-9ACBA989F816}.Sign|ARM.Build.0 = Sign|ARM
+		{C1AF3D16-5C0D-4721-9572-9ACBA989F816}.Sign|x64.ActiveCfg = Sign|x64
+		{C1AF3D16-5C0D-4721-9572-9ACBA989F816}.Sign|x64.Build.0 = Sign|x64
+		{C1AF3D16-5C0D-4721-9572-9ACBA989F816}.Sign|x86.ActiveCfg = Sign|x86
+		{C1AF3D16-5C0D-4721-9572-9ACBA989F816}.Sign|x86.Build.0 = Sign|x86
 		{978F32AD-E50F-4638-9922-1AF6E7510CE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{978F32AD-E50F-4638-9922-1AF6E7510CE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{978F32AD-E50F-4638-9922-1AF6E7510CE9}.Debug|ARM.ActiveCfg = Debug|ARM
@@ -49,6 +61,14 @@ Global
 		{978F32AD-E50F-4638-9922-1AF6E7510CE9}.Release|x64.Build.0 = Release|x64
 		{978F32AD-E50F-4638-9922-1AF6E7510CE9}.Release|x86.ActiveCfg = Release|x86
 		{978F32AD-E50F-4638-9922-1AF6E7510CE9}.Release|x86.Build.0 = Release|x86
+		{978F32AD-E50F-4638-9922-1AF6E7510CE9}.Sign|Any CPU.ActiveCfg = Sign|Any CPU
+		{978F32AD-E50F-4638-9922-1AF6E7510CE9}.Sign|Any CPU.Build.0 = Sign|Any CPU
+		{978F32AD-E50F-4638-9922-1AF6E7510CE9}.Sign|ARM.ActiveCfg = Sign|ARM
+		{978F32AD-E50F-4638-9922-1AF6E7510CE9}.Sign|ARM.Build.0 = Sign|ARM
+		{978F32AD-E50F-4638-9922-1AF6E7510CE9}.Sign|x64.ActiveCfg = Sign|x64
+		{978F32AD-E50F-4638-9922-1AF6E7510CE9}.Sign|x64.Build.0 = Sign|x64
+		{978F32AD-E50F-4638-9922-1AF6E7510CE9}.Sign|x86.ActiveCfg = Sign|x86
+		{978F32AD-E50F-4638-9922-1AF6E7510CE9}.Sign|x86.Build.0 = Sign|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
