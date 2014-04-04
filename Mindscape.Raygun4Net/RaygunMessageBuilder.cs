@@ -119,6 +119,15 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
+    public IRaygunMessageBuilder SetUser(RaygunIdentifierMessage user)
+    {
+      if (user != null)
+      {
+        _raygunMessage.Details.User = user;
+      }
+      return this;
+    }
+
     public IRaygunMessageBuilder SetHttpDetails(HttpContext context, List<string> ignoredFormNames = null)
     {
       if (context != null)
