@@ -65,6 +65,8 @@ local.properties
 *.dotCover
 *.log
 
+*.snk
+
 ## TODO: If you have NuGet Package Restore enabled, uncomment this
 packages/
 
