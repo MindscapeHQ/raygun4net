@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata minClientVersion="2.5">
+        <id>Mindscape.Raygun4Net.Signed</id>
+        <version>2.0.3</version>
+        <title />
+        <authors>Mindscape</authors>
+        <owners />
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Raygun.io Provider for .NET Framework + WinRT, Windows Phone and Xamarin</description>
+        <iconUrl>https://app.raygun.io/Content/Images/nuget-icon.png</iconUrl>
+        <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
+        <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
+    </metadata>
+    <files>
+		<!-- .NET -->
+		<file src="build\signed\Mindscape.Raygun4Net.dll" target="lib\net35\Mindscape.Raygun4Net.dll" />
+		<!-- Xamarin.Android -->
+		<file src="build\Mindscape.Raygun4Net.Xamarin.Android.dll" target="lib\MonoAndroid2.2\Mindscape.Raygun4Net.Xamarin.Android.dll" />
+		<file src="build\Mindscape.Raygun4Net.Xamarin.Android.pdb" target="lib\MonoAndroid2.2\Mindscape.Raygun4Net.Xamarin.Android.pdb" />
+		<!-- Xamarin.iOS -->
+		<file src="build\Mindscape.Raygun4Net.Xamarin.iOS.dll" target="lib\MonoTouch4.0\Mindscape.Raygun4Net.Xamarin.iOS.dll" />
+		<file src="build\Mindscape.Raygun4Net.Xamarin.iOS.dll" target="lib\MonoTouch\Mindscape.Raygun4Net.Xamarin.iOS.dll" />
+		<!-- WinRT -->
+		<file src="build\signed\Mindscape.Raygun4Net.WinRT.dll" target="lib\windows8\Mindscape.Raygun4Net.WinRT.dll" />
+		<!-- Windows Phone -->
+		<file src="build\Mindscape.Raygun4Net.WindowsPhone.dll" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.dll" />
+		<file src="build\Mindscape.Raygun4Net.WindowsPhone.pdb" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.pdb" />
+
+		<file src="readme.txt" />
+    </files>
+</package>
