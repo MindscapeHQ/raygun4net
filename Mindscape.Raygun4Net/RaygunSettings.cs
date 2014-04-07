@@ -54,5 +54,12 @@ namespace Mindscape.Raygun4Net
       get { return (string)this["excludeHttpStatusCodes"]; }
       set { this["excludeHttpStatusCodes"] = value; }
     }
+
+    [ConfigurationProperty("ignoreFormDataNames", IsRequired = false, DefaultValue = "")]
+    public string IgnoreFormDataNames
+    {
+      get { return (string)this["ignoreFormDataNames"]; }
+      set { this["ignoreFormDataNames"] = value; }
+    }
   }
 }
