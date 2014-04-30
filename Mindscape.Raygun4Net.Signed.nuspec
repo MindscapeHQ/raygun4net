@@ -7,7 +7,7 @@
         <authors>Mindscape</authors>
         <owners />
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>Raygun for signed .NET projects. Also contains unsigned Windows Phone and Xamarin providers.</description>
+        <description>Raygun for signed .NET and WinRT projects. Also contains Windows Phone and Xamarin providers.</description>
         <iconUrl>https://app.raygun.io/Content/Images/nuget-icon.png</iconUrl>
         <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
         <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
