@@ -37,7 +37,7 @@ task CompileWinRT -depends Init {
     remove-item -force -recurse $build_dir/Mindscape.Raygun4Net.WinRT.Tests -ErrorAction SilentlyContinue | Out-Null
 }
 
-task CompileWindowsPhone -depends {
+task CompileWindowsPhone -depends Init {
     exec { msbuild "$windows_phone_solution_file" /m /p:OutDir=$build_dir /p:Configuration=$Configuration }
 }
 
