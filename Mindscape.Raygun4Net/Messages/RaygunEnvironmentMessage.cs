@@ -22,8 +22,8 @@ namespace Mindscape.Raygun4Net.Messages
 
     public RaygunEnvironmentMessage()
     {
-      WindowBoundsWidth = SystemInformation.VirtualScreen.Height;
-      WindowBoundsHeight = SystemInformation.VirtualScreen.Width;
+      WindowBoundsWidth = SystemInformation.VirtualScreen.Width;
+      WindowBoundsHeight = SystemInformation.VirtualScreen.Height;
       ComputerInfo info = new ComputerInfo();
       Locale = CultureInfo.CurrentCulture.DisplayName;
 
