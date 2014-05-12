@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -16,10 +17,19 @@ namespace Mindscape.Raygun4Net.Messages
       Url = request.Url.AbsolutePath;
       HttpMethod = request.RequestType;
       IPAddress = request.UserHostAddress;
-      Data = ToDictionary(request.ServerVariables, ignoredFormNames ?? Enumerable.Empty<string>());
       QueryString = ToDictionary(request.QueryString, Enumerable.Empty<string>());
+
       Headers = ToDictionary(request.Headers, ignoredFormNames ?? Enumerable.Empty<string>());
+      Headers.Remove("Cookie");
+
       Form = ToDictionary(request.Form, ignoredFormNames ?? Enumerable.Empty<string>(), true);
+      Cookies = GetCookies(request.Cookies, ignoredFormNames ?? Enumerable.Empty<string>());
+
+      // Remove ignored and duplicated variables
+      Data = ToDictionary(request.ServerVariables, ignoredFormNames ?? Enumerable.Empty<string>());
+      Data.Remove("ALL_HTTP");
+      Data.Remove("HTTP_COOKIE");
+      Data.Remove("ALL_RAW");
 
       try
       {
@@ -39,6 +49,21 @@ namespace Mindscape.Raygun4Net.Messages
       catch (HttpException)
       {
       }
+    }
+
+    private IDictionary GetCookies(HttpCookieCollection cookieCollection, IEnumerable<string> ignoredFormNames)
+    {
+      var ignored = ignoredFormNames.ToLookup(s => s);
+
+      var cookies = cookieCollection
+          .Cast<string>()
+          .Where(key => ignored.Contains(key) == false)
+// ReSharper disable PossibleNullReferenceException 
+          // this can't be null, we got the key from the collection.
+          .ToDictionary(key => key, key => cookieCollection[key].Value);
+// ReSharper restore PossibleNullReferenceException
+
+      return cookies;
     }
 
     private static IDictionary ToDictionary(NameValueCollection nameValueCollection, IEnumerable<string> ignoreFields, bool truncateValues = false)
@@ -109,6 +134,8 @@ namespace Mindscape.Raygun4Net.Messages
     public string IPAddress { get; set; }
 
     public IDictionary QueryString { get; set; }
+
+    public IDictionary Cookies { get; set; }
 
     public IDictionary Data { get; set; }
 
