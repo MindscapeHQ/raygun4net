@@ -9,6 +9,11 @@ namespace Mindscape.Raygun4Net.Messages
   {
     public RaygunEnvironmentMessage()
     {
+      // Different environments can fail to load the environment details.
+      // For now if they fail to load for whatever reason then just
+      // swallow the exception. A good addition would be to handle
+      // these cases and load them correctly depending on where its running.
+      // see http://raygun.io/forums/thread/3655
       try
       {
         DateTime now = DateTime.Now;
@@ -20,7 +25,7 @@ namespace Mindscape.Raygun4Net.Messages
       }
       catch (Exception ex)
       {
-        System.Diagnostics.Debug.WriteLine(string.Format("Error getting environment info {0}", ex.Message));
+        System.Diagnostics.Debug.WriteLine(string.Format("Error getting environment info: {0}", ex.Message));
       }
     }
 
