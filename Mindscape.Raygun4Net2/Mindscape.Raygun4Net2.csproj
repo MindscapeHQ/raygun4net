@@ -38,9 +38,24 @@
     <Compile Include="..\AssemblyVersionInfo.cs">
       <Link>Properties\AssemblyVersionInfo.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorStackTraceLineMessage.cs">
+      <Link>Messages\RaygunErrorStackTraceLineMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunIdentifierMessage.cs">
+      <Link>Messages\RaygunIdentifierMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunMessage.cs">
+      <Link>Messages\RaygunMessage.cs</Link>
+    </Compile>
+    <Compile Include="Messages\RaygunClientMessage.cs" />
+    <Compile Include="Messages\RaygunEnvironmentMessage.cs" />
+    <Compile Include="Messages\RaygunErrorMessage.cs" />
+    <Compile Include="Messages\RaygunMessageDetails.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaygunClient.cs" />
+    <Compile Include="RaygunSettings.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
