@@ -26,6 +26,10 @@ namespace Mindscape.Raygun4Net.Messages
         WindowBoundsWidth = rect.Right - rect.Left;
         WindowBoundsHeight = rect.Bottom - rect.Top;
 
+        ProcessorCount = Environment.ProcessorCount;
+        Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
+        OSVersion = Environment.OSVersion.VersionString;
+
         Locale = CultureInfo.CurrentCulture.DisplayName;
       }
       catch (Exception ex)
@@ -56,6 +60,35 @@ namespace Mindscape.Raygun4Net.Messages
       public int Bottom;      // y position of lower-right corner  
     }
 
+    private struct MEMORY_STATUS
+    {
+      public int dwLength;
+      public int dwMemoryLoad;
+      public int dwTotalPhys;
+      public int dwAvailPhys;
+      public int dwTotalPageFile;
+      public int dwAvailPageFile;
+      public int dwTotalVirtual;
+      public int dwAvailVirtual;
+    }
+
+    [DllImport("coredll.dll", SetLastError = true)]
+    private void GlobalMemoryStatus(ref MEMORY_STATUS ms) {}
+
+    public void GetAvailablePhysicalMemory()
+    {
+      var ms = new MEMORY_STATUS();
+      try
+      {
+        GlobalMemoryStatus(ms);
+        double avail = ms.dwAvailPhys / 1048.576;
+      }
+      catch
+      {
+
+      }
+    }
+
     public int ProcessorCount { get; private set; }
 
     public string OSVersion { get; private set; }
@@ -69,6 +102,10 @@ namespace Mindscape.Raygun4Net.Messages
     public string Architecture { get; private set; }
 
     public string Model { get; private set; }
+
+    public ulong TotalVirtualMemory { get; private set; }
+
+    public ulong AvailableVirtualMemory { get; private set; }
 
     public ulong TotalPhysicalMemory { get; private set; }
 
