@@ -67,7 +67,7 @@ namespace Mindscape.Raygun4Net
 
       var message = RaygunMessageBuilder.New
         .SetEnvironmentDetails()
-        .SetMachineName("Unknown")
+        .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)
         .SetClientDetails()
         .SetVersion(ApplicationVersion)

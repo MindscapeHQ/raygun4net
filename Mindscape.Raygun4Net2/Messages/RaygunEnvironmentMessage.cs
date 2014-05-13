@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Mindscape.Raygun4Net.Messages
@@ -19,14 +20,40 @@ namespace Mindscape.Raygun4Net.Messages
         DateTime now = DateTime.Now;
         UtcOffset = TimeZone.CurrentTimeZone.GetUtcOffset(now).TotalHours;
 
-        Locale = CultureInfo.CurrentCulture.DisplayName;
+        IntPtr hWnd = GetActiveWindow();
+        RECT rect;
+        GetWindowRect(hWnd, out rect);
+        WindowBoundsWidth = rect.Right - rect.Left;
+        WindowBoundsHeight = rect.Bottom - rect.Top;
 
-        DeviceName = "Unknown";
+        Locale = CultureInfo.CurrentCulture.DisplayName;
       }
       catch (Exception ex)
       {
         System.Diagnostics.Debug.WriteLine(string.Format("Error getting environment info: {0}", ex.Message));
       }
+    }
+
+    [DllImport("user32.dll")]
+    static extern IntPtr GetForegroundWindow();
+
+    private IntPtr GetActiveWindow()
+    {
+      IntPtr handle = IntPtr.Zero;
+      return GetForegroundWindow();
+    }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT
+    {
+      public int Left;        // x position of upper-left corner  
+      public int Top;         // y position of upper-left corner  
+      public int Right;       // x position of lower-right corner  
+      public int Bottom;      // y position of lower-right corner  
     }
 
     public int ProcessorCount { get; private set; }
@@ -46,8 +73,6 @@ namespace Mindscape.Raygun4Net.Messages
     public ulong TotalPhysicalMemory { get; private set; }
 
     public ulong AvailablePhysicalMemory { get; private set; }
-
-    public string DeviceName { get; private set; }
 
     public double UtcOffset { get; private set; }
 

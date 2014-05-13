@@ -42,88 +42,91 @@ namespace Mindscape.Raygun4Net.Messages
       }
       try
       {
-        string[] stackTraceLines = stackTraceStr.Split('\n');
+        string[] stackTraceLines = stackTraceStr.Split('\r', '\n');
         foreach (string stackTraceLine in stackTraceLines)
         {
-          int lineNumber = 0;
-          string fileName = null;
-          string methodName = null;
-          string className = null;
-          string stackTraceLn = stackTraceLine;
-          // Line number
-          int index = stackTraceLine.LastIndexOf(":");
-          if (index > 0)
+          if (!String.IsNullOrEmpty(stackTraceLine))
           {
-            bool success = int.TryParse(stackTraceLn.Substring(index + 1), out lineNumber);
-            if (success)
+            int lineNumber = 0;
+            string fileName = null;
+            string methodName = null;
+            string className = null;
+            string stackTraceLn = stackTraceLine;
+            // Line number
+            int index = stackTraceLine.LastIndexOf(":");
+            if (index > 0)
             {
-              stackTraceLn = stackTraceLn.Substring(0, index);
-              // File name
-              index = stackTraceLn.LastIndexOf("] in ");
-              if (index > 0)
+              bool success = int.TryParse(stackTraceLn.Substring(index + 1), out lineNumber);
+              if (success)
               {
-                fileName = stackTraceLn.Substring(index + 5);
-                if ("<filename unknown>".Equals(fileName))
-                {
-                  fileName = null;
-                }
                 stackTraceLn = stackTraceLn.Substring(0, index);
-                // Method name
-                index = stackTraceLn.LastIndexOf("(");
+                // File name
+                index = stackTraceLn.LastIndexOf("] in ");
                 if (index > 0)
                 {
-                  index = stackTraceLn.LastIndexOf(".", index);
+                  fileName = stackTraceLn.Substring(index + 5);
+                  if ("<filename unknown>".Equals(fileName))
+                  {
+                    fileName = null;
+                  }
+                  stackTraceLn = stackTraceLn.Substring(0, index);
+                  // Method name
+                  index = stackTraceLn.LastIndexOf("(");
                   if (index > 0)
                   {
-                    int endIndex = stackTraceLn.IndexOf("[0x");
-                    if (endIndex < 0)
+                    index = stackTraceLn.LastIndexOf(".", index);
+                    if (index > 0)
                     {
-                      endIndex = stackTraceLn.Length;
+                      int endIndex = stackTraceLn.IndexOf("[0x");
+                      if (endIndex < 0)
+                      {
+                        endIndex = stackTraceLn.Length;
+                      }
+                      methodName = stackTraceLn.Substring(index + 1, endIndex - index - 1).Trim();
+                      methodName = methodName.Replace(" (", "(");
+                      stackTraceLn = stackTraceLn.Substring(0, index);
                     }
-                    methodName = stackTraceLn.Substring(index + 1, endIndex - index - 1).Trim();
-                    methodName = methodName.Replace(" (", "(");
-                    stackTraceLn = stackTraceLn.Substring(0, index);
+                  }
+                  // Class name
+                  index = stackTraceLn.IndexOf("at ");
+                  if (index >= 0)
+                  {
+                    className = stackTraceLn.Substring(index + 3);
                   }
                 }
-                // Class name
-                index = stackTraceLn.IndexOf("at ");
-                if (index >= 0)
+                else
                 {
-                  className = stackTraceLn.Substring(index + 3);
+                  fileName = stackTraceLn;
                 }
               }
               else
               {
-                fileName = stackTraceLn;
+                index = stackTraceLn.IndexOf("at ");
+                if (index >= 0)
+                {
+                  index += 3;
+                }
+                else
+                {
+                  index = 0;
+                }
+                fileName = stackTraceLn.Substring(index);
               }
             }
             else
             {
-              index = stackTraceLn.IndexOf("at ");
-              if (index >= 0)
-              {
-                index += 3;
-              }
-              else
-              {
-                index = 0;
-              }
-              fileName = stackTraceLn.Substring(index);
+              fileName = stackTraceLn;
             }
-          }
-          else
-          {
-            fileName = stackTraceLn;
-          }
-          var line = new RaygunErrorStackTraceLineMessage
-          {
-            FileName = fileName,
-            LineNumber = lineNumber,
-            MethodName = methodName,
-            ClassName = className
-          };
+            var line = new RaygunErrorStackTraceLineMessage
+            {
+              FileName = fileName,
+              LineNumber = lineNumber,
+              MethodName = methodName,
+              ClassName = className
+            };
 
-          lines.Add(line);
+            lines.Add(line);
+          }
         }
         if (lines.Count > 0)
         {
