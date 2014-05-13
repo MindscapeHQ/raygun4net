@@ -53,15 +53,15 @@ namespace Mindscape.Raygun4Net.Messages
             string className = null;
             string stackTraceLn = stackTraceLine;
             // Line number
-            int index = stackTraceLine.LastIndexOf(":");
+            int index = stackTraceLine.LastIndexOf(":line ");
             if (index > 0)
             {
-              bool success = int.TryParse(stackTraceLn.Substring(index + 1), out lineNumber);
+              bool success = int.TryParse(stackTraceLn.Substring(index + 6), out lineNumber);
               if (success)
               {
                 stackTraceLn = stackTraceLn.Substring(0, index);
                 // File name
-                index = stackTraceLn.LastIndexOf("] in ");
+                index = stackTraceLn.LastIndexOf(") in ");
                 if (index > 0)
                 {
                   fileName = stackTraceLn.Substring(index + 5);
@@ -69,7 +69,7 @@ namespace Mindscape.Raygun4Net.Messages
                   {
                     fileName = null;
                   }
-                  stackTraceLn = stackTraceLn.Substring(0, index);
+                  stackTraceLn = stackTraceLn.Substring(0, index + 1);
                   // Method name
                   index = stackTraceLn.LastIndexOf("(");
                   if (index > 0)
@@ -77,12 +77,7 @@ namespace Mindscape.Raygun4Net.Messages
                     index = stackTraceLn.LastIndexOf(".", index);
                     if (index > 0)
                     {
-                      int endIndex = stackTraceLn.IndexOf("[0x");
-                      if (endIndex < 0)
-                      {
-                        endIndex = stackTraceLn.Length;
-                      }
-                      methodName = stackTraceLn.Substring(index + 1, endIndex - index - 1).Trim();
+                      methodName = stackTraceLn.Substring(index + 1).Trim();
                       methodName = methodName.Replace(" (", "(");
                       stackTraceLn = stackTraceLn.Substring(0, index);
                     }
