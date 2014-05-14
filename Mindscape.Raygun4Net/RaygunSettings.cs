@@ -53,6 +53,14 @@ namespace Mindscape.Raygun4Net
     {
       get { return (string)this["excludeHttpStatusCodes"]; }
       set { this["excludeHttpStatusCodes"] = value; }
+
+    }
+
+    [ConfigurationProperty("excludeErrorsFromLocal", IsRequired = false, DefaultValue = false)]
+    public bool ExcludeErrorsFromLocal
+    {
+      get { return (bool)this["excludeErrorsFromLocal"]; }
+      set { this["excludeErrorsFromLocal"] = value; }
     }
 
     [ConfigurationProperty("ignoreFormDataNames", IsRequired = false, DefaultValue = "")]

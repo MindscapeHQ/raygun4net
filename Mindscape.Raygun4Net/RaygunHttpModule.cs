@@ -7,6 +7,7 @@ namespace Mindscape.Raygun4Net
   public class RaygunHttpModule : IHttpModule
   {
     private bool ExcludeErrorsBasedOnHttpStatusCode { get; set; }
+    private bool ExcludeErrorsFromLocal { get; set; }
 
     private int[] HttpStatusCodesToExclude { get; set; }
 
@@ -15,6 +16,7 @@ namespace Mindscape.Raygun4Net
       context.Error += SendError;
       HttpStatusCodesToExclude = string.IsNullOrEmpty(RaygunSettings.Settings.ExcludeHttpStatusCodesList) ? new int[0] : RaygunSettings.Settings.ExcludeHttpStatusCodesList.Split(',').Select(int.Parse).ToArray();
       ExcludeErrorsBasedOnHttpStatusCode = HttpStatusCodesToExclude.Any();
+      ExcludeErrorsFromLocal = RaygunSettings.Settings.ExcludeErrorsFromLocal;
     }
 
     public void Dispose()
@@ -27,6 +29,11 @@ namespace Mindscape.Raygun4Net
       var lastError = application.Server.GetLastError();
 
       if (ExcludeErrorsBasedOnHttpStatusCode && lastError is HttpException && HttpStatusCodesToExclude.Contains(((HttpException)lastError).GetHttpCode()))
+      {
+        return;
+      }
+
+      if (ExcludeErrorsFromLocal && HttpContext.Current.Request.IsLocal)
       {
         return;
       }
