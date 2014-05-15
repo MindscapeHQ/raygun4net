@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Mindscape.Raygun4Net
 {
-  public class RaygunClient : MonoBehaviour
+  public class RaygunClient
   {
     private readonly string _apiKey;
 
