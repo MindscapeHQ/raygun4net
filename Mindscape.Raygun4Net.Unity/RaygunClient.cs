@@ -10,6 +10,8 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunClient
   {
+    private static RaygunClient _current;
+
     private readonly string _apiKey;
 
     private string _user;
@@ -55,6 +57,33 @@ namespace Mindscape.Raygun4Net
       set
       {
         _applicationVersion = value;
+      }
+    }
+
+    /// <summary>
+    /// Causes Raygun to listen to and send all unhandled exceptions.
+    /// </summary>
+    /// <param name="apiKey">Your app api key.</param>
+    public static void Attach(string apiKey)
+    {
+      Detach();
+      _current = new RaygunClient(apiKey);
+      Application.RegisterLogCallback(HandleException);
+    }
+
+    /// <summary>
+    /// Detaches Raygun from listening to unhandled exceptions.
+    /// </summary>
+    public static void Detach()
+    {
+      Application.RegisterLogCallback(null);
+    }
+
+    private static void HandleException(string message, string stackTrace, LogType type)
+    {
+      if (type == LogType.Exception || type == LogType.Error)
+      {
+        
       }
     }
 
@@ -130,7 +159,7 @@ namespace Mindscape.Raygun4Net
         byte[] data = Encoding.ASCII.GetBytes(message);
         Hashtable table = new Hashtable();
         table.Add("X-ApiKey", _apiKey);
-        new WWW(RaygunSettings.Settings.ApiEndpoint, data, table);
+        new WWW(RaygunSettings.Settings.ApiEndpoint.AbsoluteUri, data, table);
       }
       catch (Exception e)
       {
