@@ -43,9 +43,81 @@ namespace Mindscape.Raygun4Net.Messages
       }
     }
 
+    // Unity stack trace parsing
     private RaygunErrorStackTraceLineMessage[] BuildStackTrace(string stackTrace)
     {
       List<RaygunErrorStackTraceLineMessage> lines = new List<RaygunErrorStackTraceLineMessage>();
+
+      if (stackTrace != null)
+      {
+        try
+        {
+          string[] stackTraceLines = stackTrace.Split('\r', '\n');
+          foreach (string stackTraceLine in stackTraceLines)
+          {
+            if (!String.IsNullOrEmpty(stackTraceLine))
+            {
+              int lineNumber = 0;
+              string fileName = null;
+              string methodName = null;
+              string className = null;
+              string stackTraceLn = stackTraceLine;
+              // Line number
+              int index = stackTraceLine.LastIndexOf(":");
+              if (index > 0)
+              {
+                string lineNumberString = stackTraceLn.Substring(index + 1).Replace(")", "");
+                bool success = int.TryParse(lineNumberString, out lineNumber);
+                if (success)
+                {
+                  stackTraceLn = stackTraceLn.Substring(0, index);
+                  // File name
+                  index = stackTraceLn.LastIndexOf(" (at ");
+                  if (index > 0)
+                  {
+                    fileName = stackTraceLn.Substring(index + 5);
+                    stackTraceLn = stackTraceLn.Substring(0, index);
+                    // Method name
+                    index = stackTraceLn.LastIndexOf("(");
+                    if (index > 0)
+                    {
+                      index = stackTraceLn.LastIndexOf(".", index);
+                      if (index > 0)
+                      {
+                        methodName = stackTraceLn.Substring(index + 1).Trim();
+                        methodName = methodName.Replace(" (", "(");
+                        stackTraceLn = stackTraceLn.Substring(0, index);
+                      }
+                    }
+                    // Class name
+                    className = stackTraceLn;
+                  }
+                  else
+                  {
+                    fileName = stackTraceLn;
+                  }
+                }
+              }
+              else
+              {
+                fileName = stackTraceLn;
+              }
+              RaygunErrorStackTraceLineMessage line = new RaygunErrorStackTraceLineMessage();
+              line.FileName = fileName;
+              line.LineNumber = lineNumber;
+              line.MethodName = methodName;
+              line.ClassName = className;
+
+              lines.Add(line);
+            }
+          }
+          if (lines.Count > 0)
+          {
+            return lines.ToArray();
+          }
+        }
+        catch { }
+      }
 
       return lines.ToArray();
     }
