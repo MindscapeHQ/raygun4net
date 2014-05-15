@@ -83,11 +83,12 @@ namespace Mindscape.Raygun4Net
     {
       if (type == LogType.Exception || type == LogType.Error)
       {
-        
+        RaygunMessage raygunMessage = _current.BuildMessage(message, stackTrace, type.ToString(), null, null);
+        _current.Send(raygunMessage);
       }
     }
 
-    /// <summary>
+    /*/// <summary>
     /// Transmits an exception to Raygun.io synchronously.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
@@ -106,23 +107,23 @@ namespace Mindscape.Raygun4Net
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       Send(BuildMessage(exception, tags, userCustomData));
-    }
+    }*/
 
-    internal RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    internal RaygunMessage BuildMessage(string message, string stackTrace, string type, IList<string> tags, IDictionary userCustomData)
     {
       //exception = StripWrapperExceptions(exception)
 
-      RaygunMessage message = RaygunMessageBuilder.New
+      RaygunMessage raygunMessage = RaygunMessageBuilder.New
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
-        .SetExceptionDetails(exception)
+        .SetExceptionDetails(message, stackTrace, type)
         .SetClientDetails()
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
         .SetUser(User)
         .Build();
-      return message;
+      return raygunMessage;
     }
 
     /// <summary>

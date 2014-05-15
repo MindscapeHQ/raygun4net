@@ -11,7 +11,7 @@ namespace Mindscape.Raygun4Net
 
     IRaygunMessageBuilder SetMachineName(string machineName);
 
-    IRaygunMessageBuilder SetExceptionDetails(Exception exception);
+    IRaygunMessageBuilder SetExceptionDetails(string message, string stackTrace, string type);
 
     IRaygunMessageBuilder SetClientDetails();
 

@@ -9,8 +9,22 @@ namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunErrorMessage
   {
+    private RaygunErrorMessage _innerError;
+    private IDictionary _data;
+    private string _className;
+    private string _message;
+    private RaygunErrorStackTraceLineMessage[] _stackTrace;
+
     public RaygunErrorMessage()
     {
+    }
+
+    public RaygunErrorMessage(string message, string stackTrace, string type)
+    {
+      Message = message;
+      ClassName = type ?? "Exception";
+
+      StackTrace = BuildStackTrace(stackTrace);
     }
 
     public RaygunErrorMessage(Exception exception)
@@ -27,6 +41,13 @@ namespace Mindscape.Raygun4Net.Messages
       {
         InnerError = new RaygunErrorMessage(exception.InnerException);
       }
+    }
+
+    private RaygunErrorStackTraceLineMessage[] BuildStackTrace(string stackTrace)
+    {
+      List<RaygunErrorStackTraceLineMessage> lines = new List<RaygunErrorStackTraceLineMessage>();
+
+      return lines.ToArray();
     }
 
     private RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
@@ -179,12 +200,6 @@ namespace Mindscape.Raygun4Net.Messages
 
       return lines.ToArray();
     }
-
-    private RaygunErrorMessage _innerError;
-    private IDictionary _data;
-    private string _className;
-    private string _message;
-    private RaygunErrorStackTraceLineMessage[] _stackTrace;
 
     private string GenerateMethodName(MethodBase method)
     {

@@ -41,13 +41,9 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
-    public IRaygunMessageBuilder SetExceptionDetails(Exception exception)
+    public IRaygunMessageBuilder SetExceptionDetails(string message, string stackTrace, string type)
     {
-      if (exception != null)
-      {
-        _raygunMessage.Details.Error = new RaygunErrorMessage(exception);
-      }
-
+      _raygunMessage.Details.Error = new RaygunErrorMessage(message, stackTrace, type);
       return this;
     }
 
