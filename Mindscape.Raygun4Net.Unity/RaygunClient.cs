@@ -123,48 +123,19 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private bool SendMessage(string message)
+    private void SendMessage(string message)
     {
-      //WWWForm form = new WWWForm();
-      //form.headers.Add("X-ApiKey", _apiKey);
-
-      //byte[] data = Encoding.ASCII.GetBytes(message);
-      //WWW www = new WWW(RaygunSettings.Settings.ApiEndpoint.AbsolutePath, data, form.headers);
-
-      byte[] data = Encoding.ASCII.GetBytes(message);
-      Hashtable table = new Hashtable();
-      table.Add("X-ApiKey", "ec4ofSDUPCXa6U5G3uYsEA==");
-      WWW www = new WWW("https://api.raygun.io/entries", data, table);
-
-      //StartCoroutine(WaitForRequest(www));
-      /*using (WebClient client = new WebClient())
+      try
       {
-        client.Headers.Add("X-ApiKey", _apiKey);
-        client.Encoding = System.Text.Encoding.UTF8;
-
-        try
-        {
-          client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
-        }
-        catch (Exception e)
-        {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", e.Message));
-          return false;
-        }
-      }*/
-      return true;
-    }
-
-    private IEnumerator WaitForRequest(WWW www)
-    {
-      // check for errors
-      if (www.error == null)
-      {
-        Debug.Log("WWW Ok!: " + www.text);
-      } else {
-        Debug.Log("WWW Error: "+ www.error);
+        byte[] data = Encoding.ASCII.GetBytes(message);
+        Hashtable table = new Hashtable();
+        table.Add("X-ApiKey", _apiKey);
+        new WWW(RaygunSettings.Settings.ApiEndpoint, data, table);
       }
-      yield return www;
+      catch (Exception e)
+      {
+        System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", e.Message)); 
+      }
     }
   }
 }
