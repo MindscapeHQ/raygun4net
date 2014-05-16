@@ -82,10 +82,10 @@ If using the HTTP module then you can exclude errors by their HTTP status code b
 
 **Exclude errors that originate from a local origin**
 
-Toggle this boolean and the HTTP module will not send errors to RayGun.io if the request originated from a local origin. ie. A way to prevent local debug/development from notifying Raygun without having to resort to Web.config transforms.
+Toggle this boolean and the HTTP module will not send errors to Raygun.io if the request originated from a local origin. ie. A way to prevent local debug/development from notifying Raygun without having to resort to Web.config transforms.
 
 ```
-<RaygunSettings apikey="YOUR_APP_API_KEY" excludeErrorsFromLocal=true />
+<RaygunSettings apikey="YOUR_APP_API_KEY" excludeErrorsFromLocal="true" />
 ```
 
 **Remove sensitive request data**
