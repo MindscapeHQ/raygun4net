@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using Mindscape.Raygun4Net.Messages;
 
@@ -10,6 +11,7 @@ namespace Mindscape.Raygun4Net
   public class RaygunClient
   {
     private readonly string _apiKey;
+    private static List<Type> _wrapperExceptions;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -18,6 +20,9 @@ namespace Mindscape.Raygun4Net
     public RaygunClient(string apiKey)
     {
       _apiKey = apiKey;
+      _wrapperExceptions = new List<Type>();
+
+      _wrapperExceptions.Add(typeof(TargetInvocationException));
     }
 
     private bool ValidateApiKey()
@@ -39,6 +44,24 @@ namespace Mindscape.Raygun4Net
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
     /// </summary>
     public string ApplicationVersion { get; set; }
+
+    /// <summary>
+    /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
+    /// This can be used when a wrapper exception, e.g. TargetInvocationException,
+    /// contains the actual exception as the InnerException. The message and stack trace of the inner exception will then
+    /// be used by Raygun for grouping and display. TargetInvocationException will be stripped by default.
+    /// </summary>
+    /// <param name="wrapperExceptions">An enumerable list of exception types that you want removed and replaced with their inner exception.</param>
+    public void AddWrapperExceptions(IEnumerable<Type> wrapperExceptions)
+    {
+      foreach (Type wrapper in wrapperExceptions)
+      {
+        if (!_wrapperExceptions.Contains(wrapper))
+        {
+          _wrapperExceptions.Add(wrapper);
+        }
+      }
+    }
 
     /// <summary>
     /// Transmits an exception to Raygun.io synchronously.
@@ -63,7 +86,7 @@ namespace Mindscape.Raygun4Net
 
     internal RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      //exception = StripWrapperExceptions(exception);
+      exception = StripWrapperExceptions(exception);
 
       var message = RaygunMessageBuilder.New
         .SetEnvironmentDetails()
@@ -76,6 +99,16 @@ namespace Mindscape.Raygun4Net
         .SetUser(User)
         .Build();
       return message;
+    }
+
+    private static Exception StripWrapperExceptions(Exception exception)
+    {
+      if (_wrapperExceptions.Contains(exception.GetType()) && exception.InnerException != null)
+      {
+        return StripWrapperExceptions(exception.InnerException);
+      }
+
+      return exception;
     }
 
     /// <summary>
