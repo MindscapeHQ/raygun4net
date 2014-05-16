@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.VisualBasic.Devices;
 
 namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunEnvironmentMessage
   {
+    private List<double> _diskSpaceFree = new List<double>();
+
     public RaygunEnvironmentMessage()
     {
       // Different environments can fail to load the environment details.
@@ -30,11 +34,29 @@ namespace Mindscape.Raygun4Net.Messages
         Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
         OSVersion = Environment.OSVersion.VersionString;
 
+        ComputerInfo info = new ComputerInfo();
+        TotalPhysicalMemory = (ulong)info.TotalPhysicalMemory / 0x100000; // in MB
+        AvailablePhysicalMemory = (ulong)info.AvailablePhysicalMemory / 0x100000;
+        TotalVirtualMemory = info.TotalVirtualMemory / 0x100000;
+        AvailableVirtualMemory = info.AvailableVirtualMemory / 0x100000;
+        GetDiskSpace();
+
         Locale = CultureInfo.CurrentCulture.DisplayName;
       }
       catch (Exception ex)
       {
         System.Diagnostics.Debug.WriteLine(string.Format("Error getting environment info: {0}", ex.Message));
+      }
+    }
+
+    private void GetDiskSpace()
+    {
+      foreach (DriveInfo drive in DriveInfo.GetDrives())
+      {
+        if (drive.IsReady)
+        {
+          DiskSpaceFree.Add((double)drive.AvailableFreeSpace / 0x40000000); // in GB
+        }
       }
     }
 
@@ -75,6 +97,12 @@ namespace Mindscape.Raygun4Net.Messages
     public ulong TotalVirtualMemory { get; private set; }
 
     public ulong AvailableVirtualMemory { get; private set; }
+
+    public List<double> DiskSpaceFree
+    {
+      get { return _diskSpaceFree; }
+      set { _diskSpaceFree = value; }
+    }
 
     public ulong TotalPhysicalMemory { get; private set; }
 
