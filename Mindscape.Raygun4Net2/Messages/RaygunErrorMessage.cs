@@ -70,9 +70,7 @@ namespace Mindscape.Raygun4Net.Messages
 
           string file = frame.GetFileName();
 
-          string className = method.ReflectedType != null
-                       ? method.ReflectedType.FullName
-                       : "(unknown)";
+          string className = method.ReflectedType != null ? method.ReflectedType.FullName : "(unknown)";
 
           var line = new RaygunErrorStackTraceLineMessage
           {

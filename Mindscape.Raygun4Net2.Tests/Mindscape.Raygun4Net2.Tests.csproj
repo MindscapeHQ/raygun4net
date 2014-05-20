@@ -40,8 +40,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\FakeRaygunClient.cs" />
     <Compile Include="Model\FakeRaygunErrorMessage.cs" />
+    <Compile Include="Model\WrapperException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RaygunClientTests.cs" />
+    <Compile Include="RaygunErrorMessageInnerExceptionTests.cs" />
     <Compile Include="RaygunErrorMessageTests.cs" />
   </ItemGroup>
   <ItemGroup>
