@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
@@ -74,6 +75,17 @@ namespace Mindscape.Raygun4Net
 
     /// <summary>
     /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
+    /// with the message for identification.
+    /// </summary>
+    /// <param name="exception">The exception to deliver.</param>
+    /// <param name="tags">A list of strings associated with the message.</param>
+    public void Send(Exception exception, IList<string> tags)
+    {
+      Send(exception, tags, (IDictionary)null);
+    }
+
+    /// <summary>
+    /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
     /// with the message for identification, as well as sending a key-value collection of custom data.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
@@ -82,6 +94,46 @@ namespace Mindscape.Raygun4Net
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       Send(BuildMessage(exception, tags, userCustomData));
+    }
+
+    /// <summary>
+    /// Asynchronously transmits a message to Raygun.io.
+    /// </summary>
+    /// <param name="exception">The exception to deliver.</param>
+    public void SendInBackground(Exception exception)
+    {
+      SendInBackground(exception, null, (IDictionary)null);
+    }
+
+    /// <summary>
+    /// Asynchronously transmits an exception to Raygun.io.
+    /// </summary>
+    /// <param name="exception">The exception to deliver.</param>
+    /// <param name="tags">A list of strings associated with the message.</param>
+    public void SendInBackground(Exception exception, IList<string> tags)
+    {
+      SendInBackground(exception, tags, (IDictionary)null);
+    }
+
+    /// <summary>
+    /// Asynchronously transmits an exception to Raygun.io.
+    /// </summary>
+    /// <param name="exception">The exception to deliver.</param>
+    /// <param name="tags">A list of strings associated with the message.</param>
+    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
+    public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
+    {
+      SendInBackground(BuildMessage(exception, tags, userCustomData));
+    }
+
+    /// <summary>
+    /// Asynchronously transmits a message to Raygun.io.
+    /// </summary>
+    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
+    /// set to a valid DateTime and as much of the Details property as is available.</param>
+    public void SendInBackground(RaygunMessage raygunMessage)
+    {
+      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
 
     internal RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
