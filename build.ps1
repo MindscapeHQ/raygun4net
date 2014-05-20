@@ -1,6 +1,7 @@
 properties {
     $root =                        $psake.build_script_dir
     $solution_file =                 "$root/Mindscape.Raygun4Net.sln"
+    $solution_file2 =                "$root/Mindscape.Raygun4Net2.sln"
     $winrt_solution_file =           "$root/Mindscape.Raygun4Net.WinRT.sln"
     $windows_phone_solution_file =   "$root/Mindscape.Raygun4Net.WindowsPhone.sln"
     $nugetspec =                     "$root/Mindscape.Raygun4Net.nuspec"
@@ -25,6 +26,7 @@ task Init -depends Clean {
 
 task Compile -depends Init {
     exec { msbuild "$solution_file" /m /p:OutDir=$build_dir /p:Configuration=$configuration }
+    exec { msbuild "$solution_file2" /m /p:OutDir=$build_dir /p:Configuration=$configuration }
 }
 
 task CompileWinRT -depends Init {
