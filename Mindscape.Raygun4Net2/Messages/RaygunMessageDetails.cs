@@ -22,5 +22,7 @@ namespace Mindscape.Raygun4Net.Messages
     public IDictionary UserCustomData { get; set; }
 
     public RaygunIdentifierMessage User { get; set; }
+
+    public RaygunRequestMessage Request { get; set; }
   }
 }

@@ -5,6 +5,7 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using System.Web;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
@@ -141,6 +142,7 @@ namespace Mindscape.Raygun4Net
       exception = StripWrapperExceptions(exception);
 
       var message = RaygunMessageBuilder.New
+        .SetHttpDetails(HttpContext.Current)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)
