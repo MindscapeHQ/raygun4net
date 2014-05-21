@@ -15,6 +15,8 @@
     <files>
 		<!-- .NET -->
 		<file src="build\signed\Mindscape.Raygun4Net.dll" target="lib\net35\Mindscape.Raygun4Net.dll" />
+    <!-- .NET 2.0 -->
+		<file src="build\signed\Mindscape.Raygun4Net2.dll" target="lib\net20\Mindscape.Raygun4Net2.dll" />
 		<!-- Xamarin.Android -->
 		<file src="build\Mindscape.Raygun4Net.Xamarin.Android.dll" target="lib\MonoAndroid2.2\Mindscape.Raygun4Net.Xamarin.Android.dll" />
 		<file src="build\Mindscape.Raygun4Net.Xamarin.Android.pdb" target="lib\MonoAndroid2.2\Mindscape.Raygun4Net.Xamarin.Android.pdb" />

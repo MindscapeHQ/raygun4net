@@ -3,6 +3,7 @@ properties {
     $nugetspec =                     "$root/Mindscape.Raygun4Net.nuspec"
     $signed_nugetspec =              "$root/Mindscape.Raygun4Net.signed.nuspec"
     $solution_file =                 "$root/Mindscape.Raygun4Net.sln"
+    $solution_file2 =                "$root/Mindscape.Raygun4Net2.sln"
     $winrt_solution_file =           "$root/Mindscape.Raygun4Net.WinRT.sln"
     $configuration =                 "Sign"
     $build_dir =                     "$root\build\"
@@ -26,6 +27,7 @@ task Init -depends Clean {
 
 task Compile -depends Init {
     exec { msbuild "$solution_file" /m /p:OutDir=$signed_build_dir /p:Configuration=$configuration }
+    exec { msbuild "$solution_file2" /m /p:OutDir=$signed_build_dir /p:Configuration=$configuration }
 }
 
 task CompileWinRT -depends Init {
@@ -72,8 +74,11 @@ task Zip -depends Package {
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.Android.dll $versionfolder
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.Android.pdb $versionfolder
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.iOS.dll $versionfolder
+    copy-item $build_dir/Mindscape.Raygun4Net2.dll $versionfolder
+    copy-item $build_dir/Mindscape.Raygun4Net2.pdb $versionfolder
     copy-item $signed_build_dir/Mindscape.Raygun4Net.dll $signedfolder
     copy-item $signed_build_dir/Mindscape.Raygun4Net.WinRT.dll $signedfolder
+    copy-item $signed_build_dir/Mindscape.Raygun4Net2.dll $signedfolder
 	
     $zipFullName = $release_dir + $version + ".zip"
     Get-ChildItem $outerfolder | Add-Zip $zipFullName
