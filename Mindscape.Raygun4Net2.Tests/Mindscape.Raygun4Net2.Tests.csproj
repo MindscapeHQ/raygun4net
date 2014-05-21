@@ -46,6 +46,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -56,6 +57,8 @@
     <Compile Include="RaygunClientTests.cs" />
     <Compile Include="RaygunErrorMessageInnerExceptionTests.cs" />
     <Compile Include="RaygunErrorMessageTests.cs" />
+    <Compile Include="RaygunMessageBuilderTests.cs" />
+    <Compile Include="RaygunRequestMessageTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net2\Mindscape.Raygun4Net2.csproj">

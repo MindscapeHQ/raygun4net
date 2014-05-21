@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using System.Web;
 using Mindscape.Raygun4Net.Messages;
 using NUnit.Framework;
 
@@ -80,6 +81,15 @@ namespace Mindscape.Raygun4Net2.Tests
     }
 
     [Test]
+    public void StripHttpUnhandledExceptionByDefault()
+    {
+      HttpUnhandledException wrapper = new HttpUnhandledException("Something went wrong", _exception);
+
+      RaygunMessage message = _client.CreateMessage(wrapper);
+      Assert.AreEqual("System.NullReferenceException", message.Details.Error.ClassName);
+    }
+
+    [Test]
     public void StripSpecifiedWrapperException()
     {
       _client.AddWrapperExceptions(new Type[] { typeof(WrapperException) });
@@ -93,19 +103,17 @@ namespace Mindscape.Raygun4Net2.Tests
     [Test]
     public void DontStripIfNoInnerException()
     {
-      TargetInvocationException wrapper = new TargetInvocationException(null);
+      HttpUnhandledException wrapper = new HttpUnhandledException();
 
       RaygunMessage message = _client.CreateMessage(wrapper);
-      Assert.AreEqual("System.Reflection.TargetInvocationException", message.Details.Error.ClassName);
+      Assert.AreEqual("System.Web.HttpUnhandledException", message.Details.Error.ClassName);
       Assert.IsNull(message.Details.Error.InnerError);
     }
 
     [Test]
     public void StripMultipleWrapperExceptions()
     {
-      _client.AddWrapperExceptions(new Type[] { typeof(WrapperException) });
-
-      WrapperException wrapper = new WrapperException(_exception);
+      HttpUnhandledException wrapper = new HttpUnhandledException("Something went wrong", _exception);
       TargetInvocationException wrapper2 = new TargetInvocationException(wrapper);
 
       RaygunMessage message = _client.CreateMessage(wrapper2);

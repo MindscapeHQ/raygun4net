@@ -9,7 +9,7 @@ namespace Mindscape.Raygun4Net.Messages
   {
     public RaygunClientMessage()
     {
-      Name = "Raygun4Net2.0";
+      Name = "Raygun4Net2.0"; // 2 is the version of .Net, not the Raygun provider.
       Version = Assembly.GetAssembly(typeof(RaygunClient)).GetName().Version.ToString();
       ClientUrl = @"https://github.com/MindscapeHQ/raygun4net";
     }

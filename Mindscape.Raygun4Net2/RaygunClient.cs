@@ -26,6 +26,7 @@ namespace Mindscape.Raygun4Net
       _wrapperExceptions = new List<Type>();
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
+      _wrapperExceptions.Add(typeof(HttpUnhandledException));
     }
 
     /// <summary>
@@ -64,9 +65,9 @@ namespace Mindscape.Raygun4Net
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
-    /// This can be used when a wrapper exception, e.g. TargetInvocationException,
+    /// This can be used when a wrapper exception, e.g. TargetInvocationException or HttpUnhandledException,
     /// contains the actual exception as the InnerException. The message and stack trace of the inner exception will then
-    /// be used by Raygun for grouping and display. TargetInvocationException will be stripped by default.
+    /// be used by Raygun for grouping and display. TargetInvocationException and HttpUnhandledException will be stripped by default.
     /// </summary>
     /// <param name="wrapperExceptions">An enumerable list of exception types that you want removed and replaced with their inner exception.</param>
     public void AddWrapperExceptions(IEnumerable<Type> wrapperExceptions)
