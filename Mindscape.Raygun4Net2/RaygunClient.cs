@@ -28,6 +28,15 @@ namespace Mindscape.Raygun4Net
       _wrapperExceptions.Add(typeof(TargetInvocationException));
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RaygunClient" /> class.
+    /// Uses the ApiKey specified in the config file.
+    /// </summary>
+    public RaygunClient()
+      : this(RaygunSettings.Settings.ApiKey)
+    {
+    }
+
     protected bool ValidateApiKey()
     {
       if (string.IsNullOrEmpty(_apiKey))
