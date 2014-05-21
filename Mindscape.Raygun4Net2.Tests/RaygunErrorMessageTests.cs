@@ -103,5 +103,33 @@ namespace Mindscape.Raygun4Net2.Tests
       Assert.AreEqual(21, result[0].LineNumber);
       Assert.AreEqual("DontYouDareCrash[T]()", result[0].MethodName);
     }
+
+    [Test]
+    public void ParseStackTraceWithNoFileNameOrLineNumber()
+    {
+      string stackTrace = "   at System.Web.Util.CalliEventHandlerDelegateProxy.Callback(Object sender, EventArgs e)";
+      RaygunErrorStackTraceLineMessage[] result = _raygunErrorMessage.GetStackTrace(stackTrace);
+
+      Assert.AreEqual(1, result.Length);
+
+      Assert.AreEqual("System.Web.Util.CalliEventHandlerDelegateProxy", result[0].ClassName);
+      Assert.IsNull(result[0].FileName);
+      Assert.AreEqual(0, result[0].LineNumber);
+      Assert.AreEqual("Callback(Object sender, EventArgs e)", result[0].MethodName);
+    }
+
+    [Test]
+    public void ParseStackTraceWithIntermediateMessage()
+    {
+      string stackTrace = "--- End of managed stack trace ---";
+      RaygunErrorStackTraceLineMessage[] result = _raygunErrorMessage.GetStackTrace(stackTrace);
+
+      Assert.AreEqual(1, result.Length);
+
+      Assert.IsNull(result[0].ClassName);
+      Assert.AreEqual("--- End of managed stack trace ---", result[0].FileName);
+      Assert.AreEqual(0, result[0].LineNumber);
+      Assert.IsNull(result[0].MethodName);
+    }
   }
 }
