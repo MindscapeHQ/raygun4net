@@ -81,6 +81,7 @@
     <Compile Include="Messages\RaygunRequestMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaygunClient.cs" />
+    <Compile Include="RaygunHttpModule.cs" />
     <Compile Include="RaygunMessageBuilder.cs" />
     <Compile Include="RaygunSettings.cs" />
   </ItemGroup>

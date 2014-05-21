@@ -34,5 +34,20 @@ namespace Mindscape.Raygun4Net
       get { return (Uri)this["endpoint"]; }
       set { this["endpoint"] = value; }
     }
+
+    [ConfigurationProperty("excludeHttpStatusCodes", IsRequired = false, DefaultValue = "")]
+    [RegexStringValidator(@"^(\d+(,\s?\d+)*)?$")]
+    public string ExcludeHttpStatusCodesList
+    {
+      get { return (string)this["excludeHttpStatusCodes"]; }
+      set { this["excludeHttpStatusCodes"] = value; }
+    }
+
+    [ConfigurationProperty("ignoreFormDataNames", IsRequired = false, DefaultValue = "")]
+    public string IgnoreFormDataNames
+    {
+      get { return (string)this["ignoreFormDataNames"]; }
+      set { this["ignoreFormDataNames"] = value; }
+    }
   }
 }
