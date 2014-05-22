@@ -43,17 +43,25 @@ namespace Mindscape.Raygun4Net
       var application = (HttpApplication)sender;
       var lastError = application.Server.GetLastError();
 
-      if (ExcludeErrorsBasedOnHttpStatusCode && lastError is HttpException && Contains(HttpStatusCodesToExclude, ((HttpException)lastError).GetHttpCode()))
+      if (CanSend(lastError))
       {
-        return;
+        new RaygunClient().SendInBackground(lastError);
+      }
+    }
+
+    public bool CanSend(Exception exception)
+    {
+      if (ExcludeErrorsBasedOnHttpStatusCode && exception is HttpException && Contains(HttpStatusCodesToExclude, ((HttpException)exception).GetHttpCode()))
+      {
+        return false;
       }
 
       if (ExcludeErrorsFromLocal && HttpContext.Current.Request.IsLocal)
       {
-        return;
+        return false;
       }
 
-      new RaygunClient().SendInBackground(Unwrap(lastError));
+      return true;
     }
 
     private static bool Contains(int[] array, int target)
@@ -66,16 +74,6 @@ namespace Mindscape.Raygun4Net
         }
       }
       return false;
-    }
-
-    private Exception Unwrap(Exception exception)
-    {
-      if (exception is HttpUnhandledException)
-      {
-        return exception.GetBaseException();
-      }
-
-      return exception;
     }
   }
 }

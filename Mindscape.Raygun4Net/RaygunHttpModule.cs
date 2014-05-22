@@ -28,17 +28,25 @@ namespace Mindscape.Raygun4Net
       var application = (HttpApplication)sender;
       var lastError = application.Server.GetLastError();
 
-      if (ExcludeErrorsBasedOnHttpStatusCode && lastError is HttpException && HttpStatusCodesToExclude.Contains(((HttpException)lastError).GetHttpCode()))
+      if (CanSend(lastError))
       {
-        return;
+        new RaygunClient().SendInBackground(Unwrap(lastError));
+      }
+    }
+
+    public bool CanSend(Exception exception)
+    {
+      if (ExcludeErrorsBasedOnHttpStatusCode && exception is HttpException && HttpStatusCodesToExclude.Contains(((HttpException)exception).GetHttpCode()))
+      {
+        return false;
       }
 
       if (ExcludeErrorsFromLocal && HttpContext.Current.Request.IsLocal)
       {
-        return;
+        return false;
       }
 
-      new RaygunClient().SendInBackground(Unwrap(lastError));
+      return true;
     }
 
     private Exception Unwrap(Exception exception)

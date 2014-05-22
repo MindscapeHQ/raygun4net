@@ -5,20 +5,16 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunSettings : ConfigurationSection
   {
-    private static readonly RaygunSettings settings = ConfigurationManager.GetSection("RaygunSettings") as RaygunSettings;
+    private static readonly RaygunSettings settings = ConfigurationManager.GetSection("RaygunSettings") as RaygunSettings ?? new RaygunSettings();
 
     private const string DefaultApiEndPoint = "https://api.raygun.io/entries";
 
     public static RaygunSettings Settings
     {
-      get
-      {
-        // If no configuration setting is provided then return the default values
-        return settings ?? new RaygunSettings { ApiKey = "", ApiEndpoint = new Uri(DefaultApiEndPoint), MediumTrust = false };
-      }
+      get { return settings; }
     }
 
-    [ConfigurationProperty("apikey", IsRequired = true)]
+    [ConfigurationProperty("apikey", IsRequired = true, DefaultValue = "")]
     [StringValidator]
     public string ApiKey
     {
@@ -53,7 +49,6 @@ namespace Mindscape.Raygun4Net
     {
       get { return (string)this["excludeHttpStatusCodes"]; }
       set { this["excludeHttpStatusCodes"] = value; }
-
     }
 
     [ConfigurationProperty("excludeErrorsFromLocal", IsRequired = false, DefaultValue = false)]

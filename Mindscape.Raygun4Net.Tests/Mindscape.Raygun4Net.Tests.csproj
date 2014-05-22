@@ -37,6 +37,7 @@
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
@@ -51,8 +52,10 @@
     <Compile Include="RaygunClientTests.cs" />
     <Compile Include="RaygunErrorMessageExceptionTests.cs" />
     <Compile Include="RaygunErrorMessageInnerExceptionTests.cs" />
+    <Compile Include="RaygunHttpModuleTests.cs" />
     <Compile Include="RaygunMessageBuilderTests.cs" />
     <Compile Include="RaygunRequestMessageTests.cs" />
+    <Compile Include="RaygunSettingsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net\Mindscape.Raygun4Net.csproj">
