@@ -17,8 +17,8 @@
 		<file src="build\Mindscape.Raygun4Net.dll" target="lib\net35\Mindscape.Raygun4Net.dll" />
 		<file src="build\Mindscape.Raygun4Net.pdb" target="lib\net35\Mindscape.Raygun4Net.pdb" />
     <!-- .NET 2.0 -->
-		<file src="build\Mindscape.Raygun4Net2.dll" target="lib\net20\Mindscape.Raygun4Net2.dll" />
-		<file src="build\Mindscape.Raygun4Net2.pdb" target="lib\net20\Mindscape.Raygun4Net2.pdb" />
+		<file src="build\Net2\Mindscape.Raygun4Net.dll" target="lib\net20\Mindscape.Raygun4Net.dll" />
+		<file src="build\Net2\Mindscape.Raygun4Net.pdb" target="lib\net20\Mindscape.Raygun4Net.pdb" />
 		<!-- Xamarin.Android -->
 		<file src="build\Mindscape.Raygun4Net.Xamarin.Android.dll" target="lib\MonoAndroid2.2\Mindscape.Raygun4Net.Xamarin.Android.dll" />
 		<file src="build\Mindscape.Raygun4Net.Xamarin.Android.pdb" target="lib\MonoAndroid2.2\Mindscape.Raygun4Net.Xamarin.Android.pdb" />

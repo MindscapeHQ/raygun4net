@@ -8,6 +8,7 @@ properties {
     $nugetpackage =                  "Mindscape.Raygun4Net.1.0.nupkg"
     $configuration =                 "Release"
     $build_dir =                     "$root\build\"
+    $build_dir2 =                    "$root\build\Net2"
     $nunit_dir =                     "$root\packages\NUnit.Runners.2.6.2\tools\"
     $tools_dir =                     "$root\tools"
     $nuget_dir =                     "$root\.nuget"
@@ -26,7 +27,7 @@ task Init -depends Clean {
 
 task Compile -depends Init {
     exec { msbuild "$solution_file" /m /p:OutDir=$build_dir /p:Configuration=$configuration }
-    exec { msbuild "$solution_file2" /m /p:OutDir=$build_dir /p:Configuration=$configuration }
+    exec { msbuild "$solution_file2" /m /p:OutDir=$build_dir2 /p:Configuration=$configuration }
 }
 
 task CompileWinRT -depends Init {
