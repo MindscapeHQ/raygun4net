@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A80C73AC-B86C-4249-9402-9C6E6F7746A3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Mindscape.Raygun4Net</RootNamespace>
+    <AssemblyName>Mindscape.Raygun4Net</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;SIMPLE_JSON_NO_LINQ_EXPRESSION</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>True</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;SIMPLE_JSON_NO_LINQ_EXPRESSION</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Sign|AnyCPU'">
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>Raygun4Net2.snk</AssemblyOriginatorKeyFile>
+    <OutputPath>bin\Sign\</OutputPath>
+    <DefineConstants>TRACE;SIMPLE_JSON_NO_LINQ_EXPRESSION</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\AssemblyVersionInfo.cs">
+      <Link>Properties\AssemblyVersionInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
+      <Link>IRaygunMessageBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorStackTraceLineMessage.cs">
+      <Link>Messages\RaygunErrorStackTraceLineMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunIdentifierMessage.cs">
+      <Link>Messages\RaygunIdentifierMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunMessage.cs">
+      <Link>Messages\RaygunMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunMessageDetails.cs">
+      <Link>Messages\RaygunMessageDetails.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunResponseMessage.cs">
+      <Link>Messages\RaygunResponseMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\SimpleJson.cs">
+      <Link>SimpleJson.cs</Link>
+    </Compile>
+    <Compile Include="Messages\RaygunClientMessage.cs" />
+    <Compile Include="Messages\RaygunEnvironmentMessage.cs" />
+    <Compile Include="Messages\RaygunErrorMessage.cs" />
+    <Compile Include="Messages\RaygunRequestMessage.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RaygunClient.cs" />
+    <Compile Include="RaygunHttpModule.cs" />
+    <Compile Include="RaygunMessageBuilder.cs" />
+    <Compile Include="RaygunSettings.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Raygun4Net2.snk" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

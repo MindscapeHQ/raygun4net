@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
+using System.Text;
 
 namespace Mindscape.Raygun4Net
 {
@@ -27,20 +29,6 @@ namespace Mindscape.Raygun4Net
     {
       get { return (Uri)this["endpoint"]; }
       set { this["endpoint"] = value; }
-    }
-
-    [ConfigurationProperty("mediumTrust", IsRequired = false, DefaultValue = false)]
-    public bool MediumTrust
-    {
-      get { return (bool)this["mediumTrust"]; }
-      set { this["mediumTrust"] = value; }
-    }
-
-    [ConfigurationProperty("throwOnError", IsRequired = false, DefaultValue = false)]
-    public bool ThrowOnError
-    {
-      get { return (bool)this["throwOnError"]; }
-      set { this["throwOnError"] = value; }
     }
 
     [ConfigurationProperty("excludeHttpStatusCodes", IsRequired = false, DefaultValue = "")]

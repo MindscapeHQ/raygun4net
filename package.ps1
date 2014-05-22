@@ -3,10 +3,13 @@ properties {
     $nugetspec =                     "$root/Mindscape.Raygun4Net.nuspec"
     $signed_nugetspec =              "$root/Mindscape.Raygun4Net.signed.nuspec"
     $solution_file =                 "$root/Mindscape.Raygun4Net.sln"
+    $solution_file2 =                "$root/Mindscape.Raygun4Net2.sln"
     $winrt_solution_file =           "$root/Mindscape.Raygun4Net.WinRT.sln"
     $configuration =                 "Sign"
     $build_dir =                     "$root\build\"
+    $build_dir2 =                    "$root\build\Net2"
     $signed_build_dir =              "$build_dir\signed"
+    $signed_build_dir2 =             "$build_dir\signed\Net2"
     $release_dir =                   "$root\release\"
     $nuget_dir =                     "$root\.nuget"
     $env:Path +=                     ";$nuget_dir"
@@ -26,6 +29,7 @@ task Init -depends Clean {
 
 task Compile -depends Init {
     exec { msbuild "$solution_file" /m /p:OutDir=$signed_build_dir /p:Configuration=$configuration }
+    exec { msbuild "$solution_file2" /m /p:OutDir=$signed_build_dir2 /p:Configuration=$configuration }
 }
 
 task CompileWinRT -depends Init {
@@ -59,9 +63,13 @@ task Zip -depends Package {
     
     $outerfolder = $release_dir + $version
     $versionfolder = $release_dir + $version + "\" + $version
+    $versionfolder2 = $release_dir + $version + "\" + $version + "\Net2"
     $signedfolder = $versionfolder + "\signed"
+    $signedfolder2 = $versionfolder + "\signed\Net2"
     new-item $versionfolder -itemType directory | Out-Null
+    new-item $versionfolder2 -itemType directory | Out-Null
     new-item $signedfolder -itemType directory | Out-Null
+    new-item $signedfolder2 -itemType directory | Out-Null
   
     copy-item $build_dir/Mindscape.Raygun4Net.dll $versionfolder
     copy-item $build_dir/Mindscape.Raygun4Net.pdb $versionfolder
@@ -72,8 +80,11 @@ task Zip -depends Package {
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.Android.dll $versionfolder
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.Android.pdb $versionfolder
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.iOS.dll $versionfolder
+    copy-item $build_dir2/Mindscape.Raygun4Net.dll $versionfolder2
+    copy-item $build_dir2/Mindscape.Raygun4Net.pdb $versionfolder2
     copy-item $signed_build_dir/Mindscape.Raygun4Net.dll $signedfolder
     copy-item $signed_build_dir/Mindscape.Raygun4Net.WinRT.dll $signedfolder
+    copy-item $signed_build_dir2/Mindscape.Raygun4Net.dll $signedfolder2
 	
     $zipFullName = $release_dir + $version + ".zip"
     Get-ChildItem $outerfolder | Add-Zip $zipFullName
