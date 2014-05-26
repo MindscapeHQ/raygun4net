@@ -290,10 +290,13 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    private bool _saveOnFail = true;
+
     private void SendStoredMessages()
     {
       if (NetworkInterface.NetworkInterfaceType != NetworkInterfaceType.None)
       {
+        _saveOnFail = false;
         try
         {
           using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
@@ -318,6 +321,10 @@ namespace Mindscape.Raygun4Net
         catch (Exception ex)
         {
           Debug.WriteLine(string.Format("Error sending stored messages to Raygun.io {0}", ex.Message));
+        }
+        finally
+        {
+          _saveOnFail = true;
         }
       }
     }
@@ -412,26 +419,46 @@ namespace Mindscape.Raygun4Net
 
     private void RequestReady(IAsyncResult asyncResult)
     {
-      HttpWebRequest request = asyncResult.AsyncState as HttpWebRequest;
-
-      if (request != null)
+      if (_messageQueue.Count > 0)
       {
-        using (Stream stream = request.EndGetRequestStream(asyncResult))
+        string message = _messageQueue.Dequeue();
+        if (!String.IsNullOrWhiteSpace(message))
         {
-          using (StreamWriter writer = new StreamWriter(stream))
+          try
           {
-            string message = _messageQueue.Dequeue();
-            writer.Write(message);
-            writer.Flush();
-            writer.Close();
+            HttpWebRequest request = asyncResult.AsyncState as HttpWebRequest;
+
+            if (request != null)
+            {
+              using (Stream stream = request.EndGetRequestStream(asyncResult))
+              {
+                using (StreamWriter writer = new StreamWriter(stream))
+                {
+                  writer.Write(message);
+                  writer.Flush();
+                  writer.Close();
+                }
+              }
+            }
+            else
+            {
+              throw new InvalidOperationException("The HttpWebRequest was unexpectedly null.");
+            }
+          }
+          catch (Exception e)
+          {
+            Debug.WriteLine("Error Logging Exception to Raygun.io " + e.Message);
+            if (_saveOnFail)
+            {
+              SaveMessage(message);
+            }
+          }
+          finally
+          {
+            _running = false;
           }
         }
       }
-      else
-      {
-        throw new InvalidOperationException("The HttpWebRequest was unexpectedly null.");
-      }
-
       _running = false;
     }
 
