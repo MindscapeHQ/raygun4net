@@ -56,6 +56,11 @@ namespace Mindscape.Raygun4Net
       return true;
     }
 
+    protected bool FilterShouldPreventSend(RaygunMessage raygunMessage)
+    {
+        return MessageSendFilter != null && !MessageSendFilter(raygunMessage);
+    }
+
     /// <summary>
     /// Gets or sets the user identity string.
     /// </summary>
@@ -64,7 +69,13 @@ namespace Mindscape.Raygun4Net
     /// <summary>
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
     /// </summary>
-    public string ApplicationVersion { get; set; }
+    public string ApplicationVersion { get; set; }    
+
+    /// <summary>
+    /// Gets or sets a <b>static</b> predicate that can prevent the sending of a particular message (or mutate the message before sending). Return false to prevent the message from sending.
+    /// </summary>
+    public static Func<RaygunMessage, bool> MessageSendFilter { get; set; }
+
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
@@ -212,32 +223,37 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void Send(RaygunMessage raygunMessage)
     {
-      if (ValidateApiKey())
+      if (!ValidateApiKey())
       {
-        using (var client = new WebClient())
+        return;
+      }
+      if (FilterShouldPreventSend(raygunMessage))
+      {
+        return;
+      }
+      using (var client = new WebClient())
+      {
+        client.Headers.Add("X-ApiKey", _apiKey);
+        client.Encoding = System.Text.Encoding.UTF8;
+
+        try
         {
-          client.Headers.Add("X-ApiKey", _apiKey);
-          client.Encoding = System.Text.Encoding.UTF8;
+          var message = SimpleJson.SerializeObject(raygunMessage);
+          client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
 
-          try
+          if (RaygunSettings.Settings.ThrowOnError)
           {
-            var message = SimpleJson.SerializeObject(raygunMessage);
-            client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
-          }
-          catch (Exception ex)
-          {
-            System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
-
-            if (RaygunSettings.Settings.ThrowOnError)
-            {
               throw;
-            }
           }
         }
       }
     }
 
-    /// <summary>
+      /// <summary>
     /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
     /// Then use a Send method that does not accept a version.
     /// </summary>

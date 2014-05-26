@@ -179,5 +179,29 @@ namespace Mindscape.Raygun4Net.Tests
       Assert.AreEqual("42", message.Details.UserCustomData["x"]);
       Assert.AreEqual("NULL", message.Details.UserCustomData["obj"]);
     }
+
+
+    // Filter tests
+
+    [Test]
+    public void NoFilterPassesAll()
+    {
+      RaygunClient.MessageSendFilter = null;
+      Assert.IsFalse(_client.ExposeFilterShouldPreventSend(_client.CreateMessage(_exception)));
+    }
+
+    [Test]
+    public void FilterIsChecked()
+    {
+      bool filterCalled = false;
+      RaygunClient.MessageSendFilter = x =>
+      {
+        Assert.AreEqual("NullReferenceException: The thing is null", x.Details.Error.Message);
+        filterCalled = true;
+        return false;
+      };
+      Assert.IsTrue(_client.ExposeFilterShouldPreventSend(_client.CreateMessage(_exception)));
+      Assert.IsTrue(filterCalled);
+    }
   }
 }
