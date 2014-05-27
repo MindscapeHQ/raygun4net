@@ -74,7 +74,7 @@ namespace Mindscape.Raygun4Net
     /// <summary>
     /// Gets or sets a <b>static</b> predicate that can prevent the sending of a particular message (or mutate the message before sending). Return false to prevent the message from sending.
     /// </summary>
-    public static Func<RaygunMessage, bool> MessageSendFilter { get; set; }
+    public Func<RaygunMessage, bool> MessageSendFilter { get; set; }
 
 
     /// <summary>

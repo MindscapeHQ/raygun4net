@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Web;
 using Mindscape.Raygun4Net.Messages;
 using NUnit.Framework;
@@ -186,7 +184,7 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void NoFilterPassesAll()
     {
-      RaygunClient.MessageSendFilter = null;
+      _client.MessageSendFilter = null;
       Assert.IsFalse(_client.ExposeFilterShouldPreventSend(_client.CreateMessage(_exception)));
     }
 
@@ -194,7 +192,7 @@ namespace Mindscape.Raygun4Net.Tests
     public void FilterIsChecked()
     {
       bool filterCalled = false;
-      RaygunClient.MessageSendFilter = x =>
+      _client.MessageSendFilter = x =>
       {
         Assert.AreEqual("NullReferenceException: The thing is null", x.Details.Error.Message);
         filterCalled = true;
