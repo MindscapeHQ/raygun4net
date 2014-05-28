@@ -26,5 +26,10 @@ namespace Mindscape.Raygun4Net.Tests
     {
       return ValidateApiKey();
     }
+
+    public bool ExposeFilterShouldPreventSend(RaygunMessage raygunMessage)
+    {
+        return FilterShouldPreventSend(raygunMessage);
+    }
   }
 }

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Web;
 using Mindscape.Raygun4Net.Messages;
 using NUnit.Framework;
@@ -178,6 +176,102 @@ namespace Mindscape.Raygun4Net.Tests
       Assert.AreEqual(2, message.Details.UserCustomData.Count);
       Assert.AreEqual("42", message.Details.UserCustomData["x"]);
       Assert.AreEqual("NULL", message.Details.UserCustomData["obj"]);
+    }
+
+
+    // Filter tests
+
+    [Test]
+    public void NoFilterPassesAll()
+    {
+      _client.MessageSendFilter = null;
+      Assert.IsFalse(_client.ExposeFilterShouldPreventSend(_client.CreateMessage(_exception)));
+    }
+
+    [Test]
+    public void FilterIsChecked()
+    {
+      bool filterCalled = false;
+      _client.MessageSendFilter = x =>
+      {
+        Assert.AreEqual("NullReferenceException: The thing is null", x.Details.Error.Message);
+        filterCalled = true;
+        return false;
+      };
+      Assert.IsTrue(_client.ExposeFilterShouldPreventSend(_client.CreateMessage(_exception)));
+      Assert.IsTrue(filterCalled);
+    }
+
+    [Test]
+    public void FilterCanAllowSend()
+    {
+      _client.MessageSendFilter = x =>
+      {
+        return true;
+      };
+      Assert.IsFalse(_client.ExposeFilterShouldPreventSend(_client.CreateMessage(_exception)));
+    }
+
+    [Test]
+    public void AllFiltersAreChecked()
+    {
+      bool filterCalled = false;
+      bool filter2Called = false;
+      _client.MessageSendFilter += x =>
+        {
+          Assert.AreEqual("NullReferenceException: The thing is null", x.Details.Error.Message);
+          filterCalled = true;
+          return false;
+        };
+      _client.MessageSendFilter += x =>
+        {
+          Assert.AreEqual("NullReferenceException: The thing is null", x.Details.Error.Message);
+          filter2Called = true;
+          return false;
+        };
+      Assert.IsTrue(_client.ExposeFilterShouldPreventSend(_client.CreateMessage(_exception)));
+      Assert.IsTrue(filterCalled);
+      Assert.IsTrue(filter2Called);
+    }
+
+    [Test]
+    public void DontSendIfOneFilterReturnsFalse()
+    {
+      _client.MessageSendFilter += x =>
+      {
+        return true; // Allow send
+      };
+      _client.MessageSendFilter += x =>
+      {
+        return false; // Don't allow send
+      };
+      Assert.IsTrue(_client.ExposeFilterShouldPreventSend(_client.CreateMessage(_exception)));
+
+      // Also test reverse order:
+
+      _client.MessageSendFilter += x =>
+      {
+        return false; // Don't allow send
+      };
+      _client.MessageSendFilter += x =>
+      {
+        return true; // Allow send
+      };
+      Assert.IsTrue(_client.ExposeFilterShouldPreventSend(_client.CreateMessage(_exception)));
+    }
+
+    [Test]
+    public void AllowSendIfAllFiltersReturnTrue()
+    {
+      _client.MessageSendFilter += x =>
+      {
+        return true;
+      };
+      _client.MessageSendFilter += x =>
+      {
+        return true;
+      };
+      Assert.IsFalse(_client.ExposeFilterShouldPreventSend(_client.CreateMessage(_exception)));
     }
   }
 }
