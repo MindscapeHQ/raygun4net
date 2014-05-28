@@ -58,7 +58,15 @@ namespace Mindscape.Raygun4Net
 
     protected bool FilterShouldPreventSend(RaygunMessage raygunMessage)
     {
-        return MessageSendFilter != null && !MessageSendFilter(raygunMessage);
+      bool result = false;
+      if (MessageSendFilter != null)
+      {
+        foreach (Func<RaygunMessage, bool> filter in MessageSendFilter.GetInvocationList())
+        {
+          result |= !filter(raygunMessage);
+        }
+      }
+      return result;
     }
 
     /// <summary>
@@ -75,7 +83,6 @@ namespace Mindscape.Raygun4Net
     /// Gets or sets a predicate that can prevent the sending of a particular message (or mutate the message before sending). Return false to prevent the message from sending.
     /// </summary>
     public Func<RaygunMessage, bool> MessageSendFilter { get; set; }
-
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
