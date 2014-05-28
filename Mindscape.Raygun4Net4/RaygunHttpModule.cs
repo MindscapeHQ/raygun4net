@@ -14,12 +14,16 @@ namespace Mindscape.Raygun4Net
 
     public void Init(HttpApplication context)
     {
+      HttpStatusCodesToExclude = string.IsNullOrEmpty(RaygunSettings.Settings.ExcludeHttpStatusCodesList) ? new int[0] : RaygunSettings.Settings.ExcludeHttpStatusCodesList.Split(',').Select(int.Parse).ToArray();
+      ExcludeErrorsBasedOnHttpStatusCode = HttpStatusCodesToExclude.Any();
+      ExcludeErrorsFromLocal = RaygunSettings.Settings.ExcludeErrorsFromLocal;
+
       if (GlobalFilters.Filters.Count == 1)
       {
         Filter filter = GlobalFilters.Filters.FirstOrDefault();
         if (filter.Instance is HandleErrorAttribute)
         {
-          GlobalFilters.Filters.Add(new RaygunExceptionFilterAttribute());
+          GlobalFilters.Filters.Add(new RaygunExceptionFilterAttribute(context, this));
         }
       }
       else
@@ -27,9 +31,6 @@ namespace Mindscape.Raygun4Net
         if (!HasRaygunFilter)
         {
           context.Error += SendError;
-          HttpStatusCodesToExclude = string.IsNullOrEmpty(RaygunSettings.Settings.ExcludeHttpStatusCodesList) ? new int[0] : RaygunSettings.Settings.ExcludeHttpStatusCodesList.Split(',').Select(int.Parse).ToArray();
-          ExcludeErrorsBasedOnHttpStatusCode = HttpStatusCodesToExclude.Any();
-          ExcludeErrorsFromLocal = RaygunSettings.Settings.ExcludeErrorsFromLocal;
         }
       }
     }
@@ -58,13 +59,18 @@ namespace Mindscape.Raygun4Net
       var application = (HttpApplication)sender;
       var lastError = application.Server.GetLastError();
 
-      if (CanSend(lastError))
+      SendError(application, lastError);
+    }
+
+    internal void SendError(HttpApplication application, Exception exception)
+    {
+      if (CanSend(exception))
       {
         var raygunApplication = application as IRaygunApplication;
 
         var client = raygunApplication != null ? raygunApplication.GenerateRaygunClient() : new RaygunClient();
 
-        client.SendInBackground(Unwrap(lastError));
+        client.SendInBackground(Unwrap(exception));
       }
     }
 
