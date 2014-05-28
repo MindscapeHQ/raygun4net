@@ -6,35 +6,35 @@ CLEAN.include "xpkg"
 COMPONENT = "raygun4net-2.1.0.xam"
 
 file "xpkg/xpkg.exe" do
-    sh "if exist xpkg del /Q xpkg & rd xpkg"
-	sh "if exist xpkg.zip del xpkg.zip"
-	sh "if exist #{COMPONENT} del #{COMPONENT}"
-	puts "* Downloading xpkg..."
-	mkdir "xpkg"
-	sh "curl -L https://components.xamarin.com/submit/xpkg > xpkg.zip"
-	sh "unzip -o xpkg.zip -d xpkg"
-	sh "del xpkg.zip"
+  sh "if exist xpkg del /Q xpkg & rd xpkg"
+  sh "if exist xpkg.zip del xpkg.zip"
+  sh "if exist #{COMPONENT} del #{COMPONENT}"
+  puts "* Downloading xpkg..."
+  mkdir "xpkg"
+  sh "curl -L https://components.xamarin.com/submit/xpkg > xpkg.zip"
+  sh "unzip -o xpkg.zip -d xpkg"
+  sh "del xpkg.zip"
 end
 
 task :default => "xpkg/xpkg.exe" do
-	line = <<-END
-	mono xpkg/xamarin-component.exe create-manually #{COMPONENT} \
-		--name="Raygun4Net" \
-		--summary="Send exception messages in your Android and iOS applications to the Raygun.io cloud service." \
-		--publisher="Mindscape" \
-		--website="http://raygun.io/" \
-		--details="Details.md" \
-		--license="License.md" \
-		--getting-started="GettingStarted.md" \
-		--icon="icons/raygun4net_128x128.png" \
-		--icon="icons/raygun4net_512x512.png" \
-		--library="android":"../build/Mindscape.Raygun4Net.Xamarin.Android.dll" \
-		--library="ios":"../build/Mindscape.Raygun4Net.Xamarin.iOS.dll" \
-		--sample="Android Sample. Demonstrates how to use the RaygunClient in an Android application.":"samples/Raygun.Android.Sample/Raygun.Android.Sample.sln" \
-		--sample="iOS Sample. Demonstrates how to use the RaygunClient in an iOS application.":"samples/Raygun.iOS.Sample/Raygun.iOS.Sample.sln"
-		END
-	puts "* Creating #{COMPONENT}..."
-	puts line.strip.gsub "\t\t", "\\\n    "
-	sh line, :verbose => false
-	puts "* Created #{COMPONENT}"
+  line = <<-END
+  mono xpkg/xamarin-component.exe create-manually #{COMPONENT} \
+    --name="Raygun4Net" \
+    --summary="Send exception messages in your Android and iOS applications to the Raygun.io cloud service." \
+    --publisher="Mindscape" \
+    --website="http://raygun.io/" \
+    --details="Details.md" \
+    --license="License.md" \
+    --getting-started="GettingStarted.md" \
+    --icon="icons/raygun4net_128x128.png" \
+    --icon="icons/raygun4net_512x512.png" \
+    --library="android":"../build/Mindscape.Raygun4Net.Xamarin.Android.dll" \
+    --library="ios":"../build/Mindscape.Raygun4Net.Xamarin.iOS.dll" \
+    --sample="Android Sample. Demonstrates how to use the RaygunClient in an Android application.":"samples/Raygun.Android.Sample/Raygun.Android.Sample.sln" \
+    --sample="iOS Sample. Demonstrates how to use the RaygunClient in an iOS application.":"samples/Raygun.iOS.Sample/Raygun.iOS.Sample.sln"
+    END
+  puts "* Creating #{COMPONENT}..."
+  puts line.strip.gsub "\t\t", "\\\n    "
+  sh line, :verbose => false
+  puts "* Created #{COMPONENT}"
 end
