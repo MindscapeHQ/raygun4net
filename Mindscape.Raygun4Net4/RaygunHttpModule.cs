@@ -60,7 +60,11 @@ namespace Mindscape.Raygun4Net
 
       if (CanSend(lastError))
       {
-        new RaygunClient().SendInBackground(Unwrap(lastError));
+        var raygunApplication = application as IRaygunApplication;
+
+        var client = raygunApplication != null ? raygunApplication.GenerateRaygunClient() : new RaygunClient();
+
+        client.SendInBackground(Unwrap(lastError));
       }
     }
 
