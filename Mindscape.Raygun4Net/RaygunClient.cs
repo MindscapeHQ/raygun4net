@@ -72,7 +72,7 @@ namespace Mindscape.Raygun4Net
     public string ApplicationVersion { get; set; }    
 
     /// <summary>
-    /// Gets or sets a <b>static</b> predicate that can prevent the sending of a particular message (or mutate the message before sending). Return false to prevent the message from sending.
+    /// Gets or sets a predicate that can prevent the sending of a particular message (or mutate the message before sending). Return false to prevent the message from sending.
     /// </summary>
     public Func<RaygunMessage, bool> MessageSendFilter { get; set; }
 
@@ -253,7 +253,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-      /// <summary>
+    /// <summary>
     /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
     /// Then use a Send method that does not accept a version.
     /// </summary>
