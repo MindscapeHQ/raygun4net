@@ -30,15 +30,18 @@ namespace Mindscape.Raygun4Net
 
       if (CanSend(lastError))
       {
-        var raygunApplication = application as IRaygunApplication;
-
-        var client = raygunApplication != null ? raygunApplication.GenerateRaygunClient() : new RaygunClient();
-
+        var client = GetRaygunClient(application);
         client.SendInBackground(Unwrap(lastError));
       }
     }
 
-    public bool CanSend(Exception exception)
+    protected RaygunClient GetRaygunClient(HttpApplication application)
+    {
+      var raygunApplication = application as IRaygunApplication;
+      return raygunApplication != null ? raygunApplication.GenerateRaygunClient() : new RaygunClient();
+    }
+
+    protected bool CanSend(Exception exception)
     {
       if (ExcludeErrorsBasedOnHttpStatusCode && exception is HttpException && HttpStatusCodesToExclude.Contains(((HttpException)exception).GetHttpCode()))
       {
