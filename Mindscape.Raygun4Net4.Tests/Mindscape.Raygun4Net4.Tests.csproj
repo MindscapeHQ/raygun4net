@@ -75,6 +75,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\FakeFilterAttribute.cs" />
+    <Compile Include="Model\FakeHttpApplication.cs" />
+    <Compile Include="Model\FakeRaygunHttpModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaygunHttpModuleTests.cs" />
   </ItemGroup>
