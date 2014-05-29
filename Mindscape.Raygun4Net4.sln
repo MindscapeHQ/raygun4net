@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net4", "Mindscape.Raygun4Net4\Mindscape.Raygun4Net4.csproj", "{2CF1FE1F-AD2D-40BD-9F99-57FF00445A9D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net4.Tests", "Mindscape.Raygun4Net4.Tests\Mindscape.Raygun4Net4.Tests.csproj", "{69BFF5D8-7B18-4685-B828-8DF2AADEA20D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{2CF1FE1F-AD2D-40BD-9F99-57FF00445A9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CF1FE1F-AD2D-40BD-9F99-57FF00445A9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CF1FE1F-AD2D-40BD-9F99-57FF00445A9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69BFF5D8-7B18-4685-B828-8DF2AADEA20D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69BFF5D8-7B18-4685-B828-8DF2AADEA20D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69BFF5D8-7B18-4685-B828-8DF2AADEA20D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69BFF5D8-7B18-4685-B828-8DF2AADEA20D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
