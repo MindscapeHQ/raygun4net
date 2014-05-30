@@ -42,7 +42,7 @@ namespace Mindscape.Raygun4Net2.Tests
     {
       _client.User = "Robbie Robot";
 
-      RaygunMessage message = _client.CreateMessage(_exception);
+      RaygunMessage message = _client.ExposeBuildMessage(_exception);
       Assert.AreEqual("Robbie Robot", message.Details.User.Identifier);
     }
 
@@ -66,7 +66,7 @@ namespace Mindscape.Raygun4Net2.Tests
     {
       _client.ApplicationVersion = "Custom Version";
 
-      RaygunMessage message = _client.CreateMessage(_exception);
+      RaygunMessage message = _client.ExposeBuildMessage(_exception);
       Assert.AreEqual("Custom Version", message.Details.Version);
     }
 
@@ -77,7 +77,7 @@ namespace Mindscape.Raygun4Net2.Tests
     {
       TargetInvocationException wrapper = new TargetInvocationException(_exception);
 
-      RaygunMessage message = _client.CreateMessage(wrapper);
+      RaygunMessage message = _client.ExposeBuildMessage(wrapper);
       Assert.AreEqual("System.NullReferenceException", message.Details.Error.ClassName);
     }
 
@@ -86,7 +86,7 @@ namespace Mindscape.Raygun4Net2.Tests
     {
       HttpUnhandledException wrapper = new HttpUnhandledException("Something went wrong", _exception);
 
-      RaygunMessage message = _client.CreateMessage(wrapper);
+      RaygunMessage message = _client.ExposeBuildMessage(wrapper);
       Assert.AreEqual("System.NullReferenceException", message.Details.Error.ClassName);
     }
 
@@ -97,7 +97,7 @@ namespace Mindscape.Raygun4Net2.Tests
 
       WrapperException wrapper = new WrapperException(_exception);
 
-      RaygunMessage message = _client.CreateMessage(wrapper);
+      RaygunMessage message = _client.ExposeBuildMessage(wrapper);
       Assert.AreEqual("System.NullReferenceException", message.Details.Error.ClassName);
     }
 
@@ -106,7 +106,7 @@ namespace Mindscape.Raygun4Net2.Tests
     {
       HttpUnhandledException wrapper = new HttpUnhandledException();
 
-      RaygunMessage message = _client.CreateMessage(wrapper);
+      RaygunMessage message = _client.ExposeBuildMessage(wrapper);
       Assert.AreEqual("System.Web.HttpUnhandledException", message.Details.Error.ClassName);
       Assert.IsNull(message.Details.Error.InnerError);
     }
@@ -117,7 +117,7 @@ namespace Mindscape.Raygun4Net2.Tests
       HttpUnhandledException wrapper = new HttpUnhandledException("Something went wrong", _exception);
       TargetInvocationException wrapper2 = new TargetInvocationException(wrapper);
 
-      RaygunMessage message = _client.CreateMessage(wrapper2);
+      RaygunMessage message = _client.ExposeBuildMessage(wrapper2);
       Assert.AreEqual("System.NullReferenceException", message.Details.Error.ClassName);
     }
 
@@ -126,14 +126,14 @@ namespace Mindscape.Raygun4Net2.Tests
     [Test]
     public void NoAPIKeyIsInvalid()
     {
-      Assert.IsFalse(_client.Validate());
+      Assert.IsFalse(_client.ExposeValidateApiKey());
     }
 
     [Test]
     public void APIKeyIsValid()
     {
       FakeRaygunClient client = new FakeRaygunClient("MY_API_KEY");
-      Assert.IsTrue(client.Validate());
+      Assert.IsTrue(client.ExposeValidateApiKey());
     }
 
     // Tags and user custom data tests
@@ -141,7 +141,7 @@ namespace Mindscape.Raygun4Net2.Tests
     [Test]
     public void TagsAreNullByDefault()
     {
-      RaygunMessage message = _client.CreateMessage(_exception);
+      RaygunMessage message = _client.ExposeBuildMessage(_exception);
       Assert.IsNull(message.Details.Tags);
     }
 
@@ -152,7 +152,7 @@ namespace Mindscape.Raygun4Net2.Tests
       tags.Add("Very Important");
       tags.Add("WPF");
 
-      RaygunMessage message = _client.CreateMessage(_exception, tags);
+      RaygunMessage message = _client.ExposeBuildMessage(_exception, tags);
       Assert.IsNotNull(message.Details.Tags);
       Assert.AreEqual(2, message.Details.Tags.Count);
       Assert.Contains("Very Important", (ICollection)message.Details.Tags);
@@ -162,7 +162,7 @@ namespace Mindscape.Raygun4Net2.Tests
     [Test]
     public void UserCustomDataIsNullByDefault()
     {
-      RaygunMessage message = _client.CreateMessage(_exception);
+      RaygunMessage message = _client.ExposeBuildMessage(_exception);
       Assert.IsNull(message.Details.UserCustomData);
     }
 
@@ -173,7 +173,7 @@ namespace Mindscape.Raygun4Net2.Tests
       data.Add("x", "42");
       data.Add("obj", "NULL");
 
-      RaygunMessage message = _client.CreateMessage(_exception, null, data);
+      RaygunMessage message = _client.ExposeBuildMessage(_exception, null, data);
       Assert.IsNotNull(message.Details.UserCustomData);
       Assert.AreEqual(2, message.Details.UserCustomData.Count);
       Assert.AreEqual("42", message.Details.UserCustomData["x"]);
@@ -185,7 +185,7 @@ namespace Mindscape.Raygun4Net2.Tests
     [Test]
     public void NoHandlerSendsAll()
     {
-      Assert.IsTrue(_client.ExposeCanSend(_client.CreateMessage(_exception)));
+      Assert.IsTrue(_client.ExposeCanSend(_client.ExposeBuildMessage(_exception)));
     }
 
     [Test]
@@ -198,7 +198,7 @@ namespace Mindscape.Raygun4Net2.Tests
         filterCalled = true;
         e.Cancel = true;
       };
-      Assert.IsFalse(_client.ExposeCanSend(_client.CreateMessage(_exception)));
+      Assert.IsFalse(_client.ExposeCanSend(_client.ExposeBuildMessage(_exception)));
       Assert.IsTrue(filterCalled);
     }
 
@@ -209,7 +209,7 @@ namespace Mindscape.Raygun4Net2.Tests
       {
         // Allow send by not setting e.Cancel
       };
-      Assert.IsTrue(_client.ExposeCanSend(_client.CreateMessage(_exception)));
+      Assert.IsTrue(_client.ExposeCanSend(_client.ExposeBuildMessage(_exception)));
     }
 
     [Test]
@@ -229,7 +229,7 @@ namespace Mindscape.Raygun4Net2.Tests
         filter2Called = true;
         e.Cancel = true;
       };
-      Assert.IsFalse(_client.ExposeCanSend(_client.CreateMessage(_exception)));
+      Assert.IsFalse(_client.ExposeCanSend(_client.ExposeBuildMessage(_exception)));
       Assert.IsTrue(filter1Called);
       Assert.IsTrue(filter2Called);
     }
@@ -245,7 +245,7 @@ namespace Mindscape.Raygun4Net2.Tests
       {
         // Allow send by not setting e.Cancel
       };
-      Assert.IsFalse(_client.ExposeCanSend(_client.CreateMessage(_exception)));
+      Assert.IsFalse(_client.ExposeCanSend(_client.ExposeBuildMessage(_exception)));
     }
 
     [Test]
@@ -259,7 +259,7 @@ namespace Mindscape.Raygun4Net2.Tests
       {
         e.Cancel = true;
       };
-      Assert.IsFalse(_client.ExposeCanSend(_client.CreateMessage(_exception)));
+      Assert.IsFalse(_client.ExposeCanSend(_client.ExposeBuildMessage(_exception)));
     }
 
     [Test]
@@ -273,13 +273,13 @@ namespace Mindscape.Raygun4Net2.Tests
       {
         // Allow send by not setting e.Cancel
       };
-      Assert.IsTrue(_client.ExposeCanSend(_client.CreateMessage(_exception)));
+      Assert.IsTrue(_client.ExposeCanSend(_client.ExposeBuildMessage(_exception)));
     }
 
     [Test]
     public void HandlerCanModifyMessage()
     {
-      RaygunMessage message = _client.CreateMessage(_exception);
+      RaygunMessage message = _client.ExposeBuildMessage(_exception);
       Assert.AreEqual("NullReferenceException: The thing is null", message.Details.Error.Message);
 
       _client.SendingMessage += (object o, RaygunSendingMessageEventArgs e) =>

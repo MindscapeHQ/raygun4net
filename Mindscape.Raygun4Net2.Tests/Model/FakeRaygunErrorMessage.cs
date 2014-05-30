@@ -7,7 +7,7 @@ namespace Mindscape.Raygun4Net2.Tests
 {
   public class FakeRaygunErrorMessage : RaygunErrorMessage
   {
-    public RaygunErrorStackTraceLineMessage[] GetStackTrace(string stackTrace)
+    public RaygunErrorStackTraceLineMessage[] ExposeParseStackTrace(string stackTrace)
     {
       return ParseStackTrace(stackTrace);
     }
