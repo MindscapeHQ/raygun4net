@@ -17,19 +17,19 @@ namespace Mindscape.Raygun4Net.Tests
     {
     }
 
-    public RaygunMessage CreateMessage(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
+    public RaygunMessage ExposeBuildMessage(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
     {
       return BuildMessage(exception, tags, userCustomData);
     }
 
-    public bool Validate()
+    public bool ExposeValidateApiKey()
     {
       return ValidateApiKey();
     }
 
-    public bool ExposeFilterShouldPreventSend(RaygunMessage raygunMessage)
+    public bool ExposeOnSendingMessage(RaygunMessage raygunMessage)
     {
-        return FilterShouldPreventSend(raygunMessage);
+      return OnSendingMessage(raygunMessage);
     }
   }
 }
