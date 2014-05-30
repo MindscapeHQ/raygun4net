@@ -53,7 +53,8 @@ namespace Mindscape.Raygun4Net
       return true;
     }
 
-    protected bool CanSend(RaygunMessage raygunMessage)
+    // Returns true if the message can be sent, false if the sending is canceled.
+    protected bool OnSendingMessage(RaygunMessage raygunMessage)
     {
       bool result = true;
       EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
@@ -225,22 +226,26 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void Send(RaygunMessage raygunMessage)
     {
-      if (ValidateApiKey() && CanSend(raygunMessage))
+      if (ValidateApiKey())
       {
-        string message = null;
+        bool canSend = OnSendingMessage(raygunMessage);
+        if (canSend)
+        {
+          string message = null;
 
-        try
-        {
-          message = SimpleJson.SerializeObject(raygunMessage);
-        }
-        catch (Exception ex)
-        {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error serializing raygun message: {0}", ex.Message));
-        }
+          try
+          {
+            message = SimpleJson.SerializeObject(raygunMessage);
+          }
+          catch (Exception ex)
+          {
+            System.Diagnostics.Debug.WriteLine(string.Format("Error serializing raygun message: {0}", ex.Message));
+          }
 
-        if (message != null)
-        {
-          SendMessage(message);
+          if (message != null)
+          {
+            SendMessage(message);
+          }
         }
       }
     }
