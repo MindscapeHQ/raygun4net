@@ -15,14 +15,19 @@ namespace Mindscape.Raygun4Net2.Tests
     {
     }
 
-    public RaygunMessage CreateMessage(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
+    public RaygunMessage ExposeBuildMessage(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
     {
       return BuildMessage(exception, tags, userCustomData);
     }
 
-    public bool Validate()
+    public bool ExposeValidateApiKey()
     {
       return ValidateApiKey();
+    }
+
+    public bool ExposeOnSendingMessage(RaygunMessage message)
+    {
+      return OnSendingMessage(message);
     }
   }
 }

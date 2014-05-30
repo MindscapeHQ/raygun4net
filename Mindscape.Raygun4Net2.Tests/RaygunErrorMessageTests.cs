@@ -20,13 +20,13 @@ namespace Mindscape.Raygun4Net2.Tests
     [Test]
     public void NullStackTraceIsEmpty()
     {
-      Assert.AreEqual(0, _raygunErrorMessage.GetStackTrace(null).Length);
+      Assert.AreEqual(0, _raygunErrorMessage.ExposeParseStackTrace(null).Length);
     }
 
     [Test]
     public void NoStackTraceIsEmpty()
     {
-      Assert.AreEqual(0, _raygunErrorMessage.GetStackTrace("").Length);
+      Assert.AreEqual(0, _raygunErrorMessage.ExposeParseStackTrace("").Length);
     }
 
     [Test]
@@ -56,7 +56,7 @@ namespace Mindscape.Raygun4Net2.Tests
       string stackTrace = "   at Net2ErrorHarness.ChildClass.DontYouDareCrash() in e:\\Net2ErrorHarness\\BuggyClass.cs:line 21\r\n"
                         + "   at Net2ErrorHarness.BuggyClass.CallMethod() in e:\\Net2ErrorHarness\\BuggyClass.cs:line 14\r\n"
                         + "   at Net2ErrorHarness.Program.Main(String[] args) in e:\\Net2ErrorHarness\\Program.cs:line 16";
-      RaygunErrorStackTraceLineMessage[] result = _raygunErrorMessage.GetStackTrace(stackTrace);
+      RaygunErrorStackTraceLineMessage[] result = _raygunErrorMessage.ExposeParseStackTrace(stackTrace);
 
       Assert.AreEqual(3, result.Length);
 
@@ -80,7 +80,7 @@ namespace Mindscape.Raygun4Net2.Tests
     public void ParseStackTraceWithGenericClass()
     {
       string stackTrace = "   at Net2ErrorHarness.ChildClass`1.DontYouDareCrash() in e:\\Net2ErrorHarness\\BuggyClass.cs:line 21";
-      RaygunErrorStackTraceLineMessage[] result = _raygunErrorMessage.GetStackTrace(stackTrace);
+      RaygunErrorStackTraceLineMessage[] result = _raygunErrorMessage.ExposeParseStackTrace(stackTrace);
 
       Assert.AreEqual(1, result.Length);
 
@@ -94,7 +94,7 @@ namespace Mindscape.Raygun4Net2.Tests
     public void ParseStackTraceWithGenericMethod()
     {
       string stackTrace = "   at Net2ErrorHarness.ChildClass.DontYouDareCrash[T]() in e:\\Net2ErrorHarness\\BuggyClass.cs:line 21";
-      RaygunErrorStackTraceLineMessage[] result = _raygunErrorMessage.GetStackTrace(stackTrace);
+      RaygunErrorStackTraceLineMessage[] result = _raygunErrorMessage.ExposeParseStackTrace(stackTrace);
 
       Assert.AreEqual(1, result.Length);
 
@@ -108,7 +108,7 @@ namespace Mindscape.Raygun4Net2.Tests
     public void ParseStackTraceWithNoFileNameOrLineNumber()
     {
       string stackTrace = "   at System.Web.Util.CalliEventHandlerDelegateProxy.Callback(Object sender, EventArgs e)";
-      RaygunErrorStackTraceLineMessage[] result = _raygunErrorMessage.GetStackTrace(stackTrace);
+      RaygunErrorStackTraceLineMessage[] result = _raygunErrorMessage.ExposeParseStackTrace(stackTrace);
 
       Assert.AreEqual(1, result.Length);
 
@@ -122,7 +122,7 @@ namespace Mindscape.Raygun4Net2.Tests
     public void ParseStackTraceWithIntermediateMessage()
     {
       string stackTrace = "--- End of managed stack trace ---";
-      RaygunErrorStackTraceLineMessage[] result = _raygunErrorMessage.GetStackTrace(stackTrace);
+      RaygunErrorStackTraceLineMessage[] result = _raygunErrorMessage.ExposeParseStackTrace(stackTrace);
 
       Assert.AreEqual(1, result.Length);
 
