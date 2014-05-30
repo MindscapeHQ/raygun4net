@@ -45,11 +45,18 @@ namespace Mindscape.Raygun4Net
 
       if (CanSend(lastError))
       {
-        new RaygunClient().SendInBackground(lastError);
+        var client = GetRaygunClient(application);
+        client.SendInBackground(lastError);
       }
     }
 
-    public bool CanSend(Exception exception)
+    protected RaygunClient GetRaygunClient(HttpApplication application)
+    {
+      var raygunApplication = application as IRaygunApplication;
+      return raygunApplication != null ? raygunApplication.GenerateRaygunClient() : new RaygunClient();
+    }
+
+    protected bool CanSend(Exception exception)
     {
       if (ExcludeErrorsBasedOnHttpStatusCode && exception is HttpException && Contains(HttpStatusCodesToExclude, ((HttpException)exception).GetHttpCode()))
       {
