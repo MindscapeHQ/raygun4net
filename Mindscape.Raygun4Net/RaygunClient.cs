@@ -75,6 +75,10 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     public string User { get; set; }
 
+    /// <summary>
+    /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
+    /// and requires credentials.
+    /// </summary>
     public ICredentials ProxyCredentials { get; set; }
 
     /// <summary>
