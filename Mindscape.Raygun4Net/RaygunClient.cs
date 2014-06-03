@@ -75,6 +75,8 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     public string User { get; set; }
 
+    public ICredentials ProxyCredentials { get; set; }
+
     /// <summary>
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
     /// </summary>
@@ -240,6 +242,25 @@ namespace Mindscape.Raygun4Net
           {
             client.Headers.Add("X-ApiKey", _apiKey);
             client.Encoding = System.Text.Encoding.UTF8;
+
+            Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(new Uri(RaygunSettings.Settings.ApiEndpoint.ToString()));
+
+            if (proxyUri.AbsoluteUri != RaygunSettings.Settings.ApiEndpoint.ToString())
+            {
+              client.Proxy = new WebProxy(proxyUri, false);
+
+              if (ProxyCredentials == null)
+              {
+                client.UseDefaultCredentials = true;
+                client.Proxy.Credentials = CredentialCache.DefaultCredentials;
+              }
+              else
+              {
+                client.UseDefaultCredentials = false;
+                client.Proxy.Credentials = ProxyCredentials; 
+              }
+
+            }
 
             try
             {
