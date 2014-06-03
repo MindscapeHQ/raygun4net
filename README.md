@@ -238,6 +238,17 @@ This feature is optional if you wish to disable it for privacy concerns.
 
 Providing additional name-value custom data is also available as an overload on Send().
 
+## Proxy settings
+
+The Raygun4NET provider uses the default Windows proxy settings (as set in Internet Explorer's Connection tab, or Web.config) when sending messages to the Raygun API. If your proxy requires authentication credentials, you can provide these by setting the `ProxyCredentials` property after instantiating a RaygunClient, then using it to send later:
+
+```csharp
+var raygunClient = new RaygunClient()
+{
+  ProxyCredentials = new NetworkCredential("user", "pword")
+};
+```
+
 ## Troubleshooting
 
 * If the solution fails to build due to missing dependencies (Newtonsoft etc), in Visual Studio 2012 ensure you have the NuGet extension installed and that the Tools -> Options -> Package Manager -> 'Allow Nuget to download missing packages during build' box is checked. Then, go to the directory that you cloned this repository into and run build.bat.
