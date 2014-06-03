@@ -1,8 +1,6 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -51,19 +49,15 @@ namespace Mindscape.Raygun4Net.Messages
       }
     }
 
-    private IDictionary GetCookies(HttpCookieCollection cookieCollection, IEnumerable<string> ignoredFormNames)
+    private IList GetCookies(HttpCookieCollection cookieCollection, IEnumerable<string> ignoredFormNames)
     {
       var ignored = ignoredFormNames.ToLookup(s => s);
 
-      var cookies = cookieCollection
-          .Cast<string>()
-          .Where(key => ignored.Contains(key) == false)
-// ReSharper disable PossibleNullReferenceException 
-          // this can't be null, we got the key from the collection.
-          .ToDictionary(key => key, key => cookieCollection[key].Value);
-// ReSharper restore PossibleNullReferenceException
-
-      return cookies;
+      return Enumerable.Range(0, cookieCollection.Count)
+        .Select(i => cookieCollection[i])
+        .Where(c => !ignored.Contains(c.Name))
+        .Select(c => new Cookie(c.Name, c.Value))
+        .ToList();
     }
 
     private static IDictionary ToDictionary(NameValueCollection nameValueCollection, IEnumerable<string> ignoreFields, bool truncateValues = false)
@@ -125,6 +119,18 @@ namespace Mindscape.Raygun4Net.Messages
       return dictionary;
     }
 
+    public class Cookie
+    {
+      public Cookie(string name, string value)
+      {
+        Name = name;
+        Value = value;
+      }
+
+      public string Name { get; set; }
+      public string Value { get; set; }
+    }
+
     public string HostName { get; set; }
 
     public string Url { get; set; }
@@ -135,7 +141,7 @@ namespace Mindscape.Raygun4Net.Messages
 
     public IDictionary QueryString { get; set; }
 
-    public IDictionary Cookies { get; set; }
+    public IList Cookies { get; set; }
 
     public IDictionary Data { get; set; }
 
