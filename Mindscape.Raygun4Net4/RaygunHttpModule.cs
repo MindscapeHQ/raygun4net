@@ -22,7 +22,7 @@ namespace Mindscape.Raygun4Net
       if (GlobalFilters.Filters.Count == 1)
       {
         Filter filter = GlobalFilters.Filters.FirstOrDefault();
-        if (filter.Instance is HandleErrorAttribute)
+        if (filter != null && filter.Instance.GetType().FullName.Equals("System.Web.Mvc.HandleErrorAttribute"))
         {
           GlobalFilters.Filters.Add(new RaygunExceptionFilterAttribute(context, this));
           addedFilter = true;
