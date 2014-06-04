@@ -22,12 +22,6 @@ namespace Mindscape.Raygun4Net.Tests
     }
 
     [Test]
-    public void MediumTrust_FalseByDefault()
-    {
-      Assert.IsFalse(RaygunSettings.Settings.MediumTrust);
-    }
-
-    [Test]
     public void ThrowOnError_FalseByDefault()
     {
       Assert.IsFalse(RaygunSettings.Settings.ThrowOnError);

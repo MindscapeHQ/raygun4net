@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Security;
-using System.Text;
 
 using System.Management;
 using Microsoft.VisualBasic.Devices;
-using System.Security.Permissions;
 
 namespace Mindscape.Raygun4Net.Messages
 {
@@ -30,29 +25,22 @@ namespace Mindscape.Raygun4Net.Messages
 
       OSVersion = info.OSVersion;
 
-      bool mediumTrust = RaygunSettings.Settings.MediumTrust || !HasUnrestrictedFeatureSet;
-
-      if (!mediumTrust)
-      {
         try
         {
-          // ProcessorCount cannot run in medium trust under net35, once we have
-          // moved to net40 minimum we can move this out of here
-          ProcessorCount = Environment.ProcessorCount;
-          Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
-          TotalPhysicalMemory = (ulong)info.TotalPhysicalMemory / 0x100000; // in MB
-          AvailablePhysicalMemory = (ulong)info.AvailablePhysicalMemory / 0x100000;
-          TotalVirtualMemory = info.TotalVirtualMemory / 0x100000;
-          AvailableVirtualMemory = info.AvailableVirtualMemory / 0x100000;
-          GetDiskSpace();
-          Cpu = GetCpu();
-          OSVersion = GetOSVersion();
+            ProcessorCount = Environment.ProcessorCount;
+            Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
+            TotalPhysicalMemory = (ulong)info.TotalPhysicalMemory / 0x100000; // in MB
+            AvailablePhysicalMemory = (ulong)info.AvailablePhysicalMemory / 0x100000;
+            TotalVirtualMemory = info.TotalVirtualMemory / 0x100000;
+            AvailableVirtualMemory = info.AvailableVirtualMemory / 0x100000;
+            GetDiskSpace();
+            Cpu = GetCpu();
+            OSVersion = GetOSVersion();
         }
         catch (SecurityException)
         {
-          System.Diagnostics.Trace.WriteLine("RaygunClient error: couldn't access environment variables. If you are running in Medium Trust, in web.config in RaygunSettings set mediumtrust=\"true\"");
+            System.Diagnostics.Trace.WriteLine("RaygunClient error: couldn't access environment variables. If you are running in Medium Trust, in web.config in RaygunSettings set mediumtrust=\"true\"");
         }
-      }
     }
 
     private string GetCpu()
@@ -104,40 +92,7 @@ namespace Mindscape.Raygun4Net.Messages
       }
     }
 
-    private static volatile bool _unrestrictedFeatureSet = false;
-    private static volatile bool _determinedUnrestrictedFeatureSet = false;
     private static readonly object _threadLock = new object();
-
-    private static bool HasUnrestrictedFeatureSet
-    {
-      get
-      {
-        if (!_determinedUnrestrictedFeatureSet)
-        {
-          lock (_threadLock)
-          {
-            if (!_determinedUnrestrictedFeatureSet)
-            {
-              // This seems to crash if not in full trust:
-              //_unrestrictedFeatureSet = AppDomain.CurrentDomain.ApplicationTrust == null;// || AppDomain.CurrentDomain.ApplicationTrust.DefaultGrantSet.PermissionSet.IsUnrestricted();
-              try
-              {
-                // See if we're running in full trust:
-                new PermissionSet(PermissionState.Unrestricted).Demand();
-                _unrestrictedFeatureSet = true;
-              }
-              catch (SecurityException)
-              {
-                _unrestrictedFeatureSet = false;
-              }
-
-              _determinedUnrestrictedFeatureSet = true;
-            }
-          }
-        }
-        return _unrestrictedFeatureSet;
-      }
-    }
 
     public int ProcessorCount { get; private set; }
 

@@ -29,13 +29,6 @@ namespace Mindscape.Raygun4Net
       set { this["endpoint"] = value; }
     }
 
-    [ConfigurationProperty("mediumTrust", IsRequired = false, DefaultValue = false)]
-    public bool MediumTrust
-    {
-      get { return (bool)this["mediumTrust"]; }
-      set { this["mediumTrust"] = value; }
-    }
-
     [ConfigurationProperty("throwOnError", IsRequired = false, DefaultValue = false)]
     public bool ThrowOnError
     {
