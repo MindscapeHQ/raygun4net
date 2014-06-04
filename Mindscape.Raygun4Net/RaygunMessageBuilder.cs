@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Reflection;
-using System.Web;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
@@ -63,18 +62,6 @@ namespace Mindscape.Raygun4Net
         _raygunMessage.Details.Error = new RaygunErrorMessage(exception);
       }
 
-      HttpException error = exception as HttpException;
-      if (error != null)
-      {
-        int code = error.GetHttpCode();
-        string description = null;
-        if (Enum.IsDefined(typeof(HttpStatusCode), code))
-        {
-          description = ((HttpStatusCode)code).ToString();
-        }
-        _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = code, StatusDescription = description };
-      }
-
       WebException webError = exception as WebException;
       if (webError != null)
       {
@@ -116,25 +103,6 @@ namespace Mindscape.Raygun4Net
       {
         _raygunMessage.Details.User = new RaygunIdentifierMessage(user);
       }
-      return this;
-    }
-
-    public IRaygunMessageBuilder SetHttpDetails(HttpContext context, List<string> ignoredFormNames = null)
-    {
-      if (context != null)
-      {
-        HttpRequest request;
-        try
-        {
-          request = context.Request;
-        }
-        catch (HttpException)
-        {
-          return this;
-        }
-        _raygunMessage.Details.Request = new RaygunRequestMessage(request, ignoredFormNames);
-      }
-
       return this;
     }
 

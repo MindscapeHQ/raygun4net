@@ -4,10 +4,8 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
-using System.Runtime.InteropServices;
 using Mindscape.Raygun4Net.Messages;
 
-using System.Web;
 using System.Threading;
 using System.Reflection;
 
@@ -29,7 +27,7 @@ namespace Mindscape.Raygun4Net
       _wrapperExceptions = new List<Type>();
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
-      _wrapperExceptions.Add(typeof(HttpUnhandledException));
+      // _wrapperExceptions.Add(typeof(HttpUnhandledException));
     }
 
     /// <summary>
@@ -207,7 +205,7 @@ namespace Mindscape.Raygun4Net
       exception = StripWrapperExceptions(exception);
 
       var message = RaygunMessageBuilder.New
-        .SetHttpDetails(HttpContext.Current, _ignoredFormNames)
+        // .SetHttpDetails(HttpContext.Current, _ignoredFormNames)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)

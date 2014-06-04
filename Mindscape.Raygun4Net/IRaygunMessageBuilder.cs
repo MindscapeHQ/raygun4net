@@ -15,8 +15,6 @@ namespace Mindscape.Raygun4Net
 
     IRaygunMessageBuilder SetClientDetails();
 
-    IRaygunMessageBuilder SetEnvironmentDetails();
-
     IRaygunMessageBuilder SetVersion(string version);
 
     IRaygunMessageBuilder SetUserCustomData(IDictionary userCustomData);

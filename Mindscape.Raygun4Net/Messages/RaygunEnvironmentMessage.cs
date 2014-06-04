@@ -8,8 +8,6 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 
-using System.Web;
-using System.Windows.Forms;
 using System.Management;
 using Microsoft.VisualBasic.Devices;
 using System.Security.Permissions;
@@ -22,8 +20,8 @@ namespace Mindscape.Raygun4Net.Messages
 
     public RaygunEnvironmentMessage()
     {
-      WindowBoundsWidth = SystemInformation.VirtualScreen.Width;
-      WindowBoundsHeight = SystemInformation.VirtualScreen.Height;
+      WindowBoundsWidth = 0;
+      WindowBoundsHeight = 0;
       ComputerInfo info = new ComputerInfo();
       Locale = CultureInfo.CurrentCulture.DisplayName;
 

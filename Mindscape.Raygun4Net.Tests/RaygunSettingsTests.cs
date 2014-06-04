@@ -34,12 +34,6 @@ namespace Mindscape.Raygun4Net.Tests
     }
 
     [Test]
-    public void ExcludeHttpStatusCodesList_EmptyByDefault()
-    {
-      Assert.IsEmpty(RaygunSettings.Settings.ExcludeHttpStatusCodesList);
-    }
-
-    [Test]
     public void ExcludeErrorsFromLocal_FalseByDefault()
     {
       Assert.IsFalse(RaygunSettings.Settings.ExcludeErrorsFromLocal);

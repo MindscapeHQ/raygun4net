@@ -55,27 +55,6 @@ namespace Mindscape.Raygun4Net.Tests
       Assert.IsNull(message.Details.Response);
     }
 
-    [Test]
-    public void GetStatusCodeFromHttpException()
-    {
-      HttpException exception = new HttpException(404, "the file is gone");
-      _builder.SetExceptionDetails(exception);
-      RaygunMessage message = _builder.Build();
-      Assert.IsNotNull(message.Details.Response);
-      Assert.AreEqual(404, message.Details.Response.StatusCode);
-      Assert.AreEqual("NotFound", message.Details.Response.StatusDescription);
-    }
-
-    [Test]
-    public void HandleUnknownStatusCodeFromHttpException()
-    {
-      HttpException exception = new HttpException(1, "?");
-      _builder.SetExceptionDetails(exception);
-      RaygunMessage message = _builder.Build();
-      Assert.IsNotNull(message.Details.Response);
-      Assert.AreEqual(1, message.Details.Response.StatusCode);
-      Assert.IsNull(message.Details.Response.StatusDescription);
-    }
 
     [Test]
     public void GetStatusCodeFromWebException()

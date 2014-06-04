@@ -43,14 +43,6 @@ namespace Mindscape.Raygun4Net
       set { this["throwOnError"] = value; }
     }
 
-    [ConfigurationProperty("excludeHttpStatusCodes", IsRequired = false, DefaultValue = "")]
-    [RegexStringValidator(@"^(\d+(,\s?\d+)*)?$")]
-    public string ExcludeHttpStatusCodesList
-    {
-      get { return (string)this["excludeHttpStatusCodes"]; }
-      set { this["excludeHttpStatusCodes"] = value; }
-    }
-
     [ConfigurationProperty("excludeErrorsFromLocal", IsRequired = false, DefaultValue = false)]
     public bool ExcludeErrorsFromLocal
     {

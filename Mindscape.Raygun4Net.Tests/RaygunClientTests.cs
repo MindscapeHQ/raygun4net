@@ -80,15 +80,6 @@ namespace Mindscape.Raygun4Net.Tests
     }
 
     [Test]
-    public void StripHttpUnhandledExceptionByDefault()
-    {
-      HttpUnhandledException wrapper = new HttpUnhandledException("Something went wrong", _exception);
-
-      RaygunMessage message = _client.ExposeBuildMessage(wrapper);
-      Assert.AreEqual("System.NullReferenceException", message.Details.Error.ClassName);
-    }
-
-    [Test]
     public void StripSpecifiedWrapperException()
     {
       _client.AddWrapperExceptions(new Type[] { typeof(WrapperException) });
@@ -99,25 +90,6 @@ namespace Mindscape.Raygun4Net.Tests
       Assert.AreEqual("System.NullReferenceException", message.Details.Error.ClassName);
     }
 
-    [Test]
-    public void DontStripIfNoInnerException()
-    {
-      HttpUnhandledException wrapper = new HttpUnhandledException();
-
-      RaygunMessage message = _client.ExposeBuildMessage(wrapper);
-      Assert.AreEqual("System.Web.HttpUnhandledException", message.Details.Error.ClassName);
-      Assert.IsNull(message.Details.Error.InnerError);
-    }
-
-    [Test]
-    public void StripMultipleWrapperExceptions()
-    {
-      HttpUnhandledException wrapper = new HttpUnhandledException("Something went wrong", _exception);
-      TargetInvocationException wrapper2 = new TargetInvocationException(wrapper);
-
-      RaygunMessage message = _client.ExposeBuildMessage(wrapper2);
-      Assert.AreEqual("System.NullReferenceException", message.Details.Error.ClassName);
-    }
 
     // Validation tests
 
