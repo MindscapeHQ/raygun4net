@@ -2,6 +2,7 @@ properties {
     $root =                        $psake.build_script_dir
     $solution_file =                 "$root/Mindscape.Raygun4Net.sln"
     $solution_file2 =                "$root/Mindscape.Raygun4Net2.sln"
+    $solution_file4 =                "$root/Mindscape.Raygun4Net4.sln"
     $winrt_solution_file =           "$root/Mindscape.Raygun4Net.WinRT.sln"
     $windows_phone_solution_file =   "$root/Mindscape.Raygun4Net.WindowsPhone.sln"
     $nugetspec =                     "$root/Mindscape.Raygun4Net.nuspec"
@@ -9,6 +10,7 @@ properties {
     $configuration =                 "Release"
     $build_dir =                     "$root\build\"
     $build_dir2 =                    "$root\build\Net2"
+    $build_dir4 =                    "$root\build\Net4"
     $nunit_dir =                     "$root\packages\NUnit.Runners.2.6.2\tools\"
     $tools_dir =                     "$root\tools"
     $nuget_dir =                     "$root\.nuget"
@@ -28,6 +30,7 @@ task Init -depends Clean {
 task Compile -depends Init {
     exec { msbuild "$solution_file" /m /p:OutDir=$build_dir /p:Configuration=$configuration }
     exec { msbuild "$solution_file2" /m /p:OutDir=$build_dir2 /p:Configuration=$configuration }
+    exec { msbuild "$solution_file4" /m /p:OutDir=$build_dir4 /p:Configuration=$configuration }
 }
 
 task CompileWinRT -depends Init {

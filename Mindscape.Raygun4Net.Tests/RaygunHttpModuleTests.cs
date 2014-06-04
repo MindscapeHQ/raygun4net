@@ -10,20 +10,20 @@ namespace Mindscape.Raygun4Net.Tests
   [TestFixture]
   public class RaygunHttpModuleTests
   {
-    private RaygunHttpModule _module;
+    private FakeRaygunHttpModule _module;
 
     [SetUp]
     public void SetUp()
     {
-      _module = new RaygunHttpModule();
+      _module = new FakeRaygunHttpModule();
       _module.Init(new System.Web.HttpApplication());
     }
 
     [Test]
     public void CanSend()
     {
-      Assert.IsTrue(_module.CanSend(new NullReferenceException()));
-      Assert.IsTrue(_module.CanSend(new HttpException(404, "Not Found")));
+      Assert.IsTrue(_module.ExposeCanSend(new NullReferenceException()));
+      Assert.IsTrue(_module.ExposeCanSend(new HttpException(404, "Not Found")));
     }
 
     [Test]
@@ -32,7 +32,7 @@ namespace Mindscape.Raygun4Net.Tests
       RaygunSettings.Settings.ExcludeHttpStatusCodesList = "404";
       _module.Init(new System.Web.HttpApplication());
 
-      Assert.IsTrue(_module.CanSend(new InvalidOperationException()));
+      Assert.IsTrue(_module.ExposeCanSend(new InvalidOperationException()));
 
       RaygunSettings.Settings.ExcludeHttpStatusCodesList = ""; // Revert for other tests
     }
@@ -43,7 +43,7 @@ namespace Mindscape.Raygun4Net.Tests
       RaygunSettings.Settings.ExcludeHttpStatusCodesList = "404";
       _module.Init(new System.Web.HttpApplication());
 
-      Assert.IsTrue(_module.CanSend(new HttpException(500, "Error message")));
+      Assert.IsTrue(_module.ExposeCanSend(new HttpException(500, "Error message")));
 
       RaygunSettings.Settings.ExcludeHttpStatusCodesList = ""; // Revert for other tests
     }
@@ -54,9 +54,23 @@ namespace Mindscape.Raygun4Net.Tests
       RaygunSettings.Settings.ExcludeHttpStatusCodesList = "404";
       _module.Init(new System.Web.HttpApplication());
 
-      Assert.IsFalse(_module.CanSend(new HttpException(404, "Not Found")));
+      Assert.IsFalse(_module.ExposeCanSend(new HttpException(404, "Not Found")));
 
       RaygunSettings.Settings.ExcludeHttpStatusCodesList = ""; // Revert for other tests
+    }
+
+    // GetRaygunClient tests
+
+    [Test]
+    public void GetRaygunClient()
+    {
+      Assert.IsNull(_module.ExposeGetRaygunClient(new HttpApplication()).User);
+    }
+
+    [Test]
+    public void GetCustomizedRaygunClient()
+    {
+      Assert.AreEqual("TestUser", _module.ExposeGetRaygunClient(new FakeHttpApplication()).User); // As set in FakeHttpApplication
     }
   }
 }

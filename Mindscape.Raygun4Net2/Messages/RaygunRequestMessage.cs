@@ -51,7 +51,7 @@ namespace Mindscape.Raygun4Net.Messages
       }
     }
 
-    private IDictionary GetCookies(HttpCookieCollection cookieCollection, IEnumerable<string> ignoredFormNames)
+    private IList GetCookies(HttpCookieCollection cookieCollection, IEnumerable<string> ignoredFormNames)
     {
       Dictionary<string, string> ignored = new Dictionary<string, string>();
       foreach(string key in ignoredFormNames)
@@ -59,13 +59,13 @@ namespace Mindscape.Raygun4Net.Messages
         ignored[key] = key;
       }
 
-      IDictionary cookies = new Dictionary<string, string>();
+      IList cookies = new List<Cookie>();
 
       foreach (string key in cookieCollection.Keys)
       {
         if (!ignored.ContainsKey(key))
         {
-          cookies[key] = cookieCollection[key].Value;
+          cookies.Add(new Cookie(cookieCollection[key].Name, cookieCollection[key].Value));
         }
       }
 
@@ -143,6 +143,18 @@ namespace Mindscape.Raygun4Net.Messages
       return dictionary;
     }
 
+    public class Cookie
+    {
+      public Cookie(string name, string value)
+      {
+        Name = name;
+        Value = value;
+      }
+
+      public string Name { get; set; }
+      public string Value { get; set; }
+    }
+
     public string HostName { get; set; }
 
     public string Url { get; set; }
@@ -153,7 +165,7 @@ namespace Mindscape.Raygun4Net.Messages
 
     public IDictionary QueryString { get; set; }
 
-    public IDictionary Cookies { get; set; }
+    public IList Cookies { get; set; }
 
     public IDictionary Data { get; set; }
 

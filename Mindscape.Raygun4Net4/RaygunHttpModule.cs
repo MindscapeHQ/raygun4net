@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Web;
+using System.Web.Mvc;
 
 namespace Mindscape.Raygun4Net
 {
@@ -13,10 +14,40 @@ namespace Mindscape.Raygun4Net
 
     public void Init(HttpApplication context)
     {
-      context.Error += SendError;
       HttpStatusCodesToExclude = string.IsNullOrEmpty(RaygunSettings.Settings.ExcludeHttpStatusCodesList) ? new int[0] : RaygunSettings.Settings.ExcludeHttpStatusCodesList.Split(',').Select(int.Parse).ToArray();
       ExcludeErrorsBasedOnHttpStatusCode = HttpStatusCodesToExclude.Any();
       ExcludeErrorsFromLocal = RaygunSettings.Settings.ExcludeErrorsFromLocal;
+
+      bool addedFilter = false;
+      if (GlobalFilters.Filters.Count == 1)
+      {
+        Filter filter = GlobalFilters.Filters.FirstOrDefault();
+        if (filter != null && filter.Instance.GetType().FullName.Equals("System.Web.Mvc.HandleErrorAttribute"))
+        {
+          GlobalFilters.Filters.Add(new RaygunExceptionFilterAttribute(context, this));
+          addedFilter = true;
+        }
+      }
+
+      if (!addedFilter && !HasRaygunFilter)
+      {
+        context.Error += SendError;
+      }
+    }
+
+    private static bool HasRaygunFilter
+    {
+      get
+      {
+        foreach (Filter filter in GlobalFilters.Filters)
+        {
+          if (filter.Instance is RaygunExceptionFilterAttribute)
+          {
+            return true;
+          }
+        }
+        return false;
+      }
     }
 
     public void Dispose()
@@ -28,10 +59,15 @@ namespace Mindscape.Raygun4Net
       var application = (HttpApplication)sender;
       var lastError = application.Server.GetLastError();
 
-      if (CanSend(lastError))
+      SendError(application, lastError);
+    }
+
+    internal void SendError(HttpApplication application, Exception exception)
+    {
+      if (CanSend(exception))
       {
         var client = GetRaygunClient(application);
-        client.SendInBackground(Unwrap(lastError));
+        client.SendInBackground(Unwrap(exception));
       }
     }
 
