@@ -2,37 +2,60 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security;
-
 using System.Management;
-using Microsoft.VisualBasic.Devices;
 
 namespace Mindscape.Raygun4Net.Messages
 {
+
   public class RaygunEnvironmentMessage
   {
-    private List<double> _diskSpaceFree = new List<double>();
+      [StructLayout(LayoutKind.Sequential)]
+      internal struct MEMORYSTATUSEX
+      {
+          internal uint dwLength;
+          internal uint dwMemoryLoad;
+          internal ulong ullTotalPhys;
+          internal ulong ullAvailPhys;
+          internal ulong ullTotalPageFile;
+          internal ulong ullAvailPageFile;
+          internal ulong ullTotalVirtual;
+          internal ulong ullAvailVirtual;
+          internal ulong ullAvailExtendedVirtual;
+      }
+
+      [return: MarshalAs(UnmanagedType.Bool)]
+      [DllImport("Kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+      internal static extern bool GlobalMemoryStatusEx([In, Out] MEMORYSTATUSEX lpBuffer);
+
+
+
+      private List<double> _diskSpaceFree = new List<double>();
 
     public RaygunEnvironmentMessage()
     {
       WindowBoundsWidth = 0;
       WindowBoundsHeight = 0;
-      ComputerInfo info = new ComputerInfo();
+
       Locale = CultureInfo.CurrentCulture.DisplayName;
 
       DateTime now = DateTime.Now;
       UtcOffset = TimeZone.CurrentTimeZone.GetUtcOffset(now).TotalHours;
 
-      OSVersion = info.OSVersion;
+        var statex = new MEMORYSTATUSEX();
+        GlobalMemoryStatusEx(statex);
+
+      OSVersion = Environment.OSVersion.VersionString;
 
         try
         {
             ProcessorCount = Environment.ProcessorCount;
             Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
-            TotalPhysicalMemory = (ulong)info.TotalPhysicalMemory / 0x100000; // in MB
-            AvailablePhysicalMemory = (ulong)info.AvailablePhysicalMemory / 0x100000;
-            TotalVirtualMemory = info.TotalVirtualMemory / 0x100000;
-            AvailableVirtualMemory = info.AvailableVirtualMemory / 0x100000;
+            TotalPhysicalMemory = (ulong)statex.ullTotalPhys / 0x100000; // in MB
+            AvailablePhysicalMemory = (ulong)statex.ullAvailPhys / 0x100000;
+            TotalVirtualMemory = statex.ullTotalVirtual / 0x100000;
+            AvailableVirtualMemory = statex.ullAvailVirtual / 0x100000;
             GetDiskSpace();
             Cpu = GetCpu();
             OSVersion = GetOSVersion();
@@ -43,7 +66,7 @@ namespace Mindscape.Raygun4Net.Messages
         }
     }
 
-    private string GetCpu()
+    private static string GetCpu()
     {
       ManagementClass wmiManagementProcessorClass = new ManagementClass("Win32_Processor");
       ManagementObjectCollection wmiProcessorCollection = wmiManagementProcessorClass.GetInstances();
@@ -62,7 +85,7 @@ namespace Mindscape.Raygun4Net.Messages
       return Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER");
     }
 
-    private string GetOSVersion()
+    private static string GetOSVersion()
     {
       ManagementClass wmiManagementOperatingSystemClass = new ManagementClass("Win32_OperatingSystem");
       ManagementObjectCollection wmiOperatingSystemCollection = wmiManagementOperatingSystemClass.GetInstances();
