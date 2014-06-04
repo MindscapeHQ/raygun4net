@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata minClientVersion="2.5">
     <id>Mindscape.Raygun4Net.Signed</id>
-    <version>2.1.0</version>
+    <version>2.2.0</version>
     <title />
     <authors>Mindscape</authors>
     <owners />
@@ -13,8 +13,6 @@
     <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
   </metadata>
   <files>
-		<!-- .NET -->
-		<file src="build\signed\Mindscape.Raygun4Net.dll" target="lib\net35\Mindscape.Raygun4Net.dll" />
     <!-- .NET 2.0 -->
     <file src="build\signed\Net2\Mindscape.Raygun4Net.dll" target="lib\net20\Mindscape.Raygun4Net.dll" />
     <!-- .NET 3.5 -->
