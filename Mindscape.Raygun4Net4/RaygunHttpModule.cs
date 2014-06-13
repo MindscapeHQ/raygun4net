@@ -18,36 +18,16 @@ namespace Mindscape.Raygun4Net
       ExcludeErrorsBasedOnHttpStatusCode = HttpStatusCodesToExclude.Any();
       ExcludeErrorsFromLocal = RaygunSettings.Settings.ExcludeErrorsFromLocal;
 
-      bool addedFilter = false;
       if (GlobalFilters.Filters.Count == 1)
       {
         Filter filter = GlobalFilters.Filters.FirstOrDefault();
         if (filter != null && filter.Instance.GetType().FullName.Equals("System.Web.Mvc.HandleErrorAttribute"))
         {
           GlobalFilters.Filters.Add(new RaygunExceptionFilterAttribute(context, this));
-          addedFilter = true;
         }
       }
 
-      if (!addedFilter && !HasRaygunFilter)
-      {
-        context.Error += SendError;
-      }
-    }
-
-    private static bool HasRaygunFilter
-    {
-      get
-      {
-        foreach (Filter filter in GlobalFilters.Filters)
-        {
-          if (filter.Instance is RaygunExceptionFilterAttribute)
-          {
-            return true;
-          }
-        }
-        return false;
-      }
+      context.Error += SendError;
     }
 
     public void Dispose()
