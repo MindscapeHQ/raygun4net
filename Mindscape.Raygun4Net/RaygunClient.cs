@@ -17,7 +17,8 @@ namespace Mindscape.Raygun4Net
   {
     private readonly string _apiKey;
     private static List<Type> _wrapperExceptions;
-    private List<string> _ignoredFormNames; 
+    private List<string> _ignoredFormNames;
+    private const string _sentKey = "SentByRaygun";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -159,7 +160,11 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      Send(BuildMessage(exception, tags, userCustomData));
+      if (!exception.Data.Contains(_sentKey) || false.Equals(exception.Data[_sentKey]))
+      {
+        Send(BuildMessage(exception, tags, userCustomData));
+        exception.Data[_sentKey] = true;
+      }
     }
 
     /// <summary>
@@ -189,7 +194,11 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      SendInBackground(BuildMessage(exception, tags, userCustomData));
+      if (!exception.Data.Contains(_sentKey) || false.Equals(exception.Data[_sentKey]))
+      {
+        SendInBackground(BuildMessage(exception, tags, userCustomData));
+        exception.Data[_sentKey] = true;
+      }
     }
 
     /// <summary>
