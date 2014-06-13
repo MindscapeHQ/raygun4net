@@ -13,8 +13,11 @@ namespace Mindscape.Raygun4Net.Messages
 
     public RaygunEnvironmentMessage()
     {
-      WindowBoundsHeight = Windows.UI.Xaml.Window.Current.Bounds.Height;
-      WindowBoundsWidth = Windows.UI.Xaml.Window.Current.Bounds.Width;
+      if (Windows.UI.Xaml.Window.Current != null)
+      {
+        WindowBoundsHeight = Windows.UI.Xaml.Window.Current.Bounds.Height;
+        WindowBoundsWidth = Windows.UI.Xaml.Window.Current.Bounds.Width;
+      }
       PackageVersion = string.Format("{0}.{1}", Package.Current.Id.Version.Major, Package.Current.Id.Version.Minor);
       Cpu = Package.Current.Id.Architecture.ToString();
       ResolutionScale = DisplayProperties.ResolutionScale.ToString();
