@@ -288,5 +288,21 @@ namespace Mindscape.Raygun4Net.Tests
       Assert.IsTrue(_client.ExposeOnSendingMessage(message));
       Assert.AreEqual("Custom error message", message.Details.Error.Message);
     }
+
+    // CanSend tests
+
+    [Test]
+    public void CanSend()
+    {
+      Assert.IsTrue(_client.ExposeCanSend(_exception));
+    }
+
+    [Test]
+    public void CannotSendSentException()
+    {
+      Exception exception = new InvalidOperationException("You cannot do that");
+      _client.ExposeFlagAsSent(exception);
+      Assert.IsFalse(_client.ExposeCanSend(exception));
+    }
   }
 }

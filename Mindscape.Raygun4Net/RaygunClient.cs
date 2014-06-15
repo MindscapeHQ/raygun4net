@@ -160,10 +160,10 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      if (!exception.Data.Contains(_sentKey) || false.Equals(exception.Data[_sentKey]))
+      if (CanSend(exception))
       {
         Send(BuildMessage(exception, tags, userCustomData));
-        exception.Data[_sentKey] = true;
+        FlagAsSent(exception);
       }
     }
 
@@ -194,10 +194,10 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      if (!exception.Data.Contains(_sentKey) || false.Equals(exception.Data[_sentKey]))
+      if (CanSend(exception))
       {
         SendInBackground(BuildMessage(exception, tags, userCustomData));
-        exception.Data[_sentKey] = true;
+        FlagAsSent(exception);
       }
     }
 
@@ -209,6 +209,16 @@ namespace Mindscape.Raygun4Net
     public void SendInBackground(RaygunMessage raygunMessage)
     {
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+    }
+
+    protected bool CanSend(Exception exception)
+    {
+      return !exception.Data.Contains(_sentKey) || false.Equals(exception.Data[_sentKey]);
+    }
+
+    protected void FlagAsSent(Exception exception)
+    {
+      exception.Data[_sentKey] = true;
     }
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
