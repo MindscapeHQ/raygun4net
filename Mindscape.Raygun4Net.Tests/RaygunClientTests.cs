@@ -304,5 +304,17 @@ namespace Mindscape.Raygun4Net.Tests
       _client.ExposeFlagAsSent(exception);
       Assert.IsFalse(_client.ExposeCanSend(exception));
     }
+
+    [Test]
+    public void CanSendIfExceptionIsUnknown()
+    {
+      Assert.IsTrue(_client.ExposeCanSend(null));
+    }
+
+    [Test]
+    public void FlagNullAsSent()
+    {
+      Assert.DoesNotThrow(() => { _client.ExposeFlagAsSent(null); });
+    }
   }
 }
