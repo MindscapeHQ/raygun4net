@@ -162,8 +162,8 @@ namespace Mindscape.Raygun4Net
     {
       if (CanSend(exception))
       {
-        FlagAsSent(exception);
         Send(BuildMessage(exception, tags, userCustomData));
+        FlagAsSent(exception);
       }
     }
 
@@ -196,8 +196,8 @@ namespace Mindscape.Raygun4Net
     {
       if (CanSend(exception))
       {
-        FlagAsSent(exception);
         SendInBackground(BuildMessage(exception, tags, userCustomData));
+        FlagAsSent(exception);
       }
     }
 
