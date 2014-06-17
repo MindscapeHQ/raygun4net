@@ -21,7 +21,19 @@ namespace Mindscape.Raygun4Net.Messages
       ClassName = exceptionType.FullName;
 
       StackTrace = BuildStackTrace(exception);
-      Data = exception.Data;
+
+      if (exception.Data != null)
+      {
+        IDictionary data = new Dictionary<object, object>();
+        foreach (object key in exception.Data.Keys)
+        {
+          if (!RaygunClient.SentKey.Equals(key))
+          {
+            data[key] = exception.Data[key];
+          }
+        }
+        Data = data;
+      }
 
       if (exception.InnerException != null)
       {

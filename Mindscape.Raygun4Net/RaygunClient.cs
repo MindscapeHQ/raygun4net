@@ -17,7 +17,8 @@ namespace Mindscape.Raygun4Net
   {
     private readonly string _apiKey;
     private static List<Type> _wrapperExceptions;
-    private List<string> _ignoredFormNames; 
+    private List<string> _ignoredFormNames;
+    internal const string SentKey = "AlreadySentByRaygun";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -159,7 +160,11 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      Send(BuildMessage(exception, tags, userCustomData));
+      if (CanSend(exception))
+      {
+        Send(BuildMessage(exception, tags, userCustomData));
+        FlagAsSent(exception);
+      }
     }
 
     /// <summary>
@@ -189,7 +194,11 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      SendInBackground(BuildMessage(exception, tags, userCustomData));
+      if (CanSend(exception))
+      {
+        SendInBackground(BuildMessage(exception, tags, userCustomData));
+        FlagAsSent(exception);
+      }
     }
 
     /// <summary>
@@ -200,6 +209,19 @@ namespace Mindscape.Raygun4Net
     public void SendInBackground(RaygunMessage raygunMessage)
     {
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+    }
+
+    protected bool CanSend(Exception exception)
+    {
+      return exception == null || !exception.Data.Contains(SentKey) || false.Equals(exception.Data[SentKey]);
+    }
+
+    protected void FlagAsSent(Exception exception)
+    {
+      if (exception != null)
+      {
+        exception.Data[SentKey] = true;
+      }
     }
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
@@ -263,7 +285,6 @@ namespace Mindscape.Raygun4Net
                 client.UseDefaultCredentials = false;
                 client.Proxy.Credentials = ProxyCredentials; 
               }
-
             }
 
             try

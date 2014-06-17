@@ -31,5 +31,15 @@ namespace Mindscape.Raygun4Net.Tests
     {
       return OnSendingMessage(raygunMessage);
     }
+
+    public bool ExposeCanSend(Exception exception)
+    {
+      return CanSend(exception);
+    }
+
+    public void ExposeFlagAsSent(Exception exception)
+    {
+      FlagAsSent(exception);
+    }
   }
 }
