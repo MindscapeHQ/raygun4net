@@ -17,7 +17,10 @@ namespace Mindscape.Raygun4Net
   {
     private readonly string _apiKey;
     private static List<Type> _wrapperExceptions;
-    private List<string> _ignoredFormNames;
+    private List<string> _ignoredFormNames = new List<string>();
+    private List<string> _ignoreHeaderNames = new List<string>();
+    private List<string> _ignoreCookieNames = new List<string>();
+    private List<string> _ignoreServerVariableNames = new List<string>();
     internal const string SentKey = "AlreadySentByRaygun";
 
     /// <summary>
@@ -44,6 +47,21 @@ namespace Mindscape.Raygun4Net
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreFormDataNames.Split(',');
         IgnoreFormDataNames(ignoredNames);
+      }
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreHeaderNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreHeaderNames.Split(',');
+        IgnoreHeaderNames(ignoredNames);
+      }
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreCookieNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreCookieNames.Split(',');
+        IgnoreCookieNames(ignoredNames);
+      }
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreServerVariableNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreServerVariableNames.Split(',');
+        IgnoreServerVariableNames(ignoredNames);
       }
     }
 
@@ -116,17 +134,54 @@ namespace Mindscape.Raygun4Net
     /// you to remove sensitive data from the transmitted copy of the Form on the HttpRequest by specifying the keys you want removed.
     /// This method is only effective in a web context.
     /// </summary>
-    /// <param name="names">An enumerable list of keys (Names) to be stripped from the copy of the Form NameValueCollection when sending to Raygun.</param>
-    public void IgnoreFormDataNames(IEnumerable<string> names)
+    /// <param name="names">Keys to be stripped from the copy of the Form NameValueCollection when sending to Raygun.</param>
+    public void IgnoreFormDataNames(params string[] names)
     {
-      if (_ignoredFormNames == null)
-      {
-        _ignoredFormNames = new List<string>();
-      }
-
       foreach (string name in names)
       {
         _ignoredFormNames.Add(name);
+      }
+    }
+
+    /// <summary>
+    /// Adds a list of keys to ignore when attaching the headers of an HTTP POST request. This allows
+    /// you to remove sensitive data from the transmitted copy of the Headers on the HttpRequest by specifying the keys you want removed.
+    /// This method is only effective in a web context.
+    /// </summary>
+    /// <param name="names">Keys to be stripped from the copy of the Headers NameValueCollection when sending to Raygun.</param>
+    public void IgnoreHeaderNames(params string[] names)
+    {
+      foreach (string name in names)
+      {
+        _ignoreHeaderNames.Add(name);
+      }
+    }
+
+    /// <summary>
+    /// Adds a list of keys to ignore when attaching the cookies of an HTTP POST request. This allows
+    /// you to remove sensitive data from the transmitted copy of the Cookies on the HttpRequest by specifying the keys you want removed.
+    /// This method is only effective in a web context.
+    /// </summary>
+    /// <param name="names">Keys to be stripped from the copy of the Cookies NameValueCollection when sending to Raygun.</param>
+    public void IgnoreCookieNames(params string[] names)
+    {
+      foreach (string name in names)
+      {
+        _ignoreCookieNames.Add(name);
+      }
+    }
+
+    /// <summary>
+    /// Adds a list of keys to ignore when attaching the server variables of an HTTP POST request. This allows
+    /// you to remove sensitive data from the transmitted copy of the ServerVariables on the HttpRequest by specifying the keys you want removed.
+    /// This method is only effective in a web context.
+    /// </summary>
+    /// <param name="names">Keys to be stripped from the copy of the ServerVariables NameValueCollection when sending to Raygun.</param>
+    public void IgnoreServerVariableNames(params string[] names)
+    {
+      foreach (string name in names)
+      {
+        _ignoreServerVariableNames.Add(name);
       }
     }
 
