@@ -133,6 +133,9 @@
     <Compile Include="..\Mindscape.Raygun4Net\RaygunMessageBuilder.cs">
       <Link>RaygunMessageBuilder.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\RaygunRequestMessageOptions.cs">
+      <Link>RaygunRequestMessageOptions.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\RaygunSendingMessageEventArgs.cs">
       <Link>RaygunSendingMessageEventArgs.cs</Link>
     </Compile>
@@ -144,7 +147,6 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaygunExceptionFilterAttribute.cs" />
-    <Compile Include="RaygunRequestMessageOptions.cs" />
     <Compile Include="RaygunHttpModule.cs" />
   </ItemGroup>
   <ItemGroup>
