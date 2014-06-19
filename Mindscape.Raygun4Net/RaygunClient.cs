@@ -16,11 +16,8 @@ namespace Mindscape.Raygun4Net
   public class RaygunClient
   {
     private readonly string _apiKey;
+    private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private static List<Type> _wrapperExceptions;
-    private List<string> _ignoredFormNames = new List<string>();
-    private List<string> _ignoreHeaderNames = new List<string>();
-    private List<string> _ignoreCookieNames = new List<string>();
-    private List<string> _ignoreServerVariableNames = new List<string>();
     internal const string SentKey = "AlreadySentByRaygun";
 
     /// <summary>
@@ -139,7 +136,7 @@ namespace Mindscape.Raygun4Net
     {
       foreach (string name in names)
       {
-        _ignoredFormNames.Add(name);
+        _requestMessageOptions.IgnoreFormDataNames.Add(name);
       }
     }
 
@@ -153,7 +150,7 @@ namespace Mindscape.Raygun4Net
     {
       foreach (string name in names)
       {
-        _ignoreHeaderNames.Add(name);
+        _requestMessageOptions.IgnoreHeaderNames.Add(name);
       }
     }
 
@@ -167,7 +164,7 @@ namespace Mindscape.Raygun4Net
     {
       foreach (string name in names)
       {
-        _ignoreCookieNames.Add(name);
+        _requestMessageOptions.IgnoreCookieNames.Add(name);
       }
     }
 
@@ -181,7 +178,7 @@ namespace Mindscape.Raygun4Net
     {
       foreach (string name in names)
       {
-        _ignoreServerVariableNames.Add(name);
+        _requestMessageOptions.IgnoreServerVariableNames.Add(name);
       }
     }
 
@@ -284,7 +281,7 @@ namespace Mindscape.Raygun4Net
       exception = StripWrapperExceptions(exception);
 
       var message = RaygunMessageBuilder.New
-        .SetHttpDetails(HttpContext.Current, _ignoredFormNames)
+        .SetHttpDetails(HttpContext.Current, _requestMessageOptions)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)

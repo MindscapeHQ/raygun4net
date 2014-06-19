@@ -9,7 +9,7 @@ namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunRequestMessage
   {
-    public RaygunRequestMessage(HttpRequest	request, List<string> ignoredFormNames)
+    public RaygunRequestMessage(HttpRequest	request, RaygunRequestMessageOptions options)
     {
       HostName = request.Url.Host;
       Url = request.Url.AbsolutePath;
@@ -17,14 +17,14 @@ namespace Mindscape.Raygun4Net.Messages
       IPAddress = request.UserHostAddress;
       QueryString = ToDictionary(request.QueryString, Enumerable.Empty<string>());
 
-      Headers = ToDictionary(request.Headers, ignoredFormNames ?? Enumerable.Empty<string>());
+      Headers = ToDictionary(request.Headers, options.IgnoreHeaderNames);
       Headers.Remove("Cookie");
 
-      Form = ToDictionary(request.Form, ignoredFormNames ?? Enumerable.Empty<string>(), true);
-      Cookies = GetCookies(request.Cookies, ignoredFormNames ?? Enumerable.Empty<string>());
+      Form = ToDictionary(request.Form, options.IgnoreFormDataNames, true);
+      Cookies = GetCookies(request.Cookies, options.IgnoreCookieNames);
 
       // Remove ignored and duplicated variables
-      Data = ToDictionary(request.ServerVariables, ignoredFormNames ?? Enumerable.Empty<string>());
+      Data = ToDictionary(request.ServerVariables, options.IgnoreServerVariableNames);
       Data.Remove("ALL_HTTP");
       Data.Remove("HTTP_COOKIE");
       Data.Remove("ALL_RAW");
@@ -53,6 +53,11 @@ namespace Mindscape.Raygun4Net.Messages
     {
       var ignored = ignoredFormNames.ToLookup(s => s);
 
+      if (ignored.Count == 1 && ignored.Contains("*"))
+      {
+        return Enumerable.Empty<Cookie>().ToList();
+      }
+
       return Enumerable.Range(0, cookieCollection.Count)
         .Select(i => cookieCollection[i])
         .Where(c => !ignored.Contains(c.Name))
@@ -62,6 +67,13 @@ namespace Mindscape.Raygun4Net.Messages
 
     private static IDictionary ToDictionary(NameValueCollection nameValueCollection, IEnumerable<string> ignoreFields, bool truncateValues = false)
     {
+      var dictionary = new Dictionary<string, string>();
+
+      if (ignoreFields.Count() == 1 && "*".Equals(ignoreFields.First()))
+      {
+        return dictionary;
+      }
+
       IEnumerable<string> keys;
 
       try
@@ -72,8 +84,6 @@ namespace Mindscape.Raygun4Net.Messages
       {
         return new Dictionary<string, string> { { "Values", "Not able to be retrieved" } };
       }
-
-      var dictionary = new Dictionary<string, string>();
 
       foreach (string key in keys)
       {
