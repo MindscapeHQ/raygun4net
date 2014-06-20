@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -9,8 +10,17 @@ namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunRequestMessage
   {
+    // TODO: making this obsolete doesn't help much because if the second parameter is null, there will be an ambiguous call.
+    [Obsolete("ignoredFormNames has now been split into 4 separate options. Use RaygunRequestMessage(HttpRequest, RaygunRequestMessageOptions)")]
+    public RaygunRequestMessage(HttpRequest request, List<string> ignoredFormNames)
+      : this(request, new RaygunRequestMessageOptions(ignoredFormNames, ignoredFormNames, ignoredFormNames, ignoredFormNames))
+    {
+    }
+
     public RaygunRequestMessage(HttpRequest	request, RaygunRequestMessageOptions options)
     {
+      options = options ?? new RaygunRequestMessageOptions();
+
       HostName = request.Url.Host;
       Url = request.Url.AbsolutePath;
       HttpMethod = request.RequestType;

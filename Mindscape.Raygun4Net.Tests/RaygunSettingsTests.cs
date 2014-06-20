@@ -50,5 +50,23 @@ namespace Mindscape.Raygun4Net.Tests
     {
       Assert.IsEmpty(RaygunSettings.Settings.IgnoreFormDataNames);
     }
+
+    [Test]
+    public void IgnoreHeaderNames_EmptyByDefault()
+    {
+      Assert.IsEmpty(RaygunSettings.Settings.IgnoreHeaderNames);
+    }
+
+    [Test]
+    public void IgnoreCookieNames_EmptyByDefault()
+    {
+      Assert.IsEmpty(RaygunSettings.Settings.IgnoreCookieNames);
+    }
+
+    [Test]
+    public void IgnoreServerVariableNames_EmptyByDefault()
+    {
+      Assert.IsEmpty(RaygunSettings.Settings.IgnoreServerVariableNames);
+    }
   }
 }
