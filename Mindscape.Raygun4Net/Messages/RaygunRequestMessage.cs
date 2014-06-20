@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 
 namespace Mindscape.Raygun4Net.Messages
@@ -14,7 +15,7 @@ namespace Mindscape.Raygun4Net.Messages
       HostName = request.Url.Host;
       Url = request.Url.AbsolutePath;
       HttpMethod = request.RequestType;
-      IPAddress = request.UserHostAddress;
+      IPAddress = GetCorrectIpAddress(request);
       QueryString = ToDictionary(request.QueryString, Enumerable.Empty<string>());
 
       Headers = ToDictionary(request.Headers, ignoredFormNames ?? Enumerable.Empty<string>());
@@ -47,6 +48,52 @@ namespace Mindscape.Raygun4Net.Messages
       catch (HttpException)
       {
       }
+    }
+
+    public string GetCorrectIpAddress(HttpRequest request)
+    {
+        var strIp = request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+
+        if (strIp != null && strIp.Trim().Length > 0)
+        {
+            if (strIp.Contains(","))
+            {
+                // first one = client IP per http://en.wikipedia.org/wiki/X-Forwarded-For
+                strIp = strIp.Split(',')[0];
+            }
+        }
+
+        if (!IsValidIpAddress(strIp))
+        {
+            strIp = string.Empty;
+        }
+
+        // if that's empty, get their ip via server vars
+        if (strIp == null || strIp.Trim().Length == 0)
+        {
+            strIp = request.ServerVariables["REMOTE_ADDR"];
+        }
+
+        if (!IsValidIpAddress(strIp))
+        {
+            strIp = string.Empty;
+        }
+
+        // if that's still empty, get their ip via .net's built-in method
+        if (strIp == null || strIp.Trim().Length == 0)
+        {
+            strIp = request.UserHostAddress;
+        }
+
+        return strIp;
+    }
+
+    public static bool IsValidIpAddress(string strIp)
+    {
+        if (strIp == null)
+            return false;
+
+        return Regex.IsMatch(strIp, "\\A(?:\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b)\\z");
     }
 
     private IList GetCookies(HttpCookieCollection cookieCollection, IEnumerable<string> ignoredFormNames)
