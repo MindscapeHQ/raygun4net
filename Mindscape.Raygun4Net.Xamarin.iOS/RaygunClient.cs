@@ -426,49 +426,5 @@ namespace Mindscape.Raygun4Net
         System.Diagnostics.Debug.WriteLine(string.Format("Error saving message to isolated storage {0}", ex.Message));
       }
     }
-
-    /// <summary>
-    /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
-    /// Then use a Send method that does not accept a version.
-    /// </summary>
-    [Obsolete("Set the ApplicationVersion property instead, and then call a different Send method.")]
-    public void Send(Exception exception, IList<string> tags, string version)
-    {
-      Send(exception, tags, null, version);
-    }
-
-    /// <summary>
-    /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
-    /// Then use a Send method that does not accept a version.
-    /// </summary>
-    [Obsolete("Set the ApplicationVersion property instead, and then call a different Send method.")]
-    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
-    {
-      var message = BuildMessage(exception, tags, userCustomData);
-      message.Details.Version = version;
-      Send(message);
-    }
-
-    /// <summary>
-    /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
-    /// Then use a Send method that does not accept a version.
-    /// </summary>
-    [Obsolete("Set the ApplicationVersion property instead, and then call a different Send method.")]
-    public void SendInBackground(Exception exception, IList<string> tags, string version)
-    {
-      SendInBackground(exception, tags, null, version);
-    }
-
-    /// <summary>
-    /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
-    /// Then use a Send method that does not accept a version.
-    /// </summary>
-    [Obsolete("Set the ApplicationVersion property instead, and then call a different Send method.")]
-    public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
-    {
-      var message = BuildMessage(exception, tags, userCustomData);
-      message.Details.Version = version;
-      SendInBackground(message);
-    }
   }
 }
