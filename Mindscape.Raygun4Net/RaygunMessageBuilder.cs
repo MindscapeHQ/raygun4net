@@ -119,6 +119,19 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
+    /// <summary>
+    /// This method is obsolete. Use SetHttpDetails(HttpContext, RaygunRequestMessageOptions) so that you can specify seperate ignore lists
+    /// for form data, headers, cookies and server variables.
+    /// </summary>
+    /// <param name="context">The HttpContext</param>
+    /// <param name="ignoredNames">A list of form data, headers, cookies and server variables to ignore.</param>
+    /// <returns>The message builder.</returns>
+    [Obsolete("ignoredFormNames has now been split into 4 separate options. Use SetHttpDetails(HttpContext, RaygunRequestMessageOptions)")]
+    public IRaygunMessageBuilder SetHttpDetails(HttpContext context, List<string> ignoredNames = null)
+    {
+      return SetHttpDetails(context, new RaygunRequestMessageOptions(ignoredNames, ignoredNames, ignoredNames, ignoredNames));
+    }
+
     public IRaygunMessageBuilder SetHttpDetails(HttpContext context, RaygunRequestMessageOptions options = null)
     {
       if (context != null)
