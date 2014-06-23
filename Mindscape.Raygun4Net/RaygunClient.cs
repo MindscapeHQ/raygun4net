@@ -31,15 +31,7 @@ namespace Mindscape.Raygun4Net
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
       _wrapperExceptions.Add(typeof(HttpUnhandledException));
-    }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RaygunClient" /> class.
-    /// Uses the ApiKey specified in the config file.
-    /// </summary>
-    public RaygunClient()
-      : this(RaygunSettings.Settings.ApiKey)
-    {
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormFieldNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreFormFieldNames.Split(',');
@@ -60,6 +52,15 @@ namespace Mindscape.Raygun4Net
         var ignoredNames = RaygunSettings.Settings.IgnoreServerVariableNames.Split(',');
         IgnoreServerVariableNames(ignoredNames);
       }
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RaygunClient" /> class.
+    /// Uses the ApiKey specified in the config file.
+    /// </summary>
+    public RaygunClient()
+      : this(RaygunSettings.Settings.ApiKey)
+    {
     }
 
     protected bool ValidateApiKey()
