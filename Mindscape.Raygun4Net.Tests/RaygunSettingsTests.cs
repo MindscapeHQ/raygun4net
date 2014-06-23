@@ -46,9 +46,9 @@ namespace Mindscape.Raygun4Net.Tests
     }
 
     [Test]
-    public void IgnoreFormDataNames_EmptyByDefault()
+    public void IgnoreFormFieldNames_EmptyByDefault()
     {
-      Assert.IsEmpty(RaygunSettings.Settings.IgnoreFormDataNames);
+      Assert.IsEmpty(RaygunSettings.Settings.IgnoreFormFieldNames);
     }
 
     [Test]

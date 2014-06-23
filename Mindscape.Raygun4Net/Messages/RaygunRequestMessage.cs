@@ -24,7 +24,7 @@ namespace Mindscape.Raygun4Net.Messages
       Headers = ToDictionary(request.Headers, options.IgnoreHeaderNames);
       Headers.Remove("Cookie");
 
-      Form = ToDictionary(request.Form, options.IgnoreFormDataNames, true);
+      Form = ToDictionary(request.Form, options.IgnoreFormFieldNames, true);
       Cookies = GetCookies(request.Cookies, options.IgnoreCookieNames);
 
       // Remove ignored and duplicated variables

@@ -40,10 +40,10 @@ namespace Mindscape.Raygun4Net
     public RaygunClient()
       : this(RaygunSettings.Settings.ApiKey)
     {
-      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormDataNames))
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormFieldNames))
       {
-        var ignoredNames = RaygunSettings.Settings.IgnoreFormDataNames.Split(',');
-        IgnoreFormDataNames(ignoredNames);
+        var ignoredNames = RaygunSettings.Settings.IgnoreFormFieldNames.Split(',');
+        IgnoreFormFieldNames(ignoredNames);
       }
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreHeaderNames))
       {
@@ -132,11 +132,11 @@ namespace Mindscape.Raygun4Net
     /// This method is only effective in a web context.
     /// </summary>
     /// <param name="names">Keys to be stripped from the copy of the Form NameValueCollection when sending to Raygun.</param>
-    public void IgnoreFormDataNames(params string[] names)
+    public void IgnoreFormFieldNames(params string[] names)
     {
       foreach (string name in names)
       {
-        _requestMessageOptions.IgnoreFormDataNames.Add(name);
+        _requestMessageOptions.IgnoreFormFieldNames.Add(name);
       }
     }
 
