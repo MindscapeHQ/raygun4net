@@ -28,7 +28,7 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void HostNameTest()
     {
-      var message = new RaygunRequestMessage(_defaultRequest, new RaygunRequestMessageOptions());
+      var message = new RaygunRequestMessage(_defaultRequest, null);
 
       Assert.That(message.HostName, Is.EqualTo("google.com"));
     }
@@ -36,7 +36,7 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void UrlTest()
     {
-      var message = new RaygunRequestMessage(_defaultRequest, new RaygunRequestMessageOptions());
+      var message = new RaygunRequestMessage(_defaultRequest, null);
 
       Assert.That(message.Url, Is.EqualTo("/"));
     }
@@ -44,7 +44,7 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void HttpMethodTest()
     {
-      var message = new RaygunRequestMessage(_defaultRequest, new RaygunRequestMessageOptions());
+      var message = new RaygunRequestMessage(_defaultRequest, null);
 
       Assert.That(message.HttpMethod, Is.EqualTo("GET"));
     }
@@ -54,12 +54,12 @@ namespace Mindscape.Raygun4Net.Tests
     {
       var request = new HttpRequest("test", "http://google.com", "test=test");
 
-      var message = new RaygunRequestMessage(request, new RaygunRequestMessageOptions());
+      var message = new RaygunRequestMessage(request, null);
 
       Assert.That(message.QueryString, Contains.Item(new KeyValuePair<string, string>("test", "test")));
     }
 
-    // Form data
+    // Form fields
 
     [Test]
     public void FormFields()

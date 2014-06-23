@@ -75,6 +75,9 @@
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunResponseMessage.cs">
       <Link>Messages\RaygunResponseMessage.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\RaygunRequestMessageOptions.cs">
+      <Link>RaygunRequestMessageOptions.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\SimpleJson.cs">
       <Link>SimpleJson.cs</Link>
     </Compile>

@@ -78,16 +78,16 @@ namespace Mindscape.Raygun4Net.Messages
       return Enumerable.Range(0, cookieCollection.Count)
         .Select(i => cookieCollection[i])
         .Where(c => !pureIgnores.Contains(c.Name))
-        .Where(c => !IgnoreCookie(c, expressions))
+        .Where(c => !IgnoreCookie(c.Name, expressions))
         .Select(c => new Cookie(c.Name, c.Value))
         .ToList();
     }
 
-    private bool IgnoreCookie(HttpCookie cookie, List<Regex> expressions)
+    private bool IgnoreCookie(string name, List<Regex> expressions)
     {
       foreach (Regex regex in expressions)
       {
-        Match match = regex.Match(cookie.Name);
+        Match match = regex.Match(name);
         if (match != null && match.Success)
         {
           return true;
@@ -96,11 +96,11 @@ namespace Mindscape.Raygun4Net.Messages
       return false;
     }
 
-    private static IDictionary ToDictionary(NameValueCollection nameValueCollection, IEnumerable<string> ignoreFields, bool truncateValues = false)
+    private static IDictionary ToDictionary(NameValueCollection nameValueCollection, IEnumerable<string> ignoreKeys, bool truncateValues = false)
     {
       var dictionary = new Dictionary<string, string>();
 
-      if (ignoreFields.Count() == 1 && "*".Equals(ignoreFields.First()))
+      if (ignoreKeys.Count() == 1 && "*".Equals(ignoreKeys.First()))
       {
         return dictionary;
       }
@@ -109,7 +109,7 @@ namespace Mindscape.Raygun4Net.Messages
 
       try
       {
-        keys = Filter(nameValueCollection, ignoreFields);
+        keys = Filter(nameValueCollection, ignoreKeys);
       }
       catch (HttpRequestValidationException)
       {
