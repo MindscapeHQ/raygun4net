@@ -130,6 +130,59 @@ namespace Mindscape.Raygun4Net.Tests
       Assert.AreEqual(0, message.Form.Count);
     }
 
+    [Test]
+    public void HandleInvalidRegex()
+    {
+      var request = CreateWritableRequest();
+
+      request.Form.Add("+", "FormDataValue"); // Not a valid form name, but useful for this test.
+      Assert.AreEqual(1, request.Form.Count);
+
+      var options = new RaygunRequestMessageOptions(new string[] { "+" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      RaygunRequestMessage message = null;
+      // Make sure the invalid regex "+" does not cause an exception:
+      Assert.DoesNotThrow(() =>
+        {
+          message = new RaygunRequestMessage(request, options);
+        });
+
+      Assert.AreEqual(0, message.Form.Count);
+    }
+
+    [Test]
+    public void UseRegex()
+    {
+      var request = CreateWritableRequest();
+
+      request.Form.Add("TestFormData1", "FormDataValue");
+      request.Form.Add("TestFormData2", "FormDataValue");
+      request.Form.Add("TestFormData3", "FormDataValue");
+      Assert.AreEqual(3, request.Form.Count);
+
+      var options = new RaygunRequestMessageOptions(new string[] { "TestFormData[1-2]" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      var message = new RaygunRequestMessage(request, options);
+
+      Assert.AreEqual(1, message.Form.Count);
+      Assert.IsTrue(message.Form.Contains("TestFormData3"));
+    }
+
+    [Test]
+    public void UseCaseInsensitiveRegex()
+    {
+      var request = CreateWritableRequest();
+
+      request.Form.Add("TestFormData1", "FormDataValue");
+      request.Form.Add("TestFormData2", "FormDataValue");
+      request.Form.Add("AnotherFormData", "FormDataValue");
+      Assert.AreEqual(3, request.Form.Count);
+
+      var options = new RaygunRequestMessageOptions(new string[] { "(?i)testformdata" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      var message = new RaygunRequestMessage(request, options);
+
+      Assert.AreEqual(1, message.Form.Count);
+      Assert.IsTrue(message.Form.Contains("AnotherFormData"));
+    }
+
     private HttpRequest CreateWritableRequest()
     {
       var request = new HttpRequest("test", "http://google.com", "test=test");

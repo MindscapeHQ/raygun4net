@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 
 namespace Mindscape.Raygun4Net.Messages
@@ -88,7 +89,7 @@ namespace Mindscape.Raygun4Net.Messages
 
       try
       {
-        keys = nameValueCollection.AllKeys.Where(k => k != null).Except(ignoreFields);
+        keys = Filter(nameValueCollection, ignoreFields);
       }
       catch (HttpRequestValidationException)
       {
@@ -137,6 +138,42 @@ namespace Mindscape.Raygun4Net.Messages
       }
 
       return dictionary;
+    }
+
+    private static IEnumerable<string> Filter(NameValueCollection nameValueCollection, IEnumerable<string> ignoreFields)
+    {
+      List<string> pureIgnores = new List<string>();
+      List<Regex> regexs = new List<Regex>();
+      foreach (string ignore in ignoreFields)
+      {
+        try
+        {
+          Regex regex = new Regex(ignore);
+          regexs.Add(regex);
+        }
+        catch
+        {
+          pureIgnores.Add(ignore);
+        }
+      }
+
+      foreach (string key in nameValueCollection.AllKeys.Where(k => k != null).Except(pureIgnores))
+      {
+        bool send = true;
+        foreach (Regex regex in regexs)
+        {
+          Match match = regex.Match(key);
+          if (match != null && match.Success)
+          {
+            send = false;
+            break;
+          }
+        }
+        if (send)
+        {
+          yield return key;
+        }
+      }
     }
 
     public class Cookie
