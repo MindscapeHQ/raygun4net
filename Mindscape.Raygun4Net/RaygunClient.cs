@@ -127,19 +127,6 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// This method is obsolete. Use the multi parameter method instead.
-    /// </summary>
-    /// <param name="names">A list of form names to ignore.</param>
-    [Obsolete("Use multi parameter method instead")]
-    public void IgnoreFormDataNames(IEnumerable<string> names)
-    {
-      foreach (string name in names)
-      {
-        _requestMessageOptions.IgnoreFormDataNames.Add(name);
-      }
-    }
-
-    /// <summary>
     /// Adds a list of keys to ignore when attaching the Form data of an HTTP POST request. This allows
     /// you to remove sensitive data from the transmitted copy of the Form on the HttpRequest by specifying the keys you want removed.
     /// This method is only effective in a web context.
