@@ -60,20 +60,47 @@ namespace Mindscape.Raygun4Net.Messages
       }
     }
 
-    private IList GetCookies(HttpCookieCollection cookieCollection, IEnumerable<string> ignoredFormNames)
+    private IList GetCookies(HttpCookieCollection cookieCollection, IEnumerable<string> ignoredCookies)
     {
-      var ignored = ignoredFormNames.ToLookup(s => s);
-
-      if (ignored.Count == 1 && ignored.Contains("*"))
+      if (ignoredCookies.Count() == 1 && ignoredCookies.Contains("*"))
       {
         return Enumerable.Empty<Cookie>().ToList();
       }
 
+      HashSet<string> pureIgnores = new HashSet<string>();
+      List<Regex> expressions = new List<Regex>();
+      foreach (string ignore in ignoredCookies)
+      {
+        try
+        {
+          Regex regex = new Regex(ignore);
+          expressions.Add(regex);
+        }
+        catch
+        {
+          pureIgnores.Add(ignore);
+        }
+      }
+
       return Enumerable.Range(0, cookieCollection.Count)
         .Select(i => cookieCollection[i])
-        .Where(c => !ignored.Contains(c.Name))
+        .Where(c => !pureIgnores.Contains(c.Name))
+        .Where(c => !IgnoreCookie(c, expressions))
         .Select(c => new Cookie(c.Name, c.Value))
         .ToList();
+    }
+
+    private bool IgnoreCookie(HttpCookie cookie, List<Regex> expressions)
+    {
+      foreach (Regex regex in expressions)
+      {
+        Match match = regex.Match(cookie.Name);
+        if (match != null && match.Success)
+        {
+          return true;
+        }
+      }
+      return false;
     }
 
     private static IDictionary ToDictionary(NameValueCollection nameValueCollection, IEnumerable<string> ignoreFields, bool truncateValues = false)
@@ -143,13 +170,13 @@ namespace Mindscape.Raygun4Net.Messages
     private static IEnumerable<string> Filter(NameValueCollection nameValueCollection, IEnumerable<string> ignoreFields)
     {
       List<string> pureIgnores = new List<string>();
-      List<Regex> regexs = new List<Regex>();
+      List<Regex> expressions = new List<Regex>();
       foreach (string ignore in ignoreFields)
       {
         try
         {
           Regex regex = new Regex(ignore);
-          regexs.Add(regex);
+          expressions.Add(regex);
         }
         catch
         {
@@ -160,7 +187,7 @@ namespace Mindscape.Raygun4Net.Messages
       foreach (string key in nameValueCollection.AllKeys.Where(k => k != null).Except(pureIgnores))
       {
         bool send = true;
-        foreach (Regex regex in regexs)
+        foreach (Regex regex in expressions)
         {
           Match match = regex.Match(key);
           if (match != null && match.Success)
