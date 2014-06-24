@@ -152,10 +152,11 @@ namespace Mindscape.Raygun4Net
     /// <param name="names">Keys to be stripped from the copy of the Cookies NameValueCollection when sending to Raygun.</param>
     public void IgnoreCookieNames(params string[] names)
     {
-      foreach (string name in names)
+      _requestMessageOptions.AddCookieNames(names);
+      /*foreach (string name in names)
       {
         _requestMessageOptions.IgnoreCookieNames.Add(name);
-      }
+      }*/
     }
 
     /// <summary>

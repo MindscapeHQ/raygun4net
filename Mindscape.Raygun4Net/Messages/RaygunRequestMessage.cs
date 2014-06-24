@@ -25,7 +25,7 @@ namespace Mindscape.Raygun4Net.Messages
       Headers.Remove("Cookie");
 
       Form = ToDictionary(request.Form, options.IgnoreFormFieldNames, true);
-      Cookies = GetCookies(request.Cookies, options.IgnoreCookieNames);
+      Cookies = GetCookies(request.Cookies, options.IsCookieIgnored);
 
       // Remove ignored and duplicated variables
       Data = ToDictionary(request.ServerVariables, options.IgnoreServerVariableNames);
@@ -53,9 +53,9 @@ namespace Mindscape.Raygun4Net.Messages
       }
     }
 
-    private IList GetCookies(HttpCookieCollection cookieCollection, IEnumerable<string> ignoredCookies)
+    private IList GetCookies(HttpCookieCollection cookieCollection, Func<string, bool> ignore)
     {
-      if (ignoredCookies.Count() == 1 && ignoredCookies.Contains("*"))
+      /*if (ignoredCookies.Count() == 1 && ignoredCookies.Contains("*"))
       {
         return Enumerable.Empty<Cookie>().ToList();
       }
@@ -73,12 +73,13 @@ namespace Mindscape.Raygun4Net.Messages
         {
           pureIgnores.Add(ignore);
         }
-      }
+      }*/
 
       return Enumerable.Range(0, cookieCollection.Count)
         .Select(i => cookieCollection[i])
-        .Where(c => !pureIgnores.Contains(c.Name))
-        .Where(c => !IgnoreCookie(c.Name, expressions))
+        //.Where(c => !pureIgnores.Contains(c.Name))
+        //.Where(c => !IgnoreCookie(c.Name, expressions))
+        .Where(c => !ignore(c.Name))
         .Select(c => new Cookie(c.Name, c.Value))
         .ToList();
     }
