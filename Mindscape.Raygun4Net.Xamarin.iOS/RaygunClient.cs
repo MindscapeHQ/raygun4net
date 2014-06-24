@@ -65,8 +65,8 @@ namespace Mindscape.Raygun4Net
     /// be used by Raygun for grouping and display. The above two do not need to be added manually,
     /// but if you have other wrapper exceptions that you want stripped you can pass them in here.
     /// </summary>
-    /// <param name="wrapperExceptions">An enumerable list of exception types that you want removed and replaced with their inner exception.</param>
-    public void AddWrapperExceptions(IEnumerable<Type> wrapperExceptions)
+    /// <param name="wrapperExceptions">Exception types that you want removed and replaced with their inner exception.</param>
+    public void AddWrapperExceptions(params Type[] wrapperExceptions)
     {
       foreach (Type wrapper in wrapperExceptions)
       {

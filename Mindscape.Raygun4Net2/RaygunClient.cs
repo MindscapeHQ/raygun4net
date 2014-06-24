@@ -104,8 +104,8 @@ namespace Mindscape.Raygun4Net
     /// contains the actual exception as the InnerException. The message and stack trace of the inner exception will then
     /// be used by Raygun for grouping and display. TargetInvocationException and HttpUnhandledException will be stripped by default.
     /// </summary>
-    /// <param name="wrapperExceptions">An enumerable list of exception types that you want removed and replaced with their inner exception.</param>
-    public void AddWrapperExceptions(IEnumerable<Type> wrapperExceptions)
+    /// <param name="wrapperExceptions">Exception types that you want removed and replaced with their inner exception.</param>
+    public void AddWrapperExceptions(params Type[] wrapperExceptions)
     {
       foreach (Type wrapper in wrapperExceptions)
       {

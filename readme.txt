@@ -95,11 +95,11 @@ These options are not case sensitive.
 
 Remove wrapper exceptions (available in all .NET Raygun providers)
 
-If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by providing a list:
+If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by using the multi-parameter method:
 
-raygunClient.AddWrapperExceptions(new List<Type>() { typeof(TargetInvocationException) });
+raygunClient.AddWrapperExceptions(typeof(TargetInvocationException));
 
-In this case, if a TargetInvocationException occurs, it will be removed and replaced with the actual InnerException that was the cause. Note that HttpUnhandledException and the above TargetInvocationException are already defined; you do not have to add these manually. This method is provided if you have your own common wrapper exceptions, or a framework is throwing exceptions using its own wrapper.
+In this case, if a TargetInvocationException occurs, it will be removed and replaced with the actual InnerException that was the cause. Note that HttpUnhandledException and the above TargetInvocationException are already defined; you do not have to add these manually. This method is useful if you have your own custom wrapper exceptions, or a framework is throwing exceptions using its own wrapper.
 
 WPF
 ====================
