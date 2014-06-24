@@ -290,53 +290,67 @@ namespace Mindscape.Raygun4Net.Tests
     }
 
     [Test]
-    public void HandleInvalidCookieRegex()
+    public void IgnoreCookie_StartsWith()
     {
       var request = new HttpRequest("test", "http://google.com", "test=test");
-      request.Cookies.Add(new HttpCookie("+", "CookieValue"));
-      Assert.AreEqual(1, request.Cookies.Count);
+      request.Cookies.Add(new HttpCookie("TestCookieTest", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("TestCookie", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("CookieTest", "CookieValue"));
+      Assert.AreEqual(3, request.Cookies.Count);
 
-      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "+" }, Enumerable.Empty<string>());
-      RaygunRequestMessage message = null;
-      // Make sure the invalid regex "+" does not cause an exception:
-      Assert.DoesNotThrow(() =>
-      {
-        message = new RaygunRequestMessage(request, options);
-      });
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "cookie*" }, Enumerable.Empty<string>());
+      var message = new RaygunRequestMessage(request, options);
+
+      Assert.AreEqual(2, message.Cookies.Count);
+      Assert.AreEqual(1, CookieCount(message, "TestCookieTest"));
+      Assert.AreEqual(1, CookieCount(message, "TestCookie"));
+    }
+
+    [Test]
+    public void IgnoreCookie_EndsWith()
+    {
+      var request = new HttpRequest("test", "http://google.com", "test=test");
+      request.Cookies.Add(new HttpCookie("TestCookieTest", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("TestCookie", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("CookieTest", "CookieValue"));
+      Assert.AreEqual(3, request.Cookies.Count);
+
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "*cookie" }, Enumerable.Empty<string>());
+      var message = new RaygunRequestMessage(request, options);
+
+      Assert.AreEqual(2, message.Cookies.Count);
+      Assert.AreEqual(1, CookieCount(message, "TestCookieTest"));
+      Assert.AreEqual(1, CookieCount(message, "CookieTest"));
+    }
+
+    [Test]
+    public void IgnoreCookie_Contains()
+    {
+      var request = new HttpRequest("test", "http://google.com", "test=test");
+      request.Cookies.Add(new HttpCookie("TestCookieTest", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("TestCookie", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("CookieTest", "CookieValue"));
+      Assert.AreEqual(3, request.Cookies.Count);
+
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "*cookie*" }, Enumerable.Empty<string>());
+      var message = new RaygunRequestMessage(request, options);
 
       Assert.AreEqual(0, message.Cookies.Count);
     }
 
     [Test]
-    public void UseCookieRegex()
+    public void IgnoreCookie_CaseInsensitive()
     {
       var request = new HttpRequest("test", "http://google.com", "test=test");
-      request.Cookies.Add(new HttpCookie("TestCookie1", "CookieValue"));
-      request.Cookies.Add(new HttpCookie("TestCookie2", "CookieValue"));
-      request.Cookies.Add(new HttpCookie("TestCookie3", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("TESTCOOKIE", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("TestCookie", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("testcookie", "CookieValue"));
       Assert.AreEqual(3, request.Cookies.Count);
 
-      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "TestCookie[1-2]" }, Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "TeStCoOkIe" }, Enumerable.Empty<string>());
       var message = new RaygunRequestMessage(request, options);
 
-      Assert.AreEqual(1, message.Cookies.Count);
-      Assert.AreEqual(1, CookieCount(message, "TestCookie3"));
-    }
-
-    [Test]
-    public void UseCaseInsensitiveCookieRegex()
-    {
-      var request = new HttpRequest("test", "http://google.com", "test=test");
-      request.Cookies.Add(new HttpCookie("TestCookie1", "CookieValue"));
-      request.Cookies.Add(new HttpCookie("TestCookie2", "CookieValue"));
-      request.Cookies.Add(new HttpCookie("AnotherCookie", "CookieValue"));
-      Assert.AreEqual(3, request.Cookies.Count);
-
-      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "(?i)testcookie" }, Enumerable.Empty<string>());
-      var message = new RaygunRequestMessage(request, options);
-
-      Assert.AreEqual(1, message.Cookies.Count);
-      Assert.AreEqual(1, CookieCount(message, "AnotherCookie"));
+      Assert.AreEqual(0, message.Cookies.Count);
     }
 
     private int CookieCount(RaygunRequestMessage message, string name)

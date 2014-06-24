@@ -8,13 +8,8 @@ namespace Mindscape.Raygun4Net
   public class RaygunRequestMessageOptions
   {
     private readonly List<string> _ignoredFormFieldNames = new List<string>();
-    private readonly List<Regex> _formFieldExpressions = new List<Regex>();
-
     private readonly List<string> _ignoreHeaderNames = new List<string>();
-
     private readonly List<string> _ignoreCookieNames = new List<string>();
-    private readonly List<Regex> _cookieExpressions = new List<Regex>();
-
     private readonly List<string> _ignoreServerVariableNames = new List<string>();
 
     public RaygunRequestMessageOptions() { }
@@ -36,43 +31,54 @@ namespace Mindscape.Raygun4Net
 
     public List<string> IgnoreHeaderNames { get { return _ignoreHeaderNames; } }
 
-    //public List<string> IgnoreCookieNames { get { return _ignoreCookieNames; } }
     public void AddCookieNames(params string[] names)
     {
       foreach (string name in names)
       {
-        try
+        if (name != null)
         {
-          Regex regex = new Regex(name);
-          _cookieExpressions.Add(regex);
-        }
-        catch
-        {
-          _ignoreCookieNames.AddRange(names);
+          _ignoreCookieNames.Add(name.ToLower());
         }
       }
     }
 
     public bool IsCookieIgnored(string name)
     {
-      if (_ignoreCookieNames.Count == 1 && "*".Equals(_ignoreCookieNames[0]))
+      if (name == null || (_ignoreCookieNames.Count == 1 && "*".Equals(_ignoreCookieNames[0])))
       {
         return true;
       }
 
-      if (_ignoreCookieNames.Contains(name))
+      foreach (string ignore in _ignoreCookieNames)
       {
-        return true;
-      }
-
-      foreach (Regex regex in _cookieExpressions)
-      {
-        Match match = regex.Match(name);
-        if (match != null && match.Success)
+        string lowerName = name.ToLower();
+        if (ignore.StartsWith("*"))
+        {
+          if (ignore.EndsWith("*"))
+          {
+            if (lowerName.Contains(ignore.Substring(1, ignore.Length - 2)))
+            {
+              return true;
+            }
+          }
+          else
+          {
+            if (lowerName.EndsWith(ignore.Substring(1)))
+            {
+              return true;
+            }
+          }
+        }
+        else if (ignore.EndsWith("*") && lowerName.StartsWith(ignore.Substring(0, ignore.Length - 1)))
+        {
+          return true;
+        }
+        else if (lowerName.Equals(ignore))
         {
           return true;
         }
       }
+
       return false;
     }
 
