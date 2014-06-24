@@ -16,40 +16,81 @@ namespace Mindscape.Raygun4Net
 
     public RaygunRequestMessageOptions(IEnumerable<string> formFieldNames, IEnumerable<string> headerNames, IEnumerable<string> cookieNames, IEnumerable<string> serverVariableNames)
     {
-      _ignoredFormFieldNames.AddRange(formFieldNames);
-      _ignoreHeaderNames.AddRange(headerNames);
-
-      foreach (string name in cookieNames)
-      {
-        AddCookieNames(name);
-      }
-
-      _ignoreServerVariableNames.AddRange(serverVariableNames);
+      Add(_ignoredFormFieldNames, formFieldNames);
+      Add(_ignoreHeaderNames, headerNames);
+      Add(_ignoreCookieNames, cookieNames);
+      Add(_ignoreServerVariableNames, serverVariableNames);
     }
 
-    public List<string> IgnoreFormFieldNames { get { return _ignoredFormFieldNames; } }
+    // Form fields
 
-    public List<string> IgnoreHeaderNames { get { return _ignoreHeaderNames; } }
+    public void AddFormFieldNames(params string[] names)
+    {
+      Add(_ignoredFormFieldNames, names);
+    }
+
+    public bool IsFormFieldIgnored(string name)
+    {
+      return IsIgnored(name, _ignoredFormFieldNames);
+    }
+
+    // Headers
+
+    public void AddHeaderNames(params string[] names)
+    {
+      Add(_ignoreHeaderNames, names);
+    }
+
+    public bool IsHeaderIgnored(string name)
+    {
+      return IsIgnored(name, _ignoreHeaderNames);
+    }
+
+    // Cookies
 
     public void AddCookieNames(params string[] names)
+    {
+      Add(_ignoreCookieNames, names);
+    }
+
+    public bool IsCookieIgnored(string name)
+    {
+      return IsIgnored(name, _ignoreCookieNames);
+    }
+
+    // Server variables
+
+    public void AddServerVariableNames(params string[] names)
+    {
+      Add(_ignoreServerVariableNames, names);
+    }
+
+    public bool IsServerVariableIgnored(string name)
+    {
+      return IsIgnored(name, _ignoreServerVariableNames);
+    }
+
+    // Core methods:
+
+    private void Add(List<string> list, IEnumerable<string> names)
     {
       foreach (string name in names)
       {
         if (name != null)
         {
-          _ignoreCookieNames.Add(name.ToLower());
+          list.Add(name.ToLower());
         }
       }
     }
 
-    public bool IsCookieIgnored(string name)
+    private bool IsIgnored(string name, List<string> list)
     {
-      if (name == null || (_ignoreCookieNames.Count == 1 && "*".Equals(_ignoreCookieNames[0])))
+      if (name == null || (list.Count == 1 && "*".Equals(list[0])))
       {
         return true;
       }
 
-      foreach (string ignore in _ignoreCookieNames)
+      foreach (string ignore in list)
       {
         string lowerName = name.ToLower();
         if (ignore.StartsWith("*"))
@@ -81,7 +122,5 @@ namespace Mindscape.Raygun4Net
 
       return false;
     }
-
-    public List<string> IgnoreServerVariableNames { get { return _ignoreServerVariableNames; } }
   }
 }

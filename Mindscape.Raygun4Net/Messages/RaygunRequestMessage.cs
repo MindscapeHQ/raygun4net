@@ -19,16 +19,16 @@ namespace Mindscape.Raygun4Net.Messages
       Url = request.Url.AbsolutePath;
       HttpMethod = request.RequestType;
       IPAddress = request.UserHostAddress;
-      QueryString = ToDictionary(request.QueryString, Enumerable.Empty<string>());
+      QueryString = ToDictionary(request.QueryString, null);
 
-      Headers = ToDictionary(request.Headers, options.IgnoreHeaderNames);
+      Headers = ToDictionary(request.Headers, options.IsHeaderIgnored);
       Headers.Remove("Cookie");
 
-      Form = ToDictionary(request.Form, options.IgnoreFormFieldNames, true);
+      Form = ToDictionary(request.Form, options.IsFormFieldIgnored, true);
       Cookies = GetCookies(request.Cookies, options.IsCookieIgnored);
 
       // Remove ignored and duplicated variables
-      Data = ToDictionary(request.ServerVariables, options.IgnoreServerVariableNames);
+      Data = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored);
       Data.Remove("ALL_HTTP");
       Data.Remove("HTTP_COOKIE");
       Data.Remove("ALL_RAW");
@@ -97,20 +97,27 @@ namespace Mindscape.Raygun4Net.Messages
       return false;
     }
 
-    private static IDictionary ToDictionary(NameValueCollection nameValueCollection, IEnumerable<string> ignoreKeys, bool truncateValues = false)
+    private static IDictionary ToDictionary(NameValueCollection nameValueCollection, Func<string, bool> ignore, bool truncateValues = false)
     {
       var dictionary = new Dictionary<string, string>();
 
-      if (ignoreKeys.Count() == 1 && "*".Equals(ignoreKeys.First()))
+      /*if (ignoreKeys.Count() == 1 && "*".Equals(ignoreKeys.First()))
       {
         return dictionary;
-      }
+      }*/
 
       IEnumerable<string> keys;
 
       try
       {
-        keys = Filter(nameValueCollection, ignoreKeys);
+        if (ignore == null)
+        {
+          keys = nameValueCollection.AllKeys.Where(k => k != null);
+        }
+        else
+        {
+          keys = nameValueCollection.AllKeys.Where(k => !ignore(k));
+        }
       }
       catch (HttpRequestValidationException)
       {
@@ -143,7 +150,7 @@ namespace Mindscape.Raygun4Net.Messages
         {
           // If changing QueryString to be of type string in future, will need to account for possible
           // illegal values - in this case it is contained at the end of e.Message along with an error message
-          
+
           int firstInstance = e.Message.IndexOf('\"');
           int lastInstance = e.Message.LastIndexOf('\"');
 

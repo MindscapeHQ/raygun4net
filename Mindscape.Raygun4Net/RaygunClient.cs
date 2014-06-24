@@ -135,10 +135,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="names">Keys to be stripped from the copy of the Form NameValueCollection when sending to Raygun.</param>
     public void IgnoreFormFieldNames(params string[] names)
     {
-      foreach (string name in names)
-      {
-        _requestMessageOptions.IgnoreFormFieldNames.Add(name);
-      }
+      _requestMessageOptions.AddFormFieldNames(names);
     }
 
     /// <summary>
@@ -149,10 +146,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="names">Keys to be stripped from the copy of the Headers NameValueCollection when sending to Raygun.</param>
     public void IgnoreHeaderNames(params string[] names)
     {
-      foreach (string name in names)
-      {
-        _requestMessageOptions.IgnoreHeaderNames.Add(name);
-      }
+      _requestMessageOptions.AddHeaderNames(names);
     }
 
     /// <summary>
@@ -164,10 +158,6 @@ namespace Mindscape.Raygun4Net
     public void IgnoreCookieNames(params string[] names)
     {
       _requestMessageOptions.AddCookieNames(names);
-      /*foreach (string name in names)
-      {
-        _requestMessageOptions.IgnoreCookieNames.Add(name);
-      }*/
     }
 
     /// <summary>
@@ -178,10 +168,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="names">Keys to be stripped from the copy of the ServerVariables NameValueCollection when sending to Raygun.</param>
     public void IgnoreServerVariableNames(params string[] names)
     {
-      foreach (string name in names)
-      {
-        _requestMessageOptions.IgnoreServerVariableNames.Add(name);
-      }
+      _requestMessageOptions.AddServerVariableNames(names);
     }
 
     /// <summary>

@@ -80,7 +80,7 @@ namespace Mindscape.Raygun4Net.Tests
     }
 
     [Test]
-    public void IgnoreFormFields()
+    public void IgnoreFormField()
     {
       var request = CreateWritableRequest();
 
@@ -131,56 +131,69 @@ namespace Mindscape.Raygun4Net.Tests
     }
 
     [Test]
-    public void HandleInvalidFormFieldRegex()
+    public void IgnoreFormField_StartsWith()
     {
       var request = CreateWritableRequest();
 
-      request.Form.Add("+", "FormFieldValue"); // Not a valid form name, but useful for this test.
-      Assert.AreEqual(1, request.Form.Count);
+      request.Form.Add("TestFormFieldTest", "FormFieldValue");
+      request.Form.Add("TestFormField", "FormFieldValue");
+      request.Form.Add("FormFieldTest", "FormFieldValue");
+      Assert.AreEqual(3, request.Form.Count);
 
-      var options = new RaygunRequestMessageOptions(new string[] { "+" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
-      RaygunRequestMessage message = null;
-      // Make sure the invalid regex "+" does not cause an exception:
-      Assert.DoesNotThrow(() =>
-        {
-          message = new RaygunRequestMessage(request, options);
-        });
+      var options = new RaygunRequestMessageOptions(new string[] { "formfield*" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      var message = new RaygunRequestMessage(request, options);
+
+      Assert.AreEqual(2, message.Form.Count);
+      Assert.IsTrue(message.Form.Contains("TestFormFieldTest"));
+      Assert.IsTrue(message.Form.Contains("TestFormField"));
+    }
+
+    [Test]
+    public void IgnoreFormField_EndsWith()
+    {
+      var request = CreateWritableRequest();
+
+      request.Form.Add("TestFormFieldTest", "FormFieldValue");
+      request.Form.Add("TestFormField", "FormFieldValue");
+      request.Form.Add("FormFieldTest", "FormFieldValue");
+      Assert.AreEqual(3, request.Form.Count);
+
+      var options = new RaygunRequestMessageOptions(new string[] { "*formfield" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      var message = new RaygunRequestMessage(request, options);
+
+      Assert.AreEqual(2, message.Form.Count);
+      Assert.IsTrue(message.Form.Contains("TestFormFieldTest"));
+      Assert.IsTrue(message.Form.Contains("FormFieldTest"));
+    }
+
+    [Test]
+    public void IgnoreFormField_Contains()
+    {
+      var request = CreateWritableRequest();
+
+      request.Form.Add("TestFormFieldTest", "FormFieldValue");
+      request.Form.Add("TestFormField", "FormFieldValue");
+      request.Form.Add("FormFieldTest", "FormFieldValue");
+      Assert.AreEqual(3, request.Form.Count);
+
+      var options = new RaygunRequestMessageOptions(new string[] { "*formfield*" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      var message = new RaygunRequestMessage(request, options);
 
       Assert.AreEqual(0, message.Form.Count);
     }
 
     [Test]
-    public void UseFormFieldRegex()
+    public void IgnoreFormField_CaseInsensitive()
     {
       var request = CreateWritableRequest();
 
-      request.Form.Add("TestFormField1", "FormFieldValue");
-      request.Form.Add("TestFormField2", "FormFieldValue");
-      request.Form.Add("TestFormField3", "FormFieldValue");
-      Assert.AreEqual(3, request.Form.Count);
+      request.Form.Add("TESTFORMFIELD", "FormFieldValue");
+      Assert.AreEqual(1, request.Form.Count);
 
-      var options = new RaygunRequestMessageOptions(new string[] { "TestFormField[1-2]" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(new string[] { "testformfield" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
       var message = new RaygunRequestMessage(request, options);
 
-      Assert.AreEqual(1, message.Form.Count);
-      Assert.IsTrue(message.Form.Contains("TestFormField3"));
-    }
-
-    [Test]
-    public void UseCaseInsensitiveFormFieldRegex()
-    {
-      var request = CreateWritableRequest();
-
-      request.Form.Add("TestFormField1", "FormFieldValue");
-      request.Form.Add("TestFormField2", "FormFieldValue");
-      request.Form.Add("AnotherFormField", "FormFieldValue");
-      Assert.AreEqual(3, request.Form.Count);
-
-      var options = new RaygunRequestMessageOptions(new string[] { "(?i)testformfield" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
-      var message = new RaygunRequestMessage(request, options);
-
-      Assert.AreEqual(1, message.Form.Count);
-      Assert.IsTrue(message.Form.Contains("AnotherFormField"));
+      Assert.AreEqual(0, message.Form.Count);
     }
 
     private HttpRequest CreateWritableRequest()
@@ -243,7 +256,7 @@ namespace Mindscape.Raygun4Net.Tests
     }
 
     [Test]
-    public void IgnoreDuplicateCookie()
+    public void IgnoreDuplicateCookies()
     {
       var request = new HttpRequest("test", "http://google.com", "test=test");
       request.Cookies.Add(new HttpCookie("TestCookie1", "CookieValue"));
