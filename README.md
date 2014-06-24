@@ -3,19 +3,18 @@ Raygun4Net
 
 [Raygun.io](http://raygun.io) Provider for .NET Framework
 
-=========================================================================================================
-                                         **! IMPORTANT CHANGE IN 3.0 !**
+! IMPORTANT CHANGE IN 3.0 !
+====================
 
 The ignoreFormDataNames configuration setting has been removed and replaced with 4 separate options:
 
-ignoreFormFieldNames
-ignoreHeaderNames
-ignoreCookieNames
-ignoreServerVariableNames
+* ignoreFormFieldNames
+* ignoreHeaderNames
+* ignoreCookieNames
+* ignoreServerVariableNames
 
 If you were once using the ignoreFormDataNames option to ignore headers, cookies or server variables,
 make sure to use the new correct configuration options to ignore the appropriate bit.
-=========================================================================================================
 
 Installation
 ====================
@@ -107,10 +106,10 @@ If you have sensitive data in an HTTP request that you wish to prevent being tra
 Keys to ignore can be specified on the RaygunSettings tag in web.config, (or you can use the equivalent methods on RaygunClient if you are setting things up in code).
 The available options are:
 
-ignoreFormFieldNames
-ignoreHeaderNames
-ignoreCookieNames
-ignoreServerVariableNames
+* ignoreFormFieldNames
+* ignoreHeaderNames
+* ignoreCookieNames
+* ignoreServerVariableNames
 
 These can be set to be a comma separated list of keys to ignore. Setting an option as * will indicate that all the keys will **not** be sent to Raygun.
 Placing * before, after or at both ends of a key will perform an ends-with, starts-with or contains operation respectively.
