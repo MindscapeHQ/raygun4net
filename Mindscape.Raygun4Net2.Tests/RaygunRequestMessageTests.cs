@@ -127,56 +127,69 @@ namespace Mindscape.Raygun4Net2.Tests
     }
 
     [Test]
-    public void HandleInvalidFormFieldRegex()
+    public void IgnoreFormField_StartsWith()
     {
       var request = CreateWritableRequest();
 
-      request.Form.Add("+", "FormFieldValue"); // Not a valid form name, but useful for this test.
-      Assert.AreEqual(1, request.Form.Count);
+      request.Form.Add("TestFormFieldTest", "FormFieldValue");
+      request.Form.Add("TestFormField", "FormFieldValue");
+      request.Form.Add("FormFieldTest", "FormFieldValue");
+      Assert.AreEqual(3, request.Form.Count);
 
-      var options = new RaygunRequestMessageOptions(new string[] { "+" }, _empty, _empty, _empty);
-      RaygunRequestMessage message = null;
-      // Make sure the invalid regex "+" does not cause an exception:
-      Assert.DoesNotThrow(() =>
-      {
-        message = new RaygunRequestMessage(request, options);
-      });
+      var options = new RaygunRequestMessageOptions(new string[] { "formfield*" }, _empty, _empty, _empty);
+      var message = new RaygunRequestMessage(request, options);
+
+      Assert.AreEqual(2, message.Form.Count);
+      Assert.IsTrue(message.Form.Contains("TestFormFieldTest"));
+      Assert.IsTrue(message.Form.Contains("TestFormField"));
+    }
+
+    [Test]
+    public void IgnoreFormField_EndsWith()
+    {
+      var request = CreateWritableRequest();
+
+      request.Form.Add("TestFormFieldTest", "FormFieldValue");
+      request.Form.Add("TestFormField", "FormFieldValue");
+      request.Form.Add("FormFieldTest", "FormFieldValue");
+      Assert.AreEqual(3, request.Form.Count);
+
+      var options = new RaygunRequestMessageOptions(new string[] { "*formfield" }, _empty, _empty, _empty);
+      var message = new RaygunRequestMessage(request, options);
+
+      Assert.AreEqual(2, message.Form.Count);
+      Assert.IsTrue(message.Form.Contains("TestFormFieldTest"));
+      Assert.IsTrue(message.Form.Contains("FormFieldTest"));
+    }
+
+    [Test]
+    public void IgnoreFormField_Contains()
+    {
+      var request = CreateWritableRequest();
+
+      request.Form.Add("TestFormFieldTest", "FormFieldValue");
+      request.Form.Add("TestFormField", "FormFieldValue");
+      request.Form.Add("FormFieldTest", "FormFieldValue");
+      Assert.AreEqual(3, request.Form.Count);
+
+      var options = new RaygunRequestMessageOptions(new string[] { "*formfield*" }, _empty, _empty, _empty);
+      var message = new RaygunRequestMessage(request, options);
 
       Assert.AreEqual(0, message.Form.Count);
     }
 
     [Test]
-    public void UseFormFieldRegex()
+    public void IgnoreFormField_CaseInsensitive()
     {
       var request = CreateWritableRequest();
 
-      request.Form.Add("TestFormField1", "FormFieldValue");
-      request.Form.Add("TestFormField2", "FormFieldValue");
-      request.Form.Add("TestFormField3", "FormFieldValue");
-      Assert.AreEqual(3, request.Form.Count);
+      request.Form.Add("TESTFORMFIELD", "FormFieldValue");
+      Assert.AreEqual(1, request.Form.Count);
 
-      var options = new RaygunRequestMessageOptions(new string[] { "TestFormField[1-2]" }, _empty, _empty, _empty);
+      var options = new RaygunRequestMessageOptions(new string[] { "testformfield" }, _empty, _empty, _empty);
       var message = new RaygunRequestMessage(request, options);
 
-      Assert.AreEqual(1, message.Form.Count);
-      Assert.IsTrue(message.Form.Contains("TestFormField3"));
-    }
-
-    [Test]
-    public void UseCaseInsensitiveFormFieldRegex()
-    {
-      var request = CreateWritableRequest();
-
-      request.Form.Add("TestFormField1", "FormFieldValue");
-      request.Form.Add("TestFormField2", "FormFieldValue");
-      request.Form.Add("AnotherFormField", "FormFieldValue");
-      Assert.AreEqual(3, request.Form.Count);
-
-      var options = new RaygunRequestMessageOptions(new string[] { "(?i)testformfield" }, _empty, _empty, _empty);
-      var message = new RaygunRequestMessage(request, options);
-
-      Assert.AreEqual(1, message.Form.Count);
-      Assert.IsTrue(message.Form.Contains("AnotherFormField"));
+      Assert.AreEqual(0, message.Form.Count);
     }
 
     private HttpRequest CreateWritableRequest()
@@ -286,53 +299,67 @@ namespace Mindscape.Raygun4Net2.Tests
     }
 
     [Test]
-    public void HandleInvalidCookieRegex()
+    public void IgnoreCookie_StartsWith()
     {
       var request = new HttpRequest("test", "http://google.com", "test=test");
-      request.Cookies.Add(new HttpCookie("+", "CookieValue"));
-      Assert.AreEqual(1, request.Cookies.Count);
+      request.Cookies.Add(new HttpCookie("TestCookieTest", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("TestCookie", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("CookieTest", "CookieValue"));
+      Assert.AreEqual(3, request.Cookies.Count);
 
-      var options = new RaygunRequestMessageOptions(_empty, _empty, new string[] { "+" }, _empty);
-      RaygunRequestMessage message = null;
-      // Make sure the invalid regex "+" does not cause an exception:
-      Assert.DoesNotThrow(() =>
-      {
-        message = new RaygunRequestMessage(request, options);
-      });
+      var options = new RaygunRequestMessageOptions(_empty, _empty, new string[] { "cookie*" }, _empty);
+      var message = new RaygunRequestMessage(request, options);
+
+      Assert.AreEqual(2, message.Cookies.Count);
+      Assert.AreEqual(1, CookieCount(message, "TestCookieTest"));
+      Assert.AreEqual(1, CookieCount(message, "TestCookie"));
+    }
+
+    [Test]
+    public void IgnoreCookie_EndsWith()
+    {
+      var request = new HttpRequest("test", "http://google.com", "test=test");
+      request.Cookies.Add(new HttpCookie("TestCookieTest", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("TestCookie", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("CookieTest", "CookieValue"));
+      Assert.AreEqual(3, request.Cookies.Count);
+
+      var options = new RaygunRequestMessageOptions(_empty, _empty, new string[] { "*cookie" }, _empty);
+      var message = new RaygunRequestMessage(request, options);
+
+      Assert.AreEqual(2, message.Cookies.Count);
+      Assert.AreEqual(1, CookieCount(message, "TestCookieTest"));
+      Assert.AreEqual(1, CookieCount(message, "CookieTest"));
+    }
+
+    [Test]
+    public void IgnoreCookie_Contains()
+    {
+      var request = new HttpRequest("test", "http://google.com", "test=test");
+      request.Cookies.Add(new HttpCookie("TestCookieTest", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("TestCookie", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("CookieTest", "CookieValue"));
+      Assert.AreEqual(3, request.Cookies.Count);
+
+      var options = new RaygunRequestMessageOptions(_empty, _empty, new string[] { "*cookie*" }, _empty);
+      var message = new RaygunRequestMessage(request, options);
 
       Assert.AreEqual(0, message.Cookies.Count);
     }
 
     [Test]
-    public void UseCookieRegex()
+    public void IgnoreCookie_CaseInsensitive()
     {
       var request = new HttpRequest("test", "http://google.com", "test=test");
-      request.Cookies.Add(new HttpCookie("TestCookie1", "CookieValue"));
-      request.Cookies.Add(new HttpCookie("TestCookie2", "CookieValue"));
-      request.Cookies.Add(new HttpCookie("TestCookie3", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("TESTCOOKIE", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("TestCookie", "CookieValue"));
+      request.Cookies.Add(new HttpCookie("testcookie", "CookieValue"));
       Assert.AreEqual(3, request.Cookies.Count);
 
-      var options = new RaygunRequestMessageOptions(_empty, _empty, new string[] { "TestCookie[1-2]" }, _empty);
+      var options = new RaygunRequestMessageOptions(_empty, _empty, new string[] { "TeStCoOkIe" }, _empty);
       var message = new RaygunRequestMessage(request, options);
 
-      Assert.AreEqual(1, message.Cookies.Count);
-      Assert.AreEqual(1, CookieCount(message, "TestCookie3"));
-    }
-
-    [Test]
-    public void UseCaseInsensitiveCookieRegex()
-    {
-      var request = new HttpRequest("test", "http://google.com", "test=test");
-      request.Cookies.Add(new HttpCookie("TestCookie1", "CookieValue"));
-      request.Cookies.Add(new HttpCookie("TestCookie2", "CookieValue"));
-      request.Cookies.Add(new HttpCookie("AnotherCookie", "CookieValue"));
-      Assert.AreEqual(3, request.Cookies.Count);
-
-      var options = new RaygunRequestMessageOptions(_empty, _empty, new string[] { "(?i)testcookie" }, _empty);
-      var message = new RaygunRequestMessage(request, options);
-
-      Assert.AreEqual(1, message.Cookies.Count);
-      Assert.AreEqual(1, CookieCount(message, "AnotherCookie"));
+      Assert.AreEqual(0, message.Cookies.Count);
     }
 
     private int CookieCount(RaygunRequestMessage message, string name)

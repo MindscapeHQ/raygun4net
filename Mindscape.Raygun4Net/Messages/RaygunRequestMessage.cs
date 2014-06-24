@@ -55,57 +55,15 @@ namespace Mindscape.Raygun4Net.Messages
 
     private IList GetCookies(HttpCookieCollection cookieCollection, Func<string, bool> ignore)
     {
-      /*if (ignoredCookies.Count() == 1 && ignoredCookies.Contains("*"))
-      {
-        return Enumerable.Empty<Cookie>().ToList();
-      }
-
-      HashSet<string> pureIgnores = new HashSet<string>();
-      List<Regex> expressions = new List<Regex>();
-      foreach (string ignore in ignoredCookies)
-      {
-        try
-        {
-          Regex regex = new Regex(ignore);
-          expressions.Add(regex);
-        }
-        catch
-        {
-          pureIgnores.Add(ignore);
-        }
-      }*/
-
       return Enumerable.Range(0, cookieCollection.Count)
         .Select(i => cookieCollection[i])
-        //.Where(c => !pureIgnores.Contains(c.Name))
-        //.Where(c => !IgnoreCookie(c.Name, expressions))
         .Where(c => !ignore(c.Name))
         .Select(c => new Cookie(c.Name, c.Value))
         .ToList();
     }
 
-    private bool IgnoreCookie(string name, List<Regex> expressions)
-    {
-      foreach (Regex regex in expressions)
-      {
-        Match match = regex.Match(name);
-        if (match != null && match.Success)
-        {
-          return true;
-        }
-      }
-      return false;
-    }
-
     private static IDictionary ToDictionary(NameValueCollection nameValueCollection, Func<string, bool> ignore, bool truncateValues = false)
     {
-      var dictionary = new Dictionary<string, string>();
-
-      /*if (ignoreKeys.Count() == 1 && "*".Equals(ignoreKeys.First()))
-      {
-        return dictionary;
-      }*/
-
       IEnumerable<string> keys;
 
       try
@@ -123,6 +81,8 @@ namespace Mindscape.Raygun4Net.Messages
       {
         return new Dictionary<string, string> { { "Values", "Not able to be retrieved" } };
       }
+
+      var dictionary = new Dictionary<string, string>();
 
       foreach (string key in keys)
       {
@@ -166,42 +126,6 @@ namespace Mindscape.Raygun4Net.Messages
       }
 
       return dictionary;
-    }
-
-    private static IEnumerable<string> Filter(NameValueCollection nameValueCollection, IEnumerable<string> ignoreFields)
-    {
-      List<string> pureIgnores = new List<string>();
-      List<Regex> expressions = new List<Regex>();
-      foreach (string ignore in ignoreFields)
-      {
-        try
-        {
-          Regex regex = new Regex(ignore);
-          expressions.Add(regex);
-        }
-        catch
-        {
-          pureIgnores.Add(ignore);
-        }
-      }
-
-      foreach (string key in nameValueCollection.AllKeys.Where(k => k != null).Except(pureIgnores))
-      {
-        bool send = true;
-        foreach (Regex regex in expressions)
-        {
-          Match match = regex.Match(key);
-          if (match != null && match.Success)
-          {
-            send = false;
-            break;
-          }
-        }
-        if (send)
-        {
-          yield return key;
-        }
-      }
     }
 
     public class Cookie
