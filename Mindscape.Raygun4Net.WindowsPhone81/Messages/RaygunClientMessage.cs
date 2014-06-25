@@ -7,7 +7,7 @@ namespace Mindscape.Raygun4Net.Messages
     public RaygunClientMessage()
     {
       Name = "Raygun4Net.WindowsPhone81";
-      Version = new AssemblyName(Assembly.GetExecutingAssembly().FullName).Version.ToString();
+      Version = "2.2.1.0";
       ClientUrl = @"https://github.com/MindscapeHQ/raygun4net";
     }
 
