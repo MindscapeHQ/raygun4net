@@ -14,6 +14,7 @@ using System.Threading;
 using System.Text;
 using Mindscape.Raygun4Net.WindowsPhone;
 using System.Reflection;
+using System.Net.NetworkInformation;
 
 namespace Mindscape.Raygun4Net
 {
@@ -53,7 +54,7 @@ namespace Mindscape.Raygun4Net
       _wrapperExceptions = new List<Type>();
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
-      Deployment.Current.Dispatcher.BeginInvoke(SendStoredMessages);
+      //Deployment.Current.Dispatcher.BeginInvoke(SendStoredMessages); TODO
     }
 
     /// <summary>
@@ -140,71 +141,74 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private static void Current_UnhandledException(object sender, ApplicationUnhandledExceptionEventArgs e)
+    private static void Current_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-      if (e.ExceptionObject is Exception)
+      if (e.Exception is Exception)
       {
-        _client.Send(e.ExceptionObject);
+        _client.Send(e.Exception);
       }
     }
 
-    private bool IsCalledFromApplicationUnhandledExceptionHandler()
+    private bool IsCalledFromUnhandledExceptionHandler()
     {
-      StackTrace trace = new StackTrace();
-      if (trace.FrameCount > 3)
-      {
-        StackFrame frame = trace.GetFrame(2);
-        ParameterInfo[] parameters = frame.GetMethod().GetParameters();
-        if (parameters.Length == 2 && parameters[1].ParameterType == typeof(ApplicationUnhandledExceptionEventArgs))
-        {
-          return true;
-        }
-      }
-      return false;
+      // No StackTrace object
+
+      //StackTrace trace = new StackTrace();
+      //if (trace.FrameCount > 3)
+      //{
+      //  StackFrame frame = trace.GetFrame(2);
+      //  ParameterInfo[] parameters = frame.GetMethod().GetParameters();
+      //  if (parameters.Length == 2 && parameters[1].ParameterType == typeof(UnhandledExceptionEventArgs))
+      //  {
+      //    return true;
+      //  }
+      //}
+      //return false;
+      return true;
     }
 
     /// <summary>
-    /// Sends a message to the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
+    /// Sends a message to the Raygun.io endpoint based on the given <see cref="UnhandledExceptionEventArgs"/>.
     /// </summary>
-    /// <param name="args">The <see cref="ApplicationUnhandledExceptionEventArgs"/> containing the exception information.</param>
-    public void Send(ApplicationUnhandledExceptionEventArgs args)
+    /// <param name="args">The <see cref="UnhandledExceptionEventArgs"/> containing the exception information.</param>
+    public void Send(UnhandledExceptionEventArgs args)
     {
       Send(args, null, null);
     }
 
     /// <summary>
-    /// Sends a message to the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
+    /// Sends a message to the Raygun.io endpoint based on the given <see cref="UnhandledExceptionEventArgs"/>.
     /// </summary>
-    /// <param name="args">The <see cref="ApplicationUnhandledExceptionEventArgs"/> containing the exception information.</param>
+    /// <param name="args">The <see cref="UnhandledExceptionEventArgs"/> containing the exception information.</param>
     /// <param name="tags">A list of tags to send with the message.</param>
-    public void Send(ApplicationUnhandledExceptionEventArgs args, IList<string> tags)
+    public void Send(UnhandledExceptionEventArgs args, IList<string> tags)
     {
       Send(args, tags, null);
     }
 
     /// <summary>
-    /// Sends a message to the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
+    /// Sends a message to the Raygun.io endpoint based on the given <see cref="UnhandledExceptionEventArgs"/>.
     /// </summary>
-    /// <param name="args">The <see cref="ApplicationUnhandledExceptionEventArgs"/> containing the exception information.</param>
+    /// <param name="args">The <see cref="UnhandledExceptionEventArgs"/> containing the exception information.</param>
     /// <param name="userCustomData">Custom data to send with the message.</param>
-    public void Send(ApplicationUnhandledExceptionEventArgs args, IDictionary userCustomData)
+    public void Send(UnhandledExceptionEventArgs args, IDictionary userCustomData)
     {
       Send(args, null, userCustomData);
     }
 
     /// <summary>
-    /// Sends a message to the Raygun.io endpoint based on the given <see cref="ApplicationUnhandledExceptionEventArgs"/>.
+    /// Sends a message to the Raygun.io endpoint based on the given <see cref="UnhandledExceptionEventArgs"/>.
     /// </summary>
-    /// <param name="args">The <see cref="ApplicationUnhandledExceptionEventArgs"/> containing the exception information.</param>
+    /// <param name="args">The <see cref="UnhandledExceptionEventArgs"/> containing the exception information.</param>
     /// <param name="tags">A list of tags to send with the message.</param>
     /// <param name="userCustomData">Custom data to send with the message.</param>
-    public void Send(ApplicationUnhandledExceptionEventArgs args, IList<string> tags, IDictionary userCustomData)
+    public void Send(UnhandledExceptionEventArgs args, IList<string> tags, IDictionary userCustomData)
     {
-      if (!(args.ExceptionObject is ExitException))
+      if (!(args.Exception is ExitException))
       {
         bool handled = args.Handled;
         args.Handled = true;
-        Send(BuildMessage(args.ExceptionObject, tags, userCustomData), false, !handled);
+        Send(BuildMessage(args.Exception, tags, userCustomData), false, !handled);
       }
     }
 
@@ -214,7 +218,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     public void Send(Exception exception)
     {
-      bool calledFromUnhandled = IsCalledFromApplicationUnhandledExceptionHandler();
+      bool calledFromUnhandled = IsCalledFromUnhandledExceptionHandler();
       Send(exception, null, null, calledFromUnhandled);
     }
 
@@ -225,7 +229,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of tags to send with the message.</param>
     public void Send(Exception exception, IList<string> tags)
     {
-      bool calledFromUnhandled = IsCalledFromApplicationUnhandledExceptionHandler();
+      bool calledFromUnhandled = IsCalledFromUnhandledExceptionHandler();
       Send(exception, tags, null, calledFromUnhandled);
     }
 
@@ -236,7 +240,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public void Send(Exception exception, IDictionary userCustomData)
     {
-      bool calledFromUnhandled = IsCalledFromApplicationUnhandledExceptionHandler();
+      bool calledFromUnhandled = IsCalledFromUnhandledExceptionHandler();
       Send(exception, null, userCustomData, calledFromUnhandled);
     }
 
@@ -248,7 +252,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      bool calledFromUnhandled = IsCalledFromApplicationUnhandledExceptionHandler();
+      bool calledFromUnhandled = IsCalledFromUnhandledExceptionHandler();
       Send(exception, tags, userCustomData, calledFromUnhandled);
     }
 
@@ -267,7 +271,7 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void Send(RaygunMessage raygunMessage)
     {
-      bool calledFromUnhandled = IsCalledFromApplicationUnhandledExceptionHandler();
+      bool calledFromUnhandled = IsCalledFromUnhandledExceptionHandler();
       Send(raygunMessage, calledFromUnhandled, false);
     }
 
@@ -278,7 +282,7 @@ namespace Mindscape.Raygun4Net
         try
         {
           string message = SimpleJson.SerializeObject(raygunMessage);
-          if (NetworkInterface.NetworkInterfaceType != NetworkInterfaceType.None)
+          if (NetworkInterface.GetIsNetworkAvailable())
           {
             SendMessage(message, wait, exit);
           }
@@ -298,7 +302,7 @@ namespace Mindscape.Raygun4Net
 
     private void SendStoredMessages()
     {
-      if (NetworkInterface.NetworkInterfaceType != NetworkInterfaceType.None)
+      if (NetworkInterface.GetIsNetworkAvailable())
       {
         _saveOnFail = false;
         try
