@@ -11,10 +11,7 @@ using Windows.UI.Xaml;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using Microsoft.Phone.Info;
-using System.IO.IsolatedStorage;
 using System.Text;
-using Microsoft.Phone.Net.NetworkInformation;
 using Mindscape.Raygun4Net.WindowsPhone;
 using System.Reflection;
 
@@ -28,6 +25,23 @@ namespace Mindscape.Raygun4Net
     private bool _exit;
     private bool _running;
     private static List<Type> _wrapperExceptions;
+    private string _version;
+
+    private string PackageVersion
+    {
+      get
+      {
+        if (_version == null)
+        {
+          var v = Windows.ApplicationModel.Package.Current.Id.Version;
+
+          _version = string.Format("{0}.{1}.{2}.{3}", v.Major.ToString(), v.Minor.ToString(), v.Build.ToString(), v.Revision.ToString());
+        }
+
+        return _version;
+      }
+
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -39,7 +53,6 @@ namespace Mindscape.Raygun4Net
       _wrapperExceptions = new List<Type>();
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
-      SetCallingAssembly(Assembly.GetCallingAssembly());
       Deployment.Current.Dispatcher.BeginInvoke(SendStoredMessages);
     }
 
@@ -50,7 +63,6 @@ namespace Mindscape.Raygun4Net
     public RaygunClient()
       : this(RaygunSettings.Settings.ApiKey)
     {
-      SetCallingAssembly(Assembly.GetCallingAssembly());
     }
 
     private bool ValidateApiKey()
@@ -110,7 +122,7 @@ namespace Mindscape.Raygun4Net
     {
       Detach();
       _client = new RaygunClient(apiKey);
-      _client.SetCallingAssembly(Assembly.GetCallingAssembly());
+
       if (Application.Current != null)
       {
         Application.Current.UnhandledException += Current_UnhandledException;
@@ -149,14 +161,6 @@ namespace Mindscape.Raygun4Net
         }
       }
       return false;
-    }
-
-    private void SetCallingAssembly(Assembly assembly)
-    {
-      if (!assembly.Equals(Assembly.GetExecutingAssembly()))
-      {
-        _callingAssembly = assembly;
-      }
     }
 
     /// <summary>
