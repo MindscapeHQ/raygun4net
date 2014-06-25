@@ -93,6 +93,11 @@ namespace Mindscape.Raygun4Net
     public string User { get; set; }
 
     /// <summary>
+    /// Gets or sets information about the user including the identity string.
+    /// </summary>
+    public RaygunIdentifierMessage UserInfo { get; set; }
+
+    /// <summary>
     /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
     /// and requires credentials.
     /// </summary>
@@ -278,7 +283,7 @@ namespace Mindscape.Raygun4Net
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
-        .SetUser(User)
+        .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
         .Build();
       return message;
     }

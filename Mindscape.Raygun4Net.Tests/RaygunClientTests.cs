@@ -29,10 +29,31 @@ namespace Mindscape.Raygun4Net.Tests
     }
 
     [Test]
+    public void DefaultUserInfo()
+    {
+      Assert.IsNull(_client.UserInfo);
+    }
+
+    [Test]
     public void UserProperty()
     {
       _client.User = "Robbie Robot";
       Assert.AreEqual("Robbie Robot", _client.User);
+    }
+
+    [Test]
+    public void UserInfoProperty()
+    {
+      RaygunIdentifierMessage user = new RaygunIdentifierMessage("Robbie Robot");
+      _client.UserInfo = user;
+      Assert.AreSame(user, _client.UserInfo);
+    }
+
+    [Test]
+    public void MessageWithNoUser()
+    {
+      RaygunMessage message = _client.ExposeBuildMessage(_exception);
+      Assert.IsNull(message.Details.User);
     }
 
     [Test]
@@ -42,6 +63,40 @@ namespace Mindscape.Raygun4Net.Tests
 
       RaygunMessage message = _client.ExposeBuildMessage(_exception);
       Assert.AreEqual("Robbie Robot", message.Details.User.Identifier);
+    }
+
+    [Test]
+    public void MessageWithUserInfo()
+    {
+      RaygunIdentifierMessage user = new RaygunIdentifierMessage("Robbie Robot") { IsAnonymous = true };
+      _client.UserInfo = user;
+
+      RaygunMessage message = _client.ExposeBuildMessage(_exception);
+      Assert.AreEqual("Robbie Robot", message.Details.User.Identifier);
+      Assert.IsTrue(message.Details.User.IsAnonymous);
+    }
+
+    [Test]
+    public void UserInfoTrumpsUser()
+    {
+      RaygunIdentifierMessage user = new RaygunIdentifierMessage("Robbie Robot") { IsAnonymous = true };
+      _client.UserInfo = user;
+      _client.User = "Not Robbie Robot";
+
+      RaygunMessage message = _client.ExposeBuildMessage(_exception);
+      Assert.AreEqual("Robbie Robot", message.Details.User.Identifier);
+      Assert.IsTrue(message.Details.User.IsAnonymous);
+    }
+
+    [Test]
+    public void IsAnonymousDefault()
+    {
+      RaygunIdentifierMessage user = new RaygunIdentifierMessage("Robbie Robot");
+      Assert.IsFalse(user.IsAnonymous);
+
+      _client.User = "Robbie Robot";
+      RaygunMessage message = _client.ExposeBuildMessage(_exception);
+      Assert.IsFalse(message.Details.User.IsAnonymous);
     }
 
     // Application version tests
