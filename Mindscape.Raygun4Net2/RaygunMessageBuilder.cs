@@ -97,12 +97,9 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
-    public IRaygunMessageBuilder SetUser(string user)
+    public IRaygunMessageBuilder SetUser(RaygunIdentifierMessage user)
     {
-      if (user != null && user.Length > 0)
-      {
-        _raygunMessage.Details.User = new RaygunIdentifierMessage(user);
-      }
+      _raygunMessage.Details.User = user;
       return this;
     }
 
