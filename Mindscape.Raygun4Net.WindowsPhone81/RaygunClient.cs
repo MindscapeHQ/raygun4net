@@ -17,6 +17,8 @@ using System.Reflection;
 using System.Net.NetworkInformation;
 using Windows.Storage;
 using System.Threading.Tasks;
+using Windows.Networking.Connectivity;
+using Windows.Networking;
 
 namespace Mindscape.Raygun4Net
 {
@@ -377,51 +379,73 @@ namespace Mindscape.Raygun4Net
       _running = false;
     }
 
-    private void SaveMessage(string message)
+    private async void SaveMessage(string message)
     {
       try
       {
-        using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
+        var tempFolder = ApplicationData.Current.TemporaryFolder;
+
+        var raygunFolder = await tempFolder.GetFolderAsync("RaygunIO");
+
+        if (raygunFolder == null)
         {
-          if (!isolatedStorage.DirectoryExists("RaygunIO"))
-          {
-            isolatedStorage.CreateDirectory("RaygunIO");
-          }
-          int number = 1;
-          while (true)
-          {
-            bool exists = isolatedStorage.FileExists("RaygunIO\\RaygunErrorMessage" + number + ".txt");
-            if (!exists)
-            {
-              string nextFileName = "RaygunIO\\RaygunErrorMessage" + (number + 1) + ".txt";
-              exists = isolatedStorage.FileExists(nextFileName);
-              if (exists)
-              {
-                isolatedStorage.DeleteFile(nextFileName);
-              }
-              break;
-            }
-            number++;
-          }
-          if (number == 11)
-          {
-            string firstFileName = "RaygunIO\\RaygunErrorMessage1.txt";
-            if (isolatedStorage.FileExists(firstFileName))
-            {
-              isolatedStorage.DeleteFile(firstFileName);
-            }
-          }
-          using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream("RaygunIO\\RaygunErrorMessage" + number + ".txt", FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage))
-          {
-            using (StreamWriter writer = new StreamWriter(isoStream, Encoding.Unicode))
-            {
-              writer.Write(message);
-              writer.Flush();
-              writer.Close();
-            }
-          }
-          Debug.WriteLine("Saved message: " + "RaygunIO\\RaygunErrorMessage" + number + ".txt");
+          raygunFolder = await tempFolder.CreateFolderAsync("RaygunIO");
         }
+
+        int number = 1;
+        while (true)
+        {
+          bool exists;
+
+          try
+          {
+            await raygunFolder.GetFileAsync("RaygunErrorMessage" + number + ".txt");
+            exists = true;
+          }
+          catch (FileNotFoundException e) {
+            exists = false;
+          }
+          
+          if (!exists)
+          {
+            string nextFileName = "RaygunErrorMessage" + (number + 1) + ".txt";
+
+            StorageFile nextFile = null;
+            try
+            {
+              nextFile = await raygunFolder.GetFileAsync(nextFileName);
+              exists = true;
+            }
+            catch (FileNotFoundException e)
+            {
+              exists = false;
+            }
+
+            if (exists)
+            {
+              await nextFile.DeleteAsync();
+            }
+
+            break;
+          }
+
+          number++;
+        }
+
+        if (number == 11)
+        {
+          try
+          {
+            StorageFile firstFile = await raygunFolder.GetFileAsync("RaygunErrorMessage1.txt");
+            await firstFile.DeleteAsync();
+          }
+          catch (FileNotFoundException e) { }
+        }
+
+        var file = await raygunFolder.GetFileAsync("RaygunErrorMessage" + number + ".txt");
+        await FileIO.WriteTextAsync(file, message);
+
+        Debug.WriteLine("Saved message: " + "RaygunIO\\RaygunErrorMessage" + number + ".txt");
       }
       catch (Exception ex)
       {
@@ -448,7 +472,6 @@ namespace Mindscape.Raygun4Net
                 {
                   writer.Write(message);
                   writer.Flush();
-                  writer.Close();
                 }
               }
             }
@@ -487,10 +510,15 @@ namespace Mindscape.Raygun4Net
     {
       exception = StripWrapperExceptions(exception);
 
-      object deviceName;
-      DeviceExtendedProperties.TryGetValue("DeviceName", out deviceName);
+      string deviceName = string.Empty;
+      var hostName = NetworkInformation.GetHostNames().FirstOrDefault(h => h.Type == HostNameType.DomainName);
 
-      string version = _callingAssembly != null ? new AssemblyName(_callingAssembly.FullName).Version.ToString() : "Not supplied";
+      if (hostName != null)
+      {
+        deviceName = hostName.CanonicalName;
+      }
+
+      string version = PackageVersion;
       if (!String.IsNullOrWhiteSpace(ApplicationVersion))
       {
         version = ApplicationVersion;
@@ -498,7 +526,7 @@ namespace Mindscape.Raygun4Net
 
       var message = RaygunMessageBuilder.New
           .SetEnvironmentDetails()
-          .SetMachineName(deviceName.ToString())
+          .SetMachineName(deviceName)
           .SetExceptionDetails(exception)
           .SetClientDetails()
           .SetVersion(version)
