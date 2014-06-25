@@ -16,6 +16,7 @@ using Mindscape.Raygun4Net.WindowsPhone;
 using System.Reflection;
 using System.Net.NetworkInformation;
 using Windows.Storage;
+using System.Threading.Tasks;
 
 namespace Mindscape.Raygun4Net
 {
@@ -340,7 +341,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private void SendMessage(string message, bool wait, bool exit)
+    private async void SendMessage(string message, bool wait, bool exit)
     {
       _running = true;
       _exit = exit;
@@ -356,7 +357,7 @@ namespace Mindscape.Raygun4Net
 
       while (_running)
       {
-        Thread.Sleep(10);
+        await Task.Delay(TimeSpan.FromMilliseconds(10));
       }
 
       try
@@ -371,7 +372,7 @@ namespace Mindscape.Raygun4Net
 
       if (wait)
       {
-        Thread.Sleep(3000);
+        await Task.Delay(TimeSpan.FromSeconds(3));
       }
       _running = false;
     }
