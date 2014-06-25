@@ -15,6 +15,7 @@ using System.Text;
 using Mindscape.Raygun4Net.WindowsPhone;
 using System.Reflection;
 using System.Net.NetworkInformation;
+using Windows.Storage;
 
 namespace Mindscape.Raygun4Net
 {
@@ -300,31 +301,33 @@ namespace Mindscape.Raygun4Net
 
     private bool _saveOnFail = true;
 
-    private void SendStoredMessages()
+    private async void SendStoredMessages()
     {
       if (NetworkInterface.GetIsNetworkAvailable())
       {
         _saveOnFail = false;
         try
         {
-          using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
+          var tempFolder = ApplicationData.Current.TemporaryFolder;
+
+          var raygunFolder = await tempFolder.GetFolderAsync("RaygunIO");
+
+          if (raygunFolder == null)
           {
-            if (isolatedStorage.DirectoryExists("RaygunIO"))
-            {
-              string[] fileNames = isolatedStorage.GetFileNames("RaygunIO\\*.txt");
-              foreach (string name in fileNames)
-              {
-                IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile("RaygunIO\\" + name, FileMode.Open);
-                using (StreamReader reader = new StreamReader(isoFileStream))
-                {
-                  string text = reader.ReadToEnd();
-                  SendMessage(text, false, false);
-                }
-                isolatedStorage.DeleteFile("RaygunIO\\" + name);
-              }
-              isolatedStorage.DeleteDirectory("RaygunIO");
-            }
+            raygunFolder = await tempFolder.CreateFolderAsync("RaygunIO");
           }
+
+          var files = await raygunFolder.GetFilesAsync();
+
+          foreach (var file in files)
+          {
+            string text = await FileIO.ReadTextAsync(file);
+            SendMessage(text, false, false);
+
+            await file.DeleteAsync();
+          }
+
+          await raygunFolder.DeleteAsync();
         }
         catch (Exception ex)
         {
