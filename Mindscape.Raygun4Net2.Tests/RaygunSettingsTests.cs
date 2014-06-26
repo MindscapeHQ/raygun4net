@@ -34,9 +34,27 @@ namespace Mindscape.Raygun4Net2.Tests
     }
 
     [Test]
-    public void IgnoreFormDataNames_EmptyByDefault()
+    public void IgnoreFormFieldNames_EmptyByDefault()
     {
-      Assert.IsEmpty(RaygunSettings.Settings.IgnoreFormDataNames);
+      Assert.IsEmpty(RaygunSettings.Settings.IgnoreFormFieldNames);
+    }
+
+    [Test]
+    public void IgnoreHeaderNames_EmptyByDefault()
+    {
+      Assert.IsEmpty(RaygunSettings.Settings.IgnoreHeaderNames);
+    }
+
+    [Test]
+    public void IgnoreCookieNames_EmptyByDefault()
+    {
+      Assert.IsEmpty(RaygunSettings.Settings.IgnoreCookieNames);
+    }
+
+    [Test]
+    public void IgnoreServerVariableNames_EmptyByDefault()
+    {
+      Assert.IsEmpty(RaygunSettings.Settings.IgnoreServerVariableNames);
     }
   }
 }

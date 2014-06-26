@@ -110,16 +110,13 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
-    public IRaygunMessageBuilder SetUser(string user)
+    public IRaygunMessageBuilder SetUser(RaygunIdentifierMessage user)
     {
-      if (user != null && user.Length > 0)
-      {
-        _raygunMessage.Details.User = new RaygunIdentifierMessage(user);
-      }
+      _raygunMessage.Details.User = user;
       return this;
     }
 
-    public IRaygunMessageBuilder SetHttpDetails(HttpContext context, List<string> ignoredFormNames = null)
+    public IRaygunMessageBuilder SetHttpDetails(HttpContext context, RaygunRequestMessageOptions options = null)
     {
       if (context != null)
       {
@@ -132,7 +129,7 @@ namespace Mindscape.Raygun4Net
         {
           return this;
         }
-        _raygunMessage.Details.Request = new RaygunRequestMessage(request, ignoredFormNames);
+        _raygunMessage.Details.Request = new RaygunRequestMessage(request, options ?? new RaygunRequestMessageOptions());
       }
 
       return this;

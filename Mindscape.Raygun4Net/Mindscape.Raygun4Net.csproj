@@ -74,6 +74,7 @@
     <Compile Include="RaygunClient.cs" />
     <Compile Include="RaygunHttpModule.cs" />
     <Compile Include="RaygunMessageBuilder.cs" />
+    <Compile Include="RaygunRequestMessageOptions.cs" />
     <Compile Include="RaygunSendingMessageEventArgs.cs" />
     <Compile Include="RaygunSettings.cs" />
     <Compile Include="SimpleJson.cs" />

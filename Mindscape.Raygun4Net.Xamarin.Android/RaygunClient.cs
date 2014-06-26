@@ -57,6 +57,11 @@ namespace Mindscape.Raygun4Net
     public string User { get; set; }
 
     /// <summary>
+    /// Gets or sets information about the user including the identity string.
+    /// </summary>
+    public RaygunIdentifierMessage UserInfo { get; set; }
+
+    /// <summary>
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
     /// </summary>
     public string ApplicationVersion { get; set; }
@@ -68,8 +73,8 @@ namespace Mindscape.Raygun4Net
     /// be used by Raygun for grouping and display. The above two do not need to be added manually,
     /// but if you have other wrapper exceptions that you want stripped you can pass them in here.
     /// </summary>
-    /// <param name="wrapperExceptions">An enumerable list of exception types that you want removed and replaced with their inner exception.</param>
-    public void AddWrapperExceptions(IEnumerable<Type> wrapperExceptions)
+    /// <param name="wrapperExceptions">Exception types that you want removed and replaced with their inner exception.</param>
+    public void AddWrapperExceptions(params Type[] wrapperExceptions)
     {
       foreach (Type wrapper in wrapperExceptions)
       {
@@ -231,7 +236,7 @@ namespace Mindscape.Raygun4Net
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
-        .SetUser(User)
+        .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
         .Build();
       return message;
     }
@@ -470,50 +475,6 @@ namespace Mindscape.Raygun4Net
           return;
         }
       }
-    }
-
-    /// <summary>
-    /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
-    /// Then use a Send method that does not accept a version.
-    /// </summary>
-    [Obsolete("Set the ApplicationVersion property instead, and then call a different Send method.")]
-    public void Send(Exception exception, IList<string> tags, string version)
-    {
-      Send(exception, tags, null, version);
-    }
-
-    /// <summary>
-    /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
-    /// Then use a Send method that does not accept a version.
-    /// </summary>
-    [Obsolete("Set the ApplicationVersion property instead, and then call a different Send method.")]
-    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
-    {
-      var message = BuildMessage(exception, tags, userCustomData);
-      message.Details.Version = version;
-      Send(message);
-    }
-
-    /// <summary>
-    /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
-    /// Then use a Send method that does not accept a version.
-    /// </summary>
-    [Obsolete("Set the ApplicationVersion property instead, and then call a different Send method.")]
-    public void SendInBackground(Exception exception, IList<string> tags, string version)
-    {
-      SendInBackground(exception, tags, null, version);
-    }
-
-    /// <summary>
-    /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
-    /// Then use a Send method that does not accept a version.
-    /// </summary>
-    [Obsolete("Set the ApplicationVersion property instead, and then call a different Send method.")]
-    public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
-    {
-      var message = BuildMessage(exception, tags, userCustomData);
-      message.Details.Version = version;
-      SendInBackground(message);
     }
   }
 }

@@ -58,11 +58,32 @@ namespace Mindscape.Raygun4Net
       set { this["excludeErrorsFromLocal"] = value; }
     }
 
-    [ConfigurationProperty("ignoreFormDataNames", IsRequired = false, DefaultValue = "")]
-    public string IgnoreFormDataNames
+    [ConfigurationProperty("ignoreFormFieldNames", IsRequired = false, DefaultValue = "")]
+    public string IgnoreFormFieldNames
     {
-      get { return (string)this["ignoreFormDataNames"]; }
-      set { this["ignoreFormDataNames"] = value; }
+      get { return (string)this["ignoreFormFieldNames"]; }
+      set { this["ignoreFormFieldNames"] = value; }
+    }
+
+    [ConfigurationProperty("ignoreHeaderNames", IsRequired = false, DefaultValue = "")]
+    public string IgnoreHeaderNames
+    {
+      get { return (string)this["ignoreHeaderNames"]; }
+      set { this["ignoreHeaderNames"] = value; }
+    }
+
+    [ConfigurationProperty("ignoreCookieNames", IsRequired = false, DefaultValue = "")]
+    public string IgnoreCookieNames
+    {
+      get { return (string)this["ignoreCookieNames"]; }
+      set { this["ignoreCookieNames"] = value; }
+    }
+
+    [ConfigurationProperty("ignoreServerVariableNames", IsRequired = false, DefaultValue = "")]
+    public string IgnoreServerVariableNames
+    {
+      get { return (string)this["ignoreServerVariableNames"]; }
+      set { this["ignoreServerVariableNames"] = value; }
     }
   }
 }

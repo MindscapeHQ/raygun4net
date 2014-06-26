@@ -10,23 +10,25 @@ namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunRequestMessage
   {
-    public RaygunRequestMessage(HttpRequest request, List<string> ignoredFormNames)
+    public RaygunRequestMessage(HttpRequest request, RaygunRequestMessageOptions options)
     {
+      options = options ?? new RaygunRequestMessageOptions();
+
       HostName = request.Url.Host;
       Url = request.Url.AbsolutePath;
       HttpMethod = request.RequestType;
       IPAddress = request.UserHostAddress;
-      IEnumerable<string> empty = new List<string>();
-      QueryString = ToDictionary(request.QueryString, empty);
+      
+      QueryString = ToDictionary(request.QueryString, null);
 
-      Headers = ToDictionary(request.Headers, ignoredFormNames ?? empty);
+      Headers = ToDictionary(request.Headers, options.IsHeaderIgnored);
       Headers.Remove("Cookie");
 
-      Form = ToDictionary(request.Form, ignoredFormNames ?? empty, true);
-      Cookies = GetCookies(request.Cookies, ignoredFormNames ?? empty);
+      Form = ToDictionary(request.Form, options.IsFormFieldIgnored, true);
+      Cookies = GetCookies(request.Cookies, options.IsCookieIgnored);
 
       // Remove ignored and duplicated variables
-      Data = ToDictionary(request.ServerVariables, ignoredFormNames ?? empty);
+      Data = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored);
       Data.Remove("ALL_HTTP");
       Data.Remove("HTTP_COOKIE");
       Data.Remove("ALL_RAW");
@@ -51,19 +53,15 @@ namespace Mindscape.Raygun4Net.Messages
       }
     }
 
-    private IList GetCookies(HttpCookieCollection cookieCollection, IEnumerable<string> ignoredFormNames)
-    {
-      Dictionary<string, string> ignored = new Dictionary<string, string>();
-      foreach(string key in ignoredFormNames)
-      {
-        ignored[key] = key;
-      }
+    private delegate R Func<T, R>(T value);
 
+    private IList GetCookies(HttpCookieCollection cookieCollection, Func<string, bool> ignore)
+    {
       IList cookies = new List<Cookie>();
 
       foreach (string key in cookieCollection.Keys)
       {
-        if (!ignored.ContainsKey(key))
+        if (!ignore(key))
         {
           cookies.Add(new Cookie(cookieCollection[key].Name, cookieCollection[key].Value));
         }
@@ -72,25 +70,13 @@ namespace Mindscape.Raygun4Net.Messages
       return cookies;
     }
 
-    private static IDictionary ToDictionary(NameValueCollection nameValueCollection, IEnumerable<string> ignoreFields, bool truncateValues = false)
+    private static IDictionary ToDictionary(NameValueCollection nameValueCollection, Func<string, bool> ignore, bool truncateValues = false)
     {
-      Dictionary<string, string> ignored = new Dictionary<string, string>();
-      foreach (string key in ignoreFields)
-      {
-        ignored[key] = key;
-      }
-
-      List<string> keys = new List<string>();
+      IEnumerable<string> keys;
 
       try
       {
-        foreach (string key in nameValueCollection)
-        {
-          if (!ignored.ContainsKey(key))
-          {
-            keys.Add(key);
-          }
-        }
+        keys = Filter(nameValueCollection, ignore);
       }
       catch (HttpRequestValidationException)
       {
@@ -141,6 +127,17 @@ namespace Mindscape.Raygun4Net.Messages
       }
 
       return dictionary;
+    }
+
+    private static IEnumerable<string> Filter(NameValueCollection nameValueCollection, Func<string, bool> ignore)
+    {
+      foreach (string key in nameValueCollection)
+      {
+        if (key != null && (ignore == null || !ignore(key)))
+        {
+          yield return key;
+        }
+      }
     }
 
     public class Cookie

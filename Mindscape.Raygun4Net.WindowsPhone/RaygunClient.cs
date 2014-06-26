@@ -69,6 +69,11 @@ namespace Mindscape.Raygun4Net
     public string User { get; set; }
 
     /// <summary>
+    /// Gets or sets information about the user including the identity string.
+    /// </summary>
+    public RaygunIdentifierMessage UserInfo { get; set; }
+
+    /// <summary>
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
     /// </summary>
     public string ApplicationVersion { get; set; }
@@ -80,8 +85,8 @@ namespace Mindscape.Raygun4Net
     /// be used by Raygun for grouping and display. TargetInvocationException is added for you,
     /// but if you have other wrapper exceptions that you want stripped you can pass them in here.
     /// </summary>
-    /// <param name="wrapperExceptions">An enumerable list of exception types that you want removed and replaced with their inner exception.</param>
-    public void AddWrapperExceptions(IEnumerable<Type> wrapperExceptions)
+    /// <param name="wrapperExceptions">Exception types that you want removed and replaced with their inner exception.</param>
+    public void AddWrapperExceptions(params Type[] wrapperExceptions)
     {
       foreach (Type wrapper in wrapperExceptions)
       {
@@ -492,7 +497,7 @@ namespace Mindscape.Raygun4Net
           .SetVersion(version)
           .SetTags(tags)
           .SetUserCustomData(userCustomData)
-          .SetUser(User)
+          .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
           .Build();
 
       return message;

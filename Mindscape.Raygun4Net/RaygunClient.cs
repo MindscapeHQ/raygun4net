@@ -16,8 +16,8 @@ namespace Mindscape.Raygun4Net
   public class RaygunClient
   {
     private readonly string _apiKey;
+    private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private static List<Type> _wrapperExceptions;
-    private List<string> _ignoredFormNames;
     internal const string SentKey = "AlreadySentByRaygun";
 
     /// <summary>
@@ -31,6 +31,27 @@ namespace Mindscape.Raygun4Net
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
       _wrapperExceptions.Add(typeof(HttpUnhandledException));
+
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormFieldNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreFormFieldNames.Split(',');
+        IgnoreFormFieldNames(ignoredNames);
+      }
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreHeaderNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreHeaderNames.Split(',');
+        IgnoreHeaderNames(ignoredNames);
+      }
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreCookieNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreCookieNames.Split(',');
+        IgnoreCookieNames(ignoredNames);
+      }
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreServerVariableNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreServerVariableNames.Split(',');
+        IgnoreServerVariableNames(ignoredNames);
+      }
     }
 
     /// <summary>
@@ -40,11 +61,6 @@ namespace Mindscape.Raygun4Net
     public RaygunClient()
       : this(RaygunSettings.Settings.ApiKey)
     {
-      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormDataNames))
-      {
-        var ignoredNames = RaygunSettings.Settings.IgnoreFormDataNames.Split(',');
-        IgnoreFormDataNames(ignoredNames);
-      }
     }
 
     protected bool ValidateApiKey()
@@ -77,6 +93,11 @@ namespace Mindscape.Raygun4Net
     public string User { get; set; }
 
     /// <summary>
+    /// Gets or sets information about the user including the identity string.
+    /// </summary>
+    public RaygunIdentifierMessage UserInfo { get; set; }
+
+    /// <summary>
     /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
     /// and requires credentials.
     /// </summary>
@@ -99,8 +120,8 @@ namespace Mindscape.Raygun4Net
     /// be used by Raygun for grouping and display. The above two do not need to be added manually,
     /// but if you have other wrapper exceptions that you want stripped you can pass them in here.
     /// </summary>
-    /// <param name="wrapperExceptions">An enumerable list of exception types that you want removed and replaced with their inner exception.</param>
-    public void AddWrapperExceptions(IEnumerable<Type> wrapperExceptions)
+    /// <param name="wrapperExceptions">Exception types that you want removed and replaced with their inner exception.</param>
+    public void AddWrapperExceptions(params Type[] wrapperExceptions)
     {
       foreach (Type wrapper in wrapperExceptions)
       {
@@ -116,18 +137,43 @@ namespace Mindscape.Raygun4Net
     /// you to remove sensitive data from the transmitted copy of the Form on the HttpRequest by specifying the keys you want removed.
     /// This method is only effective in a web context.
     /// </summary>
-    /// <param name="names">An enumerable list of keys (Names) to be stripped from the copy of the Form NameValueCollection when sending to Raygun.</param>
-    public void IgnoreFormDataNames(IEnumerable<string> names)
+    /// <param name="names">Keys to be stripped from the copy of the Form NameValueCollection when sending to Raygun.</param>
+    public void IgnoreFormFieldNames(params string[] names)
     {
-      if (_ignoredFormNames == null)
-      {
-        _ignoredFormNames = new List<string>();
-      }
+      _requestMessageOptions.AddFormFieldNames(names);
+    }
 
-      foreach (string name in names)
-      {
-        _ignoredFormNames.Add(name);
-      }
+    /// <summary>
+    /// Adds a list of keys to ignore when attaching the headers of an HTTP POST request. This allows
+    /// you to remove sensitive data from the transmitted copy of the Headers on the HttpRequest by specifying the keys you want removed.
+    /// This method is only effective in a web context.
+    /// </summary>
+    /// <param name="names">Keys to be stripped from the copy of the Headers NameValueCollection when sending to Raygun.</param>
+    public void IgnoreHeaderNames(params string[] names)
+    {
+      _requestMessageOptions.AddHeaderNames(names);
+    }
+
+    /// <summary>
+    /// Adds a list of keys to ignore when attaching the cookies of an HTTP POST request. This allows
+    /// you to remove sensitive data from the transmitted copy of the Cookies on the HttpRequest by specifying the keys you want removed.
+    /// This method is only effective in a web context.
+    /// </summary>
+    /// <param name="names">Keys to be stripped from the copy of the Cookies NameValueCollection when sending to Raygun.</param>
+    public void IgnoreCookieNames(params string[] names)
+    {
+      _requestMessageOptions.AddCookieNames(names);
+    }
+
+    /// <summary>
+    /// Adds a list of keys to ignore when attaching the server variables of an HTTP POST request. This allows
+    /// you to remove sensitive data from the transmitted copy of the ServerVariables on the HttpRequest by specifying the keys you want removed.
+    /// This method is only effective in a web context.
+    /// </summary>
+    /// <param name="names">Keys to be stripped from the copy of the ServerVariables NameValueCollection when sending to Raygun.</param>
+    public void IgnoreServerVariableNames(params string[] names)
+    {
+      _requestMessageOptions.AddServerVariableNames(names);
     }
 
     /// <summary>
@@ -229,7 +275,7 @@ namespace Mindscape.Raygun4Net
       exception = StripWrapperExceptions(exception);
 
       var message = RaygunMessageBuilder.New
-        .SetHttpDetails(HttpContext.Current, _ignoredFormNames)
+        .SetHttpDetails(HttpContext.Current, _requestMessageOptions)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)
@@ -237,7 +283,7 @@ namespace Mindscape.Raygun4Net
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
-        .SetUser(User)
+        .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
         .Build();
       return message;
     }
@@ -304,50 +350,6 @@ namespace Mindscape.Raygun4Net
           }
         }
       }
-    }
-
-    /// <summary>
-    /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
-    /// Then use a Send method that does not accept a version.
-    /// </summary>
-    [Obsolete("Set the ApplicationVersion property instead, and then call a different Send method.")]
-    public void Send(Exception exception, IList<string> tags, string version)
-    {
-      Send(exception, tags, null, version);
-    }
-
-    /// <summary>
-    /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
-    /// Then use a Send method that does not accept a version.
-    /// </summary>
-    [Obsolete("Set the ApplicationVersion property instead, and then call a different Send method.")]
-    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
-    {
-      var message = BuildMessage(exception, tags, userCustomData);
-      message.Details.Version = version;
-      Send(message);
-    }
-
-    /// <summary>
-    /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
-    /// Then use a Send method that does not accept a version.
-    /// </summary>
-    [Obsolete("Set the ApplicationVersion property instead, and then call a different Send method.")]
-    public void SendInBackground(Exception exception, IList<string> tags, string version)
-    {
-      SendInBackground(exception, tags, null, version);
-    }
-
-    /// <summary>
-    /// This method is obsolete. Use the ApplicationVersion property to set a custom version string.
-    /// Then use a Send method that does not accept a version.
-    /// </summary>
-    [Obsolete("Set the ApplicationVersion property instead, and then call a different Send method.")]
-    public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, string version)
-    {
-      var message = BuildMessage(exception, tags, userCustomData);
-      message.Details.Version = version;
-      SendInBackground(message);
     }
   }
 }

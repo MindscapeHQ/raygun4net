@@ -3,6 +3,18 @@ Raygun4Net
 
 [Raygun.io](http://raygun.io) Provider for .NET Framework
 
+! IMPORTANT CHANGE IN 3.0 !
+====================
+
+The ignoreFormDataNames configuration setting has been removed and replaced with 4 separate options:
+
+* ignoreFormFieldNames
+* ignoreHeaderNames
+* ignoreCookieNames
+* ignoreServerVariableNames
+
+If you were once using the ignoreFormDataNames option to ignore headers, cookies or server variables,
+make sure to use the new correct configuration options to ignore the appropriate bit.
 
 Installation
 ====================
@@ -90,29 +102,29 @@ Toggle this boolean and the HTTP module will not send errors to Raygun.io if the
 
 **Remove sensitive request data**
 
-If you have sensitive data in an HTTP request that you wish to prevent being transmitted to Raygun, you can provide a list of possible keys (Names) to remove:
+If you have sensitive data in an HTTP request that you wish to prevent being transmitted to Raygun, you can provide lists of possible keys (names) to remove.
+Keys to ignore can be specified on the RaygunSettings tag in web.config, (or you can use the equivalent methods on RaygunClient if you are setting things up in code).
+The available options are:
 
-```csharp
-raygunClient.IgnoreFormDataNames(new List<string>() { "SensitiveKey1", "SomeCreditCardData"});
-```
+* ignoreFormFieldNames
+* ignoreHeaderNames
+* ignoreCookieNames
+* ignoreServerVariableNames
 
-When an error occurs and is passed in to Raygun4Net, if any of the keys specified are present in request.Form, they will not be transmitted to the Raygun API.
-
-*Sensitive keys are removed from the following transmitted properties:*
-
-  * HttpRequest.**Headers**
-  * HttpRequest.**Form**
-  * HttpRequest.**ServerVariables**
+These can be set to be a comma separated list of keys to ignore. Setting an option as * will indicate that all the keys will **not** be sent to Raygun.
+Placing * before, after or at both ends of a key will perform an ends-with, starts-with or contains operation respectively.
+For example, ignoreFormFieldNames="*password*" will cause Raygun to ignore all form fields that **contain** "password" anywhere in the name.
+These options are **not** case sensitive.
 
 **Remove wrapper exceptions (available in all .NET Raygun providers)**
 
-If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by providing a list:
+If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by using the multi-parameter method:
 
 ```csharp
-raygunClient.AddWrapperExceptions(new List<Type>() { typeof(TargetInvocationException) });
+raygunClient.AddWrapperExceptions(typeof(TargetInvocationException));
 ```
 
-In this case, if a TargetInvocationException occurs, it will be removed and replaced with the actual InnerException that was the cause. Note that HttpUnhandledException and the above TargetInvocationException are already defined; you do not have to add these manually. This method is provided if you have your own common wrapper exceptions, or a framework is throwing exceptions using its own wrapper.
+In this case, if a TargetInvocationException occurs, it will be removed and replaced with the actual InnerException that was the cause. Note that HttpUnhandledException and the above TargetInvocationException are already defined; you do not have to add these manually. This method is useful if you have your own custom wrapper exceptions, or a framework is throwing exceptions using its own wrapper.
 
 
 ### WPF
