@@ -5,6 +5,7 @@ properties {
     $solution_file4 =                "$root/Mindscape.Raygun4Net4.sln"
     $winrt_solution_file =           "$root/Mindscape.Raygun4Net.WinRT.sln"
     $windows_phone_solution_file =   "$root/Mindscape.Raygun4Net.WindowsPhone.sln"
+    $windows_phone_81_solution_file =   "$root/Mindscape.Raygun4Net.WindowsPhone81.sln"
     $nugetspec =                     "$root/Mindscape.Raygun4Net.nuspec"
     $nugetpackage =                  "Mindscape.Raygun4Net.1.0.nupkg"
     $configuration =                 "Release"
@@ -17,7 +18,7 @@ properties {
     $env:Path +=                     ";$nunit_dir;$tools_dir;$nuget_dir"
 }
 
-task default -depends Compile, CompileWinRT, CompileWindowsPhone
+task default -depends Compile, CompileWinRT, CompileWindowsPhone, CompileWindowsPhone81
 
 task Clean {
     remove-item -force -recurse $build_dir -ErrorAction SilentlyContinue | Out-Null
@@ -47,7 +48,11 @@ task CompileWindowsPhone -depends Init {
     exec { msbuild "$windows_phone_solution_file" /m /p:OutDir=$build_dir /p:Configuration=$Configuration }
 }
 
-task Test -depends Compile, CompileWinRT, CompileWindowsPhone {
+task CompileWindowsPhone81 -depends Init {
+    exec { msbuild "$windows_phone_81_solution_file" /m /p:OutDir=$build_dir /p:Configuration=$Configuration }
+}
+
+task Test -depends Compile, CompileWinRT, CompileWindowsPhone, CompileWindowsPhone81 {
     $test_assemblies = Get-ChildItem $build_dir -Include *Tests.dll -Name
 
     Push-Location -Path $build_dir
