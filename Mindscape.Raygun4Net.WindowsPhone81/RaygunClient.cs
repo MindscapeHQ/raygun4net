@@ -213,11 +213,21 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public void Send(UnhandledExceptionEventArgs args, IList<string> tags, IDictionary userCustomData)
     {
-      if (!(args.Exception is ExitException))
+      // Throwing a dummy exception then picking out the InnerException to build/send is a workaround to deal with
+      // the fact that the StackTrace on UnhandledExceptionEventArgs.Exception goes null when accessed/inspected.
+      // This preserves the actual class, message & trace of the real exception that reached the exception handler
+      try
       {
-        bool handled = args.Handled;
-        args.Handled = true;
-        Send(BuildMessage(args.Exception, tags, userCustomData), false, !handled);
+        throw new Exception("", args.Exception);
+      }
+      catch (Exception e)
+      {
+        if (!(e is ExitException))
+        {
+          bool handled = args.Handled;
+          args.Handled = true;
+          Send(BuildMessage(e.InnerException, tags, userCustomData), false, !handled);
+        }
       }
     }
 
