@@ -58,7 +58,7 @@ namespace Mindscape.Raygun4Net
       _wrapperExceptions = new List<Type>();
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
-      //Deployment.Current.Dispatcher.BeginInvoke(SendStoredMessages); TODO
+      BeginSendStoredMessages();
     }
 
     /// <summary>
@@ -68,6 +68,11 @@ namespace Mindscape.Raygun4Net
     public RaygunClient()
       : this(RaygunSettings.Settings.ApiKey)
     {
+    }
+
+    private async void BeginSendStoredMessages()
+    {
+      await SendStoredMessages();
     }
 
     private bool ValidateApiKey()
@@ -168,7 +173,7 @@ namespace Mindscape.Raygun4Net
       //  }
       //}
       //return false;
-      return true;
+      return false;
     }
 
     /// <summary>
@@ -279,6 +284,17 @@ namespace Mindscape.Raygun4Net
       Send(raygunMessage, calledFromUnhandled, false);
     }
 
+    private bool InternetAvailable()
+    {
+      IEnumerable<ConnectionProfile> connections = NetworkInformation.GetConnectionProfiles();
+      var internetProfile = NetworkInformation.GetInternetConnectionProfile();
+
+      bool internetAvailable = connections != null && connections.Any(c =>
+        c.GetNetworkConnectivityLevel() == NetworkConnectivityLevel.InternetAccess) ||
+        (internetProfile != null && internetProfile.GetNetworkConnectivityLevel() == NetworkConnectivityLevel.InternetAccess);
+      return internetAvailable;
+    }
+
     private void Send(RaygunMessage raygunMessage, bool wait, bool exit)
     {
       if (ValidateApiKey() && !_exit)
@@ -286,7 +302,8 @@ namespace Mindscape.Raygun4Net
         try
         {
           string message = SimpleJson.SerializeObject(raygunMessage);
-          if (NetworkInterface.GetIsNetworkAvailable())
+
+          if (InternetAvailable())
           {
             SendMessage(message, wait, exit);
           }
@@ -304,21 +321,16 @@ namespace Mindscape.Raygun4Net
 
     private bool _saveOnFail = true;
 
-    private async void SendStoredMessages()
+    private async Task SendStoredMessages()
     {
-      if (NetworkInterface.GetIsNetworkAvailable())
+      if (InternetAvailable())
       {
         _saveOnFail = false;
         try
         {
           var tempFolder = ApplicationData.Current.TemporaryFolder;
 
-          var raygunFolder = await tempFolder.GetFolderAsync("RaygunIO");
-
-          if (raygunFolder == null)
-          {
-            raygunFolder = await tempFolder.CreateFolderAsync("RaygunIO");
-          }
+          var raygunFolder = await tempFolder.CreateFolderAsync("RaygunIO", CreationCollisionOption.OpenIfExists);
 
           var files = await raygunFolder.GetFilesAsync();
 
@@ -365,7 +377,7 @@ namespace Mindscape.Raygun4Net
       try
       {
         _running = true;
-        httpWebRequest.BeginGetResponse(ResponseReady, httpWebRequest);
+        var result = httpWebRequest.BeginGetResponse(ResponseReady, httpWebRequest);
       }
       catch (Exception ex)
       {
@@ -385,12 +397,7 @@ namespace Mindscape.Raygun4Net
       {
         var tempFolder = ApplicationData.Current.TemporaryFolder;
 
-        var raygunFolder = await tempFolder.GetFolderAsync("RaygunIO");
-
-        if (raygunFolder == null)
-        {
-          raygunFolder = await tempFolder.CreateFolderAsync("RaygunIO");
-        }
+        var raygunFolder = await tempFolder.CreateFolderAsync("RaygunIO", CreationCollisionOption.OpenIfExists);
 
         int number = 1;
         while (true)
@@ -414,17 +421,10 @@ namespace Mindscape.Raygun4Net
             try
             {
               nextFile = await raygunFolder.GetFileAsync(nextFileName);
-              exists = true;
-            }
-            catch (FileNotFoundException e)
-            {
-              exists = false;
-            }
 
-            if (exists)
-            {
               await nextFile.DeleteAsync();
             }
+            catch (FileNotFoundException) { }
 
             break;
           }
@@ -439,10 +439,10 @@ namespace Mindscape.Raygun4Net
             StorageFile firstFile = await raygunFolder.GetFileAsync("RaygunErrorMessage1.txt");
             await firstFile.DeleteAsync();
           }
-          catch (FileNotFoundException e) { }
+          catch (FileNotFoundException) { }
         }
 
-        var file = await raygunFolder.GetFileAsync("RaygunErrorMessage" + number + ".txt");
+        var file = await raygunFolder.CreateFileAsync("RaygunErrorMessage" + number + ".txt");
         await FileIO.WriteTextAsync(file, message);
 
         Debug.WriteLine("Saved message: " + "RaygunIO\\RaygunErrorMessage" + number + ".txt");
