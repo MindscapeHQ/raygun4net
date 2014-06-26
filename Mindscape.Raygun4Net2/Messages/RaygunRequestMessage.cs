@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Web;
 
 namespace Mindscape.Raygun4Net.Messages
