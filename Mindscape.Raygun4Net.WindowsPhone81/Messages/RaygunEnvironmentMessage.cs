@@ -39,10 +39,7 @@ namespace Mindscape.Raygun4Net.Messages
 
       try
       {
-        DeviceFirmwareVersion = deviceInfo.SystemFirmwareVersion;
-        DeviceHardwareVersion = deviceInfo.SystemHardwareVersion;
         DeviceManufacturer = deviceInfo.SystemManufacturer;
-
         DeviceName = deviceInfo.FriendlyName + " - " + deviceInfo.SystemProductName;
         OSVersion = deviceInfo.OperatingSystem;
       }
@@ -58,29 +55,7 @@ namespace Mindscape.Raygun4Net.Messages
 
     public double WindowBoundsHeight { get; private set; }
 
-    public string ResolutionScale { get; private set; }
-
     public string CurrentOrientation { get; private set; }
-
-    public string Cpu { get; private set; }
-
-    public string PackageVersion { get; private set; }
-
-    public string Architecture { get; private set; }
-
-    public long IsolatedStorageAvailableFreeSpace { get; private set; }
-
-    public long ApplicationCurrentMemoryUsage { get; private set; }
-
-    public long ApplicationMemoryUsageLimit { get; private set; }
-
-    public long ApplicationPeakMemoryUsage { get; private set; }
-
-    public long DeviceTotalMemory { get; private set; }
-
-    public string DeviceFirmwareVersion { get; private set; }
-
-    public string DeviceHardwareVersion { get; private set; }
 
     public string DeviceManufacturer { get; private set; }
 
