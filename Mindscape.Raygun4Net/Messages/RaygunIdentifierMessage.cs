@@ -35,11 +35,6 @@
     public string FirstName { get; set; }
 
     /// <summary>
-    /// User's last name.
-    /// </summary>
-    public string LastName { get; set; }
-
-    /// <summary>
     /// Device Identifier. Could be used to identify users across apps.
     /// </summary>
     public string UUID { get; set; }
