@@ -44,7 +44,6 @@ namespace Mindscape.Raygun4Net
 
         return _version;
       }
-
     }
 
     /// <summary>
@@ -157,24 +156,6 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private bool IsCalledFromUnhandledExceptionHandler()
-    {
-      // No StackTrace object
-
-      //StackTrace trace = new StackTrace();
-      //if (trace.FrameCount > 3)
-      //{
-      //  StackFrame frame = trace.GetFrame(2);
-      //  ParameterInfo[] parameters = frame.GetMethod().GetParameters();
-      //  if (parameters.Length == 2 && parameters[1].ParameterType == typeof(UnhandledExceptionEventArgs))
-      //  {
-      //    return true;
-      //  }
-      //}
-      //return false;
-      return false;
-    }
-
     /// <summary>
     /// Sends a message to the Raygun.io endpoint based on the given <see cref="UnhandledExceptionEventArgs"/>.
     /// </summary>
@@ -236,8 +217,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     public void Send(Exception exception)
     {
-      bool calledFromUnhandled = IsCalledFromUnhandledExceptionHandler();
-      Send(exception, null, null, calledFromUnhandled);
+      Send(exception, null, null, false);
     }
 
     /// <summary>
@@ -247,8 +227,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of tags to send with the message.</param>
     public void Send(Exception exception, IList<string> tags)
     {
-      bool calledFromUnhandled = IsCalledFromUnhandledExceptionHandler();
-      Send(exception, tags, null, calledFromUnhandled);
+      Send(exception, tags, null, false);
     }
 
     /// <summary>
@@ -258,8 +237,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public void Send(Exception exception, IDictionary userCustomData)
     {
-      bool calledFromUnhandled = IsCalledFromUnhandledExceptionHandler();
-      Send(exception, null, userCustomData, calledFromUnhandled);
+      Send(exception, null, userCustomData, false);
     }
 
     /// <summary>
@@ -270,8 +248,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      bool calledFromUnhandled = IsCalledFromUnhandledExceptionHandler();
-      Send(exception, tags, userCustomData, calledFromUnhandled);
+      Send(exception, tags, userCustomData, false);
     }
 
     private void Send(Exception exception, IList<string> tags, IDictionary userCustomData, bool calledFromUnhandled)
@@ -289,8 +266,7 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void Send(RaygunMessage raygunMessage)
     {
-      bool calledFromUnhandled = IsCalledFromUnhandledExceptionHandler();
-      Send(raygunMessage, calledFromUnhandled, false);
+      Send(raygunMessage, false, false);
     }
 
     private bool InternetAvailable()
@@ -370,7 +346,7 @@ namespace Mindscape.Raygun4Net
       _exit = exit;
 
       HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(RaygunSettings.Settings.ApiEndpoint);
-      httpWebRequest.ContentType = "application/x-raygun-message";
+      httpWebRequest.ContentType = "application/json";
       httpWebRequest.Method = "POST";
       httpWebRequest.Headers["X-Apikey"] = _apiKey;
       httpWebRequest.AllowReadStreamBuffering = false;
@@ -397,6 +373,7 @@ namespace Mindscape.Raygun4Net
       {
         await Task.Delay(TimeSpan.FromSeconds(3));
       }
+
       _running = false;
     }
 
