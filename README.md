@@ -25,6 +25,22 @@ Installation
 
 * If you have issues trying to install the package into a WinRT project, see the troubleshooting section below.
 
+Supported platforms/frameworks
+====================
+
+Projects built with the following frameworks are supported:
+
+* .NET 2.0, 3.5, 4.0+
+* ASP.NET
+* WinForms, WPF etc
+* Windows Store apps (universal) for Windows 8.1 and Windows Phone 8.1
+* Windows 8
+* Windows Phone 7.1 and 8
+* WinRT
+* Xamarin.iOS and Xamarin.Android
+
+Add the NuGet package to a project which uses one of the above frameworks and the correct assembly will be referenced.
+
 Where is my app API key?
 ====================
 
