@@ -32,7 +32,10 @@ namespace Mindscape.Raygun4Net.Messages
 
         var sensor = Windows.Devices.Sensors.SimpleOrientationSensor.GetDefault();
 
-        CurrentOrientation = sensor.GetCurrentOrientation().ToString();
+        if (sensor != null)
+        {
+          CurrentOrientation = sensor.GetCurrentOrientation().ToString();
+        }
       }
 
       var deviceInfo = new EasClientDeviceInformation();
