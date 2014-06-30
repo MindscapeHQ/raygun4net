@@ -25,7 +25,6 @@ namespace Mindscape.Raygun4Net
   public class RaygunClient
   {
     private readonly string _apiKey;
-    private Assembly _callingAssembly;
     private readonly Queue<string> _messageQueue = new Queue<string>();
     private bool _exit;
     private bool _running;
@@ -419,7 +418,7 @@ namespace Mindscape.Raygun4Net
             await raygunFolder.GetFileAsync("RaygunErrorMessage" + number + ".txt");
             exists = true;
           }
-          catch (FileNotFoundException e) {
+          catch (FileNotFoundException) {
             exists = false;
           }
           

@@ -6,19 +6,19 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{804EC2ED-1A6E-4A3E-96FA-D490D860A76F}</ProjectGuid>
+    <ProjectGuid>{3262773F-6144-4B41-9F19-54348D4D216A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Mindscape.Raygun4Net.WindowsPhone81</RootNamespace>
-    <AssemblyName>Mindscape.Raygun4Net.WindowsPhone81</AssemblyName>
+    <RootNamespace>Mindscape.Raygun4Net.WindowsStore.Tests</RootNamespace>
+    <AssemblyName>Mindscape.Raygun4Net.WindowsStore.Tests</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <TargetFrameworkProfile>Profile32</TargetFrameworkProfile>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile>Profile32</TargetFrameworkProfile>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -82,39 +82,32 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <TargetPlatform Include="Windows, Version=8.1" />
-    <TargetPlatform Include="WindowsPhoneApp, Version=8.1" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RaygunMessageBuilderTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
-      <Link>IRaygunMessageBuilder.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorStackTraceLineMessage.cs">
-      <Link>Messages\RaygunErrorStackTraceLineMessage.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunIdentifierMessage.cs">
-      <Link>Messages\RaygunIdentifierMessage.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunMessage.cs">
-      <Link>Messages\RaygunMessage.cs</Link>
-    </Compile>
-    <Compile Include="ExitException.cs" />
-    <Compile Include="Messages\RaygunClientMessage.cs" />
-    <Compile Include="Messages\RaygunEnvironmentMessage.cs" />
-    <Compile Include="Messages\RaygunErrorMessage.cs" />
-    <Compile Include="Messages\RaygunMessageDetails.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RaygunClient.cs" />
-    <Compile Include="RaygunMessageBuilder.cs" />
-    <Compile Include="RaygunSettings.cs" />
-    <Compile Include="SimpleJson.cs" />
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mindscape.Raygun4Net.WindowsStore\Mindscape.Raygun4Net.WindowsStore.csproj">
+      <Project>{804ec2ed-1a6e-4a3e-96fa-d490d860a76f}</Project>
+      <Name>Mindscape.Raygun4Net.WindowsStore</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <TargetPlatform Include="Windows, Version=8.1" />
+    <TargetPlatform Include="WindowsPhoneApp, Version=8.1" />
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

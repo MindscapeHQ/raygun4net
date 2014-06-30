@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.WindowsPhone81", "Mindscape.Raygun4Net.WindowsPhone81\Mindscape.Raygun4Net.WindowsPhone81.csproj", "{804EC2ED-1A6E-4A3E-96FA-D490D860A76F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.WindowsStore", "Mindscape.Raygun4Net.WindowsStore\Mindscape.Raygun4Net.WindowsStore.csproj", "{804EC2ED-1A6E-4A3E-96FA-D490D860A76F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.WindowsPhone81.Tests", "Mindscape.Raygun4Net.WindowsPhone81.Tests\Mindscape.Raygun4Net.WindowsPhone81.Tests.csproj", "{3262773F-6144-4B41-9F19-54348D4D216A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.WindowsStore.Tests", "Mindscape.Raygun4Net.WindowsStore.Tests\Mindscape.Raygun4Net.WindowsStore.Tests.csproj", "{3262773F-6144-4B41-9F19-54348D4D216A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{34D0FE65-26E7-4008-84E4-EF9ABDA8C76A}"
 	ProjectSection(SolutionItems) = preProject

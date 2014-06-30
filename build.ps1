@@ -5,7 +5,7 @@ properties {
     $solution_file4 =                "$root/Mindscape.Raygun4Net4.sln"
     $winrt_solution_file =           "$root/Mindscape.Raygun4Net.WinRT.sln"
     $windows_phone_solution_file =   "$root/Mindscape.Raygun4Net.WindowsPhone.sln"
-    $windows_phone_81_solution_file =   "$root/Mindscape.Raygun4Net.WindowsPhone81.sln"
+    $windows_store_solution_file =   "$root/Mindscape.Raygun4Net.WindowsStore.sln"
     $nugetspec =                     "$root/Mindscape.Raygun4Net.nuspec"
     $nugetpackage =                  "Mindscape.Raygun4Net.1.0.nupkg"
     $configuration =                 "Release"
@@ -19,7 +19,7 @@ properties {
     $msbuild12 =                     "${env:ProgramFiles}\msbuild\12.0\bin\msbuild.exe"
 }
 
-task default -depends Compile, CompileWinRT, CompileWindowsPhone, CompileWindowsPhone81
+task default -depends Compile, CompileWinRT, CompileWindowsPhone, CompileWindowsStore
 
 task Clean {
     remove-item -force -recurse $build_dir -ErrorAction SilentlyContinue | Out-Null
@@ -49,17 +49,17 @@ task CompileWindowsPhone -depends Init {
     exec { msbuild "$windows_phone_solution_file" /m /p:OutDir=$build_dir /p:Configuration=$Configuration }
 }
 
-task CompileWindowsPhone81 -depends Init {
-    & $msbuild12 $windows_phone_81_solution_file /m /p:OutDir=$build_dir /p:Configuration=$Configuration
-    move-item $build_dir/Mindscape.Raygun4Net.WindowsPhone81/Mindscape.Raygun4Net.WindowsPhone81.dll $build_dir
-    move-item $build_dir/Mindscape.Raygun4Net.WindowsPhone81/Mindscape.Raygun4Net.WindowsPhone81.pdb $build_dir
-    move-item $build_dir/Mindscape.Raygun4Net.WindowsPhone81.Tests/Mindscape.Raygun4Net.WindowsPhone81.Tests.dll $build_dir
-    move-item $build_dir/Mindscape.Raygun4Net.WindowsPhone81.Tests/Mindscape.Raygun4Net.WindowsPhone81.Tests.pdb $build_dir
-    remove-item -force -recurse $build_dir/Mindscape.Raygun4Net.WindowsPhone81 -ErrorAction SilentlyContinue | Out-Null
-    remove-item -force -recurse $build_dir/Mindscape.Raygun4Net.WindowsPhone81.Tests -ErrorAction SilentlyContinue | Out-Null
+task CompileWindowsStore -depends Init {
+    & $msbuild12 $windows_store_solution_file /m /p:OutDir=$build_dir /p:Configuration=$Configuration
+    move-item $build_dir/Mindscape.Raygun4Net.WindowsStore/Mindscape.Raygun4Net.WindowsStore.dll $build_dir
+    move-item $build_dir/Mindscape.Raygun4Net.WindowsStore/Mindscape.Raygun4Net.WindowsStore.pdb $build_dir
+    move-item $build_dir/Mindscape.Raygun4Net.WindowsStore.Tests/Mindscape.Raygun4Net.WindowsStore.Tests.dll $build_dir
+    move-item $build_dir/Mindscape.Raygun4Net.WindowsStore.Tests/Mindscape.Raygun4Net.WindowsStore.Tests.pdb $build_dir
+    remove-item -force -recurse $build_dir/Mindscape.Raygun4Net.WindowsStore -ErrorAction SilentlyContinue | Out-Null
+    remove-item -force -recurse $build_dir/Mindscape.Raygun4Net.WindowsStore.Tests -ErrorAction SilentlyContinue | Out-Null
 }
 
-task Test -depends Compile, CompileWinRT, CompileWindowsPhone, CompileWindowsPhone81 {
+task Test -depends Compile, CompileWinRT, CompileWindowsPhone, CompileWindowsStore {
     $test_assemblies = Get-ChildItem $build_dir -Include *Tests.dll -Name
 
     Push-Location -Path $build_dir
