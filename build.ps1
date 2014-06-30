@@ -16,6 +16,7 @@ properties {
     $tools_dir =                     "$root\tools"
     $nuget_dir =                     "$root\.nuget"
     $env:Path +=                     ";$nunit_dir;$tools_dir;$nuget_dir"
+    $msbuild12 =                     "${env:ProgramFiles}\msbuild\12.0\bin\msbuild.exe"
 }
 
 task default -depends Compile, CompileWinRT, CompileWindowsPhone, CompileWindowsPhone81
@@ -49,7 +50,13 @@ task CompileWindowsPhone -depends Init {
 }
 
 task CompileWindowsPhone81 -depends Init {
-    exec { msbuild "$windows_phone_81_solution_file" /m /p:OutDir=$build_dir /p:Configuration=$Configuration }
+    & $msbuild12 $windows_phone_81_solution_file /m /p:OutDir=$build_dir /p:Configuration=$Configuration
+    move-item $build_dir/Mindscape.Raygun4Net.WindowsPhone81/Mindscape.Raygun4Net.WindowsPhone81.dll $build_dir
+    move-item $build_dir/Mindscape.Raygun4Net.WindowsPhone81/Mindscape.Raygun4Net.WindowsPhone81.pdb $build_dir
+    move-item $build_dir/Mindscape.Raygun4Net.WindowsPhone81.Tests/Mindscape.Raygun4Net.WindowsPhone81.Tests.dll $build_dir
+    move-item $build_dir/Mindscape.Raygun4Net.WindowsPhone81.Tests/Mindscape.Raygun4Net.WindowsPhone81.Tests.pdb $build_dir
+    remove-item -force -recurse $build_dir/Mindscape.Raygun4Net.WindowsPhone81 -ErrorAction SilentlyContinue | Out-Null
+    remove-item -force -recurse $build_dir/Mindscape.Raygun4Net.WindowsPhone81.Tests -ErrorAction SilentlyContinue | Out-Null
 }
 
 task Test -depends Compile, CompileWinRT, CompileWindowsPhone, CompileWindowsPhone81 {
