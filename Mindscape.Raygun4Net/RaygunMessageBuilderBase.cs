@@ -1,23 +1,19 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Net;
 using System.Reflection;
 using System.Web;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
 {
-  public class RaygunMessageBuilder : RaygunMessageBuilderBase
+  public abstract class RaygunMessageBuilderBase : IRaygunMessageBuilder
   {
-    public static RaygunMessageBuilder New 
-    {
-      get
-      {
-        return new RaygunMessageBuilder();
-      }
-    }
+    protected readonly RaygunMessage _raygunMessage;
 
-    private readonly RaygunMessage _raygunMessage;
-
-    private RaygunMessageBuilder()
+    protected RaygunMessageBuilderBase()
     {
       _raygunMessage = new RaygunMessage();
     }
@@ -33,7 +29,7 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
-    public IRaygunMessageBuilder SetEnvironmentDetails()
+    public virtual IRaygunMessageBuilder SetEnvironmentDetails()
     {
       try
       {
@@ -52,7 +48,7 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
-    public IRaygunMessageBuilder SetExceptionDetails(Exception exception)
+    public virtual IRaygunMessageBuilder SetExceptionDetails(Exception exception)
     {
       if (exception != null)
       {
@@ -74,14 +70,9 @@ namespace Mindscape.Raygun4Net
       WebException webError = exception as WebException;
       if (webError != null)
       {
-        if (webError.Status == WebExceptionStatus.ProtocolError && webError.Response is HttpWebResponse)
+        if (webError.Status == WebExceptionStatus.ProtocolError)
         {
           HttpWebResponse response = (HttpWebResponse)webError.Response;
-          _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = (int)response.StatusCode, StatusDescription = response.StatusDescription };
-        }
-        else if (webError.Status == WebExceptionStatus.ProtocolError && webError.Response is FtpWebResponse)
-        {
-          FtpWebResponse response = (FtpWebResponse)webError.Response;
           _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = (int)response.StatusCode, StatusDescription = response.StatusDescription };
         }
         else
@@ -117,22 +108,24 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
-    public IRaygunMessageBuilder SetHttpDetails(HttpContext context, RaygunRequestMessageOptions options = null)
+    public IRaygunMessageBuilder SetVersion(string version)
     {
-      if (context != null)
+      if (!String.IsNullOrEmpty(version))
       {
-        HttpRequest request;
-        try
-        {
-          request = context.Request;
-        }
-        catch (HttpException)
-        {
-          return this;
-        }
-        _raygunMessage.Details.Request = new RaygunRequestMessage(request, options ?? new RaygunRequestMessageOptions());
+        _raygunMessage.Details.Version = version;
       }
-
+      else
+      {
+        var entryAssembly = Assembly.GetEntryAssembly();
+        if (entryAssembly != null)
+        {
+          _raygunMessage.Details.Version = entryAssembly.GetName().Version.ToString();
+        }
+        else
+        {
+          _raygunMessage.Details.Version = "Not supplied";
+        }
+      }
       return this;
     }
   }
