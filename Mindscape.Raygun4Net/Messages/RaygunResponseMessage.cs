@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Web;
-
-namespace Mindscape.Raygun4Net.Messages
+﻿namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunResponseMessage
   {

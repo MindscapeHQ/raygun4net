@@ -8,7 +8,7 @@ using System.Web;
 
 namespace Mindscape.Raygun4Net.Messages
 {
-  public class RaygunRequestMessage
+  public class RaygunRequestMessage : IRaygunRequestMessage
   {
     public RaygunRequestMessage(HttpRequest	request, RaygunRequestMessageOptions options)
     {
