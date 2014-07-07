@@ -155,7 +155,7 @@ namespace Mindscape.Raygun4Net
     {
       if (e.Exception is Exception)
       {
-        await _client.Send(e.Exception);
+        await _client.SendAsync(e.Exception);
       }
     }
 
@@ -214,9 +214,9 @@ namespace Mindscape.Raygun4Net
     /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>. The app should not be crashing when this is called.
     /// </summary>
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
-    public async Task Send(Exception exception)
+    public async Task SendAsync(Exception exception)
     {
-      await Send(exception, null, null);
+      await SendAsync(exception, null, null);
     }
 
     /// <summary>
@@ -224,9 +224,9 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     /// <param name="tags">A list of tags to send with the message.</param>
-    public async Task Send(Exception exception, IList<string> tags)
+    public async Task SendAsync(Exception exception, IList<string> tags)
     {
-      await Send(exception, tags, null);
+      await SendAsync(exception, tags, null);
     }
 
     /// <summary>
@@ -234,9 +234,9 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     /// <param name="userCustomData">Custom data to send with the message.</param>
-    public async Task Send(Exception exception, IDictionary userCustomData)
+    public async Task SendAsync(Exception exception, IDictionary userCustomData)
     {
-      await Send(exception, null, userCustomData);
+      await SendAsync(exception, null, userCustomData);
     }
 
     /// <summary>
@@ -245,7 +245,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     /// <param name="tags">A list of tags to send with the message.</param>
     /// <param name="userCustomData">Custom data to send with the message.</param>
-    public async Task Send(Exception exception, IList<string> tags, IDictionary userCustomData)
+    public async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       await SendOrSave(BuildMessage(exception, tags, userCustomData), true);
     }
@@ -255,9 +255,9 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public void Send(RaygunMessage raygunMessage)
+    public void SendAsync(RaygunMessage raygunMessage)
     {
-      Send(raygunMessage);
+      SendAsync(raygunMessage);
     }
 
     private bool InternetAvailable()
@@ -306,19 +306,19 @@ namespace Mindscape.Raygun4Net
         {
           var tempFolder = ApplicationData.Current.TemporaryFolder;
 
-          var raygunFolder = await tempFolder.CreateFolderAsync("RaygunIO", CreationCollisionOption.OpenIfExists);
+          var raygunFolder = await tempFolder.CreateFolderAsync("RaygunIO", CreationCollisionOption.OpenIfExists).AsTask().ConfigureAwait(false);
 
-          var files = await raygunFolder.GetFilesAsync();
+          var files = await raygunFolder.GetFilesAsync().AsTask().ConfigureAwait(false);
 
           foreach (var file in files)
           {
-            string text = await FileIO.ReadTextAsync(file);
-            await SendMessageAsync(text);
+            string text = await FileIO.ReadTextAsync(file).AsTask().ConfigureAwait(false);
+            await SendMessageAsync(text).ConfigureAwait(false);
 
-            await file.DeleteAsync();
+            await file.DeleteAsync().AsTask().ConfigureAwait(false);
           }
 
-          await raygunFolder.DeleteAsync();
+          await raygunFolder.DeleteAsync().AsTask().ConfigureAwait(false);
         }
         catch (Exception ex)
         {
