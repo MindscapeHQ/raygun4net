@@ -19,6 +19,9 @@ using Windows.Storage;
 using System.Threading.Tasks;
 using Windows.Networking.Connectivity;
 using Windows.Networking;
+using Windows.ApplicationModel.Background;
+using Windows.Web.Http;
+using Windows.Web.Http.Headers;
 
 namespace Mindscape.Raygun4Net
 {
@@ -202,71 +205,59 @@ namespace Mindscape.Raygun4Net
       }
       catch (Exception e)
       {
-        if (!(e is ExitException))
-        {
-          bool handled = args.Handled;
-          args.Handled = true;
-          Send(BuildMessage(e.InnerException, tags, userCustomData), false, !handled);
-        }
+        bool handled = args.Handled;
+        SendOrSave(BuildMessage(e.InnerException, tags, userCustomData), false);
       }
     }
 
     /// <summary>
-    /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>.
+    /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>. The app should not be crashing when this is called.
     /// </summary>
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     public void Send(Exception exception)
     {
-      Send(exception, null, null, false);
+      Send(exception, null, null);
     }
 
     /// <summary>
-    /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>.
+    /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>. The app should not be crashing when this is called.
     /// </summary>
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     /// <param name="tags">A list of tags to send with the message.</param>
     public void Send(Exception exception, IList<string> tags)
     {
-      Send(exception, tags, null, false);
+      Send(exception, tags, null);
     }
 
     /// <summary>
-    /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>.
+    /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>. The app should not be crashing when this is called..
     /// </summary>
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public void Send(Exception exception, IDictionary userCustomData)
     {
-      Send(exception, null, userCustomData, false);
+      Send(exception, null, userCustomData);
     }
 
     /// <summary>
-    /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>.
+    /// Sends a message immediately to the Raygun.io endpoint based on the given <see cref="Exception"/>. The app should not be crashing when this is called.
     /// </summary>
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     /// <param name="tags">A list of tags to send with the message.</param>
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      Send(exception, tags, userCustomData, false);
-    }
-
-    private void Send(Exception exception, IList<string> tags, IDictionary userCustomData, bool calledFromUnhandled)
-    {
-      if (!(exception is ExitException))
-      {
-        Send(BuildMessage(exception, tags, userCustomData), calledFromUnhandled, false);
-      }
+      SendOrSave(BuildMessage(exception, tags, userCustomData), true);
     }
 
     /// <summary>
-    /// Posts a RaygunMessage to the Raygun.io api endpoint.
+    /// Posts a RaygunMessage to the Raygun.io api endpoint. The app should not be crashing when this is called.
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void Send(RaygunMessage raygunMessage)
     {
-      Send(raygunMessage, false, false);
+      Send(raygunMessage);
     }
 
     private bool InternetAvailable()
@@ -280,7 +271,7 @@ namespace Mindscape.Raygun4Net
       return internetAvailable;
     }
 
-    private void Send(RaygunMessage raygunMessage, bool wait, bool exit)
+    private void SendOrSave(RaygunMessage raygunMessage, bool attemptSend)
     {
       if (ValidateApiKey() && !_exit)
       {
@@ -288,9 +279,9 @@ namespace Mindscape.Raygun4Net
         {
           string message = SimpleJson.SerializeObject(raygunMessage);
 
-          if (InternetAvailable())
+          if (InternetAvailable() && attemptSend)
           {
-            SendMessage(message, wait, exit);
+            SendMessageAsync(message);
           }
           else
           {
@@ -322,7 +313,7 @@ namespace Mindscape.Raygun4Net
           foreach (var file in files)
           {
             string text = await FileIO.ReadTextAsync(file);
-            SendMessage(text, false, false);
+            await SendMessageAsync(text);
 
             await file.DeleteAsync();
           }
@@ -340,38 +331,27 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private async void SendMessage(string message, bool wait, bool exit)
+    private async Task SendMessageAsync(string message)
     {
       _running = true;
-      _exit = exit;
 
-      HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(RaygunSettings.Settings.ApiEndpoint);
-      httpWebRequest.ContentType = "application/json";
-      httpWebRequest.Method = "POST";
-      httpWebRequest.Headers["X-Apikey"] = _apiKey;
-      httpWebRequest.AllowReadStreamBuffering = false;
+      var httpClient = new HttpClient();
+
+      var request = new HttpRequestMessage(HttpMethod.Post, RaygunSettings.Settings.ApiEndpoint);
+      request.Headers.Add("X-ApiKey", _apiKey);
+      request.Content = new HttpStringContent(message, Windows.Storage.Streams.UnicodeEncoding.Utf8, "application/json");
+
       _messageQueue.Enqueue(message);
       _running = true;
-      httpWebRequest.BeginGetRequestStream(RequestReady, httpWebRequest);
-
-      while (_running)
-      {
-        await Task.Delay(TimeSpan.FromMilliseconds(10));
-      }
 
       try
       {
         _running = true;
-        var result = httpWebRequest.BeginGetResponse(ResponseReady, httpWebRequest);
+        var response = await httpClient.SendRequestAsync(request, HttpCompletionOption.ResponseHeadersRead).AsTask().ConfigureAwait(false);
       }
       catch (Exception ex)
       {
         Debug.WriteLine("Error Logging Exception to Raygun.io " + ex.Message);
-      }
-
-      if (wait)
-      {
-        await Task.Delay(TimeSpan.FromSeconds(3));
       }
 
       _running = false;
@@ -383,7 +363,7 @@ namespace Mindscape.Raygun4Net
       {
         var tempFolder = ApplicationData.Current.TemporaryFolder;
 
-        var raygunFolder = await tempFolder.CreateFolderAsync("RaygunIO", CreationCollisionOption.OpenIfExists);
+        var raygunFolder = await tempFolder.CreateFolderAsync("RaygunIO", CreationCollisionOption.OpenIfExists).AsTask().ConfigureAwait(false);
 
         int number = 1;
         while (true)
@@ -392,7 +372,7 @@ namespace Mindscape.Raygun4Net
 
           try
           {
-            await raygunFolder.GetFileAsync("RaygunErrorMessage" + number + ".txt");
+            await raygunFolder.GetFileAsync("RaygunErrorMessage" + number + ".txt").AsTask().ConfigureAwait(false);
             exists = true;
           }
           catch (FileNotFoundException) {
@@ -406,9 +386,9 @@ namespace Mindscape.Raygun4Net
             StorageFile nextFile = null;
             try
             {
-              nextFile = await raygunFolder.GetFileAsync(nextFileName);
+              nextFile = await raygunFolder.GetFileAsync(nextFileName).AsTask().ConfigureAwait(false);
 
-              await nextFile.DeleteAsync();
+              await nextFile.DeleteAsync().AsTask().ConfigureAwait(false);
             }
             catch (FileNotFoundException) { }
 
@@ -422,14 +402,14 @@ namespace Mindscape.Raygun4Net
         {
           try
           {
-            StorageFile firstFile = await raygunFolder.GetFileAsync("RaygunErrorMessage1.txt");
-            await firstFile.DeleteAsync();
+            StorageFile firstFile = await raygunFolder.GetFileAsync("RaygunErrorMessage1.txt").AsTask().ConfigureAwait(false);
+            await firstFile.DeleteAsync().AsTask().ConfigureAwait(false);
           }
           catch (FileNotFoundException) { }
         }
 
-        var file = await raygunFolder.CreateFileAsync("RaygunErrorMessage" + number + ".txt");
-        await FileIO.WriteTextAsync(file, message);
+        var file = await raygunFolder.CreateFileAsync("RaygunErrorMessage" + number + ".txt").AsTask().ConfigureAwait(false);
+        await FileIO.WriteTextAsync(file, message).AsTask().ConfigureAwait(false);
 
         Debug.WriteLine("Saved message: " + "RaygunIO\\RaygunErrorMessage" + number + ".txt");
       }
