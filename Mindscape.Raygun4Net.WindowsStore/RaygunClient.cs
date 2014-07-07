@@ -151,11 +151,11 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private static void Current_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    private static async void Current_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
       if (e.Exception is Exception)
       {
-        _client.Send(e.Exception);
+        await _client.Send(e.Exception);
       }
     }
 
@@ -214,9 +214,9 @@ namespace Mindscape.Raygun4Net
     /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>. The app should not be crashing when this is called.
     /// </summary>
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
-    public void Send(Exception exception)
+    public async Task Send(Exception exception)
     {
-      Send(exception, null, null);
+      await Send(exception, null, null);
     }
 
     /// <summary>
@@ -224,9 +224,9 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     /// <param name="tags">A list of tags to send with the message.</param>
-    public void Send(Exception exception, IList<string> tags)
+    public async Task Send(Exception exception, IList<string> tags)
     {
-      Send(exception, tags, null);
+      await Send(exception, tags, null);
     }
 
     /// <summary>
@@ -234,9 +234,9 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     /// <param name="userCustomData">Custom data to send with the message.</param>
-    public void Send(Exception exception, IDictionary userCustomData)
+    public async Task Send(Exception exception, IDictionary userCustomData)
     {
-      Send(exception, null, userCustomData);
+      await Send(exception, null, userCustomData);
     }
 
     /// <summary>
@@ -245,9 +245,9 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     /// <param name="tags">A list of tags to send with the message.</param>
     /// <param name="userCustomData">Custom data to send with the message.</param>
-    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
+    public async Task Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      SendOrSave(BuildMessage(exception, tags, userCustomData), true);
+      await SendOrSave(BuildMessage(exception, tags, userCustomData), true);
     }
 
     /// <summary>
@@ -271,7 +271,7 @@ namespace Mindscape.Raygun4Net
       return internetAvailable;
     }
 
-    private void SendOrSave(RaygunMessage raygunMessage, bool attemptSend)
+    private async Task SendOrSave(RaygunMessage raygunMessage, bool attemptSend)
     {
       if (ValidateApiKey() && !_exit)
       {
@@ -281,7 +281,7 @@ namespace Mindscape.Raygun4Net
 
           if (InternetAvailable() && attemptSend)
           {
-            SendMessageAsync(message);
+            await SendMessageAsync(message);
           }
           else
           {
@@ -416,59 +416,6 @@ namespace Mindscape.Raygun4Net
       catch (Exception ex)
       {
         Debug.WriteLine(string.Format("Error saving message to isolated storage {0}", ex.Message));
-      }
-    }
-
-    private void RequestReady(IAsyncResult asyncResult)
-    {
-      if (_messageQueue.Count > 0)
-      {
-        string message = _messageQueue.Dequeue();
-        if (!String.IsNullOrWhiteSpace(message))
-        {
-          try
-          {
-            HttpWebRequest request = asyncResult.AsyncState as HttpWebRequest;
-
-            if (request != null)
-            {
-              using (Stream stream = request.EndGetRequestStream(asyncResult))
-              {
-                using (StreamWriter writer = new StreamWriter(stream))
-                {
-                  writer.Write(message);
-                  writer.Flush();
-                }
-              }
-            }
-            else
-            {
-              throw new InvalidOperationException("The HttpWebRequest was unexpectedly null.");
-            }
-          }
-          catch (Exception e)
-          {
-            Debug.WriteLine("Error Logging Exception to Raygun.io " + e.Message);
-            if (_saveOnFail)
-            {
-              SaveMessage(message);
-            }
-          }
-          finally
-          {
-            _running = false;
-          }
-        }
-      }
-      _running = false;
-    }
-
-    private void ResponseReady(IAsyncResult asyncResult)
-    {
-      _running = false;
-      if (_exit)
-      {
-        throw new ExitException();
       }
     }
 
