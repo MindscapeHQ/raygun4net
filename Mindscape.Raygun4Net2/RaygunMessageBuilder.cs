@@ -65,9 +65,14 @@ namespace Mindscape.Raygun4Net
       WebException webError = exception as WebException;
       if (webError != null)
       {
-        if (webError.Status == WebExceptionStatus.ProtocolError)
+        if (webError.Status == WebExceptionStatus.ProtocolError && webError.Response is HttpWebResponse)
         {
           HttpWebResponse response = (HttpWebResponse)webError.Response;
+          _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = (int)response.StatusCode, StatusDescription = response.StatusDescription };
+        }
+        else if (webError.Status == WebExceptionStatus.ProtocolError && webError.Response is FtpWebResponse)
+        {
+          FtpWebResponse response = (FtpWebResponse)webError.Response;
           _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = (int)response.StatusCode, StatusDescription = response.StatusDescription };
         }
         else
