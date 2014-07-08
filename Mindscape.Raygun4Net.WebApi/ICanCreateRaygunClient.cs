@@ -2,12 +2,12 @@
 
 namespace Mindscape.Raygun4Net.WebApi
 {
-  public interface ICanCreateRaygunClient
+  internal interface ICanCreateRaygunClient
   {
     RaygunWebApiClient GetClient();
   }
 
-  public class CanCreateRaygunClient : ICanCreateRaygunClient
+  internal class CanCreateRaygunClient : ICanCreateRaygunClient
   {
     private readonly Func<RaygunWebApiClient> _generateRaygunClient;
 
