@@ -10,7 +10,7 @@ namespace Mindscape.Raygun4Net.WebApi
   {
     private readonly ICanCreateRaygunClient _clientCreator;
 
-    public RaygunWebApiCustomControllerActionSelector(ICanCreateRaygunClient clientCreator)
+    internal RaygunWebApiCustomControllerActionSelector(ICanCreateRaygunClient clientCreator)
     {
       _clientCreator = clientCreator;
     }
@@ -33,7 +33,7 @@ namespace Mindscape.Raygun4Net.WebApi
   {
     private readonly ICanCreateRaygunClient _clientCreator;
 
-    public RaygunWebApiCustomControllerSelector(HttpConfiguration configuration, ICanCreateRaygunClient clientCreator) : base(configuration)
+    internal RaygunWebApiCustomControllerSelector(HttpConfiguration configuration, ICanCreateRaygunClient clientCreator) : base(configuration)
     {
       _clientCreator = clientCreator;
     }

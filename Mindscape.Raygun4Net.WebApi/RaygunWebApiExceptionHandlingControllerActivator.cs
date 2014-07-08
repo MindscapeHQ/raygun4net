@@ -10,7 +10,7 @@ namespace Mindscape.Raygun4Net.WebApi
     private readonly IHttpControllerActivator _concreteActivator;
     private readonly ICanCreateRaygunClient _clientCreator;
 
-    public RaygunWebApiExceptionHandlingControllerActivator(IHttpControllerActivator concreteActivator, ICanCreateRaygunClient clientCreator)
+    internal RaygunWebApiExceptionHandlingControllerActivator(IHttpControllerActivator concreteActivator, ICanCreateRaygunClient clientCreator)
     {
       _concreteActivator = concreteActivator;
       _clientCreator = clientCreator;
