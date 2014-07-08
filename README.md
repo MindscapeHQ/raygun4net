@@ -142,7 +142,6 @@ raygunClient.AddWrapperExceptions(typeof(TargetInvocationException));
 
 In this case, if a TargetInvocationException occurs, it will be removed and replaced with the actual InnerException that was the cause. Note that HttpUnhandledException and the above TargetInvocationException are already defined; you do not have to add these manually. This method is useful if you have your own custom wrapper exceptions, or a framework is throwing exceptions using its own wrapper.
 
-
 ### WPF
 
 Create an instance of RaygunClient by passing your app API key in the constructor. Attach an event handler to the DispatcherUnhandledException event of your application. In the event handler, use the RaygunClient.Send method to send the Exception.
@@ -184,6 +183,44 @@ private static void Application_ThreadException(object sender, ThreadExceptionEv
   _raygunClient.Send(e.Exception);
 }
 ```
+
+### Windows Store Apps (Windows 8.1 and Windows Phone 8.1)
+
+In the App.xaml.cs constructor (or any central entry point in your application), call the static RaygunClient.Attach method using your API key:
+
+```csharp
+public App()
+{
+  RaygunClient.Attach("YOUR_APP_API_KEY");
+}
+```
+
+By default, SendAsync method overloads are available for sending using `await` in async methods. When manually sending currently the compiler does not allow you to use `await` in a catch block. You can however call SendAsync in a blocking way:
+
+```csharp
+try
+{
+  throw new Exception("foo");
+}
+catch (Exception e)
+{
+  RaygunClient.Current.SendAsync(e);
+}
+```
+
+You can also provide your own implementation for App.UnhandledException if you wish to have custom logic like logging:
+
+```csharp
+async void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+{
+  await RaygunClient.Current.SendAsync(e);
+  e.Handled = true; // decide to handle or not (causes a crash)
+}
+```
+
+This handler can both use async/await, or not use it (blocking).
+
+When an UnhandledException is sent, and it is not already set to handled, it will be persisted to disk. When the application next starts, it will be delivered to Raygun.
 
 ### WinRT
 

@@ -143,6 +143,43 @@ private static void Application_ThreadException(object sender, ThreadExceptionEv
   _raygunClient.Send(e.Exception);
 }
 
+Windows Store Apps (Windows 8.1 and Windows Phone 8.1)
+====================
+
+In the App.xaml.cs constructor (or any central entry point in your application), call the static RaygunClient.Attach method using your API key:
+
+public App()
+{
+  RaygunClient.Attach("YOUR_APP_API_KEY");
+}
+
+
+By default, SendAsync method overloads are available for sending using `await` in async methods. When manually sending currently the compiler does not allow you to use `await` in a catch block. You can however call SendAsync in a blocking way:
+
+try
+{
+  throw new Exception("foo");
+}
+catch (Exception e)
+{
+  RaygunClient.Current.SendAsync(e);
+}
+
+
+You can also provide your own implementation for App.UnhandledException if you wish to have custom logic like logging:
+
+async void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+{
+  await RaygunClient.Current.SendAsync(e);
+  e.Handled = true; // decide to handle or not (causes a crash)
+}
+
+
+This handler can both use async/await, or not use it (blocking).
+
+When an UnhandledException is sent, and it is not already set to handled, it will be persisted to disk. When the application next starts, it will be delivered to Raygun.
+
+
 WinRT
 ====================
 In the App.xaml.cs constructor (or any main entry point to your application), call the static RaygunClient.Attach method using your API key.
