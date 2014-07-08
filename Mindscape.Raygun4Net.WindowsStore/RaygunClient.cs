@@ -163,9 +163,9 @@ namespace Mindscape.Raygun4Net
     /// Sends a message to the Raygun.io endpoint based on the given <see cref="UnhandledExceptionEventArgs"/>.
     /// </summary>
     /// <param name="args">The <see cref="UnhandledExceptionEventArgs"/> containing the exception information.</param>
-    public void Send(UnhandledExceptionEventArgs args)
+    public async Task SendAsync(UnhandledExceptionEventArgs args)
     {
-      Send(args, null, null);
+      await SendAsync(args, null, null);
     }
 
     /// <summary>
@@ -173,9 +173,9 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="args">The <see cref="UnhandledExceptionEventArgs"/> containing the exception information.</param>
     /// <param name="tags">A list of tags to send with the message.</param>
-    public void Send(UnhandledExceptionEventArgs args, IList<string> tags)
+    public async Task SendAsync(UnhandledExceptionEventArgs args, IList<string> tags)
     {
-      Send(args, tags, null);
+      await SendAsync(args, tags, null);
     }
 
     /// <summary>
@@ -183,9 +183,9 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="args">The <see cref="UnhandledExceptionEventArgs"/> containing the exception information.</param>
     /// <param name="userCustomData">Custom data to send with the message.</param>
-    public void Send(UnhandledExceptionEventArgs args, IDictionary userCustomData)
+    public async Task SendAsync(UnhandledExceptionEventArgs args, IDictionary userCustomData)
     {
-      Send(args, null, userCustomData);
+      await SendAsync(args, null, userCustomData);
     }
 
     /// <summary>
@@ -194,20 +194,24 @@ namespace Mindscape.Raygun4Net
     /// <param name="args">The <see cref="UnhandledExceptionEventArgs"/> containing the exception information.</param>
     /// <param name="tags">A list of tags to send with the message.</param>
     /// <param name="userCustomData">Custom data to send with the message.</param>
-    public void Send(UnhandledExceptionEventArgs args, IList<string> tags, IDictionary userCustomData)
+    public async Task SendAsync(UnhandledExceptionEventArgs args, IList<string> tags, IDictionary userCustomData)
     {
       // Throwing a dummy exception then picking out the InnerException to build/send is a workaround to deal with
       // the fact that the StackTrace on UnhandledExceptionEventArgs.Exception goes null when accessed/inspected.
       // This preserves the actual class, message & trace of the real exception that reached the exception handler
+      Exception originalException;
+
       try
       {
         throw new Exception("", args.Exception);
       }
       catch (Exception e)
       {
-        bool handled = args.Handled;
-        SendOrSave(BuildMessage(e.InnerException, tags, userCustomData), false);
+        originalException = e;
       }
+
+      bool handled = args.Handled;
+      await SendOrSave(BuildMessage(originalException.InnerException, tags, userCustomData), false).ConfigureAwait(false);
     }
 
     /// <summary>
