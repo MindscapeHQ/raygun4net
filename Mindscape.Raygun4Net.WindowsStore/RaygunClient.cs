@@ -92,6 +92,11 @@ namespace Mindscape.Raygun4Net
     public string User { get; set; }
 
     /// <summary>
+    /// Gets or sets richer data about the currently logged-in user
+    /// </summary>
+    public RaygunIdentifierMessage UserInfo { get; set; }
+
+    /// <summary>
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
     /// </summary>
     public string ApplicationVersion { get; set; }
@@ -449,7 +454,7 @@ namespace Mindscape.Raygun4Net
           .SetVersion(version)
           .SetTags(tags)
           .SetUserCustomData(userCustomData)
-          .SetUser(User)
+          .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ?  new RaygunIdentifierMessage(User) : null))
           .Build();
 
       return message;
