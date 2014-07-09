@@ -20,7 +20,7 @@ namespace Mindscape.Raygun4Net.Messages
       HostName = request.Url.Host;
       Url = request.Url.AbsolutePath;
       HttpMethod = request.RequestType;
-      IPAddress = request.UserHostAddress;
+      IPAddress = GetCorrectIpAddress(request);
       QueryString = ToDictionary(request.QueryString, null);
 
       Headers = ToDictionary(request.Headers, options.IsHeaderIgnored);
