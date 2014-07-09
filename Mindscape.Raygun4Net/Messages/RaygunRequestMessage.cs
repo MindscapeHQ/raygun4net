@@ -20,7 +20,7 @@ namespace Mindscape.Raygun4Net.Messages
       HostName = request.Url.Host;
       Url = request.Url.AbsolutePath;
       HttpMethod = request.RequestType;
-      IPAddress = GetCorrectIpAddress(request);
+      IPAddress = GetIpAddress(request);
       QueryString = ToDictionary(request.QueryString, null);
 
       Headers = ToDictionary(request.Headers, options.IsHeaderIgnored);
@@ -56,7 +56,7 @@ namespace Mindscape.Raygun4Net.Messages
       }
     }
 
-    public string GetCorrectIpAddress(HttpRequest request)
+    private string GetIpAddress(HttpRequest request)
     {
       var strIp = request.ServerVariables["HTTP_X_FORWARDED_FOR"];
 
@@ -94,12 +94,13 @@ namespace Mindscape.Raygun4Net.Messages
       return strIp;
     }
 
-    public static bool IsValidIpAddress(string strIp)
+    private static bool IsValidIpAddress(string strIp)
     {
-      if (strIp == null)
-        return false;
-
-      return IpAddressRegex.IsMatch(strIp.Trim());
+      if (strIp != null)
+      {
+        return IpAddressRegex.IsMatch(strIp.Trim());
+      }
+      return false;
     }
 
     private IList GetCookies(HttpCookieCollection cookieCollection, Func<string, bool> ignore)

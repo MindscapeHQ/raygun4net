@@ -4,12 +4,15 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Web;
 
 namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunRequestMessage
   {
+    private static readonly Regex IpAddressRegex = new Regex(@"\A(?:\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b)(:[1-9][0-9]{0,4})?\z", RegexOptions.Compiled);
+
     public RaygunRequestMessage(HttpRequest request, RaygunRequestMessageOptions options)
     {
       options = options ?? new RaygunRequestMessageOptions();
@@ -17,7 +20,7 @@ namespace Mindscape.Raygun4Net.Messages
       HostName = request.Url.Host;
       Url = request.Url.AbsolutePath;
       HttpMethod = request.RequestType;
-      IPAddress = request.UserHostAddress;
+      IPAddress = GetIpAddress(request);
       
       QueryString = ToDictionary(request.QueryString, null);
 
@@ -52,6 +55,53 @@ namespace Mindscape.Raygun4Net.Messages
       catch (HttpException)
       {
       }
+    }
+
+    private string GetIpAddress(HttpRequest request)
+    {
+      var strIp = request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+
+      if (strIp != null && strIp.Trim().Length > 0)
+      {
+        if (strIp.Contains(","))
+        {
+          // first one = client IP per http://en.wikipedia.org/wiki/X-Forwarded-For
+          strIp = strIp.Split(',')[0];
+        }
+      }
+
+      if (!IsValidIpAddress(strIp))
+      {
+        strIp = string.Empty;
+      }
+
+      // if that's empty, get their ip via server vars
+      if (strIp == null || strIp.Trim().Length == 0)
+      {
+        strIp = request.ServerVariables["REMOTE_ADDR"];
+      }
+
+      if (!IsValidIpAddress(strIp))
+      {
+        strIp = string.Empty;
+      }
+
+      // if that's still empty, get their ip via .net's built-in method
+      if (strIp == null || strIp.Trim().Length == 0)
+      {
+        strIp = request.UserHostAddress;
+      }
+
+      return strIp;
+    }
+
+    private static bool IsValidIpAddress(string strIp)
+    {
+      if (strIp != null)
+      {
+        return IpAddressRegex.IsMatch(strIp.Trim());
+      }
+      return false;
     }
 
     private delegate R Func<T, R>(T value);
