@@ -67,8 +67,21 @@ namespace Mindscape.Raygun4Net
       {
         if (webError.Status == WebExceptionStatus.ProtocolError && webError.Response is HttpWebResponse)
         {
-          HttpWebResponse response = (HttpWebResponse)webError.Response;
-          _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = (int)response.StatusCode, StatusDescription = response.StatusDescription };
+          
+          //a web exception does not necessarily have an HttpWebResponse 
+          
+          if (webError.Response is FtpWebResponse)
+          {
+              FtpWebResponse response = (FtpWebResponse)webError.Response;
+              _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = (int)response.StatusCode, StatusDescription = response.StatusDescription };
+          }
+          else
+          {
+             //this breaks if the response is an FtpWebResponse
+             HttpWebResponse response = (HttpWebResponse)webError.Response;
+             _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = (int)response.StatusCode, StatusDescription = response.StatusDescription };
+          }
+          
         }
         else if (webError.Status == WebExceptionStatus.ProtocolError && webError.Response is FtpWebResponse)
         {
