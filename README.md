@@ -228,15 +228,42 @@ static void Main (string[] args)
 
 At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages or changing options such as the User identity string.
 
-## Unique (affected) user tracking
+## Affected user tracking
 
-There is a property named *User* on RaygunClient which you can set to be the current user's ID or email address. This allows you to see the count of affected users for each error in the Raygun dashboard. If you provide an email address, and the user has an associated Gravatar, you will see their avatar in the error instance page.
+There is a property named *User* on RaygunClient which you can set to be the current user's ID. This allows you to see the count of affected users for each error in the Raygun dashboard. 
 
-```csharp
-raygunClient.User = "user@email.com";
-```
+If you want more detailed information about users (and the ability to use the new Affected User reporting feature when it is released), you can set the *UserInfo* property on the RaygunClient to a new RaygunIdentifierMessage object. [This class](https://github.com/MindscapeHQ/raygun4net/blob/master/Mindscape.Raygun4Net/Messages/RaygunIdentifierMessage.cs) has a number of properties on it to help identifier the user who experienced a crash.
 
 This feature is optional if you wish to disable it for privacy concerns.
+
+### Properties
+The only required field is Identifier.
+
+```Identifier``` is the unique identifier from your system for this user.
+
+```IsAnonymous``` is a flag indicating whether the user is logged in (or identifiable) or if they are anonymous. An anonymous user can still have a unique identifier.
+
+```Email``` The user's email address. If you use email addresses to identify your users, feel free to set the identifier to their email and leave this blank, as we will use the identifier as the email address if it looks like one, and no email address is not specified.
+
+```FullName``` The user's full name.
+
+```FirstName``` The user's first (or prefered) name.
+
+```UUID``` A device identifier. Could be used to identify users across devices, or machines that are breaking for many users.
+
+### Usage
+```csharp
+raygunClient.User = "user@email.com";
+// OR
+raygunClient.UserInfo = new RaygunIdentifierMessage("user@email.com")
+{
+  IsAnonymous = false,
+  FullName = "Robbie Raygun",
+  FirstName = "Robbie"
+};
+```
+
+
 
 ## Version numbering and tags
 
