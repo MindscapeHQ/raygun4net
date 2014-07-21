@@ -162,67 +162,6 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Sends a message to the Raygun.io endpoint based on the given <see cref="UnhandledExceptionEventArgs"/>.
-    /// </summary>
-    /// <param name="args">The <see cref="UnhandledExceptionEventArgs"/> containing the exception information.</param>
-    public async Task SendAsync(UnhandledExceptionEventArgs args)
-    {
-      await SendAsync(args.Exception, null, null);
-    }
-
-    /// <summary>
-    /// Sends a message to the Raygun.io endpoint based on the given <see cref="UnhandledExceptionEventArgs"/>.
-    /// </summary>
-    /// <param name="args">The <see cref="UnhandledExceptionEventArgs"/> containing the exception information.</param>
-    /// <param name="tags">A list of tags to send with the message.</param>
-    public async Task SendAsync(UnhandledExceptionEventArgs args, IList<string> tags)
-    {
-      await SendAsync(args.Exception, tags, null);
-    }
-
-    /// <summary>
-    /// Sends a message to the Raygun.io endpoint based on the given <see cref="UnhandledExceptionEventArgs"/>.
-    /// </summary>
-    /// <param name="args">The <see cref="UnhandledExceptionEventArgs"/> containing the exception information.</param>
-    /// <param name="userCustomData">Custom data to send with the message.</param>
-    public async Task SendAsync(UnhandledExceptionEventArgs args, IDictionary userCustomData)
-    {
-      await SendAsync(args.Exception, null, userCustomData);
-    }
-
-    private Exception _exception;
-
-    /// <summary>
-    /// Sends a message to the Raygun.io endpoint based on the given <see cref="UnhandledExceptionEventArgs"/>.
-    /// </summary>
-    /// <param name="args">The <see cref="UnhandledExceptionEventArgs"/> containing the exception information.</param>
-    /// <param name="tags">A list of tags to send with the message.</param>
-    /// <param name="userCustomData">Custom data to send with the message.</param>
-    public async Task SendAsync(UnhandledExceptionEventArgs args, IList<string> tags, IDictionary userCustomData)
-    {
-      // Throwing a dummy exception then picking out the InnerException to build/send is a workaround to deal with
-      // the fact that the StackTrace on UnhandledExceptionEventArgs.Exception goes null when accessed/inspected.
-      // This preserves the actual class, message & trace of the real exception that reached the exception handler
-      //if (!(args.Exception is ExitException))
-      {
-        //args.Handled = true;
-        Exception originalException;
-
-        try
-        {
-          throw new Exception("", args.Exception);
-        }
-        catch (Exception e)
-        {
-          originalException = e;
-        }
-        _exception = originalException.InnerException;
-        //bool handled = args.Handled;
-        await SendOrSave(BuildMessage(originalException.InnerException, tags, userCustomData), false).ConfigureAwait(false);
-      }
-    }
-
-    /// <summary>
     /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>. The app should not be crashing when this is called.
     /// </summary>
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
