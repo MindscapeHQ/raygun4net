@@ -158,10 +158,7 @@ namespace Mindscape.Raygun4Net
 
     private static async void Current_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-      if (e.Exception is Exception)
-      {
-        await _client.SendAsync(e.Exception);
-      }
+      await _client.SendAsync(e.Exception);
     }
 
     /// <summary>
@@ -170,7 +167,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="args">The <see cref="UnhandledExceptionEventArgs"/> containing the exception information.</param>
     public async Task SendAsync(UnhandledExceptionEventArgs args)
     {
-      await SendAsync(args, null, null);
+      await SendAsync(args.Exception, null, null);
     }
 
     /// <summary>
@@ -180,7 +177,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of tags to send with the message.</param>
     public async Task SendAsync(UnhandledExceptionEventArgs args, IList<string> tags)
     {
-      await SendAsync(args, tags, null);
+      await SendAsync(args.Exception, tags, null);
     }
 
     /// <summary>
@@ -190,8 +187,10 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public async Task SendAsync(UnhandledExceptionEventArgs args, IDictionary userCustomData)
     {
-      await SendAsync(args, null, userCustomData);
+      await SendAsync(args.Exception, null, userCustomData);
     }
+
+    private Exception _exception;
 
     /// <summary>
     /// Sends a message to the Raygun.io endpoint based on the given <see cref="UnhandledExceptionEventArgs"/>.
@@ -204,19 +203,23 @@ namespace Mindscape.Raygun4Net
       // Throwing a dummy exception then picking out the InnerException to build/send is a workaround to deal with
       // the fact that the StackTrace on UnhandledExceptionEventArgs.Exception goes null when accessed/inspected.
       // This preserves the actual class, message & trace of the real exception that reached the exception handler
-      Exception originalException;
-
-      try
+      //if (!(args.Exception is ExitException))
       {
-        throw new Exception("", args.Exception);
-      }
-      catch (Exception e)
-      {
-        originalException = e;
-      }
+        //args.Handled = true;
+        Exception originalException;
 
-      bool handled = args.Handled;
-      await SendOrSave(BuildMessage(originalException.InnerException, tags, userCustomData), false).ConfigureAwait(false);
+        try
+        {
+          throw new Exception("", args.Exception);
+        }
+        catch (Exception e)
+        {
+          originalException = e;
+        }
+        _exception = originalException.InnerException;
+        //bool handled = args.Handled;
+        await SendOrSave(BuildMessage(originalException.InnerException, tags, userCustomData), false).ConfigureAwait(false);
+      }
     }
 
     /// <summary>
@@ -288,7 +291,7 @@ namespace Mindscape.Raygun4Net
         {
           string message = SimpleJson.SerializeObject(raygunMessage);
 
-          if (InternetAvailable() && attemptSend)
+          if (InternetAvailable())
           {
             await SendMessageAsync(message);
           }
@@ -356,7 +359,7 @@ namespace Mindscape.Raygun4Net
       try
       {
         _running = true;
-        var response = await httpClient.SendRequestAsync(request, HttpCompletionOption.ResponseHeadersRead).AsTask().ConfigureAwait(false);
+        httpClient.SendRequestAsync(request, HttpCompletionOption.ResponseHeadersRead).AsTask().Wait(3000);// .ContinueWith(SendComplete).ConfigureAwait(false);
       }
       catch (Exception ex)
       {
@@ -366,6 +369,12 @@ namespace Mindscape.Raygun4Net
       _running = false;
     }
 
+    /*private void SendComplete(Task<HttpResponseMessage> task)
+    {
+      //throw new ExitException();
+      throw _exception;
+    }*/
+
     private async void SaveMessage(string message)
     {
       try
@@ -373,7 +382,7 @@ namespace Mindscape.Raygun4Net
         var tempFolder = ApplicationData.Current.TemporaryFolder;
 
         var raygunFolder = await tempFolder.CreateFolderAsync("RaygunIO", CreationCollisionOption.OpenIfExists).AsTask().ConfigureAwait(false);
-
+        
         int number = 1;
         while (true)
         {
