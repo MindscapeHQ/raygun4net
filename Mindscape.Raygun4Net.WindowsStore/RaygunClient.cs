@@ -152,13 +152,15 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private static async void Current_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    private static void Current_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-      await _client.SendAsync(e.Exception);
+      _client.Send(e.Exception);
     }
 
     /// <summary>
-    /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>. The app should not be crashing when this is called.
+    /// Asynchronously sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>.
+    /// It is best to call this method within a try/catch block.
+    /// If the application is crashing due to an unhandled exception, use the synchronous methods instead.
     /// </summary>
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     public async Task SendAsync(Exception exception)
@@ -167,7 +169,9 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>. The app should not be crashing when this is called.
+    /// Asynchronously sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>.
+    /// It is best to call this method within a try/catch block.
+    /// If the application is crashing due to an unhandled exception, use the synchronous methods instead.
     /// </summary>
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     /// <param name="tags">A list of tags to send with the message.</param>
@@ -177,7 +181,9 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>. The app should not be crashing when this is called..
+    /// Asynchronously sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>.
+    /// It is best to call this method within a try/catch block.
+    /// If the application is crashing due to an unhandled exception, use the synchronous methods instead.
     /// </summary>
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     /// <param name="userCustomData">Custom data to send with the message.</param>
@@ -187,24 +193,78 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Sends a message immediately to the Raygun.io endpoint based on the given <see cref="Exception"/>. The app should not be crashing when this is called.
+    /// Asynchronously sends a message to the Raygun.io endpoint based on the given <see cref="Exception"/>.
+    /// It is best to call this method within a try/catch block.
+    /// If the application is crashing due to an unhandled exception, use the synchronous methods instead.
     /// </summary>
     /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
     /// <param name="tags">A list of tags to send with the message.</param>
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      await SendOrSave(BuildMessage(exception, tags, userCustomData), true);
+      await SendAsync(BuildMessage(exception, tags, userCustomData));
     }
 
     /// <summary>
-    /// Posts a RaygunMessage to the Raygun.io api endpoint. The app should not be crashing when this is called.
+    /// Asynchronously sends a RaygunMessage to the Raygun.io api endpoint.
+    /// It is best to call this method within a try/catch block.
+    /// If the application is crashing due to an unhandled exception, use the synchronous methods instead.
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public void SendAsync(RaygunMessage raygunMessage)
+    public async Task SendAsync(RaygunMessage raygunMessage)
     {
-      SendAsync(raygunMessage);
+      await SendOrSaveAsync(raygunMessage);
+    }
+
+    /// <summary>
+    /// Sends a message immediately to the Raygun.io endpoint based on the given <see cref="Exception"/>.
+    /// </summary>
+    /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
+    public void Send(Exception exception)
+    {
+      Send(exception, null, null);
+    }
+
+    /// <summary>
+    /// Sends a message immediately to the Raygun.io endpoint based on the given <see cref="Exception"/>.
+    /// </summary>
+    /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
+    /// <param name="tags">A list of tags to send with the message.</param>
+    public void Send(Exception exception, IList<string> tags)
+    {
+      Send(exception, tags, null);
+    }
+
+    /// <summary>
+    /// Sends a message immediately to the Raygun.io endpoint based on the given <see cref="Exception"/>.
+    /// </summary>
+    /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
+    /// <param name="userCustomData">Custom data to send with the message.</param>
+    public void Send(Exception exception, IDictionary userCustomData)
+    {
+      Send(exception, null, userCustomData);
+    }
+
+    /// <summary>
+    /// Sends a message immediately to the Raygun.io endpoint based on the given <see cref="Exception"/>.
+    /// </summary>
+    /// <param name="exception">The <see cref="Exception"/> to send in the message.</param>
+    /// <param name="tags">A list of tags to send with the message.</param>
+    /// <param name="userCustomData">Custom data to send with the message.</param>
+    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
+    {
+      Send(BuildMessage(exception, tags, userCustomData));
+    }
+
+    /// <summary>
+    /// Sends a RaygunMessage immediately to the Raygun.io endpoint.
+    /// </summary>
+    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
+    /// set to a valid DateTime and as much of the Details property as is available.</param>
+    public void Send(RaygunMessage raygunMessage)
+    {
+      SendOrSaveAsync(raygunMessage).Wait(3000);
     }
 
     private bool InternetAvailable()
@@ -218,7 +278,7 @@ namespace Mindscape.Raygun4Net
       return internetAvailable;
     }
 
-    private async Task SendOrSave(RaygunMessage raygunMessage, bool attemptSend)
+    private async Task SendOrSaveAsync(RaygunMessage raygunMessage)
     {
       if (ValidateApiKey())
       {
@@ -232,7 +292,7 @@ namespace Mindscape.Raygun4Net
           }
           else
           {
-            SaveMessage(message);
+            await SaveMessage(message);
           }
         }
         catch (Exception ex)
@@ -241,6 +301,30 @@ namespace Mindscape.Raygun4Net
         }
       }
     }
+
+    /*private void SendOrSave(RaygunMessage raygunMessage)
+    {
+      if (ValidateApiKey())
+      {
+        try
+        {
+          string message = SimpleJson.SerializeObject(raygunMessage);
+
+          if (InternetAvailable())
+          {
+            SendMessageAsync(message).Wait(-1);
+          }
+          else
+          {
+            SaveMessage(message).Wait(-1);
+          }
+        }
+        catch (Exception ex)
+        {
+          Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+        }
+      }
+    }*/
 
     private bool _saveOnFail = true;
 
@@ -288,7 +372,7 @@ namespace Mindscape.Raygun4Net
 
       try
       {
-        httpClient.SendRequestAsync(request, HttpCompletionOption.ResponseHeadersRead).AsTask().Wait(3000);// .ContinueWith(SendComplete).ConfigureAwait(false);
+        await httpClient.SendRequestAsync(request, HttpCompletionOption.ResponseHeadersRead).AsTask().ConfigureAwait(false);
       }
       catch (Exception ex)
       {
@@ -296,7 +380,25 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private async void SaveMessage(string message)
+    /*private void SendMessage(string message)
+    {
+      var httpClient = new HttpClient();
+
+      var request = new HttpRequestMessage(HttpMethod.Post, RaygunSettings.Settings.ApiEndpoint);
+      request.Headers.Add("X-ApiKey", _apiKey);
+      request.Content = new HttpStringContent(message, Windows.Storage.Streams.UnicodeEncoding.Utf8, "application/json");
+
+      try
+      {
+        httpClient.SendRequestAsync(request, HttpCompletionOption.ResponseHeadersRead).AsTask().Wait(-1);
+      }
+      catch (Exception ex)
+      {
+        Debug.WriteLine("Error Logging Exception to Raygun.io " + ex.Message);
+      }
+    }*/
+
+    private async Task SaveMessage(string message)
     {
       try
       {
