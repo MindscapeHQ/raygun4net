@@ -21,6 +21,7 @@ using Windows.Networking;
 using Windows.ApplicationModel.Background;
 using Windows.Web.Http;
 using Windows.Web.Http.Headers;
+using Windows.Security.ExchangeActiveSyncProvisioning;
 
 namespace Mindscape.Raygun4Net
 {
@@ -449,14 +450,6 @@ namespace Mindscape.Raygun4Net
     {
       exception = StripWrapperExceptions(exception);
 
-      string deviceName = string.Empty;
-      var hostName = NetworkInformation.GetHostNames().FirstOrDefault(h => h.Type == HostNameType.DomainName);
-
-      if (hostName != null)
-      {
-        deviceName = hostName.CanonicalName;
-      }
-
       string version = PackageVersion;
       if (!String.IsNullOrWhiteSpace(ApplicationVersion))
       {
@@ -465,7 +458,7 @@ namespace Mindscape.Raygun4Net
 
       var message = RaygunMessageBuilder.New
           .SetEnvironmentDetails()
-          .SetMachineName(deviceName)
+          .SetMachineName(new EasClientDeviceInformation().FriendlyName)
           .SetExceptionDetails(exception)
           .SetClientDetails()
           .SetVersion(version)
