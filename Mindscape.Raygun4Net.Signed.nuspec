@@ -26,11 +26,9 @@
     <file src="build\Mindscape.Raygun4Net.Xamarin.iOS.dll" target="lib\MonoTouch4.0\Mindscape.Raygun4Net.Xamarin.iOS.dll" />
     <file src="build\Mindscape.Raygun4Net.Xamarin.iOS.dll" target="lib\MonoTouch\Mindscape.Raygun4Net.Xamarin.iOS.dll" />
     <!-- Windows Store universal apps (Windows 8.1 and Windows Phone 8.1) -->
-    <file src="build\Mindscape.Raygun4Net.WindowsStore.dll" target="lib\portable-net45+win81+wpa81+windows81\Mindscape.Raygun4Net.WindowsStore.dll" />
-    <file src="build\Mindscape.Raygun4Net.WindowsStore.pdb" target="lib\portable-net45+win81+wpa81+windows81\Mindscape.Raygun4Net.WindowsStore.pdb" />
+    <file src="build\signed\Mindscape.Raygun4Net.WindowsStore.dll" target="lib\portable-net45+win81+wpa81+windows81\Mindscape.Raygun4Net.WindowsStore.dll" />
     <!-- WinRT and Windows 8 -->
-    <file src="build\Mindscape.Raygun4Net.WinRT.dll" target="lib\portable-windows8\Mindscape.Raygun4Net.WinRT.dll" />
-    <file src="build\Mindscape.Raygun4Net.WinRT.pdb" target="lib\portable-windows8\Mindscape.Raygun4Net.WinRT.pdb" />
+    <file src="build\signed\Mindscape.Raygun4Net.WinRT.dll" target="lib\portable-windows8\Mindscape.Raygun4Net.WinRT.dll" />
     <!-- Windows Phone -->
     <file src="build\Mindscape.Raygun4Net.WindowsPhone.dll" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.dll" />
     <file src="build\Mindscape.Raygun4Net.WindowsPhone.pdb" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.pdb" />

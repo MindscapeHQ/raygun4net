@@ -79,21 +79,33 @@ task Zip -depends Package {
     new-item $signedfolder2 -itemType directory | Out-Null
     new-item $signedfolder4 -itemType directory | Out-Null
   
+    # .Net 3.5
     copy-item $build_dir/Mindscape.Raygun4Net.dll $versionfolder
     copy-item $build_dir/Mindscape.Raygun4Net.pdb $versionfolder
+	# Windows Phone
     copy-item $build_dir/Mindscape.Raygun4Net.WindowsPhone.dll $versionfolder
     copy-item $build_dir/Mindscape.Raygun4Net.WindowsPhone.pdb $versionfolder
+	# WinRT
     copy-item $build_dir/Mindscape.Raygun4Net.WinRT.dll $versionfolder
     copy-item $build_dir/Mindscape.Raygun4Net.WinRT.pdb $versionfolder
+	# Xamarin.Android
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.Android.dll $versionfolder
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.Android.pdb $versionfolder
+	# Xamarin.iOS
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.iOS.dll $versionfolder
+	# Windows Store
+	copy-item $build_dir/Mindscape.Raygun4Net.WindowsStore.dll $versionfolder
+    copy-item $build_dir/Mindscape.Raygun4Net.WindowsStore.pdb $versionfolder
+	# .Net 2.0
     copy-item $build_dir2/Mindscape.Raygun4Net.dll $versionfolder2
     copy-item $build_dir2/Mindscape.Raygun4Net.pdb $versionfolder2
+	# .Net 4.0
     copy-item $build_dir4/Mindscape.Raygun4Net.dll $versionfolder4
     copy-item $build_dir4/Mindscape.Raygun4Net.pdb $versionfolder4
+	# Signed
     copy-item $signed_build_dir/Mindscape.Raygun4Net.dll $signedfolder
     copy-item $signed_build_dir/Mindscape.Raygun4Net.WinRT.dll $signedfolder
+	copy-item $signed_build_dir/Mindscape.Raygun4Net.WindowsStore.dll $signedfolder
     copy-item $signed_build_dir2/Mindscape.Raygun4Net.dll $signedfolder2
     copy-item $signed_build_dir4/Mindscape.Raygun4Net.dll $signedfolder4
 	
