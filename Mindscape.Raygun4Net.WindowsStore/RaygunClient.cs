@@ -12,7 +12,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Text;
-using Mindscape.Raygun4Net.WindowsPhone;
 using System.Reflection;
 using System.Net.NetworkInformation;
 using Windows.Storage;
@@ -28,9 +27,6 @@ namespace Mindscape.Raygun4Net
   public class RaygunClient
   {
     private readonly string _apiKey;
-    private readonly Queue<string> _messageQueue = new Queue<string>();
-    private bool _exit;
-    private bool _running;
     private static List<Type> _wrapperExceptions;
     private string _version;
 
@@ -224,7 +220,7 @@ namespace Mindscape.Raygun4Net
 
     private async Task SendOrSave(RaygunMessage raygunMessage, bool attemptSend)
     {
-      if (ValidateApiKey() && !_exit)
+      if (ValidateApiKey())
       {
         try
         {
@@ -284,35 +280,21 @@ namespace Mindscape.Raygun4Net
 
     private async Task SendMessageAsync(string message)
     {
-      _running = true;
-
       var httpClient = new HttpClient();
 
       var request = new HttpRequestMessage(HttpMethod.Post, RaygunSettings.Settings.ApiEndpoint);
       request.Headers.Add("X-ApiKey", _apiKey);
       request.Content = new HttpStringContent(message, Windows.Storage.Streams.UnicodeEncoding.Utf8, "application/json");
 
-      _messageQueue.Enqueue(message);
-      _running = true;
-
       try
       {
-        _running = true;
         httpClient.SendRequestAsync(request, HttpCompletionOption.ResponseHeadersRead).AsTask().Wait(3000);// .ContinueWith(SendComplete).ConfigureAwait(false);
       }
       catch (Exception ex)
       {
         Debug.WriteLine("Error Logging Exception to Raygun.io " + ex.Message);
       }
-
-      _running = false;
     }
-
-    /*private void SendComplete(Task<HttpResponseMessage> task)
-    {
-      //throw new ExitException();
-      throw _exception;
-    }*/
 
     private async void SaveMessage(string message)
     {

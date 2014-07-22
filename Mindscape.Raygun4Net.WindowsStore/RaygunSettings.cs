@@ -4,7 +4,7 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunSettings
   {
-    private static readonly RaygunSettings settings = null; //ApplicationData.Current.LocalSettings.Values["RaygunSettings"] as RaygunSettings;
+    private static readonly RaygunSettings settings = null;
 
     private const string DefaultApiEndPoint = "https://api.raygun.io/entries";
 
@@ -12,7 +12,6 @@ namespace Mindscape.Raygun4Net
     {
       get
       {
-        // If no configuration setting is provided then return the default values
         return settings ?? new RaygunSettings { ApiKey = "", ApiEndpoint = new Uri(DefaultApiEndPoint) };
       }
     }
