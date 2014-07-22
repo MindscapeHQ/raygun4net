@@ -7,7 +7,8 @@ namespace Mindscape.Raygun4Net.Messages
     public RaygunClientMessage()
     {
       Name = "Raygun4Net.WindowsStore";
-      Version = "3.1.0.0";
+      System.Version v = GetType().GetTypeInfo().Assembly.GetName().Version;
+      Version = string.Format("{0}.{1}.{2}.{3}", v.Major, v.Minor, v.Build, v.Revision);
       ClientUrl = @"https://github.com/MindscapeHQ/raygun4net";
     }
 

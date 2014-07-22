@@ -30,21 +30,6 @@ namespace Mindscape.Raygun4Net
     private static List<Type> _wrapperExceptions;
     private string _version;
 
-    private string PackageVersion
-    {
-      get
-      {
-        if (_version == null)
-        {
-          var v = Windows.ApplicationModel.Package.Current.Id.Version;
-
-          _version = string.Format("{0}.{1}.{2}.{3}", v.Major.ToString(), v.Minor.ToString(), v.Build.ToString(), v.Revision.ToString());
-        }
-
-        return _version;
-      }
-    }
-
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
     /// </summary>
@@ -104,8 +89,8 @@ namespace Mindscape.Raygun4Net
     /// be used by Raygun for grouping and display. TargetInvocationException is added for you,
     /// but if you have other wrapper exceptions that you want stripped you can pass them in here.
     /// </summary>
-    /// <param name="wrapperExceptions">An enumerable list of exception types that you want removed and replaced with their inner exception.</param>
-    public void AddWrapperExceptions(IEnumerable<Type> wrapperExceptions)
+    /// <param name="wrapperExceptions">Exception types that you want removed and replaced with their inner exception.</param>
+    public void AddWrapperExceptions(params Type[] wrapperExceptions)
     {
       foreach (Type wrapper in wrapperExceptions)
       {
@@ -490,6 +475,21 @@ namespace Mindscape.Raygun4Net
           .Build();
 
       return message;
+    }
+
+    private string PackageVersion
+    {
+      get
+      {
+        if (_version == null)
+        {
+          var v = Windows.ApplicationModel.Package.Current.Id.Version;
+
+          _version = string.Format("{0}.{1}.{2}.{3}", v.Major, v.Minor, v.Build, v.Revision);
+        }
+
+        return _version;
+      }
     }
 
     private static Exception StripWrapperExceptions(Exception exception)
