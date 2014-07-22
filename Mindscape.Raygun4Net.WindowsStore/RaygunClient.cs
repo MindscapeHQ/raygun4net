@@ -200,7 +200,7 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public async Task SendAsync(RaygunMessage raygunMessage)
     {
-      await SendOrSaveAsync(raygunMessage);
+      await SendOrSave(raygunMessage);
     }
 
     /// <summary>
@@ -250,7 +250,7 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void Send(RaygunMessage raygunMessage)
     {
-      SendOrSaveAsync(raygunMessage).Wait(3000);
+      SendOrSave(raygunMessage).Wait(3000);
     }
 
     private bool InternetAvailable()
@@ -264,7 +264,7 @@ namespace Mindscape.Raygun4Net
       return internetAvailable;
     }
 
-    private async Task SendOrSaveAsync(RaygunMessage raygunMessage)
+    private async Task SendOrSave(RaygunMessage raygunMessage)
     {
       if (ValidateApiKey())
       {
@@ -274,7 +274,7 @@ namespace Mindscape.Raygun4Net
 
           if (InternetAvailable())
           {
-            await SendMessageAsync(message);
+            await SendMessage(message);
           }
           else
           {
@@ -287,30 +287,6 @@ namespace Mindscape.Raygun4Net
         }
       }
     }
-
-    /*private void SendOrSave(RaygunMessage raygunMessage)
-    {
-      if (ValidateApiKey())
-      {
-        try
-        {
-          string message = SimpleJson.SerializeObject(raygunMessage);
-
-          if (InternetAvailable())
-          {
-            SendMessageAsync(message).Wait(-1);
-          }
-          else
-          {
-            SaveMessage(message).Wait(-1);
-          }
-        }
-        catch (Exception ex)
-        {
-          Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
-        }
-      }
-    }*/
 
     private bool _saveOnFail = true;
 
@@ -330,8 +306,8 @@ namespace Mindscape.Raygun4Net
           foreach (var file in files)
           {
             string text = await FileIO.ReadTextAsync(file).AsTask().ConfigureAwait(false);
-            await SendMessageAsync(text).ConfigureAwait(false);
-
+            await SendMessage(text).ConfigureAwait(false);
+            
             await file.DeleteAsync().AsTask().ConfigureAwait(false);
           }
 
@@ -348,7 +324,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private async Task SendMessageAsync(string message)
+    private async Task SendMessage(string message)
     {
       var httpClient = new HttpClient();
 
@@ -363,26 +339,12 @@ namespace Mindscape.Raygun4Net
       catch (Exception ex)
       {
         Debug.WriteLine("Error Logging Exception to Raygun.io " + ex.Message);
+        if (_saveOnFail)
+        {
+          SaveMessage(message).Wait(3000);
+        }
       }
     }
-
-    /*private void SendMessage(string message)
-    {
-      var httpClient = new HttpClient();
-
-      var request = new HttpRequestMessage(HttpMethod.Post, RaygunSettings.Settings.ApiEndpoint);
-      request.Headers.Add("X-ApiKey", _apiKey);
-      request.Content = new HttpStringContent(message, Windows.Storage.Streams.UnicodeEncoding.Utf8, "application/json");
-
-      try
-      {
-        httpClient.SendRequestAsync(request, HttpCompletionOption.ResponseHeadersRead).AsTask().Wait(-1);
-      }
-      catch (Exception ex)
-      {
-        Debug.WriteLine("Error Logging Exception to Raygun.io " + ex.Message);
-      }
-    }*/
 
     private async Task SaveMessage(string message)
     {
