@@ -25,6 +25,22 @@ Installation
 
 * If you have issues trying to install the package into a WinRT project, see the troubleshooting section below.
 
+Supported platforms/frameworks
+====================
+
+Projects built with the following frameworks are supported:
+
+* .NET 2.0, 3.5, 4.0+
+* ASP.NET
+* WinForms, WPF etc
+* Windows Store apps (universal) for Windows 8.1 and Windows Phone 8.1
+* Windows 8
+* Windows Phone 7.1 and 8
+* WinRT
+* Xamarin.iOS and Xamarin.Android
+
+Add the NuGet package to a project which uses one of the above frameworks and the correct assembly will be referenced.
+
 Where is my app API key?
 ====================
 
@@ -126,7 +142,6 @@ raygunClient.AddWrapperExceptions(typeof(TargetInvocationException));
 
 In this case, if a TargetInvocationException occurs, it will be removed and replaced with the actual InnerException that was the cause. Note that HttpUnhandledException and the above TargetInvocationException are already defined; you do not have to add these manually. This method is useful if you have your own custom wrapper exceptions, or a framework is throwing exceptions using its own wrapper.
 
-
 ### WPF
 
 Create an instance of RaygunClient by passing your app API key in the constructor. Attach an event handler to the DispatcherUnhandledException event of your application. In the event handler, use the RaygunClient.Send method to send the Exception.
@@ -166,6 +181,32 @@ static void Main()
 private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
 {
   _raygunClient.Send(e.Exception);
+}
+```
+
+### Windows Store Apps (Windows 8.1 and Windows Phone 8.1)
+
+In the App.xaml.cs constructor (or any central entry point in your application), call the static RaygunClient.Attach method using your API key. This will catch and send all unhandled exception to Raygun.io for you.
+
+```csharp
+public App()
+{
+  RaygunClient.Attach("YOUR_APP_API_KEY");
+}
+```
+
+At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages (via the Send methods) or changing options such as the User identity string.
+
+You can manually send exceptions with the SendAsync method. When manually sending, currently the compiler does not allow you to use `await` in a catch block. You can however call SendAsync in a blocking way:
+
+```csharp
+try
+{
+  throw new Exception("foo");
+}
+catch (Exception e)
+{
+  RaygunClient.Current.SendAsync(e);
 }
 ```
 

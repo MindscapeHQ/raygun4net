@@ -143,6 +143,29 @@ private static void Application_ThreadException(object sender, ThreadExceptionEv
   _raygunClient.Send(e.Exception);
 }
 
+Windows Store Apps (Windows 8.1 and Windows Phone 8.1)
+====================
+
+In the App.xaml.cs constructor (or any central entry point in your application), call the static RaygunClient.Attach method using your API key. This will catch and send all unhandled exception to Raygun.io for you.
+
+public App()
+{
+  RaygunClient.Attach("YOUR_APP_API_KEY");
+}
+
+At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages (via the Send methods) or changing options such as the User identity string.
+
+You can manually send exceptions with the SendAsync method. When manually sending, currently the compiler does not allow you to use `await` in a catch block. You can however call SendAsync in a blocking way:
+
+try
+{
+  throw new Exception("foo");
+}
+catch (Exception e)
+{
+  RaygunClient.Current.SendAsync(e);
+}
+
 WinRT
 ====================
 In the App.xaml.cs constructor (or any main entry point to your application), call the static RaygunClient.Attach method using your API key.

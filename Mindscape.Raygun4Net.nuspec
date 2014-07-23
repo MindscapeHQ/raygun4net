@@ -2,12 +2,12 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata minClientVersion="2.5">
     <id>Mindscape.Raygun4Net</id>
-    <version>3.0.1</version>
+    <version>3.1.0</version>
     <title />
     <authors>Mindscape</authors>
     <owners />
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Raygun.io Provider for .NET Framework + WinRT, Windows Phone and Xamarin</description>
+    <description>Raygun.io Provider for .NET Framework + Windows Store apps, WinRT, Windows Phone and Xamarin</description>
     <iconUrl>https://app.raygun.io/Content/Images/nuget-icon.png</iconUrl>
     <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
     <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
@@ -28,9 +28,12 @@
     <!-- Xamarin.iOS -->
     <file src="build\Mindscape.Raygun4Net.Xamarin.iOS.dll" target="lib\MonoTouch4.0\Mindscape.Raygun4Net.Xamarin.iOS.dll" />
     <file src="build\Mindscape.Raygun4Net.Xamarin.iOS.dll" target="lib\MonoTouch\Mindscape.Raygun4Net.Xamarin.iOS.dll" />
-    <!-- WinRT -->
-    <file src="build\Mindscape.Raygun4Net.WinRT.dll" target="lib\windows8\Mindscape.Raygun4Net.WinRT.dll" />
-    <file src="build\Mindscape.Raygun4Net.WinRT.pdb" target="lib\windows8\Mindscape.Raygun4Net.WinRT.pdb" />
+    <!-- Windows Store universal apps (Windows 8.1 and Windows Phone 8.1) -->
+    <file src="build\Mindscape.Raygun4Net.WindowsStore.dll" target="lib\portable-net45+win81+wpa81+windows81\Mindscape.Raygun4Net.WindowsStore.dll" />
+    <file src="build\Mindscape.Raygun4Net.WindowsStore.pdb" target="lib\portable-net45+win81+wpa81+windows81\Mindscape.Raygun4Net.WindowsStore.pdb" />
+    <!-- WinRT and Windows 8 -->
+    <file src="build\Mindscape.Raygun4Net.WinRT.dll" target="lib\portable-windows8\Mindscape.Raygun4Net.WinRT.dll" />
+    <file src="build\Mindscape.Raygun4Net.WinRT.pdb" target="lib\portable-windows8\Mindscape.Raygun4Net.WinRT.pdb" />
     <!-- Windows Phone -->
     <file src="build\Mindscape.Raygun4Net.WindowsPhone.dll" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.dll" />
     <file src="build\Mindscape.Raygun4Net.WindowsPhone.pdb" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.pdb" />

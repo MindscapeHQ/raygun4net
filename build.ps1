@@ -47,7 +47,7 @@ task CompileWindowsPhone -depends Init {
     exec { msbuild "$windows_phone_solution_file" /m /p:OutDir=$build_dir /p:Configuration=$Configuration }
 }
 
-task Test -depends Compile, CompileWinRT, CompileWindowsPhone {
+task Test -depends Compile, CompileWinRT, CompileWindowsPhone, CompileWindowsStore {
     $test_assemblies = Get-ChildItem $build_dir -Include *Tests.dll -Name
 
     Push-Location -Path $build_dir
