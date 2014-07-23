@@ -186,7 +186,7 @@ private static void Application_ThreadException(object sender, ThreadExceptionEv
 
 ### Windows Store Apps (Windows 8.1 and Windows Phone 8.1)
 
-In the App.xaml.cs constructor (or any central entry point in your application), call the static RaygunClient.Attach method using your API key:
+In the App.xaml.cs constructor (or any central entry point in your application), call the static RaygunClient.Attach method using your API key. This will catch and send all unhandled exception to Raygun.io for you.
 
 ```csharp
 public App()
@@ -195,7 +195,9 @@ public App()
 }
 ```
 
-By default, SendAsync method overloads are available for sending using `await` in async methods. When manually sending currently the compiler does not allow you to use `await` in a catch block. You can however call SendAsync in a blocking way:
+At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages (via the Send methods) or changing options such as the User identity string.
+
+SendAsync method overloads are available for manually sending exceptions using `await` in async methods. When manually sending, currently the compiler does not allow you to use `await` in a catch block. You can however call SendAsync in a blocking way:
 
 ```csharp
 try
@@ -207,20 +209,6 @@ catch (Exception e)
   RaygunClient.Current.SendAsync(e);
 }
 ```
-
-You can also provide your own implementation for App.UnhandledException if you wish to have custom logic like logging:
-
-```csharp
-async void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-{
-  await RaygunClient.Current.SendAsync(e);
-  e.Handled = true; // decide to handle or not (causes a crash)
-}
-```
-
-This handler can both use async/await, or not use it (blocking).
-
-When an UnhandledException is sent, and it is not already set to handled, it will be persisted to disk. When the application next starts, it will be delivered to Raygun.
 
 ### WinRT
 
