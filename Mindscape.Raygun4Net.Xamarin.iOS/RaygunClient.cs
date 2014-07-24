@@ -182,6 +182,11 @@ namespace Mindscape.Raygun4Net
         message.Version = "Not supplied";
       }
       _events.Add(message);
+
+      if (eventType == RaygunEventType.SessionEnd || _events.Count >= 3)
+      {
+        SendEvents();
+      }
     }
 
     private string GetEventType(RaygunEventType eventType)
@@ -193,10 +198,68 @@ namespace Mindscape.Raygun4Net
         return "session_end";
       case RaygunEventType.SessionTombstoned:
         return "session_tombstoned";
-      case RaygunEventType.SessionResurected:
-        return "session_resurected";
+      case RaygunEventType.SessionResurrected:
+        return "session_resurrected";
       default:
         return "unknown";
+      }
+    }
+
+    private void SendEvents()
+    {
+      IList<RaygunEventMessage> events = _events;
+      _events = new List<RaygunEventMessage> ();
+      RaygunEventBatchMessage batchMessage = new RaygunEventBatchMessage();
+      batchMessage.EventData = events.ToArray ();
+
+      if (ValidateApiKey())
+      {
+        string message = null;
+        try
+        {
+          message = SimpleJson.SerializeObject(batchMessage);
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Debug.WriteLine(string.Format("Error serializing message: {0}", ex.Message));
+          return;
+        }
+
+        if (!String.IsNullOrWhiteSpace(message))
+        {
+          if (HasInternetConnection)
+          {
+            SendStoredMessages();
+            using (var client = new WebClient())
+            {
+              client.Headers.Add("X-ApiKey", _apiKey);
+              client.Encoding = System.Text.Encoding.UTF8;
+              try
+              {
+                //client.UploadString(RaygunSettings.Settings.ApiEndpoint.AbsolutePath + "/events", message);
+                string response = client.UploadString("http://192.168.13.13:3001/events", message);
+                System.Diagnostics.Debug.WriteLine(response);
+              }
+              catch (Exception ex)
+              {
+                System.Diagnostics.Debug.WriteLine(string.Format ("Error Logging Exception to Raygun.io {0}", ex.Message));
+                // SaveMessage(message); // TODO: save event messages
+                System.Diagnostics.Debug.WriteLine("Exception has been saved to the device to try again later.");
+              }
+            }
+          }
+          else
+          {
+            try
+            {
+              // SaveMessage(message); // TODO: save event message
+            }
+            catch (Exception ex)
+            {
+              System.Diagnostics.Debug.WriteLine(string.Format ("Error saving Exception to device {0}", ex.Message));
+            }
+          }
+        }
       }
     }
 

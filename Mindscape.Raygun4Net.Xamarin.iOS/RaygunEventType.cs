@@ -10,7 +10,7 @@ namespace Mindscape.Raygun4Net
 
     SessionTombstoned,
 
-    SessionResurected
+    SessionResurrected
   }
 }
 
