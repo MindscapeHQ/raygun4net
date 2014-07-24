@@ -155,6 +155,51 @@ namespace Mindscape.Raygun4Net
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
 
+    private string _sessionId;
+    private IList<RaygunEventMessage> _events = new List<RaygunEventMessage> ();
+
+    public void Log(RaygunEventType eventType)
+    {
+      if (eventType == RaygunEventType.SessionStart || _sessionId == null)
+      {
+        _sessionId = new Guid().ToString ();
+      }
+
+      RaygunEventMessage message = new RaygunEventMessage ();
+      message.SessionId = _sessionId;
+      message.User = UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null);
+      message.Type = GetEventType (eventType);
+      if (!String.IsNullOrWhiteSpace(ApplicationVersion))
+      {
+        message.Version = ApplicationVersion;
+      }
+      else if (!String.IsNullOrWhiteSpace(NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString ()))
+      {
+        message.Version = NSBundle.MainBundle.ObjectForInfoDictionary ("CFBundleVersion").ToString ();
+      }
+      else
+      {
+        message.Version = "Not supplied";
+      }
+      _events.Add(message);
+    }
+
+    private string GetEventType(RaygunEventType eventType)
+    {
+      switch (eventType) {
+      case RaygunEventType.SessionStart:
+        return "session_start";
+      case RaygunEventType.SessionEnd:
+        return "session_end";
+      case RaygunEventType.SessionTombstoned:
+        return "session_tombstoned";
+      case RaygunEventType.SessionResurected:
+        return "session_resurected";
+      default:
+        return "unknown";
+      }
+    }
+
     private static RaygunClient _client;
 
     /// <summary>
