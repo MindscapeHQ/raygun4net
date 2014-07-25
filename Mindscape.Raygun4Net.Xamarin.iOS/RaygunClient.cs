@@ -36,7 +36,7 @@ namespace Mindscape.Raygun4Net
       _wrapperExceptions.Add(typeof(TargetInvocationException));
       _wrapperExceptions.Add(typeof(AggregateException));
 
-      ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
+      //ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
 
     private bool ValidateApiKey()
@@ -183,9 +183,27 @@ namespace Mindscape.Raygun4Net
       {
         message.Version = "Not supplied";
       }
-      _events.Add(message);
 
-      if (eventType == RaygunEventType.SessionEnd || _events.Count >= 10)
+      string messageStr = null;
+      try
+      {
+        messageStr = SimpleJson.SerializeObject(message);
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Debug.WriteLine(string.Format("Error serializing message: {0}", ex.Message));
+        return;
+      }
+
+      int count = 0;
+      if (!String.IsNullOrWhiteSpace(messageStr))
+      {
+        count = SaveEvent (messageStr, message.Timestamp);
+      }
+
+      //_events.Add(message);
+
+      if (eventType == RaygunEventType.SessionEnd || count >= 3)
       {
         SendEvents();
       }
@@ -238,7 +256,7 @@ namespace Mindscape.Raygun4Net
 
     private void SendEvents()
     {
-      IList<RaygunEventMessage> events = _events;
+      /*IList<RaygunEventMessage> events = _events;
       _events = new List<RaygunEventMessage> ();
       RaygunEventBatchMessage batchMessage = new RaygunEventBatchMessage();
       batchMessage.EventData = events.ToArray ();
@@ -291,7 +309,56 @@ namespace Mindscape.Raygun4Net
             }
           }
         }
+      }*/
+
+      if (HasInternetConnection) {
+        try {
+          using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication ()) {
+            string payload = "{\"EventData\":[\"";
+            string[] fileNames = isolatedStorage.GetFileNames ("RaygunIO\\Events\\*.txt");
+            if (fileNames.Length > 0) {
+              foreach (string name in fileNames) {
+                IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile (name, FileMode.Open);
+                using (StreamReader reader = new StreamReader (isoFileStream)) {
+                  string text = reader.ReadToEnd ();
+                  payload += text + ",";
+                }
+              }
+              payload = payload.Substring (payload.Length - 1);
+              payload += "\"]}";
+              bool success = SendEvents(payload);
+              if(success)
+              {
+                foreach (string name in fileNames) {
+                  isolatedStorage.DeleteFile(name);
+                }
+              }
+            }
+          }
+        } catch (Exception ex) {
+          System.Diagnostics.Debug.WriteLine (string.Format ("Error sending stored messages to Raygun.io {0}", ex.Message));
+        }
       }
+    }
+
+    private bool SendEvents(string message)
+    {
+      using (var client = new WebClient())
+      {
+        client.Headers.Add("X-ApiKey", _apiKey);
+        client.Encoding = System.Text.Encoding.UTF8;
+
+        try
+        {
+          client.UploadString("http://192.168.13.13:3001/events", message);
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Debug.WriteLine(string.Format("Error Logging events to Raygun.io {0}", ex.Message));
+          return false;
+        }
+      }
+      return true;
     }
 
     private static RaygunClient _client;
@@ -516,6 +583,39 @@ namespace Mindscape.Raygun4Net
           System.Diagnostics.Debug.WriteLine(string.Format("Error sending stored messages to Raygun.io {0}", ex.Message));
         }
       }
+    }
+
+    private int SaveEvent(string message, DateTime timestamp)
+    {
+      try
+      {
+        using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
+        {
+          if (!isolatedStorage.DirectoryExists("RaygunIO\\Events"))
+          {
+            isolatedStorage.CreateDirectory("RaygunIO\\Events");
+          }
+          string time = timestamp.ToString();
+          time = time.Replace('/', '-');
+          string name = "RaygunIO\\Events\\RaygunEventMessage" + time + ".txt";
+          using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream(name, FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage))
+          {
+            using (StreamWriter writer = new StreamWriter(isoStream, Encoding.Unicode))
+            {
+              writer.Write(message);
+              writer.Flush();
+              writer.Close();
+            }
+          }
+          string[] fileNames = isolatedStorage.GetFileNames ("RaygunIO\\*.txt");
+          return fileNames.Length;
+        }
+      }
+      catch(Exception ex)
+      {
+        System.Diagnostics.Debug.WriteLine(string.Format("Error saving message to isolated storage {0}", ex.Message));
+      }
+      return 0;
     }
 
     private void SaveMessage(string message)
