@@ -16,6 +16,7 @@ using MonoTouch.Foundation;
 using System.IO.IsolatedStorage;
 using System.IO;
 using System.Text;
+using MonoTouch.Security;
 
 namespace Mindscape.Raygun4Net
 {
@@ -162,13 +163,14 @@ namespace Mindscape.Raygun4Net
     {
       if (eventType == RaygunEventType.SessionStart || _sessionId == null)
       {
-        _sessionId = new Guid().ToString ();
+        _sessionId = Guid.NewGuid().ToString ();
       }
 
       RaygunEventMessage message = new RaygunEventMessage ();
       message.SessionId = _sessionId;
       message.User = UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null);
       message.Type = GetEventType (eventType);
+      message.DeviceId = DeviceId;
       if (!String.IsNullOrWhiteSpace(ApplicationVersion))
       {
         message.Version = ApplicationVersion;
@@ -183,9 +185,38 @@ namespace Mindscape.Raygun4Net
       }
       _events.Add(message);
 
-      if (eventType == RaygunEventType.SessionEnd || _events.Count >= 3)
+      if (eventType == RaygunEventType.SessionEnd || _events.Count >= 10)
       {
         SendEvents();
+      }
+    }
+
+    private string DeviceId
+    {
+      get
+      {
+        SecRecord query = new SecRecord(SecKind.GenericPassword);
+        query.Service = NSBundle.MainBundle.BundleIdentifier;
+        query.Account = "RaygunDeviceID";
+
+        NSData deviceId = SecKeyChain.QueryAsData(query);
+        if (deviceId == null)
+        {
+          string id = Guid.NewGuid().ToString();
+          query.ValueData = NSData.FromString(id);
+          SecStatusCode code = SecKeyChain.Add(query);
+          if (code != SecStatusCode.Success && code != SecStatusCode.DuplicateItem)
+          {
+            System.Diagnostics.Debug.WriteLine(string.Format ("Could not save device ID. Security status code: {0}", code));
+            return null;
+          }
+
+          return id;
+        }
+        else
+        {
+          return deviceId.ToString();
+        }
       }
     }
 
