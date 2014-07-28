@@ -242,26 +242,6 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private bool SendEvents(string message)
-    {
-      using (var client = new WebClient())
-      {
-        client.Headers.Add("X-ApiKey", _apiKey);
-        client.Encoding = System.Text.Encoding.UTF8;
-
-        try
-        {
-          client.UploadString("", message);
-        }
-        catch (Exception ex)
-        {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error Logging events to Raygun.io {0}", ex.Message));
-          return false;
-        }
-      }
-      return true;
-    }
-
     private static RaygunClient _client;
 
     /// <summary>
@@ -422,6 +402,26 @@ namespace Mindscape.Raygun4Net
       return true;
     }
 
+    private bool SendEvents(string message)
+    {
+      using (var client = new WebClient())
+      {
+        client.Headers.Add("X-ApiKey", _apiKey);
+        client.Encoding = System.Text.Encoding.UTF8;
+
+        try
+        {
+          client.UploadString(RaygunSettings.Settings.EventsEndpoint, message);
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Debug.WriteLine(string.Format("Error Logging events to Raygun.io {0}", ex.Message));
+          return false;
+        }
+      }
+      return true;
+    }
+
     private bool HasInternetConnection
     {
       get
@@ -457,18 +457,18 @@ namespace Mindscape.Raygun4Net
               List<string> eventFileNames = new List<String>();
               string eventPayload = "{\"EventData\":[";
 
-              string[] fileNames = isolatedStorage.GetFileNames("RaygunIO\\*.txt");
+              string[] fileNames = isolatedStorage.GetFileNames("RaygunIO/*.txt");
               foreach (string name in fileNames)
               {
-                IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile(name, FileMode.Open);
+                IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile("RaygunIO/" + name, FileMode.Open);
                 using (StreamReader reader = new StreamReader (isoFileStream))
                 {
                   string text = reader.ReadToEnd ();
 
-                  if(name.StartsWith("RaygunIO\\RaygunEvent"))
+                  if(name.StartsWith("RaygunEvent"))
                   {
                     eventPayload += text + ",";
-                    eventFileNames.Add(name);
+                    eventFileNames.Add("RaygunIO/" + name);
                   }
                   else
                   {
@@ -479,7 +479,7 @@ namespace Mindscape.Raygun4Net
                       return;
                     }
                     System.Diagnostics.Debug.WriteLine("Sent " + name);
-                    isolatedStorage.DeleteFile(name);
+                    isolatedStorage.DeleteFile("RaygunIO/" + name);
                   }
                 }
               }
@@ -492,13 +492,14 @@ namespace Mindscape.Raygun4Net
                 // If the send fails, don't delete the message:
                 if(success)
                 {
+                  System.Diagnostics.Debug.WriteLine("Sent {0} event messages", eventFileNames.Count);
                   foreach (string name in eventFileNames) {
                     isolatedStorage.DeleteFile(name);
                   }
                 }
               }
 
-              if (isolatedStorage.GetFileNames("RaygunIO\\*.txt").Length == 0)
+              if (isolatedStorage.GetFileNames("RaygunIO/*.txt").Length == 0)
               {
                 System.Diagnostics.Debug.WriteLine("Successfully sent all pending messages");
                 isolatedStorage.DeleteDirectory("RaygunIO");
@@ -526,7 +527,7 @@ namespace Mindscape.Raygun4Net
 
           string time = timestamp.ToString();
           time = time.Replace('/', '-');
-          string name = "RaygunIO\\RaygunEventMessage" + time + ".txt";
+          string name = "RaygunIO/RaygunEventMessage" + time + ".txt";
           using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream(name, FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage))
           {
             using (StreamWriter writer = new StreamWriter(isoStream, Encoding.Unicode))
@@ -536,16 +537,8 @@ namespace Mindscape.Raygun4Net
               writer.Close();
             }
           }
-          string[] fileNames = isolatedStorage.GetFileNames ("RaygunIO\\*.txt");
-          int count = 0;
-          foreach(string fileName in fileNames)
-          {
-            if(fileName.StartsWith("RaygunIO\\RaygunEvent"))
-            {
-              count++;
-            }
-          }
-          return count;
+          string[] fileNames = isolatedStorage.GetFileNames ("RaygunIO/RaygunEvent*.txt");
+          return fileNames.Length;
         }
       }
       catch(Exception ex)

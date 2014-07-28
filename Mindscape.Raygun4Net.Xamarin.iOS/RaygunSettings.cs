@@ -16,5 +16,7 @@ namespace Mindscape.Raygun4Net
     }
 
     public Uri ApiEndpoint { get; set; }
+
+    public Uri EventsEndpoint{ get; set; }
   }
 }
