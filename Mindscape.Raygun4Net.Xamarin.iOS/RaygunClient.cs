@@ -36,7 +36,7 @@ namespace Mindscape.Raygun4Net
       _wrapperExceptions.Add(typeof(TargetInvocationException));
       _wrapperExceptions.Add(typeof(AggregateException));
 
-      //ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
+      ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
 
     private bool ValidateApiKey()
@@ -160,49 +160,40 @@ namespace Mindscape.Raygun4Net
 
     public void Log(RaygunEventType eventType)
     {
-      if (eventType == RaygunEventType.SessionStart || _sessionId == null)
-      {
-        _sessionId = Guid.NewGuid().ToString ();
-      }
+      if (ValidateApiKey ()) {
+        if (eventType == RaygunEventType.SessionStart || _sessionId == null) {
+          _sessionId = Guid.NewGuid ().ToString ();
+        }
 
-      RaygunEventMessage message = new RaygunEventMessage ();
-      message.SessionId = _sessionId;
-      message.User = UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null);
-      message.Type = GetEventType (eventType);
-      message.DeviceId = DeviceId;
-      if (!String.IsNullOrWhiteSpace(ApplicationVersion))
-      {
-        message.Version = ApplicationVersion;
-      }
-      else if (!String.IsNullOrWhiteSpace(NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString ()))
-      {
-        message.Version = NSBundle.MainBundle.ObjectForInfoDictionary ("CFBundleVersion").ToString ();
-      }
-      else
-      {
-        message.Version = "Not supplied";
-      }
+        RaygunEventMessage message = new RaygunEventMessage ();
+        message.SessionId = _sessionId;
+        message.User = UserInfo ?? (!String.IsNullOrEmpty (User) ? new RaygunIdentifierMessage (User) : null);
+        message.Type = GetEventType (eventType);
+        message.DeviceId = DeviceId;
+        if (!String.IsNullOrWhiteSpace (ApplicationVersion)) {
+          message.Version = ApplicationVersion;
+        } else if (!String.IsNullOrWhiteSpace (NSBundle.MainBundle.ObjectForInfoDictionary ("CFBundleVersion").ToString ())) {
+          message.Version = NSBundle.MainBundle.ObjectForInfoDictionary ("CFBundleVersion").ToString ();
+        } else {
+          message.Version = "Not supplied";
+        }
 
-      string messageStr = null;
-      try
-      {
-        messageStr = SimpleJson.SerializeObject(message);
-      }
-      catch (Exception ex)
-      {
-        System.Diagnostics.Debug.WriteLine(string.Format("Error serializing message: {0}", ex.Message));
-        return;
-      }
+        string messageStr = null;
+        try {
+          messageStr = SimpleJson.SerializeObject (message);
+        } catch (Exception ex) {
+          System.Diagnostics.Debug.WriteLine (string.Format ("Error serializing message: {0}", ex.Message));
+          return;
+        }
 
-      int count = 0;
-      if (!String.IsNullOrWhiteSpace(messageStr))
-      {
-        count = SaveEvent (messageStr, message.Timestamp);
-      }
+        int count = 0;
+        if (!String.IsNullOrWhiteSpace (messageStr)) {
+          count = SaveEvent (messageStr, message.Timestamp);
+        }
 
-      if (eventType == RaygunEventType.SessionEnd || count >= 3)
-      {
-        SendEvents();
+        if (eventType == RaygunEventType.SessionEnd || count >= 3) {
+          SendStoredMessages ();
+        }
       }
     }
 
@@ -455,7 +446,7 @@ namespace Mindscape.Raygun4Net
 
     private void SendStoredMessages()
     {
-      if (HasInternetConnection)
+      if (ValidateApiKey() && HasInternetConnection)
       {
         try
         {
@@ -463,28 +454,55 @@ namespace Mindscape.Raygun4Net
           {
             if (isolatedStorage.DirectoryExists("RaygunIO"))
             {
+              List<string> eventFileNames = new List<String>();
+              string eventPayload = "{\"EventData\":[";
+
               string[] fileNames = isolatedStorage.GetFileNames("RaygunIO\\*.txt");
               foreach (string name in fileNames)
               {
                 IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile(name, FileMode.Open);
-                using (StreamReader reader = new StreamReader(isoFileStream))
+                using (StreamReader reader = new StreamReader (isoFileStream))
                 {
-                  string text = reader.ReadToEnd();
-                  bool success = SendMessage(text);
-                  // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
-                  if (!success)
+                  string text = reader.ReadToEnd ();
+
+                  if(name.StartsWith("RaygunIO\\RaygunEvent"))
                   {
-                    return;
+                    eventPayload += text + ",";
+                    eventFileNames.Add(name);
                   }
-                  System.Diagnostics.Debug.WriteLine("Sent " + name);
+                  else
+                  {
+                    bool success = SendMessage(text);
+                    // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
+                    if (!success)
+                    {
+                      return;
+                    }
+                    System.Diagnostics.Debug.WriteLine("Sent " + name);
+                    isolatedStorage.DeleteFile(name);
+                  }
                 }
-                isolatedStorage.DeleteFile(name);
               }
+
+              if(eventFileNames.Count > 0)
+              {
+                eventPayload = eventPayload.Substring (0, eventPayload.Length - 1);
+                eventPayload += "]}";
+                bool success = SendEvents(eventPayload);
+                // If the send fails, don't delete the message:
+                if(success)
+                {
+                  foreach (string name in eventFileNames) {
+                    isolatedStorage.DeleteFile(name);
+                  }
+                }
+              }
+
               if (isolatedStorage.GetFileNames("RaygunIO\\*.txt").Length == 0)
               {
                 System.Diagnostics.Debug.WriteLine("Successfully sent all pending messages");
+                isolatedStorage.DeleteDirectory("RaygunIO");
               }
-              isolatedStorage.DeleteDirectory("RaygunIO");
             }
           }
         }
@@ -495,47 +513,17 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private void SendEvents()
-    {
-      if (HasInternetConnection) {
-        try {
-          using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication ()) {
-            string payload = "{\"EventData\":[";
-            string[] fileNames = isolatedStorage.GetFileNames ("RaygunIO\\*.txt");
-            if (fileNames.Length > 0) {
-              foreach (string name in fileNames) {
-                if(name.StartsWith("RaygunIO\\RaygunEvent"))
-                {
-                  IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile (name, FileMode.Open);
-                  using (StreamReader reader = new StreamReader (isoFileStream)) {
-                    string text = reader.ReadToEnd ();
-                    payload += text + ",";
-                  }
-                }
-              }
-              payload = payload.Substring (0, payload.Length - 1);
-              payload += "]}";
-              bool success = SendEvents(payload);
-              if(success)
-              {
-                foreach (string name in fileNames) {
-                  isolatedStorage.DeleteFile(name);
-                }
-              }
-            }
-          }
-        } catch (Exception ex) {
-          System.Diagnostics.Debug.WriteLine (string.Format ("Error sending stored messages to Raygun.io {0}", ex.Message));
-        }
-      }
-    }
-
     private int SaveEvent(string message, DateTime timestamp)
     {
       try
       {
         using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
         {
+          if (!isolatedStorage.DirectoryExists("RaygunIO"))
+          {
+            isolatedStorage.CreateDirectory("RaygunIO");
+          }
+
           string time = timestamp.ToString();
           time = time.Replace('/', '-');
           string name = "RaygunIO\\RaygunEventMessage" + time + ".txt";
