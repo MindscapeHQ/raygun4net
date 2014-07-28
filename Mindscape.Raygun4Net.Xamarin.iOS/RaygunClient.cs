@@ -157,7 +157,7 @@ namespace Mindscape.Raygun4Net
     }
 
     private string _sessionId;
-    private IList<RaygunEventMessage> _events = new List<RaygunEventMessage> ();
+    //private IList<RaygunEventMessage> _events = new List<RaygunEventMessage> ();
 
     public void Log(RaygunEventType eventType)
     {
@@ -286,7 +286,7 @@ namespace Mindscape.Raygun4Net
               try
               {
                 //client.UploadString(RaygunSettings.Settings.ApiEndpoint.AbsolutePath + "/events", message);
-                string response = client.UploadString("http://192.168.13.13:3001/events", message);
+                string response = client.UploadString("", message);
                 System.Diagnostics.Debug.WriteLine(response);
               }
               catch (Exception ex)
@@ -314,18 +314,21 @@ namespace Mindscape.Raygun4Net
       if (HasInternetConnection) {
         try {
           using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication ()) {
-            string payload = "{\"EventData\":[\"";
-            string[] fileNames = isolatedStorage.GetFileNames ("RaygunIO\\Events\\*.txt");
+            string payload = "{\"EventData\":[";
+            string[] fileNames = isolatedStorage.GetFileNames ("RaygunIO\\*.txt");
             if (fileNames.Length > 0) {
               foreach (string name in fileNames) {
+                if(name.StartsWith("RaygunIO\\RaygunEvent"))
+                {
                 IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile (name, FileMode.Open);
                 using (StreamReader reader = new StreamReader (isoFileStream)) {
                   string text = reader.ReadToEnd ();
                   payload += text + ",";
                 }
+                }
               }
-              payload = payload.Substring (payload.Length - 1);
-              payload += "\"]}";
+              payload = payload.Substring (0, payload.Length - 1);
+              payload += "]}";
               bool success = SendEvents(payload);
               if(success)
               {
@@ -350,7 +353,7 @@ namespace Mindscape.Raygun4Net
 
         try
         {
-          client.UploadString("http://192.168.13.13:3001/events", message);
+          client.UploadString("", message);
         }
         catch (Exception ex)
         {
@@ -591,13 +594,9 @@ namespace Mindscape.Raygun4Net
       {
         using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
         {
-          if (!isolatedStorage.DirectoryExists("RaygunIO\\Events"))
-          {
-            isolatedStorage.CreateDirectory("RaygunIO\\Events");
-          }
           string time = timestamp.ToString();
           time = time.Replace('/', '-');
-          string name = "RaygunIO\\Events\\RaygunEventMessage" + time + ".txt";
+          string name = "RaygunIO\\RaygunEventMessage" + time + ".txt";
           using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream(name, FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage))
           {
             using (StreamWriter writer = new StreamWriter(isoStream, Encoding.Unicode))
@@ -608,7 +607,15 @@ namespace Mindscape.Raygun4Net
             }
           }
           string[] fileNames = isolatedStorage.GetFileNames ("RaygunIO\\*.txt");
-          return fileNames.Length;
+          int count = 0;
+          foreach(string fileName in fileNames)
+          {
+            if(fileName.StartsWith("RaygunIO\\RaygunEvent"))
+            {
+              count++;
+            }
+          }
+          return count;
         }
       }
       catch(Exception ex)
