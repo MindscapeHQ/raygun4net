@@ -167,6 +167,13 @@ namespace Mindscape.Raygun4Net2.Tests
     }
 
     [Test]
+    public void DontStripNull()
+    {
+      RaygunMessage message = _client.ExposeBuildMessage(null);
+      Assert.IsNull(message.Details.Error);
+    }
+
+    [Test]
     public void StripMultipleWrapperExceptions()
     {
       HttpUnhandledException wrapper = new HttpUnhandledException("Something went wrong", _exception);

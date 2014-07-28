@@ -505,7 +505,7 @@ namespace Mindscape.Raygun4Net
 
     private static Exception StripWrapperExceptions(Exception exception)
     {
-      if (_wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
+      if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {
         return StripWrapperExceptions(exception.InnerException);
       }
