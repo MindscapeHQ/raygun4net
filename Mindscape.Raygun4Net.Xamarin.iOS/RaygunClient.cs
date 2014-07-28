@@ -525,6 +525,19 @@ namespace Mindscape.Raygun4Net
             isolatedStorage.CreateDirectory("RaygunIO");
           }
 
+          string[] fileNames = isolatedStorage.GetFileNames ("RaygunIO/RaygunEvent*.txt");
+          int min;
+          int max;
+          foreach(string fileName in fileNames)
+          {
+            string number = fileName.Substring("RaygunEventMessage".Length).Replace(".txt", "");
+            int num;
+            if(int.TryParse(number))
+            {
+
+            }
+          }
+
           string time = timestamp.ToString();
           time = time.Replace('/', '-');
           string name = "RaygunIO/RaygunEventMessage" + time + ".txt";
@@ -537,7 +550,7 @@ namespace Mindscape.Raygun4Net
               writer.Close();
             }
           }
-          string[] fileNames = isolatedStorage.GetFileNames ("RaygunIO/RaygunEvent*.txt");
+
           return fileNames.Length;
         }
       }
