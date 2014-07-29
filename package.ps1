@@ -5,14 +5,17 @@ properties {
     $solution_file =                 "$root/Mindscape.Raygun4Net.sln"
     $solution_file2 =                "$root/Mindscape.Raygun4Net2.sln"
     $solution_file4 =                "$root/Mindscape.Raygun4Net4.sln"
+    $solution_file45 =               "$root/Mindscape.Raygun4Net45.sln"
     $winrt_solution_file =           "$root/Mindscape.Raygun4Net.WinRT.sln"
     $configuration =                 "Sign"
     $build_dir =                     "$root\build\"
     $build_dir2 =                    "$root\build\Net2"
     $build_dir4 =                    "$root\build\Net4"
+    $build_dir45 =                   "$root\build\Net45"
     $signed_build_dir =              "$build_dir\signed"
     $signed_build_dir2 =             "$build_dir\signed\Net2"
     $signed_build_dir4 =             "$build_dir\signed\Net4"
+    $signed_build_dir45 =            "$build_dir\signed\Net45"
     $release_dir =                   "$root\release\"
     $nuget_dir =                     "$root\.nuget"
     $env:Path +=                     ";$nuget_dir"
@@ -34,6 +37,7 @@ task Compile -depends Init {
     exec { msbuild "$solution_file" /m /p:OutDir=$signed_build_dir /p:Configuration=$configuration }
     exec { msbuild "$solution_file2" /m /p:OutDir=$signed_build_dir2 /p:Configuration=$configuration }
     exec { msbuild "$solution_file4" /m /p:OutDir=$signed_build_dir4 /p:Configuration=$configuration }
+    exec { msbuild "$solution_file45" /m /p:OutDir=$signed_build_dir45 /p:Configuration=$configuration }
 }
 
 task CompileWinRT -depends Init {
@@ -69,45 +73,53 @@ task Zip -depends Package {
     $versionfolder = $release_dir + $version + "\" + $version
     $versionfolder2 = $release_dir + $version + "\" + $version + "\Net2"
     $versionfolder4 = $release_dir + $version + "\" + $version + "\Net4"
+    $versionfolder45 = $release_dir + $version + "\" + $version + "\Net45"
     $signedfolder = $versionfolder + "\signed"
     $signedfolder2 = $versionfolder + "\signed\Net2"
     $signedfolder4 = $versionfolder + "\signed\Net4"
+    $signedfolder45 = $versionfolder + "\signed\Net45"
     new-item $versionfolder -itemType directory | Out-Null
     new-item $versionfolder2 -itemType directory | Out-Null
     new-item $versionfolder4 -itemType directory | Out-Null
+    new-item $versionfolder45 -itemType directory | Out-Null
     new-item $signedfolder -itemType directory | Out-Null
     new-item $signedfolder2 -itemType directory | Out-Null
     new-item $signedfolder4 -itemType directory | Out-Null
+    new-item $signedfolder45 -itemType directory | Out-Null
   
     # .Net 3.5
     copy-item $build_dir/Mindscape.Raygun4Net.dll $versionfolder
     copy-item $build_dir/Mindscape.Raygun4Net.pdb $versionfolder
-	# Windows Phone
+    # Windows Phone
     copy-item $build_dir/Mindscape.Raygun4Net.WindowsPhone.dll $versionfolder
     copy-item $build_dir/Mindscape.Raygun4Net.WindowsPhone.pdb $versionfolder
-	# WinRT
+    # WinRT
     copy-item $build_dir/Mindscape.Raygun4Net.WinRT.dll $versionfolder
     copy-item $build_dir/Mindscape.Raygun4Net.WinRT.pdb $versionfolder
-	# Xamarin.Android
+    # Xamarin.Android
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.Android.dll $versionfolder
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.Android.pdb $versionfolder
-	# Xamarin.iOS
+    # Xamarin.iOS
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.iOS.dll $versionfolder
-	# Windows Store
-	copy-item $build_dir/Mindscape.Raygun4Net.WindowsStore.dll $versionfolder
+    # Windows Store
+    copy-item $build_dir/Mindscape.Raygun4Net.WindowsStore.dll $versionfolder
     copy-item $build_dir/Mindscape.Raygun4Net.WindowsStore.pdb $versionfolder
-	# .Net 2.0
+    # .Net 2.0
     copy-item $build_dir2/Mindscape.Raygun4Net.dll $versionfolder2
     copy-item $build_dir2/Mindscape.Raygun4Net.pdb $versionfolder2
-	# .Net 4.0
+    # .Net 4.0
     copy-item $build_dir4/Mindscape.Raygun4Net.dll $versionfolder4
     copy-item $build_dir4/Mindscape.Raygun4Net.pdb $versionfolder4
-	# Signed
+    # .Net 4.5
+    copy-item $build_dir45/Mindscape.Raygun4Net.dll $versionfolder45
+    copy-item $build_dir45/Mindscape.Raygun4Net.pdb $versionfolder45
+    # Signed
     copy-item $signed_build_dir/Mindscape.Raygun4Net.dll $signedfolder
     copy-item $signed_build_dir/Mindscape.Raygun4Net.WinRT.dll $signedfolder
-	copy-item $signed_build_dir/Mindscape.Raygun4Net.WindowsStore.dll $signedfolder
+    copy-item $signed_build_dir/Mindscape.Raygun4Net.WindowsStore.dll $signedfolder
     copy-item $signed_build_dir2/Mindscape.Raygun4Net.dll $signedfolder2
     copy-item $signed_build_dir4/Mindscape.Raygun4Net.dll $signedfolder4
+    copy-item $signed_build_dir45/Mindscape.Raygun4Net.dll $signedfolder45
 	
     $zipFullName = $release_dir + $version + ".zip"
     Get-ChildItem $outerfolder | Add-Zip $zipFullName

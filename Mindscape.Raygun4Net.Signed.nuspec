@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata minClientVersion="2.5">
     <id>Mindscape.Raygun4Net.Signed</id>
-    <version>3.1.0</version>
+    <version>3.2.0</version>
     <title />
     <authors>Mindscape</authors>
     <owners />
@@ -19,6 +19,8 @@
     <file src="build\signed\Mindscape.Raygun4Net.dll" target="lib\net35\Mindscape.Raygun4Net.dll" />
     <!-- .NET 4.0 -->
     <file src="build\signed\Net4\Mindscape.Raygun4Net.dll" target="lib\net40\Mindscape.Raygun4Net.dll" />
+    <!-- .NET 4.5 -->
+    <file src="build\signed\Net45\Mindscape.Raygun4Net.dll" target="lib\net45\Mindscape.Raygun4Net.dll" />
     <!-- Xamarin.Android -->
     <file src="build\Mindscape.Raygun4Net.Xamarin.Android.dll" target="lib\MonoAndroid2.2\Mindscape.Raygun4Net.Xamarin.Android.dll" />
     <file src="build\Mindscape.Raygun4Net.Xamarin.Android.pdb" target="lib\MonoAndroid2.2\Mindscape.Raygun4Net.Xamarin.Android.pdb" />
