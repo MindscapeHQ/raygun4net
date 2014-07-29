@@ -28,5 +28,10 @@ namespace Mindscape.Raygun4Net.WebApi
         return null;
       }
     }
+
+    internal IHttpControllerActivator ConcreteActivator
+    {
+      get { return _concreteActivator; }
+    }
   }
 }

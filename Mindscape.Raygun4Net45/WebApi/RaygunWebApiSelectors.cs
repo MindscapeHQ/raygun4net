@@ -33,6 +33,11 @@ namespace Mindscape.Raygun4Net.WebApi
     {
       return _concreteSelector.GetActionMapping(controllerDescriptor);
     }
+
+    internal IHttpActionSelector ConcreteSelector
+    {
+      get { return _concreteSelector; }
+    }
   }
 
   public class RaygunWebApiControllerSelector : IHttpControllerSelector
@@ -62,6 +67,11 @@ namespace Mindscape.Raygun4Net.WebApi
     public System.Collections.Generic.IDictionary<string, HttpControllerDescriptor> GetControllerMapping()
     {
       return _concreteSelector.GetControllerMapping();
+    }
+
+    internal IHttpControllerSelector ConcreteSelector
+    {
+      get { return _concreteSelector; }
     }
   }
 }
