@@ -16,7 +16,7 @@ namespace Mindscape.Raygun4Net.WebApi
       return this;
     }
 
-    protected override IRaygunMessageBuilder BuildMessage()
+    protected override IRaygunMessageBuilder BuildMessageCore()
     {
       return RaygunWebApiMessageBuilder.New
         .SetHttpDetails(_currentWebRequest.Value, _requestMessageOptions);

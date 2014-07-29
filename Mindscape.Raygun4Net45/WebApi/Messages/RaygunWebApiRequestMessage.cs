@@ -92,11 +92,16 @@ namespace Mindscape.Raygun4Net.WebApi.Messages
 
     public string IPAddress { get; set; }
 
+    public IDictionary QueryString { get; set; }
+
+    public IList Cookies { get; set; }
+
+    public IDictionary Data { get; set; }
+
     public IDictionary Form { get; set; }
 
     public string RawData { get; set; }
 
     public IDictionary Headers { get; set; }
-
   }
 }

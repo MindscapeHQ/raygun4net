@@ -61,7 +61,6 @@
     </Compile>
     <Compile Include="IRaygunApplication.cs" />
     <Compile Include="IRaygunMessageBuilder.cs" />
-    <Compile Include="Messages\IRaygunRequestMessage.cs" />
     <Compile Include="Messages\RaygunClientMessage.cs" />
     <Compile Include="Messages\RaygunEnvironmentMessage.cs" />
     <Compile Include="Messages\RaygunErrorStackTraceLineMessage.cs" />
@@ -73,10 +72,8 @@
     <Compile Include="Messages\RaygunMessageDetails.cs" />
     <Compile Include="Messages\RaygunRequestMessage.cs" />
     <Compile Include="RaygunClient.cs" />
-    <Compile Include="RaygunClientBase.cs" />
     <Compile Include="RaygunHttpModule.cs" />
     <Compile Include="RaygunMessageBuilder.cs" />
-    <Compile Include="RaygunMessageBuilderBase.cs" />
     <Compile Include="RaygunRequestMessageOptions.cs" />
     <Compile Include="RaygunSendingMessageEventArgs.cs" />
     <Compile Include="RaygunSettings.cs" />

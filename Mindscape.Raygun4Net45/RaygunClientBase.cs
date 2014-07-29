@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
-using System.Runtime.InteropServices;
-using Mindscape.Raygun4Net.Messages;
-
-using System.Web;
-using System.Threading;
 using System.Reflection;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
 {
@@ -30,7 +28,6 @@ namespace Mindscape.Raygun4Net
       _wrapperExceptions = new List<Type>();
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
-      _wrapperExceptions.Add(typeof(HttpUnhandledException));
 
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormFieldNames))
       {
@@ -270,13 +267,13 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    protected abstract IRaygunMessageBuilder BuildMessage();
+    protected abstract IRaygunMessageBuilder BuildMessageCore();
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       exception = StripWrapperExceptions(exception);
 
-      var message = BuildMessage()
+      var message = BuildMessageCore()
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)

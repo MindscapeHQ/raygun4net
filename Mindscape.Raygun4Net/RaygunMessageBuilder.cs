@@ -1,13 +1,17 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Net;
 using System.Reflection;
 using System.Web;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
 {
-  public class RaygunMessageBuilder : RaygunMessageBuilderBase
+  public class RaygunMessageBuilder : IRaygunMessageBuilder
   {
-    public static RaygunMessageBuilder New 
+    public static RaygunMessageBuilder New
     {
       get
       {
@@ -133,6 +137,27 @@ namespace Mindscape.Raygun4Net
         _raygunMessage.Details.Request = new RaygunRequestMessage(request, options ?? new RaygunRequestMessageOptions());
       }
 
+      return this;
+    }
+
+    public IRaygunMessageBuilder SetVersion(string version)
+    {
+      if (!String.IsNullOrEmpty(version))
+      {
+        _raygunMessage.Details.Version = version;
+      }
+      else
+      {
+        var entryAssembly = Assembly.GetEntryAssembly();
+        if (entryAssembly != null)
+        {
+          _raygunMessage.Details.Version = entryAssembly.GetName().Version.ToString();
+        }
+        else
+        {
+          _raygunMessage.Details.Version = "Not supplied";
+        }
+      }
       return this;
     }
   }

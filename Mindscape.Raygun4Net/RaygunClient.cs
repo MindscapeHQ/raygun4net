@@ -1,14 +1,58 @@
-﻿using System.Web;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Net;
+using System.Runtime.InteropServices;
+using Mindscape.Raygun4Net.Messages;
+
+using System.Web;
+using System.Threading;
+using System.Reflection;
 
 namespace Mindscape.Raygun4Net
 {
-  public class RaygunClient : RaygunClientBase
+  public class RaygunClient
   {
+    private readonly string _apiKey;
+    private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
+    private static List<Type> _wrapperExceptions;
+    internal const string SentKey = "AlreadySentByRaygun";
+
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
     /// </summary>
     /// <param name="apiKey">The API key.</param>
-    public RaygunClient(string apiKey) : base(apiKey) {}
+    public RaygunClient(string apiKey)
+    {
+      _apiKey = apiKey;
+      _wrapperExceptions = new List<Type>();
+
+      _wrapperExceptions.Add(typeof(TargetInvocationException));
+      _wrapperExceptions.Add(typeof(HttpUnhandledException));
+
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormFieldNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreFormFieldNames.Split(',');
+        IgnoreFormFieldNames(ignoredNames);
+      }
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreHeaderNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreHeaderNames.Split(',');
+        IgnoreHeaderNames(ignoredNames);
+      }
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreCookieNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreCookieNames.Split(',');
+        IgnoreCookieNames(ignoredNames);
+      }
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreServerVariableNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreServerVariableNames.Split(',');
+        IgnoreServerVariableNames(ignoredNames);
+      }
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -19,7 +63,93 @@ namespace Mindscape.Raygun4Net
     {
     }
 
-    protected override IRaygunMessageBuilder BuildMessage()
+    protected bool ValidateApiKey()
+    {
+      if (string.IsNullOrEmpty(_apiKey))
+      {
+        System.Diagnostics.Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
+        return false;
+      }
+      return true;
+    }
+
+    // Returns true if the message can be sent, false if the sending is canceled.
+    protected bool OnSendingMessage(RaygunMessage raygunMessage)
+    {
+      bool result = true;
+      EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
+      if (handler != null)
+      {
+        RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage);
+        handler(this, args);
+        result = !args.Cancel;
+      }
+      return result;
+    }
+
+    /// <summary>
+    /// Gets or sets the user identity string.
+    /// </summary>
+    public string User { get; set; }
+
+    /// <summary>
+    /// Gets or sets information about the user including the identity string.
+    /// </summary>
+    public RaygunIdentifierMessage UserInfo { get; set; }
+
+    /// <summary>
+    /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
+    /// and requires credentials.
+    /// </summary>
+    public ICredentials ProxyCredentials { get; set; }
+
+    /// <summary>
+    /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
+    /// </summary>
+    public string ApplicationVersion { get; set; }
+
+    /// <summary>
+    /// Raised just before a message is sent. This can be used to make final adjustments to the <see cref="RaygunMessage"/>, or to cancel the send.
+    /// </summary>
+    public event EventHandler<RaygunSendingMessageEventArgs> SendingMessage;
+
+    /// <summary>
+    /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
+    /// This can be used when a wrapper exception, e.g. TargetInvocationException or HttpUnhandledException,
+    /// contains the actual exception as the InnerException. The message and stack trace of the inner exception will then
+    /// be used by Raygun for grouping and display. The above two do not need to be added manually,
+    /// but if you have other wrapper exceptions that you want stripped you can pass them in here.
+    /// </summary>
+    /// <param name="wrapperExceptions">Exception types that you want removed and replaced with their inner exception.</param>
+    public void AddWrapperExceptions(params Type[] wrapperExceptions)
+    {
+      foreach (Type wrapper in wrapperExceptions)
+      {
+        if (!_wrapperExceptions.Contains(wrapper))
+        {
+          _wrapperExceptions.Add(wrapper);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Adds a list of keys to ignore when attaching the Form data of an HTTP POST request. This allows
+    /// you to remove sensitive data from the transmitted copy of the Form on the HttpRequest by specifying the keys you want removed.
+    /// This method is only effective in a web context.
+    /// </summary>
+    /// <param name="names">Keys to be stripped from the copy of the Form NameValueCollection when sending to Raygun.</param>
+    public void IgnoreFormFieldNames(params string[] names)
+    {
+      _requestMessageOptions.AddFormFieldNames(names);
+    }
+
+    /// <summary>
+    /// Adds a list of keys to ignore when attaching the headers of an HTTP POST request. This allows
+    /// you to remove sensitive data from the transmitted copy of the Headers on the HttpRequest by specifying the keys you want removed.
+    /// This method is only effective in a web context.
+    /// </summary>
+    /// <param name="names">Keys to be stripped from the copy of the Headers NameValueCollection when sending to Raygun.</param>
+    public void IgnoreHeaderNames(params string[] names)
     {
       _requestMessageOptions.AddHeaderNames(names);
     }
@@ -199,7 +329,7 @@ namespace Mindscape.Raygun4Net
               else
               {
                 client.UseDefaultCredentials = false;
-                client.Proxy.Credentials = ProxyCredentials; 
+                client.Proxy.Credentials = ProxyCredentials;
               }
             }
 
