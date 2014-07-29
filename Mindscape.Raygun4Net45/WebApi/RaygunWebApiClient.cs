@@ -25,10 +25,13 @@ namespace Mindscape.Raygun4Net.WebApi
       config.Filters.Add(new RaygunWebApiActionFilter(clientCreator));
 
       var concreteActivator = config.Services.GetHttpControllerActivator();
-      config.Services.Replace(typeof(IHttpControllerActivator), new RaygunWebApiExceptionHandlingControllerActivator(concreteActivator, clientCreator));
+      config.Services.Replace(typeof(IHttpControllerActivator), new RaygunWebApiControllerActivator(concreteActivator, clientCreator));
 
-      config.Services.Replace(typeof(IHttpControllerSelector), new RaygunWebApiCustomControllerSelector(config, clientCreator));
-      config.Services.Replace(typeof(IHttpActionSelector), new RaygunWebApiCustomControllerActionSelector(clientCreator));
+      var concreteControllerSelector = config.Services.GetHttpControllerSelector() ?? new DefaultHttpControllerSelector(config);
+      config.Services.Replace(typeof(IHttpControllerSelector), new RaygunWebApiControllerSelector(concreteControllerSelector, clientCreator));
+
+      var concreteActionSelector = config.Services.GetActionSelector() ?? new ApiControllerActionSelector();
+      config.Services.Replace(typeof(IHttpActionSelector), new RaygunWebApiActionSelector(concreteActionSelector, clientCreator));
     }
 
     public RaygunClientBase CurrentHttpRequest(HttpRequestMessage request)
