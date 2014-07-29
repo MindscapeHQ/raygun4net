@@ -16,7 +16,7 @@ namespace Mindscape.Raygun4Net.WebApi
 
     public override IRaygunMessageBuilder SetExceptionDetails(Exception exception)
     {
-      var error = exception as HttpException;
+      var error = exception as RaygunWebApiHttpException;
       if (error != null)
       {
         _raygunMessage.Details.Response = new RaygunResponseMessage

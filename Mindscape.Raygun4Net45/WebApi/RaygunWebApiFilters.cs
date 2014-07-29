@@ -41,19 +41,25 @@ namespace Mindscape.Raygun4Net.WebApi
 
       if (context != null && context.Response != null && (int)context.Response.StatusCode >= 400)
       {
-        _clientCreator.GetClient().Send(
-          new HttpException(
+        try
+        {
+          throw new RaygunWebApiHttpException(
             context.Response.StatusCode,
-            string.Format("HTTP {0} returned while handling URL {1}", (int)context.Response.StatusCode, context.Request.RequestUri)));
+            string.Format("HTTP {0} returned while handling URL {1}", (int)context.Response.StatusCode, context.Request.RequestUri));
+        }
+        catch (Exception e)
+        {
+          _clientCreator.GetClient().Send(e);
+        }
       }
     }
   }
 
-  public class HttpException : Exception
+  public class RaygunWebApiHttpException : Exception
   {
     public HttpStatusCode StatusCode { get; set; }
 
-    public HttpException(HttpStatusCode statusCode, string message)
+    public RaygunWebApiHttpException(HttpStatusCode statusCode, string message)
       : base(message)
     {
       StatusCode = statusCode;
