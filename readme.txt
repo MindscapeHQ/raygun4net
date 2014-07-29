@@ -24,6 +24,24 @@ Namespace
 ====================
 The main classes can be found in the Mindscape.Raygun4Net namespace.
 
+Supported platforms/frameworks
+====================
+
+Projects built with the following frameworks are supported:
+
+* .NET 2.0, 3.5, 4.0, 4.5
+* ASP.NET
+* MVC
+* Web Api
+* WinForms, WPF etc
+* Windows Store apps (universal) for Windows 8.1 and Windows Phone 8.1
+* Windows 8
+* Windows Phone 7.1 and 8
+* WinRT
+* Xamarin.iOS and Xamarin.Android
+
+The NuGet package will select the appropriate dll to use for your project.
+
 Usage
 ====================
 
@@ -100,6 +118,28 @@ If you have common outer exceptions that wrap a valuable inner exception which y
 raygunClient.AddWrapperExceptions(typeof(TargetInvocationException));
 
 In this case, if a TargetInvocationException occurs, it will be removed and replaced with the actual InnerException that was the cause. Note that HttpUnhandledException and the above TargetInvocationException are already defined; you do not have to add these manually. This method is useful if you have your own custom wrapper exceptions, or a framework is throwing exceptions using its own wrapper.
+
+MVC
+====================
+
+If you are installing manually, make sure you are using the Mindscape.Raygun4Net.dll that targets either .Net 4.0 or .Net 4.5. These can be located in the Net4 and Net45 folders if you downloaded the assemblies from GitHub.
+If you are installing via NuGet, the appropriate dll will be selected for you.
+
+Setting up Raygun4Net in an MVC project is exactly the same as with ASP.NET as described in the section above.
+
+Web Api
+====================
+
+If you are installing manually, make sure you are using the Mindscape.Raygun4Net.dll that targets .Net 4.5. This can be located in the Net45 folder if you downloaded the assemblies from GitHub.
+If you are installing via NuGet, the appropriate dll will be selected for you.
+
+Use RaygunSettings to provide your API key in the same way as with ASP.NET as described in the section above.
+
+Then, in the WebApiConfig.Register method of your project, simply call the static RaygunWebApiClient.Attach method:
+
+RaygunWebApiClient.Attach(config);
+
+This method takes an optional function that you can use to provide a custom instance of RaygunWebApiClient. This custom instance could be used to listen to the SendingMessage event, or set any of the various options.
 
 WPF
 ====================

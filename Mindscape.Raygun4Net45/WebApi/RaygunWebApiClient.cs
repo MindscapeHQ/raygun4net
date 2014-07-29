@@ -19,6 +19,11 @@ namespace Mindscape.Raygun4Net.WebApi
     public RaygunWebApiClient(string apiKey) : base(apiKey) { }
     public RaygunWebApiClient() { }
 
+    /// <summary>
+    /// Causes Raygun4Net to listen for exceptions.
+    /// </summary>
+    /// <param name="config">The HttpConfiguration to attach to.</param>
+    /// <param name="generateRaygunClient">An optional function to provide a custom RaygunWebApiClient instance to use for reporting exceptions.</param>
     public static void Attach(HttpConfiguration config, Func<RaygunWebApiClient> generateRaygunClient = null)
     {
       Detach(config);
@@ -43,6 +48,10 @@ namespace Mindscape.Raygun4Net.WebApi
       config.Services.Replace(typeof(IHttpActionSelector), new RaygunWebApiActionSelector(concreteActionSelector, clientCreator));
     }
 
+    /// <summary>
+    /// Causes Raygun4Net to stop listening for exceptions.
+    /// </summary>
+    /// <param name="config">The HttpConfiguration to detach from.</param>
     public static void Detach(HttpConfiguration config)
     {
       if (_exceptionFilter != null)
@@ -79,7 +88,7 @@ namespace Mindscape.Raygun4Net.WebApi
       }
     }
 
-    public RaygunClientBase CurrentHttpRequest(HttpRequestMessage request)
+    internal RaygunClientBase CurrentHttpRequest(HttpRequestMessage request)
     {
       _currentWebRequest.Value = request;
       return this;
