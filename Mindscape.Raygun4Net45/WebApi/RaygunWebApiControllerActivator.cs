@@ -25,7 +25,7 @@ namespace Mindscape.Raygun4Net.WebApi
       catch(Exception ex)
       {
         _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(request).Send(ex);
-        return null;
+        throw;
       }
     }
 
