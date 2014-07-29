@@ -17,7 +17,7 @@ namespace Mindscape.Raygun4Net.WebApi
 
     public static void Attach(HttpConfiguration config, Func<RaygunWebApiClient> generateRaygunClient = null)
     {
-      var clientCreator = new CanCreateRaygunClient(generateRaygunClient);
+      var clientCreator = new RaygunWebApiClientProvider(generateRaygunClient);
 
       config.Services.Add(typeof(IExceptionLogger), new RaygunWebApiExceptionLogger(clientCreator));
 

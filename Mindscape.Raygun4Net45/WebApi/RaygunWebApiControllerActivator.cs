@@ -8,9 +8,9 @@ namespace Mindscape.Raygun4Net.WebApi
   public class RaygunWebApiControllerActivator : IHttpControllerActivator
   {
     private readonly IHttpControllerActivator _concreteActivator;
-    private readonly ICanCreateRaygunClient _clientCreator;
+    private readonly IRaygunWebApiClientProvider _clientCreator;
 
-    internal RaygunWebApiControllerActivator(IHttpControllerActivator concreteActivator, ICanCreateRaygunClient clientCreator)
+    internal RaygunWebApiControllerActivator(IHttpControllerActivator concreteActivator, IRaygunWebApiClientProvider clientCreator)
     {
       _concreteActivator = concreteActivator;
       _clientCreator = clientCreator;
@@ -24,7 +24,7 @@ namespace Mindscape.Raygun4Net.WebApi
       }
       catch(Exception ex)
       {
-        _clientCreator.GetClient().CurrentHttpRequest(request).Send(ex);
+        _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(request).Send(ex);
         return null;
       }
     }

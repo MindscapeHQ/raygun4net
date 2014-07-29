@@ -8,29 +8,29 @@ namespace Mindscape.Raygun4Net.WebApi
 {
   public class RaygunWebApiExceptionFilter : ExceptionFilterAttribute
   {
-    private readonly ICanCreateRaygunClient _clientCreator;
+    private readonly IRaygunWebApiClientProvider _clientCreator;
 
-    internal RaygunWebApiExceptionFilter(ICanCreateRaygunClient clientCreator)
+    internal RaygunWebApiExceptionFilter(IRaygunWebApiClientProvider clientCreator)
     {
       _clientCreator = clientCreator;
     }
 
     public override void OnException(HttpActionExecutedContext context)
     {
-      _clientCreator.GetClient().CurrentHttpRequest(context.Request).Send(context.Exception);
+      _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(context.Request).Send(context.Exception);
     }
 
     public override Task OnExceptionAsync(HttpActionExecutedContext context, CancellationToken cancellationToken)
     {
-      return Task.Factory.StartNew(() => _clientCreator.GetClient().CurrentHttpRequest(context.Request).Send(context.Exception), cancellationToken);
+      return Task.Factory.StartNew(() => _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(context.Request).Send(context.Exception), cancellationToken);
     }
   }
 
   public class RaygunWebApiActionFilter : ActionFilterAttribute
   {
-    private readonly ICanCreateRaygunClient _clientCreator;
+    private readonly IRaygunWebApiClientProvider _clientCreator;
 
-    internal RaygunWebApiActionFilter(ICanCreateRaygunClient clientCreator)
+    internal RaygunWebApiActionFilter(IRaygunWebApiClientProvider clientCreator)
     {
       _clientCreator = clientCreator;
     }
@@ -49,7 +49,7 @@ namespace Mindscape.Raygun4Net.WebApi
         }
         catch (Exception e)
         {
-          _clientCreator.GetClient().Send(e);
+          _clientCreator.GenerateRaygunWebApiClient().Send(e);
         }
       }
     }

@@ -146,7 +146,7 @@
     <Compile Include="RaygunClientBase.cs" />
     <Compile Include="RaygunMessageBuilder.cs" />
     <Compile Include="RaygunMessageBuilderBase.cs" />
-    <Compile Include="WebApi\ICanCreateRaygunClient.cs" />
+    <Compile Include="WebApi\IRaygunWebApiClientProvider.cs" />
     <Compile Include="WebApi\Messages\RaygunWebApiRequestMessage.cs" />
     <Compile Include="WebApi\RaygunWebApiClient.cs" />
     <Compile Include="WebApi\RaygunWebApiSelectors.cs" />

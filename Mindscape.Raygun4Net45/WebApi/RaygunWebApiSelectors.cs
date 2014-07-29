@@ -8,9 +8,9 @@ namespace Mindscape.Raygun4Net.WebApi
   public class RaygunWebApiActionSelector : IHttpActionSelector
   {
     private readonly IHttpActionSelector _concreteSelector;
-    private readonly ICanCreateRaygunClient _clientCreator;
+    private readonly IRaygunWebApiClientProvider _clientCreator;
 
-    internal RaygunWebApiActionSelector(IHttpActionSelector concreteSelector, ICanCreateRaygunClient clientCreator)
+    internal RaygunWebApiActionSelector(IHttpActionSelector concreteSelector, IRaygunWebApiClientProvider clientCreator)
     {
       _concreteSelector = concreteSelector;
       _clientCreator = clientCreator;
@@ -24,7 +24,7 @@ namespace Mindscape.Raygun4Net.WebApi
       }
       catch (HttpResponseException ex)
       {
-        _clientCreator.GetClient().CurrentHttpRequest(controllerContext.Request).Send(ex);
+        _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(controllerContext.Request).Send(ex);
         throw;
       }
     }
@@ -38,9 +38,9 @@ namespace Mindscape.Raygun4Net.WebApi
   public class RaygunWebApiControllerSelector : IHttpControllerSelector
   {
     private readonly IHttpControllerSelector _concreteSelector;
-    private readonly ICanCreateRaygunClient _clientCreator;
+    private readonly IRaygunWebApiClientProvider _clientCreator;
 
-    internal RaygunWebApiControllerSelector(IHttpControllerSelector concreteSelector, ICanCreateRaygunClient clientCreator)
+    internal RaygunWebApiControllerSelector(IHttpControllerSelector concreteSelector, IRaygunWebApiClientProvider clientCreator)
     {
       _concreteSelector = concreteSelector;
       _clientCreator = clientCreator;
@@ -54,7 +54,7 @@ namespace Mindscape.Raygun4Net.WebApi
       }
       catch (HttpResponseException ex)
       {
-        _clientCreator.GetClient().CurrentHttpRequest(request).Send(ex);
+        _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(request).Send(ex);
         throw;
       }
     }

@@ -8,21 +8,21 @@ namespace Mindscape.Raygun4Net.WebApi
 {
   public class RaygunWebApiExceptionLogger : ExceptionLogger
   {
-    private readonly ICanCreateRaygunClient _clientCreator;
+    private readonly IRaygunWebApiClientProvider _clientCreator;
 
-    internal RaygunWebApiExceptionLogger(ICanCreateRaygunClient generateRaygunClient)
+    internal RaygunWebApiExceptionLogger(IRaygunWebApiClientProvider generateRaygunClient)
     {
       _clientCreator = generateRaygunClient;
     }
 
     public override void Log(ExceptionLoggerContext context)
     {
-      _clientCreator.GetClient().CurrentHttpRequest(context.Request).Send(context.Exception, new List<string> { "Exception Logger" });
+      _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(context.Request).Send(context.Exception, new List<string> { "Exception Logger" });
     }
 
     public override Task LogAsync(ExceptionLoggerContext context, CancellationToken cancellationToken)
     {
-      return Task.Factory.StartNew(() => _clientCreator.GetClient().CurrentHttpRequest(context.Request).Send(context.Exception, new List<string> { "Exception Logger" }), cancellationToken);
+      return Task.Factory.StartNew(() => _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(context.Request).Send(context.Exception, new List<string> { "Exception Logger" }), cancellationToken);
     }
   }
 }
