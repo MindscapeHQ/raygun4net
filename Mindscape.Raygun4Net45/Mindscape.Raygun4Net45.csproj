@@ -148,7 +148,6 @@
     <Compile Include="RaygunMessageBuilderBase.cs" />
     <Compile Include="WebApi\ICanCreateRaygunClient.cs" />
     <Compile Include="WebApi\Messages\RaygunWebApiRequestMessage.cs" />
-    <Compile Include="WebApi\RaygunWebApi.cs" />
     <Compile Include="WebApi\RaygunWebApiClient.cs" />
     <Compile Include="WebApi\RaygunWebApiCustomControllerActionSelector.cs" />
     <Compile Include="WebApi\RaygunWebApiExceptionHandlingControllerActivator.cs" />
