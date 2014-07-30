@@ -65,7 +65,7 @@ namespace Mindscape.Raygun4Net
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
-    /// This can be used when a wrapper exception, e.g. TargetInvocationException or HttpUnhandledException,
+    /// This can be used when a wrapper exception, e.g. TargetInvocationException or AggregateException,
     /// contains the actual exception as the InnerException. The message and stack trace of the inner exception will then
     /// be used by Raygun for grouping and display. The above two do not need to be added manually,
     /// but if you have other wrapper exceptions that you want stripped you can pass them in here.
@@ -79,6 +79,19 @@ namespace Mindscape.Raygun4Net
         {
           _wrapperExceptions.Add(wrapper);
         }
+      }
+    }
+
+    /// <summary>
+    /// Specifies types of wrapper exceptions that Raygun should send rather than stripping out and sending the inner exception.
+    /// This can be used to remove the default wrapper exceptions (TargetInvocationException and AggregateException).
+    /// </summary>
+    /// <param name="wrapperExceptions">Exception types that should no longer be stripped away.</param>
+    public void RemoveWrapperExceptions(params Type[] wrapperExceptions)
+    {
+      foreach (Type wrapper in wrapperExceptions)
+      {
+        _wrapperExceptions.Remove(wrapper);
       }
     }
 

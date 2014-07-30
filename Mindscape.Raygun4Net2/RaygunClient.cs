@@ -122,6 +122,19 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
+    /// Specifies types of wrapper exceptions that Raygun should send rather than stripping out and sending the inner exception.
+    /// This can be used to remove the default wrapper exceptions (TargetInvocationException and HttpUnhandledException).
+    /// </summary>
+    /// <param name="wrapperExceptions">Exception types that should no longer be stripped away.</param>
+    public void RemoveWrapperExceptions(params Type[] wrapperExceptions)
+    {
+      foreach (Type wrapper in wrapperExceptions)
+      {
+        _wrapperExceptions.Remove(wrapper);
+      }
+    }
+
+    /// <summary>
     /// Adds a list of keys to ignore when attaching the Form data of an HTTP POST request. This allows
     /// you to remove sensitive data from the transmitted copy of the Form on the HttpRequest by specifying the keys you want removed.
     /// This method is only effective in a web context.
