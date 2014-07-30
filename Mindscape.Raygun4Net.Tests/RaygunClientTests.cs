@@ -181,6 +181,17 @@ namespace Mindscape.Raygun4Net.Tests
       Assert.AreEqual("System.NullReferenceException", message.Details.Error.ClassName);
     }
 
+    [Test]
+    public void RemoveWrapperExceptions()
+    {
+      _client.RemoveWrapperExceptions(typeof(TargetInvocationException));
+
+      TargetInvocationException wrapper = new TargetInvocationException(_exception);
+
+      RaygunMessage message = _client.ExposeBuildMessage(wrapper);
+      Assert.AreEqual("System.Reflection.TargetInvocationException", message.Details.Error.ClassName);
+    }
+
     // Validation tests
 
     [Test]

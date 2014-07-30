@@ -82,6 +82,19 @@ namespace Mindscape.Raygun4Net
         }
       }
     }
+    
+    /// <summary>
+    /// Specifies types of wrapper exceptions that Raygun should send rather than stripping out and sending the inner exception.
+    /// This can be used to remove the default wrapper exception (TargetInvocationException).
+    /// </summary>
+    /// <param name="wrapperExceptions">Exception types that should no longer be stripped away.</param>
+    public void RemoveWrapperExceptions(params Type[] wrapperExceptions)
+    {
+      foreach (Type wrapper in wrapperExceptions)
+      {
+        _wrapperExceptions.Remove(wrapper);
+      }
+    }
 
     private static RaygunClient _client;
 
