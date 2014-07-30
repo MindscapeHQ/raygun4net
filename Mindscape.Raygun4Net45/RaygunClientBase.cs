@@ -1,36 +1,33 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
-using System.Runtime.InteropServices;
-using Mindscape.Raygun4Net.Messages;
-
-using System.Web;
-using System.Threading;
 using System.Reflection;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
 {
-  public class RaygunClient
+  public abstract class RaygunClientBase
   {
     private readonly string _apiKey;
-    private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
+    protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private static List<Type> _wrapperExceptions;
     internal const string SentKey = "AlreadySentByRaygun";
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RaygunClient" /> class.
+    /// Initializes a new instance of the <see cref="RaygunClientBase" /> class.
     /// </summary>
     /// <param name="apiKey">The API key.</param>
-    public RaygunClient(string apiKey)
+    protected RaygunClientBase(string apiKey)
     {
       _apiKey = apiKey;
       _wrapperExceptions = new List<Type>();
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
-      _wrapperExceptions.Add(typeof(HttpUnhandledException));
 
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormFieldNames))
       {
@@ -55,10 +52,10 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RaygunClient" /> class.
+    /// Initializes a new instance of the <see cref="RaygunClientBase" /> class.
     /// Uses the ApiKey specified in the config file.
     /// </summary>
-    public RaygunClient()
+    protected RaygunClientBase()
       : this(RaygunSettings.Settings.ApiKey)
     {
     }
@@ -270,12 +267,13 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    protected abstract IRaygunMessageBuilder BuildMessageCore();
+
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       exception = StripWrapperExceptions(exception);
 
-      var message = RaygunMessageBuilder.New
-        .SetHttpDetails(HttpContext.Current, _requestMessageOptions)
+      var message = BuildMessageCore()
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)
