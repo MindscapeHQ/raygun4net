@@ -188,7 +188,7 @@ namespace Mindscape.Raygun4Net
 
         int count = 0;
         if (!String.IsNullOrWhiteSpace (messageStr)) {
-          count = SaveEvent (messageStr, message.Timestamp);
+          count = SaveEvent (messageStr);
         }
 
         if (eventType == RaygunEventType.SessionEnd || count >= 5) {
@@ -357,7 +357,7 @@ namespace Mindscape.Raygun4Net
               System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
               try
               {
-                SaveMessage(SimpleJson.SerializeObject(raygunMessage));
+                SaveError(SimpleJson.SerializeObject(raygunMessage));
                 System.Diagnostics.Debug.WriteLine("Exception has been saved to the device to try again later.");
               }
               catch (Exception e)
@@ -372,7 +372,7 @@ namespace Mindscape.Raygun4Net
           try
           {
             var message = SimpleJson.SerializeObject(raygunMessage);
-            SaveMessage(message);
+            SaveError(message);
           }
           catch (Exception ex)
           {
@@ -490,12 +490,13 @@ namespace Mindscape.Raygun4Net
                 eventPayload += "]}";
                 bool success = SendEvents(eventPayload);
                 // If the send fails, don't delete the message:
-                if(success)
+                if(!success)
                 {
-                  System.Diagnostics.Debug.WriteLine("Sent {0} event messages", eventFileNames.Count);
-                  foreach (string name in eventFileNames) {
-                    isolatedStorage.DeleteFile(name);
-                  }
+                  return;
+                }
+                System.Diagnostics.Debug.WriteLine("Sent {0} event messages", eventFileNames.Count);
+                foreach (string name in eventFileNames) {
+                  isolatedStorage.DeleteFile(name);
                 }
               }
 
@@ -514,7 +515,17 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private int SaveEvent(string message, DateTime timestamp)
+    private int SaveEvent(string message)
+    {
+      return SaveMessage (message, "RaygunEventMessage");
+    }
+
+    private void SaveError(string message)
+    {
+      SaveMessage (message, "RaygunErrorMessage");
+    }
+
+    private int SaveMessage(string message, string type)
     {
       try
       {
@@ -526,13 +537,13 @@ namespace Mindscape.Raygun4Net
           }
 
           // Examine existing messages
-          string[] fileNames = isolatedStorage.GetFileNames ("RaygunIO/RaygunEvent*.txt");
+          string[] fileNames = isolatedStorage.GetFileNames ("RaygunIO/" + type + "*.txt");
           int count = fileNames.Length;
           int min = count == 0 ? 0 : int.MaxValue;
           int max = 0;
           foreach(string fileName in fileNames)
           {
-            string number = fileName.Substring("RaygunEventMessage".Length).Replace(".txt", "");
+            string number = fileName.Substring(type.Length).Replace(".txt", "");
             int num;
             if(int.TryParse(number, out num))
             {
@@ -542,7 +553,7 @@ namespace Mindscape.Raygun4Net
           }
 
           // Save new message to next consecutive slot
-          string name = "RaygunIO/RaygunEventMessage" + (max + 1) + ".txt";
+          string name = "RaygunIO/" + type + (max + 1) + ".txt";
           using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream(name, FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage))
           {
             using (StreamWriter writer = new StreamWriter(isoStream, Encoding.Unicode))
@@ -557,10 +568,10 @@ namespace Mindscape.Raygun4Net
           // If there are more than 10 messages, delete the oldest one
           if(count > 10 && min > 0)
           {
-            string nextFileName = "RaygunIO/RaygunEventMessage" + min + ".txt";
-            if (isolatedStorage.FileExists(nextFileName))
+            string oldestFileName = "RaygunIO/" + type + min + ".txt";
+            if (isolatedStorage.FileExists(oldestFileName))
             {
-              isolatedStorage.DeleteFile(nextFileName);
+              isolatedStorage.DeleteFile(oldestFileName);
               count--;
             }
           }
@@ -573,59 +584,6 @@ namespace Mindscape.Raygun4Net
         System.Diagnostics.Debug.WriteLine(string.Format("Error saving message to isolated storage {0}", ex.Message));
       }
       return 0;
-    }
-
-    private void SaveMessage(string message)
-    {
-      try
-      {
-        using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
-        {
-          if (!isolatedStorage.DirectoryExists("RaygunIO"))
-          {
-            isolatedStorage.CreateDirectory("RaygunIO");
-          }
-          int number = 1;
-          while (true)
-          {
-            bool exists = isolatedStorage.FileExists("RaygunIO\\RaygunErrorMessage" + number + ".txt");
-            if (!exists)
-            {
-              string nextFileName = "RaygunIO\\RaygunErrorMessage" + (number + 1) + ".txt";
-              exists = isolatedStorage.FileExists(nextFileName);
-              if (exists)
-              {
-                isolatedStorage.DeleteFile(nextFileName);
-              }
-              break;
-            }
-            number++;
-          }
-          if (number == 11)
-          {
-            string firstFileName = "RaygunIO\\RaygunErrorMessage1.txt";
-            if (isolatedStorage.FileExists(firstFileName))
-            {
-              isolatedStorage.DeleteFile(firstFileName);
-            }
-          }
-          using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream("RaygunIO\\RaygunErrorMessage" + number + ".txt", FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage))
-          {
-            using (StreamWriter writer = new StreamWriter(isoStream, Encoding.Unicode))
-            {
-              writer.Write(message);
-              writer.Flush();
-              writer.Close();
-            }
-          }
-          System.Diagnostics.Debug.WriteLine("Saved message: " + "RaygunErrorMessage" + number + ".txt");
-          System.Diagnostics.Debug.WriteLine("File Count: " + isolatedStorage.GetFileNames("RaygunIO\\*.txt").Length);
-        }
-      }
-      catch (Exception ex)
-      {
-        System.Diagnostics.Debug.WriteLine(string.Format("Error saving message to isolated storage {0}", ex.Message));
-      }
     }
   }
 }
