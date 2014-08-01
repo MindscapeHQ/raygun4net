@@ -67,5 +67,6 @@
     <Compile Include="RaygunEventType.cs" />
     <Compile Include="Messages\RaygunEventMessage.cs" />
     <Compile Include="Messages\RaygunEventBatchMessage.cs" />
+    <Compile Include="Messages\RaygunHeartbeatMessage.cs" />
   </ItemGroup>
 </Project>

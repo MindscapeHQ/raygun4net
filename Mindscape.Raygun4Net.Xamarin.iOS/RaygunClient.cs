@@ -25,6 +25,8 @@ namespace Mindscape.Raygun4Net
     private readonly string _apiKey;
     private static List<Type> _wrapperExceptions;
 
+    private static Timer _heartbeat;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
     /// </summary>
@@ -154,6 +156,35 @@ namespace Mindscape.Raygun4Net
     public void SendInBackground(RaygunMessage raygunMessage)
     {
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+    }
+
+    public void StartHeartbeat()
+    {
+      _heartbeat = new Timer ((state) => {
+        SendHeartbeat();
+      }, null, 20000, 20000);
+    }
+
+    private void SendHeartbeat()
+    {
+      if (_sessionId == null) {
+        _sessionId = Guid.NewGuid ().ToString ();
+      }
+
+      RaygunHeartbeatMessage message = new RaygunHeartbeatMessage ();
+      message.SessionId = _sessionId;
+
+      string messageStr = null;
+      try {
+        messageStr = SimpleJson.SerializeObject (message);
+      } catch (Exception ex) {
+        System.Diagnostics.Debug.WriteLine (string.Format ("Error serializing message: {0}", ex.Message));
+        return;
+      }
+
+      if (!String.IsNullOrWhiteSpace (messageStr) && HasInternetConnection) {
+        SendEvents (messageStr);
+      }
     }
 
     private string _sessionId;
