@@ -6,8 +6,11 @@ namespace Mindscape.Raygun4Net.Messages
   {
     public RaygunHeartbeatMessage ()
     {
+      Type = "Heartbeat";
       Timestamp = DateTime.UtcNow;
     }
+
+    public string Type { get; set; }
 
     public string SessionId { get; set; }
 

@@ -183,7 +183,9 @@ namespace Mindscape.Raygun4Net
       }
 
       if (!String.IsNullOrWhiteSpace (messageStr) && HasInternetConnection) {
-        SendEvents (messageStr);
+        //SendEvents (messageStr);
+        SaveEvent (messageStr);
+        SendStoredMessages ();
       }
     }
 
@@ -222,9 +224,9 @@ namespace Mindscape.Raygun4Net
           count = SaveEvent (messageStr);
         }
 
-        if (eventType == RaygunEventType.SessionEnd || count >= 5) {
+        //if (eventType == RaygunEventType.SessionEnd || count >= 5) {
           SendStoredMessages ();
-        }
+        //}
       }
     }
 
