@@ -48,9 +48,35 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+    <Folder Include="Messages\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Compile Include="RaygunClient.cs" />
+    <Compile Include="..\Mindscape.Raygun4Net\SimpleJson.cs">
+      <Link>SimpleJson.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
+      <Link>IRaygunMessageBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunIdentifierMessage.cs">
+      <Link>Messages\RaygunIdentifierMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunMessage.cs">
+      <Link>Messages\RaygunMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorStackTraceLineMessage.cs">
+      <Link>Messages\RaygunErrorStackTraceLineMessage.cs</Link>
+    </Compile>
+    <Compile Include="Messages\RaygunClientMessage.cs" />
+    <Compile Include="Messages\RaygunEnvironmentMessage.cs" />
+    <Compile Include="Messages\RaygunErrorMessage.cs" />
+    <Compile Include="..\Mindscape.Raygun4Net.Xamarin.iOS\Messages\RaygunMessageDetails.cs">
+      <Link>Messages\RaygunMessageDetails.cs</Link>
+    </Compile>
+    <Compile Include="RaygunMessageBuilder.cs" />
+    <Compile Include="..\Mindscape.Raygun4Net.Xamarin.iOS\RaygunSettings.cs">
+      <Link>RaygunSettings.cs</Link>
+    </Compile>
   </ItemGroup>
 </Project>
