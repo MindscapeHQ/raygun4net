@@ -210,7 +210,7 @@ namespace Mindscape.Raygun4Net
 
       var message = RaygunMessageBuilder.New
         .SetEnvironmentDetails()
-        //.SetMachineName(UIDevice.CurrentDevice.Name)
+        .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)
         .SetClientDetails()
         .SetVersion(ApplicationVersion)

@@ -3,6 +3,7 @@ using Mindscape.Raygun4Net.Messages;
 using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
+using MonoMac.Foundation;
 
 namespace Mindscape.Raygun4Net
 {
@@ -42,12 +43,7 @@ namespace Mindscape.Raygun4Net
       }
       catch (Exception ex)
       {
-        // Different environments can fail to load the environment details.
-        // For now if they fail to load for whatever reason then just
-        // swallow the exception. A good addition would be to handle
-        // these cases and load them correctly depending on where its running.
-        // see http://raygun.io/forums/thread/3655
-        Trace.WriteLine(string.Format("Failed to fetch the environment details: {0}", ex.Message));
+        System.Diagnostics.Debug.WriteLine(string.Format("Failed to fetch the environment details: {0}", ex.Message));
       }
 
       return this;
@@ -92,14 +88,24 @@ namespace Mindscape.Raygun4Net
       {
         _raygunMessage.Details.Version = version;
       }
-      /*else if (_raygunMessage.Details.Environment != null && !String.IsNullOrWhiteSpace(_raygunMessage.Details.Environment.PackageVersion))
-      {
-        _raygunMessage.Details.Version = _raygunMessage.Details.Environment.PackageVersion;
-      }*/
       else
+      {
+        if (NSBundle.MainBundle != null)
+        {
+          NSObject versionObject = NSBundle.MainBundle.ObjectForInfoDictionary ("CFBundleShortVersionString");
+          NSObject buildObject = NSBundle.MainBundle.ObjectForInfoDictionary ("CFBundleVersion");
+          if (versionObject != null && buildObject != null)
+          {
+            _raygunMessage.Details.Version = versionObject + " (" + buildObject + ")";
+          }
+        }
+      }
+
+      if (_raygunMessage.Details.Version == null)
       {
         _raygunMessage.Details.Version = "Not supplied";
       }
+
       return this;
     }
   }
