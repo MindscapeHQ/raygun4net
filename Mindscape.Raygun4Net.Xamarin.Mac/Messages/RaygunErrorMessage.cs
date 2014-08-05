@@ -17,17 +17,8 @@ namespace Mindscape.Raygun4Net.Messages
     {
       var exceptionType = exception.GetType();
 
-      /*MonoTouchException mex = exception as MonoTouchException;
-      if (mex != null && mex.NSException != null)
-      {
-        Message = string.Format("{0}: {1}", mex.NSException.Name, mex.NSException.Reason);
-        ClassName = mex.NSException.Name;
-      }
-      else*/
-      {
-        Message = string.Format("{0}: {1}", exceptionType.Name, exception.Message);
-        ClassName = exceptionType.FullName;
-      }
+      Message = string.Format("{0}: {1}", exceptionType.Name, exception.Message);
+      ClassName = exceptionType.FullName;
 
       StackTrace = BuildStackTrace(exception);
       Data = exception.Data;
@@ -42,17 +33,6 @@ namespace Mindscape.Raygun4Net.Messages
     {
       var lines = new List<RaygunErrorStackTraceLineMessage>();
 
-      /*MonoTouchException mex = exception as MonoTouchException;
-      if (mex != null && mex.NSException != null)
-      {
-        var ptr = Messaging.intptr_objc_msgSend(mex.NSException.Handle, Selector.GetHandle("callStackSymbols"));
-        var arr = NSArray.StringArrayFromHandle(ptr);
-        foreach (var line in arr)
-        {
-          lines.Add(new RaygunErrorStackTraceLineMessage { FileName = line });
-        }
-        return lines.ToArray();
-      }*/
       string stackTraceStr = exception.StackTrace;
       if (stackTraceStr == null)
       {
