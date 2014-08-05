@@ -62,7 +62,7 @@ namespace Mindscape.Raygun4Net.Messages
       }
       try
       {
-        string[] stackTraceLines = stackTraceStr.Split('\n');
+        string[] stackTraceLines = stackTraceStr.Split(new char[]{'\n'}, StringSplitOptions.RemoveEmptyEntries);
         foreach (string stackTraceLine in stackTraceLines)
         {
           int lineNumber = 0;
@@ -129,6 +129,10 @@ namespace Mindscape.Raygun4Net.Messages
           }
           else
           {
+            if (!String.IsNullOrWhiteSpace(stackTraceLn) && stackTraceLn.StartsWith("at "))
+            {
+              stackTraceLn = stackTraceLn.Substring(3);
+            }
             fileName = stackTraceLn;
           }
           var line = new RaygunErrorStackTraceLineMessage
