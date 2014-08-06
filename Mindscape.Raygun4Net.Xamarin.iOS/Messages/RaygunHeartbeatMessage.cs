@@ -6,7 +6,7 @@ namespace Mindscape.Raygun4Net.Messages
   {
     public RaygunHeartbeatMessage ()
     {
-      Type = "Heartbeat";
+      Type = "session_heartbeat";
       Timestamp = DateTime.UtcNow;
     }
 
