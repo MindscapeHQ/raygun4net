@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Web.Http;
 using Mindscape.Raygun4Net.Messages;
 using Mindscape.Raygun4Net.WebApi.Messages;
+using Mindscape.Raygun4Net.WebApi.Messages.Builders;
 
 namespace Mindscape.Raygun4Net.WebApi
 {
@@ -51,7 +52,7 @@ namespace Mindscape.Raygun4Net.WebApi
     {
       if (message != null)
       {
-        _raygunMessage.Details.Request = new RaygunWebApiRequestMessage(message, messageOptions);
+        _raygunMessage.Details.Request = new RaygunWebApiRequestMessageBuilder().Build(message, messageOptions);
       }
 
       return this;

@@ -6,32 +6,33 @@ using System.Diagnostics;
 using System.IO;
 using System.Web;
 
-namespace Mindscape.Raygun4Net.Messages
+namespace Mindscape.Raygun4Net.Messages.Builders
 {
-  public class RaygunRequestMessage
+  public class RaygunRequestMessageBuilder
   {
-    public RaygunRequestMessage(HttpRequest request, RaygunRequestMessageOptions options)
+    public RaygunRequestMessage Build(HttpRequest request, RaygunRequestMessageOptions options)
     {
+      var raygunRequestMessage = new RaygunRequestMessage();
       options = options ?? new RaygunRequestMessageOptions();
 
-      HostName = request.Url.Host;
-      Url = request.Url.AbsolutePath;
-      HttpMethod = request.RequestType;
-      IPAddress = request.UserHostAddress;
-      
-      QueryString = ToDictionary(request.QueryString, null);
+      raygunRequestMessage.HostName = request.Url.Host;
+      raygunRequestMessage.Url = request.Url.AbsolutePath;
+      raygunRequestMessage.HttpMethod = request.RequestType;
+      raygunRequestMessage.IPAddress = request.UserHostAddress;
 
-      Headers = ToDictionary(request.Headers, options.IsHeaderIgnored);
-      Headers.Remove("Cookie");
+      raygunRequestMessage.QueryString = ToDictionary(request.QueryString, null);
 
-      Form = ToDictionary(request.Form, options.IsFormFieldIgnored, true);
-      Cookies = GetCookies(request.Cookies, options.IsCookieIgnored);
+      raygunRequestMessage.Headers = ToDictionary(request.Headers, options.IsHeaderIgnored);
+      raygunRequestMessage.Headers.Remove("Cookie");
+
+      raygunRequestMessage.Form = ToDictionary(request.Form, options.IsFormFieldIgnored, true);
+      raygunRequestMessage.Cookies = GetCookies(request.Cookies, options.IsCookieIgnored);
 
       // Remove ignored and duplicated variables
-      Data = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored);
-      Data.Remove("ALL_HTTP");
-      Data.Remove("HTTP_COOKIE");
-      Data.Remove("ALL_RAW");
+      raygunRequestMessage.Data = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored);
+      raygunRequestMessage.Data.Remove("ALL_HTTP");
+      raygunRequestMessage.Data.Remove("HTTP_COOKIE");
+      raygunRequestMessage.Data.Remove("ALL_RAW");
 
       try
       {
@@ -45,25 +46,27 @@ namespace Mindscape.Raygun4Net.Messages
             length = temp.Length;
           }
 
-          RawData = temp.Substring(0, length);
+          raygunRequestMessage.RawData = temp.Substring(0, length);
         }
       }
       catch (HttpException)
       {
       }
+
+      return raygunRequestMessage;
     }
 
     private delegate R Func<T, R>(T value);
 
     private IList GetCookies(HttpCookieCollection cookieCollection, Func<string, bool> ignore)
     {
-      IList cookies = new List<Cookie>();
+      IList cookies = new List<Mindscape.Raygun4Net.Messages.RaygunRequestMessage.Cookie>();
 
       foreach (string key in cookieCollection.Keys)
       {
         if (!ignore(key))
         {
-          cookies.Add(new Cookie(cookieCollection[key].Name, cookieCollection[key].Value));
+          cookies.Add(new Mindscape.Raygun4Net.Messages.RaygunRequestMessage.Cookie(cookieCollection[key].Name, cookieCollection[key].Value));
         }
       }
 
@@ -139,38 +142,5 @@ namespace Mindscape.Raygun4Net.Messages
         }
       }
     }
-
-    public class Cookie
-    {
-      public Cookie(string name, string value)
-      {
-        Name = name;
-        Value = value;
-      }
-
-      public string Name { get; set; }
-      public string Value { get; set; }
-    }
-
-    public string HostName { get; set; }
-
-    public string Url { get; set; }
-
-    public string HttpMethod { get; set; }
-
-    public string IPAddress { get; set; }
-
-    public IDictionary QueryString { get; set; }
-
-    public IList Cookies { get; set; }
-
-    public IDictionary Data { get; set; }
-
-    public IDictionary Form { get; set; }
-
-    public string RawData { get; set; }
-
-    public IDictionary Headers { get; set; }
-
   }
 }

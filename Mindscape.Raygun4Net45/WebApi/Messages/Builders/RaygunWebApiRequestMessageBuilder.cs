@@ -7,11 +7,11 @@ using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net.WebApi.Messages.Builders
 {
-  public class RaygunWebApiRequestBuilder
+  public class RaygunWebApiRequestMessageBuilder
   {
-    private RaygunWebApiRequestMessage _raygunWebApiRequestMessage = new RaygunWebApiRequestMessage();
+    private RaygunRequestMessage _raygunWebApiRequestMessage = new RaygunRequestMessage();
 
-    public RaygunWebApiRequestMessage Build(HttpRequestMessage request, RaygunRequestMessageOptions options = null)
+    public RaygunRequestMessage Build(HttpRequestMessage request, RaygunRequestMessageOptions options = null)
     {
       options = options ?? new RaygunRequestMessageOptions();
 
