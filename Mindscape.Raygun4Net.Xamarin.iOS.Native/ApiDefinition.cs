@@ -10,7 +10,7 @@ namespace Mindscape.Raygun4Net.Xamarin.iOS.Native
   [BaseType (typeof (NSObject))]
   internal interface Raygun {
 
-    [Export ("sharedReporterWithApiKey:")]
+    [Static, Export ("sharedReporterWithApiKey:")]
     Raygun SharedReporterWithApiKey (string apiKey);
 
     [Export ("identify:")]
