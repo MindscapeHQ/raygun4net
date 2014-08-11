@@ -101,6 +101,8 @@ task Zip -depends Package {
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.Android.pdb $versionfolder
     # Xamarin.iOS
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.iOS.dll $versionfolder
+    # Xamarin.Mac
+    copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.Mac.dll $versionfolder
     # Windows Store
     copy-item $build_dir/Mindscape.Raygun4Net.WindowsStore.dll $versionfolder
     copy-item $build_dir/Mindscape.Raygun4Net.WindowsStore.pdb $versionfolder
