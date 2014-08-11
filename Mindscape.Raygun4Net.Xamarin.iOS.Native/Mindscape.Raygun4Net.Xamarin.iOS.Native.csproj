@@ -44,4 +44,12 @@
     <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Xamarin.ObjcBinding.CSharp.targets" />
+  <ItemGroup>
+    <ObjcBindingNativeLibrary Include="libRaygun4iOS.a" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="libRaygun4iOS.linkwith.cs">
+      <DependentUpon>libRaygun4iOS.a</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>
