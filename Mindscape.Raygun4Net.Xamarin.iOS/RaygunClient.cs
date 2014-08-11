@@ -45,6 +45,8 @@ namespace Mindscape.Raygun4Net
       _wrapperExceptions.Add(typeof(AggregateException));
 
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
+
+      Mindscape.Raygun4Net.Xamarin.iOS.Native.RaygunClient.EnableCrashReporting (apiKey);
     }
 
     private bool ValidateApiKey()
