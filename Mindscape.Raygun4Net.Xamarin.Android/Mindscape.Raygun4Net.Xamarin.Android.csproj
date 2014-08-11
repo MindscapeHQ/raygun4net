@@ -50,6 +50,9 @@
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunClientMessage.cs">
       <Link>Messages\RaygunClientMessage.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunEnvironmentMessage.cs">
+      <Link>Messages\RaygunEnvironmentMessage.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorMessage.cs">
       <Link>Messages\RaygunErrorMessage.cs</Link>
     </Compile>
@@ -59,14 +62,21 @@
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunMessage.cs">
       <Link>Messages\RaygunMessage.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunMessageDetails.cs">
+      <Link>Messages\RaygunMessageDetails.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunRequestMessage.cs">
+      <Link>Messages\RaygunRequestMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunResponseMessage.cs">
+      <Link>Messages\RaygunResponseMessage.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\SimpleJson.cs">
       <Link>SimpleJson.cs</Link>
     </Compile>
     <Compile Include="Messages\Builders\RaygunClientMessageBuilder.cs" />
     <Compile Include="Messages\Builders\RaygunEnvironmentMessageBuilder.cs" />
     <Compile Include="Messages\Builders\RaygunErrorMessageBuilder.cs" />
-    <Compile Include="Messages\RaygunEnvironmentMessage.cs" />
-    <Compile Include="Messages\RaygunMessageDetails.cs" />
     <Compile Include="RaygunClient.cs" />
     <Compile Include="RaygunMessageBuilder.cs" />
     <Compile Include="RaygunSettings.cs" />

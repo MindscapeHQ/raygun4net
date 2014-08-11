@@ -22,6 +22,8 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string Architecture { get; set; }
 
+    public string Model { get; set; }
+
     public ulong TotalVirtualMemory { get; set; }
 
     public ulong AvailableVirtualMemory { get; set; }
@@ -31,6 +33,22 @@ namespace Mindscape.Raygun4Net.Messages
     public ulong TotalPhysicalMemory { get; set; }
 
     public ulong AvailablePhysicalMemory { get; set; }
+
+    public long ApplicationCurrentMemoryUsage { get; set; }
+
+    public long ApplicationMemoryUsageLimit { get; set; }
+
+    public long ApplicationPeakMemoryUsage { get; set; }
+
+    public long IsolatedStorageAvailableFreeSpace { get; set; }
+
+    public long DeviceTotalMemory { get; set; }
+
+    public string DeviceFirmwareVersion { get; set; }
+
+    public string DeviceHardwareVersion { get; set; }
+
+    public string DeviceManufacturer { get; set; }
 
     public string DeviceName { get; set; }
 
