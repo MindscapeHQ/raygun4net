@@ -5,28 +5,27 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 
-namespace Mindscape.Raygun4Net.Messages
+namespace Mindscape.Raygun4Net.Messages.Builders
 {
-  public class RaygunErrorMessage
+  public class RaygunErrorMessageBuilder
   {
-    public RaygunErrorMessage()
+    public RaygunErrorMessage Build(Exception exception)
     {
-    }
-
-    public RaygunErrorMessage(Exception exception)
-    {
+      var raygunErrorMessage = new RaygunErrorMessage();
       var exceptionType = exception.GetType();
 
-      Message = exception.Message;
-      ClassName = exceptionType.FullName;
+      raygunErrorMessage.Message = exception.Message;
+      raygunErrorMessage.ClassName = exceptionType.FullName;
 
-      StackTrace = BuildStackTrace(exception);
-      Data = exception.Data;
+      raygunErrorMessage.StackTrace = BuildStackTrace(exception);
+      raygunErrorMessage.Data = exception.Data;
 
       if (exception.InnerException != null)
       {
-        InnerError = new RaygunErrorMessage(exception.InnerException);
+        raygunErrorMessage.InnerError = new RaygunErrorMessageBuilder().Build(exception.InnerException);
       }
+
+      return raygunErrorMessage;
     }
 
     private RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
@@ -220,15 +219,5 @@ namespace Mindscape.Raygun4Net.Messages
 
       return stringBuilder.ToString();
     }
-
-    public RaygunErrorMessage InnerError { get; set; }
-
-    public IDictionary Data { get; set; }
-
-    public string ClassName { get; set; }
-
-    public string Message { get; set; }
-
-    public RaygunErrorStackTraceLineMessage[] StackTrace { get; set; }
   }
 }

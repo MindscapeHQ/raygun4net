@@ -47,6 +47,12 @@
     <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
       <Link>IRaygunMessageBuilder.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunClientMessage.cs">
+      <Link>Messages\RaygunClientMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorMessage.cs">
+      <Link>Messages\RaygunErrorMessage.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorStackTraceLineMessage.cs">
       <Link>Messages\RaygunErrorStackTraceLineMessage.cs</Link>
     </Compile>
@@ -56,9 +62,10 @@
     <Compile Include="..\Mindscape.Raygun4Net\SimpleJson.cs">
       <Link>SimpleJson.cs</Link>
     </Compile>
-    <Compile Include="Messages\RaygunClientMessage.cs" />
+    <Compile Include="Messages\Builders\RaygunClientMessageBuilder.cs" />
+    <Compile Include="Messages\Builders\RaygunEnvironmentMessageBuilder.cs" />
+    <Compile Include="Messages\Builders\RaygunErrorMessageBuilder.cs" />
     <Compile Include="Messages\RaygunEnvironmentMessage.cs" />
-    <Compile Include="Messages\RaygunErrorMessage.cs" />
     <Compile Include="Messages\RaygunMessageDetails.cs" />
     <Compile Include="RaygunClient.cs" />
     <Compile Include="RaygunMessageBuilder.cs" />

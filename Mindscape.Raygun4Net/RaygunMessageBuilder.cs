@@ -24,7 +24,11 @@ namespace Mindscape.Raygun4Net
 
     private RaygunMessageBuilder()
     {
-      _raygunMessage = new RaygunMessage();
+      _raygunMessage = new RaygunMessage()
+      {
+        OccurredOn = DateTime.UtcNow,
+        Details = new RaygunMessageDetails()
+      };
     }
 
     public RaygunMessage Build()
@@ -42,7 +46,7 @@ namespace Mindscape.Raygun4Net
     {
       try
       {
-        _raygunMessage.Details.Environment = new RaygunEnvironmentMessage();
+        _raygunMessage.Details.Environment = new RaygunEnvironmentMessageBuilder().Build();
       }
       catch (Exception ex)
       {
@@ -100,7 +104,7 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetClientDetails()
     {
-      _raygunMessage.Details.Client = new RaygunClientMessage();
+      _raygunMessage.Details.Client = new RaygunClientMessageBuilder().Build();
       return this;
     }
 
