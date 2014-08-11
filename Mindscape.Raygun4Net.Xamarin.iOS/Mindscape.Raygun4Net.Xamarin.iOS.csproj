@@ -84,4 +84,10 @@
       <Link>RaygunSendingMessageEventArgs.cs</Link>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mindscape.Raygun4Net.Xamarin.iOS.Native\Mindscape.Raygun4Net.Xamarin.iOS.Native.csproj">
+      <Project>{6748CD82-17BD-421F-B5AC-730802A5A147}</Project>
+      <Name>Mindscape.Raygun4Net.Xamarin.iOS.Native</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>
