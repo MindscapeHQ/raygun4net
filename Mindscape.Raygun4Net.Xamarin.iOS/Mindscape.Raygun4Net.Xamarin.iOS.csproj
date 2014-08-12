@@ -3,6 +3,8 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>12.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{E8B3C09D-8598-41AE-988F-20ABD4ED378B}</ProjectGuid>
     <ProjectTypeGuids>{6BC8ED88-2882-458C-8E55-DFD12B67127B};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
@@ -83,11 +85,5 @@
     <Compile Include="..\Mindscape.Raygun4Net\RaygunSendingMessageEventArgs.cs">
       <Link>RaygunSendingMessageEventArgs.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Mindscape.Raygun4Net.Xamarin.iOS.Native\Mindscape.Raygun4Net.Xamarin.iOS.Native.csproj">
-      <Project>{6748CD82-17BD-421F-B5AC-730802A5A147}</Project>
-      <Name>Mindscape.Raygun4Net.Xamarin.iOS.Native</Name>
-    </ProjectReference>
   </ItemGroup>
 </Project>
