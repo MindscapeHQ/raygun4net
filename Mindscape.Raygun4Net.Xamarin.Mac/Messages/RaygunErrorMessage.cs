@@ -58,56 +58,49 @@ namespace Mindscape.Raygun4Net.Messages
             if (success)
             {
               stackTraceLn = stackTraceLn.Substring(0, index);
-              // File name
-              index = stackTraceLn.LastIndexOf("] in ");
-              if (index > 0)
-              {
-                fileName = stackTraceLn.Substring(index + 5);
-                stackTraceLn = stackTraceLn.Substring(0, index);
-                // Method name
-                index = stackTraceLn.LastIndexOf("(");
-                if (index > 0)
-                {
-                  index = stackTraceLn.LastIndexOf(".", index);
-                  if (index > 0)
-                  {
-                    int endIndex = stackTraceLn.IndexOf("[0x");
-                    if (endIndex < 0)
-                    {
-                      endIndex = stackTraceLn.Length;
-                    }
-                    methodName = stackTraceLn.Substring(index + 1, endIndex - index - 1).Trim();
-                    methodName = methodName.Replace(" (", "(");
-                    stackTraceLn = stackTraceLn.Substring(0, index);
-                  }
-                }
-                // Class name
-                index = stackTraceLn.IndexOf("at ");
-                if (index >= 0)
-                {
-                  className = stackTraceLn.Substring(index + 3);
-                }
-              }
-              else
-              {
-                fileName = stackTraceLn;
-              }
             }
-            else
+          }
+          // File name
+          index = stackTraceLn.LastIndexOf("] in ");
+          if (index > 0)
+          {
+            fileName = stackTraceLn.Substring(index + 5);
+            stackTraceLn = stackTraceLn.Substring(0, index);
+          }
+          // Method name
+          index = stackTraceLn.LastIndexOf("(");
+          if (index > 0 && !stackTraceLine.StartsWith("at ("))
+          {
+            index = stackTraceLn.LastIndexOf(".", index);
+            if (index > 0)
             {
+              int endIndex = stackTraceLn.IndexOf("[0x");
+              if (endIndex < 0)
+              {
+                endIndex = stackTraceLn.Length;
+              }
+              methodName = stackTraceLn.Substring(index + 1, endIndex - index - 1).Trim();
+              methodName = methodName.Replace(" (", "(");
+              stackTraceLn = stackTraceLn.Substring(0, index);
+
+              // Memory address
+              index = methodName.LastIndexOf("<0x");
+              if (index >= 0)
+              {
+                fileName = methodName.Substring(index);
+                methodName = methodName.Substring(0, index).Trim();
+              }
+
+              // Class name
               index = stackTraceLn.IndexOf("at ");
               if (index >= 0)
               {
-                index += 3;
+                className = stackTraceLn.Substring(index + 3);
               }
-              else
-              {
-                index = 0;
-              }
-              fileName = stackTraceLn.Substring(index);
             }
           }
-          else
+
+          if (methodName == null)
           {
             if (!String.IsNullOrWhiteSpace(stackTraceLn) && stackTraceLn.StartsWith("at "))
             {
@@ -115,6 +108,7 @@ namespace Mindscape.Raygun4Net.Messages
             }
             fileName = stackTraceLn;
           }
+
           var line = new RaygunErrorStackTraceLineMessage
           {
             FileName = fileName,
