@@ -45,7 +45,7 @@ namespace Mindscape.Raygun4Net.WebApi
         {
           throw new RaygunWebApiHttpException(
             context.Response.StatusCode,
-            string.Format("HTTP {0} returned while handling URL {1}", (int)context.Response.StatusCode, context.Request.RequestUri));
+            string.Format("HTTP {0} returned while handling Request {2} {1}", (int)context.Response.StatusCode, context.Request.RequestUri, context.Request.Method));
         }
         catch (Exception e)
         {
