@@ -49,7 +49,7 @@ namespace Mindscape.Raygun4Net.WebApi
         }
         catch (Exception e)
         {
-          _clientCreator.GenerateRaygunWebApiClient().Send(e);
+          _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(context.Request).Send(e);
         }
       }
     }
