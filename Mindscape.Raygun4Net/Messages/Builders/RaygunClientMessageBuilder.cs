@@ -2,18 +2,20 @@
 
 namespace Mindscape.Raygun4Net.Messages.Builders
 {
-  public class RaygunClientMessageBuilder
+  public static class RaygunClientMessageBuilder
   {
-    public RaygunClientMessage Build()
-    {
-      var raygunClientMessage = new RaygunClientMessage()
-      {
-        Name = "Raygun4Net",
-        Version = Assembly.GetAssembly(typeof(RaygunClient)).GetName().Version.ToString(),
-        ClientUrl = @"https://github.com/MindscapeHQ/raygun4net"
-      };
+    private static RaygunClientMessage _raygunClientMessage;
 
-      return raygunClientMessage;
+    static RaygunClientMessageBuilder()
+    {
+      _raygunClientMessage.Name = "Raygun4Net";
+      _raygunClientMessage.Version = Assembly.GetAssembly(typeof(RaygunClient)).GetName().Version.ToString();
+      _raygunClientMessage.ClientUrl = @"https://github.com/MindscapeHQ/raygun4net";
+    }
+
+    public static RaygunClientMessage Build()
+    {
+      return _raygunClientMessage;
     }
   }
 }

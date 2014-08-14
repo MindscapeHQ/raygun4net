@@ -63,7 +63,7 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetClientDetails()
     {
-      _raygunMessage.Details.Client = new RaygunClientMessageBuilder().Build();
+      _raygunMessage.Details.Client = RaygunClientMessageBuilder.Build();
       return this;
     }
 
