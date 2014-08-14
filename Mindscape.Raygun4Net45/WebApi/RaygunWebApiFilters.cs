@@ -55,6 +55,7 @@ namespace Mindscape.Raygun4Net.WebApi
         }
         catch (Exception e)
         {
+          // This is here on the off chance that interacting with the context or HTTP Response throws an exception.
           _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(context.Request).Send(e);
         }
       }
