@@ -18,6 +18,9 @@ namespace Mindscape.Raygun4Net.Xamarin.iOS.Native
 
     [Export ("crash")]
     void Crash();
+
+    [Export ("nextReportUUID")]
+    string NextReportUUID { get; }
   }
 }
 

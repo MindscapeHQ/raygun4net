@@ -4,6 +4,7 @@ using System.Linq;
 using MonoTouch.Foundation;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Mindscape.Raygun4Net.Xamarin.iOS.Native
 {
@@ -17,10 +18,12 @@ namespace Mindscape.Raygun4Net.Xamarin.iOS.Native
       SIGSEGV = 11
     }
 
-    private const string CrashReportDirectory = "testing";
+    private const string StackTraceDirectory = "stacktraces";
 
-    public static void EnableCrashReporting(string apiKey, Action applicationStart)
+    public static void EnableCrashReporting(string apikey)
     {
+      PopulateCrashReportDirectoryStructure ();
+
       IntPtr sigbus = Marshal.AllocHGlobal (512);
       IntPtr sigsegv = Marshal.AllocHGlobal (512);
 
@@ -28,39 +31,36 @@ namespace Mindscape.Raygun4Net.Xamarin.iOS.Native
       sigaction (Signal.SIGBUS, IntPtr.Zero, sigbus);
       sigaction (Signal.SIGSEGV, IntPtr.Zero, sigsegv);
 
-      Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun.SharedReporterWithApiKey (apiKey);
+      var reporter = Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun.SharedReporterWithApiKey (apikey);
 
       // Restore Mono SIGSEGV and SIGBUS handlers
       sigaction (Signal.SIGBUS, sigbus, IntPtr.Zero);
       sigaction (Signal.SIGSEGV, sigsegv, IntPtr.Zero);
 
-      PopulateCrashReportDirectoryStructure ();
+      Marshal.FreeHGlobal (sigbus);
+      Marshal.FreeHGlobal (sigsegv);
 
-      try
-      {
-        applicationStart();
-      }
-      catch (Exception exception)
-      {
-        WriteExceptionInformation (exception);
-        throw;
-      }
+      AppDomain.CurrentDomain.UnhandledException += (sender, e) => { WriteExceptionInformation(reporter.NextReportUUID, e.ExceptionObject as Exception); };
+      TaskScheduler.UnobservedTaskException += (sender, e) => { WriteExceptionInformation(reporter.NextReportUUID, e.Exception); };
     }
 
     private static void PopulateCrashReportDirectoryStructure()
     {
       var documents = Environment.GetFolderPath (Environment.SpecialFolder.MyDocuments);
       var cache = Path.Combine (documents, "..", "Library", "Caches");
-      Directory.CreateDirectory (Path.Combine (cache, CrashReportDirectory));
+      Directory.CreateDirectory (Path.Combine (cache, StackTraceDirectory), new System.Security.AccessControl.DirectorySecurity());
     }
 
-    private static void WriteExceptionInformation(Exception exception)
+    private static void WriteExceptionInformation(string identifier, Exception exception)
     {
-      var path = Path.Combine (CrashReportDirectory, string.Format ("%.0f", NSDate.Now.SecondsSinceReferenceDate));
+      if (exception == null) return;
 
-      Console.WriteLine ("Writing exception information to : {0}", path);
+      var documents = Environment.GetFolderPath (Environment.SpecialFolder.MyDocuments);
+      var path = Path.GetFullPath(Path.Combine (documents, "..", "Library", "Caches", StackTraceDirectory, string.Format ("{0}", identifier)));
 
-      File.WriteAllText (path, exception.StackTrace);
+      var exceptionType = exception.GetType();
+
+      File.WriteAllText (path, string.Join(Environment.NewLine, exceptionType.FullName, exception.Message, exception.StackTrace));
     }
   }
 }
