@@ -4,14 +4,12 @@ namespace Mindscape.Raygun4Net.Messages.Builders
 {
   public static class RaygunClientMessageBuilder
   {
-    private static RaygunClientMessage _raygunClientMessage;
-
-    static RaygunClientMessageBuilder()
+    private static RaygunClientMessage _raygunClientMessage = new RaygunClientMessage()
     {
-      _raygunClientMessage.Name = "Raygun4Net";
-      _raygunClientMessage.Version = Assembly.GetAssembly(typeof(RaygunClient)).GetName().Version.ToString();
-      _raygunClientMessage.ClientUrl = @"https://github.com/MindscapeHQ/raygun4net";
-    }
+        Name = "Raygun4Net",
+        Version = Assembly.GetAssembly(typeof(RaygunClient)).GetName().Version.ToString(),
+        ClientUrl = @"https://github.com/MindscapeHQ/raygun4net"
+    };
 
     public static RaygunClientMessage Build()
     {
