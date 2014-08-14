@@ -326,21 +326,24 @@ namespace Mindscape.Raygun4Net
             client.Headers.Add("X-ApiKey", _apiKey);
             client.Encoding = System.Text.Encoding.UTF8;
 
-            Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(new Uri(RaygunSettings.Settings.ApiEndpoint.ToString()));
-
-            if (proxyUri.AbsoluteUri != RaygunSettings.Settings.ApiEndpoint.ToString())
+            if (WebRequest.DefaultWebProxy != null)
             {
-              client.Proxy = new WebProxy(proxyUri, false);
+              Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(new Uri(RaygunSettings.Settings.ApiEndpoint.ToString()));
 
-              if (ProxyCredentials == null)
+              if (proxyUri != null && proxyUri.AbsoluteUri != RaygunSettings.Settings.ApiEndpoint.ToString())
               {
-                client.UseDefaultCredentials = true;
-                client.Proxy.Credentials = CredentialCache.DefaultCredentials;
-              }
-              else
-              {
-                client.UseDefaultCredentials = false;
-                client.Proxy.Credentials = ProxyCredentials;
+                client.Proxy = new WebProxy(proxyUri, false);
+
+                if (ProxyCredentials == null)
+                {
+                  client.UseDefaultCredentials = true;
+                  client.Proxy.Credentials = CredentialCache.DefaultCredentials;
+                }
+                else
+                {
+                  client.UseDefaultCredentials = false;
+                  client.Proxy.Credentials = ProxyCredentials;
+                }
               }
             }
 
