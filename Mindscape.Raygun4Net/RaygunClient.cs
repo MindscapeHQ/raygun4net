@@ -255,19 +255,9 @@ namespace Mindscape.Raygun4Net
     {
       if (CanSend(exception))
       {
-        SendInBackground(BuildMessage(exception, tags, userCustomData));
+        ThreadPool.QueueUserWorkItem(c => Send(BuildMessage(exception, tags, userCustomData)));
         FlagAsSent(exception);
       }
-    }
-
-    /// <summary>
-    /// Asynchronously transmits a message to Raygun.io.
-    /// </summary>
-    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
-    /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public void SendInBackground(RaygunMessage raygunMessage)
-    {
-      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
 
     protected bool CanSend(Exception exception)
