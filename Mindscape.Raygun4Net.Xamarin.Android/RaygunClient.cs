@@ -51,6 +51,20 @@ namespace Mindscape.Raygun4Net
       return true;
     }
 
+    // Returns true if the message can be sent, false if the sending is canceled.
+    protected bool OnSendingMessage(RaygunMessage raygunMessage)
+    {
+      bool result = true;
+      EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
+      if (handler != null)
+      {
+        RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage);
+        handler(this, args);
+        result = !args.Cancel;
+      }
+      return result;
+    }
+
     /// <summary>
     /// Gets or sets the user identity string.
     /// </summary>
@@ -65,6 +79,11 @@ namespace Mindscape.Raygun4Net
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
     /// </summary>
     public string ApplicationVersion { get; set; }
+
+    /// <summary>
+    /// Raised just before a message is sent. This can be used to make final adjustments to the <see cref="RaygunMessage"/>, or to cancel the send.
+    /// </summary>
+    public event EventHandler<RaygunSendingMessageEventArgs> SendingMessage;
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
@@ -273,44 +292,48 @@ namespace Mindscape.Raygun4Net
     {
       if (ValidateApiKey())
       {
-        if (HasInternetConnection)
+        bool canSend = OnSendingMessage(raygunMessage);
+        if (canSend)
         {
-          using (var client = new WebClient())
+          if (HasInternetConnection)
           {
-            client.Headers.Add("X-ApiKey", _apiKey);
-            client.Encoding = System.Text.Encoding.UTF8;
+            using (var client = new WebClient())
+            {
+              client.Headers.Add("X-ApiKey", _apiKey);
+              client.Encoding = System.Text.Encoding.UTF8;
 
+              try
+              {
+                var message = SimpleJson.SerializeObject(raygunMessage);
+                client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
+                System.Diagnostics.Debug.WriteLine("Sending message to Raygun.io");
+              }
+              catch (Exception ex)
+              {
+                System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+                try
+                {
+                  SaveMessage(SimpleJson.SerializeObject(raygunMessage));
+                  System.Diagnostics.Debug.WriteLine("Exception has been saved to the device to try again later.");
+                }
+                catch (Exception e)
+                {
+                  System.Diagnostics.Debug.WriteLine(string.Format("Error saving Exception to device {0}", e.Message));
+                }
+              }
+            }
+          }
+          else
+          {
             try
             {
               var message = SimpleJson.SerializeObject(raygunMessage);
-              client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
-              System.Diagnostics.Debug.WriteLine("Sending message to Raygun.io");
+              SaveMessage(message);
             }
             catch (Exception ex)
             {
-              System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
-              try
-              {
-                SaveMessage(SimpleJson.SerializeObject(raygunMessage));
-                System.Diagnostics.Debug.WriteLine("Exception has been saved to the device to try again later.");
-              }
-              catch (Exception e)
-              {
-                System.Diagnostics.Debug.WriteLine(string.Format("Error saving Exception to device {0}", e.Message));
-              }
+              System.Diagnostics.Debug.WriteLine(string.Format("Error saving Exception to device {0}", ex.Message));
             }
-          }
-        }
-        else
-        {
-          try
-          {
-            var message = SimpleJson.SerializeObject(raygunMessage);
-            SaveMessage(message);
-          }
-          catch (Exception ex)
-          {
-            System.Diagnostics.Debug.WriteLine(string.Format("Error saving Exception to device {0}", ex.Message));
           }
         }
       }
