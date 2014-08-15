@@ -8,9 +8,9 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string OSVersion { get; set; }
 
-    public double WindowBoundsWidth { get; set; }
+    public double? WindowBoundsWidth { get; set; }
 
-    public double WindowBoundsHeight { get; set; }
+    public double? WindowBoundsHeight { get; set; }
 
     public string ResolutionScale { get; set; }
 
@@ -24,25 +24,25 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string Model { get; set; }
 
-    public ulong TotalVirtualMemory { get; set; }
+    public ulong? TotalVirtualMemory { get; set; }
 
-    public ulong AvailableVirtualMemory { get; set; }
+    public ulong? AvailableVirtualMemory { get; set; }
 
     public IEnumerable<double> DiskSpaceFree { get; set; }
 
-    public ulong TotalPhysicalMemory { get; set; }
+    public ulong? TotalPhysicalMemory { get; set; }
 
-    public ulong AvailablePhysicalMemory { get; set; }
+    public ulong? AvailablePhysicalMemory { get; set; }
 
-    public long ApplicationCurrentMemoryUsage { get; set; }
+    public long? ApplicationCurrentMemoryUsage { get; set; }
 
-    public long ApplicationMemoryUsageLimit { get; set; }
+    public long? ApplicationMemoryUsageLimit { get; set; }
 
-    public long ApplicationPeakMemoryUsage { get; set; }
+    public long? ApplicationPeakMemoryUsage { get; set; }
 
-    public long IsolatedStorageAvailableFreeSpace { get; set; }
+    public long? IsolatedStorageAvailableFreeSpace { get; set; }
 
-    public long DeviceTotalMemory { get; set; }
+    public long? DeviceTotalMemory { get; set; }
 
     public string DeviceFirmwareVersion { get; set; }
 
@@ -52,7 +52,7 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string DeviceName { get; set; }
 
-    public double UtcOffset { get; set; }
+    public double? UtcOffset { get; set; }
 
     public string Locale { get; set; }
   }
