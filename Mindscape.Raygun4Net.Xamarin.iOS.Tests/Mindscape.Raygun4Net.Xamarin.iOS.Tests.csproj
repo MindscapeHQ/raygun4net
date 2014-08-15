@@ -62,7 +62,5 @@
       <Name>Mindscape.Raygun4Net.Xamarin.iOS</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Model\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

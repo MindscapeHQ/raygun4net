@@ -251,9 +251,19 @@ namespace Mindscape.Raygun4Net
     {
       exception = StripWrapperExceptions(exception);
 
+      string machineName = null;
+      try
+      {
+        machineName = UIDevice.CurrentDevice.Name;
+      }
+      catch (Exception e)
+      {
+        System.Diagnostics.Debug.WriteLine("Exception getting device name {0}", e.Message);
+      }
+
       var message = RaygunMessageBuilder.New
         .SetEnvironmentDetails()
-        .SetMachineName(UIDevice.CurrentDevice.Name)
+        .SetMachineName(machineName)
         .SetExceptionDetails(exception)
         .SetClientDetails()
         .SetVersion(ApplicationVersion)
