@@ -1,181 +1,59 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security;
-using System.Text;
-
-using System.Windows.Forms;
-using System.Management;
-using Microsoft.VisualBasic.Devices;
-using System.Security.Permissions;
+﻿using System.Collections.Generic;
 
 namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunEnvironmentMessage
   {
-    private List<double> _diskSpaceFree = new List<double>();
+    public int ProcessorCount { get; set; }
 
-    public RaygunEnvironmentMessage()
-    {
-      WindowBoundsWidth = SystemInformation.VirtualScreen.Width;
-      WindowBoundsHeight = SystemInformation.VirtualScreen.Height;
-      ComputerInfo info = new ComputerInfo();
-      Locale = CultureInfo.CurrentCulture.DisplayName;
+    public string OSVersion { get; set; }
 
-      DateTime now = DateTime.Now;
-      UtcOffset = TimeZone.CurrentTimeZone.GetUtcOffset(now).TotalHours;
+    public double? WindowBoundsWidth { get; set; }
 
-      OSVersion = info.OSVersion;
+    public double? WindowBoundsHeight { get; set; }
 
-      bool mediumTrust = RaygunSettings.Settings.MediumTrust || !HasUnrestrictedFeatureSet;
+    public string ResolutionScale { get; set; }
 
-      if (!mediumTrust)
-      {
-        try
-        {
-          // ProcessorCount cannot run in medium trust under net35, once we have
-          // moved to net40 minimum we can move this out of here
-          ProcessorCount = Environment.ProcessorCount;
-          Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
-          TotalPhysicalMemory = (ulong)info.TotalPhysicalMemory / 0x100000; // in MB
-          AvailablePhysicalMemory = (ulong)info.AvailablePhysicalMemory / 0x100000;
-          TotalVirtualMemory = info.TotalVirtualMemory / 0x100000;
-          AvailableVirtualMemory = info.AvailableVirtualMemory / 0x100000;
-          GetDiskSpace();
-          Cpu = GetCpu();
-          OSVersion = GetOSVersion();
-        }
-        catch (SecurityException)
-        {
-          System.Diagnostics.Trace.WriteLine("RaygunClient error: couldn't access environment variables. If you are running in Medium Trust, in web.config in RaygunSettings set mediumtrust=\"true\"");
-        }
-      }
-    }
+    public string CurrentOrientation { get; set; }
 
-    private string GetCpu()
-    {
-      ManagementClass wmiManagementProcessorClass = new ManagementClass("Win32_Processor");
-      ManagementObjectCollection wmiProcessorCollection = wmiManagementProcessorClass.GetInstances();
+    public string Cpu { get; set; }
 
-      foreach (ManagementObject wmiProcessorObject in wmiProcessorCollection)
-      {
-        try
-        {
-          var name = wmiProcessorObject.Properties["Name"].Value.ToString();
-          return name;
-        }
-        catch (ManagementException)
-        {
-        }
-      }
-      return Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER");
-    }
+    public string PackageVersion { get; set; }
 
-    private string GetOSVersion()
-    {
-      ManagementClass wmiManagementOperatingSystemClass = new ManagementClass("Win32_OperatingSystem");
-      ManagementObjectCollection wmiOperatingSystemCollection = wmiManagementOperatingSystemClass.GetInstances();
+    public string Architecture { get; set; }
 
-      foreach (ManagementObject wmiOperatingSystemObject in wmiOperatingSystemCollection)
-      {
-        try
-        {
-          var version = wmiOperatingSystemObject.Properties["Version"].Value.ToString();
-          return version;
-        }
-        catch (ManagementException)
-        {
-        }
-      }
-      return Environment.OSVersion.Version.ToString(3);
-    }
+    public string Model { get; set; }
 
-    private void GetDiskSpace()
-    {
-      foreach (DriveInfo drive in DriveInfo.GetDrives())
-      {
-        if (drive.IsReady)
-        {
-          DiskSpaceFree.Add((double)drive.AvailableFreeSpace / 0x40000000); // in GB
-        }
-      }
-    }
+    public ulong? TotalVirtualMemory { get; set; }
 
-    private static volatile bool _unrestrictedFeatureSet = false;
-    private static volatile bool _determinedUnrestrictedFeatureSet = false;
-    private static readonly object _threadLock = new object();
+    public ulong? AvailableVirtualMemory { get; set; }
 
-    private static bool HasUnrestrictedFeatureSet
-    {
-      get
-      {
-        if (!_determinedUnrestrictedFeatureSet)
-        {
-          lock (_threadLock)
-          {
-            if (!_determinedUnrestrictedFeatureSet)
-            {
-              // This seems to crash if not in full trust:
-              //_unrestrictedFeatureSet = AppDomain.CurrentDomain.ApplicationTrust == null;// || AppDomain.CurrentDomain.ApplicationTrust.DefaultGrantSet.PermissionSet.IsUnrestricted();
-              try
-              {
-                // See if we're running in full trust:
-                new PermissionSet(PermissionState.Unrestricted).Demand();
-                _unrestrictedFeatureSet = true;
-              }
-              catch (SecurityException)
-              {
-                _unrestrictedFeatureSet = false;
-              }
+    public IEnumerable<double> DiskSpaceFree { get; set; }
 
-              _determinedUnrestrictedFeatureSet = true;
-            }
-          }
-        }
-        return _unrestrictedFeatureSet;
-      }
-    }
+    public ulong? TotalPhysicalMemory { get; set; }
 
-    public int ProcessorCount { get; private set; }
+    public ulong? AvailablePhysicalMemory { get; set; }
 
-    public string OSVersion { get; private set; }
+    public long? ApplicationCurrentMemoryUsage { get; set; }
 
-    public double WindowBoundsWidth { get; private set; }
+    public long? ApplicationMemoryUsageLimit { get; set; }
 
-    public double WindowBoundsHeight { get; private set; }
+    public long? ApplicationPeakMemoryUsage { get; set; }
 
-    public string ResolutionScale { get; private set; }
+    public long? IsolatedStorageAvailableFreeSpace { get; set; }
 
-    public string CurrentOrientation { get; private set; }
+    public long? DeviceTotalMemory { get; set; }
 
-    public string Cpu { get; private set; }
+    public string DeviceFirmwareVersion { get; set; }
 
-    public string PackageVersion { get; private set; }
+    public string DeviceHardwareVersion { get; set; }
 
-    public string Architecture { get; private set; }
+    public string DeviceManufacturer { get; set; }
 
-    public ulong TotalVirtualMemory { get; private set; }
+    public string DeviceName { get; set; }
 
-    public ulong AvailableVirtualMemory { get; private set; }
+    public double? UtcOffset { get; set; }
 
-    public List<double> DiskSpaceFree
-    {
-      get { return _diskSpaceFree; }
-      set { _diskSpaceFree = value; }
-    }
-
-    public ulong TotalPhysicalMemory { get; private set; }
-
-    public ulong AvailablePhysicalMemory { get; private set; }
-
-    public string DeviceName { get; private set; }
-
-    public double UtcOffset { get; private set; }
-
-    public string Locale { get; private set; }
+    public string Locale { get; set; }
   }
 }

@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Web;
 using Mindscape.Raygun4Net.Messages;
+using Mindscape.Raygun4Net.Messages.Builders;
 
 namespace Mindscape.Raygun4Net
 {
@@ -23,7 +24,11 @@ namespace Mindscape.Raygun4Net
 
     private RaygunMessageBuilder()
     {
-      _raygunMessage = new RaygunMessage();
+      _raygunMessage = new RaygunMessage()
+      {
+        OccurredOn = DateTime.UtcNow,
+        Details = new RaygunMessageDetails()
+      };
     }
 
     public RaygunMessage Build()
@@ -39,7 +44,7 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetEnvironmentDetails()
     {
-      _raygunMessage.Details.Environment = new RaygunEnvironmentMessage();
+      _raygunMessage.Details.Environment = new RaygunEnvironmentMessageBuilder().Build();
       return this;
     }
 
@@ -47,7 +52,7 @@ namespace Mindscape.Raygun4Net
     {
       if (exception != null)
       {
-        _raygunMessage.Details.Error = new RaygunErrorMessage(exception);
+        _raygunMessage.Details.Error = new RaygunErrorMessageBuilder().Build(exception);
       }
 
       HttpException error = exception as HttpException;
@@ -86,7 +91,7 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetClientDetails()
     {
-      _raygunMessage.Details.Client = new RaygunClientMessage();
+      _raygunMessage.Details.Client = new RaygunClientMessageBuilder().Build();
       return this;
     }
 
@@ -121,7 +126,7 @@ namespace Mindscape.Raygun4Net
         {
           return this;
         }
-        _raygunMessage.Details.Request = new RaygunRequestMessage(request, options ?? new RaygunRequestMessageOptions());
+        _raygunMessage.Details.Request = new RaygunRequestMessageBuilder().Build(request, options ?? new RaygunRequestMessageOptions());
       }
 
       return this;

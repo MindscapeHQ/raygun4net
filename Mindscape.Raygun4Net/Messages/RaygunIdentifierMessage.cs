@@ -2,6 +2,10 @@
 {
   public class RaygunIdentifierMessage
   {
+    public RaygunIdentifierMessage()
+    {
+    }
+
     public RaygunIdentifierMessage(string user)
     {
       Identifier = user;

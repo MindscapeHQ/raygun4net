@@ -61,6 +61,10 @@
     </Compile>
     <Compile Include="IRaygunApplication.cs" />
     <Compile Include="IRaygunMessageBuilder.cs" />
+    <Compile Include="Messages\Builders\RaygunClientMessageBuilder.cs" />
+    <Compile Include="Messages\Builders\RaygunEnvironmentMessageBuilder.cs" />
+    <Compile Include="Messages\Builders\RaygunErrorMessageBuilder.cs" />
+    <Compile Include="Messages\Builders\RaygunRequestMessageBuilder.cs" />
     <Compile Include="Messages\RaygunClientMessage.cs" />
     <Compile Include="Messages\RaygunEnvironmentMessage.cs" />
     <Compile Include="Messages\RaygunErrorStackTraceLineMessage.cs" />

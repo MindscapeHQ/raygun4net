@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -11,34 +11,38 @@ using System.Text;
 using MonoTouch.UIKit;
 using MonoTouch.Foundation;
 
-namespace Mindscape.Raygun4Net.Messages
+namespace Mindscape.Raygun4Net.Messages.Builders
 {
-  public class RaygunEnvironmentMessage
+  public class RaygunEnvironmentMessageBuilder
   {
-    public RaygunEnvironmentMessage()
+    public RaygunEnvironmentMessage Build()
     {
-      UtcOffset = NSTimeZone.LocalTimeZone.GetSecondsFromGMT / 3600.0;
+      var raygunEnvironmentMessage = new RaygunEnvironmentMessage();
 
-      OSVersion = UIDevice.CurrentDevice.SystemName + " " + UIDevice.CurrentDevice.SystemVersion;
-      Architecture = GetStringSysCtl(ArchitecturePropertyName);
-      Model = UIDevice.CurrentDevice.Model;
-      ProcessorCount = (int)GetIntSysCtl(ProcessiorCountPropertyName);
+      raygunEnvironmentMessage.UtcOffset = NSTimeZone.LocalTimeZone.GetSecondsFromGMT / 3600.0;
 
-      Locale = CultureInfo.CurrentCulture.DisplayName;
+      raygunEnvironmentMessage.OSVersion = UIDevice.CurrentDevice.SystemName + " " + UIDevice.CurrentDevice.SystemVersion;
+      raygunEnvironmentMessage.Architecture = GetStringSysCtl(ArchitecturePropertyName);
+      raygunEnvironmentMessage.Model = UIDevice.CurrentDevice.Model;
+      raygunEnvironmentMessage.ProcessorCount = (int)GetIntSysCtl(ProcessiorCountPropertyName);
+
+      raygunEnvironmentMessage.Locale = CultureInfo.CurrentCulture.DisplayName;
 
       UIApplication.SharedApplication.InvokeOnMainThread(() =>
       {
-        WindowBoundsWidth = UIScreen.MainScreen.Bounds.Width;
-        WindowBoundsHeight = UIScreen.MainScreen.Bounds.Height;
+        raygunEnvironmentMessage.WindowBoundsWidth = UIScreen.MainScreen.Bounds.Width;
+        raygunEnvironmentMessage.WindowBoundsHeight = UIScreen.MainScreen.Bounds.Height;
       });
 
-      CurrentOrientation = UIDevice.CurrentDevice.Orientation.ToString();
+      raygunEnvironmentMessage.CurrentOrientation = UIDevice.CurrentDevice.Orientation.ToString();
 
-      TotalPhysicalMemory = GetIntSysCtl(TotalPhysicalMemoryPropertyName);
-      AvailablePhysicalMemory = GetIntSysCtl(AvailablePhysicalMemoryPropertyName);
+      raygunEnvironmentMessage.TotalPhysicalMemory = GetIntSysCtl(TotalPhysicalMemoryPropertyName);
+      raygunEnvironmentMessage.AvailablePhysicalMemory = GetIntSysCtl(AvailablePhysicalMemoryPropertyName);
 
-      DeviceName = UIDevice.CurrentDevice.Name;
-      PackageVersion = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString();
+      raygunEnvironmentMessage.DeviceName = UIDevice.CurrentDevice.Name;
+      raygunEnvironmentMessage.PackageVersion = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString();
+
+      return raygunEnvironmentMessage;
     }
 
     private const string TotalPhysicalMemoryPropertyName = "hw.physmem";
@@ -121,33 +125,5 @@ namespace Mindscape.Raygun4Net.Messages
 
       return ret;
     }
-
-    public int ProcessorCount { get; private set; }
-
-    public string OSVersion { get; private set; }
-
-    public double WindowBoundsWidth { get; private set; }
-
-    public double WindowBoundsHeight { get; private set; }
-
-    public string ResolutionScale { get; private set; }
-
-    public string CurrentOrientation { get; private set; }
-
-    public string PackageVersion { get; private set; }
-
-    public string Architecture { get; private set; }
-
-    public string Model { get; private set; }
-
-    public ulong TotalPhysicalMemory { get; private set; }
-
-    public ulong AvailablePhysicalMemory { get; private set; }
-
-    public string DeviceName { get; private set; }
-
-    public double UtcOffset { get; private set; }
-
-    public string Locale { get; private set; }
   }
 }

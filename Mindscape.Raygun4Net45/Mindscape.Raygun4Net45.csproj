@@ -121,6 +121,18 @@
     <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
       <Link>IRaygunMessageBuilder.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\Builders\RaygunClientMessageBuilder.cs">
+      <Link>Messages\Builders\RaygunClientMessageBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\Builders\RaygunEnvironmentMessageBuilder.cs">
+      <Link>Messages\Builders\RaygunEnvironmentMessageBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\Builders\RaygunErrorMessageBuilder.cs">
+      <Link>Messages\Builders\RaygunErrorMessageBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\Builders\RaygunRequestMessageBuilder.cs">
+      <Link>Messages\Builders\RaygunRequestMessageBuilder.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunClientMessage.cs">
       <Link>Messages\RaygunClientMessage.cs</Link>
     </Compile>
@@ -139,6 +151,12 @@
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunMessage.cs">
       <Link>Messages\RaygunMessage.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunMessageDetails.cs">
+      <Link>Messages\RaygunMessageDetails.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunRequestMessage.cs">
+      <Link>Messages\RaygunRequestMessage.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunResponseMessage.cs">
       <Link>Messages\RaygunResponseMessage.cs</Link>
     </Compile>
@@ -154,16 +172,13 @@
     <Compile Include="..\Mindscape.Raygun4Net\SimpleJson.cs">
       <Link>SimpleJson.cs</Link>
     </Compile>
-    <Compile Include="Messages\IRaygunRequestMessage.cs" />
-    <Compile Include="Messages\RaygunMessageDetails.cs" />
-    <Compile Include="Messages\RaygunRequestMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaygunClient.cs" />
     <Compile Include="RaygunClientBase.cs" />
     <Compile Include="RaygunMessageBuilder.cs" />
     <Compile Include="RaygunMessageBuilderBase.cs" />
     <Compile Include="WebApi\IRaygunWebApiClientProvider.cs" />
-    <Compile Include="WebApi\Messages\RaygunWebApiRequestMessage.cs" />
+    <Compile Include="WebApi\Messages\Builders\RaygunWebApiRequestMessageBuilder.cs" />
     <Compile Include="WebApi\RaygunWebApiClient.cs" />
     <Compile Include="WebApi\RaygunWebApiSelectors.cs" />
     <Compile Include="WebApi\RaygunWebApiControllerActivator.cs" />

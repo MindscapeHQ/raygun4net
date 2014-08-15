@@ -60,6 +60,15 @@
     <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
       <Link>IRaygunMessageBuilder.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunClientMessage.cs">
+      <Link>Messages\RaygunClientMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunEnvironmentMessage.cs">
+      <Link>Messages\RaygunEnvironmentMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorMessage.cs">
+      <Link>Messages\RaygunErrorMessage.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorStackTraceLineMessage.cs">
       <Link>Messages\RaygunErrorStackTraceLineMessage.cs</Link>
     </Compile>
@@ -72,21 +81,26 @@
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunMessageDetails.cs">
       <Link>Messages\RaygunMessageDetails.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunRequestMessage.cs">
+      <Link>Messages\RaygunRequestMessage.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunResponseMessage.cs">
       <Link>Messages\RaygunResponseMessage.cs</Link>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\RaygunRequestMessageOptions.cs">
       <Link>RaygunRequestMessageOptions.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\RaygunSendingMessageEventArgs.cs">
+      <Link>RaygunSendingMessageEventArgs.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\SimpleJson.cs">
       <Link>SimpleJson.cs</Link>
     </Compile>
-    <Compile Include="Messages\RaygunClientMessage.cs" />
-    <Compile Include="Messages\RaygunEnvironmentMessage.cs" />
-    <Compile Include="Messages\RaygunErrorMessage.cs" />
-    <Compile Include="Messages\RaygunRequestMessage.cs" />
+    <Compile Include="Messages\Builders\RaygunClientMessageBuilder.cs" />
+    <Compile Include="Messages\Builders\RaygunEnvironmentMessageBuilder.cs" />
+    <Compile Include="Messages\Builders\RaygunErrorMessageBuilder.cs" />
+    <Compile Include="Messages\Builders\RaygunRequestMessageBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RaygunSendingMessageEventArgs.cs" />
     <Compile Include="RaygunClient.cs" />
     <Compile Include="RaygunHttpModule.cs" />
     <Compile Include="RaygunMessageBuilder.cs" />
@@ -95,6 +109,7 @@
   <ItemGroup>
     <None Include="Raygun4Net2.snk" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

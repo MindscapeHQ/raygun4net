@@ -5,43 +5,47 @@ using System.Linq;
 using System.Net.Http;
 using Mindscape.Raygun4Net.Messages;
 
-namespace Mindscape.Raygun4Net.WebApi.Messages
+namespace Mindscape.Raygun4Net.WebApi.Messages.Builders
 {
-  public class RaygunWebApiRequestMessage : IRaygunRequestMessage
+  public class RaygunWebApiRequestMessageBuilder
   {
-    public RaygunWebApiRequestMessage(HttpRequestMessage request, RaygunRequestMessageOptions options = null)
+    private RaygunRequestMessage _raygunWebApiRequestMessage = new RaygunRequestMessage();
+
+    public RaygunRequestMessage Build(HttpRequestMessage request, RaygunRequestMessageOptions options = null)
     {
       options = options ?? new RaygunRequestMessageOptions();
 
-      HostName = request.RequestUri.Host;
-      Url = request.RequestUri.AbsolutePath;
-      HttpMethod = request.Method.ToString();
-      IPAddress = GetIPAddress(request);
+      _raygunWebApiRequestMessage.HostName = request.RequestUri.Host;
+      _raygunWebApiRequestMessage.Url = request.RequestUri.AbsolutePath;
+      _raygunWebApiRequestMessage.HttpMethod = request.Method.ToString();
+      _raygunWebApiRequestMessage.IPAddress = GetIPAddress(request);
 
-      Form = ToDictionary(request.GetQueryNameValuePairs(), options.IsFormFieldIgnored);
+      _raygunWebApiRequestMessage.Form = ToDictionary(request.GetQueryNameValuePairs(), options.IsFormFieldIgnored);
 
       SetHeadersAndRawData(request, options.IsHeaderIgnored);
+
+      return _raygunWebApiRequestMessage;
     }
 
     private void SetHeadersAndRawData(HttpRequestMessage request, Func<string, bool> ignored)
     {
-      Headers = new Dictionary<string, string>();
+      _raygunWebApiRequestMessage.Headers = new Dictionary<string, string>();
 
       foreach (var header in request.Headers.Where(h => !ignored(h.Key)))
       {
-        Headers[header.Key] = string.Join(",", header.Value);
+        _raygunWebApiRequestMessage.Headers[header.Key] = string.Join(",", header.Value);
       }
 
       if (request.Content.Headers.ContentLength.HasValue && request.Content.Headers.ContentLength.Value > 0)
       {
         foreach (var header in request.Content.Headers)
         {
-          Headers[header.Key] = string.Join(",", header.Value);
+          _raygunWebApiRequestMessage.Headers[header.Key] = string.Join(",", header.Value);
         }
 
         try
         {
-          RawData = request.Content.ReadAsStringAsync().Result;
+          _raygunWebApiRequestMessage.RawData = request.Content.ReadAsStringAsync().Result;
         }
         catch (Exception)
         {
@@ -83,25 +87,5 @@ namespace Mindscape.Raygun4Net.WebApi.Messages
       }
       return null;
     }
-
-    public string HostName { get; set; }
-
-    public string Url { get; set; }
-
-    public string HttpMethod { get; set; }
-
-    public string IPAddress { get; set; }
-
-    public IDictionary QueryString { get; set; }
-
-    public IList Cookies { get; set; }
-
-    public IDictionary Data { get; set; }
-
-    public IDictionary Form { get; set; }
-
-    public string RawData { get; set; }
-
-    public IDictionary Headers { get; set; }
   }
 }

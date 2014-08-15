@@ -100,6 +100,18 @@
     <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
       <Link>IRaygunMessageBuilder.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\Builders\RaygunClientMessageBuilder.cs">
+      <Link>Messages\Builders\RaygunClientMessageBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\Builders\RaygunEnvironmentMessageBuilder.cs">
+      <Link>Messages\Builders\RaygunEnvironmentMessageBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\Builders\RaygunErrorMessageBuilder.cs">
+      <Link>Messages\Builders\RaygunErrorMessageBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\Builders\RaygunRequestMessageBuilder.cs">
+      <Link>Messages\Builders\RaygunRequestMessageBuilder.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunClientMessage.cs">
       <Link>Messages\RaygunClientMessage.cs</Link>
     </Compile>
