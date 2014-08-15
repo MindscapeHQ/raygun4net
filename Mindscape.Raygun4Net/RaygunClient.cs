@@ -260,6 +260,16 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    /// <summary>
+    /// Asynchronously transmits a message to Raygun.io.
+    /// </summary>
+    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
+    /// set to a valid DateTime and as much of the Details property as is available.</param>
+    public void SendInBackground(RaygunMessage raygunMessage)
+    {
+      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+    }
+
     protected bool CanSend(Exception exception)
     {
       return exception == null || !exception.Data.Contains(SentKey) || false.Equals(exception.Data[SentKey]);
