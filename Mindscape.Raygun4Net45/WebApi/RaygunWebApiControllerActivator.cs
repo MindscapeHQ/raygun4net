@@ -22,6 +22,13 @@ namespace Mindscape.Raygun4Net.WebApi
       {
         return _concreteActivator.Create(request, controllerDescriptor, controllerType);
       }
+      catch(InvalidOperationException ex)
+      {
+        var client = _clientCreator.GenerateRaygunWebApiClient();
+        client.CurrentHttpRequest(request).SendInBackground(ex.InnerException);
+        client.FlagAsSent(ex); // Stops us re-sending the outer exception
+        throw;
+      }
       catch(Exception ex)
       {
         _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(request).SendInBackground(ex);
