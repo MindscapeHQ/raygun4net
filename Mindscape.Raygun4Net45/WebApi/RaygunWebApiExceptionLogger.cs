@@ -17,12 +17,16 @@ namespace Mindscape.Raygun4Net.WebApi
 
     public override void Log(ExceptionLoggerContext context)
     {
-      _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(context.Request).Send(context.Exception, new List<string> { "Exception Logger" });
+      _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(context.Request).Send(context.Exception);
     }
 
     public override Task LogAsync(ExceptionLoggerContext context, CancellationToken cancellationToken)
     {
-      return Task.Factory.StartNew(() => _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(context.Request).Send(context.Exception, new List<string> { "Exception Logger" }), cancellationToken);
+      return Task.Factory.StartNew(() => 
+        _clientCreator.GenerateRaygunWebApiClient()
+        .CurrentHttpRequest(context.Request)
+        .Send(context.Exception),
+      cancellationToken);
     }
   }
 }
