@@ -174,7 +174,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      SendInBackground(BuildMessage(exception, tags, userCustomData));
+      ThreadPool.QueueUserWorkItem(c => Send(BuildMessage(exception, tags, userCustomData)));
     }
     
     /// <summary>
