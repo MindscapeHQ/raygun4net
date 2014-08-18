@@ -32,21 +32,19 @@ namespace Mindscape.Raygun4Net.WebApi.Messages
         Headers[header.Key] = string.Join(",", header.Value);
       }
 
-      if (request.Content.Headers.ContentLength.HasValue && request.Content.Headers.ContentLength.Value > 0)
+      try
       {
-        foreach (var header in request.Content.Headers)
+        if (request.Content.Headers.ContentLength.HasValue && request.Content.Headers.ContentLength.Value > 0)
         {
-          Headers[header.Key] = string.Join(",", header.Value);
-        }
+          foreach (var header in request.Content.Headers)
+          {
+            Headers[header.Key] = string.Join(",", header.Value);
+          }
 
-        try
-        {
           RawData = request.Content.ReadAsStringAsync().Result;
         }
-        catch (Exception)
-        {
-        }
       }
+      catch (Exception) { }
     }
 
     private IDictionary ToDictionary(IEnumerable<KeyValuePair<string, string>> kvPairs, Func<string, bool> ignored)
@@ -64,22 +62,29 @@ namespace Mindscape.Raygun4Net.WebApi.Messages
 
     private string GetIPAddress(HttpRequestMessage request)
     {
-      if (request.Properties.ContainsKey(HttpContext))
+      try
       {
-        dynamic ctx = request.Properties[HttpContext];
-        if (ctx != null)
+        if (request.Properties.ContainsKey(HttpContext))
         {
-          return ctx.Request.UserHostAddress;
+          dynamic ctx = request.Properties[HttpContext];
+          if (ctx != null)
+          {
+            return ctx.Request.UserHostAddress;
+          }
+        }
+
+        if (request.Properties.ContainsKey(RemoteEndpointMessage))
+        {
+          dynamic remoteEndpoint = request.Properties[RemoteEndpointMessage];
+          if (remoteEndpoint != null)
+          {
+            return remoteEndpoint.Address;
+          }
         }
       }
-
-      if (request.Properties.ContainsKey(RemoteEndpointMessage))
+      catch (Exception ex)
       {
-        dynamic remoteEndpoint = request.Properties[RemoteEndpointMessage];
-        if (remoteEndpoint != null)
-        {
-          return remoteEndpoint.Address;
-        }
+        System.Diagnostics.Debug.WriteLine("Failed to get IP address: {0}", ex.Message);
       }
       return null;
     }

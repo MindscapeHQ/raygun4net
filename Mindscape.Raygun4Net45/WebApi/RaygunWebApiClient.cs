@@ -88,6 +88,19 @@ namespace Mindscape.Raygun4Net.WebApi
       }
     }
 
+    public override void SendInBackground(Exception exception, System.Collections.Generic.IList<string> tags, System.Collections.IDictionary userCustomData)
+    {
+      if (CanSend(exception))
+      {
+        var currentWebRequest = _currentWebRequest.Value;
+        ThreadPool.QueueUserWorkItem(c => {
+          _currentWebRequest.Value = currentWebRequest;
+          Send(BuildMessage(exception, tags, userCustomData));
+        });
+        FlagAsSent(exception);
+      }
+    }
+
     internal RaygunClientBase CurrentHttpRequest(HttpRequestMessage request)
     {
       _currentWebRequest.Value = request;

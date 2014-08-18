@@ -248,7 +248,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
+    public virtual void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       if (CanSend(exception))
       {
