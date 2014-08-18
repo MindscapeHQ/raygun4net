@@ -252,7 +252,7 @@ namespace Mindscape.Raygun4Net
     {
       if (CanSend(exception))
       {
-        SendInBackground(BuildMessage(exception, tags, userCustomData));
+        ThreadPool.QueueUserWorkItem(c => Send(BuildMessage(exception, tags, userCustomData)));
         FlagAsSent(exception);
       }
     }

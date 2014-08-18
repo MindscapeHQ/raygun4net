@@ -24,7 +24,7 @@ namespace Mindscape.Raygun4Net.WebApi
       }
       catch (HttpResponseException ex)
       {
-        _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(controllerContext.Request).Send(ex);
+        _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(controllerContext.Request).SendInBackground(ex);
         throw;
       }
     }
@@ -59,7 +59,7 @@ namespace Mindscape.Raygun4Net.WebApi
       }
       catch (HttpResponseException ex)
       {
-        _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(request).Send(ex);
+        _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(request).SendInBackground(ex);
         throw;
       }
     }
