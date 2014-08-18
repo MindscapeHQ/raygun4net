@@ -49,6 +49,20 @@ namespace Mindscape.Raygun4Net
       return true;
     }
 
+    // Returns true if the message can be sent, false if the sending is canceled.
+    protected bool OnSendingMessage(RaygunMessage raygunMessage)
+    {
+      bool result = true;
+      EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
+      if (handler != null)
+      {
+        RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage);
+        handler(this, args);
+        result = !args.Cancel;
+      }
+      return result;
+    }
+
     /// <summary>
     /// Gets or sets the user identity string.
     /// </summary>
@@ -63,6 +77,11 @@ namespace Mindscape.Raygun4Net
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
     /// </summary>
     public string ApplicationVersion { get; set; }
+
+    /// <summary>
+    /// Raised just before a message is sent. This can be used to make final adjustments to the <see cref="RaygunMessage"/>, or to cancel the send.
+    /// </summary>
+    public event EventHandler<RaygunSendingMessageEventArgs> SendingMessage;
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
@@ -166,34 +185,38 @@ namespace Mindscape.Raygun4Net
     {
       if (ValidateApiKey())
       {
-        HttpClientHandler handler = new HttpClientHandler {UseDefaultCredentials = true};
-
-        var client = new HttpClient(handler);
+        bool canSend = OnSendingMessage(raygunMessage);
+        if (canSend)
         {
-          client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("raygun4net-winrt", "1.0.0"));
+          HttpClientHandler handler = new HttpClientHandler {UseDefaultCredentials = true};
 
-          HttpContent httpContent = new StringContent(SimpleJson.SerializeObject(raygunMessage));
-          httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-raygun-message");
-          httpContent.Headers.Add("X-ApiKey", _apiKey);
-
-          try
+          var client = new HttpClient(handler);
           {
-            await PostMessageAsync(client, httpContent, RaygunSettings.Settings.ApiEndpoint);
-          }
-          catch (Exception ex)
-          {
-            System.Diagnostics.Debug.WriteLine("Error Logging Exception to Raygun.io {0}", ex.Message);
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("raygun4net-winrt", "1.0.0"));
 
-            if (RaygunSettings.Settings.ThrowOnError)
+            HttpContent httpContent = new StringContent(SimpleJson.SerializeObject(raygunMessage));
+            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-raygun-message");
+            httpContent.Headers.Add("X-ApiKey", _apiKey);
+
+            try
             {
-              throw;
+              await PostMessageAsync(client, httpContent, RaygunSettings.Settings.ApiEndpoint);
+            }
+            catch (Exception ex)
+            {
+              System.Diagnostics.Debug.WriteLine("Error Logging Exception to Raygun.io {0}", ex.Message);
+
+              if (RaygunSettings.Settings.ThrowOnError)
+              {
+                throw;
+              }
             }
           }
         }
       }
     }
 
-    private RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       exception = StripWrapperExceptions(exception);
 
