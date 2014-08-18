@@ -68,6 +68,20 @@ namespace Mindscape.Raygun4Net
       return true;
     }
 
+    // Returns true if the message can be sent, false if the sending is canceled.
+    protected bool OnSendingMessage(RaygunMessage raygunMessage)
+    {
+      bool result = true;
+      EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
+      if (handler != null)
+      {
+        RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage);
+        handler(this, args);
+        result = !args.Cancel;
+      }
+      return result;
+    }
+
     /// <summary>
     /// Gets or sets the user identity string.
     /// </summary>
@@ -82,6 +96,11 @@ namespace Mindscape.Raygun4Net
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
     /// </summary>
     public string ApplicationVersion { get; set; }
+
+    /// <summary>
+    /// Raised just before a message is sent. This can be used to make final adjustments to the <see cref="RaygunMessage"/>, or to cancel the send.
+    /// </summary>
+    public event EventHandler<RaygunSendingMessageEventArgs> SendingMessage;
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
@@ -281,22 +300,26 @@ namespace Mindscape.Raygun4Net
     {
       if (ValidateApiKey())
       {
-        try
+        bool canSend = OnSendingMessage(raygunMessage);
+        if (canSend)
         {
-          string message = SimpleJson.SerializeObject(raygunMessage);
+          try
+          {
+            string message = SimpleJson.SerializeObject(raygunMessage);
 
-          if (InternetAvailable())
-          {
-            await SendMessage(message);
+            if (InternetAvailable())
+            {
+              await SendMessage(message);
+            }
+            else
+            {
+              await SaveMessage(message);
+            }
           }
-          else
+          catch (Exception ex)
           {
-            await SaveMessage(message);
+            Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
           }
-        }
-        catch (Exception ex)
-        {
-          Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
         }
       }
     }
@@ -421,7 +444,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       exception = StripWrapperExceptions(exception);
 
@@ -451,9 +474,13 @@ namespace Mindscape.Raygun4Net
       {
         if (_version == null)
         {
-          var v = Windows.ApplicationModel.Package.Current.Id.Version;
-
-          _version = string.Format("{0}.{1}.{2}.{3}", v.Major, v.Minor, v.Build, v.Revision);
+          try
+          {
+            // The try catch block is to get the tests to work.
+            var v = Windows.ApplicationModel.Package.Current.Id.Version;
+            _version = string.Format("{0}.{1}.{2}.{3}", v.Major, v.Minor, v.Build, v.Revision);
+          }
+          catch (Exception) { }
         }
 
         return _version;
