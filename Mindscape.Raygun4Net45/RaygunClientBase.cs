@@ -248,11 +248,11 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
+    public virtual void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       if (CanSend(exception))
       {
-        SendInBackground(BuildMessage(exception, tags, userCustomData));
+        ThreadPool.QueueUserWorkItem(c => Send(BuildMessage(exception, tags, userCustomData)));
         FlagAsSent(exception);
       }
     }
@@ -272,7 +272,7 @@ namespace Mindscape.Raygun4Net
       return exception == null || !exception.Data.Contains(SentKey) || false.Equals(exception.Data[SentKey]);
     }
 
-    protected void FlagAsSent(Exception exception)
+    internal void FlagAsSent(Exception exception)
     {
       if (exception != null)
       {
