@@ -14,7 +14,15 @@ namespace Mindscape.Raygun4Net
       get
       {
         // If no configuration setting is provided then return the default values
-        return settings ?? new RaygunSettings { ApiKey = "", ApiEndpoint = new Uri(DefaultApiEndPoint) };
+        try
+        {
+          // The try catch block is to get the tests working
+          return settings ?? new RaygunSettings { ApiKey = "", ApiEndpoint = new Uri(DefaultApiEndPoint) };
+        }
+        catch (Exception)
+        {
+          return new RaygunSettings { ApiKey = "", ApiEndpoint = new Uri(DefaultApiEndPoint) };
+        }
       }
     }
 

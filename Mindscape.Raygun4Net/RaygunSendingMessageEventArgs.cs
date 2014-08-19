@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net

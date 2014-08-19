@@ -101,6 +101,8 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Model\FakeRaygunClient.cs" />
+    <Compile Include="RaygunClientTests.cs" />
     <Compile Include="RaygunMessageBuilderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

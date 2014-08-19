@@ -41,6 +41,8 @@
   <ItemGroup>
     <Compile Include="RaygunMessageBuilderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Model\FakeRaygunClient.cs" />
+    <Compile Include="RaygunClientTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -60,4 +62,5 @@
       <Name>Mindscape.Raygun4Net.Xamarin.iOS</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
 </Project>
