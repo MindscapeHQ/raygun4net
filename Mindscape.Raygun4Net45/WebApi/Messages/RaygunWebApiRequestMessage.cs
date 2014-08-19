@@ -20,6 +20,10 @@ namespace Mindscape.Raygun4Net.WebApi.Messages
       RawData = request.RawData;
     }
 
+    public RaygunWebApiRequestMessage(HttpRequestMessage request, RaygunRequestMessageOptions options = null)
+      : this(new HttpRequestDetails(request, options))
+    {
+    }
 
     public string HostName { get; set; }
 

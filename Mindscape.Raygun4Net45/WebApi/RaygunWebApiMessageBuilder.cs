@@ -56,5 +56,10 @@ namespace Mindscape.Raygun4Net.WebApi
 
       return this;
     }
+
+    public IRaygunMessageBuilder SetHttpDetails(HttpRequestMessage message, RaygunRequestMessageOptions messageOptions = null)
+    {
+      return SetHttpDetails(new HttpRequestDetails(message, messageOptions));
+    }
   }
 }
