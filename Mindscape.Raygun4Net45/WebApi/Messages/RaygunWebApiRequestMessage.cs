@@ -9,42 +9,57 @@ namespace Mindscape.Raygun4Net.WebApi.Messages
 {
   public class RaygunWebApiRequestMessage : IRaygunRequestMessage
   {
-    public RaygunWebApiRequestMessage(HttpRequestMessage request, RaygunRequestMessageOptions options = null)
+    public RaygunWebApiRequestMessage(HttpRequestDetails request)
     {
-      options = options ?? new RaygunRequestMessageOptions();
-
       HostName = request.RequestUri.Host;
       Url = request.RequestUri.AbsolutePath;
       HttpMethod = request.Method.ToString();
-      IPAddress = GetIPAddress(request);
+      IPAddress = request.IPAddress;
 
-      Form = ToDictionary(request.GetQueryNameValuePairs(), options.IsFormFieldIgnored);
-
-      SetHeadersAndRawData(request, options.IsHeaderIgnored);
+      Headers = request.Headers;
+      RawData = request.RawData;
     }
 
-    private void SetHeadersAndRawData(HttpRequestMessage request, Func<string, bool> ignored)
+
+    public string HostName { get; set; }
+
+    public string Url { get; set; }
+
+    public string HttpMethod { get; set; }
+
+    public string IPAddress { get; set; }
+
+    public IDictionary QueryString { get; set; }
+
+    public IList Cookies { get; set; }
+
+    public IDictionary Data { get; set; }
+
+    public IDictionary Form { get; set; }
+
+    public string RawData { get; set; }
+
+    public IDictionary Headers { get; set; }
+  }
+
+  public class HttpRequestDetails
+  {
+    public Uri RequestUri { get; set; }
+    public HttpMethod Method { get; set; }
+    public IDictionary Form { get; set; }
+    public IDictionary Headers { get; set; }
+    public string IPAddress { get; set; }
+    public string RawData { get; set; }
+
+    public HttpRequestDetails(HttpRequestMessage message, RaygunRequestMessageOptions options = null)
     {
-      Headers = new Dictionary<string, string>();
+      options = options ?? new RaygunRequestMessageOptions();
 
-      foreach (var header in request.Headers.Where(h => !ignored(h.Key)))
-      {
-        Headers[header.Key] = string.Join(",", header.Value);
-      }
-
-      try
-      {
-        if (request.Content.Headers.ContentLength.HasValue && request.Content.Headers.ContentLength.Value > 0)
-        {
-          foreach (var header in request.Content.Headers)
-          {
-            Headers[header.Key] = string.Join(",", header.Value);
-          }
-
-          RawData = request.Content.ReadAsStringAsync().Result;
-        }
-      }
-      catch (Exception) { }
+      RequestUri = message.RequestUri;
+      Method = message.Method;
+      Form = ToDictionary(message.GetQueryNameValuePairs(), options.IsFormFieldIgnored);
+      IPAddress = GetIPAddress(message);
+      SetHeadersAndRawData(message, options.IsHeaderIgnored);
     }
 
     private IDictionary ToDictionary(IEnumerable<KeyValuePair<string, string>> kvPairs, Func<string, bool> ignored)
@@ -56,9 +71,6 @@ namespace Mindscape.Raygun4Net.WebApi.Messages
       }
       return dictionary;
     }
-
-    private const string HttpContext = "MS_HttpContext";
-    private const string RemoteEndpointMessage = "System.ServiceModel.Channels.RemoteEndpointMessageProperty";
 
     private string GetIPAddress(HttpRequestMessage request)
     {
@@ -89,24 +101,31 @@ namespace Mindscape.Raygun4Net.WebApi.Messages
       return null;
     }
 
-    public string HostName { get; set; }
+    private void SetHeadersAndRawData(HttpRequestMessage request, Func<string, bool> ignored)
+    {
+      Headers = new Dictionary<string, string>();
 
-    public string Url { get; set; }
+      foreach (var header in request.Headers.Where(h => !ignored(h.Key)))
+      {
+        Headers[header.Key] = string.Join(",", header.Value);
+      }
 
-    public string HttpMethod { get; set; }
+      try
+      {
+        if (request.Content.Headers.ContentLength.HasValue && request.Content.Headers.ContentLength.Value > 0)
+        {
+          foreach (var header in request.Content.Headers)
+          {
+            Headers[header.Key] = string.Join(",", header.Value);
+          }
 
-    public string IPAddress { get; set; }
+          RawData = request.Content.ReadAsStringAsync().Result;
+        }
+      }
+      catch (Exception) { }
+    }
 
-    public IDictionary QueryString { get; set; }
-
-    public IList Cookies { get; set; }
-
-    public IDictionary Data { get; set; }
-
-    public IDictionary Form { get; set; }
-
-    public string RawData { get; set; }
-
-    public IDictionary Headers { get; set; }
+    private const string HttpContext = "MS_HttpContext";
+    private const string RemoteEndpointMessage = "System.ServiceModel.Channels.RemoteEndpointMessageProperty";
   }
 }

@@ -5,13 +5,14 @@ using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.ExceptionHandling;
-using System.Web.Http.Filters;
+using Mindscape.Raygun4Net.WebApi.Messages;
 
 namespace Mindscape.Raygun4Net.WebApi
 {
   public class RaygunWebApiClient : RaygunClientBase
   {
     private readonly ThreadLocal<HttpRequestMessage> _currentWebRequest = new ThreadLocal<HttpRequestMessage>(() => null);
+    private readonly ThreadLocal<HttpRequestDetails> _currentRequestDetails = new ThreadLocal<HttpRequestDetails>(() => null);
 
     private static RaygunWebApiExceptionFilter _exceptionFilter;
     private static RaygunWebApiActionFilter _actionFilter;
@@ -92,9 +93,14 @@ namespace Mindscape.Raygun4Net.WebApi
     {
       if (CanSend(exception))
       {
-        var currentWebRequest = _currentWebRequest.Value;
+        // We need to process the HttpRequestMessage on the current thread,
+        // otherwise it will be disposed while we are using it on the other thread.
+        var currentRequestDetails = _currentWebRequest.Value != null ? 
+          new HttpRequestDetails(_currentWebRequest.Value, _requestMessageOptions)
+          : null;
+
         ThreadPool.QueueUserWorkItem(c => {
-          _currentWebRequest.Value = currentWebRequest;
+          _currentRequestDetails.Value = currentRequestDetails;
           Send(BuildMessage(exception, tags, userCustomData));
         });
         FlagAsSent(exception);
@@ -110,7 +116,7 @@ namespace Mindscape.Raygun4Net.WebApi
     protected override IRaygunMessageBuilder BuildMessageCore()
     {
       return RaygunWebApiMessageBuilder.New
-        .SetHttpDetails(_currentWebRequest.Value, _requestMessageOptions);
+        .SetHttpDetails(_currentRequestDetails.Value);
     }
   }
 }

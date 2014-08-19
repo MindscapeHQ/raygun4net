@@ -47,11 +47,11 @@ namespace Mindscape.Raygun4Net.WebApi
       return base.SetExceptionDetails(exception);
     }
 
-    public IRaygunMessageBuilder SetHttpDetails(HttpRequestMessage message, RaygunRequestMessageOptions messageOptions = null)
+    public IRaygunMessageBuilder SetHttpDetails(HttpRequestDetails message)
     {
       if (message != null)
       {
-        _raygunMessage.Details.Request = new RaygunWebApiRequestMessage(message, messageOptions);
+        _raygunMessage.Details.Request = new RaygunWebApiRequestMessage(message);
       }
 
       return this;
