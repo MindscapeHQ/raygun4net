@@ -254,27 +254,27 @@ Xamarin for iOS
 In the main entry point of the application, use the static RaygunClient.Attach method using your app API key.
 There is also an overload for the Attach method that lets you pass in a user-identity string which is useful for tracking affected users in your Raygun.io dashboard.
 
-static void Main (string[] args)
+static void Main(string[] args)
 {
   RaygunClient.Attach("YOUR_APP_API_KEY");
 
-  UIApplication.Main (args, null, "AppDelegate");
+  UIApplication.Main(args, null, "AppDelegate");
 }
 
 At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages or changing options such as the User identity string.
 
 Xamarin for Mac
 ====================
-Xamarin for Mac support is not included in the NuGet package or the Raygun4Net Xamarin Component. Instead, download the Mindscape.Raygun4Net.Xamarin.Mac.dll from the latest release on GitHub: https://github.com/MindscapeHQ/raygun4net/releases
+Xamarin for Mac support is not included in the NuGet package or the Raygun4Net Xamarin Component. Instead, download the .zip of assemblies from the latest release on GitHub: https://github.com/MindscapeHQ/raygun4net/releases (Click the green button). Then copy and reference the Mindscape.Raygun4Net.Xamarin.Mac.dll into your Xamarin.Mac project.
 
 In the main entry point of the application, use the static RaygunClient.Attach method using your app API key.
 
 static void Main(string[] args)
 {
-  RaygunClient.Attach ("YOUR_APP_API_KEY");
+  RaygunClient.Attach("YOUR_APP_API_KEY");
 
-  NSApplication.Init ();
-  NSApplication.Main (args);
+  NSApplication.Init();
+  NSApplication.Main(args);
 }
 
 At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages or changing options such as the User identity string.
