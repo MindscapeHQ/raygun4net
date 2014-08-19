@@ -74,5 +74,8 @@
     <Compile Include="Messages\RaygunMessageDetails.cs" />
     <Compile Include="Messages\RaygunIdentifierMessage.cs" />
     <Compile Include="Messages\RaygunErrorStackTraceLineMessage.cs" />
+    <Compile Include="..\Mindscape.Raygun4Net\RaygunSendingMessageEventArgs.cs">
+      <Link>RaygunSendingMessageEventArgs.cs</Link>
+    </Compile>
   </ItemGroup>
 </Project>

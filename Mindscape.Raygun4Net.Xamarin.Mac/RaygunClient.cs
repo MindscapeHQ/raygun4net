@@ -37,6 +37,20 @@ namespace Mindscape.Raygun4Net
       return true;
     }
 
+    // Returns true if the message can be sent, false if the sending is canceled.
+    protected bool OnSendingMessage(RaygunMessage raygunMessage)
+    {
+      bool result = true;
+      EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
+      if (handler != null)
+      {
+        RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage);
+        handler(this, args);
+        result = !args.Cancel;
+      }
+      return result;
+    }
+
     /// <summary>
     /// Gets or sets the user identity string.
     /// </summary>
@@ -51,6 +65,11 @@ namespace Mindscape.Raygun4Net
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
     /// </summary>
     public string ApplicationVersion { get; set; }
+
+    /// <summary>
+    /// Raised just before a message is sent. This can be used to make final adjustments to the <see cref="RaygunMessage"/>, or to cancel the send.
+    /// </summary>
+    public event EventHandler<RaygunSendingMessageEventArgs> SendingMessage;
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
@@ -239,32 +258,36 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void Send(RaygunMessage raygunMessage)
     {
-      if (ValidateApiKey ())
+      if (ValidateApiKey())
       {
-        string message = null;
-        try
+        bool canSend = OnSendingMessage(raygunMessage);
+        if (canSend)
         {
-          message = SimpleJson.SerializeObject(raygunMessage);
-        }
-        catch (Exception ex)
-        {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error Serializing Exception {0}", ex.Message));
-        }
-
-        if (!String.IsNullOrWhiteSpace(message))
-        {
-          using (var client = new WebClient())
+          string message = null;
+          try
           {
-            client.Headers.Add("X-ApiKey", _apiKey);
-            client.Encoding = System.Text.Encoding.UTF8;
+            message = SimpleJson.SerializeObject(raygunMessage);
+          }
+          catch (Exception ex)
+          {
+            System.Diagnostics.Debug.WriteLine(string.Format("Error Serializing Exception {0}", ex.Message));
+          }
 
-            try
+          if (!String.IsNullOrWhiteSpace(message))
+          {
+            using (var client = new WebClient())
             {
-              client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
-            }
-            catch (Exception ex)
-            {
-              System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+              client.Headers.Add("X-ApiKey", _apiKey);
+              client.Encoding = System.Text.Encoding.UTF8;
+
+              try
+              {
+                client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
+              }
+              catch (Exception ex)
+              {
+                System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+              }
             }
           }
         }

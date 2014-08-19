@@ -92,8 +92,8 @@ namespace Mindscape.Raygun4Net
       {
         if (NSBundle.MainBundle != null)
         {
-          NSObject versionObject = NSBundle.MainBundle.ObjectForInfoDictionary ("CFBundleShortVersionString");
-          NSObject buildObject = NSBundle.MainBundle.ObjectForInfoDictionary ("CFBundleVersion");
+          NSObject versionObject = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleShortVersionString");
+          NSObject buildObject = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion");
           if (versionObject != null && buildObject != null)
           {
             _raygunMessage.Details.Version = versionObject + " (" + buildObject + ")";
@@ -110,4 +110,3 @@ namespace Mindscape.Raygun4Net
     }
   }
 }
-
