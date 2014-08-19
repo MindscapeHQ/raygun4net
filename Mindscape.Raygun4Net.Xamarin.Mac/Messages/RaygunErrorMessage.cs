@@ -170,6 +170,11 @@ namespace Mindscape.Raygun4Net.Messages
           fileName = stackTraceLn;
         }
 
+        if ("<filename unknown>".Equals(fileName))
+        {
+          fileName = null;
+        }
+
         var line = new RaygunErrorStackTraceLineMessage
         {
           FileName = fileName,
