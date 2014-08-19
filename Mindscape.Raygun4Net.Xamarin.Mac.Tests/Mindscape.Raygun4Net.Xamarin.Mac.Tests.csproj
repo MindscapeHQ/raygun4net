@@ -33,6 +33,8 @@
   <ItemGroup>
     <Compile Include="RaygunErrorMessageTests.cs" />
     <Compile Include="Model\FakeRaygunErrorMessage.cs" />
+    <Compile Include="Model\FakeRaygunClient.cs" />
+    <Compile Include="RaygunClientTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

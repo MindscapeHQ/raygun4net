@@ -90,14 +90,21 @@ namespace Mindscape.Raygun4Net
       }
       else
       {
-        if (NSBundle.MainBundle != null)
+        try // So that the test can run.
         {
-          NSObject versionObject = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleShortVersionString");
-          NSObject buildObject = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion");
-          if (versionObject != null && buildObject != null)
+          if (NSBundle.MainBundle != null)
           {
-            _raygunMessage.Details.Version = versionObject + " (" + buildObject + ")";
+            NSObject versionObject = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleShortVersionString");
+            NSObject buildObject = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion");
+            if (versionObject != null && buildObject != null)
+            {
+              _raygunMessage.Details.Version = versionObject + " (" + buildObject + ")";
+            }
           }
+        }
+        catch (Exception e)
+        {
+          System.Diagnostics.Debug.WriteLine("Failed to get version: ", e.Message);
         }
       }
 

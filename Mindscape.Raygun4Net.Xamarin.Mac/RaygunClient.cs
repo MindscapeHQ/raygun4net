@@ -223,7 +223,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    internal RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       exception = StripWrapperExceptions(exception);
 
