@@ -39,7 +39,7 @@ Projects built with the following frameworks are supported:
 * Windows 8
 * Windows Phone 7.1 and 8
 * WinRT
-* Xamarin.iOS and Xamarin.Android
+* Xamarin.iOS, Xamarin.Android and Xamarin.Mac
 
 Add the NuGet package to a project which uses one of the above frameworks and the correct assembly will be referenced.
 
@@ -283,11 +283,29 @@ In the main entry point of the application, use the static RaygunClient.Attach m
 There is also an overload for the Attach method that lets you pass in a user-identity string which is useful for tracking affected users in your Raygun.io dashboard.
 
 ```csharp
-static void Main (string[] args)
+static void Main(string[] args)
 {
   RaygunClient.Attach("YOUR_APP_API_KEY");
 
-  UIApplication.Main (args, null, "AppDelegate");
+  UIApplication.Main(args, null, "AppDelegate");
+}
+```
+
+At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages or changing options such as the User identity string.
+
+### Xamarin for Mac
+
+Xamarin for Mac support is not included in the NuGet package or the Raygun4Net Xamarin Component. Instead, download the .zip of assemblies from the latest release on GitHub: https://github.com/MindscapeHQ/raygun4net/releases (Click the green button). Then copy and reference the Mindscape.Raygun4Net.Xamarin.Mac.dll into your Xamarin.Mac project.
+
+In the main entry point of the application, use the static RaygunClient.Attach method using your app API key.
+
+```csharp
+static void Main(string[] args)
+{
+  RaygunClient.Attach("YOUR_APP_API_KEY");
+
+  NSApplication.Init();
+  NSApplication.Main(args);
 }
 ```
 
