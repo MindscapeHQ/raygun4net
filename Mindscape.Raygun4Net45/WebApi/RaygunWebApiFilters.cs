@@ -42,7 +42,8 @@ namespace Mindscape.Raygun4Net.WebApi
     {
       base.OnActionExecuted(context);
 
-      if (context != null && context.Response != null && (int)context.Response.StatusCode >= 400)
+      // Don't bother processing bad StatusCodes if there is an exception attached - it will be handled by another part of the framework.
+      if (context != null && context.Exception == null && context.Response != null && (int)context.Response.StatusCode >= 400)
       {
         try
         {
