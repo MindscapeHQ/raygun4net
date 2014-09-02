@@ -39,6 +39,7 @@ namespace Mindscape.Raygun4Net.Messages
         if (contentType != "text/html" && contentType != "application/x-www-form-urlencoded" && request.RequestType != "GET")
         {
           int length = 4096;
+          request.InputStream.Seek(0, SeekOrigin.Begin);
           string temp = new StreamReader(request.InputStream).ReadToEnd();
           if (length > temp.Length)
           {
