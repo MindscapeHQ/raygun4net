@@ -20,6 +20,9 @@ namespace Mindscape.Raygun4Net
     private static List<Type> _wrapperExceptions;
     internal const string SentKey = "AlreadySentByRaygun";
 
+    [ThreadStatic]
+    private static RaygunRequestMessage _currentRequestMessage;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
     /// </summary>
@@ -221,6 +224,8 @@ namespace Mindscape.Raygun4Net
     {
       if (CanSend(exception))
       {
+        _currentRequestMessage = BuildRequestMessage();
+
         Send(BuildMessage(exception, tags, userCustomData));
         FlagAsSent(exception);
       }
@@ -255,7 +260,14 @@ namespace Mindscape.Raygun4Net
     {
       if (CanSend(exception))
       {
-        ThreadPool.QueueUserWorkItem(c => Send(BuildMessage(exception, tags, userCustomData)));
+        // We need to process the HttpRequestMessage on the current thread,
+        // otherwise it will be disposed while we are using it on the other thread.
+        RaygunRequestMessage currentRequestMessage = BuildRequestMessage();
+
+        ThreadPool.QueueUserWorkItem(c => {
+          _currentRequestMessage = currentRequestMessage;
+          Send(BuildMessage(exception, tags, userCustomData));
+        });
         FlagAsSent(exception);
       }
     }
@@ -283,12 +295,34 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    private RaygunRequestMessage BuildRequestMessage()
+    {
+      RaygunRequestMessage requestMessage = null;
+      HttpContext context = HttpContext.Current;
+      if (context != null)
+      {
+        HttpRequest request = null;
+        try
+        {
+          request = context.Request;
+        }
+        catch (HttpException) { }
+
+        if (request != null)
+        {
+          requestMessage = new RaygunRequestMessage(request, _requestMessageOptions ?? new RaygunRequestMessageOptions());
+        }
+      }
+
+      return requestMessage;
+    }
+
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       exception = StripWrapperExceptions(exception);
 
       var message = RaygunMessageBuilder.New
-        .SetHttpDetails(HttpContext.Current, _requestMessageOptions)
+        .SetHttpDetails(_currentRequestMessage)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)

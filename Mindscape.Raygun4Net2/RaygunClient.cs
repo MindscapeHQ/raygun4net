@@ -16,6 +16,9 @@ namespace Mindscape.Raygun4Net
     private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private static List<Type> _wrapperExceptions;
 
+    [ThreadStatic]
+    private static RaygunRequestMessage _currentRequestMessage;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
     /// </summary>
@@ -207,6 +210,8 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
+      _currentRequestMessage = BuildRequestMessage();
+
       Send(BuildMessage(exception, tags, userCustomData));
     }
 
@@ -237,7 +242,14 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      ThreadPool.QueueUserWorkItem(c => Send(BuildMessage(exception, tags, userCustomData)));
+      // We need to process the HttpRequestMessage on the current thread,
+      // otherwise it will be disposed while we are using it on the other thread.
+      RaygunRequestMessage currentRequestMessage = BuildRequestMessage();
+
+      ThreadPool.QueueUserWorkItem(c => {
+        _currentRequestMessage = currentRequestMessage;
+        Send(BuildMessage(exception, tags, userCustomData));
+      });
     }
 
     /// <summary>
@@ -250,12 +262,34 @@ namespace Mindscape.Raygun4Net
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
 
+    private RaygunRequestMessage BuildRequestMessage()
+    {
+      RaygunRequestMessage requestMessage = null;
+      HttpContext context = HttpContext.Current;
+      if (context != null)
+      {
+        HttpRequest request = null;
+        try
+        {
+          request = context.Request;
+        }
+        catch (HttpException) { }
+
+        if (request != null)
+        {
+          requestMessage = new RaygunRequestMessage(request, _requestMessageOptions ?? new RaygunRequestMessageOptions());
+        }
+      }
+
+      return requestMessage;
+    }
+
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       exception = StripWrapperExceptions(exception);
 
       var message = RaygunMessageBuilder.New
-        .SetHttpDetails(HttpContext.Current, _requestMessageOptions)
+        .SetHttpDetails(_currentRequestMessage)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)
