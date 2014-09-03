@@ -106,9 +106,6 @@
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunEnvironmentMessage.cs">
       <Link>Messages\RaygunEnvironmentMessage.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorMessage.cs">
-      <Link>Messages\RaygunErrorMessage.cs</Link>
-    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorStackTraceLineMessage.cs">
       <Link>Messages\RaygunErrorStackTraceLineMessage.cs</Link>
     </Compile>
@@ -145,6 +142,7 @@
     <Compile Include="..\Mindscape.Raygun4Net\SimpleJson.cs">
       <Link>SimpleJson.cs</Link>
     </Compile>
+    <Compile Include="Messages\RaygunErrorMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaygunExceptionFilterAttribute.cs" />
     <Compile Include="RaygunHttpModule.cs" />
