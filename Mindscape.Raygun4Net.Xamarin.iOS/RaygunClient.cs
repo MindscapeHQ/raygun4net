@@ -201,16 +201,23 @@ namespace Mindscape.Raygun4Net
       get { return _client; }
     }
 
+    [DllImport ("libc")]
+    private static extern int sigaction (Signal sig, IntPtr act, IntPtr oact);
+
+    enum Signal {
+      SIGBUS = 10,
+      SIGSEGV = 11
+    }
+
+    private const string StackTraceDirectory = "stacktraces";
+
     /// <summary>
     /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
     /// </summary>
     /// <param name="apiKey">Your app api key.</param>
     public static void Attach(string apiKey)
     {
-      Detach();
-      _client = new RaygunClient(apiKey);
-      AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-      TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+      Attach(apiKey, null);
     }
 
     /// <summary>
@@ -224,6 +231,22 @@ namespace Mindscape.Raygun4Net
       _client = new RaygunClient(apiKey) { User = user };
       AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+
+      IntPtr sigbus = Marshal.AllocHGlobal (512);
+      IntPtr sigsegv = Marshal.AllocHGlobal (512);
+
+      // Store Mono SIGSEGV and SIGBUS handlers
+      sigaction (Signal.SIGBUS, IntPtr.Zero, sigbus);
+      sigaction (Signal.SIGSEGV, IntPtr.Zero, sigsegv);
+
+      Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun.SharedReporterWithApiKey (apiKey);
+
+      // Restore Mono SIGSEGV and SIGBUS handlers
+      sigaction (Signal.SIGBUS, sigbus, IntPtr.Zero);
+      sigaction (Signal.SIGSEGV, sigsegv, IntPtr.Zero);
+
+      Marshal.FreeHGlobal (sigbus);
+      Marshal.FreeHGlobal (sigsegv);
     }
 
     /// <summary>

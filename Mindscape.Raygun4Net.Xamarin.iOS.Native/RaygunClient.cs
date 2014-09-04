@@ -40,15 +40,19 @@ namespace Mindscape.Raygun4Net.Xamarin.iOS.Native
       Marshal.FreeHGlobal (sigbus);
       Marshal.FreeHGlobal (sigsegv);
 
-      AppDomain.CurrentDomain.UnhandledException += (sender, e) => { WriteExceptionInformation(reporter.NextReportUUID, e.ExceptionObject as Exception); };
-      TaskScheduler.UnobservedTaskException += (sender, e) => { WriteExceptionInformation(reporter.NextReportUUID, e.Exception); };
+      AppDomain.CurrentDomain.UnhandledException += (sender, e) => {
+        WriteExceptionInformation (reporter.NextReportUUID, e.ExceptionObject as Exception);
+      };
+      TaskScheduler.UnobservedTaskException += (sender, e) => {
+        WriteExceptionInformation (reporter.NextReportUUID, e.Exception);
+      };
     }
 
     private static void PopulateCrashReportDirectoryStructure()
     {
       var documents = Environment.GetFolderPath (Environment.SpecialFolder.MyDocuments);
-      var cache = Path.Combine (documents, "..", "Library", "Caches");
-      Directory.CreateDirectory (Path.Combine (cache, StackTraceDirectory), new System.Security.AccessControl.DirectorySecurity());
+      var path = Path.Combine (documents, "..", "Library", "Caches", StackTraceDirectory);
+      Directory.CreateDirectory (path);
     }
 
     private static void WriteExceptionInformation(string identifier, Exception exception)
