@@ -220,6 +220,8 @@ namespace Mindscape.Raygun4Net
       Attach(apiKey, null);
     }
 
+    private static Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun _reporter;
+
     /// <summary>
     /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
     /// </summary>
@@ -228,25 +230,28 @@ namespace Mindscape.Raygun4Net
     public static void Attach(string apiKey, string user)
     {
       Detach();
+
+      PopulateCrashReportDirectoryStructure ();
+
       _client = new RaygunClient(apiKey) { User = user };
       AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 
-      IntPtr sigbus = Marshal.AllocHGlobal (512);
-      IntPtr sigsegv = Marshal.AllocHGlobal (512);
+      //IntPtr sigbus = Marshal.AllocHGlobal (512);
+      //IntPtr sigsegv = Marshal.AllocHGlobal (512);
 
       // Store Mono SIGSEGV and SIGBUS handlers
-      sigaction (Signal.SIGBUS, IntPtr.Zero, sigbus);
-      sigaction (Signal.SIGSEGV, IntPtr.Zero, sigsegv);
+      //sigaction (Signal.SIGBUS, IntPtr.Zero, sigbus);
+      //sigaction (Signal.SIGSEGV, IntPtr.Zero, sigsegv);
 
-      Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun.SharedReporterWithApiKey (apiKey);
+      _reporter = Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun.SharedReporterWithApiKey (apiKey);
 
       // Restore Mono SIGSEGV and SIGBUS handlers
-      sigaction (Signal.SIGBUS, sigbus, IntPtr.Zero);
-      sigaction (Signal.SIGSEGV, sigsegv, IntPtr.Zero);
+      //sigaction (Signal.SIGBUS, sigbus, IntPtr.Zero);
+      //sigaction (Signal.SIGSEGV, sigsegv, IntPtr.Zero);
 
-      Marshal.FreeHGlobal (sigbus);
-      Marshal.FreeHGlobal (sigsegv);
+      //Marshal.FreeHGlobal (sigbus);
+      //Marshal.FreeHGlobal (sigsegv);
     }
 
     /// <summary>
@@ -263,6 +268,7 @@ namespace Mindscape.Raygun4Net
       if (e.Exception != null)
       {
         _client.Send(e.Exception);
+        WriteExceptionInformation (_reporter.NextReportUUID, e.Exception);
       }
     }
 
@@ -271,10 +277,31 @@ namespace Mindscape.Raygun4Net
       if (e.ExceptionObject is Exception)
       {
         _client.Send(e.ExceptionObject as Exception);
+        WriteExceptionInformation (_reporter.NextReportUUID, e.ExceptionObject as Exception);
       }
     }
 
-    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    private static void PopulateCrashReportDirectoryStructure()
+    {
+      var documents = Environment.GetFolderPath (Environment.SpecialFolder.MyDocuments);
+      var path = Path.Combine (documents, "..", "Library", "Caches", StackTraceDirectory);
+      Directory.CreateDirectory (path);
+    }
+
+    private static void WriteExceptionInformation(string identifier, Exception exception)
+    {
+      if (exception == null) return;
+
+      var documents = Environment.GetFolderPath (Environment.SpecialFolder.MyDocuments);
+      var path = Path.GetFullPath(Path.Combine (documents, "..", "Library", "Caches", StackTraceDirectory, string.Format ("{0}", identifier)));
+
+      var exceptionType = exception.GetType();
+      string message = exceptionType.Name + ": " + exception.Message;
+
+      File.WriteAllText (path, string.Join(Environment.NewLine, exceptionType.FullName, message, exception.StackTrace));
+    }
+
+    internal RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       exception = StripWrapperExceptions(exception);
 
