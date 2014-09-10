@@ -222,12 +222,19 @@ namespace Mindscape.Raygun4Net
 
     private static Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun _reporter;
 
+    public static void Attach(string apiKey, string user)
+    {
+      Attach (apiKey, user, true, true);
+    }
+
     /// <summary>
     /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
     /// </summary>
     /// <param name="apiKey">Your app api key.</param>
     /// <param name="user">An identity string for tracking affected users.</param>
-    public static void Attach(string apiKey, string user)
+    /// <param name="canReportNativeErrors">Whether or not to listen to and report native exceptions.</param>
+    /// <param name="hijackNativeSignals">When true, this solves the issue where null reference exceptions crash the app, but when false, additional native errors can be reported.</param>
+    public static void Attach(string apiKey, string user, bool canReportNativeErrors, bool hijackNativeSignals)
     {
       Detach();
 
@@ -237,21 +244,31 @@ namespace Mindscape.Raygun4Net
       AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 
-      //IntPtr sigbus = Marshal.AllocHGlobal (512);
-      //IntPtr sigsegv = Marshal.AllocHGlobal (512);
+      if (canReportNativeErrors)
+      {
+        if (hijackNativeSignals)
+        {
+          IntPtr sigbus = Marshal.AllocHGlobal (512);
+          IntPtr sigsegv = Marshal.AllocHGlobal (512);
 
-      // Store Mono SIGSEGV and SIGBUS handlers
-      //sigaction (Signal.SIGBUS, IntPtr.Zero, sigbus);
-      //sigaction (Signal.SIGSEGV, IntPtr.Zero, sigsegv);
+          // Store Mono SIGSEGV and SIGBUS handlers
+          sigaction (Signal.SIGBUS, IntPtr.Zero, sigbus);
+          sigaction (Signal.SIGSEGV, IntPtr.Zero, sigsegv);
 
-      _reporter = Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun.SharedReporterWithApiKey (apiKey);
+          _reporter = Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun.SharedReporterWithApiKey (apiKey);
 
-      // Restore Mono SIGSEGV and SIGBUS handlers
-      //sigaction (Signal.SIGBUS, sigbus, IntPtr.Zero);
-      //sigaction (Signal.SIGSEGV, sigsegv, IntPtr.Zero);
+          // Restore Mono SIGSEGV and SIGBUS handlers
+          sigaction (Signal.SIGBUS, sigbus, IntPtr.Zero);
+          sigaction (Signal.SIGSEGV, sigsegv, IntPtr.Zero);
 
-      //Marshal.FreeHGlobal (sigbus);
-      //Marshal.FreeHGlobal (sigsegv);
+          Marshal.FreeHGlobal (sigbus);
+          Marshal.FreeHGlobal (sigsegv);
+        }
+        else
+        {
+          _reporter = Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun.SharedReporterWithApiKey (apiKey);
+        }
+      }
     }
 
     /// <summary>
