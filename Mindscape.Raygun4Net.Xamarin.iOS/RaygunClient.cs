@@ -32,6 +32,8 @@ namespace Mindscape.Raygun4Net
   {
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
+    private string _user;
+    private RaygunIdentifierMessage _userInfo;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -56,6 +58,92 @@ namespace Mindscape.Raygun4Net
       }
       return true;
     }
+
+    // Returns true if the message can be sent, false if the sending is canceled.
+    protected bool OnSendingMessage(RaygunMessage raygunMessage)
+    {
+      bool result = true;
+      EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
+      if (handler != null)
+      {
+        RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage);
+        handler(this, args);
+        result = !args.Cancel;
+      }
+      return result;
+    }
+
+    /// <summary>
+    /// Gets or sets the user identity string.
+    /// </summary>
+    public string User
+    {
+      get { return _user; }
+      set
+      {
+        _user = value;
+        if (_reporter != null)
+        {
+          _reporter.Identify(_user);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets information about the user including the identity string.
+    /// </summary>
+    public RaygunIdentifierMessage UserInfo
+    {
+      get { return _userInfo; }
+      set
+      {
+        _userInfo = value;
+        if (_reporter != null)
+        {
+          _reporter.Identify(_userInfo == null ? null : UserInfoString(_userInfo));
+        }
+      }
+    }
+
+    private static string UserInfoString(RaygunIdentifierMessage userInfo)
+    {
+      string str = "";
+      if (!String.IsNullOrWhiteSpace (userInfo.FullName))
+      {
+        str += userInfo.FullName + " ";
+      }
+      else if (!String.IsNullOrWhiteSpace (userInfo.FirstName))
+      {
+        str += userInfo.FirstName + " ";
+      }
+      if (!String.IsNullOrWhiteSpace (userInfo.Identifier))
+      {
+        str += userInfo.Identifier + " ";
+      }
+      if (!String.IsNullOrWhiteSpace (userInfo.Email))
+      {
+        str += userInfo.Email + " ";
+      }
+      if (!string.IsNullOrWhiteSpace (userInfo.UUID))
+      {
+        str += userInfo.UUID + " ";
+      }
+      if (str.Length > 0)
+      {
+        str = str.Substring (0, str.Length - 1); // Removes last space
+      }
+      return str;
+    }
+
+    /// <summary>
+    /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
+    /// </summary>
+    public string ApplicationVersion { get; set; }
+
+    /// <summary>
+    /// Raised just before a message is sent. This can be used to make final adjustments to the <see cref="RaygunMessage"/>, or to cancel the send.
+    /// </summary>
+    public event EventHandler<RaygunSendingMessageEventArgs> SendingMessage;
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
@@ -210,6 +298,7 @@ namespace Mindscape.Raygun4Net
     }
 
     private const string StackTraceDirectory = "stacktraces";
+    private Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun _reporter;
 
     /// <summary>
     /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
@@ -220,8 +309,11 @@ namespace Mindscape.Raygun4Net
       Attach(apiKey, null);
     }
 
-    private static Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun _reporter;
-
+    /// <summary>
+    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    /// <param name="apiKey">Your app api key.</param>
+    /// <param name="user">An identity string for tracking affected users.</param>
     public static void Attach(string apiKey, string user)
     {
       Attach (apiKey, user, true, true);
@@ -240,7 +332,7 @@ namespace Mindscape.Raygun4Net
 
       PopulateCrashReportDirectoryStructure ();
 
-      _client = new RaygunClient(apiKey) { User = user };
+      _client = new RaygunClient(apiKey);
       AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 
@@ -255,7 +347,7 @@ namespace Mindscape.Raygun4Net
           sigaction (Signal.SIGBUS, IntPtr.Zero, sigbus);
           sigaction (Signal.SIGSEGV, IntPtr.Zero, sigsegv);
 
-          _reporter = Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun.SharedReporterWithApiKey (apiKey);
+          _client._reporter = Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun.SharedReporterWithApiKey (apiKey);
 
           // Restore Mono SIGSEGV and SIGBUS handlers
           sigaction (Signal.SIGBUS, sigbus, IntPtr.Zero);
@@ -266,9 +358,11 @@ namespace Mindscape.Raygun4Net
         }
         else
         {
-          _reporter = Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun.SharedReporterWithApiKey (apiKey);
+          _client._reporter = Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun.SharedReporterWithApiKey (apiKey);
         }
       }
+
+      _client.User = user; // Set this last so that it can passed to the native reporter.
     }
 
     /// <summary>
@@ -285,7 +379,10 @@ namespace Mindscape.Raygun4Net
       if (e.Exception != null)
       {
         _client.Send(e.Exception);
-        WriteExceptionInformation (_reporter.NextReportUUID, e.Exception);
+        if (_client._reporter != null)
+        {
+          WriteExceptionInformation (_client._reporter.NextReportUUID, e.Exception);
+        }
       }
     }
 
@@ -294,7 +391,10 @@ namespace Mindscape.Raygun4Net
       if (e.ExceptionObject is Exception)
       {
         _client.Send(e.ExceptionObject as Exception);
-        WriteExceptionInformation (_reporter.NextReportUUID, e.ExceptionObject as Exception);
+        if (_client._reporter != null)
+        {
+          WriteExceptionInformation (_client._reporter.NextReportUUID, e.ExceptionObject as Exception);
+        }
       }
     }
 
