@@ -1124,13 +1124,22 @@ namespace Mindscape.Raygun4Net
         // with \0 [default(char)] denoting a safe character.
         if (c >= EscapeTable.Length || EscapeTable[c] == default(char))
         {
-          safeCharacterCount++;
-        }
-        else if (char.IsControl(c))
-        {
-          IntToHex(c, hexSeqBuffer);
-          builder.Append("\\u");
-          builder.Append(hexSeqBuffer);
+          if (char.IsControl(c))
+          {
+            if (safeCharacterCount > 0)
+            {
+              builder.Append(charArray, i - safeCharacterCount, safeCharacterCount);
+              safeCharacterCount = 0;
+            }
+
+            IntToHex(c, hexSeqBuffer);
+            builder.Append("\\u");
+            builder.Append(hexSeqBuffer);
+          }
+          else
+          {
+            safeCharacterCount++;
+          }
         }
         else
         {
