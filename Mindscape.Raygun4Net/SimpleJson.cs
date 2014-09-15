@@ -1102,14 +1102,15 @@ namespace Mindscape.Raygun4Net
     static bool SerializeString(string aString, StringBuilder builder)
     {
       // Happy path if there's nothing to be escaped. IndexOfAny is highly optimized (and unmanaged)
-      if (aString.IndexOfAny(EscapeCharacters) == -1)
+      // Commented out to handle all control-characters.
+      /*if (aString.IndexOfAny(EscapeCharacters) == -1)
       {
         builder.Append('"');
         builder.Append(aString);
         builder.Append('"');
 
         return true;
-      }
+      }*/
 
       builder.Append('"');
       int safeCharacterCount = 0;
