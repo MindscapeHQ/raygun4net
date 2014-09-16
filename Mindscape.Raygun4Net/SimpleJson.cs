@@ -1945,7 +1945,17 @@ namespace Mindscape.Raygun4Net
         ParameterExpression instance = Expression.Parameter(typeof(object), "instance");
         UnaryExpression instanceCast = (!IsValueType(propertyInfo.DeclaringType)) ? Expression.TypeAs(instance, propertyInfo.DeclaringType) : Expression.Convert(instance, propertyInfo.DeclaringType);
         Func<object, object> compiled = Expression.Lambda<Func<object, object>>(Expression.TypeAs(Expression.Call(instanceCast, getMethodInfo), typeof(object)), instance).Compile();
-        return delegate(object source) { return compiled(source); };
+        return delegate(object source)
+        {
+          try
+          {
+            return compiled(source);
+          }
+          catch (Exception e)
+          {
+            return e.GetType().FullName + ": " + e.Message;
+          }
+        };
       }
 
       public static GetDelegate GetGetMethodByExpression(FieldInfo fieldInfo)
