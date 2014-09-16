@@ -50,6 +50,5 @@
     <Compile Include="libRaygun4iOS.linkwith.cs">
       <DependentUpon>libRaygun4iOS.a</DependentUpon>
     </Compile>
-    <Compile Include="RaygunClient.cs" />
   </ItemGroup>
 </Project>
