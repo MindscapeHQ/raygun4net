@@ -313,6 +313,17 @@ namespace Mindscape.Raygun4Net
     /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
     /// </summary>
     /// <param name="apiKey">Your app api key.</param>
+    /// <param name="canReportNativeErrors">Whether or not to listen to and report native exceptions.</param>
+    /// <param name="hijackNativeSignals">When true, this solves the issue where null reference exceptions crash the app, but when false, additional native errors can be reported.</param>
+    public static void Attach(string apiKey, bool canReportNativeErrors, bool hijackNativeSignals)
+    {
+      Attach (apiKey, null, canReportNativeErrors, hijackNativeSignals);
+    }
+
+    /// <summary>
+    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    /// <param name="apiKey">Your app api key.</param>
     /// <param name="user">An identity string for tracking affected users.</param>
     public static void Attach(string apiKey, string user)
     {
