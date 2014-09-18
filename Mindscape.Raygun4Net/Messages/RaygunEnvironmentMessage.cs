@@ -58,14 +58,15 @@ namespace Mindscape.Raygun4Net.Messages
 
     private string GetCpu()
     {
-      ManagementClass wmiManagementProcessorClass = new ManagementClass("Win32_Processor");
-      ManagementObjectCollection wmiProcessorCollection = wmiManagementProcessorClass.GetInstances();
+
+      ManagementObjectSearcher wmiProcessorSearcher = new ManagementObjectSearcher("SELECT Name FROM Win32_Processor");
+      ManagementObjectCollection wmiProcessorCollection = wmiProcessorSearcher.Get();
 
       foreach (ManagementObject wmiProcessorObject in wmiProcessorCollection)
       {
         try
         {
-          var name = wmiProcessorObject.Properties["Name"].Value.ToString();
+          var name = wmiProcessorObject["Name"].ToString();
           return name;
         }
         catch (ManagementException)
@@ -77,14 +78,14 @@ namespace Mindscape.Raygun4Net.Messages
 
     private string GetOSVersion()
     {
-      ManagementClass wmiManagementOperatingSystemClass = new ManagementClass("Win32_OperatingSystem");
-      ManagementObjectCollection wmiOperatingSystemCollection = wmiManagementOperatingSystemClass.GetInstances();
+      ManagementObjectSearcher wmiOperatingSystemSearcher = new ManagementObjectSearcher("SELECT Version FROM Win32_OperatingSystem");
+      ManagementObjectCollection wmiOperatingSystemCollection = wmiOperatingSystemSearcher.Get();
 
       foreach (ManagementObject wmiOperatingSystemObject in wmiOperatingSystemCollection)
       {
         try
         {
-          var version = wmiOperatingSystemObject.Properties["Version"].Value.ToString();
+          var version = wmiOperatingSystemObject["Version"].ToString();
           return version;
         }
         catch (ManagementException)
