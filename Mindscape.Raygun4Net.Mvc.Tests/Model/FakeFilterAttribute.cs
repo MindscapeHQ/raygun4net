@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Web.Mvc;
 
-namespace Mindscape.Raygun4Net4.Tests
+namespace Mindscape.Raygun4Net.Mvc.Tests
 {
   public class FakeFilterAttribute : FilterAttribute, IExceptionFilter
   {

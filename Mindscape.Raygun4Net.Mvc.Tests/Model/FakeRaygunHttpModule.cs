@@ -5,7 +5,7 @@ using System.Text;
 using System.Web;
 using Mindscape.Raygun4Net;
 
-namespace Mindscape.Raygun4Net4.Tests
+namespace Mindscape.Raygun4Net.Mvc.Tests
 {
   public class FakeRaygunHttpModule : RaygunHttpModule
   {

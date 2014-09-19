@@ -7,7 +7,7 @@ using System.Web.Mvc;
 using Mindscape.Raygun4Net;
 using NUnit.Framework;
 
-namespace Mindscape.Raygun4Net4.Tests
+namespace Mindscape.Raygun4Net.Mvc.Tests
 {
   [TestFixture]
   public class RaygunHttpModuleTests

@@ -31,15 +31,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Sign|AnyCPU'">
-    <OutputPath>bin\Sign\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
@@ -93,7 +84,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mindscape.Raygun4Net4\Mindscape.Raygun4Net4.csproj">
+    <ProjectReference Include="..\Mindscape.Raygun4Net.Mvc\Mindscape.Raygun4Net.Mvc.csproj">
       <Project>{2cf1fe1f-ad2d-40bd-9f99-57ff00445a9d}</Project>
       <Name>Mindscape.Raygun4Net4</Name>
     </ProjectReference>
