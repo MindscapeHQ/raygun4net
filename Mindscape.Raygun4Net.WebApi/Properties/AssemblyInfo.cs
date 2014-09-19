@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Mindscape.Raygun4Net45")]
+[assembly: AssemblyTitle("Mindscape.Raygun4Net.WebApi")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Mindscape")]
-[assembly: AssemblyProduct("Mindscape.Raygun4Net45")]
+[assembly: AssemblyProduct("Mindscape.Raygun4Net.WebApi")]
 [assembly: AssemblyCopyright("Copyright © Mindscape 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
