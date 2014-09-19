@@ -34,22 +34,6 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
-    <AssemblyOriginatorKeyFile>Raygun4Net45.snk</AssemblyOriginatorKeyFile>
-    <OutputPath>bin\Sign\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Sign|AnyCPU'">
-    <OutputPath>bin\Sign\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -109,13 +93,13 @@
     <Compile Include="..\AssemblyVersionInfo.cs">
       <Link>Properties\AssemblyVersionInfo.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net4\Messages\RaygunErrorMessage.cs">
+    <Compile Include="..\Mindscape.Raygun4Net.Mvc\Messages\RaygunErrorMessage.cs">
       <Link>Messages\RaygunErrorMessage.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net4\RaygunExceptionFilterAttribute.cs">
+    <Compile Include="..\Mindscape.Raygun4Net.Mvc\RaygunExceptionFilterAttribute.cs">
       <Link>RaygunExceptionFilterAttribute.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net4\RaygunHttpModule.cs">
+    <Compile Include="..\Mindscape.Raygun4Net.Mvc\RaygunHttpModule.cs">
       <Link>RaygunHttpModule.cs</Link>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\IRaygunApplication.cs">
@@ -123,9 +107,6 @@
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
       <Link>IRaygunMessageBuilder.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunClientMessage.cs">
-      <Link>Messages\RaygunClientMessage.cs</Link>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunEnvironmentMessage.cs">
       <Link>Messages\RaygunEnvironmentMessage.cs</Link>
@@ -155,6 +136,7 @@
       <Link>SimpleJson.cs</Link>
     </Compile>
     <Compile Include="Messages\IRaygunRequestMessage.cs" />
+    <Compile Include="Messages\RaygunClientMessage.cs" />
     <Compile Include="Messages\RaygunMessageDetails.cs" />
     <Compile Include="Messages\RaygunRequestMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
