@@ -4,15 +4,17 @@ properties {
     $solution_file2 =                "$root/Mindscape.Raygun4Net2.sln"
     $solution_file4 =                "$root/Mindscape.Raygun4Net4.sln"
     $solution_file45 =               "$root/Mindscape.Raygun4Net45.sln"
-    $winrt_solution_file =           "$root/Mindscape.Raygun4Net.WinRT.sln"
-    $windows_phone_solution_file =   "$root/Mindscape.Raygun4Net.WindowsPhone.sln"
-    $nugetspec =                     "$root/Mindscape.Raygun4Net.nuspec"
-    $nugetpackage =                  "Mindscape.Raygun4Net.1.0.nupkg"
+    $solution_file_mvc =             "$root/Mindscape.Raygun4Net.Mvc.sln"
+    $solution_file_webapi =          "$root/Mindscape.Raygun4Net.WebApi.sln"
+    $solution_file_winrt =           "$root/Mindscape.Raygun4Net.WinRT.sln"
+    $solution_file_windows_phone =   "$root/Mindscape.Raygun4Net.WindowsPhone.sln"
     $configuration =                 "Release"
     $build_dir =                     "$root\build\"
     $build_dir2 =                    "$root\build\Net2"
     $build_dir4 =                    "$root\build\Net4"
     $build_dir45 =                   "$root\build\Net45"
+    $build_dir_mvc =                 "$root\build\Mvc"
+    $build_dir_webapi =              "$root\build\WebApi"
     $nunit_dir =                     "$root\packages\NUnit.Runners.2.6.2\tools\"
     $tools_dir =                     "$root\tools"
     $nuget_dir =                     "$root\.nuget"
@@ -32,12 +34,14 @@ task Init -depends Clean {
 task Compile -depends Init {
     exec { msbuild "$solution_file" /m /p:OutDir=$build_dir /p:Configuration=$configuration }
     exec { msbuild "$solution_file2" /m /p:OutDir=$build_dir2 /p:Configuration=$configuration }
-    exec { msbuild "$solution_file4" /m /p:OutDir=$build_dir4 /p:Configuration=$configuration }
-    exec { msbuild "$solution_file45" /m /p:OutDir=$build_dir45 /p:Configuration=$configuration }
+    #exec { msbuild "$solution_file4" /m /p:OutDir=$build_dir4 /p:Configuration=$configuration }
+    #exec { msbuild "$solution_file45" /m /p:OutDir=$build_dir45 /p:Configuration=$configuration }
+    exec { msbuild "$solution_file_mvc" /m /p:OutDir=$build_dir_mvc /p:Configuration=$configuration }
+    exec { msbuild "$solution_file_webapi" /m /p:OutDir=$build_dir_webapi /p:Configuration=$configuration }
 }
 
 task CompileWinRT -depends Init {
-    exec { msbuild "$winrt_solution_file" /m /p:OutDir=$build_dir /p:Configuration=$configuration }
+    exec { msbuild "$solution_file_winrt" /m /p:OutDir=$build_dir /p:Configuration=$configuration }
     move-item $build_dir/Mindscape.Raygun4Net.WinRT/Mindscape.Raygun4Net.WinRT.dll $build_dir
     move-item $build_dir/Mindscape.Raygun4Net.WinRT/Mindscape.Raygun4Net.WinRT.pdb $build_dir
     move-item $build_dir/Mindscape.Raygun4Net.WinRT.Tests/Mindscape.Raygun4Net.WinRT.Tests.dll $build_dir
@@ -47,7 +51,7 @@ task CompileWinRT -depends Init {
 }
 
 task CompileWindowsPhone -depends Init {
-    exec { msbuild "$windows_phone_solution_file" /m /p:OutDir=$build_dir /p:Configuration=$Configuration }
+    exec { msbuild "$solution_file_windows_phone" /m /p:OutDir=$build_dir /p:Configuration=$Configuration }
 }
 
 task Test -depends Compile, CompileWinRT, CompileWindowsPhone, CompileWindowsStore {
