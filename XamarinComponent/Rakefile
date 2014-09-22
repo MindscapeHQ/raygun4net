@@ -3,7 +3,7 @@ require "rake/clean"
 CLEAN.include "*.xam"
 CLEAN.include "xpkg"
 
-COMPONENT = "raygun4net-3.3.2.xam"
+COMPONENT = "raygun4net-3.3.3.xam"
 
 file "xpkg/xpkg.exe" do
   sh "if exist xpkg del /Q xpkg & rd xpkg"
