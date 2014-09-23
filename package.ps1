@@ -41,26 +41,25 @@ task Zip -depends Package {
     $version = $nupkg_name -replace ".nupkg", ""
     
     $outerfolder = $release_dir + $version
-    $versionfolder = $release_dir + $version + "\" + $version
-    $versionfolder2 = $release_dir + $version + "\" + $version + "\Net2"
-    $versionfolder4 = $release_dir + $version + "\" + $version + "\Net4"
-    $versionfolder45 = $release_dir + $version + "\" + $version + "\Net45"
-    $versionfoldermvc = $release_dir + $version + "\" + $version + "\Mvc"
-    $versionfolderwebapi = $release_dir + $version + "\" + $version + "\WebApi"
+    $versionfolder = $outerfolder + "\" + $version
+    $versionfolder2 = $versionfolder + "\Net2"
+    $versionfolder4 = $versionfolder + "\Net4"
+    $versionfoldermvc = $versionfolder + "\Mvc"
+    $versionfolderwebapi = $versionfolder + "\WebApi"
+    
     $signedfolder = $versionfolder + "\signed"
-    $signedfolder2 = $versionfolder + "\signed\Net2"
-    $signedfolder4 = $versionfolder + "\signed\Net4"
-    $signedfolder45 = $versionfolder + "\signed\Net45"
+    $signedfolder2 = $signedfolder + "\Net2"
+    $signedfolder4 = $signedfolder + "\Net4"
+    
     new-item $versionfolder -itemType directory | Out-Null
     new-item $versionfolder2 -itemType directory | Out-Null
     new-item $versionfolder4 -itemType directory | Out-Null
-    new-item $versionfolder45 -itemType directory | Out-Null
     new-item $versionfoldermvc -itemType directory | Out-Null
     new-item $versionfolderwebapi -itemType directory | Out-Null
+    
     new-item $signedfolder -itemType directory | Out-Null
     new-item $signedfolder2 -itemType directory | Out-Null
     new-item $signedfolder4 -itemType directory | Out-Null
-    new-item $signedfolder45 -itemType directory | Out-Null
   
     # .Net 3.5
     copy-item $build_dir/Mindscape.Raygun4Net.dll $versionfolder
