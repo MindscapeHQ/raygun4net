@@ -7,13 +7,11 @@ properties {
     $build_dir =                     "$root\build\"
     $build_dir2 =                    "$root\build\Net2"
     $build_dir4 =                    "$root\build\Net4"
-    $build_dir45 =                   "$root\build\Net45"
     $build_dir_mvc =                 "$build_dir\Mvc"
     $build_dir_webapi =              "$build_dir\WebApi"
     $signed_build_dir =              "$build_dir\signed"
     $signed_build_dir2 =             "$build_dir\signed\Net2"
     $signed_build_dir4 =             "$build_dir\signed\Net4"
-    $signed_build_dir45 =            "$build_dir\signed\Net45"
     $release_dir =                   "$root\release\"
     $nuget_dir =                     "$root\.nuget"
     $env:Path +=                     ";$nuget_dir"
@@ -87,11 +85,8 @@ task Zip -depends Package {
     copy-item $build_dir2/Mindscape.Raygun4Net.dll $versionfolder2
     copy-item $build_dir2/Mindscape.Raygun4Net.pdb $versionfolder2
     # .Net 4.0
-    #copy-item $build_dir4/Mindscape.Raygun4Net.dll $versionfolder4
-    #copy-item $build_dir4/Mindscape.Raygun4Net.pdb $versionfolder4
-    # .Net 4.5
-    #copy-item $build_dir45/Mindscape.Raygun4Net.dll $versionfolder45
-    #copy-item $build_dir45/Mindscape.Raygun4Net.pdb $versionfolder45
+    copy-item $build_dir4/Mindscape.Raygun4Net.dll $versionfolder4
+    copy-item $build_dir4/Mindscape.Raygun4Net.pdb $versionfolder4
     # .Net MVC
     copy-item $build_dir_mvc/Mindscape.Raygun4Net.dll $versionfoldermvc
     copy-item $build_dir_mvc/Mindscape.Raygun4Net.pdb $versionfoldermvc
@@ -103,8 +98,7 @@ task Zip -depends Package {
     copy-item $signed_build_dir/Mindscape.Raygun4Net.WinRT.dll $signedfolder
     copy-item $signed_build_dir/Mindscape.Raygun4Net.WindowsStore.dll $signedfolder
     copy-item $signed_build_dir2/Mindscape.Raygun4Net.dll $signedfolder2
-    #copy-item $signed_build_dir4/Mindscape.Raygun4Net.dll $signedfolder4
-    #copy-item $signed_build_dir45/Mindscape.Raygun4Net.dll $signedfolder45
+    copy-item $signed_build_dir4/Mindscape.Raygun4Net.dll $signedfolder4
 	
     $zipFullName = $release_dir + $version + ".zip"
     Get-ChildItem $outerfolder | Add-Zip $zipFullName

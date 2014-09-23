@@ -3,14 +3,12 @@ properties {
     $solution_file =                 "$root/Mindscape.Raygun4Net.sln"
     $solution_file2 =                "$root/Mindscape.Raygun4Net2.sln"
     $solution_file4 =                "$root/Mindscape.Raygun4Net4.sln"
-    $solution_file45 =               "$root/Mindscape.Raygun4Net45.sln"
     $solution_file_winrt =           "$root/Mindscape.Raygun4Net.WinRT.sln"
     $configuration =                 "Sign"
     $build_dir =                     "$root\build\"
     $signed_build_dir =              "$build_dir\signed"
     $signed_build_dir2 =             "$build_dir\signed\Net2"
     $signed_build_dir4 =             "$build_dir\signed\Net4"
-    $signed_build_dir45 =            "$build_dir\signed\Net45"
     $nuget_dir =                     "$root\.nuget"
     $env:Path +=                     ";$nuget_dir"
 }
@@ -28,8 +26,7 @@ task Init -depends Clean {
 task Compile -depends Init {
     exec { msbuild "$solution_file" /m /p:OutDir=$signed_build_dir /p:Configuration=$configuration }
     exec { msbuild "$solution_file2" /m /p:OutDir=$signed_build_dir2 /p:Configuration=$configuration }
-    #exec { msbuild "$solution_file4" /m /p:OutDir=$signed_build_dir4 /p:Configuration=$configuration }
-    #exec { msbuild "$solution_file45" /m /p:OutDir=$signed_build_dir45 /p:Configuration=$configuration }
+    exec { msbuild "$solution_file4" /m /p:OutDir=$signed_build_dir4 /p:Configuration=$configuration }
 }
 
 task CompileWinRT -depends Init {
