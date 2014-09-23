@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -21,7 +20,6 @@ namespace Mindscape.Raygun4Net.Messages
       Url = request.Url.AbsolutePath;
       HttpMethod = request.RequestType;
       IPAddress = GetIpAddress(request);
-      
       QueryString = ToDictionary(request.QueryString, null);
 
       Headers = ToDictionary(request.Headers, options.IsHeaderIgnored);
@@ -222,6 +220,5 @@ namespace Mindscape.Raygun4Net.Messages
     public string RawData { get; set; }
 
     public IDictionary Headers { get; set; }
-
   }
 }

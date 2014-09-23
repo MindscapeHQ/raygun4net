@@ -13,7 +13,7 @@ namespace Mindscape.Raygun4Net.Messages
   {
     private static readonly Regex IpAddressRegex = new Regex(@"\A(?:\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b)(:[1-9][0-9]{0,4})?\z", RegexOptions.Compiled);
 
-    public RaygunRequestMessage(HttpRequest	request, RaygunRequestMessageOptions options)
+    public RaygunRequestMessage(HttpRequest request, RaygunRequestMessageOptions options)
     {
       options = options ?? new RaygunRequestMessageOptions();
 
