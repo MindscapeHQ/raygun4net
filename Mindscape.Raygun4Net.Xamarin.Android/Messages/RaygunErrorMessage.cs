@@ -17,7 +17,7 @@ namespace Mindscape.Raygun4Net.Messages
     {
       var exceptionType = exception.GetType();
 
-      Message = string.Format("{0}: {1}", exceptionType.Name, exception.Message);
+      Message = exception.Message;
       ClassName = exceptionType.FullName;
 
       StackTrace = BuildStackTrace(exception);
