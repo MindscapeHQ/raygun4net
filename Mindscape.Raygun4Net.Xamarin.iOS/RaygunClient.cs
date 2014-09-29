@@ -314,7 +314,7 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="apiKey">Your app api key.</param>
     /// <param name="canReportNativeErrors">Whether or not to listen to and report native exceptions.</param>
-    /// <param name="hijackNativeSignals">When true, this solves the issue where null reference exceptions crash the app, but when false, additional native errors can be reported.</param>
+    /// <param name="hijackNativeSignals">When true, this solves the issue where null reference exceptions inside try/catch blocks crash the app, but when false, additional native errors can be reported.</param>
     public static void Attach(string apiKey, bool canReportNativeErrors, bool hijackNativeSignals)
     {
       Attach (apiKey, null, canReportNativeErrors, hijackNativeSignals);
@@ -327,7 +327,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="user">An identity string for tracking affected users.</param>
     public static void Attach(string apiKey, string user)
     {
-      Attach (apiKey, user, true, true);
+      Attach (apiKey, user, false, true);
     }
 
     /// <summary>
@@ -336,7 +336,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="apiKey">Your app api key.</param>
     /// <param name="user">An identity string for tracking affected users.</param>
     /// <param name="canReportNativeErrors">Whether or not to listen to and report native exceptions.</param>
-    /// <param name="hijackNativeSignals">When true, this solves the issue where null reference exceptions crash the app, but when false, additional native errors can be reported.</param>
+    /// <param name="hijackNativeSignals">When true, this solves the issue where null reference exceptions inside try/catch blocks crash the app, but when false, additional native errors can be reported.</param>
     public static void Attach(string apiKey, string user, bool canReportNativeErrors, bool hijackNativeSignals)
     {
       Detach();
