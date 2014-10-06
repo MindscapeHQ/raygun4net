@@ -82,7 +82,7 @@ namespace Mindscape.Raygun4Net
       set
       {
         _user = value;
-        if (_reporter != null)
+        if (_reporter != null && _user != null)
         {
           _reporter.Identify(_user);
         }
@@ -100,7 +100,10 @@ namespace Mindscape.Raygun4Net
         _userInfo = value;
         if (_reporter != null)
         {
-          _reporter.Identify(_userInfo == null ? null : UserInfoString(_userInfo));
+          string user = _userInfo == null ? "" : UserInfoString (_userInfo);
+          if (user.Length != 0) {
+            _reporter.Identify(user);
+          }
         }
       }
     }
@@ -124,7 +127,7 @@ namespace Mindscape.Raygun4Net
       {
         str += userInfo.Email + " ";
       }
-      if (!string.IsNullOrWhiteSpace (userInfo.UUID))
+      if (!String.IsNullOrWhiteSpace (userInfo.UUID))
       {
         str += userInfo.UUID + " ";
       }
