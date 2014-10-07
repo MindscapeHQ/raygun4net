@@ -3,36 +3,40 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
+using Mindscape.Raygun4Net.Messages;
 
-namespace Mindscape.Raygun4Net.Messages
+namespace Mindscape.Raygun4Net.Builders
 {
-  public class RaygunRequestMessage
+  public class RaygunRequestMessageBuilder
   {
     private static readonly Regex IpAddressRegex = new Regex(@"\A(?:\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b)(:[1-9][0-9]{0,4})?\z", RegexOptions.Compiled);
 
-    public RaygunRequestMessage(HttpRequest request, RaygunRequestMessageOptions options)
+    public RaygunRequestMessage Build(HttpRequest request, RaygunRequestMessageOptions options)
     {
+      RaygunRequestMessage message = new RaygunRequestMessage();
+
       options = options ?? new RaygunRequestMessageOptions();
 
-      HostName = request.Url.Host;
-      Url = request.Url.AbsolutePath;
-      HttpMethod = request.RequestType;
-      IPAddress = GetIpAddress(request);
-      QueryString = ToDictionary(request.QueryString, null);
+      message.HostName = request.Url.Host;
+      message.Url = request.Url.AbsolutePath;
+      message.HttpMethod = request.RequestType;
+      message.IPAddress = GetIpAddress(request);
+      message.QueryString = ToDictionary(request.QueryString, null);
 
-      Headers = ToDictionary(request.Headers, options.IsHeaderIgnored);
-      Headers.Remove("Cookie");
+      message.Headers = ToDictionary(request.Headers, options.IsHeaderIgnored);
+      message.Headers.Remove("Cookie");
 
-      Form = ToDictionary(request.Form, options.IsFormFieldIgnored, true);
-      Cookies = GetCookies(request.Cookies, options.IsCookieIgnored);
+      message.Form = ToDictionary(request.Form, options.IsFormFieldIgnored, true);
+      message.Cookies = GetCookies(request.Cookies, options.IsCookieIgnored);
 
       // Remove ignored and duplicated variables
-      Data = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored);
-      Data.Remove("ALL_HTTP");
-      Data.Remove("HTTP_COOKIE");
-      Data.Remove("ALL_RAW");
+      message.Data = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored);
+      message.Data.Remove("ALL_HTTP");
+      message.Data.Remove("HTTP_COOKIE");
+      message.Data.Remove("ALL_RAW");
 
       try
       {
@@ -47,12 +51,14 @@ namespace Mindscape.Raygun4Net.Messages
             length = temp.Length;
           }
 
-          RawData = temp.Substring(0, length);
+          message.RawData = temp.Substring(0, length);
         }
       }
       catch (HttpException)
       {
       }
+
+      return message;
     }
 
     private string GetIpAddress(HttpRequest request)
@@ -106,13 +112,13 @@ namespace Mindscape.Raygun4Net.Messages
 
     private IList GetCookies(HttpCookieCollection cookieCollection, Func<string, bool> ignore)
     {
-      IList cookies = new List<Cookie>();
+      IList cookies = new List<Mindscape.Raygun4Net.Messages.RaygunRequestMessage.Cookie>();
 
       foreach (string key in cookieCollection.Keys)
       {
         if (!ignore(key))
         {
-          cookies.Add(new Cookie(cookieCollection[key].Name, cookieCollection[key].Value));
+          cookies.Add(new Mindscape.Raygun4Net.Messages.RaygunRequestMessage.Cookie(cookieCollection[key].Name, cookieCollection[key].Value));
         }
       }
 
@@ -188,37 +194,5 @@ namespace Mindscape.Raygun4Net.Messages
         }
       }
     }
-
-    public class Cookie
-    {
-      public Cookie(string name, string value)
-      {
-        Name = name;
-        Value = value;
-      }
-
-      public string Name { get; set; }
-      public string Value { get; set; }
-    }
-
-    public string HostName { get; set; }
-
-    public string Url { get; set; }
-
-    public string HttpMethod { get; set; }
-
-    public string IPAddress { get; set; }
-
-    public IDictionary QueryString { get; set; }
-
-    public IList Cookies { get; set; }
-
-    public IDictionary Data { get; set; }
-
-    public IDictionary Form { get; set; }
-
-    public string RawData { get; set; }
-
-    public IDictionary Headers { get; set; }
   }
 }
