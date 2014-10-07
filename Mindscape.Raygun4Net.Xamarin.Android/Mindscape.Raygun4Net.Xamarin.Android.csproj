@@ -44,6 +44,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Mindscape.Raygun4Net.WindowsStore\Messages\RaygunMessageDetails.cs">
+      <Link>Messages\RaygunMessageDetails.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
       <Link>IRaygunMessageBuilder.cs</Link>
     </Compile>
@@ -65,7 +68,6 @@
     <Compile Include="Builders\RaygunErrorMessageBuilder.cs" />
     <Compile Include="Messages\RaygunClientMessage.cs" />
     <Compile Include="Messages\RaygunEnvironmentMessage.cs" />
-    <Compile Include="Messages\RaygunMessageDetails.cs" />
     <Compile Include="RaygunClient.cs" />
     <Compile Include="RaygunMessageBuilder.cs" />
     <Compile Include="RaygunSettings.cs" />
