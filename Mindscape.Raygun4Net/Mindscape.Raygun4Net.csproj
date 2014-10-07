@@ -60,6 +60,7 @@
       <Link>Properties\AssemblyVersionInfo.cs</Link>
     </Compile>
     <Compile Include="Builders\RaygunErrorMessageBuilder.cs" />
+    <Compile Include="Builders\RaygunErrorMessageBuilderBase.cs" />
     <Compile Include="Builders\RaygunRequestMessageBuilder.cs" />
     <Compile Include="IRaygunApplication.cs" />
     <Compile Include="IRaygunMessageBuilder.cs" />
