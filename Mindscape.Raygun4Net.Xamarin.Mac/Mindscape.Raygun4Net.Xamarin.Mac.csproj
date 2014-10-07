@@ -79,5 +79,8 @@
       <Link>RaygunSendingMessageEventArgs.cs</Link>
     </Compile>
     <Compile Include="Builders\RaygunErrorMessageBuilder.cs" />
+    <Compile Include="..\Mindscape.Raygun4Net\Builders\RaygunErrorMessageBuilderBase.cs">
+      <Link>Builders\RaygunErrorMessageBuilderBase.cs</Link>
+    </Compile>
   </ItemGroup>
 </Project>
