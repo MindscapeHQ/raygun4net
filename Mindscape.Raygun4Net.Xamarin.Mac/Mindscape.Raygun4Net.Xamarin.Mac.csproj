@@ -49,6 +49,7 @@
     <Folder Include="Resources\" />
     <Folder Include="Messages\" />
     <Folder Include="Properties\" />
+    <Folder Include="Builders\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -77,5 +78,6 @@
     <Compile Include="..\Mindscape.Raygun4Net\RaygunSendingMessageEventArgs.cs">
       <Link>RaygunSendingMessageEventArgs.cs</Link>
     </Compile>
+    <Compile Include="Builders\RaygunErrorMessageBuilder.cs" />
   </ItemGroup>
 </Project>
