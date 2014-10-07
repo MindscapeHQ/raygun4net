@@ -1,32 +1,32 @@
-﻿using System;
-using System.Collections;
+﻿using Mindscape.Raygun4Net.Messages;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Mindscape.Raygun4Net.Messages
+namespace Mindscape.Raygun4Net.Builders
 {
-  public class RaygunErrorMessage
+  public class RaygunErrorMessageBuilder
   {
-    public RaygunErrorMessage()
+    public RaygunErrorMessage Build(Exception exception)
     {
-    }
+      RaygunErrorMessage message = new RaygunErrorMessage();
 
-    public RaygunErrorMessage(Exception exception)
-    {
       var exceptionType = exception.GetType();
 
-      Message = string.Format("{0}: {1}", exceptionType.Name, exception.Message);
-      ClassName = exceptionType.FullName;
+      message.Message = string.Format("{0}: {1}", exceptionType.Name, exception.Message);
+      message.ClassName = exceptionType.FullName;
 
-      StackTrace = BuildStackTrace(exception);
-      Data = exception.Data;
+      message.StackTrace = BuildStackTrace(exception);
+      message.Data = exception.Data;
 
       if (exception.InnerException != null)
       {
-        InnerError = new RaygunErrorMessage(exception.InnerException);
+        message.InnerError = new RaygunErrorMessageBuilder().Build(exception.InnerException);
       }
+
+      return message;
     }
 
     private RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
@@ -70,15 +70,5 @@ namespace Mindscape.Raygun4Net.Messages
 
       return lines.ToArray();
     }
-
-    public RaygunErrorMessage InnerError { get; set; }
-
-    public IDictionary Data { get; set; }
-
-    public string ClassName { get; set; }
-
-    public string Message { get; set; }
-
-    public RaygunErrorStackTraceLineMessage[] StackTrace { get; set; }
   }
 }
