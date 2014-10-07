@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Web;
 using Mindscape.Raygun4Net.Messages;
+using Mindscape.Raygun4Net.Builders;
 
 namespace Mindscape.Raygun4Net
 {
@@ -59,7 +60,7 @@ namespace Mindscape.Raygun4Net
 
         if (request != null)
         {
-          requestMessage = new RaygunRequestMessage(request, _requestMessageOptions ?? new RaygunRequestMessageOptions());
+          requestMessage = new RaygunRequestMessageBuilder().Build(request, _requestMessageOptions ?? new RaygunRequestMessageOptions());
         }
       }
 
