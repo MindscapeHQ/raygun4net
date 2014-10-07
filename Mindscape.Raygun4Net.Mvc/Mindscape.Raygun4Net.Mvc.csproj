@@ -81,6 +81,9 @@
     <Compile Include="..\Mindscape.Raygun4Net4\Messages\RaygunErrorMessage.cs">
       <Link>Messages\RaygunErrorMessage.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Builders\RaygunErrorMessageBuilder.cs">
+      <Link>Builders\RaygunErrorMessageBuilder.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Builders\RaygunRequestMessageBuilder.cs">
       <Link>Builders\RaygunRequestMessageBuilder.cs</Link>
     </Compile>

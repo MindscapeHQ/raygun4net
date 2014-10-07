@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using Mindscape.Raygun4Net.Messages;
+using Mindscape.Raygun4Net.Builders;
 
 namespace Mindscape.Raygun4Net
 {
@@ -50,7 +51,7 @@ namespace Mindscape.Raygun4Net
     {
       if (exception != null)
       {
-        _raygunMessage.Details.Error = new RaygunErrorMessage(exception);
+        _raygunMessage.Details.Error = new RaygunErrorMessageBuilder().Build(exception);
       }
 
       return this;
