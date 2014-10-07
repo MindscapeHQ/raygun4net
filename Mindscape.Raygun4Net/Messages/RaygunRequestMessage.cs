@@ -1,10 +1,4 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Web;
 
 namespace Mindscape.Raygun4Net.Messages
 {

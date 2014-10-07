@@ -1,49 +1,30 @@
-﻿using System;
+﻿using Mindscape.Raygun4Net.Messages;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using Mindscape.Raygun4Net.Messages;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Mindscape.Raygun4Net.WebApi.Messages
+namespace Mindscape.Raygun4Net.WebApi.Builders
 {
-  public class RaygunWebApiRequestMessage : IRaygunRequestMessage
+  public class RaygunWebApiRequestMessageBuilder
   {
-    public RaygunWebApiRequestMessage(HttpRequestDetails request)
+    public RaygunRequestMessage Build(HttpRequestDetails request)
     {
-      HostName = request.RequestUri.Host;
-      Url = request.RequestUri.AbsolutePath;
-      HttpMethod = request.Method.ToString();
-      IPAddress = request.IPAddress;
+      RaygunRequestMessage message = new RaygunRequestMessage();
 
-      Headers = request.Headers;
-      RawData = request.RawData;
+      message.HostName = request.RequestUri.Host;
+      message.Url = request.RequestUri.AbsolutePath;
+      message.HttpMethod = request.Method.ToString();
+      message.IPAddress = request.IPAddress;
+
+      message.Headers = request.Headers;
+      message.RawData = request.RawData;
+
+      return message;
     }
-
-    public RaygunWebApiRequestMessage(HttpRequestMessage request, RaygunRequestMessageOptions options = null)
-      : this(new HttpRequestDetails(request, options))
-    {
-    }
-
-    public string HostName { get; set; }
-
-    public string Url { get; set; }
-
-    public string HttpMethod { get; set; }
-
-    public string IPAddress { get; set; }
-
-    public IDictionary QueryString { get; set; }
-
-    public IList Cookies { get; set; }
-
-    public IDictionary Data { get; set; }
-
-    public IDictionary Form { get; set; }
-
-    public string RawData { get; set; }
-
-    public IDictionary Headers { get; set; }
   }
 
   public class HttpRequestDetails

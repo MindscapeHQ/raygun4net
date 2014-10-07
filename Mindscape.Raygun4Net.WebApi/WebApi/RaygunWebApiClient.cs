@@ -5,7 +5,7 @@ using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.ExceptionHandling;
-using Mindscape.Raygun4Net.WebApi.Messages;
+using Mindscape.Raygun4Net.WebApi.Builders;
 
 namespace Mindscape.Raygun4Net.WebApi
 {
