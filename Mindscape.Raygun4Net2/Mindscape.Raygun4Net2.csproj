@@ -63,6 +63,9 @@
     <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
       <Link>IRaygunMessageBuilder.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunClientMessage.cs">
+      <Link>Messages\RaygunClientMessage.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorMessage.cs">
       <Link>Messages\RaygunErrorMessage.cs</Link>
     </Compile>
@@ -95,7 +98,6 @@
     </Compile>
     <Compile Include="Builders\RaygunErrorMessageBuilder.cs" />
     <Compile Include="Builders\RaygunRequestMessageBuilder.cs" />
-    <Compile Include="Messages\RaygunClientMessage.cs" />
     <Compile Include="Messages\RaygunEnvironmentMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaygunClient.cs" />
