@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Controllers;
@@ -29,7 +30,10 @@ namespace Mindscape.Raygun4Net.WebApi
     {
       Detach(config);
 
-      var clientCreator = new RaygunWebApiClientProvider(generateRaygunClient);
+      var entryAssembly = Assembly.GetCallingAssembly();
+      string applicationVersion = entryAssembly.GetName().Version.ToString();
+
+      var clientCreator = new RaygunWebApiClientProvider(generateRaygunClient, applicationVersion);
 
       config.Services.Add(typeof(IExceptionLogger), new RaygunWebApiExceptionLogger(clientCreator));
 
