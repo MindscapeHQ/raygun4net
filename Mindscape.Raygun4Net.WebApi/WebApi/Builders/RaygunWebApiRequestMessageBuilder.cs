@@ -19,6 +19,7 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       message.Url = request.RequestUri.AbsolutePath;
       message.HttpMethod = request.Method.ToString();
       message.IPAddress = request.IPAddress;
+      message.QueryString = request.QueryString;
 
       message.Headers = request.Headers;
       message.RawData = request.RawData;
@@ -33,6 +34,7 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
     public HttpMethod Method { get; set; }
     public IDictionary Form { get; set; }
     public IDictionary Headers { get; set; }
+    public IDictionary QueryString { get; set; }
     public string IPAddress { get; set; }
     public string RawData { get; set; }
 
@@ -43,6 +45,7 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       RequestUri = message.RequestUri;
       Method = message.Method;
       Form = ToDictionary(message.GetQueryNameValuePairs(), options.IsFormFieldIgnored);
+      QueryString = ToDictionary(message.GetQueryNameValuePairs(), s => false);
       IPAddress = GetIPAddress(message);
       SetHeadersAndRawData(message, options.IsHeaderIgnored);
     }
