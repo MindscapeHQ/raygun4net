@@ -60,7 +60,7 @@ namespace Mindscape.Raygun4Net
     {
       if (exception != null)
       {
-        _raygunMessage.Details.Error = new RaygunErrorMessageBuilder().Build(exception);
+        _raygunMessage.Details.Error = RaygunErrorMessageBuilder.Build(exception);
       }
       return this;
     }

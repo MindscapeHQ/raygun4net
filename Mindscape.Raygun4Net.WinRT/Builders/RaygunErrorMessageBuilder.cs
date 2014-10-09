@@ -9,7 +9,7 @@ namespace Mindscape.Raygun4Net.Builders
 {
   public class RaygunErrorMessageBuilder
   {
-    public RaygunErrorMessage Build(Exception exception)
+    public static RaygunErrorMessage Build(Exception exception)
     {
       RaygunErrorMessage message = new RaygunErrorMessage();
 
@@ -23,7 +23,7 @@ namespace Mindscape.Raygun4Net.Builders
 
       if (exception.InnerException != null)
       {
-        message.InnerError = new RaygunErrorMessageBuilder().Build(exception.InnerException);
+        message.InnerError = Build(exception.InnerException);
       }
 
       return message;
