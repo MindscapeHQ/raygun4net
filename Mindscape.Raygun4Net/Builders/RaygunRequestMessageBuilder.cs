@@ -15,7 +15,7 @@ namespace Mindscape.Raygun4Net.Builders
   {
     private static readonly Regex IpAddressRegex = new Regex(@"\A(?:\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b)(:[1-9][0-9]{0,4})?\z", RegexOptions.Compiled);
 
-    public RaygunRequestMessage Build(HttpRequest request, RaygunRequestMessageOptions options)
+    public static RaygunRequestMessage Build(HttpRequest request, RaygunRequestMessageOptions options)
     {
       RaygunRequestMessage message = new RaygunRequestMessage();
 
@@ -62,7 +62,7 @@ namespace Mindscape.Raygun4Net.Builders
       return message;
     }
 
-    private string GetIpAddress(HttpRequest request)
+    private static string GetIpAddress(HttpRequest request)
     {
       var strIp = request.ServerVariables["HTTP_X_FORWARDED_FOR"];
 
@@ -109,7 +109,7 @@ namespace Mindscape.Raygun4Net.Builders
       return false;
     }
 
-    private IList GetCookies(HttpCookieCollection cookieCollection, Func<string, bool> ignore)
+    private static IList GetCookies(HttpCookieCollection cookieCollection, Func<string, bool> ignore)
     {
       return Enumerable.Range(0, cookieCollection.Count)
         .Select(i => cookieCollection[i])

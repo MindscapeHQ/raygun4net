@@ -48,7 +48,7 @@ namespace Mindscape.Raygun4Net
     {
       if (exception != null)
       {
-        _raygunMessage.Details.Error = new RaygunErrorMessageBuilder().Build(exception);
+        _raygunMessage.Details.Error = RaygunErrorMessageBuilder.Build(exception);
       }
 
       HttpException error = exception as HttpException;
@@ -122,7 +122,7 @@ namespace Mindscape.Raygun4Net
         {
           return this;
         }
-        _raygunMessage.Details.Request = new RaygunRequestMessageBuilder().Build(request, options ?? new RaygunRequestMessageOptions());
+        _raygunMessage.Details.Request = RaygunRequestMessageBuilder.Build(request, options ?? new RaygunRequestMessageOptions());
       }
 
       return this;

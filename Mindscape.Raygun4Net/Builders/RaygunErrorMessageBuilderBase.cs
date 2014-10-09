@@ -6,7 +6,7 @@ namespace Mindscape.Raygun4Net.Builders
 {
   public abstract class RaygunErrorMessageBuilderBase
   {
-    protected string GenerateMethodName(MethodBase method)
+    protected static string GenerateMethodName(MethodBase method)
     {
       var stringBuilder = new StringBuilder();
 

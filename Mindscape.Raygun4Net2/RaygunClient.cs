@@ -278,7 +278,7 @@ namespace Mindscape.Raygun4Net
 
         if (request != null)
         {
-          requestMessage = new RaygunRequestMessageBuilder().Build(request, _requestMessageOptions ?? new RaygunRequestMessageOptions());
+          requestMessage = RaygunRequestMessageBuilder.Build(request, _requestMessageOptions ?? new RaygunRequestMessageOptions());
         }
       }
 

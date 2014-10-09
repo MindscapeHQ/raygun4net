@@ -11,7 +11,7 @@ namespace Mindscape.Raygun4Net.Builders
 {
   public class RaygunErrorMessageBuilder : RaygunErrorMessageBuilderBase
   {
-    public RaygunErrorMessage Build(Exception exception)
+    public static RaygunErrorMessage Build(Exception exception)
     {
       RaygunErrorMessage message = new RaygunErrorMessage();
 
@@ -42,19 +42,19 @@ namespace Mindscape.Raygun4Net.Builders
         int index = 0;
         foreach (Exception e in ae.InnerExceptions)
         {
-          message.InnerErrors[index] = new RaygunErrorMessageBuilder().Build(e);
+          message.InnerErrors[index] = Build(e);
           index++;
         }
       }
       else if (exception.InnerException != null)
       {
-        message.InnerError = new RaygunErrorMessageBuilder().Build(exception.InnerException);
+        message.InnerError = Build(exception.InnerException);
       }
 
       return message;
     }
 
-    private RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
+    private static RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
     {
       var lines = new List<RaygunErrorStackTraceLineMessage>();
 
