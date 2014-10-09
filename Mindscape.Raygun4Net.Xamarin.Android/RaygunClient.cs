@@ -210,6 +210,7 @@ namespace Mindscape.Raygun4Net
       _client = new RaygunClient(apiKey);
       AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+      AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
     }
 
     /// <summary>
@@ -223,6 +224,7 @@ namespace Mindscape.Raygun4Net
       _client = new RaygunClient(apiKey) { User = user };
       AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+      AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
     }
 
     /// <summary>
@@ -232,6 +234,7 @@ namespace Mindscape.Raygun4Net
     {
       AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException -= TaskScheduler_UnobservedTaskException;
+      AndroidEnvironment.UnhandledExceptionRaiser -= AndroidEnvironment_UnhandledExceptionRaiser;
     }
 
     private static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
@@ -247,6 +250,14 @@ namespace Mindscape.Raygun4Net
       if (e.ExceptionObject is Exception)
       {
         _client.Send(e.ExceptionObject as Exception);
+      }
+    }
+
+    private static void AndroidEnvironment_UnhandledExceptionRaiser(object sender, RaiseThrowableEventArgs e)
+    {
+      if (e.Exception != null)
+      {
+        _client.Send(e.Exception);
       }
     }
 
