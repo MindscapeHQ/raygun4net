@@ -8,7 +8,7 @@ namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunEnvironmentMessage
   {
-    public RaygunEnvironmentMessage ()
+    public RaygunEnvironmentMessage()
     {
       UtcOffset = NSTimeZone.LocalTimeZone.GetSecondsFromGMT / 3600.0;
 
@@ -199,4 +199,3 @@ namespace Mindscape.Raygun4Net.Messages
     }
   }
 }
-
