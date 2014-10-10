@@ -198,7 +198,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     public void Send(Exception exception)
     {
-      Send(exception, null, (IDictionary)null);
+      Send(exception, null, (IDictionary)null, null);
     }
 
     /// <summary>
@@ -209,7 +209,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message.</param>
     public void Send(Exception exception, IList<string> tags)
     {
-      Send(exception, tags, (IDictionary)null);
+      Send(exception, tags, (IDictionary)null, null);
     }
 
     /// <summary>
@@ -222,11 +222,25 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
+        Send(exception, tags, userCustomData, null);
+    }
+
+    /// <summary>
+    /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
+    /// with the message for identification, as well as sending a key-value collection of custom data.
+    /// This uses the version number of the originating assembly.
+    /// </summary>
+    /// <param name="exception">The exception to deliver.</param>
+    /// <param name="tags">A list of strings associated with the message.</param>
+    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
+    /// <param name="userName">A string to use as the user identity string.</param>
+    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData, string userName)
+    {
       if (CanSend(exception))
       {
         _currentRequestMessage = BuildRequestMessage();
 
-        Send(BuildMessage(exception, tags, userCustomData));
+        Send(BuildMessage(exception, tags, userCustomData, (!String.IsNullOrEmpty(userName) ? new RaygunIdentifierMessage(userName) : null)));
         FlagAsSent(exception);
       }
     }
@@ -237,7 +251,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     public void SendInBackground(Exception exception)
     {
-      SendInBackground(exception, null, (IDictionary)null);
+      SendInBackground(exception, null, (IDictionary)null, null);
     }
 
     /// <summary>
@@ -247,7 +261,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message.</param>
     public void SendInBackground(Exception exception, IList<string> tags)
     {
-      SendInBackground(exception, tags, (IDictionary)null);
+      SendInBackground(exception, tags, (IDictionary)null, null);
     }
 
     /// <summary>
@@ -258,6 +272,18 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
+        SendInBackground(exception, tags, userCustomData, null);
+    }
+
+    /// <summary>
+    /// Asynchronously transmits an exception to Raygun.io.
+    /// </summary>
+    /// <param name="exception">The exception to deliver.</param>
+    /// <param name="tags">A list of strings associated with the message.</param>
+    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
+    /// <param name="userName">A string to use as the user identity string.</param>
+    public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, string userName)
+    {
       if (CanSend(exception))
       {
         // We need to process the HttpRequestMessage on the current thread,
@@ -266,7 +292,7 @@ namespace Mindscape.Raygun4Net
 
         ThreadPool.QueueUserWorkItem(c => {
           _currentRequestMessage = currentRequestMessage;
-          Send(BuildMessage(exception, tags, userCustomData));
+          Send(BuildMessage(exception, tags, userCustomData, (!String.IsNullOrEmpty(userName) ? new RaygunIdentifierMessage(userName) : null)));
         });
         FlagAsSent(exception);
       }
@@ -317,7 +343,7 @@ namespace Mindscape.Raygun4Net
       return requestMessage;
     }
 
-    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfoMessage)
     {
       exception = StripWrapperExceptions(exception);
 
@@ -330,7 +356,7 @@ namespace Mindscape.Raygun4Net
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
-        .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
+        .SetUser(userInfoMessage ?? UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
         .Build();
       return message;
     }
