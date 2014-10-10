@@ -94,5 +94,6 @@
     <Compile Include="..\Mindscape.Raygun4Net.WindowsStore\Messages\RaygunMessageDetails.cs">
       <Link>Messages\RaygunMessageDetails.cs</Link>
     </Compile>
+    <Compile Include="Builders\RaygunEnvironmentMessageBuilder.cs" />
   </ItemGroup>
 </Project>
