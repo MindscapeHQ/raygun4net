@@ -40,7 +40,7 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetEnvironmentDetails()
     {
-      _raygunMessage.Details.Environment = new RaygunEnvironmentMessage();
+      _raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.Build();
       return this;
     }
 

@@ -32,7 +32,7 @@ namespace Mindscape.Raygun4Net
     {
       try
       {
-        _raygunMessage.Details.Environment = new RaygunEnvironmentMessage();
+        _raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.Build();
       }
       catch (Exception ex)
       {
