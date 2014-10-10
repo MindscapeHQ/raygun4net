@@ -1,7 +1,6 @@
 ﻿using System;
-
+using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
-
 using NUnit.Framework;
 
 namespace Mindscape.Raygun4Net.Tests
@@ -39,13 +38,13 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void ExceptionBuilds()
     {
-      Assert.That(() => new RaygunErrorMessage(_exception), Throws.Nothing);
+      Assert.That(() => RaygunErrorMessageBuilder.Build(_exception), Throws.Nothing);
     }
 
     [Test]
     public void ErrorMessageHasInnerError()
     {
-      var errorMessage = new RaygunErrorMessage(_exception);
+      var errorMessage = RaygunErrorMessageBuilder.Build(_exception);
 
       Assert.That(errorMessage.InnerError, Is.Not.Null);
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
 using NUnit.Framework;
 
@@ -9,12 +10,12 @@ namespace Mindscape.Raygun4Net2.Tests
   [TestFixture]
   public class RaygunErrorMessageTests
   {
-    private FakeRaygunErrorMessage _raygunErrorMessage;
+    private FakeRaygunErrorMessageBuilder _raygunErrorMessage;
 
     [SetUp]
     public void SetUp()
     {
-      _raygunErrorMessage = new FakeRaygunErrorMessage();
+      _raygunErrorMessage = new FakeRaygunErrorMessageBuilder();
     }
 
     [Test]
@@ -42,7 +43,7 @@ namespace Mindscape.Raygun4Net2.Tests
         exception = e;
       }
 
-      Assert.That(() => new RaygunErrorMessage(exception), Throws.Nothing);
+      Assert.That(() => RaygunErrorMessageBuilder.Build(exception), Throws.Nothing);
     }
 
     private void ExceptionallyCrappyMethod<T, T2>(T bung)
