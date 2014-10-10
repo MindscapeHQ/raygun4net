@@ -12,13 +12,7 @@ namespace Mindscape.Raygun4Net.Messages
 
     public double WindowBoundsHeight { get; set; }
 
-    public string ResolutionScale { get; set; }
-
-    public string CurrentOrientation { get; set; }
-
     public string Cpu { get; set; }
-
-    public string PackageVersion { get; set; }
 
     public string Architecture { get; set; }
 
@@ -31,8 +25,6 @@ namespace Mindscape.Raygun4Net.Messages
     public ulong TotalPhysicalMemory { get; set; }
 
     public ulong AvailablePhysicalMemory { get; set; }
-
-    public string DeviceName { get; set; }
 
     public double UtcOffset { get; set; }
 
