@@ -106,6 +106,7 @@
     <Compile Include="..\Mindscape.Raygun4Net\SimpleJson.cs">
       <Link>SimpleJson.cs</Link>
     </Compile>
+    <Compile Include="Builders\RaygunEnvironmentMessageBuilder.cs" />
     <Compile Include="Builders\RaygunErrorMessageBuilder.cs" />
     <Compile Include="Messages\RaygunClientMessage.cs" />
     <Compile Include="Messages\RaygunEnvironmentMessage.cs" />
