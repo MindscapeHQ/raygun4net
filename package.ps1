@@ -2,6 +2,7 @@ properties {
     $root =                          $psake.build_script_dir
     $nugetspec =                     "$root/Mindscape.Raygun4Net.nuspec"
     $nugetspec_signed =              "$root/Mindscape.Raygun4Net.signed.nuspec"
+    $nugetspec_core =                "$root/Mindscape.Raygun4Net.Core.nuspec"
     $nugetspec_mvc =                 "$root/Mindscape.Raygun4Net.Mvc.nuspec"
     $nugetspec_webapi =              "$root/Mindscape.Raygun4Net.WebApi.nuspec"
     $build_dir =                     "$root\build\"
@@ -30,6 +31,7 @@ task Init -depends Clean {
 task Package -depends Init {
     exec { nuget pack $nugetspec -OutputDirectory $release_dir }
     exec { nuget pack $nugetspec_signed -OutputDirectory $release_dir }
+    exec { nuget pack $nugetspec_core -OutputDirectory $release_dir }
     exec { nuget pack $nugetspec_mvc -OutputDirectory $release_dir }
     exec { nuget pack $nugetspec_webapi -OutputDirectory $release_dir }
 }
