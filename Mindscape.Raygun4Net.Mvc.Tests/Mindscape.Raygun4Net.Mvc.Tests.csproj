@@ -84,6 +84,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Mindscape.Raygun4Net.Core\Mindscape.Raygun4Net.Core.csproj">
+      <Project>{6435c84c-1dac-41fe-aa51-faa8e9a7f090}</Project>
+      <Name>Mindscape.Raygun4Net.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Mindscape.Raygun4Net.Mvc\Mindscape.Raygun4Net.Mvc.csproj">
       <Project>{2cf1fe1f-ad2d-40bd-9f99-57ff00445a9d}</Project>
       <Name>Mindscape.Raygun4Net4</Name>

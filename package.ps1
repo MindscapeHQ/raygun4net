@@ -6,8 +6,8 @@ properties {
     $nugetspec_mvc =                 "$root/Mindscape.Raygun4Net.Mvc.nuspec"
     $nugetspec_webapi =              "$root/Mindscape.Raygun4Net.WebApi.nuspec"
     $build_dir =                     "$root\build\"
-    $build_dir2 =                    "$root\build\Net2"
-    $build_dir4 =                    "$root\build\Net4"
+    $build_dir2 =                    "$build_dir\Net2"
+    $build_dir4 =                    "$build_dir\Net4"
     $build_dir_mvc =                 "$build_dir\Mvc"
     $build_dir_webapi =              "$build_dir\WebApi"
     $signed_build_dir =              "$build_dir\signed"
@@ -79,6 +79,7 @@ task Zip -depends Package {
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.iOS.dll $versionfolder
     # Xamarin.Mac
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.Mac.dll $versionfolder
+    copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.Mac2Beta.dll $versionfolder
     # Windows Store
     copy-item $build_dir/Mindscape.Raygun4Net.WindowsStore.dll $versionfolder
     copy-item $build_dir/Mindscape.Raygun4Net.WindowsStore.pdb $versionfolder
@@ -91,9 +92,13 @@ task Zip -depends Package {
     # .Net MVC
     copy-item $build_dir_mvc/Mindscape.Raygun4Net.Mvc.dll $versionfoldermvc
     copy-item $build_dir_mvc/Mindscape.Raygun4Net.Mvc.pdb $versionfoldermvc
+    copy-item $build_dir_mvc/Mindscape.Raygun4Net.dll $versionfoldermvc
+    copy-item $build_dir_mvc/Mindscape.Raygun4Net.pdb $versionfoldermvc
     # .Net WebApi
     copy-item $build_dir_webapi/Mindscape.Raygun4Net.WebApi.dll $versionfolderwebapi
     copy-item $build_dir_webapi/Mindscape.Raygun4Net.WebApi.pdb $versionfolderwebapi
+    copy-item $build_dir_webapi/Mindscape.Raygun4Net.dll $versionfolderwebapi
+    copy-item $build_dir_webapi/Mindscape.Raygun4Net.pdb $versionfolderwebapi
     # Signed
     copy-item $signed_build_dir/Mindscape.Raygun4Net.dll $signedfolder
     copy-item $signed_build_dir/Mindscape.Raygun4Net.WinRT.dll $signedfolder
