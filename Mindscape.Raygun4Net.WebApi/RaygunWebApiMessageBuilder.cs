@@ -95,7 +95,7 @@ namespace Mindscape.Raygun4Net.WebApi
 
     public IRaygunMessageBuilder SetClientDetails()
     {
-      _raygunMessage.Details.Client = new RaygunClientMessage();
+      _raygunMessage.Details.Client = new RaygunClientMessage() { Name = "Raygun4Net.WebApi" };
       return this;
     }
 

@@ -7,13 +7,13 @@
     <authors>Mindscape</authors>
     <owners />
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Core dll for MVC and WebApi Raygun providers</description>
+    <description>Core library for MVC and WebApi Raygun providers</description>
     <iconUrl>https://app.raygun.io/Content/Images/nuget-icon.png</iconUrl>
     <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
     <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
   </metadata>
   <files>
-    <file src="build\Mindscape.Raygun4Net.Core.dll" target="lib\net40\Mindscape.Raygun4Net.Core.dll" />
-    <file src="build\Mindscape.Raygun4Net.Core.pdb" target="lib\net40\Mindscape.Raygun4Net.Core.pdb" />
+    <file src="build\Core\Mindscape.Raygun4Net.dll" target="lib\net40\Mindscape.Raygun4Net.dll" />
+    <file src="build\Core\Mindscape.Raygun4Net.pdb" target="lib\net40\Mindscape.Raygun4Net.pdb" />
   </files>
 </package>

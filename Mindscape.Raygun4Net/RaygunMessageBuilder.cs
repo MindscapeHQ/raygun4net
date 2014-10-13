@@ -100,7 +100,7 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetClientDetails()
     {
-      _raygunMessage.Details.Client = new RaygunClientMessage();
+      _raygunMessage.Details.Client = new RaygunClientMessage() { Name = "Raygun4Net.Mvc" };
       return this;
     }
 

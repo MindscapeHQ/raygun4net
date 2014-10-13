@@ -89,8 +89,8 @@ task Zip -depends Package {
     copy-item $build_dir4/Mindscape.Raygun4Net.dll $versionfolder4
     copy-item $build_dir4/Mindscape.Raygun4Net.pdb $versionfolder4
     # .Net MVC
-    copy-item $build_dir_mvc/Mindscape.Raygun4Net.dll $versionfoldermvc
-    copy-item $build_dir_mvc/Mindscape.Raygun4Net.pdb $versionfoldermvc
+    copy-item $build_dir_mvc/Mindscape.Raygun4Net.Mvc.dll $versionfoldermvc
+    copy-item $build_dir_mvc/Mindscape.Raygun4Net.Mvc.pdb $versionfoldermvc
     # .Net WebApi
     copy-item $build_dir_webapi/Mindscape.Raygun4Net.WebApi.dll $versionfolderwebapi
     copy-item $build_dir_webapi/Mindscape.Raygun4Net.WebApi.pdb $versionfolderwebapi

@@ -11,6 +11,9 @@
     <iconUrl>https://app.raygun.io/Content/Images/nuget-icon.png</iconUrl>
     <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
     <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
+    <dependencies>
+      <dependency id="Mindscape.Raygun4Net.Core" version="3.3.2.0" />
+    </dependencies>
   </metadata>
   <files>
     <file src="build\WebApi\Mindscape.Raygun4Net.WebApi.dll" target="lib\net45\Mindscape.Raygun4Net.WebApi.dll" />
