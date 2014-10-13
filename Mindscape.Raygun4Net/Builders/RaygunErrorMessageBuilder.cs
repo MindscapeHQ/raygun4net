@@ -27,7 +27,7 @@ namespace Mindscape.Raygun4Net.Builders
         IDictionary data = new Dictionary<object, object>();
         foreach (object key in exception.Data.Keys)
         {
-          if (!RaygunClient.SentKey.Equals(key))
+          if (!"AlreadySentByRaygun".Equals(key))
           {
             data[key] = exception.Data[key];
           }

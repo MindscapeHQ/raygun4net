@@ -13,8 +13,8 @@
     <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
   </metadata>
   <files>
-    <file src="build\WebApi\Mindscape.Raygun4Net.dll" target="lib\net45\Mindscape.Raygun4Net.dll" />
-    <file src="build\WebApi\Mindscape.Raygun4Net.pdb" target="lib\net45\Mindscape.Raygun4Net.pdb" />
+    <file src="build\WebApi\Mindscape.Raygun4Net.WebApi.dll" target="lib\net45\Mindscape.Raygun4Net.WebApi.dll" />
+    <file src="build\WebApi\Mindscape.Raygun4Net.WebApi.pdb" target="lib\net45\Mindscape.Raygun4Net.WebApi.pdb" />
     <file src="readme.txt" />
   </files>
 </package>

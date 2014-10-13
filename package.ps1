@@ -92,8 +92,8 @@ task Zip -depends Package {
     copy-item $build_dir_mvc/Mindscape.Raygun4Net.dll $versionfoldermvc
     copy-item $build_dir_mvc/Mindscape.Raygun4Net.pdb $versionfoldermvc
     # .Net WebApi
-    copy-item $build_dir_webapi/Mindscape.Raygun4Net.dll $versionfolderwebapi
-    copy-item $build_dir_webapi/Mindscape.Raygun4Net.pdb $versionfolderwebapi
+    copy-item $build_dir_webapi/Mindscape.Raygun4Net.WebApi.dll $versionfolderwebapi
+    copy-item $build_dir_webapi/Mindscape.Raygun4Net.WebApi.pdb $versionfolderwebapi
     # Signed
     copy-item $signed_build_dir/Mindscape.Raygun4Net.dll $signedfolder
     copy-item $signed_build_dir/Mindscape.Raygun4Net.WinRT.dll $signedfolder
