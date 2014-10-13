@@ -122,7 +122,7 @@ namespace Mindscape.Raygun4Net
         {
           return this;
         }
-        _raygunMessage.Details.Request = RaygunRequestMessageBuilder.Build(request, options ?? new RaygunRequestMessageOptions());
+        _raygunMessage.Details.Request = RaygunRequestMessageBuilder.Build(request, options);
       }
 
       return this;
