@@ -68,7 +68,7 @@ namespace Mindscape.Raygun4Net.WebApi
         _raygunMessage.Details.Response = new RaygunResponseMessage
         {
           StatusCode = (int)error.StatusCode, 
-          StatusDescription = error.StatusCode.ToString()
+          StatusDescription = error.ReasonPhrase
         };
       }
 
@@ -117,19 +117,15 @@ namespace Mindscape.Raygun4Net.WebApi
       return this;
     }
 
-    public IRaygunMessageBuilder SetHttpDetails(HttpRequestDetails message)
+    public IRaygunMessageBuilder SetHttpDetails(RaygunRequestMessage message)
     {
-      if (message != null)
-      {
-        _raygunMessage.Details.Request = new RaygunWebApiRequestMessageBuilder().Build(message);
-      }
-
+      _raygunMessage.Details.Request = message;
       return this;
     }
 
-    public IRaygunMessageBuilder SetHttpDetails(HttpRequestMessage message, RaygunRequestMessageOptions messageOptions = null)
+    public IRaygunMessageBuilder SetHttpDetails(HttpRequestMessage request, RaygunRequestMessageOptions options)
     {
-      return SetHttpDetails(new HttpRequestDetails(message, messageOptions));
+      return SetHttpDetails(RaygunWebApiRequestMessageBuilder.Build(request, options));
     }
 
     public IRaygunMessageBuilder SetVersion(string version)

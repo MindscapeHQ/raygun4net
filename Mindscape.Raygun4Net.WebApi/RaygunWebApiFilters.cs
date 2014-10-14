@@ -52,13 +52,8 @@ namespace Mindscape.Raygun4Net.WebApi
             context.Response.ReasonPhrase,
             string.Format("HTTP {0} returned while handling Request {2} {1}", (int)context.Response.StatusCode, context.Request.RequestUri, context.Request.Method));
         }
-        catch (RaygunWebApiHttpException e)
-        {
-          _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(context.Request).SendInBackground(e, null, new Dictionary<string, string> { { "ReasonCode", e.ReasonPhrase } });
-        }
         catch (Exception e)
         {
-          // This is here on the off chance that interacting with the context or HTTP Response throws an exception.
           _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(context.Request).SendInBackground(e);
         }
       }

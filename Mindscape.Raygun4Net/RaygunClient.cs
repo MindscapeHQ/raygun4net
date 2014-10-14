@@ -307,7 +307,10 @@ namespace Mindscape.Raygun4Net
         {
           request = context.Request;
         }
-        catch (HttpException) { }
+        catch (HttpException ex)
+        {
+          System.Diagnostics.Trace.WriteLine("Error retrieving HttpRequest {0}", ex.Message);
+        }
 
         if (request != null)
         {

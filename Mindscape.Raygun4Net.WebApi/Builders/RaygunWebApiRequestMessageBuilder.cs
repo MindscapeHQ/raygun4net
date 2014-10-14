@@ -11,46 +11,28 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
 {
   public class RaygunWebApiRequestMessageBuilder
   {
-    public RaygunRequestMessage Build(HttpRequestDetails request)
+    private const string HttpContext = "MS_HttpContext";
+    private const string RemoteEndpointMessage = "System.ServiceModel.Channels.RemoteEndpointMessageProperty";
+
+    public static RaygunRequestMessage Build(HttpRequestMessage request, RaygunRequestMessageOptions options)
     {
       RaygunRequestMessage message = new RaygunRequestMessage();
+
+      options = options ?? new RaygunRequestMessageOptions();
 
       message.HostName = request.RequestUri.Host;
       message.Url = request.RequestUri.AbsolutePath;
       message.HttpMethod = request.Method.ToString();
-      message.IPAddress = request.IPAddress;
-      message.QueryString = request.QueryString;
+      message.IPAddress = GetIPAddress(request);
+      message.Form = ToDictionary(request.GetQueryNameValuePairs(), options.IsFormFieldIgnored);
+      message.QueryString = ToDictionary(request.GetQueryNameValuePairs(), s => false);
 
-      message.Headers = request.Headers;
-      message.RawData = request.RawData;
+      SetHeadersAndRawData(message, request, options.IsHeaderIgnored);
 
       return message;
     }
-  }
 
-  public class HttpRequestDetails
-  {
-    public Uri RequestUri { get; set; }
-    public HttpMethod Method { get; set; }
-    public IDictionary Form { get; set; }
-    public IDictionary Headers { get; set; }
-    public IDictionary QueryString { get; set; }
-    public string IPAddress { get; set; }
-    public string RawData { get; set; }
-
-    public HttpRequestDetails(HttpRequestMessage message, RaygunRequestMessageOptions options = null)
-    {
-      options = options ?? new RaygunRequestMessageOptions();
-
-      RequestUri = message.RequestUri;
-      Method = message.Method;
-      Form = ToDictionary(message.GetQueryNameValuePairs(), options.IsFormFieldIgnored);
-      QueryString = ToDictionary(message.GetQueryNameValuePairs(), s => false);
-      IPAddress = GetIPAddress(message);
-      SetHeadersAndRawData(message, options.IsHeaderIgnored);
-    }
-
-    private IDictionary ToDictionary(IEnumerable<KeyValuePair<string, string>> kvPairs, Func<string, bool> ignored)
+    private static IDictionary ToDictionary(IEnumerable<KeyValuePair<string, string>> kvPairs, Func<string, bool> ignored)
     {
       var dictionary = new Dictionary<string, string>();
       foreach (var pair in kvPairs.Where(kv => !ignored(kv.Key)))
@@ -60,7 +42,7 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       return dictionary;
     }
 
-    private string GetIPAddress(HttpRequestMessage request)
+    private static string GetIPAddress(HttpRequestMessage request)
     {
       try
       {
@@ -89,13 +71,13 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       return null;
     }
 
-    private void SetHeadersAndRawData(HttpRequestMessage request, Func<string, bool> ignored)
+    private static void SetHeadersAndRawData(RaygunRequestMessage message, HttpRequestMessage request, Func<string, bool> ignored)
     {
-      Headers = new Dictionary<string, string>();
+      message.Headers = new Dictionary<string, string>();
 
       foreach (var header in request.Headers.Where(h => !ignored(h.Key)))
       {
-        Headers[header.Key] = string.Join(",", header.Value);
+        message.Headers[header.Key] = string.Join(",", header.Value);
       }
 
       try
@@ -104,16 +86,16 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
         {
           foreach (var header in request.Content.Headers)
           {
-            Headers[header.Key] = string.Join(",", header.Value);
+            message.Headers[header.Key] = string.Join(",", header.Value);
           }
 
-          RawData = request.Content.ReadAsStringAsync().Result;
+          message.RawData = request.Content.ReadAsStringAsync().Result;
         }
       }
-      catch (Exception) { }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Trace.WriteLine("Error retrieving Headers and RawData {0}", ex.Message);
+      }
     }
-
-    private const string HttpContext = "MS_HttpContext";
-    private const string RemoteEndpointMessage = "System.ServiceModel.Channels.RemoteEndpointMessageProperty";
   }
 }
