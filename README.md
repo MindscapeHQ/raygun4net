@@ -317,7 +317,7 @@ There is a property named ```User``` on RaygunClient which you can set to be the
 
 If you want more detailed information about users (and the ability to use the new Affected User reporting feature when it is released), you can set the ```UserInfo``` property on the RaygunClient to a new RaygunIdentifierMessage object. [This class](https://github.com/MindscapeHQ/raygun4net/blob/master/Mindscape.Raygun4Net/Messages/RaygunIdentifierMessage.cs) has a number of properties on it to help identifier the user who experienced a crash.
 
-This feature is optional if you wish to disable it for privacy concerns.
+Make sure to abide by any privacy policies that your company follows when using this feature.
 
 ### Properties
 The only required field is Identifier.

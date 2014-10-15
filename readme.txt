@@ -284,7 +284,7 @@ Unique (affected) user tracking
 
 There is a property named *User* on RaygunClient which you can set to be the current user's ID or email address. This allows you to see the count of affected users for each error in the Raygun dashboard. If you provide an email address, and the user has an associated Gravatar, you will see their avatar in the error instance page.
 
-This feature is optional if you wish to disable it for privacy concerns.
+Make sure to abide by any privacy policies that your company follows when using this feature.
 
 Version numbering and tags
 ==========================
