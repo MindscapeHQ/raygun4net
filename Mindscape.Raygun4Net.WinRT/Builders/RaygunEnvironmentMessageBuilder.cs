@@ -17,7 +17,6 @@ namespace Mindscape.Raygun4Net.Builders
         message.WindowBoundsHeight = Windows.UI.Xaml.Window.Current.Bounds.Height;
         message.WindowBoundsWidth = Windows.UI.Xaml.Window.Current.Bounds.Width;
       }
-      message.PackageVersion = string.Format("{0}.{1}", Package.Current.Id.Version.Major, Package.Current.Id.Version.Minor);
       message.Cpu = Package.Current.Id.Architecture.ToString();
       message.ResolutionScale = DisplayProperties.ResolutionScale.ToString();
       message.CurrentOrientation = DisplayProperties.CurrentOrientation.ToString();

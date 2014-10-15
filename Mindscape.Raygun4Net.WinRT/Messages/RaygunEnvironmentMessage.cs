@@ -20,8 +20,6 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string Cpu { get; set; }
 
-    public string PackageVersion { get; set; }
-
     public string Architecture { get; set; }
 
     public ulong TotalVirtualMemory { get; set; }
