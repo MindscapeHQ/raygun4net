@@ -41,7 +41,6 @@ namespace Mindscape.Raygun4Net.Builders
       message.AvailablePhysicalMemory = GetIntSysCtl(AvailablePhysicalMemoryPropertyName);
 
       message.DeviceName = UIDevice.CurrentDevice.Name;
-      message.PackageVersion = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString();
 
       return message;
     }

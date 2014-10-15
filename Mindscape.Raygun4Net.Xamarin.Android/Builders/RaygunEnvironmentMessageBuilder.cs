@@ -38,10 +38,6 @@ namespace Mindscape.Raygun4Net.Builders
         Context context = RaygunClient.Context;
         if (context != null)
         {
-          PackageManager manager = context.PackageManager;
-          PackageInfo info = manager.GetPackageInfo(context.PackageName, 0);
-          message.PackageVersion = info.VersionCode + " / " + info.VersionName;
-
           IWindowManager windowManager = context.GetSystemService(Context.WindowService).JavaCast<IWindowManager>();
           if (windowManager != null)
           {

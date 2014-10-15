@@ -518,7 +518,7 @@ namespace Mindscape.Raygun4Net
 
       object deviceName;
       DeviceExtendedProperties.TryGetValue("DeviceName", out deviceName);
-
+      
       string version = _callingAssembly != null ? new AssemblyName(_callingAssembly.FullName).Version.ToString() : "Not supplied";
       if (!String.IsNullOrWhiteSpace(ApplicationVersion))
       {

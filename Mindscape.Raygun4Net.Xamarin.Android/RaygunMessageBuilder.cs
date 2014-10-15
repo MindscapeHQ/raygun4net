@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using Android.Content;
+using Android.Content.PM;
 using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
 
@@ -91,18 +93,28 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetVersion(string version)
     {
-      if (!String.IsNullOrWhiteSpace(version))
+      if (String.IsNullOrWhiteSpace(version))
       {
-        _raygunMessage.Details.Version = version;
+        try
+        {
+          Context context = RaygunClient.Context;
+          PackageManager manager = context.PackageManager;
+          PackageInfo info = manager.GetPackageInfo(context.PackageName, 0);
+          version = info.VersionCode + " / " + info.VersionName;
+        }
+        catch (Exception ex)
+        {
+          Debug.WriteLine("Error retieving package version {0}", ex.Message);
+        }
       }
-      else if (_raygunMessage.Details.Environment != null && !String.IsNullOrWhiteSpace(_raygunMessage.Details.Environment.PackageVersion))
+
+      if (String.IsNullOrWhiteSpace(version))
       {
-        _raygunMessage.Details.Version = _raygunMessage.Details.Environment.PackageVersion;
+        version = "Not supplied";
       }
-      else
-      {
-        _raygunMessage.Details.Version = "Not supplied";
-      }
+
+      _raygunMessage.Details.Version = version;
+
       return this;
     }
   }

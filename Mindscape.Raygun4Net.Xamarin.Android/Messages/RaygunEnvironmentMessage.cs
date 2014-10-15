@@ -21,8 +21,6 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string CurrentOrientation { get; set; }
 
-    public string PackageVersion { get; set; }
-
     public string Architecture { get; set; }
 
     public string Model { get; set; }

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reflection;
 using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
+using MonoTouch.Foundation;
 
 namespace Mindscape.Raygun4Net
 {
@@ -90,18 +91,25 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetVersion(string version)
     {
-      if (!String.IsNullOrWhiteSpace(version))
+      if (String.IsNullOrWhiteSpace(version))
       {
-        _raygunMessage.Details.Version = version;
+        try
+        {
+          version = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString();
+        }
+        catch (Exception ex)
+        {
+          Trace.WriteLine("Error retieving bundle version {0}", ex.Message);
+        }
       }
-      else if (_raygunMessage.Details.Environment != null && !String.IsNullOrWhiteSpace(_raygunMessage.Details.Environment.PackageVersion))
+
+      if (String.IsNullOrWhiteSpace(version))
       {
-        _raygunMessage.Details.Version = _raygunMessage.Details.Environment.PackageVersion;
+        version = "Not supplied";
       }
-      else
-      {
-        _raygunMessage.Details.Version = "Not supplied";
-      }
+      
+      _raygunMessage.Details.Version = version;
+
       return this;
     }
   }

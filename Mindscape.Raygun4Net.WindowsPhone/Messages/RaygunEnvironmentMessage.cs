@@ -14,8 +14,6 @@
 
     public string Cpu { get; set; }
 
-    public string PackageVersion { get; set; }
-
     public string Architecture { get; set; }
 
     public long IsolatedStorageAvailableFreeSpace { get; set; }
