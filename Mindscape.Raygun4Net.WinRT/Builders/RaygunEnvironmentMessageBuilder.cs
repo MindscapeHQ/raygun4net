@@ -24,7 +24,7 @@ namespace Mindscape.Raygun4Net.Builders
 
       DateTime now = DateTime.Now;
       message.UtcOffset = TimeZoneInfo.Local.GetUtcOffset(now).TotalHours;
-
+      
       SYSTEM_INFO systemInfo = new SYSTEM_INFO();
       RaygunSystemInfoWrapper.GetNativeSystemInfo(ref systemInfo);
       message.Architecture = ((PROCESSOR_ARCHITECTURE)systemInfo.wProcessorArchitecture).ToString();
