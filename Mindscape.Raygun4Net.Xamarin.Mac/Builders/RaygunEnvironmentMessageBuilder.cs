@@ -20,87 +20,113 @@ namespace Mindscape.Raygun4Net.Builders
     {
       RaygunEnvironmentMessage message = new RaygunEnvironmentMessage ();
 
-      message.UtcOffset = NSTimeZone.LocalTimeZone.GetSecondsFromGMT / 3600.0;
-
-      message.Architecture = GetStringSysCtl(ArchitecturePropertyName);
-      message.ProcessorCount = (int)GetIntSysCtl(ProcessiorCountPropertyName);
-
-      message.Locale = CultureInfo.CurrentCulture.DisplayName;
-
-      if (NSApplication.SharedApplication != null && NSApplication.SharedApplication.KeyWindow != null)
+      try
       {
-        message.WindowBoundsWidth = NSApplication.SharedApplication.KeyWindow.Frame.Width;
-        message.WindowBoundsHeight = NSApplication.SharedApplication.KeyWindow.Frame.Height;
-      }
-
-      message.TotalPhysicalMemory = GetIntSysCtl(TotalPhysicalMemoryPropertyName);
-      message.AvailablePhysicalMemory = GetIntSysCtl(AvailablePhysicalMemoryPropertyName);
-
-      string osType = GetStringSysCtl(OSTypePropertyName);
-      string version = GetStringSysCtl(OSReleasePropertyName);
-      string osVersion = null;
-      if ("Darwin".Equals(osType) && !String.IsNullOrWhiteSpace(version))
-      {
-        if (version.StartsWith("14"))
+        if (NSApplication.SharedApplication != null && NSApplication.SharedApplication.KeyWindow != null)
         {
-          osVersion = "OS X v10.10 Yosemite";
-        }
-        else if (version.StartsWith("13"))
-        {
-          osVersion = "OS X v10.9 Mavericks";
-        }
-        else if (version.StartsWith("12.5"))
-        {
-          osVersion = "OS X v10.8.5 Mountain Lion";
-        }
-        else if (version.StartsWith("12"))
-        {
-          osVersion = "OS X v10.8 Mountain Lion";
-        }
-        else if (version.StartsWith("11"))
-        {
-          osVersion = "Mac OS X v10.7 Lion";
-        }
-        else if (version.StartsWith("10"))
-        {
-          osVersion = "Mac OS X v10.6 Snow Leopard";
-        }
-        else if (version.StartsWith("9"))
-        {
-          osVersion = "Mac OS X v10.5 Leopard";
-        }
-        else if (version.StartsWith("8"))
-        {
-          osVersion = "Mac OS X v10.4 Tiger";
-        }
-        else if (version.StartsWith("7"))
-        {
-          osVersion = "Mac OS X v10.3 Panther";
-        }
-        else if (version.StartsWith("6"))
-        {
-          osVersion = "Mac OS X v10.2 Jaguar";
-        }
-        else if (version.StartsWith("5"))
-        {
-          osVersion = "Mac OS X v10.1 Puma";
+          message.WindowBoundsWidth = NSApplication.SharedApplication.KeyWindow.Frame.Width;
+          message.WindowBoundsHeight = NSApplication.SharedApplication.KeyWindow.Frame.Height;
         }
       }
-
-      if (osVersion != null)
+      catch (Exception ex)
       {
-        osVersion += " (" + osType + " " + version + ")";
-      }
-      else if (!String.IsNullOrWhiteSpace(osType) && !"Unknown".Equals(osType) && !String.IsNullOrWhiteSpace(version) && !"Unknown".Equals(version))
-      {
-        osVersion = osType + " " + version;
-      }
-      else
-      {
-        osVersion = "Unknown";
+        System.Diagnostics.Debug.WriteLine("Error retrieving window dimensions: {0}", ex.Message);
       }
 
-      message.OSVersion = osVersion;
+      try
+      {
+        message.UtcOffset = NSTimeZone.LocalTimeZone.GetSecondsFromGMT / 3600.0;
+        message.Locale = CultureInfo.CurrentCulture.DisplayName;
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Debug.WriteLine("Error retrieving time and locale: {0}", ex.Message);
+      }
+
+      try
+      {
+        message.Architecture = GetStringSysCtl(ArchitecturePropertyName);
+        message.ProcessorCount = (int)GetIntSysCtl(ProcessiorCountPropertyName);
+        message.TotalPhysicalMemory = GetIntSysCtl(TotalPhysicalMemoryPropertyName);
+        message.AvailablePhysicalMemory = GetIntSysCtl(AvailablePhysicalMemoryPropertyName);
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Debug.WriteLine("Error retrieving device info: {0}", ex.Message);
+      }
+
+      try
+      {
+        string osType = GetStringSysCtl(OSTypePropertyName);
+        string version = GetStringSysCtl(OSReleasePropertyName);
+        string osVersion = null;
+        if ("Darwin".Equals(osType) && !String.IsNullOrWhiteSpace(version))
+        {
+          if (version.StartsWith("14"))
+          {
+            osVersion = "OS X v10.10 Yosemite";
+          }
+          else if (version.StartsWith("13"))
+          {
+            osVersion = "OS X v10.9 Mavericks";
+          }
+          else if (version.StartsWith("12.5"))
+          {
+            osVersion = "OS X v10.8.5 Mountain Lion";
+          }
+          else if (version.StartsWith("12"))
+          {
+            osVersion = "OS X v10.8 Mountain Lion";
+          }
+          else if (version.StartsWith("11"))
+          {
+            osVersion = "Mac OS X v10.7 Lion";
+          }
+          else if (version.StartsWith("10"))
+          {
+            osVersion = "Mac OS X v10.6 Snow Leopard";
+          }
+          else if (version.StartsWith("9"))
+          {
+            osVersion = "Mac OS X v10.5 Leopard";
+          }
+          else if (version.StartsWith("8"))
+          {
+            osVersion = "Mac OS X v10.4 Tiger";
+          }
+          else if (version.StartsWith("7"))
+          {
+            osVersion = "Mac OS X v10.3 Panther";
+          }
+          else if (version.StartsWith("6"))
+          {
+            osVersion = "Mac OS X v10.2 Jaguar";
+          }
+          else if (version.StartsWith("5"))
+          {
+            osVersion = "Mac OS X v10.1 Puma";
+          }
+        }
+
+        if (osVersion != null)
+        {
+          osVersion += " (" + osType + " " + version + ")";
+        }
+        else if (!String.IsNullOrWhiteSpace(osType) && !"Unknown".Equals(osType) && !String.IsNullOrWhiteSpace(version) && !"Unknown".Equals(version))
+        {
+          osVersion = osType + " " + version;
+        }
+        else
+        {
+          osVersion = "Unknown";
+        }
+
+        message.OSVersion = osVersion;
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Debug.WriteLine("Error retrieving OSVersion: {0}", ex.Message);
+      }
 
       return message;
     }

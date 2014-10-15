@@ -38,15 +38,7 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetEnvironmentDetails()
     {
-      try
-      {
-        _raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.Build();
-      }
-      catch (Exception ex)
-      {
-        System.Diagnostics.Debug.WriteLine(string.Format("Failed to fetch the environment details: {0}", ex.Message));
-      }
-
+      _raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.Build();
       return this;
     }
 
