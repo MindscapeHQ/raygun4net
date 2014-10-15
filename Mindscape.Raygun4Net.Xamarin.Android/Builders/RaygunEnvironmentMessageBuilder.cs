@@ -63,8 +63,6 @@ namespace Mindscape.Raygun4Net.Builders
           }
         }
 
-        message.DeviceName = "Unknown";
-
         Java.Lang.Runtime runtime = Java.Lang.Runtime.GetRuntime();
         message.TotalPhysicalMemory = (ulong)runtime.TotalMemory();
         message.AvailablePhysicalMemory = (ulong)runtime.FreeMemory();

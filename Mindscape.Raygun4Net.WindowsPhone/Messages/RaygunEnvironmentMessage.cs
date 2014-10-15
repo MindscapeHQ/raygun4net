@@ -8,13 +8,7 @@
 
     public double WindowBoundsHeight { get; set; }
 
-    public string ResolutionScale { get; set; }
-
     public string CurrentOrientation { get; set; }
-
-    public string Cpu { get; set; }
-
-    public string Architecture { get; set; }
 
     public long IsolatedStorageAvailableFreeSpace { get; set; }
 
@@ -31,8 +25,6 @@
     public string DeviceHardwareVersion { get; set; }
 
     public string DeviceManufacturer { get; set; }
-
-    public string DeviceName { get; set; }
 
     public double UtcOffset { get; set; }
 

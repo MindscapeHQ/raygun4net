@@ -40,8 +40,6 @@ namespace Mindscape.Raygun4Net.Builders
       message.TotalPhysicalMemory = GetIntSysCtl(TotalPhysicalMemoryPropertyName);
       message.AvailablePhysicalMemory = GetIntSysCtl(AvailablePhysicalMemoryPropertyName);
 
-      message.DeviceName = UIDevice.CurrentDevice.Name;
-
       return message;
     }
 

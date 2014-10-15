@@ -20,9 +20,6 @@ namespace Mindscape.Raygun4Net.Builders
 
       message.Locale = CultureInfo.CurrentCulture.DisplayName;
       message.OSVersion = Environment.OSVersion.Platform + " " + Environment.OSVersion.Version;
-      object deviceName;
-      DeviceExtendedProperties.TryGetValue("DeviceName", out deviceName);
-      message.DeviceName = deviceName.ToString();
 
       DateTime now = DateTime.Now;
       message.UtcOffset = TimeZoneInfo.Local.GetUtcOffset(now).TotalHours;
@@ -37,7 +34,7 @@ namespace Mindscape.Raygun4Net.Builders
           message.CurrentOrientation = frame.Orientation.ToString();
         }
       }
-
+      
       try
       {
         message.ApplicationCurrentMemoryUsage = DeviceStatus.ApplicationCurrentMemoryUsage;
