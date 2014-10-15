@@ -17,35 +17,47 @@ namespace Mindscape.Raygun4Net.Builders
     {
       RaygunEnvironmentMessage message = new RaygunEnvironmentMessage();
 
-      message.Locale = CultureInfo.CurrentCulture.DisplayName;
-
-      DateTime now = DateTime.Now;
-      message.UtcOffset = TimeZoneInfo.Local.GetUtcOffset(now).TotalHours;
-
-      if (Window.Current != null)
+      try
       {
-        message.WindowBoundsWidth = Window.Current.Bounds.Width;
-        message.WindowBoundsHeight = Window.Current.Bounds.Height;
-
-        var sensor = Windows.Devices.Sensors.SimpleOrientationSensor.GetDefault();
-
-        if (sensor != null)
+        if (Window.Current != null)
         {
-          message.CurrentOrientation = sensor.GetCurrentOrientation().ToString();
+          message.WindowBoundsWidth = Window.Current.Bounds.Width;
+          message.WindowBoundsHeight = Window.Current.Bounds.Height;
+
+          var sensor = Windows.Devices.Sensors.SimpleOrientationSensor.GetDefault();
+
+          if (sensor != null)
+          {
+            message.CurrentOrientation = sensor.GetCurrentOrientation().ToString();
+          }
         }
       }
-
-      var deviceInfo = new EasClientDeviceInformation();
+      catch (Exception ex)
+      {
+        Debug.WriteLine("Error retieving screen info: {0}", ex.Message);
+      }
 
       try
       {
+        DateTime now = DateTime.Now;
+        message.UtcOffset = TimeZoneInfo.Local.GetUtcOffset(now).TotalHours;
+        message.Locale = CultureInfo.CurrentCulture.DisplayName;
+      }
+      catch (Exception ex)
+      {
+        Debug.WriteLine("Error retieving time and locale: {0}", ex.Message);
+      }
+
+      try
+      {
+        var deviceInfo = new EasClientDeviceInformation();
         message.DeviceManufacturer = deviceInfo.SystemManufacturer;
         message.DeviceName = deviceInfo.SystemProductName;
         message.OSVersion = deviceInfo.OperatingSystem;
       }
-      catch (Exception e)
+      catch (Exception ex)
       {
-        Debug.WriteLine("Failed to get device information: {0}", e.Message);
+        Debug.WriteLine("Error retieving device info: {0}", ex.Message);
       }
 
       return message;
