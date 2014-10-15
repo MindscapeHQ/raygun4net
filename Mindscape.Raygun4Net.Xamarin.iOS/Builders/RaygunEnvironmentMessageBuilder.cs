@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -20,25 +21,51 @@ namespace Mindscape.Raygun4Net.Builders
     {
       RaygunEnvironmentMessage message = new RaygunEnvironmentMessage();
 
-      message.UtcOffset = NSTimeZone.LocalTimeZone.GetSecondsFromGMT / 3600.0;
-
-      message.OSVersion = UIDevice.CurrentDevice.SystemName + " " + UIDevice.CurrentDevice.SystemVersion;
-      message.Architecture = GetStringSysCtl(ArchitecturePropertyName);
-      message.Model = UIDevice.CurrentDevice.Model;
-      message.ProcessorCount = (int)GetIntSysCtl(ProcessiorCountPropertyName);
-
-      message.Locale = CultureInfo.CurrentCulture.DisplayName;
-
-      UIApplication.SharedApplication.InvokeOnMainThread(() =>
+      try
       {
-        message.WindowBoundsWidth = UIScreen.MainScreen.Bounds.Width;
-        message.WindowBoundsHeight = UIScreen.MainScreen.Bounds.Height;
-      });
+        UIApplication.SharedApplication.InvokeOnMainThread(() =>
+        {
+          message.WindowBoundsWidth = UIScreen.MainScreen.Bounds.Width;
+          message.WindowBoundsHeight = UIScreen.MainScreen.Bounds.Height;
+        });
+      }
+      catch (Exception ex)
+      {
+        Trace.WriteLine(string.Format("Error retrieving screen dimensions: {0}", ex.Message));
+      }
 
-      message.CurrentOrientation = UIDevice.CurrentDevice.Orientation.ToString();
+      try
+      {
+        message.UtcOffset = NSTimeZone.LocalTimeZone.GetSecondsFromGMT / 3600.0;
+        message.Locale = CultureInfo.CurrentCulture.DisplayName;
+      }
+      catch (Exception ex)
+      {
+        Trace.WriteLine(string.Format("Error retrieving time and locale: {0}", ex.Message));
+      }
 
-      message.TotalPhysicalMemory = GetIntSysCtl(TotalPhysicalMemoryPropertyName);
-      message.AvailablePhysicalMemory = GetIntSysCtl(AvailablePhysicalMemoryPropertyName);
+      try
+      {
+        message.OSVersion = UIDevice.CurrentDevice.SystemName + " " + UIDevice.CurrentDevice.SystemVersion;
+        message.Model = UIDevice.CurrentDevice.Model;
+        message.CurrentOrientation = UIDevice.CurrentDevice.Orientation.ToString();
+      }
+      catch (Exception ex)
+      {
+        Trace.WriteLine(string.Format("Error retrieving device info: {0}", ex.Message));
+      }
+
+      try
+      {
+        message.ProcessorCount = (int)GetIntSysCtl(ProcessiorCountPropertyName);
+        message.Architecture = GetStringSysCtl(ArchitecturePropertyName);
+        message.TotalPhysicalMemory = GetIntSysCtl(TotalPhysicalMemoryPropertyName);
+        message.AvailablePhysicalMemory = GetIntSysCtl(AvailablePhysicalMemoryPropertyName);
+      }
+      catch (Exception ex)
+      {
+        Trace.WriteLine(string.Format("Error retrieving memory and processor: {0}", ex.Message));
+      }
 
       return message;
     }

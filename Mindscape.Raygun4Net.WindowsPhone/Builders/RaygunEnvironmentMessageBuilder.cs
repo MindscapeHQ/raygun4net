@@ -18,23 +18,47 @@ namespace Mindscape.Raygun4Net.Builders
     {
       RaygunEnvironmentMessage message = new RaygunEnvironmentMessage();
 
-      message.Locale = CultureInfo.CurrentCulture.DisplayName;
-      message.OSVersion = Environment.OSVersion.Platform + " " + Environment.OSVersion.Version;
-
-      DateTime now = DateTime.Now;
-      message.UtcOffset = TimeZoneInfo.Local.GetUtcOffset(now).TotalHours;
-
-      if (Application.Current != null && Application.Current.RootVisual != null)
+      try
       {
-        message.WindowBoundsWidth = Application.Current.RootVisual.RenderSize.Width;
-        message.WindowBoundsHeight = Application.Current.RootVisual.RenderSize.Height;
-        PhoneApplicationFrame frame = Application.Current.RootVisual as PhoneApplicationFrame;
-        if (frame != null)
+        if (Application.Current != null && Application.Current.RootVisual != null)
         {
-          message.CurrentOrientation = frame.Orientation.ToString();
+          message.WindowBoundsWidth = Application.Current.RootVisual.RenderSize.Width;
+          message.WindowBoundsHeight = Application.Current.RootVisual.RenderSize.Height;
+          PhoneApplicationFrame frame = Application.Current.RootVisual as PhoneApplicationFrame;
+          if (frame != null)
+          {
+            message.CurrentOrientation = frame.Orientation.ToString();
+          }
         }
       }
-      
+      catch (Exception ex)
+      {
+        Debug.WriteLine("Error retrieving screen info: {0}", ex.Message);
+      }
+
+      try
+      {
+        DateTime now = DateTime.Now;
+        message.UtcOffset = TimeZoneInfo.Local.GetUtcOffset(now).TotalHours;
+        message.Locale = CultureInfo.CurrentCulture.DisplayName;
+      }
+      catch (Exception ex)
+      {
+        Debug.WriteLine("Error retrieving time and locale: {0}", ex.Message);
+      }
+
+      try
+      {
+        message.OSVersion = Environment.OSVersion.Platform + " " + Environment.OSVersion.Version;
+        message.DeviceFirmwareVersion = DeviceStatus.DeviceFirmwareVersion;
+        message.DeviceHardwareVersion = DeviceStatus.DeviceHardwareVersion;
+        message.DeviceManufacturer = DeviceStatus.DeviceManufacturer;
+      }
+      catch (Exception ex)
+      {
+        Debug.WriteLine("Error retrieving device info: {0}", ex.Message);
+      }
+
       try
       {
         message.ApplicationCurrentMemoryUsage = DeviceStatus.ApplicationCurrentMemoryUsage;
@@ -42,29 +66,18 @@ namespace Mindscape.Raygun4Net.Builders
         message.ApplicationPeakMemoryUsage = DeviceStatus.ApplicationPeakMemoryUsage;
         message.DeviceTotalMemory = DeviceStatus.DeviceTotalMemory;
       }
-      catch (Exception e)
+      catch (Exception ex)
       {
-        Debug.WriteLine("Faild to get device memory information: {0}", e.Message);
-      }
-
-      try
-      {
-        message.DeviceFirmwareVersion = DeviceStatus.DeviceFirmwareVersion;
-        message.DeviceHardwareVersion = DeviceStatus.DeviceHardwareVersion;
-        message.DeviceManufacturer = DeviceStatus.DeviceManufacturer;
-      }
-      catch (Exception e)
-      {
-        Debug.WriteLine("Failed to get device information: {0}", e.Message);
+        Debug.WriteLine("Error retrieving device memory: {0}", ex.Message);
       }
 
       try
       {
         message.IsolatedStorageAvailableFreeSpace = IsolatedStorageFile.GetUserStoreForApplication().AvailableFreeSpace;
       }
-      catch (Exception e)
+      catch (Exception ex)
       {
-        Debug.WriteLine("Failed to get isolated storage memory: {0}", e.Message);
+        Debug.WriteLine("Error retrieving isolated storage memory: {0}", ex.Message);
       }
 
       return message;

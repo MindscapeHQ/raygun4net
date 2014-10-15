@@ -23,18 +23,29 @@ namespace Mindscape.Raygun4Net.Builders
 
       try
       {
-        Java.Util.TimeZone tz = Java.Util.TimeZone.Default;
-        Java.Util.Date now = new Java.Util.Date();
-        message.UtcOffset = tz.GetOffset(now.Time) / 3600000.0;
-
-        message.OSVersion = Android.OS.Build.VERSION.Sdk;
-
-        message.Locale = CultureInfo.CurrentCulture.DisplayName;
-
         var metrics = Resources.System.DisplayMetrics;
         message.WindowBoundsWidth = metrics.WidthPixels;
         message.WindowBoundsHeight = metrics.HeightPixels;
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Trace.WriteLine(string.Format("Error retrieving screen dimensions: {0}", ex.Message));
+      }
 
+      try
+      {
+        Java.Util.TimeZone tz = Java.Util.TimeZone.Default;
+        Java.Util.Date now = new Java.Util.Date();
+        message.UtcOffset = tz.GetOffset(now.Time) / 3600000.0;
+        message.Locale = CultureInfo.CurrentCulture.DisplayName;
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Trace.WriteLine(string.Format("Error retrieving time and locale: {0}", ex.Message));
+      }
+
+      try
+      {
         Context context = RaygunClient.Context;
         if (context != null)
         {
@@ -62,11 +73,18 @@ namespace Mindscape.Raygun4Net.Builders
             }
           }
         }
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Trace.WriteLine(string.Format("Error retrieving orientation: {0}", ex.Message));
+      }
 
+      try
+      {
         Java.Lang.Runtime runtime = Java.Lang.Runtime.GetRuntime();
         message.TotalPhysicalMemory = (ulong)runtime.TotalMemory();
         message.AvailablePhysicalMemory = (ulong)runtime.FreeMemory();
-
+        message.OSVersion = Android.OS.Build.VERSION.Sdk;
         message.ProcessorCount = runtime.AvailableProcessors();
         message.Architecture = Android.OS.Build.CpuAbi;
         message.Model = string.Format("{0} / {1}", Android.OS.Build.Model, Android.OS.Build.Brand);
@@ -74,7 +92,7 @@ namespace Mindscape.Raygun4Net.Builders
       }
       catch (Exception ex)
       {
-        System.Diagnostics.Debug.WriteLine(string.Format("Error getting environment info {0}", ex.Message));
+        System.Diagnostics.Trace.WriteLine(string.Format("Error retrieving device info: {0}", ex.Message));
       }
 
       return message;

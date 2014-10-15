@@ -20,33 +20,54 @@ namespace Mindscape.Raygun4Net.Builders
       // swallow the exception. A good addition would be to handle
       // these cases and load them correctly depending on where its running.
       // see http://raygun.io/forums/thread/3655
+
       try
       {
-        DateTime now = DateTime.Now;
-        message.UtcOffset = TimeZone.CurrentTimeZone.GetUtcOffset(now).TotalHours;
-
         IntPtr hWnd = GetActiveWindow();
         RECT rect;
         GetWindowRect(hWnd, out rect);
         message.WindowBoundsWidth = rect.Right - rect.Left;
         message.WindowBoundsHeight = rect.Bottom - rect.Top;
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Debug.WriteLine(string.Format("Error retrieving window dimensions: {0}", ex.Message));
+      }
 
+      try
+      {
+        DateTime now = DateTime.Now;
+        message.UtcOffset = TimeZone.CurrentTimeZone.GetUtcOffset(now).TotalHours;
+        message.Locale = CultureInfo.CurrentCulture.DisplayName;
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Debug.WriteLine(string.Format("Error retrieving time and locale: {0}", ex.Message));
+      }
+
+      try
+      {
         message.ProcessorCount = Environment.ProcessorCount;
         message.Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
         message.OSVersion = Environment.OSVersion.VersionString;
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Debug.WriteLine(string.Format("Error retrieving processor info: {0}", ex.Message));
+      }
 
+      try
+      {
         ComputerInfo info = new ComputerInfo();
         message.TotalPhysicalMemory = (ulong)info.TotalPhysicalMemory / 0x100000; // in MB
         message.AvailablePhysicalMemory = (ulong)info.AvailablePhysicalMemory / 0x100000;
         message.TotalVirtualMemory = info.TotalVirtualMemory / 0x100000;
         message.AvailableVirtualMemory = info.AvailableVirtualMemory / 0x100000;
         message.DiskSpaceFree = GetDiskSpace();
-
-        message.Locale = CultureInfo.CurrentCulture.DisplayName;
       }
       catch (Exception ex)
       {
-        System.Diagnostics.Debug.WriteLine(string.Format("Error getting environment info: {0}", ex.Message));
+        System.Diagnostics.Debug.WriteLine(string.Format("Error retrieving memory info: {0}", ex.Message));
       }
 
       return message;
