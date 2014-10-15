@@ -69,7 +69,8 @@ namespace Mindscape.Raygun4Net.Builders
 
         message.ProcessorCount = runtime.AvailableProcessors();
         message.Architecture = Android.OS.Build.CpuAbi;
-        message.Model = string.Format("{0} / {1} / {2}", Android.OS.Build.Model, Android.OS.Build.Brand, Android.OS.Build.Manufacturer);
+        message.Model = string.Format("{0} / {1}", Android.OS.Build.Model, Android.OS.Build.Brand);
+        message.DeviceManufacturer = Android.OS.Build.Manufacturer;
       }
       catch (Exception ex)
       {
