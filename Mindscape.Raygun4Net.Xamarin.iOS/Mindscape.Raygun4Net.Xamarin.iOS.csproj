@@ -36,6 +36,9 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="monotouch" />
+    <Reference Include="Mindscape.Raygun4Net.Xamarin.iOS.Native">
+      <HintPath>..\Mindscape.Raygun4Net.Xamarin.iOS.Native\bin\Release\Mindscape.Raygun4Net.Xamarin.iOS.Native.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
@@ -85,11 +88,5 @@
     <Compile Include="..\Mindscape.Raygun4Net\RaygunSendingMessageEventArgs.cs">
       <Link>RaygunSendingMessageEventArgs.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Mindscape.Raygun4Net.Xamarin.iOS.Native\Mindscape.Raygun4Net.Xamarin.iOS.Native.csproj">
-      <Project>{6748CD82-17BD-421F-B5AC-730802A5A147}</Project>
-      <Name>Mindscape.Raygun4Net.Xamarin.iOS.Native</Name>
-    </ProjectReference>
   </ItemGroup>
 </Project>

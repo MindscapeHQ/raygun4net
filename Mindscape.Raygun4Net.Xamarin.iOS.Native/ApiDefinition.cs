@@ -5,7 +5,7 @@ using MonoTouch.ObjCRuntime;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 
-namespace Mindscape.Raygun4Net.Xamarin.iOS.Native
+namespace Mindscape.Raygun4Net.Xamarin.iOS
 {
   [BaseType (typeof (NSObject))]
   internal interface Raygun {
@@ -23,4 +23,3 @@ namespace Mindscape.Raygun4Net.Xamarin.iOS.Native
     string NextReportUUID { get; }
   }
 }
-
