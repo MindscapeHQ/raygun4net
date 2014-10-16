@@ -18,6 +18,6 @@
   <files>
     <file src="build\WebApi\Mindscape.Raygun4Net.WebApi.dll" target="lib\net45\Mindscape.Raygun4Net.WebApi.dll" />
     <file src="build\WebApi\Mindscape.Raygun4Net.WebApi.pdb" target="lib\net45\Mindscape.Raygun4Net.WebApi.pdb" />
-    <file src="readme.txt" />
+    <file src="Mindscape.Raygun4Net.WebApi\readme.txt" />
   </files>
 </package>

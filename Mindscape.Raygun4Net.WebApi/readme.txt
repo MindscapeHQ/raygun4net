@@ -25,7 +25,7 @@ Now you can either setup Raygun to send unhandled exceptions automatically or/an
 
 To send unhandled exceptions automatically, go to the WebApiConfig class in your project. In the static Register method, call the static RaygunWebApiClient.Attach method.
 
-At anytime, you can send exception reports manually simply by creating a new instance of the RaygunWebApiClient and call one of the Send or SendInBackground methods.
+Anywhere in you code, you can also send exception reports manually simply by creating a new instance of the RaygunWebApiClient and call one of the Send or SendInBackground methods.
 This is most commonly used to send exceptions caught in a try/catch block.
 
 try
@@ -34,7 +34,7 @@ try
 }
 catch (Exception e)
 {
-  new RaygunWebApiClient().Send(e);
+  new RaygunWebApiClient().SendInBackground(e);
 }
 
 Providing a custom RaygunClient to the http module

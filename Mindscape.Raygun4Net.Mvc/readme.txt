@@ -38,7 +38,7 @@ For system.webServer:
   <add name="RaygunErrorModule" type="Mindscape.Raygun4Net.RaygunHttpModule"/>
 </modules>
 
-At anytime, you can send exception reports manually simply by creating a new instance of the RaygunClient and call one of the Send or SendInBackground methods.
+Anywhere in you code, you can also send exception reports manually simply by creating a new instance of the RaygunClient and call one of the Send or SendInBackground methods.
 This is most commonly used to send exceptions caught in a try/catch block.
 
 try
@@ -47,7 +47,7 @@ try
 }
 catch (Exception e)
 {
-  new RaygunClient().Send(e);
+  new RaygunClient().SendInBackground(e);
 }
 
 Providing a custom RaygunClient to the http module

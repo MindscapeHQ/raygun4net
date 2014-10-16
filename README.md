@@ -3,23 +3,23 @@ Raygun4Net
 
 [Raygun.io](http://raygun.io) Provider for .NET Framework
 
-! IMPORTANT CHANGE IN 3.0 !
+! IMPORTANT CHANGE IN 4.0 !
 ====================
 
-The ignoreFormDataNames configuration setting has been removed and replaced with 4 separate options:
+Are you using Raygun4Net in an MVC or WebApi project? If so, make sure to pick the correct NuGet package.
 
-* ignoreFormFieldNames
-* ignoreHeaderNames
-* ignoreCookieNames
-* ignoreServerVariableNames
+If you have an MVC project, please install the Raygun4Net.Mvc package instead of the standard Raygun4Net package.
+The Raygun4Net.Mvc package includes all the functionality of the standard packaghe + MVC specific support.
 
-If you were once using the ignoreFormDataNames option to ignore headers, cookies or server variables,
-make sure to use the new correct configuration options to ignore the appropriate bit.
+If you have a WebApi project, please install the Raygun4Net.WebApi package instead of the standard Raygun4Net package.
+The Raygun4Net.WebApi package only includes WebApi specific support and does not reference System.Web
+
+NOTE: the Mvc and WebApi packages can work side-by-side, so install both if you have an Mvc WebApi project.
 
 Installation
 ====================
 
-* The easiest way to install this provider is by grabbing the NuGet package. Ensure the NuGet Visual Studio extension is installed, right-click on your project -> Manage Nuget Packages -> Online -> search for **Mindscape.Raygun4Net**, then install it. Or, visit https://nuget.org/packages/Mindscape.Raygun4Net/ for instructions on installation using the package manager console.
+* The easiest way to install this provider is by grabbing the NuGet package. Ensure the NuGet Visual Studio extension is installed, right-click on your project -> Manage Nuget Packages -> Online -> search for **Mindscape.Raygun4Net**, then install the appropriate package. Or, visit https://nuget.org/packages/Mindscape.Raygun4Net/ for instructions on installation using the package manager console.
 
 * For Visual Studio 2008 (without NuGet) you can clone this repository, run build.bat, then add project references to **Mindscape.Raygun4Net.dll** and **Newtonsoft.Json.dll**.
 
@@ -32,8 +32,6 @@ Projects built with the following frameworks are supported:
 
 * .NET 2.0, 3.5, 4.0+
 * ASP.NET
-* MVC
-* Web Api
 * WinForms, WPF etc
 * Windows Store apps (universal) for Windows 8.1 and Windows Phone 8.1
 * Windows 8
@@ -72,17 +70,9 @@ Add the Raygun settings configuration block from above:
 <RaygunSettings apikey="YOUR_APP_API_KEY" />
 ```
 
-You can then either create a new instance of the RaygunClient class and call Send(Exception) e.g.
+Now you can either setup Raygun to send unhandled exceptions automatically or/and send exceptions manually.
 
-```
-protected void Application_Error()
-{
-  var exception = Server.GetLastError();
-  new RaygunClient().Send(exception);
-}
-```
-
-Or there is an HttpModule you can add.
+To send unhandled exceptions automatically, use the RaygunHttpModule in web.config in the appropriate way for your application:
 
 For system.web:
 
@@ -98,6 +88,30 @@ For system.webServer:
 <modules>
   <add name="RaygunErrorModule" type="Mindscape.Raygun4Net.RaygunHttpModule"/>
 </modules>
+```
+
+Anywhere in you code, you can also send exception reports manually simply by creating a new instance of the RaygunClient and call one of the Send or SendInBackground methods.
+This is most commonly used to send exceptions caught in a try/catch block.
+
+```
+try
+{
+  
+}
+catch (Exception e)
+{
+  new RaygunClient().SendInBackground(e);
+}
+```
+
+Or to send exceptions in your own handlers rather than using the automatic setup above.
+
+```
+protected void Application_Error()
+{
+  var exception = Server.GetLastError();
+  new RaygunClient().Send(exception);
+}
 ```
 
 ####Additional ASP.NET configuration options
@@ -134,37 +148,28 @@ Placing * before, after or at both ends of a key will perform an ends-with, star
 For example, ignoreFormFieldNames="*password*" will cause Raygun to ignore all form fields that **contain** "password" anywhere in the name.
 These options are **not** case sensitive.
 
-**Remove wrapper exceptions (available in all .NET Raygun providers)**
+**Providing a custom RaygunClient to the http module**
 
-If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by using the multi-parameter method:
-
-```csharp
-raygunClient.AddWrapperExceptions(typeof(TargetInvocationException));
-```
-
-In this case, if a TargetInvocationException occurs, it will be removed and replaced with the actual InnerException that was the cause. Note that HttpUnhandledException and the above TargetInvocationException are already defined; you do not have to add these manually. This method is useful if you have your own custom wrapper exceptions, or a framework is throwing exceptions using its own wrapper.
+Sometimes when setting up Raygun using the http module to send exceptions automatically, you may need to provide the http module with a custom RaygunClient instance in order to use some of the optional feature described at the end of this file.
+To do this, get your Http Application to implement the IRaygunApplication interface. Implement the GenerateRaygunClient method to return a new (or previously created) RaygunClient instance.
+The http module will use the RaygunClient returned from this method to send the unhandled exceptions.
+In this method you can setup any additional options on the RaygunClient instance that you need - more information about each feature is described at the end of this file.
 
 ### MVC
 
-If you are installing manually, make sure you are using the Mindscape.Raygun4Net.dll that targets either .Net 4.0 or .Net 4.5. These can be located in the Net4 and Net45 folders if you downloaded the assemblies from GitHub.
-If you are installing via NuGet, the appropriate dll will be selected for you.
+As of version 4.0.0, Mvc support has been stripped out into a new NuGet package.
+If you have an Mvc project, please uninstall this NuGet package and install the Mindscape.Raygun4Net.Mvc NuGet package instead.
+The NuGet package will include a readme containg everything you need to know about using it.
 
-Setting up Raygun4Net in an MVC project is exactly the same as with ASP.NET as described in the section above.
+The Mvc and WebApi NuGet packages can be installed in the same project.
 
 ### Web Api
 
-If you are installing manually, make sure you are using the Mindscape.Raygun4Net.dll that targets .Net 4.5. This can be located in the Net45 folder if you downloaded the assemblies from GitHub.
-If you are installing via NuGet, the appropriate dll will be selected for you.
+As of version 4.0.0, WebApi support has been stripped out into a new NuGet package.
+If you have a WebApi project, please uninstall this NuGet package and install the Mindscape.Raygun4Net.WebApi NuGet package instead.
+The NuGet package will include a readme containg everything you need to know about using it.
 
-Use RaygunSettings to provide your API key in the same way as with ASP.NET as described in the section above.
-
-Then, in the WebApiConfig.Register method of your project, simply call the static RaygunWebApiClient.Attach method:
-
-```csharp
-RaygunWebApiClient.Attach(config);
-```
-
-This method takes an optional function that you can use to provide a custom instance of RaygunWebApiClient. This custom instance could be used to listen to the SendingMessage event, or set any of the various options.
+The Mvc and WebApi NuGet packages can be installed in the same project.
 
 ### WPF
 
@@ -311,6 +316,24 @@ static void Main(string[] args)
 
 At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages or changing options such as the User identity string.
 
+### Additional features for all .Net frameworks:
+
+## Modify or cancel message
+
+On a RaygunClient instance, attach an event handler to the SendingMessage event. This event handler will be called just before the RaygunClient sends an exception - either automatically or manually.
+The event arguments provide the RaygunMessage object that is about to be sent. One use for this event handler is to add or modify any information on the RaygunMessage.
+Another use for this method is to identify exceptions that you never want to send to raygun, and if so, set e.Cancel = true to cancel the send.
+
+## Strip wrapper exceptions
+
+If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by using the multi-parameter method:
+
+raygunClient.AddWrapperExceptions(typeof(TargetInvocationException));
+
+In this case, if a TargetInvocationException occurs, it will be removed and replaced with the actual InnerException that was the cause.
+Note that HttpUnhandledException and TargetInvocationException are already added to the wrapper exception list; you do not have to add these manually.
+This method is useful if you have your own custom wrapper exceptions, or a framework is throwing exceptions using its own wrapper.
+
 ## Affected user tracking
 
 There is a property named ```User``` on RaygunClient which you can set to be the current user's ID. This allows you to see the count of affected users for each error in the Raygun dashboard. 
@@ -346,19 +369,17 @@ raygunClient.UserInfo = new RaygunIdentifierMessage("user@email.com")
 };
 ```
 
+## Version numbering
 
+By default, Raygun will send the assembly version of your project with each report.
+If you are using WinRT, the transmitted version number will be that of the Windows Store package, set in Package.appxmanifest (under Packaging).
 
-## Version numbering and tags
+If you need to provide your own custom version value, you can do so by setting the ApplicationVersion property of the RaygunClient (in the format x.x.x.x where x is a postive integer).
 
-* If you are plugging this provider into a classic .NET application, the version number that will be transmitted will be the AssemblyVersion. If you need to provide your own custom version value, you can do so by setting the ApplicationVersion property of the RaygunClient (in the format x.x.x.x where x is a postive integer).
+## Tags and custom data
 
-* If you are using WinRT, the transmitted version number will be that of the Windows Store package, set in in Package.appxmanifest (under Packaging).
-
-* You can also set an arbitrary number of tags (as an array of strings), i.e. for tagging builds. This is optional and will be transmitted in addition to the version number above.
-
-## Custom data
-
-Providing additional name-value custom data is also available as an overload on Send().
+When sending exceptions manually, you can also send an arbitrary list of tags (an array of strings), and a collection of custom data (a dictionary of any objects).
+This can be done using the various Send and SendInBackground method overloads.
 
 ## Proxy settings
 
