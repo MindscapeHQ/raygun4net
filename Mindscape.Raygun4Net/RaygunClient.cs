@@ -14,12 +14,11 @@ using Mindscape.Raygun4Net.Builders;
 
 namespace Mindscape.Raygun4Net
 {
-  public class RaygunClient
+  public class RaygunClient : RaygunClientBase
   {
     private readonly string _apiKey;
     private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private static List<Type> _wrapperExceptions;
-    internal const string SentKey = "AlreadySentByRaygun";
 
     [ThreadStatic]
     private static RaygunRequestMessage _currentRequestMessage;

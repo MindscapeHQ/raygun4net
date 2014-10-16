@@ -15,12 +15,11 @@ using System.Linq;
 
 namespace Mindscape.Raygun4Net.WebApi
 {
-  public class RaygunWebApiClient
+  public class RaygunWebApiClient : RaygunClientBase
   {
     private readonly string _apiKey;
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private static List<Type> _wrapperExceptions;
-    internal const string SentKey = "AlreadySentByRaygun";
 
     private readonly ThreadLocal<HttpRequestMessage> _currentWebRequest = new ThreadLocal<HttpRequestMessage>(() => null);
     private readonly ThreadLocal<RaygunRequestMessage> _currentRequestMessage = new ThreadLocal<RaygunRequestMessage>(() => null);
