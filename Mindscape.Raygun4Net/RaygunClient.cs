@@ -282,19 +282,6 @@ namespace Mindscape.Raygun4Net
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
 
-    protected bool CanSend(Exception exception)
-    {
-      return exception == null || !exception.Data.Contains(SentKey) || false.Equals(exception.Data[SentKey]);
-    }
-
-    protected void FlagAsSent(Exception exception)
-    {
-      if (exception != null)
-      {
-        exception.Data[SentKey] = true;
-      }
-    }
-
     private RaygunRequestMessage BuildRequestMessage()
     {
       RaygunRequestMessage requestMessage = null;

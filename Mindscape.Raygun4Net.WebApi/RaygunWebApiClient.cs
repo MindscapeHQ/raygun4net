@@ -357,17 +357,9 @@ namespace Mindscape.Raygun4Net.WebApi
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
 
-    protected bool CanSend(Exception exception)
+    internal void FlagExceptionAsSent(Exception exception)
     {
-      return exception == null || !exception.Data.Contains(SentKey) || false.Equals(exception.Data[SentKey]);
-    }
-
-    internal void FlagAsSent(Exception exception)
-    {
-      if (exception != null)
-      {
-        exception.Data[SentKey] = true;
-      }
+      base.FlagAsSent(exception);
     }
 
     private RaygunRequestMessage BuildRequestMessage()

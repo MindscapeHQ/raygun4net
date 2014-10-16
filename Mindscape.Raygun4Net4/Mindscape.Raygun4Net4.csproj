@@ -106,6 +106,9 @@
     <Compile Include="..\Mindscape.Raygun4Net\RaygunClient.cs">
       <Link>RaygunClient.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\RaygunClientBase.cs">
+      <Link>RaygunClientBase.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\RaygunHttpModule.cs">
       <Link>RaygunHttpModule.cs</Link>
     </Compile>

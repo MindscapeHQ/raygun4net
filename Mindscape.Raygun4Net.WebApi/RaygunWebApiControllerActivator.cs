@@ -26,7 +26,7 @@ namespace Mindscape.Raygun4Net.WebApi
       {
         var client = _clientCreator.GenerateRaygunWebApiClient();
         client.CurrentHttpRequest(request).SendInBackground(ex.InnerException);
-        client.FlagAsSent(ex); // Stops us re-sending the outer exception
+        client.FlagExceptionAsSent(ex); // Stops us re-sending the outer exception
         throw;
       }
       catch(Exception ex)
