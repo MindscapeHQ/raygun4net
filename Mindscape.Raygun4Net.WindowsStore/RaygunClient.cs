@@ -28,7 +28,7 @@ namespace Mindscape.Raygun4Net
   public class RaygunClient
   {
     private readonly string _apiKey;
-    private static List<Type> _wrapperExceptions;
+    private readonly List<Type> _wrapperExceptions = new List<Type>();
     private string _version;
 
     /// <summary>
@@ -38,7 +38,7 @@ namespace Mindscape.Raygun4Net
     public RaygunClient(string apiKey)
     {
       _apiKey = apiKey;
-      _wrapperExceptions = new List<Type>();
+      
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
       BeginSendStoredMessages();
@@ -487,7 +487,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private static Exception StripWrapperExceptions(Exception exception)
+    private Exception StripWrapperExceptions(Exception exception)
     {
       if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {
