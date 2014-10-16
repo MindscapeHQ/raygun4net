@@ -23,11 +23,12 @@ namespace Mindscape.Raygun4Net
   public class RaygunClient
   {
     private readonly string _apiKey;
-    private Assembly _callingAssembly;
+    private readonly List<Type> _wrapperExceptions = new List<Type>();
     private readonly Queue<string> _messageQueue = new Queue<string>();
+
+    private Assembly _callingAssembly;
     private bool _exit;
     private bool _running;
-    private static List<Type> _wrapperExceptions;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -36,7 +37,7 @@ namespace Mindscape.Raygun4Net
     public RaygunClient(string apiKey)
     {
       _apiKey = apiKey;
-      _wrapperExceptions = new List<Type>();
+      
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
       SetCallingAssembly(Assembly.GetCallingAssembly());
@@ -539,7 +540,7 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 
-    private static Exception StripWrapperExceptions(Exception exception)
+    private Exception StripWrapperExceptions(Exception exception)
     {
       if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {

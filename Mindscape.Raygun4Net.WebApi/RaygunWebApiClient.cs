@@ -19,7 +19,7 @@ namespace Mindscape.Raygun4Net.WebApi
   {
     private readonly string _apiKey;
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
-    private static List<Type> _wrapperExceptions;
+    private readonly List<Type> _wrapperExceptions = new List<Type>();
 
     private readonly ThreadLocal<HttpRequestMessage> _currentWebRequest = new ThreadLocal<HttpRequestMessage>(() => null);
     private readonly ThreadLocal<RaygunRequestMessage> _currentRequestMessage = new ThreadLocal<RaygunRequestMessage>(() => null);
@@ -34,7 +34,6 @@ namespace Mindscape.Raygun4Net.WebApi
     public RaygunWebApiClient(string apiKey)
     {
       _apiKey = apiKey;
-      _wrapperExceptions = new List<Type>();
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
@@ -393,7 +392,7 @@ namespace Mindscape.Raygun4Net.WebApi
       return message;
     }
 
-    private static Exception StripWrapperExceptions(Exception exception)
+    private Exception StripWrapperExceptions(Exception exception)
     {
       if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {

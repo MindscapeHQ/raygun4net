@@ -18,7 +18,7 @@ namespace Mindscape.Raygun4Net
   {
     private readonly string _apiKey;
     private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
-    private static List<Type> _wrapperExceptions;
+    private readonly List<Type> _wrapperExceptions = new List<Type>();
 
     [ThreadStatic]
     private static RaygunRequestMessage _currentRequestMessage;
@@ -30,7 +30,6 @@ namespace Mindscape.Raygun4Net
     public RaygunClient(string apiKey)
     {
       _apiKey = apiKey;
-      _wrapperExceptions = new List<Type>();
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
       _wrapperExceptions.Add(typeof(HttpUnhandledException));
@@ -325,7 +324,7 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 
-    private static Exception StripWrapperExceptions(Exception exception)
+    private Exception StripWrapperExceptions(Exception exception)
     {
       if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {
