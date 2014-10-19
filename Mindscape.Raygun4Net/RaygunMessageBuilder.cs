@@ -87,7 +87,11 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetClientDetails()
     {
-      _raygunMessage.Details.Client = new RaygunClientMessage() { Name = "Raygun4Net.Mvc" };
+      _raygunMessage.Details.Client = new RaygunClientMessage()
+      {
+        // This is for the MVC project to set the correct client name - due to the client message class being in the core assembly.
+        Name = ((AssemblyTitleAttribute)GetType().Assembly.GetCustomAttributes(typeof(AssemblyTitleAttribute), false)[0]).Title
+      };
       return this;
     }
 
