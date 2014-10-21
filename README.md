@@ -9,7 +9,7 @@ Raygun4Net
 Are you using Raygun4Net in an MVC or WebApi project? If so, make sure to pick the correct NuGet package.
 
 If you have an MVC project, please install the Raygun4Net.Mvc package instead of the standard Raygun4Net package.
-The Raygun4Net.Mvc package includes all the functionality of the standard packaghe + MVC specific support.
+The Raygun4Net.Mvc package includes all the functionality of the standard package + MVC specific support.
 
 If you have a WebApi project, please install the Raygun4Net.WebApi package instead of the standard Raygun4Net package.
 The Raygun4Net.WebApi package only includes WebApi specific support and does not reference System.Web
@@ -19,7 +19,7 @@ NOTE: the Mvc and WebApi packages can work side-by-side, so install both if you 
 Installation
 ====================
 
-* The easiest way to install this provider is by grabbing the NuGet package. Ensure the NuGet Visual Studio extension is installed, right-click on your project -> Manage Nuget Packages -> Online -> search for **Mindscape.Raygun4Net**, then install the appropriate package. Or, visit https://nuget.org/packages/Mindscape.Raygun4Net/ for instructions on installation using the package manager console.
+* The easiest way to install this provider is by grabbing the NuGet package. Ensure the NuGet Visual Studio extension is installed, right-click on your project -> Manage NuGet Packages -> Online -> search for **Mindscape.Raygun4Net**, then install the appropriate package. Or, visit https://nuget.org/packages/Mindscape.Raygun4Net/ for instructions on installation using the package manager console.
 
 * For Visual Studio 2008 (without NuGet) you can clone this repository, run build.bat, then add project references to **Mindscape.Raygun4Net.dll** and **Newtonsoft.Json.dll**.
 
@@ -126,7 +126,7 @@ If using the HTTP module then you can exclude errors by their HTTP status code b
 
 **Exclude errors that originate from a local origin**
 
-Toggle this boolean and the HTTP module will not send errors to Raygun.io if the request originated from a local origin. ie. A way to prevent local debug/development from notifying Raygun without having to resort to Web.config transforms.
+Toggle this boolean and the HTTP module will not send errors to Raygun.io if the request originated from a local origin. i.e. A way to prevent local debug/development from notifying Raygun without having to resort to Web.config transforms.
 
 ```
 <RaygunSettings apikey="YOUR_APP_API_KEY" excludeErrorsFromLocal="true" />
@@ -157,17 +157,17 @@ In this method you can setup any additional options on the RaygunClient instance
 
 ### MVC
 
-As of version 4.0.0, Mvc support has been stripped out into a new NuGet package.
-If you have an Mvc project, please uninstall this NuGet package and install the Mindscape.Raygun4Net.Mvc NuGet package instead.
-The NuGet package will include a readme containg everything you need to know about using it.
+As of version 4.0.0, Mvc support has been moved into a new NuGet package.
+If you have an Mvc project, please uninstall the Raygun4Net NuGet package and install the Mindscape.Raygun4Net.Mvc NuGet package instead.
+The NuGet package will include a readme containing everything you need to know about using it.
 
 The Mvc and WebApi NuGet packages can be installed in the same project.
 
 ### Web Api
 
-As of version 4.0.0, WebApi support has been stripped out into a new NuGet package.
-If you have a WebApi project, please uninstall this NuGet package and install the Mindscape.Raygun4Net.WebApi NuGet package instead.
-The NuGet package will include a readme containg everything you need to know about using it.
+As of version 4.0.0, WebApi support has been moved into a new NuGet package.
+If you have a WebApi project, please uninstall the Raygun4Net NuGet package and install the Mindscape.Raygun4Net.WebApi NuGet package instead.
+The NuGet package will include a readme containing everything you need to know about using it.
 
 The Mvc and WebApi NuGet packages can be installed in the same project.
 
@@ -353,7 +353,7 @@ The only required field is Identifier.
 
 ```FullName``` The user's full name.
 
-```FirstName``` The user's first (or prefered) name.
+```FirstName``` The user's first (or preferred) name.
 
 ```UUID``` A device identifier. Could be used to identify users across devices, or machines that are breaking for many users.
 
@@ -374,7 +374,7 @@ raygunClient.UserInfo = new RaygunIdentifierMessage("user@email.com")
 By default, Raygun will send the assembly version of your project with each report.
 If you are using WinRT, the transmitted version number will be that of the Windows Store package, set in Package.appxmanifest (under Packaging).
 
-If you need to provide your own custom version value, you can do so by setting the ApplicationVersion property of the RaygunClient (in the format x.x.x.x where x is a postive integer).
+If you need to provide your own custom version value, you can do so by setting the ApplicationVersion property of the RaygunClient (in the format x.x.x.x where x is a positive integer).
 
 ## Tags and custom data
 
@@ -394,6 +394,6 @@ var raygunClient = new RaygunClient()
 
 ## Troubleshooting
 
-* If the solution fails to build due to missing dependencies (Newtonsoft etc), in Visual Studio 2012 ensure you have the NuGet extension installed and that the Tools -> Options -> Package Manager -> 'Allow Nuget to download missing packages during build' box is checked. Then, go to the directory that you cloned this repository into and run build.bat.
+* If the solution fails to build due to missing dependencies (Newtonsoft etc), in Visual Studio 2012 ensure you have the NuGet extension installed and that the Tools -> Options -> Package Manager -> 'Allow NuGet to download missing packages during build' box is checked. Then, go to the directory that you cloned this repository into and run build.bat.
 
 * When installing the package via NuGet into a WinRT project you encounter an error due to an invalid dependency, clone this repository into a directory via Git. Then, open a Powershell or command prompt in the directory location, and run `.\build.bat CompileWinRT`. Then, add the resulting Mindscape.Raygun4Net.WinRT.dll (located in the /release folder) to your project.

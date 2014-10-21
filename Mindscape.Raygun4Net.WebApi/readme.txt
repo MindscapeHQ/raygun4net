@@ -1,5 +1,5 @@
-Raygun4Net.Mvc - Raygun.io Provider for ASP .NET MVC projects
-=============================================================
+Raygun4Net.WebApi - Raygun.io Provider for ASP .NET WebApi projects
+===================================================================
 
 Where is my app API key?
 ========================
@@ -59,7 +59,7 @@ Exclude errors that originate from a local origin
 -------------------------------------------------
 
 Toggle this boolean and Raygun will not send errors to Raygun.io if the request originated from a local origin.
-ie. A way to prevent local debug/development from notifying Raygun without having to resort to Web.config transforms.
+i.e. A way to prevent local debug/development from notifying Raygun without having to resort to Web.config transforms.
 
 <RaygunSettings apikey="YOUR_APP_API_KEY" excludeErrorsFromLocal="true" />
 
@@ -111,10 +111,16 @@ Version numbering
 -----------------
 
 By default, Raygun will send the assembly version of your project with each report.
-If you need to provide your own custom version value, you can do so by setting the ApplicationVersion property of the RaygunWebApiClient (in the format x.x.x.x where x is a postive integer).
+If you need to provide your own custom version value, you can do so by setting the ApplicationVersion property of the RaygunWebApiClient (in the format x.x.x.x where x is a positive integer).
 
 Tags and custom data
 --------------------
 
 When sending exceptions manually, you can also send an arbitrary list of tags (an array of strings), and a collection of custom data (a dictionary of any objects).
 This can be done using the various Send and SendInBackground method overloads.
+
+MVC support
+===========
+
+Do you also need MVC Raygun support for your project? Simply install the Mindscape.Raygun4Net.Mvc NuGet package which will work happily with this WebApi package.
+The MVC package includes an http module that will set up an MVC exception filter which can send exceptions to Raygun that could otherwise be missed in MVC projects.

@@ -73,7 +73,7 @@ Exclude errors that originate from a local origin
 -------------------------------------------------
 
 Toggle this boolean and the HTTP module will not send errors to Raygun.io if the request originated from a local origin.
-ie. A way to prevent local debug/development from notifying Raygun without having to resort to Web.config transforms.
+i.e. A way to prevent local debug/development from notifying Raygun without having to resort to Web.config transforms.
 
 <RaygunSettings apikey="YOUR_APP_API_KEY" excludeErrorsFromLocal="true" />
 
@@ -125,10 +125,16 @@ Version numbering
 -----------------
 
 By default, Raygun will send the assembly version of your project with each report.
-If you need to provide your own custom version value, you can do so by setting the ApplicationVersion property of the RaygunClient (in the format x.x.x.x where x is a postive integer).
+If you need to provide your own custom version value, you can do so by setting the ApplicationVersion property of the RaygunClient (in the format x.x.x.x where x is a positive integer).
 
 Tags and custom data
 --------------------
 
 When sending exceptions manually, you can also send an arbitrary list of tags (an array of strings), and a collection of custom data (a dictionary of any objects).
 This can be done using the various Send and SendInBackground method overloads.
+
+WebApi support
+==============
+
+Do you also need WebApi Raygun support for your project? Simply install the Mindscape.Raygun4Net.WebApi NuGet package which will work happily with this MVC package.
+The WebApi package is able to send additional exceptions to Raygun that occur in WebApi projects and can only be detected in specific ways which the package will do for you.

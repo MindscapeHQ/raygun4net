@@ -7,7 +7,7 @@ Raygun4Net - Raygun.io Provider for .NET Framework
 | Are you using Raygun4Net in an MVC or WebApi project? If so, this is not the NuGet package you are looking for. |
 |                                                                                                                 |
 | If you have an MVC project, please uninstall this package, and install the Raygun4Net.Mvc package instead.      |
-| The Raygun4Net.Mvc package includes all the functionality of this packaghe + MVC specific support.              |
+| The Raygun4Net.Mvc package includes all the functionality of this package + MVC specific support.               |
 |                                                                                                                 |
 | If you have a WebApi project, please uninstall this package, and install the Raygun4Net.WebApi package instead. |
 | The Raygun4Net.WebApi package only includes WebApi specific support and does not reference System.Web           |
@@ -31,7 +31,7 @@ Projects built with the following frameworks are supported:
 
 * .NET 2.0, 3.5, 4.0, 4.5
 * ASP.NET
-* WinForms, WPF etc
+* WinForms, WPF etc.
 * Windows Store apps (universal) for Windows 8.1 and Windows Phone 8.1
 * Windows 8
 * Windows Phone 7.1 and 8
@@ -105,7 +105,7 @@ If using the HTTP module then you can exclude errors by their HTTP status code b
 Exclude errors that originate from a local origin
 -------------------------------------------------
 
-Toggle this boolean and the HTTP module will not send errors to Raygun.io if the request originated from a local origin. ie. A way to prevent local debug/development from notifying Raygun without having to resort to Web.config transforms.
+Toggle this boolean and the HTTP module will not send errors to Raygun.io if the request originated from a local origin. i.e. A way to prevent local debug/development from notifying Raygun without having to resort to Web.config transforms.
 
 <RaygunSettings apikey="YOUR_APP_API_KEY" excludeErrorsFromLocal="true" />
 
@@ -137,18 +137,18 @@ In this method you can setup any additional options on the RaygunClient instance
 MVC
 ====================
 
-As of version 4.0.0, Mvc support has been stripped out into a new NuGet package.
+As of version 4.0.0, Mvc support has been moved into a new NuGet package.
 If you have an Mvc project, please uninstall this NuGet package and install the Mindscape.Raygun4Net.Mvc NuGet package instead.
-The NuGet package will include a readme containg everything you need to know about using it.
+The NuGet package will include a readme containing everything you need to know about using it.
 
 The Mvc and WebApi NuGet packages can be installed in the same project.
 
 Web Api
 ====================
 
-As of version 4.0.0, WebApi support has been stripped out into a new NuGet package.
+As of version 4.0.0, WebApi support has been moved into a new NuGet package.
 If you have a WebApi project, please uninstall this NuGet package and install the Mindscape.Raygun4Net.WebApi NuGet package instead.
-The NuGet package will include a readme containg everything you need to know about using it.
+The NuGet package will include a readme containing everything you need to know about using it.
 
 The Mvc and WebApi NuGet packages can be installed in the same project.
 
@@ -326,7 +326,7 @@ Version numbering
 By default, Raygun will send the assembly version of your project with each report.
 If you are using WinRT, the transmitted version number will be that of the Windows Store package, set in Package.appxmanifest (under Packaging).
 
-If you need to provide your own custom version value, you can do so by setting the ApplicationVersion property of the RaygunClient (in the format x.x.x.x where x is a postive integer).
+If you need to provide your own custom version value, you can do so by setting the ApplicationVersion property of the RaygunClient (in the format x.x.x.x where x is a positive integer).
 
 Tags and custom data
 --------------------
@@ -338,7 +338,7 @@ This can be done using the various Send and SendInBackground method overloads.
 ====================
 Troubleshooting
 ====================
-If the solution fails to build due to missing dependencies (Newtonsoft etc), in Visual Studio 2012 ensure
+If the solution fails to build due to missing dependencies (Newtonsoft etc.), in Visual Studio 2012 ensure
 you have the NuGet extension installed and that the Tools -> Options -> Package Manager ->
-'Allow Nuget to download missing packages during build' box is checked. Then, go to the directory that
+'Allow NuGet to download missing packages during build' box is checked. Then, go to the directory that
 you cloned this repository into and run build.bat.
