@@ -20,12 +20,12 @@ namespace Mindscape.Raygun4Net.Builders
       MonoTouchException mex = exception as MonoTouchException;
       if (mex != null && mex.NSException != null)
       {
-        message.Message = string.Format("{0}: {1}", mex.NSException.Name, mex.NSException.Reason);
+        message.Message = mex.NSException.Reason;
         message.ClassName = mex.NSException.Name;
       }
       else
       {
-        message.Message = string.Format("{0}: {1}", exceptionType.Name, exception.Message);
+        message.Message = exception.Message;
         message.ClassName = exceptionType.FullName;
       }
 
