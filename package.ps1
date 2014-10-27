@@ -1,21 +1,18 @@
 properties {
     $root =                          $psake.build_script_dir
     $nugetspec =                     "$root/Mindscape.Raygun4Net.nuspec"
-    $signed_nugetspec =              "$root/Mindscape.Raygun4Net.signed.nuspec"
-    $solution_file =                 "$root/Mindscape.Raygun4Net.sln"
-    $solution_file2 =                "$root/Mindscape.Raygun4Net2.sln"
-    $solution_file4 =                "$root/Mindscape.Raygun4Net4.sln"
-    $solution_file45 =               "$root/Mindscape.Raygun4Net45.sln"
-    $winrt_solution_file =           "$root/Mindscape.Raygun4Net.WinRT.sln"
-    $configuration =                 "Sign"
+    $nugetspec_signed =              "$root/Mindscape.Raygun4Net.signed.nuspec"
+    $nugetspec_core =                "$root/Mindscape.Raygun4Net.Core.nuspec"
+    $nugetspec_mvc =                 "$root/Mindscape.Raygun4Net.Mvc.nuspec"
+    $nugetspec_webapi =              "$root/Mindscape.Raygun4Net.WebApi.nuspec"
     $build_dir =                     "$root\build\"
-    $build_dir2 =                    "$root\build\Net2"
-    $build_dir4 =                    "$root\build\Net4"
-    $build_dir45 =                   "$root\build\Net45"
+    $build_dir2 =                    "$build_dir\Net2"
+    $build_dir4 =                    "$build_dir\Net4"
+    $build_dir_mvc =                 "$build_dir\Mvc"
+    $build_dir_webapi =              "$build_dir\WebApi"
     $signed_build_dir =              "$build_dir\signed"
     $signed_build_dir2 =             "$build_dir\signed\Net2"
     $signed_build_dir4 =             "$build_dir\signed\Net4"
-    $signed_build_dir45 =            "$build_dir\signed\Net45"
     $release_dir =                   "$root\release\"
     $nuget_dir =                     "$root\.nuget"
     $env:Path +=                     ";$nuget_dir"
@@ -25,42 +22,18 @@ task default -depends Zip
 
 task Clean {
     remove-item -force -recurse $release_dir -ErrorAction SilentlyContinue | Out-Null
-    remove-item -force -recurse $signed_build_dir -ErrorAction SilentlyContinue | Out-Null
 }
 
 task Init -depends Clean {
     new-item $release_dir -itemType directory | Out-Null
-    new-item $signed_build_dir -itemType directory | Out-Null
 }
 
-task Compile -depends Init {
-    exec { msbuild "$solution_file" /m /p:OutDir=$signed_build_dir /p:Configuration=$configuration }
-    exec { msbuild "$solution_file2" /m /p:OutDir=$signed_build_dir2 /p:Configuration=$configuration }
-    exec { msbuild "$solution_file4" /m /p:OutDir=$signed_build_dir4 /p:Configuration=$configuration }
-    exec { msbuild "$solution_file45" /m /p:OutDir=$signed_build_dir45 /p:Configuration=$configuration }
-}
-
-task CompileWinRT -depends Init {
-    exec { msbuild "$winrt_solution_file" /m /p:OutDir=$signed_build_dir /p:Configuration=$configuration }
-    move-item $signed_build_dir/Mindscape.Raygun4Net.WinRT/Mindscape.Raygun4Net.WinRT.dll $signed_build_dir
-    move-item $signed_build_dir/Mindscape.Raygun4Net.WinRT/Mindscape.Raygun4Net.WinRT.pdb $signed_build_dir
-    move-item $signed_build_dir/Mindscape.Raygun4Net.WinRT.Tests/Mindscape.Raygun4Net.WinRT.Tests.dll $signed_build_dir
-    move-item $signed_build_dir/Mindscape.Raygun4Net.WinRT.Tests/Mindscape.Raygun4Net.WinRT.Tests.pdb $signed_build_dir
-    remove-item -force -recurse $signed_build_dir/Mindscape.Raygun4Net.WinRT -ErrorAction SilentlyContinue | Out-Null
-    remove-item -force -recurse $signed_build_dir/Mindscape.Raygun4Net.WinRT.Tests -ErrorAction SilentlyContinue | Out-Null
-}
-
-task Package -depends Compile, CompileWinRT {
+task Package -depends Init {
     exec { nuget pack $nugetspec -OutputDirectory $release_dir }
-    exec { nuget pack $signed_nugetspec -OutputDirectory $release_dir }
-}
-
-task PushNugetPackage -depends Package {
-    Push-Location -Path $release_dir
-
-    exec { nuget push "$release_dir*.nupkg" }
-
-    Pop-Location
+    exec { nuget pack $nugetspec_signed -OutputDirectory $release_dir }
+    exec { nuget pack $nugetspec_core -OutputDirectory $release_dir }
+    exec { nuget pack $nugetspec_mvc -OutputDirectory $release_dir }
+    exec { nuget pack $nugetspec_webapi -OutputDirectory $release_dir }
 }
 
 task Zip -depends Package {
@@ -70,22 +43,25 @@ task Zip -depends Package {
     $version = $nupkg_name -replace ".nupkg", ""
     
     $outerfolder = $release_dir + $version
-    $versionfolder = $release_dir + $version + "\" + $version
-    $versionfolder2 = $release_dir + $version + "\" + $version + "\Net2"
-    $versionfolder4 = $release_dir + $version + "\" + $version + "\Net4"
-    $versionfolder45 = $release_dir + $version + "\" + $version + "\Net45"
+    $versionfolder = $outerfolder + "\" + $version
+    $versionfolder2 = $versionfolder + "\Net2"
+    $versionfolder4 = $versionfolder + "\Net4"
+    $versionfoldermvc = $versionfolder + "\Mvc"
+    $versionfolderwebapi = $versionfolder + "\WebApi"
+    
     $signedfolder = $versionfolder + "\signed"
-    $signedfolder2 = $versionfolder + "\signed\Net2"
-    $signedfolder4 = $versionfolder + "\signed\Net4"
-    $signedfolder45 = $versionfolder + "\signed\Net45"
+    $signedfolder2 = $signedfolder + "\Net2"
+    $signedfolder4 = $signedfolder + "\Net4"
+    
     new-item $versionfolder -itemType directory | Out-Null
     new-item $versionfolder2 -itemType directory | Out-Null
     new-item $versionfolder4 -itemType directory | Out-Null
-    new-item $versionfolder45 -itemType directory | Out-Null
+    new-item $versionfoldermvc -itemType directory | Out-Null
+    new-item $versionfolderwebapi -itemType directory | Out-Null
+    
     new-item $signedfolder -itemType directory | Out-Null
     new-item $signedfolder2 -itemType directory | Out-Null
     new-item $signedfolder4 -itemType directory | Out-Null
-    new-item $signedfolder45 -itemType directory | Out-Null
   
     # .Net 3.5
     copy-item $build_dir/Mindscape.Raygun4Net.dll $versionfolder
@@ -103,6 +79,7 @@ task Zip -depends Package {
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.iOS.dll $versionfolder
     # Xamarin.Mac
     copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.Mac.dll $versionfolder
+    copy-item $build_dir/Mindscape.Raygun4Net.Xamarin.Mac2Beta.dll $versionfolder
     # Windows Store
     copy-item $build_dir/Mindscape.Raygun4Net.WindowsStore.dll $versionfolder
     copy-item $build_dir/Mindscape.Raygun4Net.WindowsStore.pdb $versionfolder
@@ -112,16 +89,22 @@ task Zip -depends Package {
     # .Net 4.0
     copy-item $build_dir4/Mindscape.Raygun4Net.dll $versionfolder4
     copy-item $build_dir4/Mindscape.Raygun4Net.pdb $versionfolder4
-    # .Net 4.5
-    copy-item $build_dir45/Mindscape.Raygun4Net.dll $versionfolder45
-    copy-item $build_dir45/Mindscape.Raygun4Net.pdb $versionfolder45
+    # .Net MVC
+    copy-item $build_dir_mvc/Mindscape.Raygun4Net.Mvc.dll $versionfoldermvc
+    copy-item $build_dir_mvc/Mindscape.Raygun4Net.Mvc.pdb $versionfoldermvc
+    copy-item $build_dir_mvc/Mindscape.Raygun4Net.dll $versionfoldermvc
+    copy-item $build_dir_mvc/Mindscape.Raygun4Net.pdb $versionfoldermvc
+    # .Net WebApi
+    copy-item $build_dir_webapi/Mindscape.Raygun4Net.WebApi.dll $versionfolderwebapi
+    copy-item $build_dir_webapi/Mindscape.Raygun4Net.WebApi.pdb $versionfolderwebapi
+    copy-item $build_dir_webapi/Mindscape.Raygun4Net.dll $versionfolderwebapi
+    copy-item $build_dir_webapi/Mindscape.Raygun4Net.pdb $versionfolderwebapi
     # Signed
     copy-item $signed_build_dir/Mindscape.Raygun4Net.dll $signedfolder
     copy-item $signed_build_dir/Mindscape.Raygun4Net.WinRT.dll $signedfolder
     copy-item $signed_build_dir/Mindscape.Raygun4Net.WindowsStore.dll $signedfolder
     copy-item $signed_build_dir2/Mindscape.Raygun4Net.dll $signedfolder2
     copy-item $signed_build_dir4/Mindscape.Raygun4Net.dll $signedfolder4
-    copy-item $signed_build_dir45/Mindscape.Raygun4Net.dll $signedfolder45
 	
     $zipFullName = $release_dir + $version + ".zip"
     Get-ChildItem $outerfolder | Add-Zip $zipFullName

@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Linq;
 
 namespace Mindscape.Raygun4Net.Messages
 {
@@ -6,9 +7,8 @@ namespace Mindscape.Raygun4Net.Messages
   {
     public RaygunClientMessage()
     {
-      Name = "Raygun4Net.WindowsStore";
-      System.Version v = GetType().GetTypeInfo().Assembly.GetName().Version;
-      Version = string.Format("{0}.{1}.{2}.{3}", v.Major, v.Minor, v.Build, v.Revision);
+      Name = ((AssemblyTitleAttribute)GetType().GetTypeInfo().Assembly.GetCustomAttributes(typeof(AssemblyTitleAttribute)).First()).Title;
+      Version = GetType().GetTypeInfo().Assembly.GetName().Version.ToString();
       ClientUrl = @"https://github.com/MindscapeHQ/raygun4net";
     }
 

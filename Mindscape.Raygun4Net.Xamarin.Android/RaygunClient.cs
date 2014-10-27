@@ -25,7 +25,7 @@ namespace Mindscape.Raygun4Net
   public class RaygunClient
   {
     private readonly string _apiKey;
-    private static List<Type> _wrapperExceptions;
+    private readonly List<Type> _wrapperExceptions = new List<Type>();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -34,7 +34,7 @@ namespace Mindscape.Raygun4Net
     public RaygunClient(string apiKey)
     {
       _apiKey = apiKey;
-      _wrapperExceptions = new List<Type>();
+      
       _wrapperExceptions.Add(typeof(TargetInvocationException));
       _wrapperExceptions.Add(typeof(AggregateException));
 
@@ -210,6 +210,7 @@ namespace Mindscape.Raygun4Net
       _client = new RaygunClient(apiKey);
       AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+      AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
     }
 
     /// <summary>
@@ -223,6 +224,7 @@ namespace Mindscape.Raygun4Net
       _client = new RaygunClient(apiKey) { User = user };
       AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+      AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
     }
 
     /// <summary>
@@ -232,6 +234,7 @@ namespace Mindscape.Raygun4Net
     {
       AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException -= TaskScheduler_UnobservedTaskException;
+      AndroidEnvironment.UnhandledExceptionRaiser -= AndroidEnvironment_UnhandledExceptionRaiser;
     }
 
     private static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
@@ -247,6 +250,14 @@ namespace Mindscape.Raygun4Net
       if (e.ExceptionObject is Exception)
       {
         _client.Send(e.ExceptionObject as Exception);
+      }
+    }
+
+    private static void AndroidEnvironment_UnhandledExceptionRaiser(object sender, RaiseThrowableEventArgs e)
+    {
+      if (e.Exception != null)
+      {
+        _client.Send(e.Exception);
       }
     }
 
@@ -273,7 +284,7 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 
-    private static Exception StripWrapperExceptions(Exception exception)
+    private Exception StripWrapperExceptions(Exception exception)
     {
       if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {

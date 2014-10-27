@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 using System.Web;
+using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
@@ -39,20 +40,7 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetEnvironmentDetails()
     {
-      try
-      {
-        _raygunMessage.Details.Environment = new RaygunEnvironmentMessage();
-      }
-      catch (Exception ex)
-      {
-        // Different environments can fail to load the environment details.
-        // For now if they fail to load for whatever reason then just
-        // swallow the exception. A good addition would be to handle
-        // these cases and load them correctly depending on where its running.
-        // see http://raygun.io/forums/thread/3655
-        Trace.WriteLine(string.Format("Failed to fetch the environment details: {0}", ex.Message));
-      }
-
+      _raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.Build();
       return this;
     }
 
@@ -60,7 +48,7 @@ namespace Mindscape.Raygun4Net
     {
       if (exception != null)
       {
-        _raygunMessage.Details.Error = new RaygunErrorMessage(exception);
+        _raygunMessage.Details.Error = RaygunErrorMessageBuilder.Build(exception);
       }
 
       HttpException error = exception as HttpException;
@@ -99,7 +87,11 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetClientDetails()
     {
-      _raygunMessage.Details.Client = new RaygunClientMessage();
+      _raygunMessage.Details.Client = new RaygunClientMessage()
+      {
+        // This is for the MVC project to set the correct client name - due to the client message class being in the core assembly.
+        Name = ((AssemblyTitleAttribute)GetType().Assembly.GetCustomAttributes(typeof(AssemblyTitleAttribute), false)[0]).Title
+      };
       return this;
     }
 
@@ -134,7 +126,7 @@ namespace Mindscape.Raygun4Net
         {
           return this;
         }
-        _raygunMessage.Details.Request = new RaygunRequestMessage(request, options ?? new RaygunRequestMessageOptions());
+        _raygunMessage.Details.Request = RaygunRequestMessageBuilder.Build(request, options);
       }
 
       return this;

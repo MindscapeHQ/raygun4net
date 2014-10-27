@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 using MonoMac.Foundation;
+using Mindscape.Raygun4Net.Builders;
 
 namespace Mindscape.Raygun4Net
 {
@@ -37,15 +38,7 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetEnvironmentDetails()
     {
-      try
-      {
-        _raygunMessage.Details.Environment = new RaygunEnvironmentMessage();
-      }
-      catch (Exception ex)
-      {
-        System.Diagnostics.Debug.WriteLine(string.Format("Failed to fetch the environment details: {0}", ex.Message));
-      }
-
+      _raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.Build();
       return this;
     }
 
@@ -53,7 +46,7 @@ namespace Mindscape.Raygun4Net
     {
       if (exception != null)
       {
-        _raygunMessage.Details.Error = new RaygunErrorMessage(exception);
+        _raygunMessage.Details.Error = RaygunErrorMessageBuilder.Build(exception);
       }
       return this;
     }

@@ -59,6 +59,10 @@
     <Compile Include="..\AssemblyVersionInfo.cs">
       <Link>Properties\AssemblyVersionInfo.cs</Link>
     </Compile>
+    <Compile Include="Builders\RaygunEnvironmentMessageBuilder.cs" />
+    <Compile Include="Builders\RaygunErrorMessageBuilder.cs" />
+    <Compile Include="Builders\RaygunErrorMessageBuilderBase.cs" />
+    <Compile Include="Builders\RaygunRequestMessageBuilder.cs" />
     <Compile Include="IRaygunApplication.cs" />
     <Compile Include="IRaygunMessageBuilder.cs" />
     <Compile Include="Messages\RaygunClientMessage.cs" />
@@ -72,6 +76,7 @@
     <Compile Include="Messages\RaygunMessageDetails.cs" />
     <Compile Include="Messages\RaygunRequestMessage.cs" />
     <Compile Include="RaygunClient.cs" />
+    <Compile Include="RaygunClientBase.cs" />
     <Compile Include="RaygunHttpModule.cs" />
     <Compile Include="RaygunMessageBuilder.cs" />
     <Compile Include="RaygunRequestMessageOptions.cs" />
@@ -82,7 +87,6 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <None Include="Raygun4Net.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" />

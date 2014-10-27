@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata minClientVersion="2.5">
+    <id>Mindscape.Raygun4Net.Core</id>
+    <version>4.0.0</version>
+    <title />
+    <authors>Mindscape</authors>
+    <owners />
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Core library for MVC and WebApi Raygun providers</description>
+    <iconUrl>https://app.raygun.io/Content/Images/nuget-icon.png</iconUrl>
+    <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
+    <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
+  </metadata>
+  <files>
+    <file src="build\Mvc\Mindscape.Raygun4Net.dll" target="lib\net40\Mindscape.Raygun4Net.dll" />
+    <file src="build\Mvc\Mindscape.Raygun4Net.pdb" target="lib\net40\Mindscape.Raygun4Net.pdb" />
+  </files>
+</package>

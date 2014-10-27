@@ -26,6 +26,7 @@ namespace Mindscape.Raygun4Net.Xamarin.Android.Tests
 		
 		public static void UpdateIdValues()
 		{
+			global::Mindscape.Raygun4Net.Xamarin.Android.Resource.String.library_name = global::Mindscape.Raygun4Net.Xamarin.Android.Tests.Resource.String.library_name;
 			global::Xamarin.Android.NUnitLite.Resource.Id.OptionHostName = global::Mindscape.Raygun4Net.Xamarin.Android.Tests.Resource.Id.OptionHostName;
 			global::Xamarin.Android.NUnitLite.Resource.Id.OptionPort = global::Mindscape.Raygun4Net.Xamarin.Android.Tests.Resource.Id.OptionPort;
 			global::Xamarin.Android.NUnitLite.Resource.Id.OptionRemoteServer = global::Mindscape.Raygun4Net.Xamarin.Android.Tests.Resource.Id.OptionRemoteServer;
@@ -33,6 +34,7 @@ namespace Mindscape.Raygun4Net.Xamarin.Android.Tests
 			global::Xamarin.Android.NUnitLite.Resource.Id.ResultFullName = global::Mindscape.Raygun4Net.Xamarin.Android.Tests.Resource.Id.ResultFullName;
 			global::Xamarin.Android.NUnitLite.Resource.Id.ResultMessage = global::Mindscape.Raygun4Net.Xamarin.Android.Tests.Resource.Id.ResultMessage;
 			global::Xamarin.Android.NUnitLite.Resource.Id.ResultResultState = global::Mindscape.Raygun4Net.Xamarin.Android.Tests.Resource.Id.ResultResultState;
+			global::Xamarin.Android.NUnitLite.Resource.Id.ResultRunSingleMethodTest = global::Mindscape.Raygun4Net.Xamarin.Android.Tests.Resource.Id.ResultRunSingleMethodTest;
 			global::Xamarin.Android.NUnitLite.Resource.Id.ResultStackTrace = global::Mindscape.Raygun4Net.Xamarin.Android.Tests.Resource.Id.ResultStackTrace;
 			global::Xamarin.Android.NUnitLite.Resource.Id.ResultsFailed = global::Mindscape.Raygun4Net.Xamarin.Android.Tests.Resource.Id.ResultsFailed;
 			global::Xamarin.Android.NUnitLite.Resource.Id.ResultsId = global::Mindscape.Raygun4Net.Xamarin.Android.Tests.Resource.Id.ResultsId;
@@ -47,7 +49,6 @@ namespace Mindscape.Raygun4Net.Xamarin.Android.Tests
 			global::Xamarin.Android.NUnitLite.Resource.Layout.results = global::Mindscape.Raygun4Net.Xamarin.Android.Tests.Resource.Layout.results;
 			global::Xamarin.Android.NUnitLite.Resource.Layout.test_result = global::Mindscape.Raygun4Net.Xamarin.Android.Tests.Resource.Layout.test_result;
 			global::Xamarin.Android.NUnitLite.Resource.Layout.test_suite = global::Mindscape.Raygun4Net.Xamarin.Android.Tests.Resource.Layout.test_suite;
-			global::Mindscape.Raygun4Net.Xamarin.Android.Resource.String.library_name = global::Mindscape.Raygun4Net.Xamarin.Android.Tests.Resource.String.library_name;
 		}
 		
 		public partial class Attribute
@@ -91,20 +92,23 @@ namespace Mindscape.Raygun4Net.Xamarin.Android.Tests
 			// aapt resource value: 0x7f050000
 			public const int OptionRemoteServer = 2131034112;
 			
-			// aapt resource value: 0x7f05000f
-			public const int OptionsButton = 2131034127;
-			
-			// aapt resource value: 0x7f05000a
-			public const int ResultFullName = 2131034122;
-			
-			// aapt resource value: 0x7f05000c
-			public const int ResultMessage = 2131034124;
+			// aapt resource value: 0x7f050010
+			public const int OptionsButton = 2131034128;
 			
 			// aapt resource value: 0x7f05000b
-			public const int ResultResultState = 2131034123;
+			public const int ResultFullName = 2131034123;
 			
 			// aapt resource value: 0x7f05000d
-			public const int ResultStackTrace = 2131034125;
+			public const int ResultMessage = 2131034125;
+			
+			// aapt resource value: 0x7f05000c
+			public const int ResultResultState = 2131034124;
+			
+			// aapt resource value: 0x7f05000a
+			public const int ResultRunSingleMethodTest = 2131034122;
+			
+			// aapt resource value: 0x7f05000e
+			public const int ResultStackTrace = 2131034126;
 			
 			// aapt resource value: 0x7f050006
 			public const int ResultsFailed = 2131034118;
@@ -127,11 +131,11 @@ namespace Mindscape.Raygun4Net.Xamarin.Android.Tests
 			// aapt resource value: 0x7f050004
 			public const int ResultsResult = 2131034116;
 			
-			// aapt resource value: 0x7f05000e
-			public const int RunTestsButton = 2131034126;
+			// aapt resource value: 0x7f05000f
+			public const int RunTestsButton = 2131034127;
 			
-			// aapt resource value: 0x7f050010
-			public const int TestSuiteListView = 2131034128;
+			// aapt resource value: 0x7f050011
+			public const int TestSuiteListView = 2131034129;
 			
 			static Id()
 			{

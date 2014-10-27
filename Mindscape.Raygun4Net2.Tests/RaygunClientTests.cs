@@ -267,7 +267,7 @@ namespace Mindscape.Raygun4Net2.Tests
       bool filterCalled = false;
       _client.SendingMessage += (object o, RaygunSendingMessageEventArgs e) =>
       {
-        Assert.AreEqual("NullReferenceException: The thing is null", e.Message.Details.Error.Message);
+        Assert.AreEqual("The thing is null", e.Message.Details.Error.Message);
         filterCalled = true;
         e.Cancel = true;
       };
@@ -292,13 +292,13 @@ namespace Mindscape.Raygun4Net2.Tests
       bool filter2Called = false;
       _client.SendingMessage += (object o, RaygunSendingMessageEventArgs e) =>
       {
-        Assert.AreEqual("NullReferenceException: The thing is null", e.Message.Details.Error.Message);
+        Assert.AreEqual("The thing is null", e.Message.Details.Error.Message);
         filter1Called = true;
         e.Cancel = true;
       };
       _client.SendingMessage += (object o, RaygunSendingMessageEventArgs e) =>
       {
-        Assert.AreEqual("NullReferenceException: The thing is null", e.Message.Details.Error.Message);
+        Assert.AreEqual("The thing is null", e.Message.Details.Error.Message);
         filter2Called = true;
         e.Cancel = true;
       };
@@ -353,7 +353,7 @@ namespace Mindscape.Raygun4Net2.Tests
     public void HandlerCanModifyMessage()
     {
       RaygunMessage message = _client.ExposeBuildMessage(_exception);
-      Assert.AreEqual("NullReferenceException: The thing is null", message.Details.Error.Message);
+      Assert.AreEqual("The thing is null", message.Details.Error.Message);
 
       _client.SendingMessage += (object o, RaygunSendingMessageEventArgs e) =>
       {

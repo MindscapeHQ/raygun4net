@@ -10,15 +10,15 @@ using Mindscape.Raygun4Net.Messages;
 using System.Web;
 using System.Threading;
 using System.Reflection;
+using Mindscape.Raygun4Net.Builders;
 
 namespace Mindscape.Raygun4Net
 {
-  public class RaygunClient
+  public class RaygunClient : RaygunClientBase
   {
     private readonly string _apiKey;
     private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
-    private static List<Type> _wrapperExceptions;
-    internal const string SentKey = "AlreadySentByRaygun";
+    private readonly List<Type> _wrapperExceptions = new List<Type>();
 
     [ThreadStatic]
     private static RaygunRequestMessage _currentRequestMessage;
@@ -30,7 +30,6 @@ namespace Mindscape.Raygun4Net
     public RaygunClient(string apiKey)
     {
       _apiKey = apiKey;
-      _wrapperExceptions = new List<Type>();
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
       _wrapperExceptions.Add(typeof(HttpUnhandledException));
@@ -282,19 +281,6 @@ namespace Mindscape.Raygun4Net
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
 
-    protected bool CanSend(Exception exception)
-    {
-      return exception == null || !exception.Data.Contains(SentKey) || false.Equals(exception.Data[SentKey]);
-    }
-
-    protected void FlagAsSent(Exception exception)
-    {
-      if (exception != null)
-      {
-        exception.Data[SentKey] = true;
-      }
-    }
-
     private RaygunRequestMessage BuildRequestMessage()
     {
       RaygunRequestMessage requestMessage = null;
@@ -306,11 +292,14 @@ namespace Mindscape.Raygun4Net
         {
           request = context.Request;
         }
-        catch (HttpException) { }
+        catch (HttpException ex)
+        {
+          System.Diagnostics.Trace.WriteLine("Error retrieving HttpRequest {0}", ex.Message);
+        }
 
         if (request != null)
         {
-          requestMessage = new RaygunRequestMessage(request, _requestMessageOptions ?? new RaygunRequestMessageOptions());
+          requestMessage = RaygunRequestMessageBuilder.Build(request, _requestMessageOptions);
         }
       }
 
@@ -335,7 +324,7 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 
-    private static Exception StripWrapperExceptions(Exception exception)
+    private Exception StripWrapperExceptions(Exception exception)
     {
       if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {

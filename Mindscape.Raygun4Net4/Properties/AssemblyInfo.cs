@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Mindscape.Raygun4Net4")]
+[assembly: AssemblyTitle("Raygun4Net4.0")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Mindscape")]
-[assembly: AssemblyProduct("Mindscape.Raygun4Net4")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("Mindscape Raygun4Net")]
 [assembly: AssemblyCopyright("Copyright © Mindscape 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,4 +20,4 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("10455ac9-81d7-4e57-a9a5-49e6046da0f7")]
+[assembly: Guid("3ef21258-8500-4b62-a721-7b94f2faf40c")]

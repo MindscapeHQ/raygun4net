@@ -28,7 +28,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="nunit.framework" />
+    <Reference Include="Mindscape.Raygun4Net.Xamarin.Mac">
+      <HintPath>..\Mindscape.Raygun4Net.Xamarin.Mac\bin\Release\Mindscape.Raygun4Net.Xamarin.Mac.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\Projects\Xamarin_Mac_ErrorHarness_OldAPI\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="RaygunErrorMessageTests.cs" />
@@ -41,9 +46,6 @@
     <Folder Include="Model\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mindscape.Raygun4Net.Xamarin.Mac\Mindscape.Raygun4Net.Xamarin.Mac.csproj">
-      <Project>{B78E58F3-853F-4991-BFF6-5AECE0C04B91}</Project>
-      <Name>Mindscape.Raygun4Net.Xamarin.Mac</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
