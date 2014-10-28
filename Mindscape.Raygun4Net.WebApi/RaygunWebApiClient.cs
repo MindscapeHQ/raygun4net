@@ -166,10 +166,9 @@ namespace Mindscape.Raygun4Net.WebApi
 
     protected bool CanSend(RaygunMessage message)
     {
-      int[] exclude = string.IsNullOrEmpty(RaygunSettings.Settings.ExcludeHttpStatusCodesList) ? new int[0] : RaygunSettings.Settings.ExcludeHttpStatusCodesList.Split(',').Select(int.Parse).ToArray();
       if (message != null && message.Details != null && message.Details.Response != null)
       {
-        return !exclude.Contains(message.Details.Response.StatusCode);
+        return !RaygunSettings.Settings.ExcludedStatusCodes.Contains(message.Details.Response.StatusCode);
       }
       return true;
     }

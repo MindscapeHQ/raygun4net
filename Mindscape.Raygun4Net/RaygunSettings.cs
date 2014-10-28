@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Linq;
 
 namespace Mindscape.Raygun4Net
 {
@@ -49,6 +50,11 @@ namespace Mindscape.Raygun4Net
     {
       get { return (string)this["excludeHttpStatusCodes"]; }
       set { this["excludeHttpStatusCodes"] = value; }
+    }
+
+    public int[] ExcludedStatusCodes
+    {
+      get { return string.IsNullOrEmpty(ExcludeHttpStatusCodesList) ? new int[0] : ExcludeHttpStatusCodesList.Split(',').Select(int.Parse).ToArray(); }
     }
 
     [ConfigurationProperty("excludeErrorsFromLocal", IsRequired = false, DefaultValue = false)]
