@@ -164,6 +164,16 @@ namespace Mindscape.Raygun4Net.WebApi
       return result;
     }
 
+    protected bool CanSend(RaygunMessage message)
+    {
+      int[] exclude = string.IsNullOrEmpty(RaygunSettings.Settings.ExcludeHttpStatusCodesList) ? new int[0] : RaygunSettings.Settings.ExcludeHttpStatusCodesList.Split(',').Select(int.Parse).ToArray();
+      if (message != null && message.Details != null && message.Details.Response != null)
+      {
+        return !exclude.Contains(message.Details.Response.StatusCode);
+      }
+      return true;
+    }
+
     /// <summary>
     /// Gets or sets the user identity string.
     /// </summary>
@@ -411,7 +421,7 @@ namespace Mindscape.Raygun4Net.WebApi
     {
       if (ValidateApiKey())
       {
-        bool canSend = OnSendingMessage(raygunMessage);
+        bool canSend = OnSendingMessage(raygunMessage) && CanSend(raygunMessage);
         if (canSend)
         {
           using (var client = new WebClient())
