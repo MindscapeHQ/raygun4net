@@ -72,14 +72,14 @@ namespace Mindscape.Raygun4Net
       return true;
     }
 
-    private bool _sendingMessageLock;
+    private bool _handlingRecursiveErrorSending;
 
     // Returns true if the message can be sent, false if the sending is canceled.
     protected bool OnSendingMessage(RaygunMessage raygunMessage)
     {
       bool result = true;
 
-      if (!_sendingMessageLock)
+      if (!_handlingRecursiveErrorSending)
       {
         EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
         if (handler != null)
@@ -91,9 +91,9 @@ namespace Mindscape.Raygun4Net
           }
           catch (Exception e)
           {
-            _sendingMessageLock = true;
+            _handlingRecursiveErrorSending = true;
             Send(e);
-            _sendingMessageLock = false;
+            _handlingRecursiveErrorSending = false;
           }
           result = !args.Cancel;
         }
