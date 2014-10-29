@@ -1018,35 +1018,42 @@ namespace Mindscape.Raygun4Net
         success = SerializeString(stringValue, builder);
       else
       {
-        IDictionary<string, object> dict = value as IDictionary<string, object>;
+        IDictionary dict = value as IDictionary;
         if (dict != null)
         {
           success = SerializeObject(jsonSerializerStrategy, dict.Keys, dict.Values, builder);
         }
         else
         {
-          IDictionary<string, string> stringDictionary = value as IDictionary<string, string>;
-          if (stringDictionary != null)
+          IDictionary<string, object> stringObjectDictionary = value as IDictionary<string, object>;
+          if (stringObjectDictionary != null)
           {
-            success = SerializeObject(jsonSerializerStrategy, stringDictionary.Keys, stringDictionary.Values, builder);
+            success = SerializeObject(jsonSerializerStrategy, stringObjectDictionary.Keys, stringObjectDictionary.Values, builder);
           }
           else
           {
-            IEnumerable enumerableValue = value as IEnumerable;
-            if (enumerableValue != null)
-              success = SerializeArray(jsonSerializerStrategy, enumerableValue, builder);
-            else if (IsNumeric(value))
-              success = SerializeNumber(value, builder);
-            else if (value is bool)
-              builder.Append((bool)value ? "true" : "false");
-            else if (value == null)
-              builder.Append("null");
+            IDictionary<string, string> stringDictionary = value as IDictionary<string, string>;
+            if (stringDictionary != null)
+            {
+              success = SerializeObject(jsonSerializerStrategy, stringDictionary.Keys, stringDictionary.Values, builder);
+            }
             else
             {
-              object serializedObject;
-              success = jsonSerializerStrategy.TrySerializeNonPrimitiveObject(value, out serializedObject);
-              if (success)
-                SerializeValue(jsonSerializerStrategy, serializedObject, builder);
+              IEnumerable enumerableValue = value as IEnumerable;
+              if (enumerableValue != null)
+                success = SerializeArray(jsonSerializerStrategy, enumerableValue, builder);
+              else if (IsNumeric (value))
+                success = SerializeNumber(value, builder);
+              else if (value is bool)
+                builder.Append ((bool)value ? "true" : "false");
+              else if (value == null)
+                builder.Append("null");
+              else {
+                object serializedObject;
+                success = jsonSerializerStrategy.TrySerializeNonPrimitiveObject(value, out serializedObject);
+                if (success)
+                  SerializeValue(jsonSerializerStrategy, serializedObject, builder);
+              }
             }
           }
         }
@@ -1070,7 +1077,9 @@ namespace Mindscape.Raygun4Net
             builder.Append(",");
           string stringKey = key as string;
           if (stringKey != null)
-            SerializeString(stringKey, builder);
+            SerializeString (stringKey, builder);
+          else if (key != null)
+            SerializeString (key.ToString(), builder);
           else
             if (!SerializeValue(jsonSerializerStrategy, value, builder)) return false;
           builder.Append(":");
