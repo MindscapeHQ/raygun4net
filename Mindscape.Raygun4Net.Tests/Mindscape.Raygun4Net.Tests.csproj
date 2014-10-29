@@ -60,6 +60,7 @@
     <Compile Include="RaygunMessageBuilderTests.cs" />
     <Compile Include="RaygunRequestMessageTests.cs" />
     <Compile Include="RaygunSettingsTests.cs" />
+    <Compile Include="SimpleJsonTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net\Mindscape.Raygun4Net.csproj">
