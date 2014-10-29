@@ -72,17 +72,33 @@ namespace Mindscape.Raygun4Net
       return true;
     }
 
+    private bool _sendingMessageLock;
+
     // Returns true if the message can be sent, false if the sending is canceled.
     protected bool OnSendingMessage(RaygunMessage raygunMessage)
     {
       bool result = true;
-      EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
-      if (handler != null)
+
+      if (!_sendingMessageLock)
       {
-        RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage);
-        handler(this, args);
-        result = !args.Cancel;
+        EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
+        if (handler != null)
+        {
+          RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage);
+          try
+          {
+            handler(this, args);
+          }
+          catch (Exception e)
+          {
+            _sendingMessageLock = true;
+            Send(e);
+            _sendingMessageLock = false;
+          }
+          result = !args.Cancel;
+        }
       }
+
       return result;
     }
 
