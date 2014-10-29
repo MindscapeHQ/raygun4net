@@ -11,14 +11,25 @@ namespace Mindscape.Raygun4Net
 
     protected bool CanSend(Exception exception)
     {
-      return exception == null || !exception.Data.Contains(SentKey) || false.Equals(exception.Data[SentKey]);
+      return exception == null || exception.Data == null || !exception.Data.Contains(SentKey) || false.Equals(exception.Data[SentKey]);
     }
 
     protected void FlagAsSent(Exception exception)
     {
-      if (exception != null)
+      if (exception != null && exception.Data != null)
       {
-        exception.Data[SentKey] = true;
+        try
+        {
+          Type[] genericTypes = exception.Data.GetType().GetGenericArguments();
+          if (genericTypes.Length > 0 && genericTypes[0].IsAssignableFrom(typeof(string)))
+          {
+            exception.Data[SentKey] = true;
+          }
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Trace.WriteLine(String.Format("Failed to flag exception as sent: {0}", ex.Message));
+        }
       }
     }
   }
