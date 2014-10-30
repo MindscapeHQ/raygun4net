@@ -150,20 +150,6 @@ namespace Mindscape.Raygun4Net.WebApi
       return true;
     }
 
-    // Returns true if the message can be sent, false if the sending is canceled.
-    protected bool OnSendingMessage(RaygunMessage raygunMessage)
-    {
-      bool result = true;
-      EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
-      if (handler != null)
-      {
-        RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage);
-        handler(this, args);
-        result = !args.Cancel;
-      }
-      return result;
-    }
-
     protected bool CanSend(RaygunMessage message)
     {
       if (message != null && message.Details != null && message.Details.Response != null)
@@ -193,11 +179,6 @@ namespace Mindscape.Raygun4Net.WebApi
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
     /// </summary>
     public string ApplicationVersion { get; set; }
-
-    /// <summary>
-    /// Raised just before a message is sent. This can be used to make final adjustments to the <see cref="RaygunMessage"/>, or to cancel the send.
-    /// </summary>
-    public event EventHandler<RaygunSendingMessageEventArgs> SendingMessage;
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
@@ -279,7 +260,7 @@ namespace Mindscape.Raygun4Net.WebApi
     /// Transmits an exception to Raygun.io synchronously, using the version number of the originating assembly.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
-    public void Send(Exception exception)
+    public override void Send(Exception exception)
     {
       Send(exception, null, (IDictionary)null);
     }

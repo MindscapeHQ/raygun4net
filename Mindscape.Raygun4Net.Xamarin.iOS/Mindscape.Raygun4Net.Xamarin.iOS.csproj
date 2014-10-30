@@ -59,6 +59,9 @@
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorStackTraceLineMessage.cs">
       <Link>Messages\RaygunErrorStackTraceLineMessage.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\RaygunClientBase.cs">
+      <Link>RaygunClientBase.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\SimpleJson.cs">
       <Link>SimpleJson.cs</Link>
     </Compile>
