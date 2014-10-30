@@ -128,7 +128,11 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      Send(BuildMessage(exception, tags, userCustomData));
+      if (CanSend(exception))
+      {
+        Send(BuildMessage(exception, tags, userCustomData));
+        FlagAsSent(exception);
+      }
     }
 
     /// <summary>
@@ -158,7 +162,11 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      ThreadPool.QueueUserWorkItem(c => Send(BuildMessage(exception, tags, userCustomData)));
+      if (CanSend(exception))
+      {
+        ThreadPool.QueueUserWorkItem(c => Send(BuildMessage(exception, tags, userCustomData)));
+        FlagAsSent(exception);
+      }
     }
 
     /// <summary>
