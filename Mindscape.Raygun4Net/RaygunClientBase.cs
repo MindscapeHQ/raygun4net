@@ -26,7 +26,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception ex)
         {
-          System.Diagnostics.Trace.WriteLine(String.Format("Failed to flag exception as sent: {0}", ex.Message));
+          System.Diagnostics.Debug.WriteLine(String.Format("Failed to flag exception as sent: {0}", ex.Message));
         }
       }
     }
