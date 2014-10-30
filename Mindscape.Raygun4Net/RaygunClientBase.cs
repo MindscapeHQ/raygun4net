@@ -19,7 +19,7 @@ namespace Mindscape.Raygun4Net
         try
         {
           Type[] genericTypes = exception.Data.GetType().GetGenericArguments();
-          if (genericTypes.Length > 0 && genericTypes[0].IsAssignableFrom(typeof(string)))
+          if (genericTypes.Length == 0 || genericTypes[0].IsAssignableFrom(typeof(string)))
           {
             exception.Data[SentKey] = true;
           }
