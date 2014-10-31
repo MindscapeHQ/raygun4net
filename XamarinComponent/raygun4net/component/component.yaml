@@ -17,5 +17,5 @@ publisher-url: https://raygun.io
 libraries: 
   ios: lib/ios/Mindscape.Raygun4Net.Xamarin.iOS.dll
   android: lib/android/Mindscape.Raygun4Net.Xamarin.Android.dll
-version: 4.0.0
+version: 4.0.1
 ...
