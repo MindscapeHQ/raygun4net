@@ -68,5 +68,11 @@ namespace Mindscape.Raygun4Net.Tests
     {
       Assert.IsEmpty(RaygunSettings.Settings.IgnoreServerVariableNames);
     }
+
+    [Test]
+    public void IsNotReadOnly()
+    {
+      Assert.IsFalse(RaygunSettings.Settings.IsReadOnly());
+    }
   }
 }

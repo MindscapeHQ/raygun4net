@@ -91,5 +91,14 @@ namespace Mindscape.Raygun4Net
       get { return (string)this["ignoreServerVariableNames"]; }
       set { this["ignoreServerVariableNames"] = value; }
     }
+
+    /// <summary>
+    /// Return false.
+    /// </summary>
+    /// <returns>False</returns>
+    public override bool IsReadOnly()
+    {
+      return false;
+    }
   }
 }
