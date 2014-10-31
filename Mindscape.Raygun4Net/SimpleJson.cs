@@ -1950,21 +1950,31 @@ namespace Mindscape.Raygun4Net
 
       public static GetDelegate GetGetMethodByExpression(PropertyInfo propertyInfo)
       {
-        MethodInfo getMethodInfo = GetGetterMethodInfo(propertyInfo);
-        ParameterExpression instance = Expression.Parameter(typeof(object), "instance");
-        UnaryExpression instanceCast = (!IsValueType(propertyInfo.DeclaringType)) ? Expression.TypeAs(instance, propertyInfo.DeclaringType) : Expression.Convert(instance, propertyInfo.DeclaringType);
-        Func<object, object> compiled = Expression.Lambda<Func<object, object>>(Expression.TypeAs(Expression.Call(instanceCast, getMethodInfo), typeof(object)), instance).Compile();
-        return delegate(object source)
+        try
         {
-          try
+          MethodInfo getMethodInfo = GetGetterMethodInfo(propertyInfo);
+          ParameterExpression instance = Expression.Parameter(typeof (object), "instance");
+          UnaryExpression instanceCast = (!IsValueType(propertyInfo.DeclaringType)) ? Expression.TypeAs(instance, propertyInfo.DeclaringType) : Expression.Convert(instance, propertyInfo.DeclaringType);
+          Func<object, object> compiled = Expression.Lambda<Func<object, object>>(Expression.TypeAs(Expression.Call(instanceCast, getMethodInfo), typeof (object)), instance).Compile();
+          return delegate(object source)
           {
-            return compiled(source);
-          }
-          catch (Exception e)
+            try
+            {
+              return compiled(source);
+            }
+            catch (Exception e)
+            {
+              return e.GetType().FullName + ": " + e.Message;
+            }
+          };
+        }
+        catch (Exception e)
+        {
+          return delegate(object source)
           {
             return e.GetType().FullName + ": " + e.Message;
-          }
-        };
+          };
+        }
       }
 
       public static GetDelegate GetGetMethodByExpression(FieldInfo fieldInfo)
