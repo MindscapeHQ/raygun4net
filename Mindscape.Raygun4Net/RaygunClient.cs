@@ -261,9 +261,22 @@ namespace Mindscape.Raygun4Net
         // otherwise it will be disposed while we are using it on the other thread.
         RaygunRequestMessage currentRequestMessage = BuildRequestMessage();
 
-        ThreadPool.QueueUserWorkItem(c => {
-          _currentRequestMessage = currentRequestMessage;
-          Send(BuildMessage(exception, tags, userCustomData, userInfo));
+        ThreadPool.QueueUserWorkItem(c =>
+        {
+          try
+          {
+            _currentRequestMessage = currentRequestMessage;
+            Send(BuildMessage(exception, tags, userCustomData, userInfo));
+          }
+          catch (Exception)
+          {
+            // This will swallow any unhandled exceptions unless we explicitly want to throw on error.
+            // Otherwise this can bring the whole process down.
+            if (RaygunSettings.Settings.ThrowOnError)
+            {
+              throw;
+            }
+          }
         });
         FlagAsSent(exception);
       }
