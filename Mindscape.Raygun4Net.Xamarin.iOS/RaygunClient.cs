@@ -10,12 +10,18 @@ using Mindscape.Raygun4Net.Messages;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Reflection;
-using MonoTouch.UIKit;
-using MonoTouch.SystemConfiguration;
-using MonoTouch.Foundation;
 using System.IO.IsolatedStorage;
 using System.IO;
 using System.Text;
+#if __UNIFIED__
+using UIKit;
+using SystemConfiguration;
+using Foundation;
+#else
+using MonoTouch.UIKit;
+using MonoTouch.SystemConfiguration;
+using MonoTouch.Foundation;
+#endif
 
 namespace Mindscape.Raygun4Net
 {

@@ -4,8 +4,13 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using Mindscape.Raygun4Net.Messages;
+#if __UNIFIED__
+using Foundation;
+using ObjCRuntime;
+#else
 using MonoTouch.Foundation;
 using MonoTouch.ObjCRuntime;
+#endif
 
 namespace Mindscape.Raygun4Net.Builders
 {
@@ -44,6 +49,7 @@ namespace Mindscape.Raygun4Net.Builders
     {
       var lines = new List<RaygunErrorStackTraceLineMessage>();
 
+      #if !__UNIFIED__
       MonoTouchException mex = exception as MonoTouchException;
       if (mex != null && mex.NSException != null)
       {
@@ -55,6 +61,8 @@ namespace Mindscape.Raygun4Net.Builders
         }
         return lines.ToArray();
       }
+      #endif
+
       string stackTraceStr = exception.StackTrace;
       if (stackTraceStr == null)
       {

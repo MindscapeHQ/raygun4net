@@ -5,7 +5,11 @@ using System.Diagnostics;
 using System.Reflection;
 using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
+#if __UNIFIED__
+using Foundation;
+#else
 using MonoTouch.Foundation;
+#endif
 
 namespace Mindscape.Raygun4Net
 {

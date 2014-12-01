@@ -5,8 +5,13 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 using Mindscape.Raygun4Net.Messages;
+#if __UNIFIED__
+using Foundation;
+using UIKit;
+#else
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
+#endif
 
 namespace Mindscape.Raygun4Net.Builders
 {
@@ -70,7 +75,11 @@ namespace Mindscape.Raygun4Net.Builders
       return message;
     }
 
+    #if __UNIFIED__
+    [DllImport("/usr/lib/libSystem.dylib")]
+    #else
     [DllImport(global::MonoTouch.Constants.SystemLibrary)]
+    #endif
     private static extern int sysctlbyname([MarshalAs(UnmanagedType.LPStr)] string property,
                                            IntPtr output,
                                            IntPtr oldLen,
