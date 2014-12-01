@@ -1,4 +1,5 @@
-﻿using Mindscape.Raygun4Net.Messages;
+﻿using System.IO;
+using Mindscape.Raygun4Net.Messages;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
 
     public static RaygunRequestMessage Build(HttpRequestMessage request, RaygunRequestMessageOptions options)
     {
-      RaygunRequestMessage message = new RaygunRequestMessage();
+      var message = new RaygunRequestMessage();
 
       options = options ?? new RaygunRequestMessageOptions();
 
@@ -26,8 +27,13 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       message.IPAddress = GetIPAddress(request);
       message.Form = ToDictionary(request.GetQueryNameValuePairs(), options.IsFormFieldIgnored);
       message.QueryString = ToDictionary(request.GetQueryNameValuePairs(), s => false);
+      object body;
+      if (request.Properties.TryGetValue("body", out body))
+      {
+        message.RawData = body.ToString();
+      }
 
-      SetHeadersAndRawData(message, request, options.IsHeaderIgnored);
+      SetHeaders(message, request, options.IsHeaderIgnored);
 
       return message;
     }
@@ -71,7 +77,7 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       return null;
     }
 
-    private static void SetHeadersAndRawData(RaygunRequestMessage message, HttpRequestMessage request, Func<string, bool> ignored)
+    private static void SetHeaders(RaygunRequestMessage message, HttpRequestMessage request, Func<string, bool> ignored)
     {
       message.Headers = new Dictionary<string, string>();
 
@@ -88,8 +94,6 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
           {
             message.Headers[header.Key] = string.Join(",", header.Value);
           }
-
-          message.RawData = request.Content.ReadAsStringAsync().Result;
         }
       }
       catch (Exception ex)
