@@ -275,49 +275,20 @@ namespace Mindscape.Raygun4Net
     {
       if (ValidateApiKey())
       {
-        bool canSend = OnSendingMessage(raygunMessage);
-        if (canSend)
+        try
         {
-          if (HasInternetConnection)
-          {
-            SendStoredMessages();
-            using (var client = new WebClient ())
-            {
-              client.Headers.Add("X-ApiKey", _apiKey);
-              client.Encoding = System.Text.Encoding.UTF8;
+          var message = SimpleJson.SerializeObject(raygunMessage);
+          SaveMessage(message);
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Debug.WriteLine(string.Format("Error saving Exception to device {0}", ex.Message));
+        }
 
-              try
-              {
-                var message = SimpleJson.SerializeObject(raygunMessage);
-                client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
-              }
-              catch (Exception ex)
-              {
-                System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
-                try
-                {
-                  SaveMessage(SimpleJson.SerializeObject(raygunMessage));
-                  System.Diagnostics.Debug.WriteLine("Exception has been saved to the device to try again later.");
-                }
-                catch (Exception e)
-                {
-                  System.Diagnostics.Debug.WriteLine(string.Format("Error saving Exception to device {0}", e.Message));
-                }
-              }
-            }
-          }
-          else
-          {
-            try
-            {
-              var message = SimpleJson.SerializeObject(raygunMessage);
-              SaveMessage(message);
-            }
-            catch (Exception ex)
-            {
-              System.Diagnostics.Debug.WriteLine(string.Format("Error saving Exception to device {0}", ex.Message));
-            }
-          }
+        bool canSend = OnSendingMessage(raygunMessage);
+        if (canSend && HasInternetConnection)
+        {
+          SendStoredMessages ();
         }
       }
     }
