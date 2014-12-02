@@ -6,9 +6,9 @@
     <ProjectTypeGuids>{A3F8F2AB-B479-4A4A-A458-A89E7DC349F1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <ProjectGuid>{0D23E598-3C00-4337-A75D-DAB723724A58}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Mindscape.Raygun4Net.Mac.Unified</RootNamespace>
+    <RootNamespace>Mindscape.Raygun4Net.Xamarin.Mac.Unified</RootNamespace>
     <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
-    <AssemblyName>Mindscape.Raygun4Net.Mac.Unified</AssemblyName>
+    <AssemblyName>Mindscape.Raygun4Net.Xamarin.Mac.Unified</AssemblyName>
     <TargetFrameworkIdentifier>Xamarin.Mac</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
   </PropertyGroup>
