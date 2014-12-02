@@ -1,6 +1,10 @@
 using System;
-using MonoTouch.UIKit;
 using System.Drawing;
+#if __UNIFIED__
+using UIKit;
+#else
+using MonoTouch.UIKit;
+#endif
 
 namespace Raygun.iOS.Sample
 {
@@ -24,11 +28,7 @@ namespace Raygun.iOS.Sample
 
       button = UIButton.FromType(UIButtonType.RoundedRect);
 
-      button.Frame = new RectangleF(
-          View.Frame.Width / 2 - buttonWidth / 2,
-          View.Frame.Height / 2 - buttonHeight / 2,
-          buttonWidth,
-          buttonHeight);
+      button.Frame = new RectangleF((float)(View.Frame.Width / 2 - buttonWidth / 2), (float)(View.Frame.Height / 2 - buttonHeight / 2), buttonWidth, buttonHeight);
 
       button.SetTitle("Crash", UIControlState.Normal);
 

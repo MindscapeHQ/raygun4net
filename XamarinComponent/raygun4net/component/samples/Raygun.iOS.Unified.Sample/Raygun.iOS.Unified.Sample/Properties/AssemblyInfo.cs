@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Raygun.iOS.Sample")]
+[assembly: AssemblyTitle("Raygun.iOS.Unified.Sample")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Mindscape")]
-[assembly: AssemblyProduct("Raygun.iOS.Sample")]
+[assembly: AssemblyProduct("Raygun.iOS.Unified.Sample")]
 [assembly: AssemblyCopyright("Copyright © Mindscape 2013-2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
