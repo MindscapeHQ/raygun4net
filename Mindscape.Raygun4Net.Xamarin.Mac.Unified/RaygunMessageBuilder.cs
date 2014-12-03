@@ -1,15 +1,10 @@
 ﻿using System;
+using Mindscape.Raygun4Net.Messages;
+using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
-using Mindscape.Raygun4Net.Builders;
-using Mindscape.Raygun4Net.Messages;
-#if __UNIFIED__
 using Foundation;
-#else
-using MonoTouch.Foundation;
-#endif
+using Mindscape.Raygun4Net.Builders;
 
 namespace Mindscape.Raygun4Net
 {
@@ -82,24 +77,34 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetVersion(string version)
     {
-      if (String.IsNullOrWhiteSpace(version))
+      if (!String.IsNullOrWhiteSpace(version))
       {
-        try
+        _raygunMessage.Details.Version = version;
+      }
+      else
+      {
+        try // So that the test can run.
         {
-          version = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString();
+          if (NSBundle.MainBundle != null)
+          {
+            NSObject versionObject = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleShortVersionString");
+            NSObject buildObject = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion");
+            if (versionObject != null && buildObject != null)
+            {
+              _raygunMessage.Details.Version = versionObject + " (" + buildObject + ")";
+            }
+          }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-          Trace.WriteLine("Error retieving bundle version {0}", ex.Message);
+          System.Diagnostics.Debug.WriteLine("Failed to get version: ", e.Message);
         }
       }
 
-      if (String.IsNullOrWhiteSpace(version))
+      if (_raygunMessage.Details.Version == null)
       {
-        version = "Not supplied";
+        _raygunMessage.Details.Version = "Not supplied";
       }
-      
-      _raygunMessage.Details.Version = version;
 
       return this;
     }

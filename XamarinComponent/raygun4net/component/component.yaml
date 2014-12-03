@@ -11,11 +11,13 @@ publisher: Mindscape
 name: Raygun4Net
 id: raygun4net
 samples: 
-  iOS Sample: samples/Raygun.iOS.Sample/Raygun.iOS.Sample.sln
+  iOS Classic Sample: samples/Raygun.iOS.Sample/Raygun.iOS.Sample.sln
+  iOS Unified Sample: samples/Raygun.iOS.Unified.Sample/Raygun.iOS.Unified.Sample.sln
   android Sample: samples/Raygun.Android.Sample/Raygun.Android.Sample.sln
 publisher-url: https://raygun.io
 libraries: 
   ios: lib/ios/Mindscape.Raygun4Net.Xamarin.iOS.dll
+  ios-unified: lib/ios-unified/Mindscape.Raygun4Net.Xamarin.iOS.Unified.dll
   android: lib/android/Mindscape.Raygun4Net.Xamarin.Android.dll
 version: 4.0.1
 ...

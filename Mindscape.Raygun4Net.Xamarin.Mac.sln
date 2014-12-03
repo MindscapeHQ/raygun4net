@@ -5,12 +5,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.Xamari
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.Xamarin.Mac.Tests", "Mindscape.Raygun4Net.Xamarin.Mac.Tests\Mindscape.Raygun4Net.Xamarin.Mac.Tests.csproj", "{5DB13CB2-BF32-4ADD-98B0-F863478C29BE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.Xamarin.Mac.Unified", "Mindscape.Raygun4Net.Xamarin.Mac.Unified\Mindscape.Raygun4Net.Xamarin.Mac.Unified.csproj", "{0D23E598-3C00-4337-A75D-DAB723724A58}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0D23E598-3C00-4337-A75D-DAB723724A58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D23E598-3C00-4337-A75D-DAB723724A58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D23E598-3C00-4337-A75D-DAB723724A58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D23E598-3C00-4337-A75D-DAB723724A58}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5DB13CB2-BF32-4ADD-98B0-F863478C29BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5DB13CB2-BF32-4ADD-98B0-F863478C29BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5DB13CB2-BF32-4ADD-98B0-F863478C29BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
