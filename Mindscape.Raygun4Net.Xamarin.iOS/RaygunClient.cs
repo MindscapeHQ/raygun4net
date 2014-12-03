@@ -13,14 +13,17 @@ using System.Reflection;
 using System.IO.IsolatedStorage;
 using System.IO;
 using System.Text;
+
 #if __UNIFIED__
 using UIKit;
 using SystemConfiguration;
 using Foundation;
+using Security;
 #else
 using MonoTouch.UIKit;
 using MonoTouch.SystemConfiguration;
 using MonoTouch.Foundation;
+using MonoTouch.Security;
 #endif
 
 namespace Mindscape.Raygun4Net
@@ -133,7 +136,7 @@ namespace Mindscape.Raygun4Net
     {
       Send(BuildMessage(exception, tags, userCustomData));
     }
-    
+
     /// <summary>
     /// Asynchronously transmits a message to Raygun.io.
     /// </summary>
@@ -163,7 +166,7 @@ namespace Mindscape.Raygun4Net
     {
       ThreadPool.QueueUserWorkItem(c => Send(BuildMessage(exception, tags, userCustomData)));
     }
-    
+
     /// <summary>
     /// Asynchronously transmits a message to Raygun.io.
     /// </summary>
@@ -172,6 +175,35 @@ namespace Mindscape.Raygun4Net
     public void SendInBackground(RaygunMessage raygunMessage)
     {
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+    }
+
+    private string DeviceId
+    {
+      get
+      {
+        SecRecord query = new SecRecord (SecKind.GenericPassword);
+        query.Service = "Mindscape.Raygun";
+        query.Account = "RaygunDeviceID";
+
+        NSData deviceId = SecKeyChain.QueryAsData (query);
+        if (deviceId == null)
+        {
+          string id = Guid.NewGuid ().ToString ();
+          query.ValueData = NSData.FromString (id);
+          SecStatusCode code = SecKeyChain.Add (query);
+          if (code != SecStatusCode.Success && code != SecStatusCode.DuplicateItem)
+          {
+            System.Diagnostics.Debug.WriteLine (string.Format ("Could not save device ID. Security status code: {0}", code));
+            return null;
+          }
+
+          return id;
+        }
+        else
+        {
+          return deviceId.ToString ();
+        }
+      }
     }
 
     private static RaygunClient _client;
@@ -256,10 +288,19 @@ namespace Mindscape.Raygun4Net
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
-        .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
+        .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : BuildRaygunIdentifierMessage(machineName)))
         .Build();
 
       return message;
+    }
+
+    private RaygunIdentifierMessage BuildRaygunIdentifierMessage(string machineName)
+    {
+      string deviceId = DeviceId;
+      return !String.IsNullOrWhiteSpace (deviceId) ? new RaygunIdentifierMessage (deviceId) {
+        IsAnonymous = true,
+        FullName = machineName
+      } : null;
     }
 
     private Exception StripWrapperExceptions(Exception exception)
