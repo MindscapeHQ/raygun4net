@@ -67,9 +67,6 @@
     <Compile Include="..\Mindscape.Raygun4Net\SimpleJson.cs">
       <Link>SimpleJson.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net.Xamarin.Mac\RaygunClient.cs">
-      <Link>RaygunClient.cs</Link>
-    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunClientMessage.cs">
       <Link>Messages\RaygunClientMessage.cs</Link>
     </Compile>
@@ -102,6 +99,7 @@
     </Compile>
     <Compile Include="RaygunMessageBuilder.cs" />
     <Compile Include="Builders\RaygunEnvironmentMessageBuilder.cs" />
+    <Compile Include="RaygunClient.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />
 </Project>
