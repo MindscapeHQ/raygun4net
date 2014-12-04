@@ -54,6 +54,7 @@ namespace Mindscape.Raygun4Net
         var ignoredNames = RaygunSettings.Settings.IgnoreServerVariableNames.Split(',');
         IgnoreServerVariableNames(ignoredNames);
       }
+      IsRawDataIgnored = RaygunSettings.Settings.IsRawDataIgnored;
     }
 
     /// <summary>
@@ -170,6 +171,19 @@ namespace Mindscape.Raygun4Net
     public void IgnoreServerVariableNames(params string[] names)
     {
       _requestMessageOptions.AddServerVariableNames(names);
+    }
+
+    /// <summary>
+    /// Specifies whether or not RawData from web requests is ignored when sending reports to Raygun.io.
+    /// The default is false which means RawData will be sent to Raygun.io.
+    /// </summary>
+    public bool IsRawDataIgnored
+    {
+      get { return _requestMessageOptions.IsRawDataIgnored; }
+      set
+      {
+        _requestMessageOptions.IsRawDataIgnored = value;
+      }
     }
 
     /// <summary>
