@@ -227,14 +227,14 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    /// <param name="userName">A string to use as the user identity string.</param>
-    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData, string userName)
+    /// <param name="userInfo">Information about the user including the identity string.</param>
+    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo)
     {
       if (CanSend(exception))
       {
         _currentRequestMessage = BuildRequestMessage();
 
-        Send(BuildMessage(exception, tags, userCustomData, (!String.IsNullOrEmpty(userName) ? new RaygunIdentifierMessage(userName) : null)));
+        Send(BuildMessage(exception, tags, userCustomData, userInfo));
         FlagAsSent(exception);
       }
     }
@@ -275,8 +275,8 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    /// <param name="userName">A string to use as the user identity string.</param>
-    public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, string userName)
+    /// <param name="userName">Information about the user including the identity string.</param>
+    public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo)
     {
       if (CanSend(exception))
       {
@@ -286,7 +286,7 @@ namespace Mindscape.Raygun4Net
 
         ThreadPool.QueueUserWorkItem(c => {
           _currentRequestMessage = currentRequestMessage;
-          Send(BuildMessage(exception, tags, userCustomData, (!String.IsNullOrEmpty(userName) ? new RaygunIdentifierMessage(userName) : null)));
+          Send(BuildMessage(exception, tags, userCustomData, userInfo));
         });
         FlagAsSent(exception);
       }
