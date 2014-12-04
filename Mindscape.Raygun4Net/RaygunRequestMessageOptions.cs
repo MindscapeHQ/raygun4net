@@ -10,7 +10,8 @@ namespace Mindscape.Raygun4Net
     private readonly List<string> _ignoreHeaderNames = new List<string>();
     private readonly List<string> _ignoreCookieNames = new List<string>();
     private readonly List<string> _ignoreServerVariableNames = new List<string>();
-
+    private bool _isRawDataIgnored;
+    
     public RaygunRequestMessageOptions() { }
 
     public RaygunRequestMessageOptions(IEnumerable<string> formFieldNames, IEnumerable<string> headerNames, IEnumerable<string> cookieNames, IEnumerable<string> serverVariableNames)
@@ -19,6 +20,17 @@ namespace Mindscape.Raygun4Net
       Add(_ignoreHeaderNames, headerNames);
       Add(_ignoreCookieNames, cookieNames);
       Add(_ignoreServerVariableNames, serverVariableNames);
+    }
+
+    // RawData
+
+    public bool IsRawDataIgnored
+    {
+      get { return _isRawDataIgnored; }
+      set
+      {
+        _isRawDataIgnored = value;
+      }
     }
 
     // Form fields

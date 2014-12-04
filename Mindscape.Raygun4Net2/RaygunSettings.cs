@@ -71,5 +71,12 @@ namespace Mindscape.Raygun4Net
       get { return (string)this["ignoreServerVariableNames"]; }
       set { this["ignoreServerVariableNames"] = value; }
     }
+
+    [ConfigurationProperty("isRawDataIgnored", IsRequired = false, DefaultValue = false)]
+    public bool IsRawDataIgnored
+    {
+      get { return (bool)this["isRawDataIgnored"]; }
+      set { this["isRawDataIgnored"] = value; }
+    }
   }
 }

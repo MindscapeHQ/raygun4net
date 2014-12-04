@@ -27,10 +27,14 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       message.IPAddress = GetIPAddress(request);
       message.Form = ToDictionary(request.GetQueryNameValuePairs(), options.IsFormFieldIgnored);
       message.QueryString = ToDictionary(request.GetQueryNameValuePairs(), s => false);
-      object body;
-      if (request.Properties.TryGetValue("body", out body))
+
+      if (!options.IsRawDataIgnored)
       {
-        message.RawData = body.ToString();
+        object body;
+        if (request.Properties.TryGetValue("body", out body))
+        {
+          message.RawData = body.ToString();
+        }
       }
 
       SetHeaders(message, request, options.IsHeaderIgnored);

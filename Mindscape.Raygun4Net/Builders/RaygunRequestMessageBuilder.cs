@@ -39,24 +39,27 @@ namespace Mindscape.Raygun4Net.Builders
       message.Data.Remove("HTTP_COOKIE");
       message.Data.Remove("ALL_RAW");
 
-      try
+      if (!options.IsRawDataIgnored)
       {
-        var contentType = request.Headers["Content-Type"];
-        if (contentType != "text/html" && contentType != "application/x-www-form-urlencoded" && request.RequestType != "GET")
+        try
         {
-          int length = 4096;
-          request.InputStream.Seek(0, SeekOrigin.Begin);
-          string temp = new StreamReader(request.InputStream).ReadToEnd();
-          if (length > temp.Length)
+          var contentType = request.Headers["Content-Type"];
+          if (contentType != "text/html" && contentType != "application/x-www-form-urlencoded" && request.RequestType != "GET")
           {
-            length = temp.Length;
-          }
+            int length = 4096;
+            request.InputStream.Seek(0, SeekOrigin.Begin);
+            string temp = new StreamReader(request.InputStream).ReadToEnd();
+            if (length > temp.Length)
+            {
+              length = temp.Length;
+            }
 
-          message.RawData = temp.Substring(0, length);
+            message.RawData = temp.Substring(0, length);
+          }
         }
-      }
-      catch (HttpException)
-      {
+        catch (HttpException)
+        {
+        }
       }
 
       return message;

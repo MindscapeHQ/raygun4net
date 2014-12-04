@@ -58,6 +58,12 @@ namespace Mindscape.Raygun4Net2.Tests
     }
 
     [Test]
+    public void IsRawDataIgnored_FalseByDefault()
+    {
+      Assert.IsFalse(RaygunSettings.Settings.IsRawDataIgnored);
+    }
+
+    [Test]
     public void IsNotReadOnly()
     {
       Assert.IsFalse(RaygunSettings.Settings.IsReadOnly());
