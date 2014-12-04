@@ -275,7 +275,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    /// <param name="userName">Information about the user including the identity string.</param>
+    /// <param name="userInfo">Information about the user including the identity string.</param>
     public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo)
     {
       if (CanSend(exception))
@@ -325,6 +325,11 @@ namespace Mindscape.Raygun4Net
       }
 
       return requestMessage;
+    }
+
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    {
+      return BuildMessage(exception, tags, userCustomData, null);
     }
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfoMessage)
