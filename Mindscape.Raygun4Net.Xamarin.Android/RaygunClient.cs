@@ -19,6 +19,7 @@ using Android.OS;
 using System.Text;
 using System.Threading.Tasks;
 using Android.Bluetooth;
+using Android.Provider;
 
 namespace Mindscape.Raygun4Net
 {
@@ -36,7 +37,7 @@ namespace Mindscape.Raygun4Net
       _apiKey = apiKey;
       
       _wrapperExceptions.Add(typeof(TargetInvocationException));
-      _wrapperExceptions.Add(typeof(AggregateException));
+      _wrapperExceptions.Add(typeof(System.AggregateException));
 
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
@@ -179,6 +180,22 @@ namespace Mindscape.Raygun4Net
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
 
+    private string DeviceId
+    {
+      get
+      {
+        try
+        {
+          return Settings.Secure.GetString(Context.ContentResolver, Settings.Secure.AndroidId);
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Debug.WriteLine("Failed to get device id: {0}", ex.Message);
+        }
+        return null;
+      }
+    }
+
     private static RaygunClient _client;
 
     /// <summary>
@@ -268,9 +285,18 @@ namespace Mindscape.Raygun4Net
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
-        .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
+        .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : BuildRaygunIdentifierMessage(null)))
         .Build();
       return message;
+    }
+
+    private RaygunIdentifierMessage BuildRaygunIdentifierMessage(string machineName)
+    {
+      string deviceId = DeviceId;
+      return !String.IsNullOrWhiteSpace (deviceId) ? new RaygunIdentifierMessage (deviceId) {
+        IsAnonymous = true,
+        FullName = machineName
+      } : null;
     }
 
     private Exception StripWrapperExceptions(Exception exception)
