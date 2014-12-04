@@ -64,6 +64,7 @@
     <Compile Include="Builders\RaygunWebApiRequestMessageBuilder.cs" />
     <Compile Include="IRaygunWebApiClientProvider.cs" />
     <Compile Include="RaygunWebApiClient.cs" />
+    <Compile Include="RaygunWebApiDelegatingHandler.cs" />
     <Compile Include="RaygunWebApiSelectors.cs" />
     <Compile Include="RaygunWebApiControllerActivator.cs" />
     <Compile Include="RaygunWebApiExceptionLogger.cs" />

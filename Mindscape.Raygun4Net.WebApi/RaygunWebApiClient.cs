@@ -80,6 +80,8 @@ namespace Mindscape.Raygun4Net.WebApi
       var entryAssembly = Assembly.GetCallingAssembly();
       string applicationVersion = entryAssembly.GetName().Version.ToString();
 
+      config.MessageHandlers.Add(new RaygunWebApiDelegatingHandler());
+
       var clientCreator = new RaygunWebApiClientProvider(generateRaygunClient, applicationVersion);
 
       config.Services.Add(typeof(IExceptionLogger), new RaygunWebApiExceptionLogger(clientCreator));
@@ -353,7 +355,7 @@ namespace Mindscape.Raygun4Net.WebApi
 
     private RaygunRequestMessage BuildRequestMessage()
     {
-      RaygunRequestMessage message = _currentWebRequest.Value != null ? RaygunWebApiRequestMessageBuilder.Build(_currentWebRequest.Value, _requestMessageOptions) : null;
+      var message = _currentWebRequest.Value != null ? RaygunWebApiRequestMessageBuilder.Build(_currentWebRequest.Value, _requestMessageOptions) : null;
       _currentWebRequest.Value = null;
       return message;
     }
