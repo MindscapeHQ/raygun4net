@@ -89,6 +89,26 @@ namespace Mindscape.Raygun4Net.Tests
     }
 
     [Test]
+    public void MessageWithUserInfoFromBuild()
+    {
+        RaygunMessage message = _client.ExposeBuildMessage(_exception, null, null, new RaygunIdentifierMessage("Robbie Robot"));
+        Assert.AreEqual("Robbie Robot", message.Details.User.Identifier);
+        Assert.IsFalse(message.Details.User.IsAnonymous);
+    }
+
+    [Test]
+    public void UserInfoFromBuildTrumpsAll()
+    {
+        RaygunIdentifierMessage user = new RaygunIdentifierMessage("Not Robbie Robot") { IsAnonymous = true };
+        _client.UserInfo = user;
+        _client.User = "Also Not Robbie Robot";
+
+        RaygunMessage message = _client.ExposeBuildMessage(_exception, null, null, new RaygunIdentifierMessage("Robbie Robot"));
+        Assert.AreEqual("Robbie Robot", message.Details.User.Identifier);
+        Assert.IsFalse(message.Details.User.IsAnonymous);
+    }
+
+    [Test]
     public void IsAnonymousDefault()
     {
       RaygunIdentifierMessage user = new RaygunIdentifierMessage("Robbie Robot");
