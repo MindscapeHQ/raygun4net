@@ -153,6 +153,12 @@ namespace Mindscape.Raygun4Net.WebApi
       return true;
     }
 
+    /// <summary>
+    /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
+    /// and requires credentials.
+    /// </summary>
+    public ICredentials ProxyCredentials { get; set; }
+
     protected bool CanSend(RaygunMessage message)
     {
       if (message != null && message.Details != null && message.Details.Response != null)
