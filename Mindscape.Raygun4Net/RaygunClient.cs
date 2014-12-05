@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
-using System.Runtime.InteropServices;
 using Mindscape.Raygun4Net.Messages;
 
 using System.Web;
@@ -75,27 +73,6 @@ namespace Mindscape.Raygun4Net
       }
       return true;
     }
-
-    /// <summary>
-    /// Gets or sets the user identity string.
-    /// </summary>
-    public string User { get; set; }
-
-    /// <summary>
-    /// Gets or sets information about the user including the identity string.
-    /// </summary>
-    public RaygunIdentifierMessage UserInfo { get; set; }
-
-    /// <summary>
-    /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
-    /// and requires credentials.
-    /// </summary>
-    public ICredentials ProxyCredentials { get; set; }
-
-    /// <summary>
-    /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
-    /// </summary>
-    public string ApplicationVersion { get; set; }
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.

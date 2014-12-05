@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Mindscape.Raygun4Net.Messages;
-using Mindscape.Raygun4Net.WebApi;
+﻿using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net.WebApi.Tests.Model
 {

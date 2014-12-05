@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
@@ -6,6 +7,27 @@ namespace Mindscape.Raygun4Net
   public abstract class RaygunClientBase
   {
     protected internal const string SentKey = "AlreadySentByRaygun";
+
+    /// <summary>
+    /// Gets or sets the user identity string.
+    /// </summary>
+    public string User { get; set; }
+
+    /// <summary>
+    /// Gets or sets information about the user including the identity string.
+    /// </summary>
+    public RaygunIdentifierMessage UserInfo { get; set; }
+
+    /// <summary>
+    /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
+    /// and requires credentials.
+    /// </summary>
+    public ICredentials ProxyCredentials { get; set; }
+
+    /// <summary>
+    /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
+    /// </summary>
+    public string ApplicationVersion { get; set; }
 
     protected bool CanSend(Exception exception)
     {
