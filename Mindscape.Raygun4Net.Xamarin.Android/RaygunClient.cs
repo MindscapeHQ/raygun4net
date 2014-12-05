@@ -53,21 +53,6 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Gets or sets the user identity string.
-    /// </summary>
-    public string User { get; set; }
-
-    /// <summary>
-    /// Gets or sets information about the user including the identity string.
-    /// </summary>
-    public RaygunIdentifierMessage UserInfo { get; set; }
-
-    /// <summary>
-    /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
-    /// </summary>
-    public string ApplicationVersion { get; set; }
-
-    /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
     /// This can be used when a wrapper exception, e.g. TargetInvocationException or AggregateException,
     /// contains the actual exception as the InnerException. The message and stack trace of the inner exception will then

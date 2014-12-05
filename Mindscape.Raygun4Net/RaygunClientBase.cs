@@ -19,12 +19,6 @@ namespace Mindscape.Raygun4Net
     public RaygunIdentifierMessage UserInfo { get; set; }
 
     /// <summary>
-    /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
-    /// and requires credentials.
-    /// </summary>
-    public ICredentials ProxyCredentials { get; set; }
-
-    /// <summary>
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
     /// </summary>
     public string ApplicationVersion { get; set; }

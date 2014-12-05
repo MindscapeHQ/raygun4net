@@ -75,6 +75,12 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
+    /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
+    /// and requires credentials.
+    /// </summary>
+    public ICredentials ProxyCredentials { get; set; }
+
+    /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
     /// This can be used when a wrapper exception, e.g. TargetInvocationException or HttpUnhandledException,
     /// contains the actual exception as the InnerException. The message and stack trace of the inner exception will then
