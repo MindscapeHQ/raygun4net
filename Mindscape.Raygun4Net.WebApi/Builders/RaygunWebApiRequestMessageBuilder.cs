@@ -1,12 +1,9 @@
-﻿using System.IO;
-using Mindscape.Raygun4Net.Messages;
+﻿using Mindscape.Raygun4Net.Messages;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Mindscape.Raygun4Net.WebApi.Builders
 {
@@ -31,7 +28,7 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       if (!options.IsRawDataIgnored)
       {
         object body;
-        if (request.Properties.TryGetValue("body", out body))
+        if (request.Properties.TryGetValue(RaygunWebApiDelegatingHandler.RequestBodyKey, out body))
         {
           message.RawData = body.ToString();
         }
