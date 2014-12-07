@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Linq;
+using System.Net.Http;
 
 namespace Mindscape.Raygun4Net.WebApi
 {
@@ -11,7 +12,7 @@ namespace Mindscape.Raygun4Net.WebApi
       var body = await request.Content.ReadAsStringAsync();
       if (!string.IsNullOrEmpty(body))
       {
-        request.Properties[RequestBodyKey] = body;
+        request.Properties[RequestBodyKey] = body.Length > 4096 ? body.Substring(0, 4096) : body;
       }
 
       return await base.SendAsync(request, cancellationToken);
