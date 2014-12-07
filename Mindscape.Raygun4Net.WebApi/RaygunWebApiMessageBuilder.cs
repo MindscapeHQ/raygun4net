@@ -4,7 +4,6 @@ using System.Net.Http;
 using System.Web.Http;
 using Mindscape.Raygun4Net.Messages;
 using Mindscape.Raygun4Net.WebApi.Builders;
-using System.Diagnostics;
 using Mindscape.Raygun4Net.Builders;
 using System.Reflection;
 using System.Collections;
