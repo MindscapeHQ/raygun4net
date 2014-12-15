@@ -82,10 +82,10 @@ namespace Mindscape.Raygun4Net
       set
       {
         _user = value;
-        if (_reporter != null && _user != null)
+        /*if (_reporter != null && _user != null)
         {
           _reporter.Identify(_user);
-        }
+        }*/
       }
     }
 
@@ -98,13 +98,13 @@ namespace Mindscape.Raygun4Net
       set
       {
         _userInfo = value;
-        if (_reporter != null)
+        /*if (_reporter != null)
         {
           string user = _userInfo == null ? "" : UserInfoString (_userInfo);
           if (user.Length != 0) {
             _reporter.Identify(user);
           }
-        }
+        }*/
       }
     }
 
@@ -301,7 +301,7 @@ namespace Mindscape.Raygun4Net
     }
 
     private const string StackTraceDirectory = "stacktraces";
-    private Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun _reporter;
+    private Mindscape.Raygun4Net.Xamarin.iOS.Raygun _reporter;
 
     /// <summary>
     /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
@@ -361,7 +361,7 @@ namespace Mindscape.Raygun4Net
           sigaction (Signal.SIGBUS, IntPtr.Zero, sigbus);
           sigaction (Signal.SIGSEGV, IntPtr.Zero, sigsegv);
 
-          _client._reporter = Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun.SharedReporterWithApiKey (apiKey);
+          //_client._reporter = Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun.SharedReporterWithApiKey (apiKey);
 
           // Restore Mono SIGSEGV and SIGBUS handlers
           sigaction (Signal.SIGBUS, sigbus, IntPtr.Zero);
@@ -372,7 +372,7 @@ namespace Mindscape.Raygun4Net
         }
         else
         {
-          _client._reporter = Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun.SharedReporterWithApiKey (apiKey);
+          //_client._reporter = Mindscape.Raygun4Net.Xamarin.iOS.Native.Raygun.SharedReporterWithApiKey (apiKey);
         }
       }
 
@@ -393,10 +393,10 @@ namespace Mindscape.Raygun4Net
       if (e.Exception != null)
       {
         _client.Send(e.Exception);
-        if (_client._reporter != null)
+        /*if (_client._reporter != null)
         {
           WriteExceptionInformation (_client._reporter.NextReportUUID, e.Exception);
-        }
+        }*/
       }
     }
 
@@ -405,10 +405,10 @@ namespace Mindscape.Raygun4Net
       if (e.ExceptionObject is Exception)
       {
         _client.Send(e.ExceptionObject as Exception);
-        if (_client._reporter != null)
+        /*if (_client._reporter != null)
         {
           WriteExceptionInformation (_client._reporter.NextReportUUID, e.ExceptionObject as Exception);
-        }
+        }*/
       }
     }
 
