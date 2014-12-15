@@ -62,7 +62,7 @@ namespace Mindscape.Raygun4Net
     /// <summary>
     /// Gets or sets the user identity string.
     /// </summary>
-    public new string User
+    public override string User
     {
       get { return _user; }
       set
@@ -78,7 +78,7 @@ namespace Mindscape.Raygun4Net
     /// <summary>
     /// Gets or sets information about the user including the identity string.
     /// </summary>
-    public new RaygunIdentifierMessage UserInfo
+    public override RaygunIdentifierMessage UserInfo
     {
       get { return _userInfo; }
       set
