@@ -464,20 +464,39 @@ namespace Mindscape.Raygun4Net
     {
       if (ValidateApiKey())
       {
-        try
-        {
-          var message = SimpleJson.SerializeObject(raygunMessage);
-          SaveMessage(message);
-        }
-        catch (Exception ex)
-        {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error saving Exception to device {0}", ex.Message));
-        }
-
         bool canSend = OnSendingMessage(raygunMessage);
-        if (canSend && HasInternetConnection)
+        if (canSend)
         {
-          SendStoredMessages ();
+          string message = null;
+          try
+          {
+            message = SimpleJson.SerializeObject(raygunMessage);
+          }
+          catch (Exception ex)
+          {
+            System.Diagnostics.Debug.WriteLine (string.Format ("Error serializing message {0}", ex.Message));
+          }
+
+          if (message != null)
+          {
+            try
+            {
+              SaveMessage (message);
+            }
+            catch (Exception ex)
+            {
+              System.Diagnostics.Debug.WriteLine (string.Format ("Error saving Exception to device {0}", ex.Message));
+              if (HasInternetConnection)
+              {
+                SendMessage (message);
+              }
+            }
+
+            if (HasInternetConnection)
+            {
+              SendStoredMessages ();
+            }
+          }
         }
       }
     }
