@@ -67,9 +67,18 @@ Global
 		{E8B3C09D-8598-41AE-988F-20ABD4ED378B}.Release|iPhone.Build.0 = Release|Any CPU
 		{E8B3C09D-8598-41AE-988F-20ABD4ED378B}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{E8B3C09D-8598-41AE-988F-20ABD4ED378B}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = Mindscape.Raygun4Net.Xamarin.iOS\Mindscape.Raygun4Net.Xamarin.iOS.csproj
+		{6748CD82-17BD-421F-B5AC-730802A5A147}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6748CD82-17BD-421F-B5AC-730802A5A147}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6748CD82-17BD-421F-B5AC-730802A5A147}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6748CD82-17BD-421F-B5AC-730802A5A147}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8B3C09D-8598-41AE-988F-20ABD4ED378B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8B3C09D-8598-41AE-988F-20ABD4ED378B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8B3C09D-8598-41AE-988F-20ABD4ED378B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8B3C09D-8598-41AE-988F-20ABD4ED378B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B9AB03D-E9EF-4CC4-83FB-7C30987446DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B9AB03D-E9EF-4CC4-83FB-7C30987446DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B9AB03D-E9EF-4CC4-83FB-7C30987446DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B9AB03D-E9EF-4CC4-83FB-7C30987446DC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

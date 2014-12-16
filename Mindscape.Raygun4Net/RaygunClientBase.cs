@@ -11,12 +11,12 @@ namespace Mindscape.Raygun4Net
     /// <summary>
     /// Gets or sets the user identity string.
     /// </summary>
-    public string User { get; set; }
+    public virtual string User { get; set; }
 
     /// <summary>
     /// Gets or sets information about the user including the identity string.
     /// </summary>
-    public RaygunIdentifierMessage UserInfo { get; set; }
+    public virtual RaygunIdentifierMessage UserInfo { get; set; }
 
     /// <summary>
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
