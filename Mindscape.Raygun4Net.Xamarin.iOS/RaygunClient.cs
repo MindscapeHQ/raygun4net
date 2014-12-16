@@ -320,14 +320,14 @@ namespace Mindscape.Raygun4Net
     {
       Detach();
 
-      PopulateCrashReportDirectoryStructure ();
-
       _client = new RaygunClient(apiKey);
       AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 
       if (canReportNativeErrors)
       {
+        PopulateCrashReportDirectoryStructure();
+
         if (hijackNativeSignals)
         {
           IntPtr sigbus = Marshal.AllocHGlobal (512);
@@ -407,6 +407,12 @@ namespace Mindscape.Raygun4Net
       try
       {
         Directory.CreateDirectory(StackTracePath);
+
+        // Write client info to a file to be picked up by the native reporter:
+        var clientInfoPath = Path.GetFullPath(Path.Combine(StackTracePath, "RaygunClientInfo"));
+        var clientMessage = new RaygunClientMessage();
+        string clientInfo = String.Format("{0}\n{1}\n{2}", clientMessage.Version, clientMessage.Name, clientMessage.ClientUrl);
+        File.WriteAllText(clientInfoPath, clientInfo);
       }
       catch (Exception ex)
       {
