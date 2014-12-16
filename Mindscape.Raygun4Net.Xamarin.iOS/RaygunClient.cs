@@ -388,24 +388,48 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    private static string StackTracePath
+    {
+      get
+      {
+        string documents = NSFileManager.DefaultManager.GetUrls(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomain.User)[0].Path;
+        var path = Path.Combine (documents, "..", "Library", "Caches", StackTraceDirectory);
+        return path;
+      }
+    }
+
     private static void PopulateCrashReportDirectoryStructure()
     {
-      var documents = Environment.GetFolderPath (Environment.SpecialFolder.MyDocuments);
-      var path = Path.Combine (documents, "..", "Library", "Caches", StackTraceDirectory);
-      Directory.CreateDirectory (path);
+      try
+      {
+        Directory.CreateDirectory(StackTracePath);
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Debug.WriteLine (string.Format ("Failed to populate crash report directory structure: {0}", ex.Message));
+      }
     }
 
     private static void WriteExceptionInformation(string identifier, Exception exception)
     {
-      if (exception == null) return;
+      try
+      {
+        if (exception == null)
+        {
+          return;
+        }
 
-      var documents = Environment.GetFolderPath (Environment.SpecialFolder.MyDocuments);
-      var path = Path.GetFullPath(Path.Combine (documents, "..", "Library", "Caches", StackTraceDirectory, string.Format ("{0}", identifier)));
+        var path = Path.GetFullPath(Path.Combine(StackTracePath, string.Format ("{0}", identifier)));
 
-      var exceptionType = exception.GetType();
-      string message = exceptionType.Name + ": " + exception.Message;
+        var exceptionType = exception.GetType ();
+        string message = exceptionType.Name + ": " + exception.Message;
 
-      File.WriteAllText (path, string.Join(Environment.NewLine, exceptionType.FullName, message, exception.StackTrace));
+        File.WriteAllText(path, string.Join(Environment.NewLine, exceptionType.FullName, message, exception.StackTrace));
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Debug.WriteLine (string.Format ("Failed to write managed exception information: {0}", ex.Message));
+      }
     }
 
     internal RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
