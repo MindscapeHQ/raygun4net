@@ -353,6 +353,10 @@ namespace Mindscape.Raygun4Net
       }
 
       _client.User = user; // Set this last so that it can be passed to the native reporter.
+      if (user == null)
+      {
+        _client._reporter.Identify(_client.DeviceId);
+      }
     }
 
     /// <summary>
