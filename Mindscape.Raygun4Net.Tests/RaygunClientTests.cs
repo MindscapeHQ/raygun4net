@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using System.Reflection;
 using System.Web;
 using Mindscape.Raygun4Net.Messages;
@@ -18,6 +19,34 @@ namespace Mindscape.Raygun4Net.Tests
     public void SetUp()
     {
       _client = new FakeRaygunClient();
+    }
+
+    [Test]
+    public void DefaultProxyCredentials()
+    {
+      Assert.IsNull(_client.ProxyCredentials);
+    }
+
+    [Test]
+    public void DefaultWebProxy()
+    {
+      Assert.IsNull(_client.WebProxy);
+    }
+
+    [Test]
+    public void ProxyCredentials()
+    {
+      var credentials = new NetworkCredential();
+      _client.ProxyCredentials = credentials;
+      Assert.AreSame(credentials, _client.ProxyCredentials);
+    }
+
+    [Test]
+    public void WebProxy()
+    {
+      var proxy = new WebProxy();
+      _client.WebProxy = proxy;
+      Assert.AreSame(proxy, _client.WebProxy);
     }
 
     // User tests
@@ -408,6 +437,21 @@ namespace Mindscape.Raygun4Net.Tests
     public void FlagNullAsSent()
     {
       Assert.DoesNotThrow(() => { _client.ExposeFlagAsSent(null); });
+    }
+
+    // WebProxy creation tests
+    [Test]
+    public void WebProxyPropertyPreferredOverDefaultWebProxy()
+    {
+      var theProxyWeDontWant = new WebProxy();
+      var theProxyWeDoWant = new WebProxy();
+
+      WebRequest.DefaultWebProxy = theProxyWeDontWant;
+      _client.WebProxy = theProxyWeDoWant;
+
+      var webClient = _client.ExposeCreateWebClient();
+
+      Assert.AreSame(theProxyWeDoWant, webClient.Proxy);
     }
   }
 }
