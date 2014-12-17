@@ -81,6 +81,11 @@ namespace Mindscape.Raygun4Net
     public ICredentials ProxyCredentials { get; set; }
 
     /// <summary>
+    /// Gets or sets an IWebProxy instance which can be used to override the default system proxy server settings
+    /// </summary>
+    public IWebProxy WebProxy { get; set; }
+
+    /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
     /// This can be used when a wrapper exception, e.g. TargetInvocationException or HttpUnhandledException,
     /// contains the actual exception as the InnerException. The message and stack trace of the inner exception will then
@@ -368,32 +373,8 @@ namespace Mindscape.Raygun4Net
         bool canSend = OnSendingMessage(raygunMessage);
         if (canSend)
         {
-          using (var client = new WebClient())
+          using (var client = CreateWebClient())
           {
-            client.Headers.Add("X-ApiKey", _apiKey);
-            client.Encoding = System.Text.Encoding.UTF8;
-
-            if (WebRequest.DefaultWebProxy != null)
-            {
-              Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(new Uri(RaygunSettings.Settings.ApiEndpoint.ToString()));
-
-              if (proxyUri != null && proxyUri.AbsoluteUri != RaygunSettings.Settings.ApiEndpoint.ToString())
-              {
-                client.Proxy = new WebProxy(proxyUri, false);
-
-                if (ProxyCredentials == null)
-                {
-                  client.UseDefaultCredentials = true;
-                  client.Proxy.Credentials = CredentialCache.DefaultCredentials;
-                }
-                else
-                {
-                  client.UseDefaultCredentials = false;
-                  client.Proxy.Credentials = ProxyCredentials;
-                }
-              }
-            }
-
             try
             {
               var message = SimpleJson.SerializeObject(raygunMessage);
@@ -411,6 +392,39 @@ namespace Mindscape.Raygun4Net
           }
         }
       }
+    }
+
+    protected WebClient CreateWebClient()
+    {
+      var client = new WebClient();
+      client.Headers.Add("X-ApiKey", _apiKey);
+      client.Encoding = System.Text.Encoding.UTF8;
+
+      if (WebProxy != null)
+      {
+        client.Proxy = WebProxy;
+      }
+      else if (WebRequest.DefaultWebProxy != null)
+      {
+        Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(new Uri(RaygunSettings.Settings.ApiEndpoint.ToString()));
+
+        if (proxyUri != null && proxyUri.AbsoluteUri != RaygunSettings.Settings.ApiEndpoint.ToString())
+        {
+          client.Proxy = new WebProxy(proxyUri, false);
+
+          if (ProxyCredentials == null)
+          {
+            client.UseDefaultCredentials = true;
+            client.Proxy.Credentials = CredentialCache.DefaultCredentials;
+          }
+          else
+          {
+            client.UseDefaultCredentials = false;
+            client.Proxy.Credentials = ProxyCredentials;
+          }
+        }
+      }
+      return client;
     }
   }
 }
