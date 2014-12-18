@@ -18,12 +18,14 @@ namespace Mindscape.Raygun4Net
       ExcludeErrorsBasedOnHttpStatusCode = HttpStatusCodesToExclude.Any();
       ExcludeErrorsFromLocal = RaygunSettings.Settings.ExcludeErrorsFromLocal;
 
-      if (GlobalFilters.Filters.Count == 1)
+      if (GlobalFilters.Filters.Any())
       {
-        Filter filter = GlobalFilters.Filters.FirstOrDefault();
-        if (filter != null && filter.Instance.GetType().FullName.Equals("System.Web.Mvc.HandleErrorAttribute"))
+        foreach (var filter in GlobalFilters.Filters)
         {
-          GlobalFilters.Filters.Add(new RaygunExceptionFilterAttribute(context, this));
+          if (filter != null && filter.Instance.GetType().IsSubclassOf(typeof(HandleErrorAttribute)))
+          {
+            GlobalFilters.Filters.Add(new RaygunExceptionFilterAttribute(context, this));
+          }
         }
       }
 
