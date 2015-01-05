@@ -16,8 +16,13 @@
     </dependencies>
   </metadata>
   <files>
+    <!-- .NET 3.5 -->
+    <file src="build\Mindscape.Raygun4Net.dll" target="lib\net35\Mindscape.Raygun4Net.dll" />
+    <file src="build\Mindscape.Raygun4Net.pdb" target="lib\net35\Mindscape.Raygun4Net.pdb" />
+    <!-- .NET 4.0+ -->
     <file src="build\Mvc\Mindscape.Raygun4Net.Mvc.dll" target="lib\net40\Mindscape.Raygun4Net.Mvc.dll" />
     <file src="build\Mvc\Mindscape.Raygun4Net.Mvc.pdb" target="lib\net40\Mindscape.Raygun4Net.Mvc.pdb" />
+    
     <file src="Mindscape.Raygun4Net.Mvc\readme.txt" />
   </files>
 </package>
