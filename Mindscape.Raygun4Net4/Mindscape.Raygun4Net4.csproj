@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2CF1FE1F-AD2D-40BD-9F99-57FF00445A9D}</ProjectGuid>
+    <ProjectGuid>{6D1C7E96-5E04-421D-8E8A-B3C8C02FD41D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Mindscape.Raygun4Net</RootNamespace>
