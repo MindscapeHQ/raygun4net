@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="MainActivity.cs" />
     <Compile Include="Model\FakeRaygunClient.cs" />
+    <Compile Include="Model\WrapperException.cs" />
     <Compile Include="RaygunClientTests.cs" />
     <Compile Include="RaygunMessageBuilderTests.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />

@@ -116,7 +116,7 @@ namespace Mindscape.Raygun4Net
     {
       if (CanSend(exception))
       {
-        Send(BuildMessage(exception, tags, userCustomData));
+        StripAndSend(exception, tags, userCustomData);
         FlagAsSent(exception);
       }
     }
@@ -150,7 +150,7 @@ namespace Mindscape.Raygun4Net
     {
       if (CanSend(exception))
       {
-        ThreadPool.QueueUserWorkItem(c => Send(BuildMessage(exception, tags, userCustomData)));
+        ThreadPool.QueueUserWorkItem(c => StripAndSend(exception, tags, userCustomData));
         FlagAsSent(exception);
       }
     }
@@ -259,8 +259,6 @@ namespace Mindscape.Raygun4Net
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      exception = StripWrapperExceptions(exception);
-
       JNIEnv.ExceptionClear();
       var message = RaygunMessageBuilder.New
         .SetEnvironmentDetails()
@@ -284,14 +282,41 @@ namespace Mindscape.Raygun4Net
       } : null;
     }
 
-    private Exception StripWrapperExceptions(Exception exception)
+    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
+    {
+      foreach (Exception e in StripWrapperExceptions(exception))
+      {
+        Send(BuildMessage(e, tags, userCustomData));
+      }
+    }
+
+    protected IEnumerable<Exception> StripWrapperExceptions(Exception exception)
     {
       if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {
-        return StripWrapperExceptions(exception.InnerException);
+        System.AggregateException aggregate = exception as System.AggregateException;
+        if (aggregate != null)
+        {
+          foreach (Exception e in aggregate.InnerExceptions)
+          {
+            foreach (Exception ex in StripWrapperExceptions(e))
+            {
+              yield return ex;
+            }
+          }
+        }
+        else
+        {
+          foreach (Exception e in StripWrapperExceptions(exception.InnerException))
+          {
+            yield return e;
+          }
+        }
       }
-
-      return exception;
+      else
+      {
+        yield return exception;
+      }
     }
 
     /// <summary>
