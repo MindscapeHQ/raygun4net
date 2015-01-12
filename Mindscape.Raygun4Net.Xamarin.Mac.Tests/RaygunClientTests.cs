@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Linq;
 using NUnit.Framework;
 using Mindscape.Raygun4Net.Messages;
+using System.Reflection;
+using System.Collections.Generic;
 
 namespace Mindscape.Raygun4Net.Xamarin.Mac.Tests
 {
@@ -125,6 +128,136 @@ namespace Mindscape.Raygun4Net.Xamarin.Mac.Tests
 
       Assert.IsTrue(_client.ExposeOnSendingMessage(message));
       Assert.AreEqual("Custom error message", message.Details.Error.Message);
+    }
+
+    // Exception stripping tests
+
+    [Test]
+    public void StripTargetInvocationExceptionByDefault()
+    {
+      TargetInvocationException wrapper = new TargetInvocationException(_exception);
+
+      List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
+      Assert.AreEqual(1, exceptions.Count);
+      Assert.IsTrue(exceptions.Contains(_exception));
+    }
+
+    [Test]
+    public void StripAggregateExceptionByDefault()
+    {
+      AggregateException wrapper = new AggregateException(_exception);
+
+      List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
+      Assert.AreEqual(1, exceptions.Count);
+      Assert.IsTrue(exceptions.Contains(_exception));
+    }
+
+    [Test]
+    public void StripSpecifiedWrapperException()
+    {
+      _client.AddWrapperExceptions(typeof(WrapperException));
+
+      WrapperException wrapper = new WrapperException(_exception);
+
+      List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
+      Assert.AreEqual(1, exceptions.Count);
+      Assert.IsTrue(exceptions.Contains(_exception));
+    }
+
+    [Test]
+    public void DontStripIfNoInnerException()
+    {
+      TargetInvocationException wrapper = new TargetInvocationException(null);
+
+      List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
+      Assert.AreEqual(1, exceptions.Count);
+      Assert.IsTrue(exceptions.Contains(wrapper));
+    }
+
+    [Test]
+    public void DontStripNull()
+    {
+      List<Exception> exceptions = _client.ExposeStripWrapperExceptions(null).ToList();
+      Assert.AreEqual(1, exceptions.Count); // The current expected behaviour is that you can pass null to the Send methods and cause Raygun to send a report.
+      Assert.IsTrue(exceptions.Contains(null));
+    }
+
+    [Test]
+    public void StripMultipleWrapperExceptions()
+    {
+      _client.AddWrapperExceptions(typeof(WrapperException));
+
+      WrapperException wrapper = new WrapperException(_exception);
+      TargetInvocationException wrapper2 = new TargetInvocationException(wrapper);
+
+      List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper2).ToList();
+      Assert.AreEqual(1, exceptions.Count);
+      Assert.IsTrue(exceptions.Contains(_exception));
+    }
+
+    [Test]
+    public void RemoveWrapperExceptions()
+    {
+      _client.RemoveWrapperExceptions(typeof(TargetInvocationException));
+
+      TargetInvocationException wrapper = new TargetInvocationException(_exception);
+
+      List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
+      Assert.AreEqual(1, exceptions.Count);
+      Assert.IsTrue(exceptions.Contains(wrapper));
+    }
+
+    [Test]
+    public void StripAggregateException()
+    {
+      OutOfMemoryException exception2 = new OutOfMemoryException("Ran out of Int64s");
+      AggregateException wrapper = new AggregateException(_exception, exception2);
+
+      List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
+      Assert.AreEqual(2, exceptions.Count);
+      Assert.IsTrue(exceptions.Contains(_exception));
+      Assert.IsTrue(exceptions.Contains(exception2));
+    }
+
+    [Test]
+    public void StripAggregateExceptionAndTargetInvocationException()
+    {
+      OutOfMemoryException exception2 = new OutOfMemoryException("Ran out of Int64s");
+      TargetInvocationException innerWrapper = new TargetInvocationException(exception2);
+      AggregateException wrapper = new AggregateException(_exception, innerWrapper);
+
+      List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
+      Assert.AreEqual(2, exceptions.Count);
+      Assert.IsTrue(exceptions.Contains(_exception));
+      Assert.IsTrue(exceptions.Contains(exception2));
+    }
+
+    [Test]
+    public void StripTargetInvocationExceptionAndAggregateException()
+    {
+      OutOfMemoryException exception2 = new OutOfMemoryException("Ran out of Int64s");
+      AggregateException innerWrapper = new AggregateException(_exception, exception2);
+      TargetInvocationException wrapper = new TargetInvocationException(innerWrapper);
+
+      List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
+      Assert.AreEqual(2, exceptions.Count);
+      Assert.IsTrue(exceptions.Contains(_exception));
+      Assert.IsTrue(exceptions.Contains(exception2));
+    }
+
+    [Test]
+    public void StripNestedAggregateExceptions()
+    {
+      OutOfMemoryException exception2 = new OutOfMemoryException("Ran out of Int64s");
+      NotSupportedException exception3 = new NotSupportedException("Forgot to implement this method");
+      AggregateException innerWrapper = new AggregateException(_exception, exception2);
+      AggregateException wrapper = new AggregateException(innerWrapper, exception3);
+
+      List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
+      Assert.AreEqual(3, exceptions.Count);
+      Assert.IsTrue(exceptions.Contains(_exception));
+      Assert.IsTrue(exceptions.Contains(exception2));
+      Assert.IsTrue(exceptions.Contains(exception3));
     }
   }
 }

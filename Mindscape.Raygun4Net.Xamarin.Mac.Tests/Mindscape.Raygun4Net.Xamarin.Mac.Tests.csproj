@@ -40,6 +40,7 @@
     <Compile Include="Model\FakeRaygunErrorMessage.cs" />
     <Compile Include="Model\FakeRaygunClient.cs" />
     <Compile Include="RaygunClientTests.cs" />
+    <Compile Include="Model\WrapperException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
