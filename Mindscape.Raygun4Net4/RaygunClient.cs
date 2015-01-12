@@ -357,35 +357,32 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private IEnumerable<Exception> StripWrapperExceptions(Exception exception)
+    protected IEnumerable<Exception> StripWrapperExceptions(Exception exception)
     {
-      if (exception != null)
+      if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {
-        if (_wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
+        AggregateException aggregate = exception as AggregateException;
+        if (aggregate != null)
         {
-          AggregateException aggregate = exception as AggregateException;
-          if (aggregate != null)
+          foreach (Exception e in aggregate.InnerExceptions)
           {
-            foreach (Exception e in aggregate.InnerExceptions)
+            foreach (Exception ex in StripWrapperExceptions(e))
             {
-              foreach (Exception ex in StripWrapperExceptions(e))
-              {
-                yield return ex;
-              }
-            }
-          }
-          else
-          {
-            foreach (Exception e in StripWrapperExceptions(exception.InnerException))
-            {
-              yield return e;
+              yield return ex;
             }
           }
         }
         else
         {
-          yield return exception;
+          foreach (Exception e in StripWrapperExceptions(exception.InnerException))
+          {
+            yield return e;
+          }
         }
+      }
+      else
+      {
+        yield return exception;
       }
     }
 
