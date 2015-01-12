@@ -81,9 +81,6 @@
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunClientMessage.cs">
       <Link>Messages\RaygunClientMessage.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorMessage.cs">
-      <Link>Messages\RaygunErrorMessage.cs</Link>
-    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorStackTraceLineMessage.cs">
       <Link>Messages\RaygunErrorStackTraceLineMessage.cs</Link>
     </Compile>
@@ -99,6 +96,9 @@
     <Compile Include="Builders\RaygunEnvironmentMessageBuilder.cs" />
     <Compile Include="..\Mindscape.Raygun4Net\RaygunClientBase.cs">
       <Link>RaygunClientBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net4\Messages\RaygunErrorMessage.cs">
+      <Link>Messages\RaygunErrorMessage.cs</Link>
     </Compile>
   </ItemGroup>
 </Project>
