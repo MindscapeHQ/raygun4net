@@ -343,7 +343,7 @@ namespace Mindscape.Raygun4Net
       _exit = exit;
 
       HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(RaygunSettings.Settings.ApiEndpoint);
-      httpWebRequest.ContentType = "application/x-raygun-message";
+      httpWebRequest.ContentType = "application/json; charset=utf-8";
       httpWebRequest.Method = "POST";
       httpWebRequest.Headers["X-Apikey"] = _apiKey;
       httpWebRequest.AllowReadStreamBuffering = false;
