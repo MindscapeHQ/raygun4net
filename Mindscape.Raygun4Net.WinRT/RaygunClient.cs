@@ -213,7 +213,7 @@ namespace Mindscape.Raygun4Net
             client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("raygun4net-winrt", "1.0.0"));
 
             HttpContent httpContent = new StringContent(SimpleJson.SerializeObject(raygunMessage));
-            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-raygun-message");
+            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json; charset=utf-8");
             httpContent.Headers.Add("X-ApiKey", _apiKey);
 
             try
