@@ -18,10 +18,21 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     public virtual RaygunIdentifierMessage UserInfo { get; set; }
 
+    private string applicationVersion;
     /// <summary>
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
     /// </summary>
-    public string ApplicationVersion { get; set; }
+    public string ApplicationVersion
+    {
+        get
+        {
+            return this.applicationVersion;
+        }
+        set
+        {
+            this.applicationVersion = value;
+        }
+    }
 
     protected bool CanSend(Exception exception)
     {

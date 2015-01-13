@@ -144,6 +144,10 @@ namespace Mindscape.Raygun4Net
       {
         _raygunMessage.Details.Version = version;
       }
+      else if (!String.IsNullOrEmpty(RaygunSettings.Settings.ApplicationVersion))
+      {
+        _raygunMessage.Details.Version = RaygunSettings.Settings.ApplicationVersion;
+      }
       else
       {
         var entryAssembly = Assembly.GetEntryAssembly();

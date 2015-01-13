@@ -398,6 +398,7 @@ namespace Mindscape.Raygun4Net
     {
       var client = new WebClient();
       client.Headers.Add("X-ApiKey", _apiKey);
+      client.Headers.Add("content-type", "application/json; charset=utf-8");
       client.Encoding = System.Text.Encoding.UTF8;
 
       if (WebProxy != null)

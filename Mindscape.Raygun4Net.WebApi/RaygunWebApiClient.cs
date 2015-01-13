@@ -57,6 +57,10 @@ namespace Mindscape.Raygun4Net.WebApi
         var ignoredNames = RaygunSettings.Settings.IgnoreServerVariableNames.Split(',');
         IgnoreServerVariableNames(ignoredNames);
       }
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.ApplicationVersion))
+      {
+        ApplicationVersion = RaygunSettings.Settings.ApplicationVersion;
+      }
       IsRawDataIgnored = RaygunSettings.Settings.IsRawDataIgnored;
     }
 
@@ -78,8 +82,16 @@ namespace Mindscape.Raygun4Net.WebApi
     {
       Detach(config);
 
-      var entryAssembly = Assembly.GetCallingAssembly();
-      string applicationVersion = entryAssembly.GetName().Version.ToString();
+      string applicationVersion;
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.ApplicationVersion))
+      {
+        applicationVersion = RaygunSettings.Settings.ApplicationVersion;
+      }
+      else
+      {
+        var entryAssembly = Assembly.GetCallingAssembly();
+        applicationVersion = entryAssembly.GetName().Version.ToString();
+      }     
 
       config.MessageHandlers.Add(new RaygunWebApiDelegatingHandler());
 
@@ -433,6 +445,7 @@ namespace Mindscape.Raygun4Net.WebApi
           using (var client = new WebClient())
           {
             client.Headers.Add("X-ApiKey", _apiKey);
+            client.Headers.Add("content-type", "application/json; charset=utf-8");
             client.Encoding = System.Text.Encoding.UTF8;
 
             if (WebRequest.DefaultWebProxy != null)
