@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Mindscape")]
 [assembly: AssemblyProduct("Mindscape Raygun4Net")]
-[assembly: AssemblyCopyright("Copyright © Mindscape 2012-2014")]
+[assembly: AssemblyCopyright("Copyright © Mindscape 2012-2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

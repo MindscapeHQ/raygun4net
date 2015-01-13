@@ -11,7 +11,7 @@ using System.Resources;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Mindscape")]
 [assembly: AssemblyProduct("Mindscape.Raygun4Net.WindowsPhone.Tests")]
-[assembly: AssemblyCopyright("Copyright © Mindscape 2014")]
+[assembly: AssemblyCopyright("Copyright © Mindscape 2014-2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
