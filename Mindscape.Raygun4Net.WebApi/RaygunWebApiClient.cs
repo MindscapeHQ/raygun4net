@@ -291,7 +291,7 @@ namespace Mindscape.Raygun4Net.WebApi
       {
         _currentRequestMessage.Value = BuildRequestMessage();
 
-        Send(BuildMessage(exception, tags, userCustomData));
+        StripAndSend(exception, tags, userCustomData);
         FlagAsSent(exception);
       }
     }
@@ -331,7 +331,7 @@ namespace Mindscape.Raygun4Net.WebApi
 
         ThreadPool.QueueUserWorkItem(c => {
           _currentRequestMessage.Value = currentRequestMessage;
-          Send(BuildMessage(exception, tags, userCustomData));
+          StripAndSend(exception, tags, userCustomData);
         });
         FlagAsSent(exception);
       }
@@ -367,8 +367,6 @@ namespace Mindscape.Raygun4Net.WebApi
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      exception = StripWrapperExceptions(exception);
-
       var message = RaygunWebApiMessageBuilder.New
         .SetHttpDetails(_currentRequestMessage.Value)
         .SetEnvironmentDetails()
@@ -383,14 +381,41 @@ namespace Mindscape.Raygun4Net.WebApi
       return message;
     }
 
-    private Exception StripWrapperExceptions(Exception exception)
+    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
+    {
+      foreach (Exception e in StripWrapperExceptions(exception))
+      {
+        Send(BuildMessage(e, tags, userCustomData));
+      }
+    }
+
+    protected IEnumerable<Exception> StripWrapperExceptions(Exception exception)
     {
       if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {
-        return StripWrapperExceptions(exception.InnerException);
+        AggregateException aggregate = exception as AggregateException;
+        if (aggregate != null)
+        {
+          foreach (Exception e in aggregate.InnerExceptions)
+          {
+            foreach (Exception ex in StripWrapperExceptions(e))
+            {
+              yield return ex;
+            }
+          }
+        }
+        else
+        {
+          foreach (Exception e in StripWrapperExceptions(exception.InnerException))
+          {
+            yield return e;
+          }
+        }
       }
-
-      return exception;
+      else
+      {
+        yield return exception;
+      }
     }
 
     /// <summary>

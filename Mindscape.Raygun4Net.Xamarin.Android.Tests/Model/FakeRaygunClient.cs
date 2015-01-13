@@ -30,5 +30,10 @@ namespace Mindscape.Raygun4Net.Xamarin.Android.Tests
     {
       return OnSendingMessage(message);
     }
+
+    public IEnumerable<Exception> ExposeStripWrapperExceptions(Exception exception)
+    {
+      return StripWrapperExceptions(exception);
+    }
   }
 }

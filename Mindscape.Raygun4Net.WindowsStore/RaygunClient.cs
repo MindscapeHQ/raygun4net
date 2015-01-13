@@ -238,7 +238,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      await SendAsync(BuildMessage(exception, tags, userCustomData));
+      await StripAndSendAsync(exception, tags, userCustomData);
     }
 
     /// <summary>
@@ -290,7 +290,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">Custom data to send with the message.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      Send(BuildMessage(exception, tags, userCustomData));
+      StripAndSend(exception, tags, userCustomData);
     }
 
     /// <summary>
@@ -464,8 +464,6 @@ namespace Mindscape.Raygun4Net
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      exception = StripWrapperExceptions(exception);
-
       string version = PackageVersion;
       if (!String.IsNullOrWhiteSpace(ApplicationVersion))
       {
@@ -505,14 +503,51 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private Exception StripWrapperExceptions(Exception exception)
+    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
+    {
+      foreach (Exception e in StripWrapperExceptions(exception))
+      {
+        Send(BuildMessage(e, tags, userCustomData));
+      }
+    }
+
+    private async Task StripAndSendAsync(Exception exception, IList<string> tags, IDictionary userCustomData)
+    {
+      var tasks = new List<Task>();
+      foreach (Exception e in StripWrapperExceptions(exception))
+      {
+        tasks.Add(SendAsync(BuildMessage(e, tags, userCustomData)));
+      }
+      await Task.WhenAll(tasks);
+    }
+
+    protected IEnumerable<Exception> StripWrapperExceptions(Exception exception)
     {
       if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {
-        return StripWrapperExceptions(exception.InnerException);
+        System.AggregateException aggregate = exception as System.AggregateException;
+        if (aggregate != null)
+        {
+          foreach (Exception e in aggregate.InnerExceptions)
+          {
+            foreach (Exception ex in StripWrapperExceptions(e))
+            {
+              yield return ex;
+            }
+          }
+        }
+        else
+        {
+          foreach (Exception e in StripWrapperExceptions(exception.InnerException))
+          {
+            yield return e;
+          }
+        }
       }
-
-      return exception;
+      else
+      {
+        yield return exception;
+      }
     }
   }
 }

@@ -21,7 +21,18 @@ namespace Mindscape.Raygun4Net.Builders
       message.StackTrace = BuildStackTrace(exception);
       message.Data = exception.Data;
 
-      if (exception.InnerException != null)
+      AggregateException ae = exception as AggregateException;
+      if (ae != null && ae.InnerExceptions != null)
+      {
+        message.InnerErrors = new RaygunErrorMessage[ae.InnerExceptions.Count];
+        int index = 0;
+        foreach (Exception e in ae.InnerExceptions)
+        {
+          message.InnerErrors[index] = Build(e);
+          index++;
+        }
+      }
+      else if (exception.InnerException != null)
       {
         message.InnerError = Build(exception.InnerException);
       }

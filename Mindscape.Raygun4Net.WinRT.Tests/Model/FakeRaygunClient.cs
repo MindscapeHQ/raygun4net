@@ -27,5 +27,10 @@ namespace Mindscape.Raygun4Net.WinRT.Tests
     {
       return OnSendingMessage(raygunMessage);
     }
+
+    public IEnumerable<Exception> ExposeStripWrapperExceptions(Exception exception)
+    {
+      return StripWrapperExceptions(exception);
+    }
   }
 }

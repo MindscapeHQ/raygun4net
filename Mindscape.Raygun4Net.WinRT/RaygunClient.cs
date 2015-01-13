@@ -185,7 +185,7 @@ namespace Mindscape.Raygun4Net
       var exception = unhandledExceptionEventArgs.Exception;
       exception.Data.Add("Message", unhandledExceptionEventArgs.Message);
 
-      Send(BuildMessage(exception, tags, userCustomData));
+      Send(exception, tags, userCustomData);
     }
 
     /// <summary>
@@ -196,7 +196,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that is to be sent along with the message.</param>
     public void Send(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
     {
-      Send(BuildMessage(exception, tags, userCustomData));
+      StripAndSend(exception, tags, userCustomData);
     }
 
     public async void Send(RaygunMessage raygunMessage)
@@ -236,8 +236,6 @@ namespace Mindscape.Raygun4Net
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      exception = StripWrapperExceptions(exception);
-
       var message = RaygunMessageBuilder.New
           .SetEnvironmentDetails()
           .SetMachineName(NetworkInformation.GetHostNames()[0].DisplayName)
@@ -252,14 +250,41 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 
-    private Exception StripWrapperExceptions(Exception exception)
+    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
+    {
+      foreach (Exception e in StripWrapperExceptions(exception))
+      {
+        Send(BuildMessage(e, tags, userCustomData));
+      }
+    }
+
+    protected IEnumerable<Exception> StripWrapperExceptions(Exception exception)
     {
       if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {
-        return StripWrapperExceptions(exception.InnerException);
+        System.AggregateException aggregate = exception as System.AggregateException;
+        if (aggregate != null)
+        {
+          foreach (Exception e in aggregate.InnerExceptions)
+          {
+            foreach (Exception ex in StripWrapperExceptions(e))
+            {
+              yield return ex;
+            }
+          }
+        }
+        else
+        {
+          foreach (Exception e in StripWrapperExceptions(exception.InnerException))
+          {
+            yield return e;
+          }
+        }
       }
-
-      return exception;
+      else
+      {
+        yield return exception;
+      }
     }
 
 #pragma warning disable 1998

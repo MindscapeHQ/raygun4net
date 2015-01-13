@@ -7,8 +7,8 @@
     <ProjectGuid>{69BFF5D8-7B18-4685-B828-8DF2AADEA20D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Mindscape.Raygun4Net4.Tests</RootNamespace>
-    <AssemblyName>Mindscape.Raygun4Net4.Tests</AssemblyName>
+    <RootNamespace>Mindscape.Raygun4Net.Mvc.Tests</RootNamespace>
+    <AssemblyName>Mindscape.Raygun4Net.Mvc.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -76,8 +76,11 @@
   <ItemGroup>
     <Compile Include="Model\FakeFilterAttribute.cs" />
     <Compile Include="Model\FakeHttpApplication.cs" />
+    <Compile Include="Model\FakeRaygunClient.cs" />
     <Compile Include="Model\FakeRaygunHttpModule.cs" />
+    <Compile Include="Model\WrapperException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RaygunClientTests.cs" />
     <Compile Include="RaygunHttpModuleTests.cs" />
   </ItemGroup>
   <ItemGroup>
