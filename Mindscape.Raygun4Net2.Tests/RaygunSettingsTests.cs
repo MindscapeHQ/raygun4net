@@ -64,6 +64,12 @@ namespace Mindscape.Raygun4Net2.Tests
     }
 
     [Test]
+    public void ApplicationVersion_EmptyByDefault()
+    {
+      Assert.IsEmpty(RaygunSettings.Settings.ApplicationVersion);
+    }
+
+    [Test]
     public void IsNotReadOnly()
     {
       Assert.IsFalse(RaygunSettings.Settings.IsReadOnly());
