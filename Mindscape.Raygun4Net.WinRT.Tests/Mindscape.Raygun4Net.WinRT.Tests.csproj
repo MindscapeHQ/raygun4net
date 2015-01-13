@@ -102,6 +102,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Model\FakeRaygunClient.cs" />
+    <Compile Include="Model\WrapperException.cs" />
     <Compile Include="RaygunClientTests.cs" />
     <Compile Include="RaygunMessageBuilderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
