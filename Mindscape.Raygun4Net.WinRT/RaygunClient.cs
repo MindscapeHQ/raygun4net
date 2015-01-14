@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using Mindscape.Raygun4Net.Messages;
 
 using System.Threading.Tasks;
@@ -212,8 +213,7 @@ namespace Mindscape.Raygun4Net
           {
             client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("raygun4net-winrt", "1.0.0"));
 
-            HttpContent httpContent = new StringContent(SimpleJson.SerializeObject(raygunMessage));
-            httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-raygun-message");
+            HttpContent httpContent = new StringContent(SimpleJson.SerializeObject(raygunMessage), Encoding.UTF8, "application/json");
             httpContent.Headers.Add("X-ApiKey", _apiKey);
 
             try
