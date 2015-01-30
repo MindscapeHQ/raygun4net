@@ -70,10 +70,11 @@ namespace Mindscape.Raygun4Net.Builders
 
       if (strIp != null && strIp.Trim().Length > 0)
       {
-        if (strIp.Contains(","))
+        string[] addresses = strIp.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        if (addresses.Length > 0)
         {
           // first one = client IP per http://en.wikipedia.org/wiki/X-Forwarded-For
-          strIp = strIp.Split(',')[0];
+          strIp = addresses[0];
         }
       }
 
