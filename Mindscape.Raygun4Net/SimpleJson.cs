@@ -1008,10 +1008,23 @@ namespace Mindscape.Raygun4Net
 
     static bool SerializeValue(IJsonSerializerStrategy jsonSerializerStrategy, object value, StringBuilder builder)
     {
+      return SerializeValue(jsonSerializerStrategy, value, builder, new Queue());
+    }
+
+    static bool SerializeValue(IJsonSerializerStrategy jsonSerializerStrategy, object value, StringBuilder builder, Queue visited)
+    {
       if (value == null)
       {
         return false;
       }
+
+      if (visited.Contains(value))
+      {
+        return SerializeString("[Circular reference detected, object not serialized]", builder); ;
+      }
+
+      visited.Enqueue(value);
+
       bool success = true;
       string stringValue = value as string;
       if (stringValue != null)
@@ -1021,27 +1034,27 @@ namespace Mindscape.Raygun4Net
         IDictionary dict = value as IDictionary;
         if (dict != null)
         {
-          success = SerializeObject(jsonSerializerStrategy, dict.Keys, dict.Values, builder);
+          success = SerializeObject(jsonSerializerStrategy, dict.Keys, dict.Values, builder, visited);
         }
         else
         {
           IDictionary<string, object> stringObjectDictionary = value as IDictionary<string, object>;
           if (stringObjectDictionary != null)
           {
-            success = SerializeObject(jsonSerializerStrategy, stringObjectDictionary.Keys, stringObjectDictionary.Values, builder);
+            success = SerializeObject(jsonSerializerStrategy, stringObjectDictionary.Keys, stringObjectDictionary.Values, builder, visited);
           }
           else
           {
             IDictionary<string, string> stringDictionary = value as IDictionary<string, string>;
             if (stringDictionary != null)
             {
-              success = SerializeObject(jsonSerializerStrategy, stringDictionary.Keys, stringDictionary.Values, builder);
+              success = SerializeObject(jsonSerializerStrategy, stringDictionary.Keys, stringDictionary.Values, builder, visited);
             }
             else
             {
               IEnumerable enumerableValue = value as IEnumerable;
               if (enumerableValue != null)
-                success = SerializeArray(jsonSerializerStrategy, enumerableValue, builder);
+                success = SerializeArray(jsonSerializerStrategy, enumerableValue, builder, visited);
               else if (IsNumeric (value))
                 success = SerializeNumber(value, builder);
               else if (value is bool)
@@ -1052,16 +1065,22 @@ namespace Mindscape.Raygun4Net
                 object serializedObject;
                 success = jsonSerializerStrategy.TrySerializeNonPrimitiveObject(value, out serializedObject);
                 if (success)
-                  SerializeValue(jsonSerializerStrategy, serializedObject, builder);
+                  SerializeValue(jsonSerializerStrategy, serializedObject, builder, visited);
               }
             }
           }
         }
       }
+
+      if (visited.Count > 0) // Just to be safe
+      {
+        visited.Dequeue();
+      }
+
       return success;
     }
 
-    static bool SerializeObject(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable keys, IEnumerable values, StringBuilder builder)
+    static bool SerializeObject(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable keys, IEnumerable values, StringBuilder builder, Queue visited)
     {
       builder.Append("{");
       IEnumerator ke = keys.GetEnumerator();
@@ -1081,9 +1100,9 @@ namespace Mindscape.Raygun4Net
           else if (key != null)
             SerializeString (key.ToString(), builder);
           else
-            if (!SerializeValue(jsonSerializerStrategy, value, builder)) return false;
+            if (!SerializeValue(jsonSerializerStrategy, value, builder, visited)) return false;
           builder.Append(":");
-          if (!SerializeValue(jsonSerializerStrategy, value, builder))
+          if (!SerializeValue(jsonSerializerStrategy, value, builder, visited))
             return false;
           first = false;
         }
@@ -1092,7 +1111,7 @@ namespace Mindscape.Raygun4Net
       return true;
     }
 
-    static bool SerializeArray(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable anArray, StringBuilder builder)
+    static bool SerializeArray(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable anArray, StringBuilder builder, Queue visited)
     {
       builder.Append("[");
       bool first = true;
@@ -1100,7 +1119,7 @@ namespace Mindscape.Raygun4Net
       {
         if (!first)
           builder.Append(",");
-        if (!SerializeValue(jsonSerializerStrategy, value, builder))
+        if (!SerializeValue(jsonSerializerStrategy, value, builder, visited))
           return false;
         first = false;
       }
