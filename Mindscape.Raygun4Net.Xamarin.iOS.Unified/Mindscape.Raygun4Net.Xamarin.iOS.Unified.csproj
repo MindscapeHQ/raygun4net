@@ -107,6 +107,11 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <ObjcBindingNativeLibrary Include="..\Mindscape.Raygun4Net.Xamarin.iOS\libRaygun4iOS.a">
+      <Link>libRaygun4iOS.a</Link>
+    </ObjcBindingNativeLibrary>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\Mindscape.Raygun4Net\SimpleJson.cs">
       <Link>SimpleJson.cs</Link>
     </Compile>
@@ -168,8 +173,5 @@
     <Compile Include="..\Mindscape.Raygun4Net4\Messages\RaygunErrorMessage.cs">
       <Link>Messages\RaygunErrorMessage.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <ObjcBindingNativeLibrary Include="libRaygun4iOS.a" />
   </ItemGroup>
 </Project>
