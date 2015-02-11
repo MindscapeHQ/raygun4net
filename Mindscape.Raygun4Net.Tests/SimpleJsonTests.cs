@@ -15,6 +15,8 @@ namespace Mindscape.Raygun4Net.Tests
     private CyclicObject _cyclicArray;
     private CyclicObject _cyclicDictionary;
     private CyclicObject _cyclicGenericDictionary;
+    private CyclicObject _deepCyclicObject;
+    private CyclicObject _siblingObject;
 
     [SetUp]
     public void SetUp()
@@ -30,6 +32,15 @@ namespace Mindscape.Raygun4Net.Tests
 
       _cyclicGenericDictionary = new CyclicObject();
       _cyclicGenericDictionary.GenericDictionary["Key"] = _cyclicGenericDictionary;
+
+      _deepCyclicObject = new CyclicObject();
+      _deepCyclicObject.Child = new CyclicObject();
+      _deepCyclicObject.Child.Array[0] = new CyclicObject();
+      _deepCyclicObject.Child.Array[0].Dictionary["Key"] = _deepCyclicObject;
+
+      _siblingObject = new CyclicObject();
+      _siblingObject.Child = new CyclicObject();
+      _siblingObject.Array[0] = _siblingObject.Child;
     }
 
     [Test]
@@ -59,39 +70,44 @@ namespace Mindscape.Raygun4Net.Tests
     public void HandleCircularObjectStructure()
     {
       string json = SimpleJson.SerializeObject(_cyclicObject);
-      Assert.IsTrue(json.Contains("\"Child\":\"" + SimpleJson.CYCLIC_MESSAGE + "\""));
+      Assert.AreEqual("{\"Child\":\"" + SimpleJson.CYCLIC_MESSAGE + "\",\"Array\":[null],\"Dictionary\":{},\"GenericDictionary\":{}}", json);
     }
 
     [Test]
     public void HandleCircularObjectStructureWithinArray()
     {
       string json = SimpleJson.SerializeObject(_cyclicArray);
-      Assert.IsTrue(json.Contains("\"Array\":[\"" + SimpleJson.CYCLIC_MESSAGE + "\"]"));
+      Assert.AreEqual("{\"Array\":[\"" + SimpleJson.CYCLIC_MESSAGE + "\"],\"Dictionary\":{},\"GenericDictionary\":{}}", json);
     }
 
     [Test]
     public void HandleCircularObjectStructureWithinDictionary()
     {
       string json = SimpleJson.SerializeObject(_cyclicDictionary);
-      Assert.IsTrue(json.Contains("\"Dictionary\":{\"Key\":\"" + SimpleJson.CYCLIC_MESSAGE + "\"}"));
+      Assert.AreEqual("{\"Array\":[null],\"Dictionary\":{\"Key\":\"" + SimpleJson.CYCLIC_MESSAGE + "\"},\"GenericDictionary\":{}}", json);
     }
 
     [Test]
     public void HandleCircularObjectStructureWithinGenericDictionary()
     {
-
+      string json = SimpleJson.SerializeObject(_cyclicGenericDictionary);
+      Assert.AreEqual("{\"Array\":[null],\"Dictionary\":{},\"GenericDictionary\":{\"Key\":\"" + SimpleJson.CYCLIC_MESSAGE + "\"}}", json);
     }
 
     [Test]
     public void HandleDeepCircularObjectStructure()
     {
-
+      string json = SimpleJson.SerializeObject(_deepCyclicObject);
+      Assert.AreEqual("{\"Child\":{\"Array\":[{\"Array\":[null],\"Dictionary\":{\"Key\":\"" + SimpleJson.CYCLIC_MESSAGE + "\"},\"GenericDictionary\":{}}],\"Dictionary\":{},\"GenericDictionary\":{}},\"Array\":[null],\"Dictionary\":{},\"GenericDictionary\":{}}", json);
     }
 
     [Test]
     public void SerizlizeTheSameObjectWhenNotInACircularObjectStructure()
     {
-
+      string json = SimpleJson.SerializeObject(_siblingObject);
+      // The same object is repeated twice within the same parent, but there are siblings and don't form a cycle, so the json does not mention the cyclic message.
+      // This is to test that objects are removed from the visited stack as the serializer traverses back through the object structure.
+      Assert.AreEqual("{\"Child\":{\"Array\":[null],\"Dictionary\":{},\"GenericDictionary\":{}},\"Array\":[{\"Array\":[null],\"Dictionary\":{},\"GenericDictionary\":{}}],\"Dictionary\":{},\"GenericDictionary\":{}}", json);
     }
   }
 }
