@@ -66,6 +66,30 @@ namespace Mindscape.Raygun4Net.Tests
       Assert.AreEqual("{\"OccurredOn\":\"0001-01-01T00:00:00Z\",\"Details\":{\"Error\":{\"Data\":{\"0\":\"First!\"}}}}", messageString);
     }
 
+    // Array tests
+
+    [Test]
+    public void ArrayContainingNull()
+    {
+      CyclicObject co = new CyclicObject();
+      co.Array = new CyclicObject[3];
+      string json = SimpleJson.SerializeObject(co);
+      Assert.AreEqual("{\"Array\":[null,null,null],\"Dictionary\":{},\"GenericDictionary\":{}}", json);
+    }
+
+    // Dictionary tests
+
+    [Test]
+    public void NullInDictionaryDoesNotSerialize()
+    {
+      CyclicObject co = new CyclicObject();
+      co.Dictionary["Key"] = null;
+      string json = SimpleJson.SerializeObject(co);
+      Assert.AreEqual("{\"Array\":[null],\"Dictionary\":{},\"GenericDictionary\":{}}", json);
+    }
+
+    // Cyclic object structure tests
+
     [Test]
     public void HandleCircularObjectStructure()
     {

@@ -9,7 +9,7 @@ namespace Mindscape.Raygun4Net.Tests.Model
   public class CyclicObject
   {
     private CyclicObject _child;
-    private readonly CyclicObject[] _array = new CyclicObject[1];
+    private CyclicObject[] _array = new CyclicObject[1];
     private readonly IDictionary _dictionary = new Dictionary<object, object>();
     private readonly IDictionary<string, object> _genericDictionary = new Dictionary<string, object>();
 
@@ -25,6 +25,10 @@ namespace Mindscape.Raygun4Net.Tests.Model
     public CyclicObject[] Array
     {
       get { return _array; }
+      set
+      {
+        _array = value;
+      }
     }
 
     public IDictionary Dictionary
