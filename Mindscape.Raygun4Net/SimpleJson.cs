@@ -521,6 +521,8 @@ namespace Mindscape.Raygun4Net
     private static readonly char[] EscapeCharacters = new char[] { '"', '\\', '\b', '\f', '\n', '\r', '\t' };
     private static readonly string EscapeCharactersString = new string(EscapeCharacters);
 
+    public const string CYCLIC_MESSAGE = "[Circular reference detected, object not serialized]";
+
     static SimpleJson()
     {
       EscapeTable = new char[93];
@@ -1008,10 +1010,10 @@ namespace Mindscape.Raygun4Net
 
     static bool SerializeValue(IJsonSerializerStrategy jsonSerializerStrategy, object value, StringBuilder builder)
     {
-      return SerializeValue(jsonSerializerStrategy, value, builder, new Queue());
+      return SerializeValue(jsonSerializerStrategy, value, builder, new Stack());
     }
 
-    static bool SerializeValue(IJsonSerializerStrategy jsonSerializerStrategy, object value, StringBuilder builder, Queue visited)
+    static bool SerializeValue(IJsonSerializerStrategy jsonSerializerStrategy, object value, StringBuilder builder, Stack visited)
     {
       if (value == null)
       {
@@ -1020,10 +1022,11 @@ namespace Mindscape.Raygun4Net
 
       if (visited.Contains(value))
       {
-        return SerializeString("[Circular reference detected, object not serialized]", builder); ;
+        visited.Pop();
+        return SerializeString(CYCLIC_MESSAGE, builder); ;
       }
 
-      visited.Enqueue(value);
+      visited.Push(value);
 
       bool success = true;
       string stringValue = value as string;
@@ -1074,13 +1077,13 @@ namespace Mindscape.Raygun4Net
 
       if (visited.Count > 0) // Just to be safe
       {
-        visited.Dequeue();
+        visited.Pop();
       }
 
       return success;
     }
 
-    static bool SerializeObject(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable keys, IEnumerable values, StringBuilder builder, Queue visited)
+    static bool SerializeObject(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable keys, IEnumerable values, StringBuilder builder, Stack visited)
     {
       builder.Append("{");
       IEnumerator ke = keys.GetEnumerator();
@@ -1111,7 +1114,7 @@ namespace Mindscape.Raygun4Net
       return true;
     }
 
-    static bool SerializeArray(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable anArray, StringBuilder builder, Queue visited)
+    static bool SerializeArray(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable anArray, StringBuilder builder, Stack visited)
     {
       builder.Append("[");
       bool first = true;
@@ -1119,7 +1122,9 @@ namespace Mindscape.Raygun4Net
       {
         if (!first)
           builder.Append(",");
-        if (!SerializeValue(jsonSerializerStrategy, value, builder, visited))
+        if (value == null)
+          builder.Append("null");
+        else if (!SerializeValue(jsonSerializerStrategy, value, builder, visited))
           return false;
         first = false;
       }
