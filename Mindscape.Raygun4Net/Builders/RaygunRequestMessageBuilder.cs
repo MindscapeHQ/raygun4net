@@ -15,6 +15,8 @@ namespace Mindscape.Raygun4Net.Builders
   {
     private static readonly Regex IpAddressRegex = new Regex(@"\A(?:\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b)(:[1-9][0-9]{0,4})?\z", RegexOptions.Compiled);
 
+    private static bool _accessIPAddress = true;
+
     public static RaygunRequestMessage Build(HttpRequest request, RaygunRequestMessageOptions options)
     {
       RaygunRequestMessage message = new RaygunRequestMessage();
@@ -67,38 +69,50 @@ namespace Mindscape.Raygun4Net.Builders
 
     private static string GetIpAddress(HttpRequest request)
     {
-      var strIp = request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+      string strIp = null;
 
-      if (strIp != null && strIp.Trim().Length > 0)
+      if (_accessIPAddress)
       {
-        string[] addresses = strIp.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-        if (addresses.Length > 0)
+        try
         {
-          // first one = client IP per http://en.wikipedia.org/wiki/X-Forwarded-For
-          strIp = addresses[0];
+          strIp = request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+
+          if (strIp != null && strIp.Trim().Length > 0)
+          {
+            string[] addresses = strIp.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (addresses.Length > 0)
+            {
+              // first one = client IP per http://en.wikipedia.org/wiki/X-Forwarded-For
+              strIp = addresses[0];
+            }
+          }
+
+          if (!IsValidIpAddress(strIp))
+          {
+            strIp = string.Empty;
+          }
+
+          // if that's empty, get their ip via server vars
+          if (strIp == null || strIp.Trim().Length == 0)
+          {
+            strIp = request.ServerVariables["REMOTE_ADDR"];
+          }
+
+          if (!IsValidIpAddress(strIp))
+          {
+            strIp = string.Empty;
+          }
+
+          // if that's still empty, get their ip via .net's built-in method
+          if (strIp == null || strIp.Trim().Length == 0)
+          {
+            strIp = request.UserHostAddress;
+          }
         }
-      }
-
-      if (!IsValidIpAddress(strIp))
-      {
-        strIp = string.Empty;
-      }
-
-      // if that's empty, get their ip via server vars
-      if (strIp == null || strIp.Trim().Length == 0)
-      {
-        strIp = request.ServerVariables["REMOTE_ADDR"];
-      }
-
-      if (!IsValidIpAddress(strIp))
-      {
-        strIp = string.Empty;
-      }
-
-      // if that's still empty, get their ip via .net's built-in method
-      if (strIp == null || strIp.Trim().Length == 0)
-      {
-        strIp = request.UserHostAddress;
+        catch (Exception)
+        {
+          _accessIPAddress = false;
+        }
       }
 
       return strIp;
