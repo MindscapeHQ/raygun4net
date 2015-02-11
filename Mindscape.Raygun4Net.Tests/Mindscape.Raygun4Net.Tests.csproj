@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\CyclicObject.cs" />
     <Compile Include="Model\FakeException.cs" />
     <Compile Include="Model\FakeHttpApplication.cs" />
     <Compile Include="Model\FakeRaygunClient.cs" />
