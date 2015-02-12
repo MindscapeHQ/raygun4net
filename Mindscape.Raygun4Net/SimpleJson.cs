@@ -1010,10 +1010,10 @@ namespace Mindscape.Raygun4Net
 
     static bool SerializeValue(IJsonSerializerStrategy jsonSerializerStrategy, object value, StringBuilder builder)
     {
-      return SerializeValue(jsonSerializerStrategy, value, builder, new Stack());
+      return SerializeValue(jsonSerializerStrategy, value, builder, new Stack<object>());
     }
 
-    static bool SerializeValue(IJsonSerializerStrategy jsonSerializerStrategy, object value, StringBuilder builder, Stack visited)
+    static bool SerializeValue(IJsonSerializerStrategy jsonSerializerStrategy, object value, StringBuilder builder, Stack<object> visited)
     {
       if (value == null)
       {
@@ -1083,7 +1083,7 @@ namespace Mindscape.Raygun4Net
       return success;
     }
 
-    static bool SerializeObject(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable keys, IEnumerable values, StringBuilder builder, Stack visited)
+    static bool SerializeObject(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable keys, IEnumerable values, StringBuilder builder, Stack<object> visited)
     {
       builder.Append("{");
       IEnumerator ke = keys.GetEnumerator();
@@ -1114,7 +1114,7 @@ namespace Mindscape.Raygun4Net
       return true;
     }
 
-    static bool SerializeArray(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable anArray, StringBuilder builder, Stack visited)
+    static bool SerializeArray(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable anArray, StringBuilder builder, Stack<object> visited)
     {
       builder.Append("[");
       bool first = true;
