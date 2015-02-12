@@ -66,38 +66,47 @@ namespace Mindscape.Raygun4Net.Builders
 
     private static string GetIpAddress(HttpRequest request)
     {
-      var strIp = request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+      string strIp = null;
 
-      if (strIp != null && strIp.Trim().Length > 0)
+      try
       {
-        string[] addresses = strIp.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-        if (addresses.Length > 0)
+        strIp = request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+
+        if (strIp != null && strIp.Trim().Length > 0)
         {
-          // first one = client IP per http://en.wikipedia.org/wiki/X-Forwarded-For
-          strIp = addresses[0];
+          string[] addresses = strIp.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+          if (addresses.Length > 0)
+          {
+            // first one = client IP per http://en.wikipedia.org/wiki/X-Forwarded-For
+            strIp = addresses[0];
+          }
+        }
+
+        if (!IsValidIpAddress(strIp))
+        {
+          strIp = string.Empty;
+        }
+
+        // if that's empty, get their ip via server vars
+        if (strIp == null || strIp.Trim().Length == 0)
+        {
+          strIp = request.ServerVariables["REMOTE_ADDR"];
+        }
+
+        if (!IsValidIpAddress(strIp))
+        {
+          strIp = string.Empty;
+        }
+
+        // if that's still empty, get their ip via .net's built-in method
+        if (strIp == null || strIp.Trim().Length == 0)
+        {
+          strIp = request.UserHostAddress;
         }
       }
-
-      if (!IsValidIpAddress(strIp))
+      catch (Exception ex)
       {
-        strIp = string.Empty;
-      }
-
-      // if that's empty, get their ip via server vars
-      if (strIp == null || strIp.Trim().Length == 0)
-      {
-        strIp = request.ServerVariables["REMOTE_ADDR"];
-      }
-
-      if (!IsValidIpAddress(strIp))
-      {
-        strIp = string.Empty;
-      }
-
-      // if that's still empty, get their ip via .net's built-in method
-      if (strIp == null || strIp.Trim().Length == 0)
-      {
-        strIp = request.UserHostAddress;
+        System.Diagnostics.Trace.WriteLine("Failed to get IP address: {0}", ex.Message);
       }
 
       return strIp;
