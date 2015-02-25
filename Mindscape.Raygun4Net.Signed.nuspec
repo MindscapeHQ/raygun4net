@@ -20,6 +20,7 @@
     <!-- .NET 3.5 Client Profile -->
     <file src="build\signed\Net3.ClientProfile\Mindscape.Raygun4Net.dll" target="lib\net35-client\Mindscape.Raygun4Net.dll" />
     <!-- .NET 4.0 -->
+    <file src="build\signed\Net4\Mindscape.Raygun4Net4.dll" target="lib\net40\Mindscape.Raygun4Net4.dll" />
     <file src="build\signed\Net4\Mindscape.Raygun4Net.dll" target="lib\net40\Mindscape.Raygun4Net.dll" />
     <!-- .NET 4.0 Client Profile -->
     <file src="build\signed\Net4.ClientProfile\Mindscape.Raygun4Net.dll" target="lib\net40-client\Mindscape.Raygun4Net.dll" />
