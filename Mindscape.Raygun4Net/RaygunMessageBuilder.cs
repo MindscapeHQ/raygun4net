@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Web;
@@ -89,9 +90,17 @@ namespace Mindscape.Raygun4Net
     {
       _raygunMessage.Details.Client = new RaygunClientMessage()
       {
-        // This is for the MVC project to set the correct client name - due to the client message class being in the core assembly.
+        // RaygunClientMessage is in core, so this message builder overrides the Name to get the correct client name.
         Name = ((AssemblyTitleAttribute)GetType().Assembly.GetCustomAttributes(typeof(AssemblyTitleAttribute), false)[0]).Title
       };
+
+      // The MVC provider references the Raygun4Net4 provider, so this is a special case to get the correct client name:
+      var mvcAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName.StartsWith("Mindscape.Raygun4Net.Mvc"));
+      if (mvcAssembly != null)
+      {
+        _raygunMessage.Details.Client.Name = "Raygun4Net.Mvc";
+      }
+
       return this;
     }
 
