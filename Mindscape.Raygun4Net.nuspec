@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata minClientVersion="2.5">
     <id>Mindscape.Raygun4Net</id>
-    <version>4.2.1</version>
+    <version>5.0.0</version>
     <title />
     <authors>Mindscape</authors>
     <owners />
@@ -11,9 +11,6 @@
     <iconUrl>https://app.raygun.io/Content/Images/nuget-icon.png</iconUrl>
     <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
     <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
-    <dependencies>
-      <dependency id="Mindscape.Raygun4Net.Core" version="4.2.1" />
-    </dependencies>
   </metadata>
   <files>
     <!-- .NET 2.0 -->
@@ -28,6 +25,8 @@
     <!-- .NET 4.0 -->
     <file src="build\Net4\Mindscape.Raygun4Net4.dll" target="lib\net40\Mindscape.Raygun4Net4.dll" />
     <file src="build\Net4\Mindscape.Raygun4Net4.pdb" target="lib\net40\Mindscape.Raygun4Net4.pdb" />
+    <file src="build\Net4\Mindscape.Raygun4Net.dll" target="lib\net40\Mindscape.Raygun4Net.dll" />
+    <file src="build\Net4\Mindscape.Raygun4Net.pdb" target="lib\net40\Mindscape.Raygun4Net.pdb" />
     <!-- .NET 4.0 Client Profile -->
     <file src="build\Net4.ClientProfile\Mindscape.Raygun4Net.dll" target="lib\net40-client\Mindscape.Raygun4Net.dll" />
     <file src="build\Net4.ClientProfile\Mindscape.Raygun4Net.pdb" target="lib\net40-client\Mindscape.Raygun4Net.pdb" />

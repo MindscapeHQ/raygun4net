@@ -93,6 +93,10 @@
     </ProjectReference>
     <ProjectReference Include="..\Mindscape.Raygun4Net.Mvc\Mindscape.Raygun4Net.Mvc.csproj">
       <Project>{2cf1fe1f-ad2d-40bd-9f99-57ff00445a9d}</Project>
+      <Name>Mindscape.Raygun4Net.Mvc</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Mindscape.Raygun4Net4\Mindscape.Raygun4Net4.csproj">
+      <Project>{6d1c7e96-5e04-421d-8e8a-b3c8c02fd41d}</Project>
       <Name>Mindscape.Raygun4Net4</Name>
     </ProjectReference>
   </ItemGroup>

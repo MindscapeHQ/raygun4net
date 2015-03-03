@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata minClientVersion="2.5">
     <id>Mindscape.Raygun4Net.Mvc</id>
-    <version>4.2.1</version>
+    <version>5.0.0</version>
     <title />
     <authors>Mindscape</authors>
     <owners />
@@ -12,7 +12,7 @@
     <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
     <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
     <dependencies>
-      <dependency id="Mindscape.Raygun4Net.Core" version="4.2.1" />
+      <dependency id="Mindscape.Raygun4Net.Core" version="5.0.0" />
     </dependencies>
   </metadata>
   <files>
@@ -22,6 +22,8 @@
     <!-- .NET 4.0+ -->
     <file src="build\Mvc\Mindscape.Raygun4Net.Mvc.dll" target="lib\net40\Mindscape.Raygun4Net.Mvc.dll" />
     <file src="build\Mvc\Mindscape.Raygun4Net.Mvc.pdb" target="lib\net40\Mindscape.Raygun4Net.Mvc.pdb" />
+    <file src="build\Mvc\Mindscape.Raygun4Net4.dll" target="lib\net40\Mindscape.Raygun4Net4.dll" />
+    <file src="build\Mvc\Mindscape.Raygun4Net4.pdb" target="lib\net40\Mindscape.Raygun4Net4.pdb" />
     
     <file src="Mindscape.Raygun4Net.Mvc\readme.txt" />
   </files>
