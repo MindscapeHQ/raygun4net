@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
-using System.Web;
 using Mindscape.Raygun4Net.Messages;
 using NUnit.Framework;
 
