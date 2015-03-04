@@ -132,11 +132,11 @@ namespace Mindscape.Raygun4Net
       return this;
     }*/
 
-    public IRaygunMessageBuilder SetHttpDetails(RaygunRequestMessage message)
+    /*public IRaygunMessageBuilder SetHttpDetails(RaygunRequestMessage message)
     {
       _raygunMessage.Details.Request = message;
       return this;
-    }
+    }*/
 
     public IRaygunMessageBuilder SetVersion(string version)
     {

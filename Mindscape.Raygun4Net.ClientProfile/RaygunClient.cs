@@ -15,7 +15,7 @@ namespace Mindscape.Raygun4Net
   public class RaygunClient : RaygunClientBase
   {
     private readonly string _apiKey;
-    private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
+    //private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private readonly List<Type> _wrapperExceptions = new List<Type>();
 
     //[ThreadStatic]
@@ -30,7 +30,7 @@ namespace Mindscape.Raygun4Net
       _apiKey = apiKey;
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
-
+      /*
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormFieldNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreFormFieldNames.Split(',');
@@ -51,7 +51,7 @@ namespace Mindscape.Raygun4Net
         var ignoredNames = RaygunSettings.Settings.IgnoreServerVariableNames.Split(',');
         IgnoreServerVariableNames(ignoredNames);
       }
-      IsRawDataIgnored = RaygunSettings.Settings.IsRawDataIgnored;
+      IsRawDataIgnored = RaygunSettings.Settings.IsRawDataIgnored;*/
     }
 
     /// <summary>
@@ -115,7 +115,7 @@ namespace Mindscape.Raygun4Net
         _wrapperExceptions.Remove(wrapper);
       }
     }
-
+    /*
     /// <summary>
     /// Adds a list of keys to ignore when attaching the Form data of an HTTP POST request. This allows
     /// you to remove sensitive data from the transmitted copy of the Form on the HttpRequest by specifying the keys you want removed.
@@ -172,7 +172,7 @@ namespace Mindscape.Raygun4Net
         _requestMessageOptions.IsRawDataIgnored = value;
       }
     }
-
+    */
     /// <summary>
     /// Transmits an exception to Raygun.io synchronously, using the version number of the originating assembly.
     /// </summary>
