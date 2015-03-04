@@ -204,7 +204,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-        Send(exception, tags, userCustomData, null);
+      Send(exception, tags, userCustomData, null);
     }
 
     /// <summary>
@@ -254,7 +254,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-        SendInBackground(exception, tags, userCustomData, null);
+      SendInBackground(exception, tags, userCustomData, null);
     }
 
     /// <summary>
