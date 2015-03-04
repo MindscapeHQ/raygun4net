@@ -91,9 +91,13 @@ namespace Mindscape.Raygun4Net.WebApi
       {
         var entryAssembly = Assembly.GetCallingAssembly();
         applicationVersion = entryAssembly.GetName().Version.ToString();
-      }     
+      }
 
-      config.MessageHandlers.Add(new RaygunWebApiDelegatingHandler());
+      var owinAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName.StartsWith("Owin"));
+      if (owinAssembly == null)
+      {
+        config.MessageHandlers.Add(new RaygunWebApiDelegatingHandler());
+      }
 
       var clientCreator = new RaygunWebApiClientProvider(generateRaygunClient, applicationVersion);
 
