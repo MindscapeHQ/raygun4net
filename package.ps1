@@ -1,21 +1,25 @@
 properties {
-    $root =                          $psake.build_script_dir
-    $nugetspec =                     "$root/Mindscape.Raygun4Net.nuspec"
-    $nugetspec_signed =              "$root/Mindscape.Raygun4Net.signed.nuspec"
-    $nugetspec_core =                "$root/Mindscape.Raygun4Net.Core.nuspec"
-    $nugetspec_mvc =                 "$root/Mindscape.Raygun4Net.Mvc.nuspec"
-    $nugetspec_webapi =              "$root/Mindscape.Raygun4Net.WebApi.nuspec"
-    $build_dir =                     "$root\build\"
-    $build_dir2 =                    "$build_dir\Net2"
-    $build_dir4 =                    "$build_dir\Net4"
-    $build_dir_mvc =                 "$build_dir\Mvc"
-    $build_dir_webapi =              "$build_dir\WebApi"
-    $signed_build_dir =              "$build_dir\signed"
-    $signed_build_dir2 =             "$build_dir\signed\Net2"
-    $signed_build_dir4 =             "$build_dir\signed\Net4"
-    $release_dir =                   "$root\release\"
-    $nuget_dir =                     "$root\.nuget"
-    $env:Path +=                     ";$nuget_dir"
+    $root =                             $psake.build_script_dir
+    $nugetspec =                        "$root/Mindscape.Raygun4Net.nuspec"
+    $nugetspec_signed =                 "$root/Mindscape.Raygun4Net.signed.nuspec"
+    $nugetspec_core =                   "$root/Mindscape.Raygun4Net.Core.nuspec"
+    $nugetspec_mvc =                    "$root/Mindscape.Raygun4Net.Mvc.nuspec"
+    $nugetspec_webapi =                 "$root/Mindscape.Raygun4Net.WebApi.nuspec"
+    $build_dir =                        "$root\build\"
+    $build_dir2 =                       "$build_dir\Net2"
+    $build_dir3_client_profile =        "$build_dir\Net3.ClientProfile"
+    $build_dir4 =                       "$build_dir\Net4"
+    $build_dir4_client_profile =        "$build_dir\Net4.ClientProfile"
+    $build_dir_mvc =                    "$build_dir\Mvc"
+    $build_dir_webapi =                 "$build_dir\WebApi"
+    $signed_build_dir =                 "$build_dir\signed"
+    $signed_build_dir2 =                "$build_dir\signed\Net2"
+    $signed_build_dir3_client_profile = "$build_dir\signed\Net3.ClientProfile"
+    $signed_build_dir4 =                "$build_dir\signed\Net4"
+    $signed_build_dir4_client_profile = "$build_dir\signed\Net4.ClientProfile"
+    $release_dir =                      "$root\release\"
+    $nuget_dir =                        "$root\.nuget"
+    $env:Path +=                        ";$nuget_dir"
 }
 
 task default -depends Zip
@@ -45,23 +49,31 @@ task Zip -depends Package {
     $outerfolder = $release_dir + $version
     $versionfolder = $outerfolder + "\" + $version
     $versionfolder2 = $versionfolder + "\Net2"
+    $versionfolder3clientprofile = $versionfolder + "\Net3.ClientProfile"
     $versionfolder4 = $versionfolder + "\Net4"
+    $versionfolder4clientprofile = $versionfolder + "\Net4.ClientProfile"
     $versionfoldermvc = $versionfolder + "\Mvc"
     $versionfolderwebapi = $versionfolder + "\WebApi"
     
     $signedfolder = $versionfolder + "\signed"
     $signedfolder2 = $signedfolder + "\Net2"
+    $signedfolder3clientprofile = $signedfolder + "\Net3.ClientProfile"
     $signedfolder4 = $signedfolder + "\Net4"
+    $signedfolder4clientprofile = $signedfolder + "\Net4.ClientProfile"
     
     new-item $versionfolder -itemType directory | Out-Null
     new-item $versionfolder2 -itemType directory | Out-Null
+    new-item $versionfolder3clientprofile -itemType directory | Out-Null
     new-item $versionfolder4 -itemType directory | Out-Null
+    new-item $versionfolder4clientprofile -itemType directory | Out-Null
     new-item $versionfoldermvc -itemType directory | Out-Null
     new-item $versionfolderwebapi -itemType directory | Out-Null
     
     new-item $signedfolder -itemType directory | Out-Null
     new-item $signedfolder2 -itemType directory | Out-Null
+    new-item $signedfolder3clientprofile -itemType directory | Out-Null
     new-item $signedfolder4 -itemType directory | Out-Null
+    new-item $signedfolder4clientprofile -itemType directory | Out-Null
   
     # .Net 3.5
     copy-item $build_dir/Mindscape.Raygun4Net.dll $versionfolder
@@ -87,9 +99,15 @@ task Zip -depends Package {
     # .Net 2.0
     copy-item $build_dir2/Mindscape.Raygun4Net.dll $versionfolder2
     copy-item $build_dir2/Mindscape.Raygun4Net.pdb $versionfolder2
+    # .Net 3.5 Client Profile
+    copy-item $build_dir3_client_profile/Mindscape.Raygun4Net.dll $versionfolder3clientprofile
+    copy-item $build_dir3_client_profile/Mindscape.Raygun4Net.pdb $versionfolder3clientprofile
     # .Net 4.0
     copy-item $build_dir4/Mindscape.Raygun4Net.dll $versionfolder4
     copy-item $build_dir4/Mindscape.Raygun4Net.pdb $versionfolder4
+    # .Net 4.0 Client Profile
+    copy-item $build_dir4_client_profile/Mindscape.Raygun4Net.dll $versionfolder4clientprofile
+    copy-item $build_dir4_client_profile/Mindscape.Raygun4Net.pdb $versionfolder4clientprofile
     # .Net MVC
     copy-item $build_dir_mvc/Mindscape.Raygun4Net.Mvc.dll $versionfoldermvc
     copy-item $build_dir_mvc/Mindscape.Raygun4Net.Mvc.pdb $versionfoldermvc
@@ -105,7 +123,9 @@ task Zip -depends Package {
     copy-item $signed_build_dir/Mindscape.Raygun4Net.WinRT.dll $signedfolder
     copy-item $signed_build_dir/Mindscape.Raygun4Net.WindowsStore.dll $signedfolder
     copy-item $signed_build_dir2/Mindscape.Raygun4Net.dll $signedfolder2
+    copy-item $signed_build_dir3_client_profile/Mindscape.Raygun4Net.dll $signedfolder3clientprofile
     copy-item $signed_build_dir4/Mindscape.Raygun4Net.dll $signedfolder4
+    copy-item $signed_build_dir4_client_profile/Mindscape.Raygun4Net.dll $signedfolder4clientprofile
 	
     $zipFullName = $release_dir + $version + ".zip"
     Get-ChildItem $outerfolder | Add-Zip $zipFullName
