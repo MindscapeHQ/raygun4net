@@ -11,7 +11,7 @@ properties {
     $solution_file_windows_phone =   "$root/Mindscape.Raygun4Net.WindowsPhone.sln"
     $configuration =                 "Release"
     $build_dir =                     "$root\build\"
-    $build_dir_client_profile =      "$root\build\Net3.ClientProfile"
+    $build_dir_client_profile =      "$build_dir\Net3.ClientProfile"
     $build_dir2 =                    "$build_dir\Net2"
     $build_dir4 =                    "$build_dir\Net4"
     $build_dir4_client_profile =     "$build_dir\Net4.ClientProfile"
