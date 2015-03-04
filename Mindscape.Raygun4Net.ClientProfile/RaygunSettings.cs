@@ -44,61 +44,6 @@ namespace Mindscape.Raygun4Net
       set { this["throwOnError"] = value; }
     }
 
-    [ConfigurationProperty("excludeHttpStatusCodes", IsRequired = false, DefaultValue = "")]
-    [RegexStringValidator(@"^(\d+(,\s?\d+)*)?$")]
-    public string ExcludeHttpStatusCodesList
-    {
-      get { return (string)this["excludeHttpStatusCodes"]; }
-      set { this["excludeHttpStatusCodes"] = value; }
-    }
-
-    public int[] ExcludedStatusCodes
-    {
-      get { return string.IsNullOrEmpty(ExcludeHttpStatusCodesList) ? new int[0] : ExcludeHttpStatusCodesList.Split(',').Select(int.Parse).ToArray(); }
-    }
-
-    [ConfigurationProperty("excludeErrorsFromLocal", IsRequired = false, DefaultValue = false)]
-    public bool ExcludeErrorsFromLocal
-    {
-      get { return (bool)this["excludeErrorsFromLocal"]; }
-      set { this["excludeErrorsFromLocal"] = value; }
-    }
-
-    [ConfigurationProperty("ignoreFormFieldNames", IsRequired = false, DefaultValue = "")]
-    public string IgnoreFormFieldNames
-    {
-      get { return (string)this["ignoreFormFieldNames"]; }
-      set { this["ignoreFormFieldNames"] = value; }
-    }
-
-    [ConfigurationProperty("ignoreHeaderNames", IsRequired = false, DefaultValue = "")]
-    public string IgnoreHeaderNames
-    {
-      get { return (string)this["ignoreHeaderNames"]; }
-      set { this["ignoreHeaderNames"] = value; }
-    }
-
-    [ConfigurationProperty("ignoreCookieNames", IsRequired = false, DefaultValue = "")]
-    public string IgnoreCookieNames
-    {
-      get { return (string)this["ignoreCookieNames"]; }
-      set { this["ignoreCookieNames"] = value; }
-    }
-
-    [ConfigurationProperty("ignoreServerVariableNames", IsRequired = false, DefaultValue = "")]
-    public string IgnoreServerVariableNames
-    {
-      get { return (string)this["ignoreServerVariableNames"]; }
-      set { this["ignoreServerVariableNames"] = value; }
-    }
-
-    [ConfigurationProperty("isRawDataIgnored", IsRequired = false, DefaultValue = false)]
-    public bool IsRawDataIgnored
-    {
-      get { return (bool)this["isRawDataIgnored"]; }
-      set { this["isRawDataIgnored"] = value; }
-    }
-
     [ConfigurationProperty("applicationVersion", IsRequired = false, DefaultValue = "")]
     public string ApplicationVersion
     {

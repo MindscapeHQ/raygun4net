@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Net;
 using System.Reflection;
-using System.Web;
 using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
 
@@ -50,48 +47,13 @@ namespace Mindscape.Raygun4Net
       {
         _raygunMessage.Details.Error = RaygunErrorMessageBuilder.Build(exception);
       }
-      
-      /*HttpException error = exception as HttpException;
-      if (error != null)
-      {
-        int code = error.GetHttpCode();
-        string description = null;
-        if (Enum.IsDefined(typeof(HttpStatusCode), code))
-        {
-          description = ((HttpStatusCode)code).ToString();
-        }
-        _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = code, StatusDescription = description };
-      }*/
-
-      /*WebException webError = exception as WebException;
-      if (webError != null)
-      {
-        if (webError.Status == WebExceptionStatus.ProtocolError && webError.Response is HttpWebResponse)
-        {
-          HttpWebResponse response = (HttpWebResponse)webError.Response;
-          _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = (int)response.StatusCode, StatusDescription = response.StatusDescription };
-        }
-        else if (webError.Status == WebExceptionStatus.ProtocolError && webError.Response is FtpWebResponse)
-        {
-          FtpWebResponse response = (FtpWebResponse)webError.Response;
-          _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = (int)response.StatusCode, StatusDescription = response.StatusDescription };
-        }
-        else
-        {
-          _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusDescription = webError.Status.ToString() };
-        }
-      }*/
 
       return this;
     }
 
     public IRaygunMessageBuilder SetClientDetails()
     {
-      _raygunMessage.Details.Client = new RaygunClientMessage()
-      {
-        // This is for the MVC project to set the correct client name - due to the client message class being in the core assembly.
-        Name = ((AssemblyTitleAttribute)GetType().Assembly.GetCustomAttributes(typeof(AssemblyTitleAttribute), false)[0]).Title
-      };
+      _raygunMessage.Details.Client = new RaygunClientMessage();
       return this;
     }
 
@@ -112,31 +74,6 @@ namespace Mindscape.Raygun4Net
       _raygunMessage.Details.User = user;
       return this;
     }
-
-    /*public IRaygunMessageBuilder SetHttpDetails(HttpContext context, RaygunRequestMessageOptions options = null)
-    {
-      if (context != null)
-      {
-        HttpRequest request;
-        try
-        {
-          request = context.Request;
-        }
-        catch (HttpException)
-        {
-          return this;
-        }
-        _raygunMessage.Details.Request = RaygunRequestMessageBuilder.Build(request, options);
-      }
-
-      return this;
-    }*/
-
-    /*public IRaygunMessageBuilder SetHttpDetails(RaygunRequestMessage message)
-    {
-      _raygunMessage.Details.Request = message;
-      return this;
-    }*/
 
     public IRaygunMessageBuilder SetVersion(string version)
     {
