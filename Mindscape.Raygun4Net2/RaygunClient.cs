@@ -161,6 +161,15 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    protected override bool CanSend(Exception exception)
+    {
+      if (RaygunSettings.Settings.ExcludeErrorsFromLocal && HttpContext.Current != null && HttpContext.Current.Request.IsLocal)
+      {
+        return false;
+      }
+      return base.CanSend(exception);
+    }
+
     /// <summary>
     /// Transmits an exception to Raygun.io synchronously.
     /// </summary>
