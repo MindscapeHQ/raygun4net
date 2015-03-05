@@ -28,4 +28,3 @@ namespace Mindscape.Raygun4Net.WebApi
 #pragma warning restore 1998
   }
 }
-

@@ -175,6 +175,15 @@ namespace Mindscape.Raygun4Net.WebApi
     /// </summary>
     public ICredentials ProxyCredentials { get; set; }
 
+    protected override bool CanSend(Exception exception)
+    {
+      if (RaygunSettings.Settings.ExcludeErrorsFromLocal && _currentWebRequest.Value != null && _currentWebRequest.Value.IsLocal())
+      {
+        return false;
+      }
+      return base.CanSend(exception);
+    }
+
     protected bool CanSend(RaygunMessage message)
     {
       if (message != null && message.Details != null && message.Details.Response != null)
