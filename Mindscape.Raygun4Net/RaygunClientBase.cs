@@ -23,7 +23,7 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     public string ApplicationVersion { get; set; }
 
-    protected bool CanSend(Exception exception)
+    protected virtual bool CanSend(Exception exception)
     {
       return exception == null || exception.Data == null || !exception.Data.Contains(SentKey) || false.Equals(exception.Data[SentKey]);
     }
