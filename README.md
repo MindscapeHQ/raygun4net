@@ -3,25 +3,32 @@ Raygun4Net
 
 [Raygun.io](http://raygun.io) Provider for .NET Framework
 
-! IMPORTANT CHANGE IN 4.0 !
+! IMPORTANT CHANGE IN 5.0 !
 ====================
 
-Are you using Raygun4Net in an MVC or WebApi project? If so, make sure to pick the correct NuGet package.
+If you are manually referencing Raygun4Net dlls in your project rather than installing the NuGet package, then there are some minor dependency changes that you'll need to be aware of:
 
-If you have an MVC project, please install the Raygun4Net.Mvc package instead of the standard Raygun4Net package.
-The Raygun4Net.Mvc package includes all the functionality of the standard package + MVC specific support.
+For Mvc projects, make sure your project references these dlls:
+* Mindscape.Raygun4Net
+* Mindscape.Raygun4Net.Mvc
+* Mindscape Raygun4Net4
 
-If you have a WebApi project, please install the Raygun4Net.WebApi package instead of the standard Raygun4Net package.
-The Raygun4Net.WebApi package only includes WebApi specific support and does not reference System.Web
+For other .Net 4.0+ projects, make sure your project references these dlls:
+* Mindscape.Raygun4Net
+* Mindscape.Raygun4Net4
 
-NOTE: the Mvc and WebApi packages can work side-by-side, so install both if you have an Mvc WebApi project.
+For both of the above setups, you can find all the correct dlls in the Mvc and Net4 folders respectively within the .zip file hosted on the [latest GiutHub release](https://github.com/MindscapeHQ/raygun4net/releases).
+If you build the Raygun4Net projects yourself with the build.bat script, all the correct dlls will be in the raygun4net/build/Mvc and raygun4net/build/Net4 folders.
+Or if you build the Raygun4Net projects in Visual Studio, all the correct dlls will be within the bin folder for each project.
+
+If you are using Raygun4Net in a .Net project type not listed above, or if you are installing via NuGet, then you'll have no problems upgrading to version 5.0. There are no breaking changes in this version.
 
 Installation
 ====================
 
 * The easiest way to install this provider is by grabbing the NuGet package. Ensure the NuGet Visual Studio extension is installed, right-click on your project -> Manage NuGet Packages -> Online -> search for **Mindscape.Raygun4Net**, then install the appropriate package. Or, visit https://nuget.org/packages/Mindscape.Raygun4Net/ for instructions on installation using the package manager console.
 
-* For Visual Studio 2008 (without NuGet) you can clone this repository, run build.bat, then add project references to **Mindscape.Raygun4Net.dll** and **Newtonsoft.Json.dll**.
+* For Visual Studio 2008 (without NuGet) you can clone this repository, run build.bat, then add project references to **Mindscape.Raygun4Net.dll**
 
 * If you have issues trying to install the package into a WinRT project, see the troubleshooting section below.
 
@@ -32,14 +39,17 @@ Projects built with the following frameworks are supported:
 
 * .NET 2.0, 3.5, 4.0+
 * ASP.NET
-* WinForms, WPF etc
+* Mvc
+* WebApi
+* WinForms, WPF, console apps etc
 * Windows Store apps (universal) for Windows 8.1 and Windows Phone 8.1
 * Windows 8
 * Windows Phone 7.1 and 8
 * WinRT
-* Xamarin.iOS, Xamarin.Android and Xamarin.Mac
+* Xamarin.iOS and Xamarin.Mac (Both unified and classic)
+* Xamarin.Android
 
-Add the NuGet package to a project which uses one of the above frameworks and the correct assembly will be referenced.
+Install the NuGet package to a project which uses one of the above frameworks and the correct assembly will be referenced.
 
 Where is my app API key?
 ====================
@@ -394,6 +404,6 @@ var raygunClient = new RaygunClient()
 
 ## Troubleshooting
 
-* If the solution fails to build due to missing dependencies (Newtonsoft etc), in Visual Studio 2012 ensure you have the NuGet extension installed and that the Tools -> Options -> Package Manager -> 'Allow NuGet to download missing packages during build' box is checked. Then, go to the directory that you cloned this repository into and run build.bat.
+* If the solution fails to build due to missing dependencies, in Visual Studio 2012 ensure you have the NuGet extension installed and that the Tools -> Options -> Package Manager -> 'Allow NuGet to download missing packages during build' box is checked. Then, go to the directory that you cloned this repository into and run build.bat.
 
 * When installing the package via NuGet into a WinRT project you encounter an error due to an invalid dependency, clone this repository into a directory via Git. Then, open a Powershell or command prompt in the directory location, and run `.\build.bat CompileWinRT`. Then, add the resulting Mindscape.Raygun4Net.WinRT.dll (located in the /release folder) to your project.

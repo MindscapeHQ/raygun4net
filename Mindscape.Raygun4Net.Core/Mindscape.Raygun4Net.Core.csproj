@@ -29,6 +29,22 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
+    <AssemblyOriginatorKeyFile>Raygun4Net.Core.snk</AssemblyOriginatorKeyFile>
+    <OutputPath>bin\Sign\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Sign|AnyCPU'">
+    <OutputPath>bin\Sign\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
@@ -46,12 +62,6 @@
   <ItemGroup>
     <Compile Include="..\AssemblyVersionInfo.cs">
       <Link>Properties\AssemblyVersionInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net4\Builders\RaygunErrorMessageBuilder.cs">
-      <Link>Builders\RaygunErrorMessageBuilder.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net4\Messages\RaygunErrorMessage.cs">
-      <Link>Messages\RaygunErrorMessage.cs</Link>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Builders\RaygunEnvironmentMessageBuilder.cs">
       <Link>Builders\RaygunEnvironmentMessageBuilder.cs</Link>
@@ -101,6 +111,8 @@
     <Compile Include="..\Mindscape.Raygun4Net\SimpleJson.cs">
       <Link>SimpleJson.cs</Link>
     </Compile>
+    <Compile Include="Builders\RaygunErrorMessageBuilder.cs" />
+    <Compile Include="Messages\RaygunErrorMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

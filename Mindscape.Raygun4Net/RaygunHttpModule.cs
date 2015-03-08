@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using System.Web;
 
 namespace Mindscape.Raygun4Net
@@ -17,6 +18,14 @@ namespace Mindscape.Raygun4Net
       HttpStatusCodesToExclude = RaygunSettings.Settings.ExcludedStatusCodes;
       ExcludeErrorsBasedOnHttpStatusCode = HttpStatusCodesToExclude.Any();
       ExcludeErrorsFromLocal = RaygunSettings.Settings.ExcludeErrorsFromLocal;
+
+      var mvcAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName.StartsWith("Mindscape.Raygun4Net.Mvc"));
+      if (mvcAssembly != null)
+      {
+        var type = mvcAssembly.GetType("Mindscape.Raygun4Net.RaygunExceptionFilterAttacher");
+        var method = type.GetMethod("AttachExceptionFilter", BindingFlags.Static | BindingFlags.Public);
+        method.Invoke(null, new object[] { context, this });
+      }
     }
 
     public void Dispose()
@@ -32,6 +41,15 @@ namespace Mindscape.Raygun4Net
       {
         var client = GetRaygunClient(application);
         client.SendInBackground(Unwrap(lastError));
+      }
+    }
+
+    public void SendError(HttpApplication application, Exception exception)
+    {
+      if (CanSend(exception))
+      {
+        var client = GetRaygunClient(application);
+        client.SendInBackground(Unwrap(exception));
       }
     }
 

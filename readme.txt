@@ -1,19 +1,17 @@
 Raygun4Net - Raygun.io Provider for .NET Framework
 ===================
 
-===================================================================================================================
-|                                            ! IMPORTANT CHANGE IN 4.0 !                                          |
-|                                                                                                                 |
-| Are you using Raygun4Net in an MVC or WebApi project? If so, this is not the NuGet package you are looking for. |
-|                                                                                                                 |
-| If you have an MVC project, please uninstall this package, and install the Raygun4Net.Mvc package instead.      |
-| The Raygun4Net.Mvc package includes all the functionality of this package + MVC specific support.               |
-|                                                                                                                 |
-| If you have a WebApi project, please uninstall this package, and install the Raygun4Net.WebApi package instead. |
-| The Raygun4Net.WebApi package only includes WebApi specific support and does not reference System.Web           |
-|                                                                                                                 |
-| NOTE: the Mvc and WebApi packages can work side-by-side, so install both if you have an Mvc WebApi project.     |
-===================================================================================================================
+Using Raygun4Net in an Mvc or WebApi project?
+====================
+If so, then this is not the NuGet package you are looking for.
+
+If you have an MVC project, please uninstall this package, and install the Raygun4Net.Mvc package instead.
+The Raygun4Net.Mvc package includes all the functionality of this package + MVC specific support.
+
+If you have a WebApi project, please uninstall this package, and install the Raygun4Net.WebApi package instead.
+The Raygun4Net.WebApi package only includes WebApi specific support and does not reference System.Web
+
+NOTE: the Mvc and WebApi packages can work side-by-side, so install both if you have an Mvc WebApi project.
 
 Where is my app API key?
 ====================
@@ -31,12 +29,13 @@ Projects built with the following frameworks are supported:
 
 * .NET 2.0, 3.5, 4.0, 4.5
 * ASP.NET
-* WinForms, WPF etc.
+* WinForms, WPF, console apps etc.
 * Windows Store apps (universal) for Windows 8.1 and Windows Phone 8.1
 * Windows 8
 * Windows Phone 7.1 and 8
 * WinRT
-* Xamarin.iOS, Xamarin.Android and Xamarin.Mac
+* Xamarin.iOS and Xamarin.Mac (Both unified and classic)
+* Xamarin.Android
 
 The NuGet package will select the appropriate dll to use for your project.
 
@@ -333,12 +332,3 @@ Tags and custom data
 
 When sending exceptions manually, you can also send an arbitrary list of tags (an array of strings), and a collection of custom data (a dictionary of any objects).
 This can be done using the various Send and SendInBackground method overloads.
-
-
-====================
-Troubleshooting
-====================
-If the solution fails to build due to missing dependencies (Newtonsoft etc.), in Visual Studio 2012 ensure
-you have the NuGet extension installed and that the Tools -> Options -> Package Manager ->
-'Allow NuGet to download missing packages during build' box is checked. Then, go to the directory that
-you cloned this repository into and run build.bat.
