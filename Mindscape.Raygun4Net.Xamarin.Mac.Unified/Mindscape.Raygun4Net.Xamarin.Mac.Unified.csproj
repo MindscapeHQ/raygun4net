@@ -99,7 +99,7 @@
     <Compile Include="RaygunMessageBuilder.cs" />
     <Compile Include="Builders\RaygunEnvironmentMessageBuilder.cs" />
     <Compile Include="RaygunClient.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net4\Messages\RaygunErrorMessage.cs">
+    <Compile Include="..\Mindscape.Raygun4Net.Core\Messages\RaygunErrorMessage.cs">
       <Link>Messages\RaygunErrorMessage.cs</Link>
     </Compile>
   </ItemGroup>

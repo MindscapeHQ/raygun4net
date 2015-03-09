@@ -46,11 +46,11 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.Mac" />
-    <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
-    </Reference>
     <Reference Include="Mindscape.Raygun4Net.Xamarin.Mac.Unified">
       <HintPath>..\Mindscape.Raygun4Net.Xamarin.Mac.Unified\bin\Release\Mindscape.Raygun4Net.Xamarin.Mac.Unified.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

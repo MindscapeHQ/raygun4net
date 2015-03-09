@@ -17,7 +17,7 @@ For other .Net 4.0+ projects, make sure your project references these dlls:
 * Mindscape.Raygun4Net
 * Mindscape.Raygun4Net4
 
-For both of the above setups, you can find all the correct dlls in the Mvc and Net4 folders respectively within the .zip file hosted on the [latest GiutHub release](https://github.com/MindscapeHQ/raygun4net/releases).
+For both of the above setups, you can find all the correct dlls in the Mvc and Net4 folders respectively within the .zip file hosted on the [latest GitHub release](https://github.com/MindscapeHQ/raygun4net/releases).
 If you build the Raygun4Net projects yourself with the build.bat script, all the correct dlls will be in the raygun4net/build/Mvc and raygun4net/build/Net4 folders.
 Or if you build the Raygun4Net projects in Visual Studio, all the correct dlls will be within the bin folder for each project.
 
@@ -38,6 +38,7 @@ Supported platforms/frameworks
 Projects built with the following frameworks are supported:
 
 * .NET 2.0, 3.5, 4.0+
+* .NET 3.5 and 4.0 Client Profile
 * ASP.NET
 * Mvc
 * WebApi
@@ -310,7 +311,7 @@ At any point after calling the Attach method, you can use RaygunClient.Current t
 
 ### Xamarin for Mac
 
-Xamarin for Mac support is not included in the NuGet package or the Raygun4Net Xamarin Component. Instead, download the .zip of assemblies from the latest release on GitHub: https://github.com/MindscapeHQ/raygun4net/releases (Click the green button). Then copy and reference the Mindscape.Raygun4Net.Xamarin.Mac.dll into your Xamarin.Mac project.
+Xamarin for Mac support is not included in the NuGet package or the Raygun4Net Xamarin Component. Instead, download the .zip of assemblies from the latest release on GitHub: https://github.com/MindscapeHQ/raygun4net/releases (Click the green button). Then copy and reference the Xamarin.Mac\Mindscape.Raygun4Net.Xamarin.Mac.dll (or the unified dll) into your Xamarin.Mac project.
 
 In the main entry point of the application, use the static RaygunClient.Attach method using your app API key.
 

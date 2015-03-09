@@ -28,11 +28,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="Mindscape.Raygun4Net.Xamarin.Mac">
+    <Reference Include="Mindscape.Raygun4Net.Xamarin">
       <HintPath>..\Mindscape.Raygun4Net.Xamarin.Mac\bin\Release\Mindscape.Raygun4Net.Xamarin.Mac.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">
-      <HintPath>..\..\Projects\Xamarin_Mac_ErrorHarness_OldAPI\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
