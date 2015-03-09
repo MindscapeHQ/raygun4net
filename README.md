@@ -17,7 +17,7 @@ For other .Net 4.0+ projects, make sure your project references these dlls:
 * Mindscape.Raygun4Net
 * Mindscape.Raygun4Net4
 
-For both of the above setups, you can find all the correct dlls in the Mvc and Net4 folders respectively within the .zip file hosted on the [latest GiutHub release](https://github.com/MindscapeHQ/raygun4net/releases).
+For both of the above setups, you can find all the correct dlls in the Mvc and Net4 folders respectively within the .zip file hosted on the [latest GitHub release](https://github.com/MindscapeHQ/raygun4net/releases).
 If you build the Raygun4Net projects yourself with the build.bat script, all the correct dlls will be in the raygun4net/build/Mvc and raygun4net/build/Net4 folders.
 Or if you build the Raygun4Net projects in Visual Studio, all the correct dlls will be within the bin folder for each project.
 

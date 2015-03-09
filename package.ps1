@@ -123,6 +123,8 @@ task Zip -depends Package {
     copy-item $build_dir3_client_profile/Mindscape.Raygun4Net.dll $versionfolder3clientprofile
     copy-item $build_dir3_client_profile/Mindscape.Raygun4Net.pdb $versionfolder3clientprofile
     # .Net 4.0
+    copy-item $build_dir4/Mindscape.Raygun4Net.dll $versionfolder4
+    copy-item $build_dir4/Mindscape.Raygun4Net.pdb $versionfolder4
     copy-item $build_dir4/Mindscape.Raygun4Net4.dll $versionfolder4
     copy-item $build_dir4/Mindscape.Raygun4Net4.pdb $versionfolder4
     # .Net 4.0 Client Profile
@@ -146,6 +148,7 @@ task Zip -depends Package {
     copy-item $signed_build_dir/Mindscape.Raygun4Net.WindowsStore.dll $signedfolderwindowsstore
     copy-item $signed_build_dir2/Mindscape.Raygun4Net.dll $signedfolder2
     copy-item $signed_build_dir3_client_profile/Mindscape.Raygun4Net.dll $signedfolder3clientprofile
+    copy-item $signed_build_dir4/Mindscape.Raygun4Net.dll $signedfolder4
     copy-item $signed_build_dir4/Mindscape.Raygun4Net4.dll $signedfolder4
     copy-item $signed_build_dir4_client_profile/Mindscape.Raygun4Net.dll $signedfolder4clientprofile
 	

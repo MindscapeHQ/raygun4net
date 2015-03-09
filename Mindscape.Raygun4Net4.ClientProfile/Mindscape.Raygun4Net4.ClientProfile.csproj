@@ -70,14 +70,14 @@
     <Compile Include="..\Mindscape.Raygun4Net.ClientProfile\RaygunSettings.cs">
       <Link>RaygunSettings.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net.WindowsStore\Messages\RaygunMessageDetails.cs">
-      <Link>Messages\RaygunMessageDetails.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net4\Builders\RaygunErrorMessageBuilder.cs">
+    <Compile Include="..\Mindscape.Raygun4Net.Core\Builders\RaygunErrorMessageBuilder.cs">
       <Link>Builders\RaygunErrorMessageBuilder.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net4\Messages\RaygunErrorMessage.cs">
+    <Compile Include="..\Mindscape.Raygun4Net.Core\Messages\RaygunErrorMessage.cs">
       <Link>Messages\RaygunErrorMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net.WindowsStore\Messages\RaygunMessageDetails.cs">
+      <Link>Messages\RaygunMessageDetails.cs</Link>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Builders\RaygunEnvironmentMessageBuilder.cs">
       <Link>Builders\RaygunEnvironmentMessageBuilder.cs</Link>
