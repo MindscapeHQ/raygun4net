@@ -156,7 +156,7 @@ The available options are:
 
 These can be set to be a comma separated list of keys to ignore. Setting an option as * will indicate that all the keys will **not** be sent to Raygun.
 Placing * before, after or at both ends of a key will perform an ends-with, starts-with or contains operation respectively.
-For example, ignoreFormFieldNames="*password*" will cause Raygun to ignore all form fields that **contain** "password" anywhere in the name.
+For example, ignoreFormFieldNames="\*password\*" will cause Raygun to ignore all form fields that **contain** "password" anywhere in the name.
 These options are **not** case sensitive.
 
 **Providing a custom RaygunClient to the http module**
