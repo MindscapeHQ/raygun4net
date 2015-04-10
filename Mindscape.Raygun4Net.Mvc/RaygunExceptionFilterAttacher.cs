@@ -9,13 +9,12 @@ namespace Mindscape.Raygun4Net
   {
     public static void AttachExceptionFilter(HttpApplication context, RaygunHttpModule module)
     {
-      if (GlobalFilters.Filters.Count == 1)
+      if (GlobalFilters.Filters.Count == 0) return;
+
+      Filter filter = GlobalFilters.Filters.FirstOrDefault(f => f.Instance.GetType().FullName.Equals("System.Web.Mvc.HandleErrorAttribute"));
+      if (filter != null)
       {
-        Filter filter = GlobalFilters.Filters.FirstOrDefault();
-        if (filter != null && filter.Instance.GetType().FullName.Equals("System.Web.Mvc.HandleErrorAttribute"))
-        {
-          GlobalFilters.Filters.Add(new RaygunExceptionFilterAttribute(context, module));
-        }
+        GlobalFilters.Filters.Add(new RaygunExceptionFilterAttribute(context, module));
       }
     }
   }
