@@ -6,6 +6,27 @@ namespace Mindscape.Raygun4Net.Builders
 {
   public abstract class RaygunErrorMessageBuilderBase
   {
+    protected static string FormatTypeName(Type type, bool fullName)
+    {
+      string name = fullName ? type.FullName : type.Name;
+      if (!type.IsGenericType)
+      {
+        return name;
+      }
+
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.Append(name.Substring(0, name.IndexOf("`")));
+      stringBuilder.Append("<");
+      foreach (Type t in type.GetGenericArguments())
+      {
+        stringBuilder.Append(FormatTypeName(t, false)).Append(",");
+      }
+      stringBuilder.Remove(stringBuilder.Length - 1, 1);
+      stringBuilder.Append(">");
+
+      return stringBuilder.ToString();
+    }
+
     protected static string GenerateMethodName(MethodBase method)
     {
       var stringBuilder = new StringBuilder();

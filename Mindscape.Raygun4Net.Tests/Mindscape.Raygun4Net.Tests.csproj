@@ -51,6 +51,7 @@
     <Compile Include="Model\FakeHttpApplication.cs" />
     <Compile Include="Model\FakeRaygunClient.cs" />
     <Compile Include="Model\FakeRaygunHttpModule.cs" />
+    <Compile Include="Model\GenericException.cs" />
     <Compile Include="Model\WrapperException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaygunClientBaseTests.cs" />

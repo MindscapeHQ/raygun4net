@@ -6,7 +6,7 @@ using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net.Builders
 {
-  public static class RaygunErrorMessageBuilder
+  public class RaygunErrorMessageBuilder : RaygunErrorMessageBuilderBase
   {
     public static RaygunErrorMessage Build(Exception exception)
     {
@@ -15,7 +15,7 @@ namespace Mindscape.Raygun4Net.Builders
       var exceptionType = exception.GetType();
 
       message.Message = exception.Message;
-      message.ClassName = exceptionType.FullName;
+      message.ClassName = FormatTypeName(exceptionType, true);
 
       message.StackTrace = BuildStackTrace(exception);
       message.Data = exception.Data;

@@ -60,6 +60,9 @@
     <Compile Include="..\Mindscape.Raygun4Net.WindowsStore\Messages\RaygunMessageDetails.cs">
       <Link>Messages\RaygunMessageDetails.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Builders\RaygunErrorMessageBuilderBase.cs">
+      <Link>Builders\RaygunErrorMessageBuilderBase.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
       <Link>IRaygunMessageBuilder.cs</Link>
     </Compile>
