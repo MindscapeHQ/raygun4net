@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
+using Mindscape.Raygun4Net.Tests.Model;
 using NUnit.Framework;
 
 namespace Mindscape.Raygun4Net.Tests
@@ -32,6 +34,20 @@ namespace Mindscape.Raygun4Net.Tests
     public void ExceptionBuilds()
     {
       Assert.That(() => RaygunErrorMessageBuilder.Build(_exception), Throws.Nothing);
+    }
+
+    [Test]
+    public void FormatGenericExceptionClassName()
+    {
+      var message = RaygunErrorMessageBuilder.Build(new GenericException<Dictionary<string, List<object>>>());
+      Assert.AreEqual("Mindscape.Raygun4Net.Tests.Model.GenericException<Dictionary<String,List<Object>>>", message.ClassName);
+    }
+
+    [Test]
+    public void IncludeNamespaceInExceptionClassName()
+    {
+      var message = RaygunErrorMessageBuilder.Build(_exception);
+      Assert.AreEqual("System.InvalidOperationException", message.ClassName);
     }
   }
 }
