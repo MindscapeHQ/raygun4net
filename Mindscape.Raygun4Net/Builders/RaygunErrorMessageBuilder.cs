@@ -18,7 +18,7 @@ namespace Mindscape.Raygun4Net.Builders
       var exceptionType = exception.GetType();
 
       message.Message = exception.Message;
-      message.ClassName = FormatFullTypeName(exceptionType);
+      message.ClassName = FormatTypeName(exceptionType, true);
 
       message.StackTrace = BuildStackTrace(exception);
 
@@ -41,40 +41,6 @@ namespace Mindscape.Raygun4Net.Builders
       }
 
       return message;
-    }
-
-    private static string FormatFullTypeName(Type type)
-    {
-      if (!type.IsGenericType)
-      {
-        return type.FullName;
-      }
-
-      StringBuilder stringBuilder = new StringBuilder();
-      stringBuilder.Append(type.FullName.Substring(0, type.FullName.LastIndexOf("`")));
-      stringBuilder.Append("<");
-      type.GetGenericArguments().Aggregate(stringBuilder, (a, t) => a.Append(FormatTypeName(t)).Append(","));
-      stringBuilder.Remove(stringBuilder.Length - 1, 1);
-      stringBuilder.Append(">");
-
-      return stringBuilder.ToString();
-    }
-
-    private static string FormatTypeName(Type type)
-    {
-      if (!type.IsGenericType)
-      {
-        return type.Name;
-      }
-
-      StringBuilder stringBuilder = new StringBuilder();
-      stringBuilder.Append(type.Name.Substring(0, type.Name.LastIndexOf("`")));
-      stringBuilder.Append("<");
-      type.GetGenericArguments().Aggregate(stringBuilder, (a, t) => a.Append(FormatTypeName(t)).Append(","));
-      stringBuilder.Remove(stringBuilder.Length - 1, 1);
-      stringBuilder.Append(">");
-
-      return stringBuilder.ToString();
     }
 
     private static RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
