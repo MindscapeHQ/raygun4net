@@ -89,5 +89,12 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     public abstract void Send(Exception exception);
+
+    /// <summary>
+    /// Posts a RaygunMessage to the Raygun.io api endpoint.
+    /// </summary>
+    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
+    /// set to a valid DateTime and as much of the Details property as is available.</param>
+    public abstract void Send(RaygunMessage raygunMessage);
   }
 }
