@@ -88,6 +88,23 @@ namespace Mindscape.Raygun4Net.Tests
       Assert.AreEqual("{\"Array\":[null],\"Dictionary\":{},\"GenericDictionary\":{}}", json);
     }
 
+    // Type tests
+
+    [Test]
+    public void SerializeTypeObject()
+    {
+      string json = SimpleJson.SerializeObject(typeof(FakeRaygunClient));
+      Assert.AreEqual("\"Mindscape.Raygun4Net.Tests.FakeRaygunClient, Mindscape.Raygun4Net.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"", json);
+    }
+
+    [Test]
+    public void SerializeTypeProperty()
+    {
+      var o = new { Type = typeof(FakeRaygunClient) };
+      string json = SimpleJson.SerializeObject(o);
+      Assert.AreEqual("{\"Type\":\"Mindscape.Raygun4Net.Tests.FakeRaygunClient, Mindscape.Raygun4Net.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"}", json);
+    }
+
     // Cyclic object structure tests
 
     [Test]

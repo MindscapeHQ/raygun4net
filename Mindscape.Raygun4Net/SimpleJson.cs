@@ -1552,6 +1552,8 @@ namespace Mindscape.Raygun4Net
         output = ((Guid)input).ToString("D");
       else if (input is Uri)
         output = input.ToString();
+      else if (input is Type)
+        output = ((Type)input).AssemblyQualifiedName;
       else
       {
         Enum inputEnum = input as Enum;
