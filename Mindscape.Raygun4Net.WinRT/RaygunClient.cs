@@ -197,7 +197,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that is to be sent along with the message.</param>
     public void Send(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
     {
-      StripAndSend(exception, tags, userCustomData);
+      StripAndSend(exception, tags, userCustomData, null);
     }
 
     public async void Send(RaygunMessage raygunMessage)
@@ -234,10 +234,11 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime)
     {
       var message = RaygunMessageBuilder.New
           .SetEnvironmentDetails()
+          .SetTimeStamp(currentTime)
           .SetMachineName(NetworkInformation.GetHostNames()[0].DisplayName)
           .SetExceptionDetails(exception)
           .SetClientDetails()
@@ -250,11 +251,11 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 
-    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
+    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime)
     {
       foreach (Exception e in StripWrapperExceptions(exception))
       {
-        Send(BuildMessage(e, tags, userCustomData));
+        Send(BuildMessage(e, tags, userCustomData, currentTime));
       }
     }
 

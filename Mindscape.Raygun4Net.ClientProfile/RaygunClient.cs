@@ -135,7 +135,7 @@ namespace Mindscape.Raygun4Net
     {
       if (CanSend(exception))
       {
-        Send(BuildMessage(exception, tags, userCustomData, userInfo));
+        Send(BuildMessage(exception, tags, userCustomData, userInfo, null));
         FlagAsSent(exception);
       }
     }
@@ -179,13 +179,14 @@ namespace Mindscape.Raygun4Net
     /// <param name="userInfo">Information about the user including the identity string.</param>
     public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo)
     {
+      DateTime? currentTime = DateTime.UtcNow;
       if (CanSend(exception))
       {
         ThreadPool.QueueUserWorkItem(c =>
         {
           try
           {
-            Send(BuildMessage(exception, tags, userCustomData, userInfo));
+            Send(BuildMessage(exception, tags, userCustomData, userInfo, currentTime));
           }
           catch (Exception)
           {
@@ -213,15 +214,16 @@ namespace Mindscape.Raygun4Net
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      return BuildMessage(exception, tags, userCustomData, null);
+      return BuildMessage(exception, tags, userCustomData, null, null);
     }
 
-    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfoMessage)
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfoMessage, DateTime? currentTime)
     {
       exception = StripWrapperExceptions(exception);
 
       var message = RaygunMessageBuilder.New
         .SetEnvironmentDetails()
+        .SetTimeStamp(currentTime)
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)
         .SetClientDetails()
@@ -248,7 +250,7 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public void Send(RaygunMessage raygunMessage)
+    public override void Send(RaygunMessage raygunMessage)
     {
       if (ValidateApiKey())
       {

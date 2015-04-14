@@ -353,10 +353,11 @@ namespace Mindscape.Raygun4Net.WebApi
         // We need to process the HttpRequestMessage on the current thread,
         // otherwise it will be disposed while we are using it on the other thread.
         RaygunRequestMessage currentRequestMessage = BuildRequestMessage();
+        DateTime currentTime = DateTime.UtcNow;
 
         ThreadPool.QueueUserWorkItem(c => {
           _currentRequestMessage.Value = currentRequestMessage;
-          StripAndSend(exception, tags, userCustomData);
+          StripAndSend(exception, tags, userCustomData, currentTime);
         });
         FlagAsSent(exception);
       }
@@ -390,10 +391,11 @@ namespace Mindscape.Raygun4Net.WebApi
       return this;
     }
 
-    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime = null)
     {
       var message = RaygunWebApiMessageBuilder.New
         .SetHttpDetails(_currentRequestMessage.Value)
+        .SetTimeStamp(currentTime)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)
@@ -406,11 +408,11 @@ namespace Mindscape.Raygun4Net.WebApi
       return message;
     }
 
-    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
+    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime = null)
     {
       foreach (Exception e in StripWrapperExceptions(exception))
       {
-        Send(BuildMessage(e, tags, userCustomData));
+        Send(BuildMessage(e, tags, userCustomData, currentTime));
       }
     }
 

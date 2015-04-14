@@ -20,7 +20,7 @@ namespace Mindscape.Raygun4Net.WinRT.Tests
 
     public RaygunMessage ExposeBuildMessage(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
     {
-      return BuildMessage(exception, tags, userCustomData);
+      return BuildMessage(exception, tags, userCustomData, null);
     }
 
     public bool ExposeOnSendingMessage(RaygunMessage raygunMessage)
