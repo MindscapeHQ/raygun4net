@@ -21,6 +21,13 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       _module.Init(new System.Web.HttpApplication());
     }
 
+    [TearDown]
+    public void TearDown()
+    {
+      GlobalFilters.Filters.Clear();
+      RaygunSettings.Settings.ExcludeHttpStatusCodesList = "";
+    }
+
     [Test]
     public void CanSend()
     {
@@ -35,8 +42,6 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       _module.Init(new System.Web.HttpApplication());
 
       Assert.IsTrue(_module.ExposeCanSend(new InvalidOperationException()));
-
-      RaygunSettings.Settings.ExcludeHttpStatusCodesList = ""; // Revert for other tests
     }
 
     [Test]
@@ -46,8 +51,6 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       _module.Init(new System.Web.HttpApplication());
 
       Assert.IsTrue(_module.ExposeCanSend(new HttpException(500, "Error message")));
-
-      RaygunSettings.Settings.ExcludeHttpStatusCodesList = ""; // Revert for other tests
     }
 
     [Test]
@@ -57,8 +60,6 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       _module.Init(new System.Web.HttpApplication());
 
       Assert.IsFalse(_module.ExposeCanSend(new HttpException(404, "Not Found")));
-
-      RaygunSettings.Settings.ExcludeHttpStatusCodesList = ""; // Revert for other tests
     }
 
     // GetRaygunClient tests
@@ -78,7 +79,7 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
     // Global filter tests
 
     [Test]
-    public void AddRaygunFilterIfOnlyHandleErrorAttributeIsPresent()
+    public void AddRaygunFilterIfHandleErrorAttributeIsPresent()
     {
       GlobalFilters.Filters.Add(new HandleErrorAttribute());
       Assert.AreEqual(1, GlobalFilters.Filters.Count);
@@ -88,8 +89,6 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
 
       Assert.IsTrue(HasRaygunFilter);
       Assert.AreEqual(2, GlobalFilters.Filters.Count);
-
-      GlobalFilters.Filters.Clear(); // Revert for other tests
     }
 
     [Test]
@@ -101,12 +100,10 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
 
       Assert.IsFalse(HasRaygunFilter);
       Assert.AreEqual(0, GlobalFilters.Filters.Count);
-
-      GlobalFilters.Filters.Clear(); // Revert for other tests
     }
 
     [Test]
-    public void DoNotAddRaygunFilterIfMoreThanHandleErrorAttributeIsPresent()
+    public void CanAddRaygunFilterIfMoreThanHandleErrorAttributeIsPresent()
     {
       GlobalFilters.Filters.Add(new HandleErrorAttribute());
       GlobalFilters.Filters.Add(new FakeFilterAttribute());
@@ -115,10 +112,8 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
 
       _module.Init(new System.Web.HttpApplication());
 
-      Assert.IsFalse(HasRaygunFilter);
-      Assert.AreEqual(2, GlobalFilters.Filters.Count);
-
-      GlobalFilters.Filters.Clear(); // Revert for other tests
+      Assert.IsTrue(HasRaygunFilter);
+      Assert.AreEqual(3, GlobalFilters.Filters.Count);
     }
 
     [Test]
@@ -132,8 +127,6 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
 
       Assert.IsFalse(HasRaygunFilter);
       Assert.AreEqual(1, GlobalFilters.Filters.Count);
-
-      GlobalFilters.Filters.Clear(); // Revert for other tests
     }
 
     [Test]
@@ -148,8 +141,6 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
 
       Assert.IsTrue(HasRaygunFilter);
       Assert.AreEqual(2, GlobalFilters.Filters.Count);
-
-      GlobalFilters.Filters.Clear(); // Revert for other tests
     }
 
     private static bool HasRaygunFilter
