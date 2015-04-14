@@ -265,7 +265,7 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public void Send(RaygunMessage raygunMessage)
+    public override void Send(RaygunMessage raygunMessage)
     {
       bool calledFromUnhandled = IsCalledFromApplicationUnhandledExceptionHandler();
       Send(raygunMessage, calledFromUnhandled, false);
