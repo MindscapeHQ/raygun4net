@@ -176,9 +176,22 @@ namespace Mindscape.Raygun4Net
 
     protected override bool CanSend(Exception exception)
     {
-      if (RaygunSettings.Settings.ExcludeErrorsFromLocal && HttpContext.Current != null && HttpContext.Current.Request.IsLocal)
+      if (RaygunSettings.Settings.ExcludeErrorsFromLocal && HttpContext.Current != null)
       {
-        return false;
+        try
+        {
+          if (HttpContext.Current.Request.IsLocal)
+          {
+            return false;
+          }
+        }
+        catch
+        {
+          if (RaygunSettings.Settings.ThrowOnError)
+          {
+            throw;
+          }
+        }
       }
       return base.CanSend(exception);
     }
