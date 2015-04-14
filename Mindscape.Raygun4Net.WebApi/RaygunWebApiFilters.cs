@@ -45,17 +45,12 @@ namespace Mindscape.Raygun4Net.WebApi
       // Don't bother processing bad StatusCodes if there is an exception attached - it will be handled by another part of the framework.
       if (context != null && context.Exception == null && context.Response != null && (int)context.Response.StatusCode >= 400)
       {
-        try
-        {
-          throw new RaygunWebApiHttpException(
-            context.Response.StatusCode,
-            context.Response.ReasonPhrase,
-            string.Format("HTTP {0} returned while handling Request {2} {1}", (int)context.Response.StatusCode, context.Request.RequestUri, context.Request.Method));
-        }
-        catch (Exception e)
-        {
-          _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(context.Request).SendInBackground(e);
-        }
+        Exception e = new RaygunWebApiHttpException(
+          context.Response.StatusCode,
+          context.Response.ReasonPhrase,
+          string.Format("HTTP {0} returned while handling Request {2} {1}", (int)context.Response.StatusCode, context.Request.RequestUri, context.Request.Method));
+
+        _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(context.Request).SendInBackground(e);
       }
     }
   }
