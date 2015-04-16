@@ -81,5 +81,14 @@ namespace Mindscape.Raygun4Net
       _raygunMessage.Details.Version = Version;
       return this;
     }
+    
+    public IRaygunMessageBuilder SetTimeStamp(DateTime? currentTime)
+    {
+      if (currentTime != null)
+      {
+        _raygunMessage.OccurredOn = currentTime.Value;
+      }
+      return this;
+    }
   }
 }

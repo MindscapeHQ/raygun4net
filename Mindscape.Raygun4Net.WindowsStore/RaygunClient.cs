@@ -464,6 +464,11 @@ namespace Mindscape.Raygun4Net
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
+      return BuildMessage(exception, tags, userCustomData, null);
+    }
+
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime)
+    {
       string version = PackageVersion;
       if (!String.IsNullOrWhiteSpace(ApplicationVersion))
       {
@@ -472,6 +477,7 @@ namespace Mindscape.Raygun4Net
 
       var message = RaygunMessageBuilder.New
           .SetEnvironmentDetails()
+          .SetTimeStamp(currentTime)
           .SetMachineName(new EasClientDeviceInformation().FriendlyName)
           .SetExceptionDetails(exception)
           .SetClientDetails()
@@ -505,18 +511,20 @@ namespace Mindscape.Raygun4Net
 
     private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
+      var currentTime = DateTime.UtcNow;
       foreach (Exception e in StripWrapperExceptions(exception))
       {
-        Send(BuildMessage(e, tags, userCustomData));
+        Send(BuildMessage(e, tags, userCustomData, currentTime));
       }
     }
 
     private async Task StripAndSendAsync(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       var tasks = new List<Task>();
+      var currentTime = DateTime.UtcNow;
       foreach (Exception e in StripWrapperExceptions(exception))
       {
-        tasks.Add(SendAsync(BuildMessage(e, tags, userCustomData)));
+        tasks.Add(SendAsync(BuildMessage(e, tags, userCustomData, currentTime)));
       }
       await Task.WhenAll(tasks);
     }

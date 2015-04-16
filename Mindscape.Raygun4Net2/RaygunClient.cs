@@ -201,7 +201,7 @@ namespace Mindscape.Raygun4Net
     {
       _currentRequestMessage = BuildRequestMessage();
 
-      Send(BuildMessage(exception, tags, userCustomData));
+      Send(BuildMessage(exception, tags, userCustomData, null));
     }
 
     /// <summary>
@@ -235,9 +235,10 @@ namespace Mindscape.Raygun4Net
       // otherwise it will be disposed while we are using it on the other thread.
       RaygunRequestMessage currentRequestMessage = BuildRequestMessage();
 
+      DateTime? currentTime = DateTime.UtcNow;
       ThreadPool.QueueUserWorkItem(c => {
         _currentRequestMessage = currentRequestMessage;
-        Send(BuildMessage(exception, tags, userCustomData));
+        Send(BuildMessage(exception, tags, userCustomData, currentTime));
       });
     }
 
@@ -275,10 +276,16 @@ namespace Mindscape.Raygun4Net
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
+      return BuildMessage(exception, tags, userCustomData, null);
+    }
+
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime)
+    {
       exception = StripWrapperExceptions(exception);
 
       var message = RaygunMessageBuilder.New
         .SetHttpDetails(_currentRequestMessage)
+        .SetTimeStamp(currentTime)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)

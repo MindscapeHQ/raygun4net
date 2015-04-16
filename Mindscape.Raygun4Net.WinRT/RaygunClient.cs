@@ -236,8 +236,14 @@ namespace Mindscape.Raygun4Net
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
+      return BuildMessage(exception, tags, userCustomData, null);
+    }
+
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime)
+    {
       var message = RaygunMessageBuilder.New
           .SetEnvironmentDetails()
+          .SetTimeStamp(currentTime)
           .SetMachineName(NetworkInformation.GetHostNames()[0].DisplayName)
           .SetExceptionDetails(exception)
           .SetClientDetails()
@@ -252,9 +258,10 @@ namespace Mindscape.Raygun4Net
 
     private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
+      var currentTime = DateTime.UtcNow;
       foreach (Exception e in StripWrapperExceptions(exception))
       {
-        Send(BuildMessage(e, tags, userCustomData));
+        Send(BuildMessage(e, tags, userCustomData, currentTime));
       }
     }
 

@@ -244,7 +244,7 @@ namespace Mindscape.Raygun4Net
       {
         _currentRequestMessage = BuildRequestMessage();
 
-        Send(BuildMessage(exception, tags, userCustomData, userInfo));
+        Send(BuildMessage(exception, tags, userCustomData, userInfo, null));
         FlagAsSent(exception);
       }
     }
@@ -293,13 +293,14 @@ namespace Mindscape.Raygun4Net
         // We need to process the HttpRequestMessage on the current thread,
         // otherwise it will be disposed while we are using it on the other thread.
         RaygunRequestMessage currentRequestMessage = BuildRequestMessage();
-
+        DateTime currentTime = DateTime.UtcNow;
+        
         ThreadPool.QueueUserWorkItem(c =>
         {
           try
           {
             _currentRequestMessage = currentRequestMessage;
-            Send(BuildMessage(exception, tags, userCustomData, userInfo));
+            Send(BuildMessage(exception, tags, userCustomData, userInfo, currentTime));
           }
           catch (Exception)
           {
@@ -352,15 +353,21 @@ namespace Mindscape.Raygun4Net
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      return BuildMessage(exception, tags, userCustomData, null);
+      return BuildMessage(exception, tags, userCustomData, null, null);
     }
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfoMessage)
+    {
+      return BuildMessage(exception, tags, userCustomData, userInfoMessage, null);
+    }
+
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfoMessage, DateTime? currentTime)
     {
       exception = StripWrapperExceptions(exception);
 
       var message = RaygunMessageBuilder.New
         .SetHttpDetails(_currentRequestMessage)
+        .SetTimeStamp(currentTime)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)
