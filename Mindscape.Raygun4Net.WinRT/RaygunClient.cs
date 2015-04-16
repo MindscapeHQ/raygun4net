@@ -197,7 +197,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that is to be sent along with the message.</param>
     public void Send(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
     {
-      StripAndSend(exception, tags, userCustomData, null);
+      StripAndSend(exception, tags, userCustomData);
     }
 
     public async void Send(RaygunMessage raygunMessage)
@@ -251,8 +251,9 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 
-    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime)
+    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
+      var currentTime = DateTime.UtcNow;
       foreach (Exception e in StripWrapperExceptions(exception))
       {
         Send(BuildMessage(e, tags, userCustomData, currentTime));
