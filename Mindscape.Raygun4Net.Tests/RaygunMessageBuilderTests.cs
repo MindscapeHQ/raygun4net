@@ -44,6 +44,28 @@ namespace Mindscape.Raygun4Net.Tests
       Assert.AreEqual("Not supplied", message.Details.Version);
     }
 
+    [Test]
+    public void OccurredOnIsNow()
+    {
+      RaygunMessage message = _builder.Build();
+      Assert.IsTrue((DateTime.UtcNow - message.OccurredOn).TotalSeconds < 1);
+    }
+
+    [Test]
+    public void SetTimeStamp()
+    {
+      DateTime time = new DateTime(2015, 2, 16);
+      RaygunMessage message = _builder.SetTimeStamp(time).Build();
+      Assert.AreEqual(time, message.OccurredOn);
+    }
+
+    [Test]
+    public void SetNullTimeStamp()
+    {
+      RaygunMessage message = _builder.SetTimeStamp(null).Build();
+      Assert.IsTrue((DateTime.UtcNow - message.OccurredOn).TotalSeconds < 1);
+    }
+
     // Response tests
 
     [Test]
