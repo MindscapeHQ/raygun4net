@@ -63,23 +63,30 @@ namespace Mindscape.Raygun4Net
         _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = code, StatusDescription = description };
       }
 
-      WebException webError = exception as WebException;
-      if (webError != null)
+      try
       {
-        if (webError.Status == WebExceptionStatus.ProtocolError && webError.Response is HttpWebResponse)
+        WebException webError = exception as WebException;
+        if (webError != null)
         {
-          HttpWebResponse response = (HttpWebResponse)webError.Response;
-          _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = (int)response.StatusCode, StatusDescription = response.StatusDescription };
+          if (webError.Status == WebExceptionStatus.ProtocolError && webError.Response is HttpWebResponse)
+          {
+            HttpWebResponse response = (HttpWebResponse)webError.Response;
+            _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = (int)response.StatusCode, StatusDescription = response.StatusDescription };
+          }
+          else if (webError.Status == WebExceptionStatus.ProtocolError && webError.Response is FtpWebResponse)
+          {
+            FtpWebResponse response = (FtpWebResponse)webError.Response;
+            _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = (int)response.StatusCode, StatusDescription = response.StatusDescription };
+          }
+          else
+          {
+            _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusDescription = webError.Status.ToString() };
+          }
         }
-        else if (webError.Status == WebExceptionStatus.ProtocolError && webError.Response is FtpWebResponse)
-        {
-          FtpWebResponse response = (FtpWebResponse)webError.Response;
-          _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = (int)response.StatusCode, StatusDescription = response.StatusDescription };
-        }
-        else
-        {
-          _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusDescription = webError.Status.ToString() };
-        }
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Trace.WriteLine("Error retrieving response info {0}", ex.Message);
       }
 
       return this;
