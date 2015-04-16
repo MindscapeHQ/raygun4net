@@ -20,7 +20,7 @@ namespace Mindscape.Raygun4Net.Tests
 
     public RaygunMessage ExposeBuildMessage(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData, [Optional] RaygunIdentifierMessage userIdentifierMessage)
     {
-      return BuildMessage(exception, tags, userCustomData, userIdentifierMessage, null);
+      return BuildMessage(exception, tags, userCustomData, userIdentifierMessage);
     }
 
     public WebClient ExposeCreateWebClient()

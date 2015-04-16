@@ -17,7 +17,7 @@ namespace Mindscape.Raygun4Net2.Tests
 
     public RaygunMessage ExposeBuildMessage(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
     {
-      return BuildMessage(exception, tags, userCustomData, null);
+      return BuildMessage(exception, tags, userCustomData);
     }
 
     public bool ExposeValidateApiKey()
