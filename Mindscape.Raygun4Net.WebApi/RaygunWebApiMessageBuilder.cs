@@ -144,8 +144,10 @@ namespace Mindscape.Raygun4Net.WebApi
 
     public IRaygunMessageBuilder SetTimeStamp(DateTime? currentTime)
     {
-      if(currentTime != null)
+      if (currentTime != null)
+      {
         _raygunMessage.OccurredOn = currentTime.Value;
+      }
       return this;
     }
   }
