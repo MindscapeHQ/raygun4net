@@ -217,6 +217,11 @@ namespace Mindscape.Raygun4Net
       return BuildMessage(exception, tags, userCustomData, null, null);
     }
 
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfoMessage)
+    {
+      return BuildMessage(exception, tags, userCustomData, userInfoMessage, null);
+    }
+
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfoMessage, DateTime? currentTime)
     {
       exception = StripWrapperExceptions(exception);

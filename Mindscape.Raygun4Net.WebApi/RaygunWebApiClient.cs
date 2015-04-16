@@ -391,6 +391,11 @@ namespace Mindscape.Raygun4Net.WebApi
       return this;
     }
 
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    {
+      return BuildMessage(exception, tags, userCustomData, null);
+    }
+
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime = null)
     {
       var message = RaygunWebApiMessageBuilder.New
