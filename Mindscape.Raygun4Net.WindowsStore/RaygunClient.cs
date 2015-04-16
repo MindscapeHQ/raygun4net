@@ -462,6 +462,11 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    {
+      return BuildMessage(exception, tags, userCustomData, null);
+    }
+
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime)
     {
       string version = PackageVersion;
