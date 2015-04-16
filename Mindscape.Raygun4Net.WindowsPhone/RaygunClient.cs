@@ -204,7 +204,7 @@ namespace Mindscape.Raygun4Net
       {
         bool handled = args.Handled;
         args.Handled = true;
-        Send(BuildMessage(args.ExceptionObject, tags, userCustomData, null), false, !handled);
+        Send(BuildMessage(args.ExceptionObject, tags, userCustomData), false, !handled);
       }
     }
 
@@ -256,7 +256,7 @@ namespace Mindscape.Raygun4Net
     {
       if (!(exception is ExitException))
       {
-        Send(BuildMessage(exception, tags, userCustomData, null), calledFromUnhandled, false);
+        Send(BuildMessage(exception, tags, userCustomData), calledFromUnhandled, false);
       }
     }
 
@@ -479,7 +479,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime)
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       exception = StripWrapperExceptions(exception);
 
@@ -494,7 +494,6 @@ namespace Mindscape.Raygun4Net
 
       var message = RaygunMessageBuilder.New
           .SetEnvironmentDetails()
-          .SetTimeStamp(currentTime)
           .SetMachineName(deviceName.ToString())
           .SetExceptionDetails(exception)
           .SetClientDetails()
