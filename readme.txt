@@ -28,6 +28,7 @@ Supported platforms/frameworks
 Projects built with the following frameworks are supported:
 
 * .NET 2.0, 3.5, 4.0, 4.5
+* .NET 3.5 and 4.0 Client Profile
 * ASP.NET
 * WinForms, WPF, console apps etc.
 * Windows Store apps (universal) for Windows 8.1 and Windows Phone 8.1

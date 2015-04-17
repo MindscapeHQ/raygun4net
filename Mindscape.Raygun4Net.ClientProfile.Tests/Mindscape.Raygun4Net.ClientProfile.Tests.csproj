@@ -55,6 +55,9 @@
     <Compile Include="..\Mindscape.Raygun4Net.Tests\Model\FakeRaygunClient.cs">
       <Link>Model\FakeRaygunClient.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net.Tests\Model\GenericException.cs">
+      <Link>Model\GenericException.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net.Tests\Model\WrapperException.cs">
       <Link>Model\WrapperException.cs</Link>
     </Compile>
