@@ -103,6 +103,9 @@ namespace Mindscape.Raygun4Net.AspNet5.Builders
       }
       else
       {
+        _raygunMessage.Details.Version = "Not supplied";
+
+        /*
         var entryAssembly = Assembly.GetEntryAssembly();
         if (entryAssembly != null)
         {
@@ -112,6 +115,7 @@ namespace Mindscape.Raygun4Net.AspNet5.Builders
         {
           _raygunMessage.Details.Version = "Not supplied";
         }
+        */
       }
       return this;
     }
