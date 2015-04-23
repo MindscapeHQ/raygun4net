@@ -13,6 +13,9 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunClient : RaygunClientBase
   {
+    private static int _queueDepth = 0;
+    private static object _queueDepthLock = new object();
+
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
 
@@ -182,6 +185,15 @@ namespace Mindscape.Raygun4Net
       DateTime? currentTime = DateTime.UtcNow;
       if (CanSend(exception))
       {
+        lock (_queueDepthLock)
+        {
+          if (_queueDepth < RaygunSettings.Settings.MaximumQueueDepth)
+          {
+            _queueDepth++;
+          }
+          else return;
+        }
+
         ThreadPool.QueueUserWorkItem(c =>
         {
           try
@@ -197,6 +209,13 @@ namespace Mindscape.Raygun4Net
               throw;
             }
           }
+          finally
+          {
+            lock (_queueDepthLock)
+            {
+              _queueDepth--;
+            }
+          }
         });
         FlagAsSent(exception);
       }
@@ -209,7 +228,29 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void SendInBackground(RaygunMessage raygunMessage)
     {
-      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+      lock (_queueDepthLock)
+      {
+        if (_queueDepth < RaygunSettings.Settings.MaximumQueueDepth)
+        {
+          _queueDepth++;
+        }
+        else return;
+      }
+
+      ThreadPool.QueueUserWorkItem(c =>
+      {
+        try
+        {
+          Send(raygunMessage);
+        }
+        finally
+        {
+          lock (_queueDepthLock)
+          {
+            _queueDepth--;
+          }
+        }
+      });
     }
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
