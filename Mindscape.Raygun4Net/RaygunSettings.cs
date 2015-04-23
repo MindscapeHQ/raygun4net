@@ -106,6 +106,13 @@ namespace Mindscape.Raygun4Net
         set { this["applicationVersion"] = value; }
     }
 
+    [ConfigurationProperty("maximumQueueDepth", IsRequired = false, DefaultValue = 1000)]
+    public int MaximumQueueDepth
+    {
+      get { return (int)this["maximumQueueDepth"]; }
+      set { this["maximumQueueDepth"] = value; }
+    }
+
     /// <summary>
     /// Return false.
     /// </summary>
