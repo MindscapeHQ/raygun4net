@@ -17,6 +17,9 @@ namespace Mindscape.Raygun4Net.WebApi
 {
   public class RaygunWebApiClient : RaygunClientBase
   {
+    private static int _queueDepth = 0;
+    private static object _queueDepthLock = new object();
+
     private readonly string _apiKey;
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private readonly List<Type> _wrapperExceptions = new List<Type>();
@@ -355,9 +358,28 @@ namespace Mindscape.Raygun4Net.WebApi
         RaygunRequestMessage currentRequestMessage = BuildRequestMessage();
         DateTime currentTime = DateTime.UtcNow;
 
+        lock (_queueDepthLock)
+        {
+          if (_queueDepth < RaygunSettings.Settings.MaximumQueueDepth)
+          {
+            _queueDepth++;
+          }
+          else return;
+        }
+
         ThreadPool.QueueUserWorkItem(c => {
-          _currentRequestMessage.Value = currentRequestMessage;
-          StripAndSend(exception, tags, userCustomData, currentTime);
+          try
+          {
+            _currentRequestMessage.Value = currentRequestMessage;
+            StripAndSend(exception, tags, userCustomData, currentTime);
+          }
+          finally
+          {
+            lock (_queueDepthLock)
+            {
+              _queueDepth--;
+            }
+          }
         });
         FlagAsSent(exception);
       }
@@ -370,7 +392,29 @@ namespace Mindscape.Raygun4Net.WebApi
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void SendInBackground(RaygunMessage raygunMessage)
     {
-      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+      lock (_queueDepthLock)
+      {
+        if (_queueDepth < RaygunSettings.Settings.MaximumQueueDepth)
+        {
+          _queueDepth++;
+        }
+        else return;
+      }
+
+      ThreadPool.QueueUserWorkItem(c =>
+      {
+        try
+        {
+          Send(raygunMessage);
+        }
+        finally
+        {
+          lock (_queueDepthLock)
+          {
+            _queueDepth--;
+          }
+        }
+      });
     }
 
     internal void FlagExceptionAsSent(Exception exception)
