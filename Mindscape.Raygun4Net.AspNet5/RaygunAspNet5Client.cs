@@ -346,7 +346,7 @@ namespace Mindscape.Raygun4Net.AspNet5
             }
             catch (Exception ex)
             {
-              System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+              System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
 
               if (_settings.ThrowOnError)
               {
