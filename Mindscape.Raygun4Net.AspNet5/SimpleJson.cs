@@ -545,7 +545,7 @@ namespace Mindscape.Raygun4Net
       object obj;
       if (TryDeserializeObject(json, out obj))
         return obj;
-      throw new SerializationException("Invalid JSON string");
+      throw new Exception("Invalid JSON string");
     }
 
     /// <summary>
@@ -1585,84 +1585,6 @@ namespace Mindscape.Raygun4Net
     }
   }
 
-#if SIMPLE_JSON_DATACONTRACT
-    [GeneratedCode("simple-json", "1.0.0")]
-#if SIMPLE_JSON_INTERNAL
-    internal
-#else
-    public
-#endif
- class DataContractJsonSerializerStrategy : PocoJsonSerializerStrategy
-    {
-        public DataContractJsonSerializerStrategy()
-        {
-            GetCache = new ReflectionUtils.ThreadSafeDictionary<Type, IDictionary<string, ReflectionUtils.GetDelegate>>(GetterValueFactory);
-            SetCache = new ReflectionUtils.ThreadSafeDictionary<Type, IDictionary<string, KeyValuePair<Type, ReflectionUtils.SetDelegate>>>(SetterValueFactory);
-        }
-
-        internal override IDictionary<string, ReflectionUtils.GetDelegate> GetterValueFactory(Type type)
-        {
-            bool hasDataContract = ReflectionUtils.GetAttribute(type, typeof(DataContractAttribute)) != null;
-            if (!hasDataContract)
-                return base.GetterValueFactory(type);
-            string jsonKey;
-            IDictionary<string, ReflectionUtils.GetDelegate> result = new Dictionary<string, ReflectionUtils.GetDelegate>();
-            foreach (PropertyInfo propertyInfo in ReflectionUtils.GetProperties(type))
-            {
-                if (propertyInfo.CanRead)
-                {
-                    MethodInfo getMethod = ReflectionUtils.GetGetterMethodInfo(propertyInfo);
-                    if (!getMethod.IsStatic && CanAdd(propertyInfo, out jsonKey))
-                        result[jsonKey] = ReflectionUtils.GetGetMethod(propertyInfo);
-                }
-            }
-            foreach (FieldInfo fieldInfo in ReflectionUtils.GetFields(type))
-            {
-                if (!fieldInfo.IsStatic && CanAdd(fieldInfo, out jsonKey))
-                    result[jsonKey] = ReflectionUtils.GetGetMethod(fieldInfo);
-            }
-            return result;
-        }
-
-        internal override IDictionary<string, KeyValuePair<Type, ReflectionUtils.SetDelegate>> SetterValueFactory(Type type)
-        {
-            bool hasDataContract = ReflectionUtils.GetAttribute(type, typeof(DataContractAttribute)) != null;
-            if (!hasDataContract)
-                return base.SetterValueFactory(type);
-            string jsonKey;
-            IDictionary<string, KeyValuePair<Type, ReflectionUtils.SetDelegate>> result = new Dictionary<string, KeyValuePair<Type, ReflectionUtils.SetDelegate>>();
-            foreach (PropertyInfo propertyInfo in ReflectionUtils.GetProperties(type))
-            {
-                if (propertyInfo.CanWrite)
-                {
-                    MethodInfo setMethod = ReflectionUtils.GetSetterMethodInfo(propertyInfo);
-                    if (!setMethod.IsStatic && CanAdd(propertyInfo, out jsonKey))
-                        result[jsonKey] = new KeyValuePair<Type, ReflectionUtils.SetDelegate>(propertyInfo.PropertyType, ReflectionUtils.GetSetMethod(propertyInfo));
-                }
-            }
-            foreach (FieldInfo fieldInfo in ReflectionUtils.GetFields(type))
-            {
-                if (!fieldInfo.IsInitOnly && !fieldInfo.IsStatic && CanAdd(fieldInfo, out jsonKey))
-                    result[jsonKey] = new KeyValuePair<Type, ReflectionUtils.SetDelegate>(fieldInfo.FieldType, ReflectionUtils.GetSetMethod(fieldInfo));
-            }
-            // todo implement sorting for DATACONTRACT.
-            return result;
-        }
-
-        private static bool CanAdd(MemberInfo info, out string jsonKey)
-        {
-            jsonKey = null;
-            if (ReflectionUtils.GetAttribute(info, typeof(IgnoreDataMemberAttribute)) != null)
-                return false;
-            DataMemberAttribute dataMemberAttribute = (DataMemberAttribute)ReflectionUtils.GetAttribute(info, typeof(DataMemberAttribute));
-            if (dataMemberAttribute == null)
-                return false;
-            jsonKey = string.IsNullOrEmpty(dataMemberAttribute.Name) ? info.Name : dataMemberAttribute.Name;
-            return true;
-        }
-    }
-
-#endif
 
   namespace Reflection
   {
@@ -1696,18 +1618,6 @@ namespace Mindscape.Raygun4Net
       }
 #endif
 
-      public static Attribute GetAttribute(MemberInfo info, Type type)
-      {
-#if SIMPLE_JSON_TYPEINFO
-                if (info == null || type == null || !info.IsDefined(type))
-                    return null;
-                return info.GetCustomAttribute(type);
-#else
-        if (info == null || type == null || !Attribute.IsDefined(info, type))
-          return null;
-        return Attribute.GetCustomAttribute(info, type);
-#endif
-      }
 
       public static Type GetGenericListElementType(Type type)
       {
@@ -1728,19 +1638,6 @@ namespace Mindscape.Raygun4Net
         return GetGenericTypeArguments(type)[0];
       }
 
-      public static Attribute GetAttribute(Type objectType, Type attributeType)
-      {
-
-#if SIMPLE_JSON_TYPEINFO
-                if (objectType == null || attributeType == null || !objectType.GetTypeInfo().IsDefined(attributeType))
-                    return null;
-                return objectType.GetTypeInfo().GetCustomAttribute(attributeType);
-#else
-        if (objectType == null || attributeType == null || !Attribute.IsDefined(objectType, attributeType))
-          return null;
-        return Attribute.GetCustomAttribute(objectType, attributeType);
-#endif
-      }
 
       public static Type[] GetGenericTypeArguments(Type type)
       {
@@ -1753,7 +1650,7 @@ namespace Mindscape.Raygun4Net
 
       public static bool IsTypeGeneric(Type type)
       {
-        return GetTypeInfo(type).IsGenericType;
+        return GetTypeInfo(type).GetGenericArguments().Length > 0;
       }
 
       public static bool IsTypeGenericeCollectionInterface(Type type)
@@ -1787,7 +1684,7 @@ namespace Mindscape.Raygun4Net
         if (typeof(System.Collections.IDictionary).IsAssignableFrom(type))
           return true;
 #endif
-        if (!GetTypeInfo(type).IsGenericType)
+        if (!IsTypeGeneric(GetTypeInfo(type)))
           return false;
 
         Type genericDefinition = type.GetGenericTypeDefinition();
@@ -1796,7 +1693,7 @@ namespace Mindscape.Raygun4Net
 
       public static bool IsNullableType(Type type)
       {
-        return GetTypeInfo(type).IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+        return IsTypeGeneric(GetTypeInfo(type)) && type.GetGenericTypeDefinition() == typeof(Nullable<>);
       }
 
       public static object ToNullableType(object obj, Type nullableType)
