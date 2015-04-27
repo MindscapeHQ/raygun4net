@@ -178,7 +178,13 @@ The Mvc and WebApi NuGet packages can be installed in the same project.
 
 As of version 4.0.0, WebApi support has been moved into a new NuGet package.
 If you have a WebApi project, please uninstall the Raygun4Net NuGet package and install the Mindscape.Raygun4Net.WebApi NuGet package instead.
-The NuGet package will include a readme containing everything you need to know about using it.
+
+Once the package is installed, go to the WebApiConfig class in your project.
+In the static Register method, call the static RaygunWebApiClient.Attach method.
+
+```csharp
+RaygunWebApiClient.Attach(config);
+```
 
 The Mvc and WebApi NuGet packages can be installed in the same project.
 
