@@ -73,13 +73,18 @@ namespace Mindscape.Raygun4Net.WebApi
     {
     }
 
+    public static void Attach(HttpConfiguration config)
+    {
+      AttachInternal(config);
+    }
+
     /// <summary>
     /// Causes Raygun4Net to listen for exceptions.
     /// </summary>
     /// <param name="config">The HttpConfiguration to attach to.</param>
     /// <param name="generateRaygunClient">An optional function to provide a custom RaygunWebApiClient instance to use for reporting exceptions.</param>
     [Obsolete("Use Attach(HttpConfiguration config, Func<HttpRequestMessage, RaygunWebApiClient> generateRaygunClient = null) instead")]
-    public static void Attach(HttpConfiguration config, Func<RaygunWebApiClient> generateRaygunClient = null)
+    public static void Attach(HttpConfiguration config, Func<RaygunWebApiClient> generateRaygunClient)
     {
       if (generateRaygunClient != null)
       {
@@ -100,7 +105,7 @@ namespace Mindscape.Raygun4Net.WebApi
     /// The HttpRequestMessage parameter to this function might be null if there is no request in the context of the
     /// failure we are currently handling.
     /// </param>
-    public static void Attach(HttpConfiguration config, Func<HttpRequestMessage, RaygunWebApiClient> generateRaygunClient = null)
+    public static void Attach(HttpConfiguration config, Func<HttpRequestMessage, RaygunWebApiClient> generateRaygunClient)
     {
       AttachInternal(config, generateRaygunClient);
     }
