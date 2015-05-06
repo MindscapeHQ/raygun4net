@@ -15,14 +15,13 @@ namespace Mindscape.Raygun4Net.WebApi
 
     public override void Log(ExceptionLoggerContext context)
     {
-      _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(context.Request).SendInBackground(context.Exception);
+      _clientCreator.GenerateRaygunWebApiClient(context.Request).SendInBackground(context.Exception);
     }
 
 #pragma warning disable 1998
     public override async Task LogAsync(ExceptionLoggerContext context, CancellationToken cancellationToken)
     {
-        _clientCreator.GenerateRaygunWebApiClient()
-            .CurrentHttpRequest(context.Request)
+      _clientCreator.GenerateRaygunWebApiClient(context.Request)
             .SendInBackground(context.Exception);
     }
 #pragma warning restore 1998

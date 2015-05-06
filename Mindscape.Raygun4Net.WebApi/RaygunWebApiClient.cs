@@ -78,7 +78,34 @@ namespace Mindscape.Raygun4Net.WebApi
     /// </summary>
     /// <param name="config">The HttpConfiguration to attach to.</param>
     /// <param name="generateRaygunClient">An optional function to provide a custom RaygunWebApiClient instance to use for reporting exceptions.</param>
+    [Obsolete("Use Attach(HttpConfiguration config, Func<HttpRequestMessage, RaygunWebApiClient> generateRaygunClient = null) instead")]
     public static void Attach(HttpConfiguration config, Func<RaygunWebApiClient> generateRaygunClient = null)
+    {
+      if (generateRaygunClient != null)
+      {
+        AttachInternal(config, message => generateRaygunClient());
+      }
+      else
+      {
+        AttachInternal(config);
+      }
+    }
+
+    /// <summary>
+    /// Causes Raygun4Net to listen for exceptions.
+    /// </summary>
+    /// <param name="config">The HttpConfiguration to attach to.</param>
+    /// <param name="generateRaygunClient">
+    /// An optional function to provide a custom RaygunWebApiClient instance to use for reporting exceptions.
+    /// The HttpRequestMessage parameter to this function might be null if there is no request in the context of the
+    /// failure we are currently handling.
+    /// </param>
+    public static void Attach(HttpConfiguration config, Func<HttpRequestMessage, RaygunWebApiClient> generateRaygunClient = null)
+    {
+      AttachInternal(config, generateRaygunClient);
+    }
+
+    private static void AttachInternal(HttpConfiguration config, Func<HttpRequestMessage,RaygunWebApiClient> generateRaygunClientWithMessage = null)
     {
       Detach(config);
 
@@ -99,7 +126,7 @@ namespace Mindscape.Raygun4Net.WebApi
         config.MessageHandlers.Add(new RaygunWebApiDelegatingHandler());
       }
 
-      var clientCreator = new RaygunWebApiClientProvider(generateRaygunClient, applicationVersion);
+      var clientCreator = new RaygunWebApiClientProvider(generateRaygunClientWithMessage, applicationVersion);
 
       config.Services.Add(typeof(IExceptionLogger), new RaygunWebApiExceptionLogger(clientCreator));
 
