@@ -46,6 +46,20 @@ Sometimes when setting up Raygun to send exceptions automatically, you may need 
 To do this, use the static RaygunWebApiClient method overload that takes a function. Within this function, return a new (or previously created) RaygunWebApiClient instance.
 In this function you can setup any additional options on the RaygunWebApiClient instance that you need - more information about each feature is described below.
 
+RaygunWebApiClient.Attach(config, () => {
+  var client = new RaygunWebApiClient();
+  client.ApplicationVersion = "5.9.0.1";
+  client.UserInfo = new RaygunIdentifierMessage("user@example.com");
+  client.SendingMessage += (sender, args) =>
+  {
+    if (args.Message.Details.MachineName == "BadServer")
+    {
+      args.Cancel = true;
+    }
+  };
+  return client;
+});
+
 Additional configuration options and features
 =============================================
 
