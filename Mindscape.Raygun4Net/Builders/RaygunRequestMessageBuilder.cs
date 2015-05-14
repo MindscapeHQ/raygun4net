@@ -49,6 +49,10 @@ namespace Mindscape.Raygun4Net.Builders
             int length = 4096;
             request.InputStream.Seek(0, SeekOrigin.Begin);
             string temp = new StreamReader(request.InputStream).ReadToEnd();
+
+            Dictionary<string, string> ignored = GetIgnoredFormValues(request.Form, options.IsFormFieldIgnored);
+            temp = StripIgnoredFormData(temp, ignored);
+
             if (length > temp.Length)
             {
               length = temp.Length;
@@ -63,6 +67,29 @@ namespace Mindscape.Raygun4Net.Builders
       }
 
       return message;
+    }
+
+    private static Dictionary<string, string> GetIgnoredFormValues(NameValueCollection form, Func<string, bool> ignore)
+    {
+      Dictionary<string, string> ignoredFormValues = new Dictionary<string, string>();
+      foreach (string key in form.Keys)
+      {
+        if (ignore(key))
+        {
+          ignoredFormValues.Add(key, form[key]);
+        }
+      }
+      return ignoredFormValues;
+    }
+
+    private static string StripIgnoredFormData(string rawData, Dictionary<string, string> ignored)
+    {
+      foreach (string key in ignored.Keys)
+      {
+        string toRemove = "name=\"" + key + "\"\r\n\r\n" + ignored[key];
+        rawData = rawData.Replace(toRemove, "");
+      }
+      return rawData;
     }
 
     private static string GetIpAddress(HttpRequest request)
