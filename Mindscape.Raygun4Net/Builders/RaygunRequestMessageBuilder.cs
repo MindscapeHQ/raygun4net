@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -44,7 +45,7 @@ namespace Mindscape.Raygun4Net.Builders
         try
         {
           var contentType = request.Headers["Content-Type"];
-          if (contentType != "text/html" && contentType != "application/x-www-form-urlencoded" && request.RequestType != "GET")
+          if (contentType != "text/html" && (contentType == null || CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "application/x-www-form-urlencoded", CompareOptions.IgnoreCase) < 0) && request.RequestType != "GET")
           {
             int length = 4096;
             request.InputStream.Seek(0, SeekOrigin.Begin);
