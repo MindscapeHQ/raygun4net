@@ -70,7 +70,7 @@ namespace Mindscape.Raygun4Net.Builders
       return message;
     }
 
-    private static Dictionary<string, string> GetIgnoredFormValues(NameValueCollection form, Func<string, bool> ignore)
+    protected static Dictionary<string, string> GetIgnoredFormValues(NameValueCollection form, Func<string, bool> ignore)
     {
       Dictionary<string, string> ignoredFormValues = new Dictionary<string, string>();
       foreach (string key in form.Keys)
@@ -83,7 +83,7 @@ namespace Mindscape.Raygun4Net.Builders
       return ignoredFormValues;
     }
 
-    private static string StripIgnoredFormData(string rawData, Dictionary<string, string> ignored)
+    protected static string StripIgnoredFormData(string rawData, Dictionary<string, string> ignored)
     {
       foreach (string key in ignored.Keys)
       {
