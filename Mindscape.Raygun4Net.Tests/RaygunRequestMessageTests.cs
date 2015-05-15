@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Reflection;
 using System.Web;
@@ -378,6 +379,51 @@ namespace Mindscape.Raygun4Net.Tests
         }
       }
       return count;
+    }
+
+    // Helper method tests
+
+    [Test]
+    public void GetIgnoredFormValues()
+    {
+      var options = new RaygunRequestMessageOptions(new string[] { "Password" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      NameValueCollection form = new NameValueCollection();
+      form.Add("Key", "Value");
+      form.Add("Password", "p");
+
+      Dictionary<string, string> ignored = FakeRaygunRequestMessageBuilder.ExposeGetIgnoredFormValues(form, options.IsFormFieldIgnored);
+
+      Assert.AreEqual(1, ignored.Count);
+      Assert.AreEqual("Password", ignored.Keys.First());
+      Assert.AreEqual("p", ignored["Password"]);
+    }
+
+    [Test]
+    public void GetIgnoredFormValues_MultipleIgnores()
+    {
+      var options = new RaygunRequestMessageOptions(new string[] { "Password", "SensitiveNumber" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      NameValueCollection form = new NameValueCollection();
+      form.Add("SensitiveNumber", "7");
+      form.Add("Key", "Value");
+      form.Add("Password", "p");
+
+      Dictionary<string, string> ignored = FakeRaygunRequestMessageBuilder.ExposeGetIgnoredFormValues(form, options.IsFormFieldIgnored);
+
+      Assert.AreEqual(2, ignored.Count);
+      Assert.IsTrue(ignored.Keys.Contains("Password"));
+      Assert.AreEqual("p", ignored["Password"]);
+      Assert.IsTrue(ignored.Keys.Contains("SensitiveNumber"));
+      Assert.AreEqual("7", ignored["SensitiveNumber"]);
+    }
+
+    [Test]
+    public void StripIgnoredFormData()
+    {
+      string rawData = "------WebKitFormBoundarye64VBkpu4PoxFbpl Content-Disposition: form-data; name=\"Password\"\r\n\r\nsecret ------WebKitFormBoundarye64VBkpu4PoxFbpl--";
+      Dictionary<string, string> ignored = new Dictionary<string, string>() { { "Password", "secret" } };
+      rawData = FakeRaygunRequestMessageBuilder.ExposeStripIgnoredFormData(rawData, ignored);
+
+      Assert.AreEqual("------WebKitFormBoundarye64VBkpu4PoxFbpl Content-Disposition: form-data;  ------WebKitFormBoundarye64VBkpu4PoxFbpl--", rawData);
     }
   }
 }

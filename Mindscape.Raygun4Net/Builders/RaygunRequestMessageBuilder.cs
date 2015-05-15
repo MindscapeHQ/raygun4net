@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -43,12 +44,18 @@ namespace Mindscape.Raygun4Net.Builders
       {
         try
         {
+          // Don't send the raw request data at all if the content-type is urlencoded
           var contentType = request.Headers["Content-Type"];
-          if (contentType != "text/html" && contentType != "application/x-www-form-urlencoded" && request.RequestType != "GET")
+          if (contentType != "text/html" && (contentType == null || CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "application/x-www-form-urlencoded", CompareOptions.IgnoreCase) < 0) && request.RequestType != "GET")
           {
             int length = 4096;
             request.InputStream.Seek(0, SeekOrigin.Begin);
             string temp = new StreamReader(request.InputStream).ReadToEnd();
+
+            // If we made it this far, strip out any values that have been marked as ignored form fields
+            Dictionary<string, string> ignored = GetIgnoredFormValues(request.Form, options.IsFormFieldIgnored);
+            temp = StripIgnoredFormData(temp, ignored);
+
             if (length > temp.Length)
             {
               length = temp.Length;
@@ -63,6 +70,29 @@ namespace Mindscape.Raygun4Net.Builders
       }
 
       return message;
+    }
+
+    protected static Dictionary<string, string> GetIgnoredFormValues(NameValueCollection form, Func<string, bool> ignore)
+    {
+      Dictionary<string, string> ignoredFormValues = new Dictionary<string, string>();
+      foreach (string key in form.Keys)
+      {
+        if (ignore(key))
+        {
+          ignoredFormValues.Add(key, form[key]);
+        }
+      }
+      return ignoredFormValues;
+    }
+
+    protected static string StripIgnoredFormData(string rawData, Dictionary<string, string> ignored)
+    {
+      foreach (string key in ignored.Keys)
+      {
+        string toRemove = "name=\"" + key + "\"\r\n\r\n" + ignored[key];
+        rawData = rawData.Replace(toRemove, "");
+      }
+      return rawData;
     }
 
     private static string GetIpAddress(HttpRequest request)

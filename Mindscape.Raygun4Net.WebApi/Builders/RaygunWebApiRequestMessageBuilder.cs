@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 
@@ -25,16 +26,25 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       message.Form = ToDictionary(request.GetQueryNameValuePairs(), options.IsFormFieldIgnored);
       message.QueryString = ToDictionary(request.GetQueryNameValuePairs(), s => false);
 
+      SetHeaders(message, request, options.IsHeaderIgnored);
+
       if (!options.IsRawDataIgnored)
       {
-        object body;
-        if (request.Properties.TryGetValue(RaygunWebApiDelegatingHandler.RequestBodyKey, out body))
+        string contentType = null;
+        if (message.Headers != null && message.Headers.Contains("Content-Type"))
         {
-          message.RawData = body.ToString();
+          contentType = (string)message.Headers["Content-Type"];
+        }
+
+        if (contentType == null || CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "application/x-www-form-urlencoded", CompareOptions.IgnoreCase) < 0)
+        {
+          object body;
+          if (request.Properties.TryGetValue(RaygunWebApiDelegatingHandler.RequestBodyKey, out body))
+          {
+            message.RawData = body.ToString();
+          }
         }
       }
-
-      SetHeaders(message, request, options.IsHeaderIgnored);
 
       return message;
     }
@@ -99,7 +109,7 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       }
       catch (Exception ex)
       {
-        System.Diagnostics.Trace.WriteLine("Error retrieving Headers and RawData {0}", ex.Message);
+        System.Diagnostics.Trace.WriteLine("Error retrieving Headers: {0}", ex.Message);
       }
     }
   }
