@@ -44,6 +44,7 @@ namespace Mindscape.Raygun4Net.Builders
       {
         try
         {
+          // Don't send the raw request data at all if the content-type is urlencoded
           var contentType = request.Headers["Content-Type"];
           if (contentType != "text/html" && (contentType == null || CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "application/x-www-form-urlencoded", CompareOptions.IgnoreCase) < 0) && request.RequestType != "GET")
           {
@@ -51,6 +52,7 @@ namespace Mindscape.Raygun4Net.Builders
             request.InputStream.Seek(0, SeekOrigin.Begin);
             string temp = new StreamReader(request.InputStream).ReadToEnd();
 
+            // If we made it this far, strip out any values that have been marked as ignored form fields
             Dictionary<string, string> ignored = GetIgnoredFormValues(request.Form, options.IsFormFieldIgnored);
             temp = StripIgnoredFormData(temp, ignored);
 
