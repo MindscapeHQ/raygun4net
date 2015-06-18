@@ -79,7 +79,9 @@ namespace Mindscape.Raygun4Net.WebApi
     /// <param name="config">The HttpConfiguration to attach to.</param>
     public static void Attach(HttpConfiguration config)
     {
-      AttachInternal(config);
+      var entryAssembly = Assembly.GetCallingAssembly();
+      string version = entryAssembly.GetName().Version.ToString();
+      AttachInternal(config, null, version);
     }
 
     /// <summary>
@@ -90,13 +92,15 @@ namespace Mindscape.Raygun4Net.WebApi
     [Obsolete("Use Attach(HttpConfiguration config, Func<HttpRequestMessage, RaygunWebApiClient> generateRaygunClient = null) instead")]
     public static void Attach(HttpConfiguration config, Func<RaygunWebApiClient> generateRaygunClient)
     {
+      var entryAssembly = Assembly.GetCallingAssembly();
+      string version = entryAssembly.GetName().Version.ToString();
       if (generateRaygunClient != null)
       {
-        AttachInternal(config, message => generateRaygunClient());
+        AttachInternal(config, message => generateRaygunClient(), version);
       }
       else
       {
-        AttachInternal(config);
+        AttachInternal(config, null, version);
       }
     }
 
@@ -111,10 +115,12 @@ namespace Mindscape.Raygun4Net.WebApi
     /// </param>
     public static void Attach(HttpConfiguration config, Func<HttpRequestMessage, RaygunWebApiClient> generateRaygunClient)
     {
-      AttachInternal(config, generateRaygunClient);
+      var entryAssembly = Assembly.GetCallingAssembly();
+      string version = entryAssembly.GetName().Version.ToString();
+      AttachInternal(config, generateRaygunClient, version);
     }
 
-    private static void AttachInternal(HttpConfiguration config, Func<HttpRequestMessage,RaygunWebApiClient> generateRaygunClientWithMessage = null)
+    private static void AttachInternal(HttpConfiguration config, Func<HttpRequestMessage, RaygunWebApiClient> generateRaygunClientWithMessage, string applicationVersionFromAttach)
     {
       Detach(config);
 
@@ -125,8 +131,7 @@ namespace Mindscape.Raygun4Net.WebApi
       }
       else
       {
-        var entryAssembly = Assembly.GetCallingAssembly();
-        applicationVersion = entryAssembly.GetName().Version.ToString();
+        applicationVersion = applicationVersionFromAttach;
       }
 
       var owinAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName.StartsWith("Owin"));
