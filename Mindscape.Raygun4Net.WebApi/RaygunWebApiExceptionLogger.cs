@@ -21,8 +21,7 @@ namespace Mindscape.Raygun4Net.WebApi
 #pragma warning disable 1998
     public override async Task LogAsync(ExceptionLoggerContext context, CancellationToken cancellationToken)
     {
-      _clientCreator.GenerateRaygunWebApiClient(context.Request)
-            .SendInBackground(context.Exception);
+      _clientCreator.GenerateRaygunWebApiClient(context.Request).SendInBackground(context.Exception);
     }
 #pragma warning restore 1998
   }

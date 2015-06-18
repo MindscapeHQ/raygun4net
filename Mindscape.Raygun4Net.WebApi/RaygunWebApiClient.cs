@@ -73,6 +73,10 @@ namespace Mindscape.Raygun4Net.WebApi
     {
     }
 
+    /// <summary>
+    /// Causes Raygun4Net to listen for exceptions.
+    /// </summary>
+    /// <param name="config">The HttpConfiguration to attach to.</param>
     public static void Attach(HttpConfiguration config)
     {
       AttachInternal(config);
