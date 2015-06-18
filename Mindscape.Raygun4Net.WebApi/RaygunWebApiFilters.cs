@@ -18,13 +18,13 @@ namespace Mindscape.Raygun4Net.WebApi
 
     public override void OnException(HttpActionExecutedContext context)
     {
-      _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(context.Request).SendInBackground(context.Exception);
+      _clientCreator.GenerateRaygunWebApiClient(context.Request).SendInBackground(context.Exception);
     }
 
 #pragma warning disable 1998
     public override async Task OnExceptionAsync(HttpActionExecutedContext context, CancellationToken cancellationToken)
     {
-      _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(context.Request).SendInBackground(context.Exception);
+      _clientCreator.GenerateRaygunWebApiClient(context.Request).SendInBackground(context.Exception);
     }
 #pragma warning restore 1998
   }
@@ -50,7 +50,7 @@ namespace Mindscape.Raygun4Net.WebApi
           context.Response.ReasonPhrase,
           string.Format("HTTP {0} returned while handling Request {2} {1}", (int)context.Response.StatusCode, context.Request.RequestUri, context.Request.Method));
 
-        _clientCreator.GenerateRaygunWebApiClient().CurrentHttpRequest(context.Request).SendInBackground(e);
+        _clientCreator.GenerateRaygunWebApiClient(context.Request).SendInBackground(e);
       }
     }
   }
