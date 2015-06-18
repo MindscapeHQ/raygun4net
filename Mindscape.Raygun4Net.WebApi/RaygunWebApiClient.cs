@@ -89,7 +89,6 @@ namespace Mindscape.Raygun4Net.WebApi
     /// </summary>
     /// <param name="config">The HttpConfiguration to attach to.</param>
     /// <param name="generateRaygunClient">An optional function to provide a custom RaygunWebApiClient instance to use for reporting exceptions.</param>
-    [Obsolete("Use Attach(HttpConfiguration config, Func<HttpRequestMessage, RaygunWebApiClient> generateRaygunClient = null) instead")]
     public static void Attach(HttpConfiguration config, Func<RaygunWebApiClient> generateRaygunClient)
     {
       var entryAssembly = Assembly.GetCallingAssembly();
