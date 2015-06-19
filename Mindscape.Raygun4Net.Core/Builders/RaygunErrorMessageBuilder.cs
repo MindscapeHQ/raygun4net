@@ -35,12 +35,12 @@ namespace Mindscape.Raygun4Net.Builders
         message.Data = data;
       }
 
-      AggregateException ae = exception as AggregateException;
-      if (ae != null && ae.InnerExceptions != null)
+      IList<Exception> innerExceptions = GetInnerExceptions(exception);
+      if (innerExceptions != null && innerExceptions.Count > 0)
       {
-        message.InnerErrors = new RaygunErrorMessage[ae.InnerExceptions.Count];
+        message.InnerErrors = new RaygunErrorMessage[innerExceptions.Count];
         int index = 0;
-        foreach (Exception e in ae.InnerExceptions)
+        foreach (Exception e in innerExceptions)
         {
           message.InnerErrors[index] = Build(e);
           index++;
@@ -52,6 +52,33 @@ namespace Mindscape.Raygun4Net.Builders
       }
 
       return message;
+    }
+
+    private static IList<Exception> GetInnerExceptions(Exception exception)
+    {
+      AggregateException ae = exception as AggregateException;
+      if (ae != null)
+      {
+        return ae.InnerExceptions;
+      }
+
+      ReflectionTypeLoadException rtle = exception as ReflectionTypeLoadException;
+      if (rtle != null)
+      {
+        int index = 0;
+        foreach (Exception e in rtle.LoaderExceptions)
+        {
+          try
+          {
+            e.Data["Type"] = rtle.Types[index];
+          }
+          catch { }
+          index++;
+        }
+        return rtle.LoaderExceptions.ToList();
+      }
+
+      return null;
     }
 
     private static RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)

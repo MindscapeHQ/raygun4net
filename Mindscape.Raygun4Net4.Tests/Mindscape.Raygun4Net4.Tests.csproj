@@ -49,6 +49,7 @@
     <Compile Include="Model\WrapperException.cs" />
     <Compile Include="RaygunClientTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RaygunErrorMessageBuilderTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

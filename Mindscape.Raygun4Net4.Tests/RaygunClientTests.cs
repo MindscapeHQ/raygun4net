@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -155,6 +156,24 @@ namespace Mindscape.Raygun4Net4.Tests
       Assert.Contains(_exception, exceptions);
       Assert.Contains(exception2, exceptions);
       Assert.Contains(exception3, exceptions);
+    }
+
+    [Test]
+    public void StripReflectionTypeLoadException()
+    {
+      _client.AddWrapperExceptions(typeof(ReflectionTypeLoadException));
+
+      FileNotFoundException ex1 = new FileNotFoundException();
+      FileNotFoundException ex2 = new FileNotFoundException();
+      ReflectionTypeLoadException wrapper = new ReflectionTypeLoadException(new Type[] { typeof(FakeRaygunClient), typeof(WrapperException) }, new Exception[] { ex1, ex2 });
+
+      List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
+      Assert.AreEqual(2, exceptions.Count);
+      Assert.Contains(ex1, exceptions);
+      Assert.Contains(ex2, exceptions);
+
+      Assert.IsTrue(ex1.Data["Type"].ToString().Contains("FakeRaygunClient"));
+      Assert.IsTrue(ex2.Data["Type"].ToString().Contains("WrapperException"));
     }
   }
 }

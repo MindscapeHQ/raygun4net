@@ -6,6 +6,7 @@ using Mindscape.Raygun4Net.Messages;
 using Mindscape.Raygun4Net.WebApi.Tests.Model;
 using NUnit.Framework;
 using System.Reflection;
+using System.IO;
 
 namespace Mindscape.Raygun4Net.WebApi.Tests
 {
@@ -247,5 +248,22 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
       Assert.Contains(exception3, exceptions);
     }
 
+    [Test]
+    public void StripReflectionTypeLoadException()
+    {
+      _client.AddWrapperExceptions(typeof(ReflectionTypeLoadException));
+
+      FileNotFoundException ex1 = new FileNotFoundException();
+      FileNotFoundException ex2 = new FileNotFoundException();
+      ReflectionTypeLoadException wrapper = new ReflectionTypeLoadException(new Type[] { typeof(FakeRaygunWebApiClient), typeof(WrapperException) }, new Exception[] { ex1, ex2 });
+
+      List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
+      Assert.AreEqual(2, exceptions.Count);
+      Assert.Contains(ex1, exceptions);
+      Assert.Contains(ex2, exceptions);
+
+      Assert.IsTrue(ex1.Data["Type"].ToString().Contains("FakeRaygunWebApiClient"));
+      Assert.IsTrue(ex2.Data["Type"].ToString().Contains("WrapperException"));
+    }
   }
 }
