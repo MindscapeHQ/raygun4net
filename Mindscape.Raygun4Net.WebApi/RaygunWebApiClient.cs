@@ -463,7 +463,7 @@ namespace Mindscape.Raygun4Net.WebApi
 
     protected IEnumerable<Exception> StripWrapperExceptions(Exception exception)
     {
-      if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
+      if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && (exception.InnerException != null || exception is ReflectionTypeLoadException)))
       {
         AggregateException aggregate = exception as AggregateException;
         if (aggregate != null)
@@ -478,9 +478,30 @@ namespace Mindscape.Raygun4Net.WebApi
         }
         else
         {
-          foreach (Exception e in StripWrapperExceptions(exception.InnerException))
+          ReflectionTypeLoadException rtle = exception as ReflectionTypeLoadException;
+          if (rtle != null)
           {
-            yield return e;
+            int index = 0;
+            foreach (Exception e in rtle.LoaderExceptions)
+            {
+              try
+              {
+                e.Data["Type"] = rtle.Types[index];
+              }
+              catch { }
+              foreach (Exception ex in StripWrapperExceptions(e))
+              {
+                yield return ex;
+              }
+              index++;
+            }
+          }
+          else
+          {
+            foreach (Exception e in StripWrapperExceptions(exception.InnerException))
+            {
+              yield return e;
+            }
           }
         }
       }
