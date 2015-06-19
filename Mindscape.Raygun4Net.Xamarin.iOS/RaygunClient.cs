@@ -233,6 +233,16 @@ namespace Mindscape.Raygun4Net
     {
       get
       {
+        try
+        {
+          string identifier = NSUserDefaults.StandardUserDefaults.StringForKey ("io.rgun.identifier");
+          if (!String.IsNullOrWhiteSpace(identifier))
+          {
+            return identifier;
+          }
+        }
+        catch { }
+
         SecRecord query = new SecRecord (SecKind.GenericPassword);
         query.Service = "Mindscape.Raygun";
         query.Account = "RaygunDeviceID";
