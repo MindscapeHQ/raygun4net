@@ -86,10 +86,6 @@ namespace Mindscape.Raygun4Net
         _userInfo = value;
         if (_reporter != null)
         {
-          /*string user = _userInfo == null ? "" : UserInfoString (_userInfo);
-          if (user.Length != 0) {
-            _reporter.Identify(user);
-          }*/
           if (_userInfo != null) {
             var info = new Mindscape.Raygun4Net.Xamarin.iOS.RaygunUserInfo ();
             info.Identifier = _userInfo.Identifier;
@@ -103,36 +99,6 @@ namespace Mindscape.Raygun4Net
           }
         }
       }
-    }
-
-    private static string UserInfoString(RaygunIdentifierMessage userInfo)
-    {
-      string str = "";
-      if (!String.IsNullOrWhiteSpace (userInfo.FullName))
-      {
-        str += userInfo.FullName + " ";
-      }
-      else if (!String.IsNullOrWhiteSpace (userInfo.FirstName))
-      {
-        str += userInfo.FirstName + " ";
-      }
-      if (!String.IsNullOrWhiteSpace (userInfo.Identifier))
-      {
-        str += userInfo.Identifier + " ";
-      }
-      if (!String.IsNullOrWhiteSpace (userInfo.Email))
-      {
-        str += userInfo.Email + " ";
-      }
-      if (!String.IsNullOrWhiteSpace (userInfo.UUID))
-      {
-        str += userInfo.UUID + " ";
-      }
-      if (str.Length > 0)
-      {
-        str = str.Substring (0, str.Length - 1); // Removes last space
-      }
-      return str;
     }
 
     /// <summary>
