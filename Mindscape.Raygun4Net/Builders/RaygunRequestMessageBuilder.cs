@@ -22,24 +22,85 @@ namespace Mindscape.Raygun4Net.Builders
 
       options = options ?? new RaygunRequestMessageOptions();
 
-      message.HostName = request.Url.Host;
-      message.Url = request.Url.AbsolutePath;
-      message.HttpMethod = request.RequestType;
-      message.IPAddress = GetIpAddress(request);
-      message.QueryString = ToDictionary(request.QueryString, null);
+      try
+      {
+        message.HostName = request.Url.Host;
+        message.Url = request.Url.AbsolutePath;
+        message.HttpMethod = request.RequestType;
+        message.IPAddress = GetIpAddress(request);
+      }
+      catch (Exception e)
+      {
+        System.Diagnostics.Trace.WriteLine("Failed to get basic request info: {0}", e.Message);
+      }
 
-      message.Headers = ToDictionary(request.Headers, options.IsHeaderIgnored);
-      message.Headers.Remove("Cookie");
+      // Query string
+      try
+      {
+        message.QueryString = ToDictionary(request.QueryString, null);
+      }
+      catch (Exception e)
+      {
+        if (message.QueryString == null)
+        {
+          message.QueryString = new Dictionary<string, string>() { { "Failed to retrieve", e.Message } };
+        }
+      }
 
-      message.Form = ToDictionary(request.Form, options.IsFormFieldIgnored, true);
-      message.Cookies = GetCookies(request.Cookies, options.IsCookieIgnored);
+      // Headers
+      try
+      {
+        message.Headers = ToDictionary(request.Headers, options.IsHeaderIgnored);
+        message.Headers.Remove("Cookie");
+      }
+      catch (Exception e)
+      {
+        if (message.Headers == null)
+        {
+          message.Headers = new Dictionary<string, string>() { { "Failed to retrieve", e.Message } };
+        }
+      }
 
-      // Remove ignored and duplicated variables
-      message.Data = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored);
-      message.Data.Remove("ALL_HTTP");
-      message.Data.Remove("HTTP_COOKIE");
-      message.Data.Remove("ALL_RAW");
+      // Form fields
+      try
+      {
+        message.Form = ToDictionary(request.Form, options.IsFormFieldIgnored, true);
+      }
+      catch (Exception e)
+      {
+        if (message.Form == null)
+        {
+          message.Form = new Dictionary<string, string>() { { "Failed to retrieve", e.Message } };
+        }
+      }
 
+      // Cookies
+      try
+      {
+        message.Cookies = GetCookies(request.Cookies, options.IsCookieIgnored);
+      }
+      catch (Exception e)
+      {
+        System.Diagnostics.Trace.WriteLine("Failed to get cookies: {0}", e.Message);
+      }
+
+      // Server variables
+      try
+      {
+        message.Data = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored);
+        message.Data.Remove("ALL_HTTP");
+        message.Data.Remove("HTTP_COOKIE");
+        message.Data.Remove("ALL_RAW");
+      }
+      catch (Exception e)
+      {
+        if (message.Data == null)
+        {
+          message.Data = new Dictionary<string, string>() { { "Failed to retrieve", e.Message } };
+        }
+      }
+
+      // Raw data
       if (!options.IsRawDataIgnored)
       {
         try
@@ -64,8 +125,12 @@ namespace Mindscape.Raygun4Net.Builders
             message.RawData = temp.Substring(0, length);
           }
         }
-        catch (HttpException)
+        catch (Exception e)
         {
+          if (message.RawData == null)
+          {
+            message.RawData = "Failed to retrieve raw data: " + e.Message;
+          }
         }
       }
 
@@ -176,9 +241,9 @@ namespace Mindscape.Raygun4Net.Builders
           keys = nameValueCollection.AllKeys.Where(k => !ignore(k));
         }
       }
-      catch (HttpRequestValidationException)
+      catch (Exception e)
       {
-        return new Dictionary<string, string> { { "Values", "Not able to be retrieved" } };
+        return new Dictionary<string, string> { { "Failed to retrieve", e.Message } };
       }
 
       var dictionary = new Dictionary<string, string>();
@@ -205,22 +270,9 @@ namespace Mindscape.Raygun4Net.Builders
 
           dictionary.Add(keyToSend, valueToSend);
         }
-        catch (HttpRequestValidationException e)
+        catch (Exception e)
         {
-          // If changing QueryString to be of type string in future, will need to account for possible
-          // illegal values - in this case it is contained at the end of e.Message along with an error message
-
-          int firstInstance = e.Message.IndexOf('\"');
-          int lastInstance = e.Message.LastIndexOf('\"');
-
-          if (firstInstance != -1 && lastInstance != -1)
-          {
-            dictionary.Add(key, e.Message.Substring(firstInstance + 1, lastInstance - firstInstance - 1));
-          }
-          else
-          {
-            dictionary.Add(key, string.Empty);
-          }
+          dictionary.Add(key, e.Message);
         }
       }
 
