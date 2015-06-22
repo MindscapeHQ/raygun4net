@@ -68,7 +68,7 @@ namespace Mindscape.Raygun4Net
       set
       {
         _user = value;
-        if (_reporter != null && _user != null)
+        if (_reporter != null)
         {
           _reporter.Identify(_user);
         }
@@ -86,42 +86,19 @@ namespace Mindscape.Raygun4Net
         _userInfo = value;
         if (_reporter != null)
         {
-          string user = _userInfo == null ? "" : UserInfoString (_userInfo);
-          if (user.Length != 0) {
-            _reporter.Identify(user);
+          if (_userInfo != null) {
+            var info = new Mindscape.Raygun4Net.Xamarin.iOS.RaygunUserInfo ();
+            info.Identifier = _userInfo.Identifier;
+            info.IsAnonymous = _userInfo.IsAnonymous;
+            info.Email = _userInfo.Email;
+            info.FullName = _userInfo.FullName;
+            info.FirstName = _userInfo.FirstName;
+            _reporter.IdentifyWithUserInfo (info);
+          } else {
+            _reporter.IdentifyWithUserInfo (null);
           }
         }
       }
-    }
-
-    private static string UserInfoString(RaygunIdentifierMessage userInfo)
-    {
-      string str = "";
-      if (!String.IsNullOrWhiteSpace (userInfo.FullName))
-      {
-        str += userInfo.FullName + " ";
-      }
-      else if (!String.IsNullOrWhiteSpace (userInfo.FirstName))
-      {
-        str += userInfo.FirstName + " ";
-      }
-      if (!String.IsNullOrWhiteSpace (userInfo.Identifier))
-      {
-        str += userInfo.Identifier + " ";
-      }
-      if (!String.IsNullOrWhiteSpace (userInfo.Email))
-      {
-        str += userInfo.Email + " ";
-      }
-      if (!String.IsNullOrWhiteSpace (userInfo.UUID))
-      {
-        str += userInfo.UUID + " ";
-      }
-      if (str.Length > 0)
-      {
-        str = str.Substring (0, str.Length - 1); // Removes last space
-      }
-      return str;
     }
 
     /// <summary>
@@ -233,6 +210,16 @@ namespace Mindscape.Raygun4Net
     {
       get
       {
+        try
+        {
+          string identifier = NSUserDefaults.StandardUserDefaults.StringForKey ("io.raygun.identifier");
+          if (!String.IsNullOrWhiteSpace(identifier))
+          {
+            return identifier;
+          }
+        }
+        catch { }
+
         SecRecord query = new SecRecord (SecKind.GenericPassword);
         query.Service = "Mindscape.Raygun";
         query.Account = "RaygunDeviceID";
@@ -464,7 +451,7 @@ namespace Mindscape.Raygun4Net
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
-        .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : BuildRaygunIdentifierMessage(machineName)))
+        .SetUser(BuildRaygunIdentifierMessage(machineName))
         .Build();
 
       return message;
@@ -472,11 +459,26 @@ namespace Mindscape.Raygun4Net
 
     private RaygunIdentifierMessage BuildRaygunIdentifierMessage(string machineName)
     {
+      RaygunIdentifierMessage message = UserInfo;
       string deviceId = DeviceId;
-      return !String.IsNullOrWhiteSpace (deviceId) ? new RaygunIdentifierMessage (deviceId) {
-        IsAnonymous = true,
-        FullName = machineName
-      } : null;
+
+      if (message == null || message.Identifier == null) {
+        if (!String.IsNullOrWhiteSpace (User)) {
+          message = new RaygunIdentifierMessage (User);
+        } else if(!String.IsNullOrWhiteSpace (deviceId)){
+          message = new RaygunIdentifierMessage (deviceId) {
+            IsAnonymous = true,
+            FullName = machineName,
+            UUID = deviceId
+          };
+        }
+      }
+
+      if (message != null && message.UUID == null) {
+        message.UUID = deviceId;
+      }
+
+      return message;
     }
 
     private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
