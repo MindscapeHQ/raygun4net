@@ -22,23 +22,54 @@ namespace Mindscape.Raygun4Net.Builders
 
       options = options ?? new RaygunRequestMessageOptions();
 
-      message.HostName = request.Url.Host;
-      message.Url = request.Url.AbsolutePath;
-      message.HttpMethod = request.RequestType;
-      message.IPAddress = GetIpAddress(request);
-      message.QueryString = ToDictionary(request.QueryString, null);
+      try
+      {
+        message.HostName = request.Url.Host;
+        message.Url = request.Url.AbsolutePath;
+        message.HttpMethod = request.RequestType;
+        message.IPAddress = GetIpAddress(request);
+      }
+      catch { }
 
-      message.Headers = ToDictionary(request.Headers, options.IsHeaderIgnored);
-      message.Headers.Remove("Cookie");
+      try
+      {
+        message.QueryString = ToDictionary(request.QueryString, null);
+      }
+      catch (Exception e)
+      {
+        if (message.QueryString == null)
+        {
+          message.QueryString = new Dictionary<string, string>() { { "Failed to retrieve query string", e.Message } };
+        }
+      }
 
-      message.Form = ToDictionary(request.Form, options.IsFormFieldIgnored, true);
-      message.Cookies = GetCookies(request.Cookies, options.IsCookieIgnored);
+      try
+      {
+        message.Headers = ToDictionary(request.Headers, options.IsHeaderIgnored);
+        message.Headers.Remove("Cookie");
+      }
+      catch { }
 
-      // Remove ignored and duplicated variables
-      message.Data = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored);
-      message.Data.Remove("ALL_HTTP");
-      message.Data.Remove("HTTP_COOKIE");
-      message.Data.Remove("ALL_RAW");
+      try
+      {
+        message.Form = ToDictionary(request.Form, options.IsFormFieldIgnored, true);
+      }
+      catch { }
+
+      try
+      {
+        message.Cookies = GetCookies(request.Cookies, options.IsCookieIgnored);
+      }
+      catch { }
+
+      try
+      {
+        message.Data = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored);
+        message.Data.Remove("ALL_HTTP");
+        message.Data.Remove("HTTP_COOKIE");
+        message.Data.Remove("ALL_RAW");
+      }
+      catch { }
 
       if (!options.IsRawDataIgnored)
       {
@@ -64,7 +95,7 @@ namespace Mindscape.Raygun4Net.Builders
             message.RawData = temp.Substring(0, length);
           }
         }
-        catch (HttpException)
+        catch (Exception)
         {
         }
       }
@@ -176,9 +207,9 @@ namespace Mindscape.Raygun4Net.Builders
           keys = nameValueCollection.AllKeys.Where(k => !ignore(k));
         }
       }
-      catch (HttpRequestValidationException)
+      catch (Exception e)
       {
-        return new Dictionary<string, string> { { "Values", "Not able to be retrieved" } };
+        return new Dictionary<string, string> { { "Failed to retrieve", e.Message } };
       }
 
       var dictionary = new Dictionary<string, string>();
@@ -205,7 +236,7 @@ namespace Mindscape.Raygun4Net.Builders
 
           dictionary.Add(keyToSend, valueToSend);
         }
-        catch (HttpRequestValidationException e)
+        catch (Exception e)
         {
           // If changing QueryString to be of type string in future, will need to account for possible
           // illegal values - in this case it is contained at the end of e.Message along with an error message
@@ -219,7 +250,7 @@ namespace Mindscape.Raygun4Net.Builders
           }
           else
           {
-            dictionary.Add(key, string.Empty);
+            dictionary.Add(key, e.Message);
           }
         }
       }
