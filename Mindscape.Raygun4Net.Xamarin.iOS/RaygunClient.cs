@@ -462,7 +462,7 @@ namespace Mindscape.Raygun4Net
       RaygunIdentifierMessage message = UserInfo;
       string deviceId = DeviceId;
 
-      if (message == null) {
+      if (message == null || message.Identifier == null) {
         if (!String.IsNullOrWhiteSpace (User)) {
           message = new RaygunIdentifierMessage (User);
         } else if(!String.IsNullOrWhiteSpace (deviceId)){
