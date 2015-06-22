@@ -29,8 +29,12 @@ namespace Mindscape.Raygun4Net.Builders
         message.HttpMethod = request.RequestType;
         message.IPAddress = GetIpAddress(request);
       }
-      catch { }
+      catch (Exception e)
+      {
+        System.Diagnostics.Trace.WriteLine("Failed to get basic request info: {0}", e.Message);
+      }
 
+      // Query string
       try
       {
         message.QueryString = ToDictionary(request.QueryString, null);
@@ -39,29 +43,48 @@ namespace Mindscape.Raygun4Net.Builders
       {
         if (message.QueryString == null)
         {
-          message.QueryString = new Dictionary<string, string>() { { "Failed to retrieve query string", e.Message } };
+          message.QueryString = new Dictionary<string, string>() { { "Failed to retrieve", e.Message } };
         }
       }
 
+      // Headers
       try
       {
         message.Headers = ToDictionary(request.Headers, options.IsHeaderIgnored);
         message.Headers.Remove("Cookie");
       }
-      catch { }
+      catch (Exception e)
+      {
+        if (message.Headers == null)
+        {
+          message.Headers = new Dictionary<string, string>() { { "Failed to retrieve", e.Message } };
+        }
+      }
 
+      // Form fields
       try
       {
         message.Form = ToDictionary(request.Form, options.IsFormFieldIgnored, true);
       }
-      catch { }
+      catch (Exception e)
+      {
+        if (message.Form == null)
+        {
+          message.Form = new Dictionary<string, string>() { { "Failed to retrieve", e.Message } };
+        }
+      }
 
+      // Cookies
       try
       {
         message.Cookies = GetCookies(request.Cookies, options.IsCookieIgnored);
       }
-      catch { }
+      catch (Exception e)
+      {
+        System.Diagnostics.Trace.WriteLine("Failed to get cookies: {0}", e.Message);
+      }
 
+      // Server variables
       try
       {
         message.Data = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored);
@@ -69,8 +92,15 @@ namespace Mindscape.Raygun4Net.Builders
         message.Data.Remove("HTTP_COOKIE");
         message.Data.Remove("ALL_RAW");
       }
-      catch { }
+      catch (Exception e)
+      {
+        if (message.Data == null)
+        {
+          message.Data = new Dictionary<string, string>() { { "Failed to retrieve", e.Message } };
+        }
+      }
 
+      // Raw data
       if (!options.IsRawDataIgnored)
       {
         try
@@ -95,8 +125,12 @@ namespace Mindscape.Raygun4Net.Builders
             message.RawData = temp.Substring(0, length);
           }
         }
-        catch (Exception)
+        catch (Exception e)
         {
+          if (message.RawData == null)
+          {
+            message.RawData = "Failed to retrieve raw data: " + e.Message;
+          }
         }
       }
 
@@ -238,20 +272,7 @@ namespace Mindscape.Raygun4Net.Builders
         }
         catch (Exception e)
         {
-          // If changing QueryString to be of type string in future, will need to account for possible
-          // illegal values - in this case it is contained at the end of e.Message along with an error message
-
-          int firstInstance = e.Message.IndexOf('\"');
-          int lastInstance = e.Message.LastIndexOf('\"');
-
-          if (firstInstance != -1 && lastInstance != -1)
-          {
-            dictionary.Add(key, e.Message.Substring(firstInstance + 1, lastInstance - firstInstance - 1));
-          }
-          else
-          {
-            dictionary.Add(key, e.Message);
-          }
+          dictionary.Add(key, e.Message);
         }
       }
 
