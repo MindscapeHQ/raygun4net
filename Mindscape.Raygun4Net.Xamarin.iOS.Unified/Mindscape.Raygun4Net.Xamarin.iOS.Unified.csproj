@@ -17,7 +17,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\iPhoneSimulator\Debug</OutputPath>
-    <DefineConstants>DEBUG;__UNIFIED__;</DefineConstants>
+    <DefineConstants>DEBUG;__UNIFIED__;SIMPLE_JSON_NO_LINQ_EXPRESSION</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -37,14 +37,14 @@
     <ConsolePause>false</ConsolePause>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DefineConstants>__UNIFIED__;</DefineConstants>
+    <DefineConstants>__UNIFIED__;SIMPLE_JSON_NO_LINQ_EXPRESSION</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;__UNIFIED__;</DefineConstants>
+    <DefineConstants>DEBUG;__UNIFIED__;SIMPLE_JSON_NO_LINQ_EXPRESSION</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -64,7 +64,7 @@
     <ConsolePause>false</ConsolePause>
     <CodesignKey>iPhone Developer</CodesignKey>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DefineConstants>__UNIFIED__;</DefineConstants>
+    <DefineConstants>__UNIFIED__;SIMPLE_JSON_NO_LINQ_EXPRESSION</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Ad-Hoc|iPhone' ">
     <Optimize>true</Optimize>
@@ -78,7 +78,7 @@
     <CodesignProvision>Automatic:AdHoc</CodesignProvision>
     <CodesignKey>iPhone Distribution</CodesignKey>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DefineConstants>__UNIFIED__;</DefineConstants>
+    <DefineConstants>__UNIFIED__;SIMPLE_JSON_NO_LINQ_EXPRESSION</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AppStore|iPhone' ">
     <Optimize>true</Optimize>
@@ -91,7 +91,7 @@
     <CodesignProvision>Automatic:AppStore</CodesignProvision>
     <CodesignKey>iPhone Distribution</CodesignKey>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DefineConstants>__UNIFIED__;</DefineConstants>
+    <DefineConstants>__UNIFIED__;SIMPLE_JSON_NO_LINQ_EXPRESSION</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
