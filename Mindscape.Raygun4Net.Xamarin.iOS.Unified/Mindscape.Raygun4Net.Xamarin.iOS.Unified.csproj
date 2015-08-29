@@ -9,8 +9,6 @@
     <RootNamespace>Mindscape.Raygun4Net.Xamarin.iOS.Unified</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AssemblyName>Mindscape.Raygun4Net.Xamarin.iOS.Unified</AssemblyName>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>true</DebugSymbols>
@@ -128,9 +126,6 @@
     <Compile Include="..\AssemblyVersionInfo.cs">
       <Link>Properties\AssemblyVersionInfo.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunClientMessage.cs">
-      <Link>Messages\RaygunClientMessage.cs</Link>
-    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorStackTraceLineMessage.cs">
       <Link>Messages\RaygunErrorStackTraceLineMessage.cs</Link>
     </Compile>
@@ -173,5 +168,6 @@
     <Compile Include="..\Mindscape.Raygun4Net.Core\Messages\RaygunErrorMessage.cs">
       <Link>Messages\RaygunErrorMessage.cs</Link>
     </Compile>
+    <Compile Include="Messages\RaygunClientMessage.cs" />
   </ItemGroup>
 </Project>
