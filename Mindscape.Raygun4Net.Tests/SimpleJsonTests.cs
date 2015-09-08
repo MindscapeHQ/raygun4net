@@ -150,5 +150,32 @@ namespace Mindscape.Raygun4Net.Tests
       // This is to test that objects are removed from the visited stack as the serializer traverses back through the object structure.
       Assert.AreEqual("{\"Child\":{\"Array\":[null],\"Dictionary\":{},\"GenericDictionary\":{}},\"Array\":[{\"Array\":[null],\"Dictionary\":{},\"GenericDictionary\":{}}],\"Dictionary\":{},\"GenericDictionary\":{}}", json);
     }
+
+    [Test]
+    public void HandleCircularObjectStructureInMultipleBranches_Array()
+    {
+      CyclicObject cyclicObject = new CyclicObject();
+      cyclicObject.Array = new CyclicObject[4];
+      cyclicObject.Array[0] = cyclicObject;
+      cyclicObject.Array[1] = cyclicObject;
+      cyclicObject.Array[2] = cyclicObject;
+      cyclicObject.Array[3] = cyclicObject;
+
+      string json = SimpleJson.SerializeObject(cyclicObject);
+      Assert.AreEqual("{\"Array\":[\"" + SimpleJson.CYCLIC_MESSAGE + "\",\"" + SimpleJson.CYCLIC_MESSAGE + "\",\"" + SimpleJson.CYCLIC_MESSAGE + "\",\"" + SimpleJson.CYCLIC_MESSAGE + "\"],\"Dictionary\":{},\"GenericDictionary\":{}}", json);
+    }
+
+    [Test]
+    public void HandleCircularObjectStructureInMultipleBranches_Dictionary()
+    {
+      CyclicObject cyclicObject = new CyclicObject();
+      cyclicObject.Dictionary["Key1"] = cyclicObject;
+      cyclicObject.Dictionary["Key2"] = cyclicObject;
+      cyclicObject.Dictionary["Key3"] = cyclicObject;
+      cyclicObject.Dictionary["Key4"] = cyclicObject;
+
+      string json = SimpleJson.SerializeObject(cyclicObject);
+      Assert.AreEqual("{\"Array\":[null],\"Dictionary\":{\"Key1\":\"" + SimpleJson.CYCLIC_MESSAGE + "\"," + "\"Key2\":\"" + SimpleJson.CYCLIC_MESSAGE + "\"," + "\"Key3\":\"" + SimpleJson.CYCLIC_MESSAGE + "\"," + "\"Key4\":\"" + SimpleJson.CYCLIC_MESSAGE + "\"},\"GenericDictionary\":{}}", json);
+    }
   }
 }
