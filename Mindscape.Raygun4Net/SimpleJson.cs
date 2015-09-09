@@ -1022,7 +1022,6 @@ namespace Mindscape.Raygun4Net
 
       if (visited.Contains(value))
       {
-        visited.Pop();
         return SerializeString(CYCLIC_MESSAGE, builder); ;
       }
 
