@@ -349,7 +349,9 @@ Another use for this method is to identify exceptions that you never want to sen
 
 If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by using the multi-parameter method:
 
+```csharp
 raygunClient.AddWrapperExceptions(typeof(TargetInvocationException));
+```
 
 In this case, if a TargetInvocationException occurs, it will be removed and replaced with the actual InnerException that was the cause.
 Note that HttpUnhandledException and TargetInvocationException are already added to the wrapper exception list; you do not have to add these manually.
