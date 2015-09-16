@@ -24,7 +24,7 @@ namespace Mindscape.Raygun4Net.Builders
       AggregateException ae = exception as AggregateException;
       if (ae != null && ae.InnerExceptions != null)
       {
-        message.InnerErrors = new RaygunErrorMessage[ae.InnerExceptions.Count];
+        message.InnerErrors = new List<RaygunErrorMessage>(ae.InnerExceptions.Count);
         int index = 0;
         foreach (Exception e in ae.InnerExceptions)
         {
@@ -62,7 +62,7 @@ namespace Mindscape.Raygun4Net.Builders
       return stringBuilder.ToString();
     }
 
-    private static RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
+    private static List<RaygunErrorStackTraceLineMessage> BuildStackTrace(Exception exception)
     {
       var lines = new List<RaygunErrorStackTraceLineMessage>();
 
@@ -101,7 +101,7 @@ namespace Mindscape.Raygun4Net.Builders
         }
       }
 
-      return lines.ToArray();
+      return lines;
     }
   }
 }

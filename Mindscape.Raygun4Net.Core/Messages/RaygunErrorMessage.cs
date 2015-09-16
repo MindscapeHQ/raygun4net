@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace Mindscape.Raygun4Net.Messages
 {
@@ -6,7 +7,7 @@ namespace Mindscape.Raygun4Net.Messages
   {
     public RaygunErrorMessage InnerError { get; set; }
 
-    public RaygunErrorMessage[] InnerErrors { get; set; }
+    public List<RaygunErrorMessage> InnerErrors { get; set; }
 
     public IDictionary Data { get; set; }
 
@@ -14,7 +15,7 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string Message { get; set; }
 
-    public RaygunErrorStackTraceLineMessage[] StackTrace { get; set; }
+    public List<RaygunErrorStackTraceLineMessage> StackTrace { get; set; }
 
     public override string ToString()
     {
