@@ -360,7 +360,7 @@ namespace Mindscape.Raygun4Net.WebApi
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
-    public void Send(Exception exception, IList<string> tags)
+    public virtual void Send(Exception exception, IList<string> tags)
     {
       Send(exception, tags, (IDictionary)null);
     }
@@ -373,7 +373,7 @@ namespace Mindscape.Raygun4Net.WebApi
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
+    public virtual void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       if (CanSend(exception))
       {
@@ -388,7 +388,7 @@ namespace Mindscape.Raygun4Net.WebApi
     /// Asynchronously transmits a message to Raygun.io.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
-    public void SendInBackground(Exception exception)
+    public virtual void SendInBackground(Exception exception)
     {
       SendInBackground(exception, null, (IDictionary)null);
     }
@@ -398,7 +398,7 @@ namespace Mindscape.Raygun4Net.WebApi
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
-    public void SendInBackground(Exception exception, IList<string> tags)
+    public virtual void SendInBackground(Exception exception, IList<string> tags)
     {
       SendInBackground(exception, tags, (IDictionary)null);
     }
@@ -409,7 +409,7 @@ namespace Mindscape.Raygun4Net.WebApi
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
+    public virtual void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       if (CanSend(exception))
       {
@@ -431,7 +431,7 @@ namespace Mindscape.Raygun4Net.WebApi
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public void SendInBackground(RaygunMessage raygunMessage)
+    public virtual void SendInBackground(RaygunMessage raygunMessage)
     {
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
