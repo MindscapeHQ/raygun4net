@@ -116,10 +116,33 @@ namespace Mindscape.Raygun4Net.WebApi
     {
       var entryAssembly = Assembly.GetCallingAssembly();
       string version = entryAssembly.GetName().Version.ToString();
+      if (generateRaygunClient != null)
+      {
+        AttachInternal(config, context => generateRaygunClient(context != null ? context.RequestMessage : null), version);
+      }
+      else
+      {
+        AttachInternal(config, null, version);
+      }
+    }
+
+    /// <summary>
+    /// Causes Raygun4Net to listen for exceptions.
+    /// </summary>
+    /// <param name="config">The HttpConfiguration to attach to.</param>
+    /// <param name="generateRaygunClient">
+    /// An optional function to provide a custom RaygunWebApiClient instance to use for reporting exceptions.
+    /// The HttpRequestMessage parameter to this function might be null if there is no request in the context of the
+    /// failure we are currently handling.
+    /// </param>
+    public static void Attach(HttpConfiguration config, Func<RaygunWebApiContext, RaygunWebApiClient> generateRaygunClient)
+    {
+      var entryAssembly = Assembly.GetCallingAssembly();
+      string version = entryAssembly.GetName().Version.ToString();
       AttachInternal(config, generateRaygunClient, version);
     }
 
-    private static void AttachInternal(HttpConfiguration config, Func<HttpRequestMessage, RaygunWebApiClient> generateRaygunClientWithMessage, string applicationVersionFromAttach)
+    private static void AttachInternal(HttpConfiguration config, Func<RaygunWebApiContext, RaygunWebApiClient> generateRaygunClientWithMessage, string applicationVersionFromAttach)
     {
       Detach(config);
 
