@@ -78,7 +78,7 @@ namespace Mindscape.Raygun4Net
     {
       if (exception is HttpUnhandledException)
       {
-        return exception.GetBaseException();
+        return exception.InnerException;
       }
 
       return exception;
