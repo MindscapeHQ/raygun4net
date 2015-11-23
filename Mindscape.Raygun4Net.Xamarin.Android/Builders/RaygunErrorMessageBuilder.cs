@@ -67,71 +67,59 @@ namespace Mindscape.Raygun4Net.Builders
           string fileName = null;
           string methodName = null;
           string className = null;
-          string stackTraceLn = stackTraceLine;
+          string stackTraceLn = stackTraceLine.Trim();
           // Line number
-          int index = stackTraceLine.LastIndexOf(":");
+          int index = stackTraceLn.LastIndexOf(":");
           if (index > 0)
           {
             bool success = int.TryParse(stackTraceLn.Substring(index + 1), out lineNumber);
             if (success)
             {
               stackTraceLn = stackTraceLn.Substring(0, index);
-              // File name
-              index = stackTraceLn.LastIndexOf("] in ");
-              if (index > 0)
-              {
-                fileName = stackTraceLn.Substring(index + 5);
-                if ("<filename unknown>".Equals(fileName))
-                {
-                  fileName = null;
-                }
-                stackTraceLn = stackTraceLn.Substring(0, index);
-                // Method name
-                index = stackTraceLn.LastIndexOf("(");
-                if (index > 0)
-                {
-                  index = stackTraceLn.LastIndexOf(".", index);
-                  if (index > 0)
-                  {
-                    int endIndex = stackTraceLn.IndexOf("[0x");
-                    if (endIndex < 0)
-                    {
-                      endIndex = stackTraceLn.Length;
-                    }
-                    methodName = stackTraceLn.Substring(index + 1, endIndex - index - 1).Trim();
-                    methodName = methodName.Replace(" (", "(");
-                    stackTraceLn = stackTraceLn.Substring(0, index);
-                  }
-                }
-                // Class name
-                index = stackTraceLn.IndexOf("at ");
-                if (index >= 0)
-                {
-                  className = stackTraceLn.Substring(index + 3);
-                }
-              }
-              else
-              {
-                fileName = stackTraceLn;
-              }
-            }
-            else
-            {
-              index = stackTraceLn.IndexOf("at ");
-              if (index >= 0)
-              {
-                index += 3;
-              }
-              else
-              {
-                index = 0;
-              }
-              fileName = stackTraceLn.Substring(index);
             }
           }
-          else
+          // File name
+          index = stackTraceLn.LastIndexOf("] in ");
+          if (index > 0)
           {
-            fileName = stackTraceLn;
+            fileName = stackTraceLn.Substring(index + 5);
+            if ("<filename unknown>".Equals(fileName))
+            {
+              fileName = null;
+            }
+            stackTraceLn = stackTraceLn.Substring(0, index);
+          }
+
+          if (!stackTraceLn.StartsWith("at (wrapper") && !stackTraceLn.StartsWith("(wrapper"))
+          {
+            // Method name
+            index = stackTraceLn.LastIndexOf("(");
+            if (index > 0)
+            {
+              index = stackTraceLn.LastIndexOf(".", index);
+              if (index > 0)
+              {
+                int endIndex = stackTraceLn.IndexOf("[0x");
+                if (endIndex < 0)
+                {
+                  endIndex = stackTraceLn.IndexOf("<0x");
+                  if (endIndex < 0)
+                  {
+                    endIndex = stackTraceLn.Length;
+                  }
+                }
+
+                methodName = stackTraceLn.Substring(index + 1, endIndex - index - 1).Trim();
+                methodName = methodName.Replace(" (", "(");
+                stackTraceLn = stackTraceLn.Substring(0, index);
+              }
+            }
+            // Class name
+            index = stackTraceLn.IndexOf("at ");
+            if (index >= 0)
+            {
+              className = stackTraceLn.Substring(index + 3);
+            }
           }
 
           if (lineNumber != 0 || !String.IsNullOrWhiteSpace(methodName) || !String.IsNullOrWhiteSpace(fileName) || !String.IsNullOrWhiteSpace(className))
@@ -142,6 +130,19 @@ namespace Mindscape.Raygun4Net.Builders
               LineNumber = lineNumber,
               MethodName = methodName,
               ClassName = className
+            };
+
+            lines.Add(line);
+          }
+          else if (!String.IsNullOrWhiteSpace(stackTraceLn))
+          {
+            if (stackTraceLn.StartsWith("at "))
+            {
+              stackTraceLn = stackTraceLn.Substring(3);
+            }
+            var line = new RaygunErrorStackTraceLineMessage
+            {
+              FileName = stackTraceLn
             };
 
             lines.Add(line);
