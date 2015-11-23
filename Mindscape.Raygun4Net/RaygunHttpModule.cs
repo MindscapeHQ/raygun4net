@@ -40,7 +40,7 @@ namespace Mindscape.Raygun4Net
       if (CanSend(lastError))
       {
         var client = GetRaygunClient(application);
-        client.SendInBackground(Unwrap(lastError));
+        client.SendInBackground(lastError);
       }
     }
 
@@ -49,7 +49,7 @@ namespace Mindscape.Raygun4Net
       if (CanSend(exception))
       {
         var client = GetRaygunClient(application);
-        client.SendInBackground(Unwrap(exception));
+        client.SendInBackground(exception);
       }
     }
 
@@ -72,16 +72,6 @@ namespace Mindscape.Raygun4Net
       }
 
       return true;
-    }
-
-    private Exception Unwrap(Exception exception)
-    {
-      if (exception is HttpUnhandledException)
-      {
-        return exception.GetBaseException();
-      }
-
-      return exception;
     }
   }
 }
