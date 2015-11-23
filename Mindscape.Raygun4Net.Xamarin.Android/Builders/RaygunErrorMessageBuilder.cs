@@ -133,15 +133,19 @@ namespace Mindscape.Raygun4Net.Builders
           {
             fileName = stackTraceLn;
           }
-          var line = new RaygunErrorStackTraceLineMessage
-          {
-            FileName = fileName,
-            LineNumber = lineNumber,
-            MethodName = methodName,
-            ClassName = className
-          };
 
-          lines.Add(line);
+          if (lineNumber != 0 || !String.IsNullOrWhiteSpace(methodName) || !String.IsNullOrWhiteSpace(fileName) || !String.IsNullOrWhiteSpace(className))
+          {
+            var line = new RaygunErrorStackTraceLineMessage
+            {
+              FileName = fileName,
+              LineNumber = lineNumber,
+              MethodName = methodName,
+              ClassName = className
+            };
+
+            lines.Add(line);
+          }
         }
         if (lines.Count > 0)
         {

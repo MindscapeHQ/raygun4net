@@ -39,6 +39,8 @@ namespace Mindscape.Raygun4Net
       _wrapperExceptions.Add(typeof(TargetInvocationException));
       _wrapperExceptions.Add(typeof(System.AggregateException));
 
+      SendingMessage += RaygunClient_SendingMessage;
+
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
 
@@ -547,6 +549,30 @@ namespace Mindscape.Raygun4Net
         {
           file.Delete();
           return;
+        }
+      }
+    }
+
+    private void RaygunClient_SendingMessage(object sender, RaygunSendingMessageEventArgs e)
+    {
+      if (e.Message != null && e.Message.Details != null && e.Message.Details.Error != null)
+      {
+        RaygunErrorStackTraceLineMessage[] stackTrace = e.Message.Details.Error.StackTrace;
+        if (stackTrace != null && stackTrace.Length > 1)
+        {
+          if (stackTrace[0].FileName != null && stackTrace[0].FileName.Contains("--- End of managed exception stack trace ---"))
+          {
+            foreach (RaygunErrorStackTraceLineMessage line in stackTrace)
+            {
+              if (line.FileName != null && line.FileName.Contains("Caused by:") && line.FileName.Contains("JavaProxyThrowable"))
+              {
+                // Reaching this point means the exception is wrapping a managed exception that has already been sent.
+                // Such exception does not contain any additional useful information, and so is a waste to send it.
+                e.Cancel = true;
+                break;
+              }
+            }
+          }
         }
       }
     }
