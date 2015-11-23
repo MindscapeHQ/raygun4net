@@ -141,7 +141,10 @@ namespace Mindscape.Raygun4Net.Builders
             ClassName = className
           };
 
-          lines.Add(line);
+          if (line.LineNumber != 0 || !String.IsNullOrWhiteSpace(line.MethodName) || !String.IsNullOrWhiteSpace(line.FileName) || !String.IsNullOrWhiteSpace(line.ClassName))
+          {
+            lines.Add(line);
+          }
         }
         if (lines.Count > 0)
         {
