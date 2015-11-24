@@ -10,7 +10,6 @@ using System.Threading;
 using System.Reflection;
 using Mindscape.Raygun4Net.Builders;
 using System.IO;
-using System.Text;
 
 namespace Mindscape.Raygun4Net
 {
