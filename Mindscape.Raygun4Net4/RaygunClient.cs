@@ -9,6 +9,9 @@ using System.Web;
 using System.Threading;
 using System.Reflection;
 using Mindscape.Raygun4Net.Builders;
+using System.IO.IsolatedStorage;
+using System.IO;
+using System.Text;
 
 namespace Mindscape.Raygun4Net
 {
@@ -53,6 +56,8 @@ namespace Mindscape.Raygun4Net
         IgnoreServerVariableNames(ignoredNames);
       }
       IsRawDataIgnored = RaygunSettings.Settings.IsRawDataIgnored;
+
+      ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
 
     /// <summary>
@@ -442,28 +447,53 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public override void Send(RaygunMessage raygunMessage)
     {
-      if (ValidateApiKey())
+      bool canSend = OnSendingMessage(raygunMessage);
+      if (canSend)
       {
-        bool canSend = OnSendingMessage(raygunMessage);
-        if (canSend)
+        string message = null;
+        try
         {
-          using (var client = CreateWebClient())
-          {
-            try
-            {
-              var message = SimpleJson.SerializeObject(raygunMessage);
-              client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
-            }
-            catch (Exception ex)
-            {
-              System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+          message = SimpleJson.SerializeObject(raygunMessage);
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Trace.WriteLine(string.Format("Error serializing exception {0}", ex.Message));
 
-              if (RaygunSettings.Settings.ThrowOnError)
-              {
-                throw;
-              }
+          if (RaygunSettings.Settings.ThrowOnError)
+          {
+            throw;
+          }
+        }
+
+        if (message != null)
+        {
+          try
+          {
+            Send(message);
+          }
+          catch (Exception ex)
+          {
+            SaveMessage(message);
+            System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+
+            if (RaygunSettings.Settings.ThrowOnError)
+            {
+              throw;
             }
           }
+
+          SendStoredMessages();
+        }
+      }
+    }
+
+    private void Send(string message)
+    {
+      if (ValidateApiKey())
+      {
+        using (var client = CreateWebClient())
+        {
+          client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
         }
       }
     }
@@ -500,6 +530,102 @@ namespace Mindscape.Raygun4Net
         }
       }
       return client;
+    }
+
+    private void SaveMessage(string message)
+    {
+      try
+      {
+        //using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
+        //{
+          string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\RaygunOfflineStorage";
+          if (!Directory.Exists(path))
+          {
+            Directory.CreateDirectory(path);
+          }
+          int number = 1;
+          while (true)
+          {
+            bool exists = File.Exists(path + "\\RaygunErrorMessage" + number + ".txt");
+            if (!exists)
+            {
+              string nextFileName = path + "\\RaygunErrorMessage" + (number + 1) + ".txt";
+              exists = File.Exists(nextFileName);
+              if (exists)
+              {
+                File.Delete(nextFileName);
+              }
+              break;
+            }
+            number++;
+          }
+          if (number == 11)
+          {
+            string firstFileName = path + "\\RaygunErrorMessage1.txt";
+            if (File.Exists(firstFileName))
+            {
+              File.Delete(firstFileName);
+            }
+          }
+          File.WriteAllText(path + "\\RaygunErrorMessage" + number + ".txt", message);
+          /*using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream(path + "\\RaygunErrorMessage" + number + ".txt", FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage))
+          {
+            using (StreamWriter writer = new StreamWriter(isoStream, Encoding.Unicode))
+            {
+              writer.Write(message);
+              writer.Flush();
+              writer.Close();
+            }
+          }*/
+          System.Diagnostics.Trace.WriteLine("Saved message: " + "RaygunErrorMessage" + number + ".txt");
+        //}
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Trace.WriteLine(string.Format("Error saving message to isolated storage {0}", ex.Message));
+      }
+    }
+
+    private void SendStoredMessages()
+    {
+      try
+      {
+        using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
+        {
+          if (isolatedStorage.DirectoryExists("RaygunIO"))
+          {
+            string[] fileNames = isolatedStorage.GetFileNames("RaygunIO\\*.txt");
+            foreach (string name in fileNames)
+            {
+              IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile(name, FileMode.Open);
+              using (StreamReader reader = new StreamReader(isoFileStream))
+              {
+                string text = reader.ReadToEnd();
+                try
+                {
+                  Send(text);
+                }
+                catch
+                {
+                  // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
+                  return;
+                }
+                System.Diagnostics.Debug.WriteLine("Sent " + name);
+              }
+              isolatedStorage.DeleteFile(name);
+            }
+            if (isolatedStorage.GetFileNames("RaygunIO\\*.txt").Length == 0)
+            {
+              System.Diagnostics.Debug.WriteLine("Successfully sent all pending messages");
+            }
+            isolatedStorage.DeleteDirectory("RaygunIO");
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Debug.WriteLine(string.Format("Error sending stored messages to Raygun.io {0}", ex.Message));
+      }
     }
   }
 }
