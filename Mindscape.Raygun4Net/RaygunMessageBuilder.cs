@@ -166,7 +166,7 @@ namespace Mindscape.Raygun4Net
       }
       else
       {
-        var entryAssembly = Assembly.GetEntryAssembly();
+        var entryAssembly = Assembly.GetEntryAssembly() ?? GetWebEntryAssembly();
         if (entryAssembly != null)
         {
           _raygunMessage.Details.Version = entryAssembly.GetName().Version.ToString();
@@ -177,6 +177,21 @@ namespace Mindscape.Raygun4Net
         }
       }
       return this;
+    }
+
+    private static Assembly GetWebEntryAssembly()
+    {
+      if (HttpContext.Current != null && HttpContext.Current.ApplicationInstance != null)
+      {
+        var type = HttpContext.Current.ApplicationInstance.GetType();
+        while (type != null && "ASP".Equals(type.Namespace))
+        {
+          type = type.BaseType;
+        }
+
+        return type == null ? null : type.Assembly;
+      }
+      return null;
     }
 
     public IRaygunMessageBuilder SetTimeStamp(DateTime? currentTime)
