@@ -590,17 +590,19 @@ namespace Mindscape.Raygun4Net
     {
       try
       {
-        using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
-        {
-          if (isolatedStorage.DirectoryExists("RaygunIO"))
+        //using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
+        //{
+          string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\RaygunOfflineStorage";
+          if (Directory.Exists(path))
           {
-            string[] fileNames = isolatedStorage.GetFileNames("RaygunIO\\*.txt");
-            foreach (string name in fileNames)
+            foreach (string name in Directory.EnumerateFiles(path))
             {
-              IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile(name, FileMode.Open);
-              using (StreamReader reader = new StreamReader(isoFileStream))
-              {
-                string text = reader.ReadToEnd();
+              string text = File.ReadAllText(name);
+
+              //IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile(name, FileMode.Open);
+              //using (StreamReader reader = new StreamReader(isoFileStream))
+              //{
+                //string text = reader.ReadToEnd();
                 try
                 {
                   Send(text);
@@ -611,16 +613,16 @@ namespace Mindscape.Raygun4Net
                   return;
                 }
                 System.Diagnostics.Debug.WriteLine("Sent " + name);
-              }
-              isolatedStorage.DeleteFile(name);
+              //}
+              File.Delete(name);
             }
-            if (isolatedStorage.GetFileNames("RaygunIO\\*.txt").Length == 0)
+            /*if (isolatedStorage.GetFileNames("RaygunIO\\*.txt").Length == 0)
             {
               System.Diagnostics.Debug.WriteLine("Successfully sent all pending messages");
             }
-            isolatedStorage.DeleteDirectory("RaygunIO");
+            isolatedStorage.DeleteDirectory("RaygunIO");*/
           }
-        }
+        //}
       }
       catch (Exception ex)
       {
