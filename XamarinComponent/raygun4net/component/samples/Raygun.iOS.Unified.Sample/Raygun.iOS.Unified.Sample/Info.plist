@@ -21,7 +21,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>MinimumOSVersion</key>
-	<string>5.2</string>
+	<string>7.0</string>
 	<key>CFBundleDisplayName</key>
 	<string>Raygun iOS Unified Sample</string>
 	<key>CFBundleIdentifier</key>
