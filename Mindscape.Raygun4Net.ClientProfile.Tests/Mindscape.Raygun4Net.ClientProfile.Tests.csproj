@@ -79,13 +79,13 @@
     <Compile Include="RaygunSettingsTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mindscape.Raygun4Net.ClientProfile\Mindscape.Raygun4Net.ClientProfile.csproj">
-      <Project>{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}</Project>
-      <Name>Mindscape.Raygun4Net.ClientProfile</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ProjectReference Include="..\Mindscape.Raygun4Net.ClientProfile\Mindscape.Raygun4Net.ClientProfile.csproj">
+      <Project>{495e53b3-f3af-4c4f-baaf-865efaa2f4a9}</Project>
+      <Name>Mindscape.Raygun4Net.ClientProfile</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

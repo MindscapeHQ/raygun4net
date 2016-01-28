@@ -59,7 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net4.ClientProfile\Mindscape.Raygun4Net4.ClientProfile.csproj">
-      <Project>{2cf1fe1f-ad2d-40bd-9f99-57ff00445a9d}</Project>
+      <Project>{a658c5bb-b1ce-408d-a4bf-5e17ec0c74a0}</Project>
       <Name>Mindscape.Raygun4Net4.ClientProfile</Name>
     </ProjectReference>
   </ItemGroup>

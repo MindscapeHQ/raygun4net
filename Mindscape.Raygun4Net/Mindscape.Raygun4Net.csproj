@@ -77,6 +77,7 @@
     <Compile Include="Messages\RaygunRequestMessage.cs" />
     <Compile Include="RaygunClient.cs" />
     <Compile Include="RaygunClientBase.cs" />
+    <Compile Include="RaygunCustomGroupingKeyEventArgs.cs" />
     <Compile Include="RaygunHttpModule.cs" />
     <Compile Include="RaygunMessageBuilder.cs" />
     <Compile Include="RaygunRequestMessageOptions.cs" />
