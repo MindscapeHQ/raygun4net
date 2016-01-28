@@ -333,3 +333,13 @@ Tags and custom data
 
 When sending exceptions manually, you can also send an arbitrary list of tags (an array of strings), and a collection of custom data (a dictionary of any objects).
 This can be done using the various Send and SendInBackground method overloads.
+
+Custom grouping keys
+--------------------
+You can provide your own grouping key if you wish. We only recommend this you're having issues with errors not being grouped properly.
+
+On a RaygunClient instance, attach an event handler to the CustomGroupingKey event. This event handler will be called after Raygun has built the RaygunMessage object, but before the SendingMessage event is called.
+The event arguments provide the RaygunMessage object that is about to be sent, and the original exception that triggered it. You can use anything you like to generate the key, and set it by `CustomGroupingKey`
+property on the event arguments. Setting it to null or empty string will leave the exception to be grouped by Raygun, setting it to something will cause Raygun to group it with other exceptions you've sent with that key.
+
+The key has a maximum length of 100.
