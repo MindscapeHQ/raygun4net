@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2CF1FE1F-AD2D-40BD-9F99-57FF00445A9D}</ProjectGuid>
+    <ProjectGuid>{A658C5BB-B1CE-408D-A4BF-5E17EC0C74A0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Mindscape.Raygun4Net</RootNamespace>
@@ -108,6 +108,9 @@
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\RaygunClientBase.cs">
       <Link>RaygunClientBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\RaygunCustomGroupingKeyEventArgs.cs">
+      <Link>RaygunCustomGroupingKeyEventArgs.cs</Link>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\RaygunSendingMessageEventArgs.cs">
       <Link>RaygunSendingMessageEventArgs.cs</Link>

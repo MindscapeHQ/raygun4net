@@ -295,6 +295,13 @@ namespace Mindscape.Raygun4Net
         .SetUserCustomData(userCustomData)
         .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
         .Build();
+
+      var customGroupingKey = OnCustomGroupingKey(exception, message);
+      if (string.IsNullOrEmpty(customGroupingKey) == false)
+      {
+        message.Details.GroupingKey = customGroupingKey;
+      }
+
       return message;
     }
 

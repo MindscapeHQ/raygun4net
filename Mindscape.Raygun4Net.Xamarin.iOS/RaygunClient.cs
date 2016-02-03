@@ -454,6 +454,12 @@ namespace Mindscape.Raygun4Net
         .SetUser(BuildRaygunIdentifierMessage(machineName))
         .Build();
 
+      var customGroupingKey = OnCustomGroupingKey(exception, message);
+      if(string.IsNullOrEmpty(customGroupingKey) == false)
+      {
+        message.Details.GroupingKey = customGroupingKey;
+      }
+
       return message;
     }
 
