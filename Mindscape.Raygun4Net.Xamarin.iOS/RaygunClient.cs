@@ -585,7 +585,94 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private bool SendMessage(string message, int timeout)
+    private string _sessionId;
+
+    public void SendPulseEvent(RaygunPulseEventType type)
+    {
+      RaygunPulseMessage message = new RaygunPulseMessage();
+      RaygunPulseDataMessage data = new RaygunPulseDataMessage();
+      data.Timestamp = DateTime.UtcNow;
+      data.Version = GetVersion();
+      message.EventData = new RaygunPulseDataMessage[] { data };
+      switch(type) {
+      case RaygunPulseEventType.SessionStart:
+        data.Type = "session_start";
+        _sessionId = Guid.NewGuid().ToString();
+        break;
+      case RaygunPulseEventType.SessionEnd:
+        data.Type = "session_end";
+        break;
+      }
+      data.SessionId = _sessionId;
+      Send(message);
+    }
+
+    private string GetVersion()
+    {
+      string version = ApplicationVersion;
+      if (String.IsNullOrWhiteSpace(version))
+      {
+        try
+        {
+          version = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString();
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Trace.WriteLine("Error retieving bundle version {0}", ex.Message);
+        }
+      }
+
+      if (String.IsNullOrWhiteSpace(version))
+      {
+        version = "Not supplied";
+      }
+
+      return version;
+    }
+
+    public void Send(RaygunPulseMessage raygunPulseMessage)
+    {
+      if (ValidateApiKey())
+      {
+        //bool canSend = OnSendingMessage(raygunMessage);
+        //if (canSend)
+        {
+          string message = null;
+          try
+          {
+            message = SimpleJson.SerializeObject(raygunPulseMessage);
+          }
+          catch (Exception ex)
+          {
+            System.Diagnostics.Debug.WriteLine (string.Format ("Error serializing message {0}", ex.Message));
+          }
+
+          if (message != null)
+          {
+            SendPulseMessage (message);
+            /*try
+            {
+              SaveMessage (message);
+            }
+            catch (Exception ex)
+            {
+              System.Diagnostics.Debug.WriteLine (string.Format ("Error saving Exception to device {0}", ex.Message));
+              if (HasInternetConnection)
+              {
+                SendMessage (message);
+              }
+            }
+
+            if (HasInternetConnection)
+            {
+              SendStoredMessages ();
+            }*/
+          }
+        }
+      }
+    }
+
+    private bool SendMessage (string message, int timeout)
     {
       using (var client = new TimeoutWebClient(timeout))
       {
@@ -600,6 +687,27 @@ namespace Mindscape.Raygun4Net
         catch (Exception ex)
         {
           System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+          return false;
+        }
+      }
+      return true;
+    }
+
+    private bool SendPulseMessage(string message)
+    {
+      using (var client = new WebClient())
+      {
+        client.Headers.Add("X-ApiKey", _apiKey);
+        client.Headers.Add("content-type", "application/json; charset=utf-8");
+        client.Encoding = System.Text.Encoding.UTF8;
+
+        try
+        {
+          client.UploadString(RaygunSettings.Settings.PulseEndpoint, message);
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Pulse message to Raygun.io {0}", ex.Message));
           return false;
         }
       }

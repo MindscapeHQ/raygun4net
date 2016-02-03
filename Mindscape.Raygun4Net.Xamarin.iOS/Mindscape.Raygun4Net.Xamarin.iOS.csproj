@@ -96,5 +96,8 @@
     <Compile Include="..\Mindscape.Raygun4Net\RaygunCustomGroupingKeyEventArgs.cs">
       <Link>RaygunCustomGroupingKeyEventArgs.cs</Link>
     </Compile>
+    <Compile Include="Messages\RaygunPulseMessage.cs" />
+    <Compile Include="RaygunPulseEventType.cs" />
+    <Compile Include="Messages\RaygunPulseDataMessage.cs" />
   </ItemGroup>
 </Project>
