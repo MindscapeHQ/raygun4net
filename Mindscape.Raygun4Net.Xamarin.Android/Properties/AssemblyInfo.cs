@@ -11,7 +11,7 @@ using Android.App;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Mindscape")]
 [assembly: AssemblyProduct("Mindscape Raygun4Net")]
-[assembly: AssemblyCopyright("Copyright © Mindscape 2013-2015")]
+[assembly: AssemblyCopyright("Copyright © Mindscape 2013-2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
