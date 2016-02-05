@@ -2,9 +2,9 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata minClientVersion="2.5">
     <id>Mindscape.Raygun4Net.Signed</id>
-    <version>5.2.0</version>
+    <version>5.3.0</version>
     <title />
-    <authors>Mindscape</authors>
+    <authors>Raygun</authors>
     <owners />
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Raygun.io provider for signed projects built with .NET Framework + Windows Store apps, Windows Phone, Xamarin, Windows 8 and  WinRT.</description>
