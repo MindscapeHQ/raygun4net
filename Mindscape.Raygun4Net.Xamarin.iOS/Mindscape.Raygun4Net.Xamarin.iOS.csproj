@@ -93,5 +93,8 @@
     <Compile Include="..\Mindscape.Raygun4Net.Core\Messages\RaygunErrorMessage.cs">
       <Link>Messages\RaygunErrorMessage.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\RaygunCustomGroupingKeyEventArgs.cs">
+      <Link>RaygunCustomGroupingKeyEventArgs.cs</Link>
+    </Compile>
   </ItemGroup>
 </Project>
