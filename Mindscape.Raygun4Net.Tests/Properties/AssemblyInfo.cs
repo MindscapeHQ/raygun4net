@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Raygun4Net.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Mindscape")]
-[assembly: AssemblyProduct("Mindscape.Raygun4Net.Tests")]
-[assembly: AssemblyCopyright("Copyright © Mindscape 2012-2016")]
+[assembly: AssemblyCompany("Raygun")]
+[assembly: AssemblyProduct("Raygun4Net")]
+[assembly: AssemblyCopyright("Copyright © Raygun 2012-2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

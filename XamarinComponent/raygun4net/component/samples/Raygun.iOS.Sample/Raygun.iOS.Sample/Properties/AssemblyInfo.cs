@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Raygun.iOS.Sample")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Mindscape")]
-[assembly: AssemblyProduct("Raygun.iOS.Sample")]
-[assembly: AssemblyCopyright("Copyright © Mindscape 2013-2014")]
+[assembly: AssemblyCompany("Raygun")]
+[assembly: AssemblyProduct("Raygun4Net")]
+[assembly: AssemblyCopyright("Copyright © Raygun 2013-2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

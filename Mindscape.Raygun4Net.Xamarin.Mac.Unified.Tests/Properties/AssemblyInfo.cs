@@ -7,9 +7,9 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTitle("Raygun4Net.Xamarin.Mac.Unified.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Mindscape")]
-[assembly: AssemblyProduct("Mindscape Raygun4Net")]
-[assembly: AssemblyCopyright("Copyright © Mindscape 2015-2016")]
+[assembly: AssemblyCompany("Raygun")]
+[assembly: AssemblyProduct("Raygun4Net")]
+[assembly: AssemblyCopyright("Copyright © Raygun 2015-2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
