@@ -572,7 +572,7 @@ namespace Mindscape.Raygun4Net
 
     private bool SendMessage(string message)
     {
-      using (var client = new WebClient())
+      using (var client = new TimeoutWebClient())
       {
         client.Headers.Add("X-ApiKey", _apiKey);
         client.Headers.Add("content-type", "application/json; charset=utf-8");
@@ -705,6 +705,16 @@ namespace Mindscape.Raygun4Net
       catch (Exception ex)
       {
         System.Diagnostics.Debug.WriteLine(string.Format("Error saving message to isolated storage {0}", ex.Message));
+      }
+    }
+
+    private class TimeoutWebClient : WebClient
+    {
+      protected override WebRequest GetWebRequest(Uri address)
+      {
+        WebRequest request = base.GetWebRequest(address);
+        request.Timeout = 5000;
+        return request;
       }
     }
   }
