@@ -3,8 +3,8 @@
   <metadata minClientVersion="2.5">
     <id>Mindscape.Raygun4Net.WebApi</id>
     <version>5.3.0</version>
-    <title />
-    <authors>Mindscape</authors>
+    <title>Raygun4Net for Web API</title>
+    <authors>Raygun</authors>
     <owners />
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Raygun.io Provider for ASP.NET WebApi projects</description>

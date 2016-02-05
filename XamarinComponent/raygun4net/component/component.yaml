@@ -7,7 +7,7 @@ license: License.md
 icons: 
   - raygun4net_128x128.png
   - raygun4net_512x512.png
-publisher: Mindscape
+publisher: Raygun
 name: Raygun4Net
 id: raygun4net
 samples: 
