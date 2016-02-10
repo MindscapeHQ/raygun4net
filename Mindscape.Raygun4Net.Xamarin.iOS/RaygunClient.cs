@@ -561,7 +561,9 @@ namespace Mindscape.Raygun4Net
               }
             }
 
-            if (HasInternetConnection)
+            // In the case of sending messages during a crash, only send stored messages if there are 2 or less.
+            // This is to prevent keeping the app open for a long time while it crashes.
+            if (HasInternetConnection && GetStoredMessageCount <= 2)
             {
               SendStoredMessages ();
             }
@@ -653,6 +655,26 @@ namespace Mindscape.Raygun4Net
           System.Diagnostics.Debug.WriteLine(string.Format("Error sending stored messages to Raygun.io {0}", ex.Message));
         }
       }
+    }
+
+    private int GetStoredMessageCount()
+    {
+      try
+      {
+        using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
+        {
+          if (isolatedStorage.DirectoryExists("RaygunIO"))
+          {
+            string[] fileNames = isolatedStorage.GetFileNames("RaygunIO\\*.txt");
+            return fileNames.Length;
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Debug.WriteLine(string.Format("Error getting stored message count: {0}", ex.Message));
+      }
+      return 0;
     }
 
     private void SaveMessage(string message)
