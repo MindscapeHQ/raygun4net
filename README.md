@@ -415,6 +415,16 @@ var raygunClient = new RaygunClient()
 };
 ```
 
+## Custom grouping keys
+
+You can provide your own grouping key if you wish. We only recommend this you're having issues with errors not being grouped properly.
+
+On a RaygunClient instance, attach an event handler to the CustomGroupingKey event. This event handler will be called after Raygun has built the RaygunMessage object, but before the SendingMessage event is called.
+The event arguments provide the RaygunMessage object that is about to be sent, and the original exception that triggered it. You can use anything you like to generate the key, and set it by `CustomGroupingKey`
+property on the event arguments. Setting it to null or empty string will leave the exception to be grouped by Raygun, setting it to something will cause Raygun to group it with other exceptions you've sent with that key.
+
+The key has a maximum length of 100.
+
 ## Troubleshooting
 
 * If the solution fails to build due to missing dependencies, in Visual Studio 2012 ensure you have the NuGet extension installed and that the Tools -> Options -> Package Manager -> 'Allow NuGet to download missing packages during build' box is checked. Then, go to the directory that you cloned this repository into and run build.bat.
