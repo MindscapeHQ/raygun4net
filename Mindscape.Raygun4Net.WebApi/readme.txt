@@ -43,7 +43,7 @@ Providing a custom RaygunClient to the automatic exception handlers
 ===================================================================
 
 Sometimes when setting up Raygun to send exceptions automatically, you may need to provide a custom RaygunWebApiClient instance in order to use some of the optional feature described below.
-To do this, use the static RaygunWebApiClient method overload that takes a function. Within this function, return a new (or previously created) RaygunWebApiClient instance.
+To do this, use the static RaygunWebApiClient.Attach method overload that takes a function. Within this function, return a new (or previously created) RaygunWebApiClient instance.
 In this function you can setup any additional options on the RaygunWebApiClient instance that you need - more information about each feature is described below.
 
 RaygunWebApiClient.Attach(config, () => {

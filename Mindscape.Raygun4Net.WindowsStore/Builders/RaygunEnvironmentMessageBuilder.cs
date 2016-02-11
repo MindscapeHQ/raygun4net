@@ -34,7 +34,7 @@ namespace Mindscape.Raygun4Net.Builders
       }
       catch (Exception ex)
       {
-        Debug.WriteLine("Error retieving screen info: {0}", ex.Message);
+        Debug.WriteLine("Error retrieving screen info: {0}", ex.Message);
       }
 
       try
@@ -45,7 +45,7 @@ namespace Mindscape.Raygun4Net.Builders
       }
       catch (Exception ex)
       {
-        Debug.WriteLine("Error retieving time and locale: {0}", ex.Message);
+        Debug.WriteLine("Error retrieving time and locale: {0}", ex.Message);
       }
 
       try
@@ -57,7 +57,7 @@ namespace Mindscape.Raygun4Net.Builders
       }
       catch (Exception ex)
       {
-        Debug.WriteLine("Error retieving device info: {0}", ex.Message);
+        Debug.WriteLine("Error retrieving device info: {0}", ex.Message);
       }
 
       return message;
