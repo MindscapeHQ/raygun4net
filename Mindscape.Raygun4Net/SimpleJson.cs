@@ -1033,41 +1033,49 @@ namespace Mindscape.Raygun4Net
         success = SerializeString(stringValue, builder);
       else
       {
-        IDictionary dict = value as IDictionary;
-        if (dict != null)
+        if (value.GetType().IsArray)
         {
-          success = SerializeObject(jsonSerializerStrategy, dict.Keys, dict.Values, builder, visited);
+          success = SerializeArray(jsonSerializerStrategy, value as IEnumerable, builder, visited);
         }
         else
         {
-          IDictionary<string, object> stringObjectDictionary = value as IDictionary<string, object>;
-          if (stringObjectDictionary != null)
+          IDictionary dict = value as IDictionary;
+          if (dict != null)
           {
-            success = SerializeObject(jsonSerializerStrategy, stringObjectDictionary.Keys, stringObjectDictionary.Values, builder, visited);
+            success = SerializeObject(jsonSerializerStrategy, dict.Keys, dict.Values, builder, visited);
           }
           else
           {
-            IDictionary<string, string> stringDictionary = value as IDictionary<string, string>;
-            if (stringDictionary != null)
+            IDictionary<string, object> stringObjectDictionary = value as IDictionary<string, object>;
+            if (stringObjectDictionary != null)
             {
-              success = SerializeObject(jsonSerializerStrategy, stringDictionary.Keys, stringDictionary.Values, builder, visited);
+              success = SerializeObject(jsonSerializerStrategy, stringObjectDictionary.Keys, stringObjectDictionary.Values, builder, visited);
             }
             else
             {
-              IEnumerable enumerableValue = value as IEnumerable;
-              if (enumerableValue != null)
-                success = SerializeArray(jsonSerializerStrategy, enumerableValue, builder, visited);
-              else if (IsNumeric (value))
-                success = SerializeNumber(value, builder);
-              else if (value is bool)
-                builder.Append ((bool)value ? "true" : "false");
-              else if (value == null)
-                builder.Append("null");
-              else {
-                object serializedObject;
-                success = jsonSerializerStrategy.TrySerializeNonPrimitiveObject(value, out serializedObject);
-                if (success)
-                  SerializeValue(jsonSerializerStrategy, serializedObject, builder, visited);
+              IDictionary<string, string> stringDictionary = value as IDictionary<string, string>;
+              if (stringDictionary != null)
+              {
+                success = SerializeObject(jsonSerializerStrategy, stringDictionary.Keys, stringDictionary.Values, builder, visited);
+              }
+              else
+              {
+                IEnumerable enumerableValue = value as IEnumerable;
+                if (enumerableValue != null)
+                  success = SerializeArray(jsonSerializerStrategy, enumerableValue, builder, visited);
+                else if (IsNumeric(value))
+                  success = SerializeNumber(value, builder);
+                else if (value is bool)
+                  builder.Append((bool)value ? "true" : "false");
+                else if (value == null)
+                  builder.Append("null");
+                else
+                {
+                  object serializedObject;
+                  success = jsonSerializerStrategy.TrySerializeNonPrimitiveObject(value, out serializedObject);
+                  if (success)
+                    SerializeValue(jsonSerializerStrategy, serializedObject, builder, visited);
+                }
               }
             }
           }
