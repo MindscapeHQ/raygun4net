@@ -90,7 +90,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception ex)
         {
-          Trace.WriteLine("Error retieving bundle version {0}", ex.Message);
+          Trace.WriteLine("Error retrieving bundle version {0}", ex.Message);
         }
       }
 

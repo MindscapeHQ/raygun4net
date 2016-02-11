@@ -91,7 +91,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception ex)
         {
-          Debug.WriteLine("Error retieving package version {0}", ex.Message);
+          Debug.WriteLine("Error retrieving package version {0}", ex.Message);
         }
       }
 

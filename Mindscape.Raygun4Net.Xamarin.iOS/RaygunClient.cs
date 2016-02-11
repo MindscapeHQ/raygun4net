@@ -46,7 +46,7 @@ namespace Mindscape.Raygun4Net
       _wrapperExceptions.Add(typeof(TargetInvocationException));
       _wrapperExceptions.Add(typeof(AggregateException));
 
-      ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
+      ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(0); });
     }
 
     private bool ValidateApiKey()
@@ -100,6 +100,14 @@ namespace Mindscape.Raygun4Net
         }
       }
     }
+
+    /// <summary>
+    /// Gets or sets the maximum number of milliseconds allowed to attempt a synchronous send to Raygun.
+    /// A value of 0 will use a timeout of 100 seconds.
+    /// The default is 0.
+    /// </summary>
+    /// <value>The synchronous timeout in milliseconds.</value>
+    public int SynchronousTimeout { get; set; }
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
@@ -163,7 +171,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      StripAndSend(exception, tags, userCustomData);
+      StripAndSend(exception, tags, userCustomData, SynchronousTimeout);
     }
 
     /// <summary>
@@ -193,7 +201,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      ThreadPool.QueueUserWorkItem(c => StripAndSend(exception, tags, userCustomData));
+      ThreadPool.QueueUserWorkItem(c => StripAndSend(exception, tags, userCustomData, 0));
     }
 
     /// <summary>
@@ -203,7 +211,7 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void SendInBackground(RaygunMessage raygunMessage)
     {
-      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage, 0));
     }
 
     private string DeviceId
@@ -487,11 +495,11 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 
-    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
+    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, int timeout)
     {
       foreach (Exception e in StripWrapperExceptions(exception))
       {
-        Send(BuildMessage(e, tags, userCustomData));
+        Send(BuildMessage(e, tags, userCustomData), timeout);
       }
     }
 
@@ -531,6 +539,11 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public override void Send(RaygunMessage raygunMessage)
     {
+      Send (raygunMessage, SynchronousTimeout);
+    }
+
+    private void Send(RaygunMessage raygunMessage, int timeout)
+    {
       if (ValidateApiKey())
       {
         bool canSend = OnSendingMessage(raygunMessage);
@@ -550,29 +563,31 @@ namespace Mindscape.Raygun4Net
           {
             try
             {
-              SaveMessage (message);
+              SaveMessage(message);
             }
             catch (Exception ex)
             {
               System.Diagnostics.Debug.WriteLine (string.Format ("Error saving Exception to device {0}", ex.Message));
               if (HasInternetConnection)
               {
-                SendMessage (message);
+                SendMessage(message, timeout);
               }
             }
 
-            if (HasInternetConnection)
+            // In the case of sending messages during a crash, only send stored messages if there are 2 or less.
+            // This is to prevent keeping the app open for a long time while it crashes.
+            if (HasInternetConnection && GetStoredMessageCount() <= 2)
             {
-              SendStoredMessages ();
+              SendStoredMessages(timeout);
             }
           }
         }
       }
     }
 
-    private bool SendMessage(string message)
+    private bool SendMessage(string message, int timeout)
     {
-      using (var client = new WebClient())
+      using (var client = new TimeoutWebClient(timeout))
       {
         client.Headers.Add("X-ApiKey", _apiKey);
         client.Headers.Add("content-type", "application/json; charset=utf-8");
@@ -613,7 +628,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private void SendStoredMessages()
+    private void SendStoredMessages(int timeout)
     {
       if (HasInternetConnection)
       {
@@ -630,7 +645,7 @@ namespace Mindscape.Raygun4Net
                 using (StreamReader reader = new StreamReader(isoFileStream))
                 {
                   string text = reader.ReadToEnd();
-                  bool success = SendMessage(text);
+                  bool success = SendMessage(text, timeout);
                   // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
                   if (!success)
                   {
@@ -653,6 +668,26 @@ namespace Mindscape.Raygun4Net
           System.Diagnostics.Debug.WriteLine(string.Format("Error sending stored messages to Raygun.io {0}", ex.Message));
         }
       }
+    }
+
+    private int GetStoredMessageCount()
+    {
+      try
+      {
+        using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
+        {
+          if (isolatedStorage.DirectoryExists("RaygunIO"))
+          {
+            string[] fileNames = isolatedStorage.GetFileNames("RaygunIO\\*.txt");
+            return fileNames.Length;
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Debug.WriteLine(string.Format("Error getting stored message count: {0}", ex.Message));
+      }
+      return 0;
     }
 
     private void SaveMessage(string message)
@@ -705,6 +740,26 @@ namespace Mindscape.Raygun4Net
       catch (Exception ex)
       {
         System.Diagnostics.Debug.WriteLine(string.Format("Error saving message to isolated storage {0}", ex.Message));
+      }
+    }
+
+    private class TimeoutWebClient : WebClient
+    {
+      private readonly int _timeout;
+
+      public TimeoutWebClient(int timeout)
+      {
+        _timeout = timeout;
+      }
+
+      protected override WebRequest GetWebRequest(Uri address)
+      {
+        WebRequest request = base.GetWebRequest(address);
+        if (_timeout > 0)
+        {
+          request.Timeout = _timeout;
+        }
+        return request;
       }
     }
   }
