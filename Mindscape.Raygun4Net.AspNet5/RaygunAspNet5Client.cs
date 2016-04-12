@@ -144,9 +144,14 @@ namespace Mindscape.Raygun4Net.AspNet5
     /// Transmits an exception to Raygun.io synchronously, using the version number of the originating assembly.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
-    public override void Send(Exception exception)
+    public async override void Send(Exception exception)
     {
-      Send(exception, null, (IDictionary)null);
+      await Send(exception, null, (IDictionary)null);
+    }
+
+    public async Task SendSync(Exception exception)
+    {
+      await Send(exception, null, (IDictionary)null);
     }
 
     /// <summary>
@@ -155,9 +160,9 @@ namespace Mindscape.Raygun4Net.AspNet5
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
-    public void Send(Exception exception, IList<string> tags)
+    public async Task Send(Exception exception, IList<string> tags)
     {
-      Send(exception, tags, (IDictionary)null);
+      await Send(exception, tags, (IDictionary)null);
     }
 
     /// <summary>
@@ -168,7 +173,7 @@ namespace Mindscape.Raygun4Net.AspNet5
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    public async void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
+    public async Task Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       if (CanSend(exception))
       {
@@ -183,9 +188,9 @@ namespace Mindscape.Raygun4Net.AspNet5
     /// Asynchronously transmits a message to Raygun.io.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
-    public void SendInBackground(Exception exception)
+    public Task SendInBackground(Exception exception)
     {
-      SendInBackground(exception, null, (IDictionary)null);
+      return SendInBackground(exception, null, (IDictionary)null);
     }
 
     /// <summary>
@@ -193,9 +198,9 @@ namespace Mindscape.Raygun4Net.AspNet5
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
-    public void SendInBackground(Exception exception, IList<string> tags)
+    public Task SendInBackground(Exception exception, IList<string> tags)
     {
-      SendInBackground(exception, tags, (IDictionary)null);
+      return SendInBackground(exception, tags, (IDictionary)null);
     }
 
     /// <summary>
@@ -204,7 +209,7 @@ namespace Mindscape.Raygun4Net.AspNet5
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    public async void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
+    public async Task SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       if (CanSend(exception))
       {
@@ -227,9 +232,9 @@ namespace Mindscape.Raygun4Net.AspNet5
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public void SendInBackground(RaygunMessage raygunMessage)
+    public Task SendInBackground(RaygunMessage raygunMessage)
     {
-      Task.Run(() => Send(raygunMessage));
+      return Task.Run(() => Send(raygunMessage));
     }
 
     internal void FlagExceptionAsSent(Exception exception)
@@ -268,11 +273,11 @@ namespace Mindscape.Raygun4Net.AspNet5
       return message.Build();
     }
 
-    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
+    private async Task StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       foreach (Exception e in StripWrapperExceptions(exception))
       {
-        Send(BuildMessage(e, tags, userCustomData));
+        await Send(BuildMessage(e, tags, userCustomData));
       }
     }
 
@@ -310,7 +315,7 @@ namespace Mindscape.Raygun4Net.AspNet5
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public async void Send(RaygunMessage raygunMessage)
+    public async Task Send(RaygunMessage raygunMessage)
     {
       if (ValidateApiKey())
       {
@@ -322,13 +327,21 @@ namespace Mindscape.Raygun4Net.AspNet5
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
 
             requestMessage.Headers.Add("X-ApiKey", _apiKey);
-            requestMessage.Headers.Add("content-type", "application/json; charset=utf-8");
 
             try
             {
               var message = SimpleJson.SerializeObject(raygunMessage);
               requestMessage.Content = new StringContent(message, Encoding.UTF8, "application/json");
-              await client.SendAsync(requestMessage);
+              var result = await client.SendAsync(requestMessage);
+              if(!result.IsSuccessStatusCode)
+              {
+                System.Diagnostics.Debug.WriteLine($"Error Logging Exception to Raygun.io {result.ReasonPhrase}");
+
+                if (_settings.ThrowOnError)
+                {
+                  throw new Exception("Could not log to Raygun");
+                }
+              }
             }
             catch (Exception ex)
             {
