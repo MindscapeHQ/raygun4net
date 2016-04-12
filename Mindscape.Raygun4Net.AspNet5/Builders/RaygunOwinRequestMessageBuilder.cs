@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Mindscape.Raygun4Net.Messages;
 using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Http.Extensions;
 
 namespace Mindscape.Raygun4Net.AspNet5.Builders
 {
@@ -19,7 +20,7 @@ namespace Mindscape.Raygun4Net.AspNet5.Builders
       options = options ?? new RaygunRequestMessageOptions();
 
       message.HostName = request.Host.Value;
-      //message.Url = context.;
+      message.Url = request.GetDisplayUrl();
       message.HttpMethod = request.Method;
       message.IPAddress = GetIpAddress(request);
       message.Form = ToDictionary(await request.ReadFormAsync(), options.IsFormFieldIgnored);
@@ -64,7 +65,7 @@ namespace Mindscape.Raygun4Net.AspNet5.Builders
       }
     }
 
-    private static IDictionary ToDictionary(IEnumerable<KeyValuePair<string, string[]>> query, Func<string, bool> isFormFieldIgnored)
+    private static IDictionary ToDictionary(IReadableStringCollection query, Func<string, bool> isFormFieldIgnored)
     {
       var dict = new Dictionary<string, string>();
       foreach(var value in query.Where(v => isFormFieldIgnored(v.Key) == false))

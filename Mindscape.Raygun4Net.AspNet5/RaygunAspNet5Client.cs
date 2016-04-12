@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using Mindscape.Raygun4Net.Messages;
 using Mindscape.Raygun4Net.AspNet5.Builders;
 using Microsoft.AspNet.Http;
+using System.Net.Http;
+using System.Text;
 
 namespace Mindscape.Raygun4Net.AspNet5
 {
@@ -210,12 +212,13 @@ namespace Mindscape.Raygun4Net.AspNet5
         // otherwise it will be disposed while we are using it on the other thread.
         RaygunRequestMessage currentRequestMessage = await BuildRequestMessage();
 
-        ThreadPool.QueueUserWorkItem(c =>
+        var task = Task.Run(() =>
         {
           _currentRequestMessage.Value = currentRequestMessage;
           StripAndSend(exception, tags, userCustomData);
         });
         FlagAsSent(exception);
+        await task;
       }
     }
 
@@ -226,7 +229,7 @@ namespace Mindscape.Raygun4Net.AspNet5
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void SendInBackground(RaygunMessage raygunMessage)
     {
-      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+      Task.Run(() => Send(raygunMessage));
     }
 
     internal void FlagExceptionAsSent(Exception exception)
@@ -252,15 +255,17 @@ namespace Mindscape.Raygun4Net.AspNet5
       var message = RaygunOwinMessageBuilder.New(_settings)
         .SetRequestDetails(_currentRequestMessage.Value)
         .SetEnvironmentDetails()
+#if DNX451
         .SetMachineName(Environment.MachineName)
+#endif
         .SetExceptionDetails(exception)
         .SetClientDetails()
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
-        .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
-        .Build();
-      return message;
+        .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null));
+
+      return message.Build();
     }
 
     private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
@@ -305,44 +310,25 @@ namespace Mindscape.Raygun4Net.AspNet5
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public void Send(RaygunMessage raygunMessage)
+    public async void Send(RaygunMessage raygunMessage)
     {
       if (ValidateApiKey())
       {
         bool canSend = OnSendingMessage(raygunMessage) && CanSend(raygunMessage);
         if (canSend)
         {
-          using (var client = new WebClient())
+          using (var client = new HttpClient())
           {
-            client.Headers.Add("X-ApiKey", _apiKey);
-            client.Headers.Add("content-type", "application/json; charset=utf-8");
-            client.Encoding = System.Text.Encoding.UTF8;
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
 
-            if (WebRequest.DefaultWebProxy != null)
-            {
-              Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(new Uri(_settings.ApiEndpoint.ToString()));
-
-              if (proxyUri != null && proxyUri.AbsoluteUri != _settings.ApiEndpoint.ToString())
-              {
-                client.Proxy = new WebProxy(proxyUri, false);
-
-                if (ProxyCredentials == null)
-                {
-                  client.UseDefaultCredentials = true;
-                  client.Proxy.Credentials = CredentialCache.DefaultCredentials;
-                }
-                else
-                {
-                  client.UseDefaultCredentials = false;
-                  client.Proxy.Credentials = ProxyCredentials;
-                }
-              }
-            }
+            requestMessage.Headers.Add("X-ApiKey", _apiKey);
+            requestMessage.Headers.Add("content-type", "application/json; charset=utf-8");
 
             try
             {
               var message = SimpleJson.SerializeObject(raygunMessage);
-              client.UploadString(_settings.ApiEndpoint, message);
+              requestMessage.Content = new StringContent(message, Encoding.UTF8, "application/json");
+              await client.SendAsync(requestMessage);
             }
             catch (Exception ex)
             {

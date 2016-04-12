@@ -1,6 +1,4 @@
 ﻿using System;
-using Microsoft.Framework.ConfigurationModel;
-using System.Linq;
 
 namespace Mindscape.Raygun4Net
 {

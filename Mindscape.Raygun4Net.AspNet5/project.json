@@ -1,21 +1,15 @@
 {
     "version": "1.0.0-*",
     "dependencies": {
-        "Microsoft.AspNet.Http": "1.0.0-beta3",
-        "Microsoft.AspNet.Http.Extensions": "1.0.0-beta3",
-        "Microsoft.Framework.ConfigurationModel.Json": "1.0.0-beta3"
+        "Microsoft.AspNet.Http": "1.0.0-rc1-final",
+        "Microsoft.AspNet.Http.Extensions": "1.0.0-rc1-final",
+        "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-final",
+        "Microsoft.Extensions.OptionsModel": "1.0.0-rc1-final",
+        "System.Net.Http": "4.0.1-beta-23516"
     },
 
     "frameworks": {
-        "aspnet50": {
-            "dependencies": {
-                
-            }
-        },
-        "aspnetcore50": {
-            "dependencies": {
-                "System.Runtime": "4.0.20-beta-22523"
-            }
-        }
+        "dnx451": { },
+        "dnxcore50": { }
     }
 }

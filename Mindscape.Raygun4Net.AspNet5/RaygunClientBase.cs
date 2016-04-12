@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Reflection;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
@@ -34,7 +35,7 @@ namespace Mindscape.Raygun4Net
       {
         try
         {
-          Type[] genericTypes = exception.Data.GetType().GetGenericArguments();
+          Type[] genericTypes = exception.Data.GetType().GetTypeInfo().GenericTypeArguments;
           if (genericTypes.Length == 0 || genericTypes[0].IsAssignableFrom(typeof(string)))
           {
             exception.Data[SentKey] = true;

@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
-using Microsoft.Framework.ConfigurationModel;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.OptionsModel;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Mindscape.Raygun4Net.AspNet5
 {
@@ -11,10 +13,10 @@ namespace Mindscape.Raygun4Net.AspNet5
     private readonly RequestDelegate _next;
     private readonly RaygunSettings _settings;
 
-    public RaygunAspNetMiddleware(RequestDelegate next, RaygunSettings settings)
+    public RaygunAspNetMiddleware(RequestDelegate next, IOptions<RaygunSettings> settings)
     {
       _next = next;
-      _settings = settings;
+      _settings = settings.Value;
     }
     public Task Invoke(HttpContext httpContext)
     {
@@ -30,14 +32,16 @@ namespace Mindscape.Raygun4Net.AspNet5
 
   public static class IApplicationBuilderExtensions
   {
-    public static IApplicationBuilder AddRaygun(this IApplicationBuilder app, IConfiguration config, Action<RaygunSettings> configAction = null)
+    public static IApplicationBuilder AddRaygun(this IApplicationBuilder app, Action<RaygunSettings> customConfig = null)
     {
-      var settings = config.Get<RaygunSettings>("RaygunSettings");
-      if(configAction != null)
-      {
-        configAction(settings);
-      }
-      return app.UseMiddleware<RaygunAspNetMiddleware>(settings);
+      return app.UseMiddleware<RaygunAspNetMiddleware>();
+    }
+
+    public static IServiceCollection LoadRaygunConfiguration(this IServiceCollection services, IConfiguration configuration)
+    {
+      var settings = configuration.GetSection("RaygunSettings");
+      services.Configure<RaygunSettings>(settings);
+      return services;
     }
   }
 }
