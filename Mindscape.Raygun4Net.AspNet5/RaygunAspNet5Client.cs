@@ -179,7 +179,7 @@ namespace Mindscape.Raygun4Net.AspNet5
       {
         _currentRequestMessage.Value = await BuildRequestMessage();
 
-        StripAndSend(exception, tags, userCustomData);
+        await StripAndSend(exception, tags, userCustomData);
         FlagAsSent(exception);
       }
     }
@@ -217,10 +217,10 @@ namespace Mindscape.Raygun4Net.AspNet5
         // otherwise it will be disposed while we are using it on the other thread.
         RaygunRequestMessage currentRequestMessage = await BuildRequestMessage();
 
-        var task = Task.Run(() =>
+        var task = Task.Run(async () =>
         {
           _currentRequestMessage.Value = currentRequestMessage;
-          StripAndSend(exception, tags, userCustomData);
+          await StripAndSend(exception, tags, userCustomData);
         });
         FlagAsSent(exception);
         await task;
