@@ -484,6 +484,13 @@ namespace Mindscape.Raygun4Net
         }
 #endif
     }
+
+  public class JsonSerializationException : Exception
+  {
+    public JsonSerializationException(string message) : base(message)
+    {
+    }
+  }
 }
 
 namespace Mindscape.Raygun4Net
@@ -545,7 +552,7 @@ namespace Mindscape.Raygun4Net
       object obj;
       if (TryDeserializeObject(json, out obj))
         return obj;
-      throw new SerializationException("Invalid JSON string");
+      throw new JsonSerializationException("Invalid JSON string");
     }
 
     /// <summary>
