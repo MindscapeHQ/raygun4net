@@ -73,9 +73,15 @@ namespace Mindscape.Raygun4Net.AspNet5.Builders
       return this;
     }
 
-    public IRaygunMessageBuilder SetRequestDetails(RaygunRequestMessage message)
+    public RaygunAspNet5MessageBuilder SetRequestDetails(RaygunRequestMessage message)
     {
       _raygunMessage.Details.Request = message;
+      return this;
+    }
+
+    public RaygunAspNet5MessageBuilder SetResponseDetails(RaygunResponseMessage message)
+    {
+      _raygunMessage.Details.Response = message;
       return this;
     }
 

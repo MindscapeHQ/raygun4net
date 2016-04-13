@@ -22,6 +22,7 @@ namespace Mindscape.Raygun4Net.AspNet5
 
     private readonly ThreadLocal<HttpContext> _currentRequest = new ThreadLocal<HttpContext>(() => null);
     private readonly ThreadLocal<RaygunRequestMessage> _currentRequestMessage = new ThreadLocal<RaygunRequestMessage>(() => null);
+    private readonly ThreadLocal<RaygunResponseMessage> _currentResponseMessage = new ThreadLocal<RaygunResponseMessage>(() => null);
     private readonly RaygunSettings _settings;
 
 
@@ -178,6 +179,7 @@ namespace Mindscape.Raygun4Net.AspNet5
       if (CanSend(exception))
       {
         _currentRequestMessage.Value = await BuildRequestMessage();
+        _currentResponseMessage.Value = BuildResponseMessage();
 
         await StripAndSend(exception, tags, userCustomData);
         FlagAsSent(exception);
@@ -216,10 +218,12 @@ namespace Mindscape.Raygun4Net.AspNet5
         // We need to process the Request on the current thread,
         // otherwise it will be disposed while we are using it on the other thread.
         RaygunRequestMessage currentRequestMessage = await BuildRequestMessage();
+        RaygunResponseMessage currentResponseMessage = BuildResponseMessage();
 
         var task = Task.Run(async () =>
         {
           _currentRequestMessage.Value = currentRequestMessage;
+          _currentResponseMessage.Value = currentResponseMessage;
           await StripAndSend(exception, tags, userCustomData);
         });
         FlagAsSent(exception);
@@ -249,6 +253,13 @@ namespace Mindscape.Raygun4Net.AspNet5
       return message;
     }
 
+    private RaygunResponseMessage BuildResponseMessage()
+    {
+      var message = _currentRequest.Value != null ? RaygunAspNet5ResponseMessageBuilder.Build(_currentRequest.Value) : null;
+      _currentRequest.Value = null;
+      return message;
+    }
+
     internal RaygunAspNet5Client RaygunCurrentRequest(HttpContext request)
     {
       _currentRequest.Value = request;
@@ -258,6 +269,7 @@ namespace Mindscape.Raygun4Net.AspNet5
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       var message = RaygunAspNet5MessageBuilder.New(_settings)
+        .SetResponseDetails(_currentResponseMessage.Value)
         .SetRequestDetails(_currentRequestMessage.Value)
         .SetEnvironmentDetails()
 #if DNX451
