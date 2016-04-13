@@ -6946,7 +6946,12 @@
       "Microsoft.Extensions.OptionsModel >= 1.0.0-rc1-final",
       "System.Net.Http >= 4.0.1-beta-23516"
     ],
-    "DNX,Version=v4.5.1": [],
+    "DNX,Version=v4.5.1": [
+      "fx/System.Windows.Forms >= 4.0.0",
+      "fx/Microsoft.VisualBasic >= 10.0.0",
+      "fx/System.Drawing >= 4.0.0",
+      "fx/System.Management >= 4.0.0"
+    ],
     "DNXCore,Version=v5.0": [
       "System.Diagnostics.StackTrace >= 4.0.1-beta-23516"
     ]

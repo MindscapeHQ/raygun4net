@@ -35,7 +35,7 @@ namespace Mindscape.Raygun4Net.AspNet5.Builders
 
     public IRaygunMessageBuilder SetEnvironmentDetails()
     {
-      _raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.Build();
+      _raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.Build(_settings);
       return this;
     }
 

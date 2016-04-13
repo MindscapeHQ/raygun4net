@@ -9,7 +9,14 @@
     },
 
     "frameworks": {
-        "dnx451": { },
+        "dnx451": {
+            "frameworkAssemblies": {
+                "System.Windows.Forms": "4.0.0.0",
+                "Microsoft.VisualBasic": "10.0.0.0",
+                "System.Drawing": "4.0.0.0",
+                "System.Management": "4.0.0.0"
+            }
+        },
         "dnxcore50": {
             "dependencies": {
                 "System.Diagnostics.StackTrace": "4.0.1-beta-23516"
