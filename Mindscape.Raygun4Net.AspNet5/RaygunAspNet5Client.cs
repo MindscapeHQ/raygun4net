@@ -280,9 +280,16 @@ namespace Mindscape.Raygun4Net.AspNet5
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
-        .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null));
+        .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
+        .Build();
 
-      return message.Build();
+      var customGroupingKey = OnCustomGroupingKey(exception, message);
+      if (string.IsNullOrEmpty(customGroupingKey) == false)
+      {
+        message.Details.GroupingKey = customGroupingKey;
+      }
+
+      return message;
     }
 
     private async Task StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)

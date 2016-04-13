@@ -7,6 +7,8 @@ namespace Mindscape.Raygun4Net.Messages
   {
     public string MachineName { get; set; }
 
+    public string GroupingKey { get; set; }
+
     public string Version { get; set; }
 
     public RaygunErrorMessage Error { get; set; }

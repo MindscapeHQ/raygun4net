@@ -85,6 +85,38 @@ namespace Mindscape.Raygun4Net
       return result;
     }
 
+
+    /// <summary>
+    /// Raised before a message is sent. This can be used to add a custom grouping key to a RaygunMessage before sending it to the Raygun service.
+    /// </summary>
+    public event EventHandler<RaygunCustomGroupingKeyEventArgs> CustomGroupingKey;
+
+    private bool _handlingRecursiveGrouping;
+    protected string OnCustomGroupingKey(Exception exception, RaygunMessage message)
+    {
+      string result = null;
+      if (!_handlingRecursiveGrouping)
+      {
+        var handler = CustomGroupingKey;
+        if (handler != null)
+        {
+          var args = new RaygunCustomGroupingKeyEventArgs(exception, message);
+          try
+          {
+            handler(this, args);
+          }
+          catch (Exception e)
+          {
+            _handlingRecursiveGrouping = true;
+            Send(e);
+            _handlingRecursiveGrouping = false;
+          }
+          result = args.CustomGroupingKey;
+        }
+      }
+      return result;
+    }
+
     /// <summary>
     /// Transmits an exception to Raygun.io synchronously.
     /// </summary>
