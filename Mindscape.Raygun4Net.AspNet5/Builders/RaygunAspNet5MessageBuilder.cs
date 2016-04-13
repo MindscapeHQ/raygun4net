@@ -1,24 +1,22 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net.AspNet5.Builders
 {
-  public class RaygunOwinMessageBuilder : IRaygunMessageBuilder
+  public class RaygunAspNet5MessageBuilder : IRaygunMessageBuilder
   {
-
-    public static RaygunOwinMessageBuilder New(RaygunSettings settings)
+    public static RaygunAspNet5MessageBuilder New(RaygunSettings settings)
     {
-      return new RaygunOwinMessageBuilder(settings);
+      return new RaygunAspNet5MessageBuilder(settings);
     }
 
     private readonly RaygunMessage _raygunMessage;
-    private RaygunSettings _settings;
+    private readonly RaygunSettings _settings;
 
-    private RaygunOwinMessageBuilder(RaygunSettings settings)
+    private RaygunAspNet5MessageBuilder(RaygunSettings settings)
     {
       _raygunMessage = new RaygunMessage();
       _settings = settings;
@@ -47,16 +45,6 @@ namespace Mindscape.Raygun4Net.AspNet5.Builders
       {
         _raygunMessage.Details.Error = RaygunErrorMessageBuilder.Build(exception);
       }
-
-      //var error = exception as UnhandledRequestException;
-      //if (error != null)
-      //{
-      //  _raygunMessage.Details.Response = new RaygunResponseMessage
-      //  {
-      //    StatusCode = error.StatusCode,
-      //    StatusDescription = error.ReasonPhrase
-      //  };
-      //}
 
       return this;
     }
@@ -105,6 +93,7 @@ namespace Mindscape.Raygun4Net.AspNet5.Builders
       {
         _raygunMessage.Details.Version = "Not supplied";
 
+        // Requires something equivalent to GetEntryAssembly to exist in DNXCORE50.
         /*
         var entryAssembly = Assembly.GetEntryAssembly();
         if (entryAssembly != null)

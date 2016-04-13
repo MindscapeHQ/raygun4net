@@ -22,9 +22,23 @@ namespace Mindscape.Raygun4Net.AspNet5.Builders
       message.HostName = request.Host.Value;
       message.Url = request.GetDisplayUrl();
       message.HttpMethod = request.Method;
-      message.IPAddress = GetIpAddress(request);
-      message.Form = ToDictionary(await request.ReadFormAsync(), options.IsFormFieldIgnored);
-      message.QueryString = ToDictionary(request.Query, f => false);
+      message.IPAddress = GetIpAddress(context.Connection);
+      try
+      {
+        if(request.HasFormContentType)
+        {
+          message.Form = ToDictionary(await request.ReadFormAsync(), options.IsFormFieldIgnored);
+        }
+      }
+// ReSharper disable once EmptyGeneralCatchClause
+      catch {}
+
+      try
+      {
+        message.QueryString = ToDictionary(request.Query, f => false);
+      }
+// ReSharper disable once EmptyGeneralCatchClause
+      catch { }
 
       if (!options.IsRawDataIgnored)
       {
@@ -43,16 +57,15 @@ namespace Mindscape.Raygun4Net.AspNet5.Builders
       return message;
     }
 
-    private static string GetIpAddress(HttpRequest request)
+    private static string GetIpAddress(ConnectionInfo request)
     {
-      return "";
-      //string ip = request.RemoteIpAddress ?? request.LocalIpAddress;
-      //int? port = request.RemotePort ?? request.LocalPort;
-      //if (string.IsNullOrWhiteSpace(ip)) return "";
+      var ip = request.RemoteIpAddress ?? request.LocalIpAddress;
+      if (ip == null) return "";
+      int? port = request.RemotePort == 0 ? request.LocalPort : request.RemotePort;
 
-      //if (port.HasValue) return ip + ":" + port.Value;
-      
-      //return ip;
+      if (port != 0) return ip + ":" + port.Value;
+
+      return ip.ToString();
     }
 
     private static void SetHeaders(RaygunRequestMessage message, HttpRequest request, Func<string, bool> ignored)

@@ -257,7 +257,7 @@ namespace Mindscape.Raygun4Net.AspNet5
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      var message = RaygunOwinMessageBuilder.New(_settings)
+      var message = RaygunAspNet5MessageBuilder.New(_settings)
         .SetRequestDetails(_currentRequestMessage.Value)
         .SetEnvironmentDetails()
 #if DNX451
