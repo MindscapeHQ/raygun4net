@@ -10,6 +10,10 @@
 
     "frameworks": {
         "dnx451": { },
-        "dnxcore50": { }
+        "dnxcore50": {
+            "dependencies": {
+                "System.Diagnostics.StackTrace": "4.0.1-beta-23516"
+            }
+        }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net.Builders
@@ -16,7 +18,7 @@ namespace Mindscape.Raygun4Net.Builders
       message.Message = exception.Message;
       message.ClassName = exceptionType.FullName;
 
-      //message.StackTrace = BuildStackTrace(exception);
+      message.StackTrace = BuildStackTrace(exception);
 
       if (exception.Data != null)
       {
@@ -50,7 +52,7 @@ namespace Mindscape.Raygun4Net.Builders
       return message;
     }
 
-    /*
+    
     private static RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
     {
       var lines = new List<RaygunErrorStackTraceLineMessage>();
@@ -82,7 +84,7 @@ namespace Mindscape.Raygun4Net.Builders
 
           string file = frame.GetFileName();
 
-          string className = method.ReflectedType != null ? method.ReflectedType.FullName : "(unknown)";
+          string className = method.DeclaringType != null ? method.DeclaringType.FullName : "(unknown)";
 
           var line = new RaygunErrorStackTraceLineMessage
           {
@@ -98,6 +100,6 @@ namespace Mindscape.Raygun4Net.Builders
 
       return lines.ToArray();
     }
-    */
+    
   }
 }
