@@ -59,7 +59,7 @@ namespace Mindscape.Raygun4Net.AspNet5
       }
       catch(Exception e)
       {
-        var client = new RaygunAspNet5Client(_settings);
+        var client = new RaygunAspNetCoreClient(_settings);
         client.RaygunCurrentRequest(httpContext);
         await client.SendInBackground(e);
         throw;

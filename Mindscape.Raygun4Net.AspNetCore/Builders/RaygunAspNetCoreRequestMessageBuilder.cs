@@ -10,7 +10,7 @@ using Microsoft.AspNet.Http.Extensions;
 
 namespace Mindscape.Raygun4Net.AspNet5.Builders
 {
-  public class RaygunAspNet5RequestMessageBuilder
+  public class RaygunAspNetCoreRequestMessageBuilder
   {
     public static async Task<RaygunRequestMessage> Build(HttpContext context, RaygunRequestMessageOptions options)
     {

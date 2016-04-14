@@ -14,7 +14,7 @@ using System.Text;
 
 namespace Mindscape.Raygun4Net.AspNet5
 {
-  public class RaygunAspNet5Client : RaygunClientBase
+  public class RaygunAspNetCoreClient : RaygunClientBase
   {
     private readonly string _apiKey;
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
@@ -32,7 +32,7 @@ namespace Mindscape.Raygun4Net.AspNet5
     /// </summary>
     public ICredentials ProxyCredentials { get; set; }
 
-    public RaygunAspNet5Client(RaygunSettings settings)
+    public RaygunAspNetCoreClient(RaygunSettings settings)
     {
       _settings = settings;
       _apiKey = settings.ApiKey;
@@ -248,19 +248,19 @@ namespace Mindscape.Raygun4Net.AspNet5
 
     private async Task<RaygunRequestMessage> BuildRequestMessage()
     {
-      var message = _currentRequest.Value != null ? await RaygunAspNet5RequestMessageBuilder.Build(_currentRequest.Value, _requestMessageOptions) : null;
+      var message = _currentRequest.Value != null ? await RaygunAspNetCoreRequestMessageBuilder.Build(_currentRequest.Value, _requestMessageOptions) : null;
       _currentRequest.Value = null;
       return message;
     }
 
     private RaygunResponseMessage BuildResponseMessage()
     {
-      var message = _currentRequest.Value != null ? RaygunAspNet5ResponseMessageBuilder.Build(_currentRequest.Value) : null;
+      var message = _currentRequest.Value != null ? RaygunAspNetCoreResponseMessageBuilder.Build(_currentRequest.Value) : null;
       _currentRequest.Value = null;
       return message;
     }
 
-    internal RaygunAspNet5Client RaygunCurrentRequest(HttpContext request)
+    internal RaygunAspNetCoreClient RaygunCurrentRequest(HttpContext request)
     {
       _currentRequest.Value = request;
       return this;
@@ -268,7 +268,7 @@ namespace Mindscape.Raygun4Net.AspNet5
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      var message = RaygunAspNet5MessageBuilder.New(_settings)
+      var message = RaygunAspNetCoreMessageBuilder.New(_settings)
         .SetResponseDetails(_currentResponseMessage.Value)
         .SetRequestDetails(_currentRequestMessage.Value)
         .SetEnvironmentDetails()

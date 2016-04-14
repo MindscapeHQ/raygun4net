@@ -5,7 +5,7 @@ using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net.AspNet5.Builders
 {
-  public class RaygunAspNet5ResponseMessageBuilder
+  public class RaygunAspNetCoreResponseMessageBuilder
   {
     public static RaygunResponseMessage Build(HttpContext context)
     {

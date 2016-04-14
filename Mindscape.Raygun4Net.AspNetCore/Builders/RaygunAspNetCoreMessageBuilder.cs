@@ -6,17 +6,17 @@ using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net.AspNet5.Builders
 {
-  public class RaygunAspNet5MessageBuilder : IRaygunMessageBuilder
+  public class RaygunAspNetCoreMessageBuilder : IRaygunMessageBuilder
   {
-    public static RaygunAspNet5MessageBuilder New(RaygunSettings settings)
+    public static RaygunAspNetCoreMessageBuilder New(RaygunSettings settings)
     {
-      return new RaygunAspNet5MessageBuilder(settings);
+      return new RaygunAspNetCoreMessageBuilder(settings);
     }
 
     private readonly RaygunMessage _raygunMessage;
     private readonly RaygunSettings _settings;
 
-    private RaygunAspNet5MessageBuilder(RaygunSettings settings)
+    private RaygunAspNetCoreMessageBuilder(RaygunSettings settings)
     {
       _raygunMessage = new RaygunMessage();
       _settings = settings;
@@ -73,13 +73,13 @@ namespace Mindscape.Raygun4Net.AspNet5.Builders
       return this;
     }
 
-    public RaygunAspNet5MessageBuilder SetRequestDetails(RaygunRequestMessage message)
+    public RaygunAspNetCoreMessageBuilder SetRequestDetails(RaygunRequestMessage message)
     {
       _raygunMessage.Details.Request = message;
       return this;
     }
 
-    public RaygunAspNet5MessageBuilder SetResponseDetails(RaygunResponseMessage message)
+    public RaygunAspNetCoreMessageBuilder SetResponseDetails(RaygunResponseMessage message)
     {
       _raygunMessage.Details.Response = message;
       return this;

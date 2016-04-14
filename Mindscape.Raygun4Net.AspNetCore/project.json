@@ -1,5 +1,5 @@
 {
-    "version": "1.0.0-*",
+    "version": "1.0.0-beta1",
     "dependencies": {
         "Microsoft.AspNet.Http": "1.0.0-rc1-final",
         "Microsoft.AspNet.Http.Extensions": "1.0.0-rc1-final",
