@@ -3,7 +3,7 @@ using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Features;
 using Mindscape.Raygun4Net.Messages;
 
-namespace Mindscape.Raygun4Net.AspNet5.Builders
+namespace Mindscape.Raygun4Net.AspNetCore.Builders
 {
   public class RaygunAspNetCoreResponseMessageBuilder
   {

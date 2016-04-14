@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.OptionsModel;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Mindscape.Raygun4Net.AspNet5
+namespace Mindscape.Raygun4Net.AspNetCore
 {
   public interface IRaygunSettingsProvider
   {
