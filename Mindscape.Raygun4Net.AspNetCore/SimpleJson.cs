@@ -42,7 +42,7 @@
 // usually already defined in properties
 //#define NETFX_CORE;
 
-// If you are targetting WinStore, WP8 and NET4.5+ PCL make sure to #define SIMPLE_JSON_TYPEINFO;
+// If you are targetting WinStore, WP8, NET4.5+ PCL, or .NET Core make sure to #define SIMPLE_JSON_TYPEINFO;
 
 #define SIMPLE_JSON_TYPEINFO
 
