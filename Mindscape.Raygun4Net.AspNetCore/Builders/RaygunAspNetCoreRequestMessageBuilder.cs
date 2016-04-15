@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Mindscape.Raygun4Net.Messages;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Extensions;
-using Microsoft.AspNet.Http.Features;
 
 namespace Mindscape.Raygun4Net.AspNetCore.Builders
 {
@@ -16,46 +16,131 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
     public static async Task<RaygunRequestMessage> Build(HttpContext context, RaygunRequestMessageOptions options)
     {
       var request = context.Request;
-      var message = new RaygunRequestMessage();
-
       options = options ?? new RaygunRequestMessageOptions();
 
-      message.HostName = request.Host.Value;
-      message.Url = request.GetDisplayUrl();
-      message.HttpMethod = request.Method;
-      message.IPAddress = GetIpAddress(context.Connection);
+      var message = new RaygunRequestMessage
+      {
+        HostName = request.Host.Value,
+        Url = request.GetDisplayUrl(),
+        HttpMethod = request.Method,
+        IPAddress = GetIpAddress(context.Connection),
+        Form = await GetForm(options, request),
+        Cookies = GetCookies(options, request),
+        QueryString = GetQueryString(request),
+        RawData = GetRawData(options, request),
+        Headers = GetHeaders(request, options.IsHeaderIgnored)
+      };
+
+      return message;
+    }
+
+    private static async Task<IDictionary> GetForm(RaygunRequestMessageOptions options, HttpRequest request)
+    {
+      IDictionary dictionary = null;
       try
       {
-        if(request.HasFormContentType)
+        if (request.HasFormContentType)
         {
-          message.Form = ToDictionary(await request.ReadFormAsync(), options.IsFormFieldIgnored);
+          dictionary = ToDictionary(await request.ReadFormAsync(), options.IsFormFieldIgnored);
         }
       }
 // ReSharper disable once EmptyGeneralCatchClause
-      catch {}
+      catch { }
+      return dictionary;
+    }
 
+    private static IList GetCookies(RaygunRequestMessageOptions options, HttpRequest request)
+    {
+      IList cookies = null;
       try
       {
-        message.QueryString = ToDictionary(request.Query, f => false);
+        if (request.HasFormContentType)
+        {
+          cookies = GetCookies(request.Cookies, options.IsCookieIgnored);
+        }
+      }
+        // ReSharper disable once EmptyGeneralCatchClause
+      catch { }
+      return cookies;
+    }
+
+    private static IDictionary GetQueryString(HttpRequest request)
+    {
+      IDictionary queryString = null;
+      try
+      {
+        queryString = ToDictionary(request.Query, f => false);
       }
 // ReSharper disable once EmptyGeneralCatchClause
       catch { }
+      return queryString;
+    }
 
-      if (!options.IsRawDataIgnored)
+    private static string GetRawData(RaygunRequestMessageOptions options, HttpRequest request)
+    {
+      if (options.IsRawDataIgnored)
       {
-        try
-        {
-          using (var reader = new StreamReader(request.Body))
-          {
-            message.RawData = reader.ReadToEnd();
-          }
-// ReSharper disable once EmptyGeneralCatchClause
-        } catch {}
+        return null;
       }
 
-      SetHeaders(message, request, options.IsHeaderIgnored);
+      try
+      {
+        // Don't send the raw request data at all if the content-type is urlencoded
+        var contentType = request.ContentType;
+        if (contentType != "text/html" &&
+            (contentType == null ||
+             CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "application/x-www-form-urlencoded",
+               CompareOptions.IgnoreCase) < 0) && request.Method != "GET")
+        {
+          int length = 4096;
+          request.Body.Seek(0, SeekOrigin.Begin);
+          string temp = new StreamReader(request.Body).ReadToEnd();
 
-      return message;
+          // If we made it this far, strip out any values that have been marked as ignored form fields
+          Dictionary<string, string> ignored = GetIgnoredFormValues(request.Form, options.IsFormFieldIgnored);
+          temp = StripIgnoredFormData(temp, ignored);
+
+          if (length > temp.Length)
+          {
+            length = temp.Length;
+          }
+
+          return temp.Substring(0, length);
+        }
+        return null;
+      }
+      catch (Exception e)
+      {
+        return "Failed to retrieve raw data: " + e.Message;
+      }
+    }
+
+    protected static Dictionary<string, string> GetIgnoredFormValues(IFormCollection form, Func<string, bool> ignore)
+    {
+      Dictionary<string, string> ignoredFormValues = new Dictionary<string, string>();
+      foreach (string key in form.Keys)
+      {
+        if (ignore(key))
+        {
+          ignoredFormValues.Add(key, form[key]);
+        }
+      }
+      return ignoredFormValues;
+    }
+
+    protected static string StripIgnoredFormData(string rawData, Dictionary<string, string> ignored)
+    {
+      foreach (string key in ignored.Keys)
+      {
+        string toRemove = "name=\"" + key + "\"\r\n\r\n" + ignored[key];
+        rawData = rawData.Replace(toRemove, "");
+      }
+      return rawData;
+    }
+
+    private static List<RaygunRequestMessage.Cookie> GetCookies(IReadableStringCollection cookies, Func<string, bool> isCookieIgnored)
+    {
+      return cookies.Where(c => !isCookieIgnored(c.Key)).SelectMany(c => c.Value.Select(cv => new RaygunRequestMessage.Cookie(c.Key, cv))).ToList();
     }
 
     private static string GetIpAddress(ConnectionInfo request)
@@ -69,14 +154,16 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return ip.ToString();
     }
 
-    private static void SetHeaders(RaygunRequestMessage message, HttpRequest request, Func<string, bool> ignored)
+    private static Dictionary<string, string> GetHeaders(HttpRequest request, Func<string, bool> ignored)
     {
-      message.Headers = new Dictionary<string, string>();
+      var headers = new Dictionary<string, string>();
 
       foreach (var header in request.Headers.Where(h => !ignored(h.Key)))
       {
-        message.Headers[header.Key] = string.Join(",", header.Value);
+        headers[header.Key] = string.Join(",", header.Value);
       }
+
+      return headers;
     }
 
     private static IDictionary ToDictionary(IReadableStringCollection query, Func<string, bool> isFormFieldIgnored)
