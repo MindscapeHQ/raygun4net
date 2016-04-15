@@ -1,0 +1,1 @@
+dnu pack .\Mindscape.Raygun4Net.AspNetCore\ --out build\AspNetCore --configuration Release
