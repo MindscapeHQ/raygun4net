@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Mindscape.Raygun4Net.Messages;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Extensions;
+using Microsoft.AspNet.Http.Features;
 
 namespace Mindscape.Raygun4Net.AspNetCore.Builders
 {

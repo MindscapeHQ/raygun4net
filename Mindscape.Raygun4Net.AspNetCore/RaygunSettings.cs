@@ -21,7 +21,7 @@ namespace Mindscape.Raygun4Net
 
     public int[] ExcludedStatusCodes { get; set; }
 
-    public bool ExcludeErrorsFromLocal { get; set; }
+    //public bool ExcludeErrorsFromLocal { get; set; }
 
     public string[] IgnoreFormFieldNames { get; set; }
 

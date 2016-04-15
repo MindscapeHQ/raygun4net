@@ -8,48 +8,18 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Mindscape.Raygun4Net.AspNetCore
 {
-  public interface IRaygunSettingsProvider
-  {
-    RaygunSettings GetRaygunSettings(RaygunSettings baseSettings);
-  }
-
-  public class RaygunSettingsProvider : IRaygunSettingsProvider
-  {
-    private readonly Func<RaygunSettings, RaygunSettings> _customConfig;
-
-    public RaygunSettingsProvider(Func<RaygunSettings, RaygunSettings> customConfig)
-    {
-      this._customConfig = customConfig;
-    }
-
-
-    public RaygunSettings GetRaygunSettings(RaygunSettings baseSettings)
-    {
-      if(_customConfig != null)
-      {
-        return _customConfig(baseSettings);
-      }
-      return baseSettings;
-    }
-  }
-
   public class RaygunAspNetMiddleware
   {
     private readonly RequestDelegate _next;
+    private readonly RaygunMiddlewareSettings _middlewareSettings;
     private readonly RaygunSettings _settings;
 
-    public RaygunAspNetMiddleware(RequestDelegate next, IOptions<RaygunSettings> settings, IRaygunSettingsProvider customConfig)
+    public RaygunAspNetMiddleware(RequestDelegate next, IOptions<RaygunSettings> settings, RaygunMiddlewareSettings middlewareSettings)
     {
       _next = next;
+      _middlewareSettings = middlewareSettings;
 
-      if(customConfig != null)
-      {
-        _settings = customConfig.GetRaygunSettings(settings.Value ?? new RaygunSettings());  
-      }
-      else
-      {
-        _settings = settings.Value ?? new RaygunSettings();
-      }
+      _settings = _middlewareSettings.ClientProvider.GetRaygunSettings(settings.Value ?? new RaygunSettings());  
     }
     public async Task Invoke(HttpContext httpContext)
     {
@@ -59,7 +29,16 @@ namespace Mindscape.Raygun4Net.AspNetCore
       }
       catch(Exception e)
       {
-        var client = new RaygunAspNetCoreClient(_settings);
+        /*
+         * There is no IsLocal on IPAddress or anything, so this is way harder than it looks. 
+         * https://github.com/aspnet/Hosting/issues/570#issuecomment-171571555
+         * https://github.com/aspnet/HttpAbstractions/issues/536
+        if(_settings.ExcludeErrorsFromLocal && IS_LOCAL_CONNECTION)
+        {
+          throw;
+        }*/
+
+        var client = _middlewareSettings.ClientProvider.GetClient(_settings);
         client.RaygunCurrentRequest(httpContext);
         await client.SendInBackground(e);
         throw;
@@ -74,12 +53,24 @@ namespace Mindscape.Raygun4Net.AspNetCore
       return app.UseMiddleware<RaygunAspNetMiddleware>();
     }
 
-    public static IServiceCollection AddRaygun(this IServiceCollection services, IConfiguration configuration, Func<RaygunSettings, RaygunSettings> customConfig = null)
+    public static IServiceCollection AddRaygun(this IServiceCollection services, IConfiguration configuration)
     {
       var settings = configuration.GetSection("RaygunSettings");
       services.Configure<RaygunSettings>(settings);
-      services.AddInstance<IRaygunSettingsProvider>(new RaygunSettingsProvider(customConfig));
-      
+      services.AddInstance<IRaygunAspNetCoreClientProvider>(new DefaultRaygunAspNetCoreClientProvider());
+      services.AddSingleton<RaygunMiddlewareSettings>();
+
+      return services;
+    }
+
+    public static IServiceCollection AddRaygun(this IServiceCollection services, IConfiguration configuration, RaygunMiddlewareSettings middlewareSettings)
+    {
+      var settings = configuration.GetSection("RaygunSettings");
+      services.Configure<RaygunSettings>(settings);
+
+      services.AddInstance(middlewareSettings.ClientProvider ?? new DefaultRaygunAspNetCoreClientProvider());
+      services.AddInstance(middlewareSettings);
+
       return services;
     }
   }
