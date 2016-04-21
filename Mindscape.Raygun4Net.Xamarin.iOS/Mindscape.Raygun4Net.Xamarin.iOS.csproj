@@ -99,5 +99,8 @@
     <Compile Include="Messages\RaygunPulseMessage.cs" />
     <Compile Include="RaygunPulseEventType.cs" />
     <Compile Include="Messages\RaygunPulseDataMessage.cs" />
+    <Compile Include="Pulse.cs" />
+    <Compile Include="Messages\RaygunPulseData.cs" />
+    <Compile Include="Messages\RaygunPulseTimingMessage.cs" />
   </ItemGroup>
 </Project>

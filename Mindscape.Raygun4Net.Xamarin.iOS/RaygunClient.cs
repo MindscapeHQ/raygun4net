@@ -13,6 +13,9 @@ using System.Reflection;
 using System.IO.IsolatedStorage;
 using System.IO;
 using System.Text;
+using MonoTouch.ObjCRuntime;
+using MonoTouch;
+using System.Diagnostics;
 
 #if __UNIFIED__
 using UIKit;
@@ -287,6 +290,15 @@ namespace Mindscape.Raygun4Net
     /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
     /// </summary>
     /// <param name="apiKey">Your app api key.</param>
+    public static void Attach(string apiKey, bool attachPulse)
+    {
+      Attach(apiKey, null);
+    }
+
+    /// <summary>
+    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    /// <param name="apiKey">Your app api key.</param>
     /// <param name="canReportNativeErrors">Whether or not to listen to and report native exceptions.</param>
     /// <param name="hijackNativeSignals">When true, this solves the issue where null reference exceptions inside try/catch blocks crash the app, but when false, additional native errors can be reported.</param>
     public static void Attach(string apiKey, bool canReportNativeErrors, bool hijackNativeSignals)
@@ -356,6 +368,58 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    public static RaygunClient Initialize(string apiKey)
+    {
+      _client = new RaygunClient(apiKey);
+      return _client;
+    }
+
+    public RaygunClient AttachCrashReporting()
+    {
+      return AttachCrashReporting(false, false);
+    }
+
+    public RaygunClient AttachCrashReporting(bool canReportNativeErrors, bool hijackNativeSignals)
+    {
+      AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+      TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+
+      if (canReportNativeErrors)
+      {
+        PopulateCrashReportDirectoryStructure();
+
+        if (hijackNativeSignals)
+        {
+          IntPtr sigbus = Marshal.AllocHGlobal (512);
+          IntPtr sigsegv = Marshal.AllocHGlobal (512);
+
+          // Store Mono SIGSEGV and SIGBUS handlers
+          sigaction (Signal.SIGBUS, IntPtr.Zero, sigbus);
+          sigaction (Signal.SIGSEGV, IntPtr.Zero, sigsegv);
+
+          _reporter = Mindscape.Raygun4Net.Xamarin.iOS.Raygun.SharedReporterWithApiKey (_apiKey);
+
+          // Restore Mono SIGSEGV and SIGBUS handlers
+          sigaction (Signal.SIGBUS, sigbus, IntPtr.Zero);
+          sigaction (Signal.SIGSEGV, sigsegv, IntPtr.Zero);
+
+          Marshal.FreeHGlobal (sigbus);
+          Marshal.FreeHGlobal (sigsegv);
+        }
+        else
+        {
+          _reporter = Mindscape.Raygun4Net.Xamarin.iOS.Raygun.SharedReporterWithApiKey (_apiKey);
+        }
+      }
+      return this;
+    }
+
+    public RaygunClient AttachPulse()
+    {
+      Pulse.Attach(this);
+      return this;
+    }
+
     /// <summary>
     /// Detaches Raygun from listening to unhandled exceptions and unobserved task exceptions.
     /// </summary>
@@ -363,6 +427,20 @@ namespace Mindscape.Raygun4Net
     {
       AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException -= TaskScheduler_UnobservedTaskException;
+    }
+
+    /// <summary>
+    /// Detaches Raygun from listening to unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    public static void DetachCrashReporting()
+    {
+      AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
+      TaskScheduler.UnobservedTaskException -= TaskScheduler_UnobservedTaskException;
+    }
+
+    public static void DetachPulse()
+    {
+      Pulse.Detach();
     }
 
     private static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
@@ -593,7 +671,22 @@ namespace Mindscape.Raygun4Net
       RaygunPulseDataMessage data = new RaygunPulseDataMessage();
       data.Timestamp = DateTime.UtcNow;
       data.Version = GetVersion();
-      message.EventData = new RaygunPulseDataMessage[] { data };
+
+      data.OS = UIDevice.CurrentDevice.SystemName;
+      data.OSVersion = UIDevice.CurrentDevice.SystemVersion;
+      data.Platform = Mindscape.Raygun4Net.Builders.RaygunEnvironmentMessageBuilder.GetStringSysCtl("hw.machine");
+
+      string machineName = null;
+      try
+      {
+        machineName = UIDevice.CurrentDevice.Name;
+      }
+      catch (Exception e)
+      {
+        System.Diagnostics.Debug.WriteLine("Exception getting device name {0}", e.Message);
+      }
+      data.User = BuildRaygunIdentifierMessage(machineName);
+      message.EventData = new [] { data };
       switch(type) {
       case RaygunPulseEventType.SessionStart:
         data.Type = "session_start";
@@ -604,6 +697,43 @@ namespace Mindscape.Raygun4Net
         break;
       }
       data.SessionId = _sessionId;
+      Send(message);
+    }
+
+    public void SendPulsePageTimingEvent(string name, decimal duration)
+    {
+      if(_sessionId == null) {
+        SendPulseEvent(RaygunPulseEventType.SessionStart);
+      }
+
+      RaygunPulseMessage message = new RaygunPulseMessage();
+      RaygunPulseDataMessage dataMessage = new RaygunPulseDataMessage();
+      dataMessage.SessionId = _sessionId;
+      dataMessage.Timestamp = DateTime.UtcNow - TimeSpan.FromMilliseconds((long)duration);
+      dataMessage.Version = GetVersion();
+      dataMessage.OS = UIDevice.CurrentDevice.SystemName + " " + UIDevice.CurrentDevice.SystemVersion;
+      dataMessage.Platform = UIDevice.CurrentDevice.Model;
+      dataMessage.Type = "mobile_event_timing";
+
+      string machineName = null;
+      try
+      {
+        machineName = UIDevice.CurrentDevice.Name;
+      }
+      catch (Exception e)
+      {
+        System.Diagnostics.Debug.WriteLine("Exception getting device name {0}", e.Message);
+      }
+
+      dataMessage.User = BuildRaygunIdentifierMessage(machineName);
+
+      RaygunPulseData data = new RaygunPulseData(){ Name = name, Timing = new RaygunPulseTimingMessage() { Type = "p", Duration = duration } };
+      RaygunPulseData[] dataArray = { data };
+      string dataStr = SimpleJson.SerializeObject(dataArray);
+      dataMessage.Data = dataStr;
+
+      message.EventData = new [] { dataMessage };
+
       Send(message);
     }
 
