@@ -20,6 +20,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Android.Bluetooth;
 using Android.Provider;
+using Android.Content.PM;
 
 namespace Mindscape.Raygun4Net
 {
@@ -35,7 +36,9 @@ namespace Mindscape.Raygun4Net
     public RaygunClient(string apiKey)
     {
       _apiKey = apiKey;
-      
+
+      ServicePointManager.ServerCertificateValidationCallback += (o, certificate, chain, errors) => true;
+
       _wrapperExceptions.Add(typeof(TargetInvocationException));
       _wrapperExceptions.Add(typeof(System.AggregateException));
 
@@ -220,6 +223,26 @@ namespace Mindscape.Raygun4Net
       AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
     }
 
+    public static RaygunClient Initialize(string apiKey)
+    {
+      _client = new RaygunClient(apiKey);
+      return _client;
+    }
+
+    public RaygunClient AttachCrashReporting()
+    {
+      AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+      TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+      AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
+      return this;
+    }
+
+    public RaygunClient AttachPulse(Activity mainActivity)
+    {
+      Pulse.Attach(this, mainActivity);
+      return this;
+    }
+
     /// <summary>
     /// Detaches Raygun from listening to unhandled exceptions and unobserved task exceptions.
     /// </summary>
@@ -228,6 +251,21 @@ namespace Mindscape.Raygun4Net
       AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException -= TaskScheduler_UnobservedTaskException;
       AndroidEnvironment.UnhandledExceptionRaiser -= AndroidEnvironment_UnhandledExceptionRaiser;
+    }
+
+    /// <summary>
+    /// Detaches Raygun from listening to unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    public static void DetachCrashReporting()
+    {
+      AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
+      TaskScheduler.UnobservedTaskException -= TaskScheduler_UnobservedTaskException;
+      AndroidEnvironment.UnhandledExceptionRaiser -= AndroidEnvironment_UnhandledExceptionRaiser;
+    }
+
+    public static void DetachPulse()
+    {
+      Pulse.Detach();
     }
 
     private static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
@@ -382,6 +420,153 @@ namespace Mindscape.Raygun4Net
           }
         }
       }
+    }
+
+    private string _sessionId;
+
+    public void SendPulseEvent(RaygunPulseEventType type)
+    {
+      RaygunPulseMessage message = new RaygunPulseMessage();
+      RaygunPulseDataMessage data = new RaygunPulseDataMessage();
+      data.Timestamp = DateTime.UtcNow;
+      data.Version = GetVersion();
+
+      data.OS = "Android";
+      data.OSVersion = Android.OS.Build.VERSION.Sdk;
+      data.Platform = string.Format("{0} {1}", Android.OS.Build.Manufacturer, Android.OS.Build.Model);
+
+      data.User = UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : BuildRaygunIdentifierMessage(null));
+      message.EventData = new[] { data };
+      switch (type)
+      {
+        case RaygunPulseEventType.SessionStart:
+          data.Type = "session_start";
+          _sessionId = Guid.NewGuid().ToString();
+          break;
+        case RaygunPulseEventType.SessionEnd:
+          data.Type = "session_end";
+          break;
+      }
+      data.SessionId = _sessionId;
+      Send(message);
+    }
+
+    public void SendPulsePageTimingEvent(string name, decimal duration)
+    {
+      if (_sessionId == null)
+      {
+        SendPulseEvent(RaygunPulseEventType.SessionStart);
+      }
+
+      RaygunPulseMessage message = new RaygunPulseMessage();
+      RaygunPulseDataMessage dataMessage = new RaygunPulseDataMessage();
+      dataMessage.SessionId = _sessionId;
+      dataMessage.Timestamp = DateTime.UtcNow - TimeSpan.FromMilliseconds((long)duration);
+      dataMessage.Version = GetVersion();
+      dataMessage.OS = "Android";
+      dataMessage.OSVersion = Android.OS.Build.VERSION.Sdk;
+      dataMessage.Platform = string.Format("{0} {1}", Android.OS.Build.Manufacturer, Android.OS.Build.Model);
+      dataMessage.Type = "mobile_event_timing";
+
+      dataMessage.User = UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : BuildRaygunIdentifierMessage(null));
+
+      RaygunPulseData data = new RaygunPulseData() { Name = name, Timing = new RaygunPulseTimingMessage() { Type = "p", Duration = duration } };
+      RaygunPulseData[] dataArray = { data };
+      string dataStr = SimpleJson.SerializeObject(dataArray);
+      dataMessage.Data = dataStr;
+
+      message.EventData = new[] { dataMessage };
+
+      Send(message);
+    }
+
+    public string GetVersion()
+    {
+      string version = ApplicationVersion;
+      if (String.IsNullOrWhiteSpace(version))
+      {
+        try
+        {
+          Context context = RaygunClient.Context;
+          PackageManager manager = context.PackageManager;
+          PackageInfo info = manager.GetPackageInfo(context.PackageName, 0);
+          version = info.VersionCode + " / " + info.VersionName;
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Debug.WriteLine("Error retrieving package version {0}", ex.Message);
+        }
+      }
+
+      if (String.IsNullOrWhiteSpace(version))
+      {
+        version = "Not supplied";
+      }
+
+      return version;
+    }
+
+    public void Send(RaygunPulseMessage raygunPulseMessage)
+    {
+      if (ValidateApiKey())
+      {
+        //bool canSend = OnSendingMessage(raygunMessage);
+        //if (canSend)
+        {
+          string message = null;
+          try
+          {
+            message = SimpleJson.SerializeObject(raygunPulseMessage);
+          }
+          catch (Exception ex)
+          {
+            System.Diagnostics.Debug.WriteLine(string.Format("Error serializing message {0}", ex.Message));
+          }
+
+          if (message != null)
+          {
+            SendPulseMessage(message);
+            /*try
+            {
+              SaveMessage (message);
+            }
+            catch (Exception ex)
+            {
+              System.Diagnostics.Debug.WriteLine (string.Format ("Error saving Exception to device {0}", ex.Message));
+              if (HasInternetConnection)
+              {
+                SendMessage (message);
+              }
+            }
+
+            if (HasInternetConnection)
+            {
+              SendStoredMessages ();
+            }*/
+          }
+        }
+      }
+    }
+
+    private bool SendPulseMessage(string message)
+    {
+      using (var client = new WebClient())
+      {
+        client.Headers.Add("X-ApiKey", _apiKey);
+        client.Headers.Add("content-type", "application/json; charset=utf-8");
+        client.Encoding = System.Text.Encoding.UTF8;
+
+        try
+        {
+          client.UploadString(RaygunSettings.Settings.PulseEndpoint, message);
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Pulse message to Raygun.io {0}", ex.Message));
+          return false;
+        }
+      }
+      return true;
     }
 
     private bool SendMessage(string message)

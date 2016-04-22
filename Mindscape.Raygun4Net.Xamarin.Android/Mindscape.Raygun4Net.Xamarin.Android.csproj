@@ -14,6 +14,8 @@
     <FileAlignment>512</FileAlignment>
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <AndroidUseLatestPlatformSdk>False</AndroidUseLatestPlatformSdk>
+    <TargetFrameworkVersion>v4.0.3</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -80,8 +82,14 @@
     <Compile Include="Builders\RaygunEnvironmentMessageBuilder.cs" />
     <Compile Include="Builders\RaygunErrorMessageBuilder.cs" />
     <Compile Include="Messages\RaygunEnvironmentMessage.cs" />
+    <Compile Include="Messages\RaygunPulseData.cs" />
+    <Compile Include="Messages\RaygunPulseDataMessage.cs" />
+    <Compile Include="Messages\RaygunPulseMessage.cs" />
+    <Compile Include="Messages\RaygunPulseTimingMessage.cs" />
+    <Compile Include="Pulse.cs" />
     <Compile Include="RaygunClient.cs" />
     <Compile Include="RaygunMessageBuilder.cs" />
+    <Compile Include="RaygunPulseEventType.cs" />
     <Compile Include="RaygunSettings.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
