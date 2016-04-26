@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace Mindscape.Raygun4Net
 {
-  public static class Pulse
+  internal static class Pulse
   {
     private static RaygunClient _raygunClient;
     private static readonly Dictionary<string, Stopwatch> _timers = new Dictionary<string, Stopwatch>();
@@ -35,7 +35,7 @@ namespace Mindscape.Raygun4Net
       _didEnterBackgroundObserver = NSNotificationCenter.DefaultCenter.AddObserver(UIApplication.DidEnterBackgroundNotification, OnDidEnterBackground);
     }
 
-    public static void Detach()
+    internal static void Detach()
     {
       DetachNotifications();
 

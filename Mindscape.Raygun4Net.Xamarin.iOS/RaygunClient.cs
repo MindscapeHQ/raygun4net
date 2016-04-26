@@ -711,8 +711,9 @@ namespace Mindscape.Raygun4Net
       dataMessage.SessionId = _sessionId;
       dataMessage.Timestamp = DateTime.UtcNow - TimeSpan.FromMilliseconds((long)duration);
       dataMessage.Version = GetVersion();
-      dataMessage.OS = UIDevice.CurrentDevice.SystemName + " " + UIDevice.CurrentDevice.SystemVersion;
-      dataMessage.Platform = UIDevice.CurrentDevice.Model;
+      dataMessage.OS = UIDevice.CurrentDevice.SystemName;
+      dataMessage.OSVersion = UIDevice.CurrentDevice.SystemVersion;
+      dataMessage.Platform = Mindscape.Raygun4Net.Builders.RaygunEnvironmentMessageBuilder.GetStringSysCtl("hw.machine");
       dataMessage.Type = "mobile_event_timing";
 
       string machineName = null;
