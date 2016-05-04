@@ -223,20 +223,35 @@ namespace Mindscape.Raygun4Net
       AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
     }
 
+    /// <summary>
+    /// Initializes the static RaygunClient with the given Raygun api key.
+    /// </summary>
+    /// <param name="apiKey">Your Raygun api key for this application.</param>
+    /// <returns>The RaygunClient to chain other methods.</returns>
     public static RaygunClient Initialize(string apiKey)
     {
       _client = new RaygunClient(apiKey);
       return _client;
     }
 
+    /// <summary>
+    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    /// <returns>The RaygunClient to chain other methods.</returns>
     public RaygunClient AttachCrashReporting()
     {
+      RaygunClient.DetachCrashReporting();
       AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
       AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
       return this;
     }
 
+    /// <summary>
+    /// Causes Raygun to automatically send session and view events for Raygun Pulse.
+    /// </summary>
+    /// <param name="mainActivity">The main/entry activity of the Android app.</param>
+    /// <returns>The RaygunClient to chain other methods.</returns>
     public RaygunClient AttachPulse(Activity mainActivity)
     {
       Pulse.Attach(this, mainActivity);
@@ -424,7 +439,12 @@ namespace Mindscape.Raygun4Net
 
     private string _sessionId;
 
-    public void SendPulseEvent(RaygunPulseEventType type)
+    internal void SendPulseEvent(RaygunPulseEventType type)
+    {
+      ThreadPool.QueueUserWorkItem(c => SendPulseEventCore(type));
+    }
+
+    private void SendPulseEventCore(RaygunPulseEventType type)
     {
       RaygunPulseMessage message = new RaygunPulseMessage();
       RaygunPulseDataMessage data = new RaygunPulseDataMessage();
@@ -451,7 +471,12 @@ namespace Mindscape.Raygun4Net
       Send(message);
     }
 
-    public void SendPulsePageTimingEvent(string name, decimal duration)
+    internal void SendPulsePageTimingEvent(string name, decimal duration)
+    {
+      ThreadPool.QueueUserWorkItem(c => SendPulsePageTimingEventCore(name, duration));
+    }
+
+    private void SendPulsePageTimingEventCore(string name, decimal duration)
     {
       if (_sessionId == null)
       {
@@ -480,7 +505,7 @@ namespace Mindscape.Raygun4Net
       Send(message);
     }
 
-    public string GetVersion()
+    private string GetVersion()
     {
       string version = ApplicationVersion;
       if (String.IsNullOrWhiteSpace(version))
@@ -506,7 +531,7 @@ namespace Mindscape.Raygun4Net
       return version;
     }
 
-    public void Send(RaygunPulseMessage raygunPulseMessage)
+    private void Send(RaygunPulseMessage raygunPulseMessage)
     {
       if (ValidateApiKey())
       {

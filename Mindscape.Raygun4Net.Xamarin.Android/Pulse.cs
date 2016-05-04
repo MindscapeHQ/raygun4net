@@ -41,6 +41,10 @@ namespace Mindscape.Raygun4Net
       if (_pulse != null && _mainActivity != null && _mainActivity.Application != null)
       {
         _mainActivity.Application.UnregisterActivityLifecycleCallbacks(_pulse);
+        _mainActivity = null;
+        _currentActivity = null;
+        _pulse = null;
+        _raygunClient = null;
       }
     }
 

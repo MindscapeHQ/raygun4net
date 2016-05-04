@@ -12,7 +12,7 @@ using Android.Widget;
 
 namespace Mindscape.Raygun4Net
 {
-  public enum RaygunPulseEventType
+  internal enum RaygunPulseEventType
   {
     SessionStart,
 
