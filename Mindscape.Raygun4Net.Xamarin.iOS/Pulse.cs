@@ -81,10 +81,27 @@ namespace Mindscape.Raygun4Net
 
     delegate void CaptureDelegate (IntPtr block, IntPtr self);
 
+    delegate void CaptureBooleanDelegate (IntPtr block, IntPtr self, bool b);
+
     [MonoNativeFunctionWrapper]
     public delegate void OriginalDelegate(IntPtr self);
 
+    [MonoNativeFunctionWrapper]
+    public delegate void OriginalBooleanDelegate(IntPtr self, bool b);
+
     private static void Hijack(NSObject obj, string selector, ref IntPtr originalImpl, CaptureDelegate captureDelegate)
+    {
+      var method = class_getInstanceMethod (obj.ClassHandle, new Selector (selector).Handle);
+      originalImpl = method_getImplementation (method);
+      if(originalImpl != IntPtr.Zero) {
+        var block_value = new BlockLiteral();
+        block_value.SetupBlock(captureDelegate, null);
+        var imp = imp_implementationWithBlock(ref block_value);
+        method_setImplementation(method, imp);
+      }
+    }
+
+    private static void Hijack(NSObject obj, string selector, ref IntPtr originalImpl, CaptureBooleanDelegate captureDelegate)
     {
       var method = class_getInstanceMethod (obj.ClassHandle, new Selector (selector).Handle);
       originalImpl = method_getImplementation (method);
@@ -127,13 +144,13 @@ namespace Mindscape.Raygun4Net
 
     private static IntPtr original_viewDidAppear_impl;
 
-    [MonoPInvokeCallback (typeof (CaptureDelegate))]
-    static void ViewDidAppearCapture (IntPtr block, IntPtr self)
+    [MonoPInvokeCallback (typeof (CaptureBooleanDelegate))]
+    static void ViewDidAppearCapture (IntPtr block, IntPtr self, bool animated)
     {
       NSObject obj = Runtime.GetNSObject(self);
       Console.WriteLine ("did appear " + obj.ToString());
-      var orig = (OriginalDelegate) Marshal.GetDelegateForFunctionPointer( original_viewDidAppear_impl, typeof(OriginalDelegate));
-      orig(self);
+      var orig = (OriginalBooleanDelegate) Marshal.GetDelegateForFunctionPointer( original_viewDidAppear_impl, typeof(OriginalBooleanDelegate));
+      orig(self, animated);
 
       Stopwatch stopwatch;
 
@@ -152,7 +169,7 @@ namespace Mindscape.Raygun4Net
 
     // viewDidLayoutSubviews
 
-    private static IntPtr original_viewDidLayoutSubviews_impl;
+    /*private static IntPtr original_viewDidLayoutSubviews_impl;
 
     [MonoPInvokeCallback (typeof (CaptureDelegate))]
     static void ViewDidLayoutSubviewsCapture (IntPtr block, IntPtr self)
@@ -161,7 +178,7 @@ namespace Mindscape.Raygun4Net
       Console.WriteLine ("did layout subviews " + obj.ToString());
       var orig = (OriginalDelegate) Marshal.GetDelegateForFunctionPointer( original_viewDidLayoutSubviews_impl, typeof(OriginalDelegate));
       orig(self);
-    }
+    }*/
 
     // Helpers
 
