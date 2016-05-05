@@ -1,46 +1,63 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using MonoTouch;
-using MonoTouch.UIKit;
-using MonoTouch.ObjCRuntime;
-using MonoTouch.Foundation;
 using System.Diagnostics;
 using Mindscape.Raygun4Net.Messages;
 using System.Collections.Generic;
+
+#if __UNIFIED__
+using UIKit;
+using ObjCRuntime;
+using Foundation;
+#else
+using MonoTouch.UIKit;
+using MonoTouch.ObjCRuntime;
+using MonoTouch.Foundation;
+#endif
 
 namespace Mindscape.Raygun4Net
 {
   internal static class Pulse
   {
     private static RaygunClient _raygunClient;
-    private static readonly Dictionary<string, Stopwatch> _timers = new Dictionary<string, Stopwatch>();
+    private static readonly Dictionary<string, DateTime?> _timers = new Dictionary<string, DateTime?>();
+    private static string _lastViewName;
 
     private static NSObject _didBecomeActiveObserver;
     private static NSObject _didEnterBackgroundObserver;
+    private static NSObject _willResignActiveObserver;
 
     internal static void Attach(RaygunClient raygunClient)
     {
-      _raygunClient = raygunClient;
+      if(_raygunClient == null && raygunClient != null)
+      {
+        _raygunClient = raygunClient;
 
-      AttachNotifications();
+        AttachNotifications();
 
-      Hijack(new UIViewController(), "viewDidLoad", ref original_viewDidLoad_impl, ViewDidLoadCapture);
-      Hijack(new UIViewController(), "viewDidAppear:", ref original_viewDidAppear_impl, ViewDidAppearCapture);
-      //Hijack(new UIViewController(), "viewDidLayoutSubviews", ref original_viewDidLayoutSubviews_impl, ViewDidLayoutSubviewsCapture);
+        Hijack(new UIViewController(), "viewDidLoad", ref original_viewDidLoad_impl, ViewDidLoadCapture);
+        Hijack(new UIViewController(), "viewDidAppear:", ref original_viewDidAppear_impl, ViewDidAppearCapture);
+        //Hijack(new UIViewController(), "viewDidLayoutSubviews", ref original_viewDidLayoutSubviews_impl, ViewDidLayoutSubviewsCapture);
+      }
     }
 
     private static void AttachNotifications()
     {
       _didBecomeActiveObserver = NSNotificationCenter.DefaultCenter.AddObserver(UIApplication.DidBecomeActiveNotification, OnDidBecomeActive);
       _didEnterBackgroundObserver = NSNotificationCenter.DefaultCenter.AddObserver(UIApplication.DidEnterBackgroundNotification, OnDidEnterBackground);
+      _willResignActiveObserver = NSNotificationCenter.DefaultCenter.AddObserver(UIApplication.WillResignActiveNotification, OnWillResignActive);
     }
 
     internal static void Detach()
     {
-      DetachNotifications();
+      if(_raygunClient != null) {
+        DetachNotifications();
 
-      Restore(new UIViewController(), "viewDidLoad", original_viewDidLoad_impl);
-      Restore(new UIViewController(), "viewDidAppear:", original_viewDidAppear_impl);
+        Restore(new UIViewController(), "viewDidLoad", original_viewDidLoad_impl);
+        Restore(new UIViewController(), "viewDidAppear:", original_viewDidAppear_impl);
+
+        _raygunClient = null;
+      }
     }
 
     private static void DetachNotifications()
@@ -51,17 +68,29 @@ namespace Mindscape.Raygun4Net
       if(_didEnterBackgroundObserver != null) {
         _didEnterBackgroundObserver.Dispose();
       }
+      if(_willResignActiveObserver != null) {
+        _willResignActiveObserver.Dispose();
+      }
     }
 
     private static void OnDidBecomeActive(NSNotification notification)
     {
-      Console.WriteLine("SESSION START");
+      //Console.WriteLine("SESSION START");
       _raygunClient.SendPulseEvent(RaygunPulseEventType.SessionStart);
+      if(_lastViewName != null) {
+        _raygunClient.SendPulsePageTimingEvent(_lastViewName, 0);
+      }
     }
 
     private static void OnDidEnterBackground(NSNotification notification)
     {
-      Console.WriteLine("SESSION END");
+      //Console.WriteLine("SESSION END");
+      _raygunClient.SendPulseEvent(RaygunPulseEventType.SessionEnd);
+    }
+
+    private static void OnWillResignActive(NSNotification notification)
+    {
+      //Console.WriteLine("SESSION END");
       _raygunClient.SendPulseEvent(RaygunPulseEventType.SessionEnd);
     }
 
@@ -128,16 +157,14 @@ namespace Mindscape.Raygun4Net
     [MonoPInvokeCallback (typeof (CaptureDelegate))]
     static void ViewDidLoadCapture (IntPtr block, IntPtr self)
     {
-      NSObject obj = Runtime.GetNSObject(self);
-      Stopwatch stopwatch = new Stopwatch();
-      stopwatch.Start();
-      Console.WriteLine ("Start load " + obj.ToString());
-
-      _timers[obj.ToString()] = stopwatch;
-      stopwatch.Start();
-
       var orig = (OriginalDelegate) Marshal.GetDelegateForFunctionPointer( original_viewDidLoad_impl, typeof(OriginalDelegate));
       orig(self);
+
+      NSObject obj = Runtime.GetNSObject(self);
+      string pageName = GetPageName(obj.ToString());
+      //Console.WriteLine ("Start load " + obj.ToString());
+
+      _timers[pageName] = DateTime.Now;
     }
 
     // viewDidAppear
@@ -147,23 +174,24 @@ namespace Mindscape.Raygun4Net
     [MonoPInvokeCallback (typeof (CaptureBooleanDelegate))]
     static void ViewDidAppearCapture (IntPtr block, IntPtr self, bool animated)
     {
-      NSObject obj = Runtime.GetNSObject(self);
-      Console.WriteLine ("did appear " + obj.ToString());
-      var orig = (OriginalBooleanDelegate) Marshal.GetDelegateForFunctionPointer( original_viewDidAppear_impl, typeof(OriginalBooleanDelegate));
+      var orig = (OriginalBooleanDelegate) Marshal.GetDelegateForFunctionPointer(original_viewDidAppear_impl, typeof(OriginalBooleanDelegate));
       orig(self, animated);
 
-      Stopwatch stopwatch;
+      NSObject obj = Runtime.GetNSObject(self);
+      string pageName = GetPageName(obj.ToString());
+      _lastViewName = pageName;
 
-      _timers.TryGetValue(obj.ToString(), out stopwatch);
+      DateTime? start;
+      _timers.TryGetValue(pageName, out start);
+      _timers.Remove(pageName);
       decimal duration = 0;
-      if(stopwatch != null) {
-        stopwatch.Stop();
-        duration = (decimal)stopwatch.ElapsedMilliseconds;
+      if(start != null) {
+        duration = (decimal)((DateTime.Now - start.Value).TotalMilliseconds);
       }
 
-      string pageName = GetPageName(obj.ToString());
       if(!"UINavigationController".Equals(pageName) && !"UIInputWindowController".Equals(pageName)) {
         _raygunClient.SendPulsePageTimingEvent(pageName, duration);
+        //Console.WriteLine ("did appear " + obj.ToString() + " " + duration);
       }
     }
 

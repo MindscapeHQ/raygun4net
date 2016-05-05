@@ -13,7 +13,6 @@ using System.Reflection;
 using System.IO.IsolatedStorage;
 using System.IO;
 using System.Text;
-using MonoTouch.ObjCRuntime;
 using MonoTouch;
 using System.Diagnostics;
 
@@ -22,11 +21,13 @@ using UIKit;
 using SystemConfiguration;
 using Foundation;
 using Security;
+using ObjCRuntime;
 #else
 using MonoTouch.UIKit;
 using MonoTouch.SystemConfiguration;
 using MonoTouch.Foundation;
 using MonoTouch.Security;
+using MonoTouch.ObjCRuntime;
 #endif
 
 namespace Mindscape.Raygun4Net
@@ -290,15 +291,6 @@ namespace Mindscape.Raygun4Net
     /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
     /// </summary>
     /// <param name="apiKey">Your app api key.</param>
-    public static void Attach(string apiKey, bool attachPulse)
-    {
-      Attach(apiKey, null);
-    }
-
-    /// <summary>
-    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
-    /// </summary>
-    /// <param name="apiKey">Your app api key.</param>
     /// <param name="canReportNativeErrors">Whether or not to listen to and report native exceptions.</param>
     /// <param name="hijackNativeSignals">When true, this solves the issue where null reference exceptions inside try/catch blocks crash the app, but when false, additional native errors can be reported.</param>
     public static void Attach(string apiKey, bool canReportNativeErrors, bool hijackNativeSignals)
@@ -368,19 +360,37 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    /// <summary>
+    /// Initializes the static RaygunClient with the given Raygun api key.
+    /// </summary>
+    /// <param name="apiKey">Your Raygun api key for this application.</param>
+    /// <returns>The RaygunClient to chain other methods.</returns>
     public static RaygunClient Initialize(string apiKey)
     {
       _client = new RaygunClient(apiKey);
       return _client;
     }
 
+    /// <summary>
+    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
+    /// Native iOS exception reporting is not enabled with this method, an overload is available to do so.
+    /// </summary>
+    /// <returns>The RaygunClient to chain other methods.</returns>
     public RaygunClient AttachCrashReporting()
     {
       return AttachCrashReporting(false, false);
     }
 
+    /// <summary>
+    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    /// <param name="canReportNativeErrors">Whether or not to listen to and report native exceptions.</param>
+    /// <param name="hijackNativeSignals">When true, this solves the issue where null reference exceptions inside try/catch blocks crash the app, but when false, additional native errors can be reported.</param>
+    /// <returns>The RaygunClient to chain other methods.</returns>
     public RaygunClient AttachCrashReporting(bool canReportNativeErrors, bool hijackNativeSignals)
     {
+      RaygunClient.DetachCrashReporting();
+
       AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 
@@ -414,6 +424,10 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
+    /// <summary>
+    /// Causes Raygun to automatically send session and view events for Raygun Pulse.
+    /// </summary>
+    /// <returns>The RaygunClient to chain other methods.</returns>
     public RaygunClient AttachPulse()
     {
       Pulse.Attach(this);
@@ -438,6 +452,9 @@ namespace Mindscape.Raygun4Net
       TaskScheduler.UnobservedTaskException -= TaskScheduler_UnobservedTaskException;
     }
 
+    /// <summary>
+    /// Detaches Raygun from automatically sending session and view events to Raygun Pulse.
+    /// </summary>
     public static void DetachPulse()
     {
       Pulse.Detach();
@@ -667,6 +684,15 @@ namespace Mindscape.Raygun4Net
 
     internal void SendPulseEvent(RaygunPulseEventType type)
     {
+      if (type == RaygunPulseEventType.SessionStart)
+      {
+        _sessionId = Guid.NewGuid().ToString();
+      }
+      ThreadPool.QueueUserWorkItem(c => SendPulseEventCore(type));
+    }
+
+    private void SendPulseEventCore(RaygunPulseEventType type)
+    {
       RaygunPulseMessage message = new RaygunPulseMessage();
       RaygunPulseDataMessage data = new RaygunPulseDataMessage();
       data.Timestamp = DateTime.UtcNow;
@@ -690,7 +716,6 @@ namespace Mindscape.Raygun4Net
       switch(type) {
       case RaygunPulseEventType.SessionStart:
         data.Type = "session_start";
-        _sessionId = Guid.NewGuid().ToString();
         break;
       case RaygunPulseEventType.SessionEnd:
         data.Type = "session_end";
@@ -701,6 +726,11 @@ namespace Mindscape.Raygun4Net
     }
 
     internal void SendPulsePageTimingEvent(string name, decimal duration)
+    {
+      ThreadPool.QueueUserWorkItem(c => SendPulsePageTimingEventCore(name, duration));
+    }
+
+    private void SendPulsePageTimingEventCore(string name, decimal duration)
     {
       if(_sessionId == null) {
         SendPulseEvent(RaygunPulseEventType.SessionStart);
@@ -745,7 +775,9 @@ namespace Mindscape.Raygun4Net
       {
         try
         {
-          version = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString();
+          string versionNumber = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleShortVersionString").ToString();
+          string buildNumber = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString();
+          version = String.Format("{0} ({1})", versionNumber, buildNumber);
         }
         catch (Exception ex)
         {

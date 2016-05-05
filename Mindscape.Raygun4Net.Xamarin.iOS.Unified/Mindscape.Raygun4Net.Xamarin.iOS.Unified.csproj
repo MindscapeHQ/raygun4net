@@ -175,6 +175,23 @@
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\RaygunCustomGroupingKeyEventArgs.cs">
       <Link>RaygunCustomGroupingKeyEventArgs.cs</Link>
+    <Compile Include="..\Mindscape.Raygun4Net.Xamarin.iOS\Messages\RaygunPulseData.cs">
+      <Link>Messages\RaygunPulseData.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net.Xamarin.iOS\Messages\RaygunPulseDataMessage.cs">
+      <Link>Messages\RaygunPulseDataMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net.Xamarin.iOS\Messages\RaygunPulseMessage.cs">
+      <Link>Messages\RaygunPulseMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net.Xamarin.iOS\Messages\RaygunPulseTimingMessage.cs">
+      <Link>Messages\RaygunPulseTimingMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net.Xamarin.iOS\Pulse.cs">
+      <Link>Pulse.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net.Xamarin.iOS\RaygunPulseEventType.cs">
+      <Link>RaygunPulseEventType.cs</Link>
     </Compile>
   </ItemGroup>
 </Project>
