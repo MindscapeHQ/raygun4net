@@ -86,7 +86,9 @@ namespace Mindscape.Raygun4Net
       {
         try
         {
-          version = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString();
+          string versionNumber = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleShortVersionString").ToString();
+          string buildNumber = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString();
+          version = String.Format("{0} ({1})", versionNumber, buildNumber);
         }
         catch (Exception ex)
         {
