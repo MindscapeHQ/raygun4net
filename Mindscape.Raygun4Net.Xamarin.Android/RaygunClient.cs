@@ -278,6 +278,9 @@ namespace Mindscape.Raygun4Net
       AndroidEnvironment.UnhandledExceptionRaiser -= AndroidEnvironment_UnhandledExceptionRaiser;
     }
 
+    /// <summary>
+    /// Detaches Raygun from automatically sending session and view events to Raygun Pulse.
+    /// </summary>
     public static void DetachPulse()
     {
       Pulse.Detach();
@@ -441,6 +444,10 @@ namespace Mindscape.Raygun4Net
 
     internal void SendPulseEvent(RaygunPulseEventType type)
     {
+      if (type == RaygunPulseEventType.SessionStart)
+      {
+        _sessionId = Guid.NewGuid().ToString();
+      }
       ThreadPool.QueueUserWorkItem(c => SendPulseEventCore(type));
     }
 
@@ -461,7 +468,6 @@ namespace Mindscape.Raygun4Net
       {
         case RaygunPulseEventType.SessionStart:
           data.Type = "session_start";
-          _sessionId = Guid.NewGuid().ToString();
           break;
         case RaygunPulseEventType.SessionEnd:
           data.Type = "session_end";
