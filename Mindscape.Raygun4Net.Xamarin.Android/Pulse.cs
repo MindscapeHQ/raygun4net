@@ -9,6 +9,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using System.Diagnostics;
 
 namespace Mindscape.Raygun4Net
 {
@@ -19,7 +20,7 @@ namespace Mindscape.Raygun4Net
     private static Activity _mainActivity;
 
     private static Activity _currentActivity;
-    private static DateTime _start;
+    private static readonly Stopwatch _timer = new Stopwatch();
 
     internal static void Attach(RaygunClient raygunClient, Activity mainActivity)
     {
@@ -32,7 +33,7 @@ namespace Mindscape.Raygun4Net
 
         _raygunClient.SendPulseEvent(RaygunPulseEventType.SessionStart);
         _currentActivity = _mainActivity;
-        _start = DateTime.Now;
+        _timer.Start();
       }
     }
 
@@ -58,7 +59,7 @@ namespace Mindscape.Raygun4Net
       if (activity != _currentActivity)
       {
         _currentActivity = activity;
-        _start = DateTime.Now;
+        _timer.Restart();
       }
       //Console.WriteLine("ACTIVITY CREATED " + activity.Title);
     }
@@ -73,7 +74,7 @@ namespace Mindscape.Raygun4Net
       if (activity != _currentActivity)
       {
         _currentActivity = activity;
-        _start = DateTime.Now;
+        _timer.Restart();
       }
       //Console.WriteLine("ACTIVITY STARTED " + activity.Title);
     }
@@ -89,12 +90,13 @@ namespace Mindscape.Raygun4Net
       decimal duration = 0;
       if (activity == _currentActivity)
       {
-        duration = (decimal)((DateTime.Now - _start).TotalMilliseconds);
+        _timer.Stop();
+        duration = _timer.ElapsedMilliseconds;
       }
       _currentActivity = activity;
 
       _raygunClient.SendPulsePageTimingEvent(activityName, duration);
-      //Console.WriteLine("ACTIVITY RESUMED " + activity.Title);
+      //Console.WriteLine("ACTIVITY RESUMED " + activity.Title + " DURATION: " + duration);
     }
 
     public void OnActivityPaused(Activity activity)
