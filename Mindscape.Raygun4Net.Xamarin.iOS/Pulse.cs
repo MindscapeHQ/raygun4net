@@ -35,7 +35,9 @@ namespace Mindscape.Raygun4Net
 
         AttachNotifications();
 
+        Hijack(new UIViewController(), "loadView", ref original_loadView_impl, LoadViewCapture);
         Hijack(new UIViewController(), "viewDidLoad", ref original_viewDidLoad_impl, ViewDidLoadCapture);
+        Hijack(new UIViewController(), "viewWillAppear:", ref original_viewWillAppear_impl, ViewWillAppearCapture);
         Hijack(new UIViewController(), "viewDidAppear:", ref original_viewDidAppear_impl, ViewDidAppearCapture);
         //Hijack(new UIViewController(), "viewDidLayoutSubviews", ref original_viewDidLayoutSubviews_impl, ViewDidLayoutSubviewsCapture);
       }
@@ -53,7 +55,9 @@ namespace Mindscape.Raygun4Net
       if(_raygunClient != null) {
         DetachNotifications();
 
+        Restore(new UIViewController(), "loadView", original_loadView_impl);
         Restore(new UIViewController(), "viewDidLoad", original_viewDidLoad_impl);
+        Restore(new UIViewController(), "viewWillAppear:", original_viewWillAppear_impl);
         Restore(new UIViewController(), "viewDidAppear:", original_viewDidAppear_impl);
 
         _raygunClient = null;
@@ -150,6 +154,30 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    // loadView
+
+    private static IntPtr original_loadView_impl;
+
+    [MonoPInvokeCallback (typeof (CaptureDelegate))]
+    static void LoadViewCapture (IntPtr block, IntPtr self)
+    {
+      NSObject obj = Runtime.GetNSObject(self);
+      string pageName = GetPageName(obj.ToString());
+      //Console.WriteLine ("Start load " + obj.ToString());
+
+      Stopwatch stopwatch;
+      _timers.TryGetValue(pageName, out stopwatch);
+      if(stopwatch == null) {
+        stopwatch = new Stopwatch();
+        _timers[pageName] = stopwatch;
+        stopwatch.Start();
+        //Console.WriteLine ("Started timer in load-view");
+      }
+
+      var orig = (OriginalDelegate) Marshal.GetDelegateForFunctionPointer(original_loadView_impl, typeof(OriginalDelegate));
+      orig(self);
+    }
+
     // viewDidLoad
 
     private static IntPtr original_viewDidLoad_impl;
@@ -157,16 +185,44 @@ namespace Mindscape.Raygun4Net
     [MonoPInvokeCallback (typeof (CaptureDelegate))]
     static void ViewDidLoadCapture (IntPtr block, IntPtr self)
     {
-      var orig = (OriginalDelegate) Marshal.GetDelegateForFunctionPointer( original_viewDidLoad_impl, typeof(OriginalDelegate));
-      orig(self);
-
       NSObject obj = Runtime.GetNSObject(self);
       string pageName = GetPageName(obj.ToString());
       //Console.WriteLine ("Start load " + obj.ToString());
 
-      Stopwatch stopwatch = new Stopwatch();
-      stopwatch.Start();
-      _timers[pageName] = stopwatch;
+      Stopwatch stopwatch;
+      _timers.TryGetValue(pageName, out stopwatch);
+      if(stopwatch == null) {
+        stopwatch = new Stopwatch();
+        _timers[pageName] = stopwatch;
+        stopwatch.Start();
+        //Console.WriteLine ("Started timer in did-load");
+      }
+
+      var orig = (OriginalDelegate) Marshal.GetDelegateForFunctionPointer(original_viewDidLoad_impl, typeof(OriginalDelegate));
+      orig(self);
+    }
+
+    // viewWillAppear
+
+    private static IntPtr original_viewWillAppear_impl;
+
+    [MonoPInvokeCallback (typeof (CaptureBooleanDelegate))]
+    static void ViewWillAppearCapture (IntPtr block, IntPtr self, bool animated)
+    {
+      NSObject obj = Runtime.GetNSObject(self);
+      string pageName = GetPageName(obj.ToString());
+
+      Stopwatch stopwatch;
+      _timers.TryGetValue(pageName, out stopwatch);
+      if(stopwatch == null) {
+        stopwatch = new Stopwatch();
+        _timers[pageName] = stopwatch;
+        stopwatch.Start();
+        //Console.WriteLine ("Started timer in will-appear");
+      }
+
+      var orig = (OriginalBooleanDelegate) Marshal.GetDelegateForFunctionPointer(original_viewWillAppear_impl, typeof(OriginalBooleanDelegate));
+      orig(self, animated);
     }
 
     // viewDidAppear
@@ -194,7 +250,7 @@ namespace Mindscape.Raygun4Net
 
       if(!"UINavigationController".Equals(pageName) && !"UIInputWindowController".Equals(pageName)) {
         _raygunClient.SendPulsePageTimingEvent(pageName, duration);
-        Console.WriteLine ("did appear " + obj.ToString() + " " + duration);
+        //Console.WriteLine ("did appear " + obj.ToString() + " " + duration);
       }
     }
 
