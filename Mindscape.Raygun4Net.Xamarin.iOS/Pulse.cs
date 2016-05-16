@@ -20,7 +20,7 @@ namespace Mindscape.Raygun4Net
   internal static class Pulse
   {
     private static RaygunClient _raygunClient;
-    private static readonly Dictionary<string, DateTime?> _timers = new Dictionary<string, DateTime?>();
+    private static readonly Dictionary<string, Stopwatch> _timers = new Dictionary<string, Stopwatch>();
     private static string _lastViewName;
 
     private static NSObject _didBecomeActiveObserver;
@@ -164,7 +164,9 @@ namespace Mindscape.Raygun4Net
       string pageName = GetPageName(obj.ToString());
       //Console.WriteLine ("Start load " + obj.ToString());
 
-      _timers[pageName] = DateTime.Now;
+      Stopwatch stopwatch = new Stopwatch();
+      stopwatch.Start();
+      _timers[pageName] = stopwatch;
     }
 
     // viewDidAppear
@@ -181,17 +183,18 @@ namespace Mindscape.Raygun4Net
       string pageName = GetPageName(obj.ToString());
       _lastViewName = pageName;
 
-      DateTime? start;
-      _timers.TryGetValue(pageName, out start);
-      _timers.Remove(pageName);
+      Stopwatch stopwatch;
+      _timers.TryGetValue(pageName, out stopwatch);
       decimal duration = 0;
-      if(start != null) {
-        duration = (decimal)((DateTime.Now - start.Value).TotalMilliseconds);
+      if(stopwatch != null) {
+        stopwatch.Stop();
+        duration = stopwatch.ElapsedMilliseconds;
       }
+      _timers.Remove(pageName);
 
       if(!"UINavigationController".Equals(pageName) && !"UIInputWindowController".Equals(pageName)) {
         _raygunClient.SendPulsePageTimingEvent(pageName, duration);
-        //Console.WriteLine ("did appear " + obj.ToString() + " " + duration);
+        Console.WriteLine ("did appear " + obj.ToString() + " " + duration);
       }
     }
 
