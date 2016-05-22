@@ -39,7 +39,6 @@ namespace Mindscape.Raygun4Net
         Hijack(new UIViewController(), "viewDidLoad", ref original_viewDidLoad_impl, ViewDidLoadCapture);
         Hijack(new UIViewController(), "viewWillAppear:", ref original_viewWillAppear_impl, ViewWillAppearCapture);
         Hijack(new UIViewController(), "viewDidAppear:", ref original_viewDidAppear_impl, ViewDidAppearCapture);
-        //Hijack(new UIViewController(), "viewDidLayoutSubviews", ref original_viewDidLayoutSubviews_impl, ViewDidLayoutSubviewsCapture);
       }
     }
 
@@ -254,19 +253,6 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    // viewDidLayoutSubviews
-
-    /*private static IntPtr original_viewDidLayoutSubviews_impl;
-
-    [MonoPInvokeCallback (typeof (CaptureDelegate))]
-    static void ViewDidLayoutSubviewsCapture (IntPtr block, IntPtr self)
-    {
-      NSObject obj = Runtime.GetNSObject(self);
-      Console.WriteLine ("did layout subviews " + obj.ToString());
-      var orig = (OriginalDelegate) Marshal.GetDelegateForFunctionPointer( original_viewDidLayoutSubviews_impl, typeof(OriginalDelegate));
-      orig(self);
-    }*/
-
     // Helpers
 
     private static string GetPageName(string objectName)
@@ -282,56 +268,6 @@ namespace Mindscape.Raygun4Net
       }
       return pageName;
     }
-
-    // Initial experiment code
-
-    /*void HijackWillMoveToSuperView ()
-    {
-      var method = class_getInstanceMethod (new UIView ().ClassHandle, new Selector ("willMoveToSuperview:").Handle);
-      original_impl = method_getImplementation (method);
-      var block_value = new BlockLiteral ();
-      CaptureDelegate d = MyCapture;
-      block_value.SetupBlock (d, null);
-      var imp = imp_implementationWithBlock (ref block_value);
-      method_setImplementation (method, imp);
-    }*/
-
-    /*[MonoPInvokeCallback (typeof (CaptureDelegate))]
-    private static void MyCapture (IntPtr block, IntPtr self, IntPtr uiView)
-    {
-      Console.WriteLine ("Moving to: {0}", Runtime.GetNSObject (uiView));
-      original_impl (self, uiView);
-      Console.WriteLine ("Added");
-    }*/
-
-    /*private static IntPtr original_request_impl;
-
-    private static void HijackRequest ()
-    {
-      var method = class_getInstanceMethod (new NSUrl ("").ClassHandle, new Selector ("URLWithString:").Handle);
-      //var method = class_getInstanceMethod (new NSMutableUrlRequest ().ClassHandle, new Selector ("initWithURL:").Handle);
-      original_request_impl = method_getImplementation (method);
-      var block_value = new BlockLiteral ();
-      ActionCaptureDelegate d = MyRequestCapture;
-      block_value.SetupBlock (d, null);
-      var imp = imp_implementationWithBlock (ref block_value);
-      method_setImplementation (method, imp);
-    }
-
-    [MonoPInvokeCallback (typeof (ActionCaptureDelegate))]
-    private static void MyRequestCapture (IntPtr block, IntPtr self)
-    {
-      //NSObject obj = Runtime.GetNSObject(self);
-      //Stopwatch stopwatch = new Stopwatch();
-      //stopwatch.Start();
-      //Console.WriteLine ("Start request " + obj.ToString());
-      //var orig = (OriginalDelegate) Marshal.GetDelegateForFunctionPointer( original_request_impl, typeof(OriginalDelegate));
-      //orig(self);
-      //Console.WriteLine ("Stop request " + stopwatch.ElapsedMilliseconds);
-      //stopwatch.Stop();
-
-      Console.WriteLine("HIT");
-    }*/
   }
 }
 
