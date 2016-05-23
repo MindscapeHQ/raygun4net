@@ -464,12 +464,11 @@ namespace Mindscape.Raygun4Net
     {
       if (e.Exception != null)
       {
-        _client.Send(e.Exception, new List<string>(){ "UnhandledException" });
+        _client.Send(e.Exception);
         if (_client._reporter != null)
         {
           WriteExceptionInformation (_client._reporter.NextReportUUID, e.Exception);
         }
-        Pulse.SendRemainingViews();
       }
     }
 
