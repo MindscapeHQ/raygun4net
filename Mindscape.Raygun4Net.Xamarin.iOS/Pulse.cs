@@ -98,15 +98,19 @@ namespace Mindscape.Raygun4Net
     }
 
     internal static void SendRemainingViews(){
-      foreach(string view in _timers.Keys) {
-        decimal duration = 0;
-        Stopwatch stopwatch;
-        _timers.TryGetValue(view, out stopwatch);
-        if(stopwatch != null) {
-          stopwatch.Stop();
-          duration = stopwatch.ElapsedMilliseconds;
+      if(_raygunClient != null) {
+        foreach(string view in _timers.Keys) {
+          decimal duration = 0;
+          Stopwatch stopwatch;
+          _timers.TryGetValue(view, out stopwatch);
+          if(stopwatch != null) {
+            stopwatch.Stop();
+            duration = stopwatch.ElapsedMilliseconds;
+          }
+          _raygunClient.SendPulsePageTimingEventNow(view, duration);
         }
-        _raygunClient.SendPulsePageTimingEventNow(view, duration);
+
+        _raygunClient.SendPulseEventNow(RaygunPulseEventType.SessionEnd);
       }
     }
 

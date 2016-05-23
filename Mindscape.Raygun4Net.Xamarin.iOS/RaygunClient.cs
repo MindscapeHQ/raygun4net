@@ -684,6 +684,15 @@ namespace Mindscape.Raygun4Net
 
     private string _sessionId;
 
+    internal void SendPulseEventNow(RaygunPulseEventType type)
+    {
+      if (type == RaygunPulseEventType.SessionStart)
+      {
+        _sessionId = Guid.NewGuid().ToString();
+      }
+      SendPulseEventCore(type);
+    }
+
     internal void SendPulseEvent(RaygunPulseEventType type)
     {
       if (type == RaygunPulseEventType.SessionStart)
