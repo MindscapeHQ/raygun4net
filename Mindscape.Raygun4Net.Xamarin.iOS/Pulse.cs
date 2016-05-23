@@ -97,6 +97,19 @@ namespace Mindscape.Raygun4Net
       _raygunClient.SendPulseEvent(RaygunPulseEventType.SessionEnd);
     }
 
+    internal static void SendRemainingViews(){
+      foreach(string view in _timers.Keys) {
+        decimal duration = 0;
+        Stopwatch stopwatch;
+        _timers.TryGetValue(view, out stopwatch);
+        if(stopwatch != null) {
+          stopwatch.Stop();
+          duration = stopwatch.ElapsedMilliseconds;
+        }
+        _raygunClient.SendPulsePageTimingEventNow(view, duration);
+      }
+    }
+
     // Swizzling
 
     [DllImport ("/usr/lib/libobjc.dylib")]
@@ -164,13 +177,15 @@ namespace Mindscape.Raygun4Net
       string pageName = GetPageName(obj.ToString());
       //Console.WriteLine ("Start load " + obj.ToString());
 
-      Stopwatch stopwatch;
-      _timers.TryGetValue(pageName, out stopwatch);
-      if(stopwatch == null) {
-        stopwatch = new Stopwatch();
-        _timers[pageName] = stopwatch;
-        stopwatch.Start();
-        //Console.WriteLine ("Started timer in load-view");
+      if(IsValidPageName(pageName)) {
+        Stopwatch stopwatch;
+        _timers.TryGetValue(pageName, out stopwatch);
+        if(stopwatch == null) {
+          stopwatch = new Stopwatch();
+          _timers[pageName] = stopwatch;
+          stopwatch.Start();
+          //Console.WriteLine ("Started timer in load-view");
+        }
       }
 
       var orig = (OriginalDelegate) Marshal.GetDelegateForFunctionPointer(original_loadView_impl, typeof(OriginalDelegate));
@@ -188,13 +203,15 @@ namespace Mindscape.Raygun4Net
       string pageName = GetPageName(obj.ToString());
       //Console.WriteLine ("Start load " + obj.ToString());
 
-      Stopwatch stopwatch;
-      _timers.TryGetValue(pageName, out stopwatch);
-      if(stopwatch == null) {
-        stopwatch = new Stopwatch();
-        _timers[pageName] = stopwatch;
-        stopwatch.Start();
-        //Console.WriteLine ("Started timer in did-load");
+      if(IsValidPageName(pageName)) {
+        Stopwatch stopwatch;
+        _timers.TryGetValue(pageName, out stopwatch);
+        if(stopwatch == null) {
+          stopwatch = new Stopwatch();
+          _timers[pageName] = stopwatch;
+          stopwatch.Start();
+          //Console.WriteLine ("Started timer in did-load");
+        }
       }
 
       var orig = (OriginalDelegate) Marshal.GetDelegateForFunctionPointer(original_viewDidLoad_impl, typeof(OriginalDelegate));
@@ -211,13 +228,15 @@ namespace Mindscape.Raygun4Net
       NSObject obj = Runtime.GetNSObject(self);
       string pageName = GetPageName(obj.ToString());
 
-      Stopwatch stopwatch;
-      _timers.TryGetValue(pageName, out stopwatch);
-      if(stopwatch == null) {
-        stopwatch = new Stopwatch();
-        _timers[pageName] = stopwatch;
-        stopwatch.Start();
-        //Console.WriteLine ("Started timer in will-appear");
+      if(IsValidPageName(pageName)) {
+        Stopwatch stopwatch;
+        _timers.TryGetValue(pageName, out stopwatch);
+        if(stopwatch == null) {
+          stopwatch = new Stopwatch();
+          _timers[pageName] = stopwatch;
+          stopwatch.Start();
+          //Console.WriteLine ("Started timer in will-appear");
+        }
       }
 
       var orig = (OriginalBooleanDelegate) Marshal.GetDelegateForFunctionPointer(original_viewWillAppear_impl, typeof(OriginalBooleanDelegate));
@@ -244,10 +263,10 @@ namespace Mindscape.Raygun4Net
       if(stopwatch != null) {
         stopwatch.Stop();
         duration = stopwatch.ElapsedMilliseconds;
+        _timers.Remove(pageName);
       }
-      _timers.Remove(pageName);
 
-      if(!"UINavigationController".Equals(pageName) && !"UIInputWindowController".Equals(pageName)) {
+      if(IsValidPageName(pageName)) {
         _raygunClient.SendPulsePageTimingEvent(pageName, duration);
         //Console.WriteLine ("did appear " + obj.ToString() + " " + duration);
       }
@@ -267,6 +286,13 @@ namespace Mindscape.Raygun4Net
         pageName = pageName.Substring(0, index);
       }
       return pageName;
+    }
+
+    private static bool IsValidPageName(string pageName){
+      if(!"UINavigationController".Equals(pageName) && !"UIInputWindowController".Equals(pageName) && !"UIStatusBarViewController".Equals(pageName)) {
+        return true;
+      }
+      return false;
     }
   }
 }
