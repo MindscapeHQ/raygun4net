@@ -319,7 +319,9 @@ namespace Mindscape.Raygun4Net
     {
       Detach();
 
-      _client = new RaygunClient(apiKey);
+      if(_client == null) {
+        _client = new RaygunClient(apiKey);
+      }
       AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 
@@ -367,7 +369,9 @@ namespace Mindscape.Raygun4Net
     /// <returns>The RaygunClient to chain other methods.</returns>
     public static RaygunClient Initialize(string apiKey)
     {
-      _client = new RaygunClient(apiKey);
+      if(_client == null) {
+        _client = new RaygunClient(apiKey);
+      }
       return _client;
     }
 
