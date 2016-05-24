@@ -203,7 +203,10 @@ namespace Mindscape.Raygun4Net
     public static void Attach(string apiKey)
     {
       Detach();
-      _client = new RaygunClient(apiKey);
+      if (_client == null)
+      {
+        _client = new RaygunClient(apiKey);
+      }
       AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
       AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
@@ -217,7 +220,10 @@ namespace Mindscape.Raygun4Net
     public static void Attach(string apiKey, string user)
     {
       Detach();
-      _client = new RaygunClient(apiKey) { User = user };
+      if (_client == null)
+      {
+        _client = new RaygunClient(apiKey) { User = user };
+      }
       AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
       AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
@@ -230,7 +236,10 @@ namespace Mindscape.Raygun4Net
     /// <returns>The RaygunClient to chain other methods.</returns>
     public static RaygunClient Initialize(string apiKey)
     {
-      _client = new RaygunClient(apiKey);
+      if (_client == null)
+      {
+        _client = new RaygunClient(apiKey);
+      }
       return _client;
     }
 
