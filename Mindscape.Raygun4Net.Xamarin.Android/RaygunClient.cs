@@ -308,6 +308,7 @@ namespace Mindscape.Raygun4Net
       if (e.ExceptionObject is Exception)
       {
         _client.Send((e.ExceptionObject as Exception), new List<string>(){ "UnhandledException" });
+        Pulse.SendRemainingActivity();
       }
     }
 
@@ -316,6 +317,7 @@ namespace Mindscape.Raygun4Net
       if (e.Exception != null)
       {
         _client.Send(e.Exception, new List<string>() { "UnhandledException" });
+        Pulse.SendRemainingActivity();
       }
     }
 
@@ -451,6 +453,15 @@ namespace Mindscape.Raygun4Net
 
     private string _sessionId;
 
+    internal void SendPulseEventNow(RaygunPulseEventType type)
+    {
+      if (type == RaygunPulseEventType.SessionStart)
+      {
+        _sessionId = Guid.NewGuid().ToString();
+      }
+      SendPulseEventCore(type);
+    }
+
     internal void SendPulseEvent(RaygunPulseEventType type)
     {
       if (type == RaygunPulseEventType.SessionStart)
@@ -484,6 +495,11 @@ namespace Mindscape.Raygun4Net
       }
       data.SessionId = _sessionId;
       Send(message);
+    }
+
+    internal void SendPulsePageTimingEventNow(string name, decimal duration)
+    {
+      SendPulsePageTimingEventCore(name, duration);
     }
 
     internal void SendPulsePageTimingEvent(string name, decimal duration)

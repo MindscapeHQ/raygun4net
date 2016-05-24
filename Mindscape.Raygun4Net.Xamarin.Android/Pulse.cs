@@ -49,6 +49,20 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    internal static void SendRemainingActivity()
+    {
+      if (_pulse != null)
+      {
+        if (_timer.IsRunning && _currentActivity != null)
+        {
+          _timer.Stop();
+          string activityName = GetActivityName(_currentActivity);
+          _raygunClient.SendPulsePageTimingEventNow(activityName, _timer.ElapsedMilliseconds);
+        }
+        _raygunClient.SendPulseEventNow(RaygunPulseEventType.SessionEnd);
+      }
+    }
+
     public void OnActivityCreated(Activity activity, Bundle savedInstanceState)
     {
       if (_currentActivity == null)
@@ -124,7 +138,7 @@ namespace Mindscape.Raygun4Net
 
     }
 
-    private string GetActivityName(Activity activity)
+    private static string GetActivityName(Activity activity)
     {
       return activity.GetType().Name;
     }
