@@ -479,7 +479,7 @@ namespace Mindscape.Raygun4Net
       data.Version = GetVersion();
 
       data.OS = "Android";
-      data.OSVersion = Android.OS.Build.VERSION.Sdk;
+      data.OSVersion = Android.OS.Build.VERSION.Release;
       data.Platform = string.Format("{0} {1}", Android.OS.Build.Manufacturer, Android.OS.Build.Model);
 
       data.User = UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : BuildRaygunIdentifierMessage(null));
@@ -520,7 +520,7 @@ namespace Mindscape.Raygun4Net
       dataMessage.Timestamp = DateTime.UtcNow - TimeSpan.FromMilliseconds((long)duration);
       dataMessage.Version = GetVersion();
       dataMessage.OS = "Android";
-      dataMessage.OSVersion = Android.OS.Build.VERSION.Sdk;
+      dataMessage.OSVersion = Android.OS.Build.VERSION.Release;
       dataMessage.Platform = string.Format("{0} {1}", Android.OS.Build.Manufacturer, Android.OS.Build.Model);
       dataMessage.Type = "mobile_event_timing";
 
