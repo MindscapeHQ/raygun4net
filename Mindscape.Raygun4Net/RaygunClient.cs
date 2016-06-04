@@ -304,6 +304,7 @@ namespace Mindscape.Raygun4Net
           {
             _currentRequestMessage = currentRequestMessage;
             Send(BuildMessage(exception, tags, userCustomData, userInfo, currentTime));
+            FlagAsSent(exception);
           }
           catch (Exception)
           {
@@ -315,7 +316,6 @@ namespace Mindscape.Raygun4Net
             }
           }
         });
-        FlagAsSent(exception);
       }
     }
 
