@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Http;
+using Microsoft.AspNetCore.Http;
 using Mindscape.Raygun4Net.AspNetCore.Builders;
 using Mindscape.Raygun4Net.Messages;
 

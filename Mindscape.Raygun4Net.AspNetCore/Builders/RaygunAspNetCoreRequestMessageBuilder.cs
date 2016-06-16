@@ -6,8 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Mindscape.Raygun4Net.Messages;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Http.Extensions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace Mindscape.Raygun4Net.AspNetCore.Builders
 {
@@ -138,9 +138,9 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return rawData;
     }
 
-    private static List<RaygunRequestMessage.Cookie> GetCookies(IReadableStringCollection cookies, Func<string, bool> isCookieIgnored)
+    private static List<RaygunRequestMessage.Cookie> GetCookies(IRequestCookieCollection cookies, Func<string, bool> isCookieIgnored)
     {
-      return cookies.Where(c => !isCookieIgnored(c.Key)).SelectMany(c => c.Value.Select(cv => new RaygunRequestMessage.Cookie(c.Key, cv))).ToList();
+      return cookies.Where(c => !isCookieIgnored(c.Key)).Select(c => new RaygunRequestMessage.Cookie(c.Key, c.Value)).ToList();
     }
 
     private static string GetIpAddress(ConnectionInfo request)
@@ -166,10 +166,20 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return headers;
     }
 
-    private static IDictionary ToDictionary(IReadableStringCollection query, Func<string, bool> isFormFieldIgnored)
+    private static IDictionary ToDictionary(IQueryCollection query, Func<string, bool> isFormFieldIgnored)
     {
       var dict = new Dictionary<string, string>();
       foreach(var value in query.Where(v => isFormFieldIgnored(v.Key) == false))
+      {
+        dict[value.Key] = string.Join(",", value.Value);
+      }
+      return dict;
+    }
+
+    private static IDictionary ToDictionary(IFormCollection query, Func<string, bool> isFormFieldIgnored)
+    {
+      var dict = new Dictionary<string, string>();
+      foreach (var value in query.Where(v => isFormFieldIgnored(v.Key) == false))
       {
         dict[value.Key] = string.Join(",", value.Value);
       }

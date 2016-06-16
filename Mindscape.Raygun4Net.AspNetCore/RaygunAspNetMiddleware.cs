@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Http;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.OptionsModel;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Mindscape.Raygun4Net.AspNetCore
@@ -53,11 +53,11 @@ namespace Mindscape.Raygun4Net.AspNetCore
       return app.UseMiddleware<RaygunAspNetMiddleware>();
     }
 
-    public static IServiceCollection AddRaygun(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddRaygun(this IServiceCollection services, IConfigurationRoot configuration)
     {
-      var settings = configuration.GetSection("RaygunSettings");
-      services.Configure<RaygunSettings>(settings);
-      services.AddInstance<IRaygunAspNetCoreClientProvider>(new DefaultRaygunAspNetCoreClientProvider());
+      ConfigureSettings(services, configuration);
+
+      services.AddTransient<IRaygunAspNetCoreClientProvider>(_ => new DefaultRaygunAspNetCoreClientProvider());
       services.AddSingleton<RaygunMiddlewareSettings>();
 
       return services;
@@ -65,13 +65,27 @@ namespace Mindscape.Raygun4Net.AspNetCore
 
     public static IServiceCollection AddRaygun(this IServiceCollection services, IConfiguration configuration, RaygunMiddlewareSettings middlewareSettings)
     {
-      var settings = configuration.GetSection("RaygunSettings");
-      services.Configure<RaygunSettings>(settings);
+      ConfigureSettings(services, configuration);
 
-      services.AddInstance(middlewareSettings.ClientProvider ?? new DefaultRaygunAspNetCoreClientProvider());
-      services.AddInstance(middlewareSettings);
+      services.AddTransient(_ => middlewareSettings.ClientProvider ?? new DefaultRaygunAspNetCoreClientProvider());
+      services.AddTransient(_ => middlewareSettings);
 
       return services;
+    }
+
+    private static void ConfigureSettings(this IServiceCollection services, IConfiguration configuration)
+    {
+      var settings = configuration.GetSection("RaygunSettings");
+      services.Configure<RaygunSettings>(options =>
+      {
+        if (!string.IsNullOrWhiteSpace(settings["ApiEndPoint"]))
+        {
+          options.ApiEndpoint = new Uri(settings["ApiEndPoint"]);
+        }
+        
+        options.ApiKey = settings["ApiKey"];
+        options.ApplicationVersion = settings["ApplicationVersion"];
+      });
     }
   }
 }

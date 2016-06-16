@@ -4,27 +4,24 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{684F22B6-57AD-4806-A027-BF6BAC901475}"
-	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
-	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Mindscape.Raygun4Net.AspNet5", "Mindscape.Raygun4Net.AspNet5\Mindscape.Raygun4Net.AspNet5.xproj", "{B2F1D585-D634-47EA-AE67-BCCA49AFDDEA}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Mindscape.Raygun4Net.AspNetCore", "Mindscape.Raygun4Net.AspNetCore\Mindscape.Raygun4Net.AspNetCore.xproj", "{30672B20-E007-4FDF-81A3-BCF60EF023C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-		Sign|Any CPU = Sign|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B2F1D585-D634-47EA-AE67-BCCA49AFDDEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B2F1D585-D634-47EA-AE67-BCCA49AFDDEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B2F1D585-D634-47EA-AE67-BCCA49AFDDEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B2F1D585-D634-47EA-AE67-BCCA49AFDDEA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B2F1D585-D634-47EA-AE67-BCCA49AFDDEA}.Sign|Any CPU.ActiveCfg = Debug|Any CPU
-		{B2F1D585-D634-47EA-AE67-BCCA49AFDDEA}.Sign|Any CPU.Build.0 = Debug|Any CPU
+		{30672B20-E007-4FDF-81A3-BCF60EF023C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30672B20-E007-4FDF-81A3-BCF60EF023C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30672B20-E007-4FDF-81A3-BCF60EF023C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30672B20-E007-4FDF-81A3-BCF60EF023C2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{30672B20-E007-4FDF-81A3-BCF60EF023C2} = {684F22B6-57AD-4806-A027-BF6BAC901475}
 	EndGlobalSection
 EndGlobal
