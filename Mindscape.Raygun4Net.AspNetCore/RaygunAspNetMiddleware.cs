@@ -55,7 +55,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
 
     public static IServiceCollection AddRaygun(this IServiceCollection services, IConfigurationRoot configuration)
     {
-      ConfigureSettings(services, configuration);
+      services.Configure<RaygunSettings>(configuration.GetSection("RaygunSettings"));
 
       services.AddTransient<IRaygunAspNetCoreClientProvider>(_ => new DefaultRaygunAspNetCoreClientProvider());
       services.AddSingleton<RaygunMiddlewareSettings>();
@@ -65,27 +65,12 @@ namespace Mindscape.Raygun4Net.AspNetCore
 
     public static IServiceCollection AddRaygun(this IServiceCollection services, IConfiguration configuration, RaygunMiddlewareSettings middlewareSettings)
     {
-      ConfigureSettings(services, configuration);
+      services.Configure<RaygunSettings>(configuration.GetSection("RaygunSettings"));
 
       services.AddTransient(_ => middlewareSettings.ClientProvider ?? new DefaultRaygunAspNetCoreClientProvider());
       services.AddTransient(_ => middlewareSettings);
 
       return services;
-    }
-
-    private static void ConfigureSettings(this IServiceCollection services, IConfiguration configuration)
-    {
-      var settings = configuration.GetSection("RaygunSettings");
-      services.Configure<RaygunSettings>(options =>
-      {
-        if (!string.IsNullOrWhiteSpace(settings["ApiEndPoint"]))
-        {
-          options.ApiEndpoint = new Uri(settings["ApiEndPoint"]);
-        }
-        
-        options.ApiKey = settings["ApiKey"];
-        options.ApplicationVersion = settings["ApplicationVersion"];
-      });
     }
   }
 }
