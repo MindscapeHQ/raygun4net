@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Deployment.Application;
 using System.Linq;
 using System.Net;
 using Mindscape.Raygun4Net.Messages;
@@ -541,7 +542,7 @@ namespace Mindscape.Raygun4Net
     {
       try
       {
-        string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\RaygunOfflineStorage";
+        string path = OfflineStoragePath;
         if (!Directory.Exists(path))
         {
           Directory.CreateDirectory(path);
@@ -585,13 +586,25 @@ namespace Mindscape.Raygun4Net
 
     private static object _sendLock = new object();
 
+    private string OfflineStoragePath
+    {
+      get
+      {
+        var baseDir = ApplicationDeployment.IsNetworkDeployed ? 
+                    ApplicationDeployment.CurrentDeployment.DataDirectory : 
+                    Environment.GetFolderPath( Environment.SpecialFolder.LocalApplicationData );
+
+        return Path.Combine( baseDir, "RaygunOfflineStorage");
+      }
+    }
+
     private void SendStoredMessages()
     {
       lock (_sendLock)
       {
         try
         {
-          string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\RaygunOfflineStorage";
+          string path = OfflineStoragePath;
           if (Directory.Exists(path))
           {
             foreach (string name in Directory.EnumerateFiles(path))
