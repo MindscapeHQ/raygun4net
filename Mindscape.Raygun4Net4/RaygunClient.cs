@@ -543,7 +543,7 @@ namespace Mindscape.Raygun4Net
     {
       try
       {
-        using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetMachineStoreForAssembly())
+        using (IsolatedStorageFile isolatedStorage = GetIsolatedStorageScope())
         {
           string directoryName = "RaygunOfflineStorage";
           if (!isolatedStorage.DirectoryExists(directoryName))
@@ -602,7 +602,7 @@ namespace Mindscape.Raygun4Net
       {
         try
         {
-          using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetMachineStoreForAssembly())
+          using (IsolatedStorageFile isolatedStorage = GetIsolatedStorageScope())
           {
             string directoryName = "RaygunOfflineStorage";
             if (isolatedStorage.DirectoryExists(directoryName))
@@ -639,6 +639,18 @@ namespace Mindscape.Raygun4Net
         {
           System.Diagnostics.Debug.WriteLine(string.Format("Error sending stored messages to Raygun.io {0}", ex.Message));
         }
+      }
+    }
+
+    private IsolatedStorageFile GetIsolatedStorageScope()
+    {
+      if (AppDomain.CurrentDomain != null && AppDomain.CurrentDomain.ActivationContext != null)
+      {
+        return IsolatedStorageFile.GetUserStoreForApplication();
+      }
+      else
+      {
+        return IsolatedStorageFile.GetUserStoreForAssembly();
       }
     }
   }
