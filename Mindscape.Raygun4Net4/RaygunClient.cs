@@ -681,46 +681,51 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    private static object _sendLock = new object();
+
     private void SendStoredMessages()
     {
-      try
+      lock (_sendLock)
       {
-        using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetMachineStoreForAssembly())
+        try
         {
-          string directoryName = "RaygunOfflineStorage";
-          if (isolatedStorage.DirectoryExists(directoryName))
+          using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetMachineStoreForAssembly())
           {
-            string[] fileNames = isolatedStorage.GetFileNames(directoryName + "\\*.txt");
-            foreach (string name in fileNames)
+            string directoryName = "RaygunOfflineStorage";
+            if (isolatedStorage.DirectoryExists(directoryName))
             {
-              IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile(directoryName + "\\" + name, FileMode.Open);
-              using (StreamReader reader = new StreamReader(isoFileStream))
+              string[] fileNames = isolatedStorage.GetFileNames(directoryName + "\\*.txt");
+              foreach (string name in fileNames)
               {
-                string text = reader.ReadToEnd();
-                try
+                IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile(directoryName + "\\" + name, FileMode.Open);
+                using (StreamReader reader = new StreamReader(isoFileStream))
                 {
-                  Send(text);
+                  string text = reader.ReadToEnd();
+                  try
+                  {
+                    Send(text);
+                  }
+                  catch
+                  {
+                    // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
+                    return;
+                  }
+                  System.Diagnostics.Debug.WriteLine("Sent " + name);
                 }
-                catch
-                {
-                  // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
-                  return;
-                }
-                System.Diagnostics.Debug.WriteLine("Sent " + name);
+                isolatedStorage.DeleteFile(directoryName + "\\" + name);
               }
-              isolatedStorage.DeleteFile(directoryName + "\\" + name);
-            }
-            if (isolatedStorage.GetFileNames(directoryName + "\\*.txt").Length == 0)
-            {
-              System.Diagnostics.Debug.WriteLine("Successfully sent all pending messages");
-              isolatedStorage.DeleteDirectory(directoryName);
+              if (isolatedStorage.GetFileNames(directoryName + "\\*.txt").Length == 0)
+              {
+                System.Diagnostics.Debug.WriteLine("Successfully sent all pending messages");
+                isolatedStorage.DeleteDirectory(directoryName);
+              }
             }
           }
         }
-      }
-      catch (Exception ex)
-      {
-        System.Diagnostics.Debug.WriteLine(string.Format("Error sending stored messages to Raygun.io {0}", ex.Message));
+        catch (Exception ex)
+        {
+          System.Diagnostics.Debug.WriteLine(string.Format("Error sending stored messages to Raygun.io {0}", ex.Message));
+        }
       }
     }
   }
