@@ -1,10 +1,10 @@
-Raygun4Net.WebApi - Raygun.io Provider for ASP .NET WebApi projects
+Raygun4Net.WebApi - Raygun Provider for ASP .NET WebApi projects
 ===================================================================
 
 Where is my app API key?
 ========================
-When you create a new application on your Raygun.io dashboard, your app API key is displayed at the top of the instructions page.
-You can also find the API key by clicking the "Application Settings" button in the side bar of the Raygun.io dashboard.
+When you create a new application on your Raygun dashboard, your app API key is displayed at the top of the instructions page.
+You can also find the API key by clicking the "Application Settings" button in the side bar of the Raygun dashboard.
 
 Namespace
 =========
@@ -74,7 +74,7 @@ For example if you wanted to exclude errors that return the "I'm a teapot" respo
 Exclude errors that originate from a local origin
 -------------------------------------------------
 
-Toggle this boolean and Raygun will not send errors to Raygun.io if the request originated from a local origin.
+Toggle this boolean and Raygun will not send errors to Raygun if the request originated from a local origin.
 i.e. A way to prevent local debug/development from notifying Raygun without having to resort to Web.config transforms.
 
 <RaygunSettings apikey="YOUR_APP_API_KEY" excludeErrorsFromLocal="true" />
