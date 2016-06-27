@@ -1,10 +1,13 @@
 properties {
     $root =                             $psake.build_script_dir
-    $nugetspec =                        "$root/Mindscape.Raygun4Net.nuspec"
-    $nugetspec_signed =                 "$root/Mindscape.Raygun4Net.signed.nuspec"
-    $nugetspec_core =                   "$root/Mindscape.Raygun4Net.Core.nuspec"
-    $nugetspec_mvc =                    "$root/Mindscape.Raygun4Net.Mvc.nuspec"
-    $nugetspec_webapi =                 "$root/Mindscape.Raygun4Net.WebApi.nuspec"
+    $nugetspec =                        "$root\Mindscape.Raygun4Net.nuspec"
+    $nugetspec_signed =                 "$root\Mindscape.Raygun4Net.signed.nuspec"
+    $nugetspec_core =                   "$root\Mindscape.Raygun4Net.Core.nuspec"
+    $nugetspec_mvc =                    "$root\Mindscape.Raygun4Net.Mvc.nuspec"
+    $nugetspec_webapi =                 "$root\Mindscape.Raygun4Net.WebApi.nuspec"
+    $nugetspec_signed_core =            "$root\Mindscape.Raygun4Net.Core.Signed.nuspec"
+    $nugetspec_signed_mvc =             "$root\Mindscape.Raygun4Net.Mvc.Signed.nuspec"
+    $nugetspec_signed_webapi =          "$root\Mindscape.Raygun4Net.WebApi.Signed.nuspec"
     $build_dir =                        "$root\build\"
     $build_dir2 =                       "$build_dir\Net2"
     $build_dir3_client_profile =        "$build_dir\Net3.ClientProfile"
@@ -17,6 +20,8 @@ properties {
     $signed_build_dir3_client_profile = "$build_dir\signed\Net3.ClientProfile"
     $signed_build_dir4 =                "$build_dir\signed\Net4"
     $signed_build_dir4_client_profile = "$build_dir\signed\Net4.ClientProfile"
+    $signed_build_dir_mvc =             "$build_dir\signed\Mvc"
+    $signed_build_dir_webapi =          "$build_dir\signed\WebApi"
     $release_dir =                      "$root\release\"
     $nuget_dir =                        "$root\.nuget"
     $env:Path +=                        ";$nuget_dir"
@@ -38,6 +43,9 @@ task Package -depends Init {
     exec { nuget pack $nugetspec_core -OutputDirectory $release_dir }
     exec { nuget pack $nugetspec_mvc -OutputDirectory $release_dir }
     exec { nuget pack $nugetspec_webapi -OutputDirectory $release_dir }
+    exec { nuget pack $nugetspec_signed_core -OutputDirectory $release_dir }
+    exec { nuget pack $nugetspec_signed_mvc -OutputDirectory $release_dir }
+    exec { nuget pack $nugetspec_signed_webapi -OutputDirectory $release_dir }
 }
 
 task Zip -depends Package {
@@ -70,6 +78,8 @@ task Zip -depends Package {
     $signedfolder4clientprofile = $signedfolder + "\Net4.ClientProfile"
     $signedfolderwindowsstore = $signedfolder + "\WindowsStore"
     $signedfolderwinrt = $signedfolder + "\WinRT"
+    $signedfoldermvc = $signedfolder + "\Mvc"
+    $signedfolderwebapi = $signedfolder + "\WebApi"
     
     new-item $versionfolder -itemType directory | Out-Null
     new-item $versionfolder2 -itemType directory | Out-Null
@@ -94,6 +104,8 @@ task Zip -depends Package {
     new-item $signedfolder4clientprofile -itemType directory | Out-Null
     new-item $signedfolderwindowsstore -itemType directory | Out-Null
     new-item $signedfolderwinrt -itemType directory | Out-Null
+    new-item $signedfoldermvc -itemType directory | Out-Null
+    new-item $signedfolderwebapi -itemType directory | Out-Null
   
     # .Net 3.5
     copy-item $build_dir/Mindscape.Raygun4Net.dll $versionfolder3
@@ -151,6 +163,18 @@ task Zip -depends Package {
     copy-item $signed_build_dir4/Mindscape.Raygun4Net.dll $signedfolder4
     copy-item $signed_build_dir4/Mindscape.Raygun4Net4.dll $signedfolder4
     copy-item $signed_build_dir4_client_profile/Mindscape.Raygun4Net.dll $signedfolder4clientprofile
+    # Signed MVC
+    copy-item $signed_build_dir_mvc/Mindscape.Raygun4Net.dll $signedfoldermvc
+    copy-item $signed_build_dir_mvc/Mindscape.Raygun4Net.pdb $signedfoldermvc
+    copy-item $signed_build_dir_mvc/Mindscape.Raygun4Net.Mvc.dll $signedfoldermvc
+    copy-item $signed_build_dir_mvc/Mindscape.Raygun4Net.Mvc.pdb $signedfoldermvc
+    copy-item $signed_build_dir_mvc/Mindscape.Raygun4Net4.dll $signedfoldermvc
+    copy-item $signed_build_dir_mvc/Mindscape.Raygun4Net4.pdb $signedfoldermvc
+    #Signed WebApi
+    copy-item $signed_build_dir_webapi/Mindscape.Raygun4Net.WebApi.dll $signedfolderwebapi
+    copy-item $signed_build_dir_webapi/Mindscape.Raygun4Net.WebApi.pdb $signedfolderwebapi
+    copy-item $signed_build_dir_webapi/Mindscape.Raygun4Net.dll $signedfolderwebapi
+    copy-item $signed_build_dir_webapi/Mindscape.Raygun4Net.pdb $signedfolderwebapi
 	
     $zipFullName = $release_dir + $version + ".zip"
     Get-ChildItem $outerfolder | Add-Zip $zipFullName

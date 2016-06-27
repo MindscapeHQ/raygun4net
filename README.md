@@ -1,7 +1,7 @@
 Raygun4Net
 ==========
 
-[Raygun.io](http://raygun.io) Provider for .NET Framework
+[Raygun](http://raygun.com) provider for .NET Framework
 
 ! IMPORTANT CHANGE IN 5.0 !
 ====================
@@ -55,9 +55,9 @@ Install the NuGet package to a project which uses one of the above frameworks an
 Where is my app API key?
 ====================
 
-When sending exceptions to the Raygun.io service, an app API key is required to map the messages to your application.
+When sending exceptions to the Raygun service, an app API key is required to map the messages to your application.
 
-When you create a new application on your Raygun.io dashboard, your app API key is displayed at the top of the instructions page. You can also find the API key by clicking the "Application Settings" button in the side bar of the Raygun.io dashboard.
+When you create a new application in your Raygun dashboard, your app API key is displayed at the top of the instructions page. You can also find the API key by clicking the "Application Settings" button in the side bar of the Raygun dashboard.
 
 Namespace
 ====================
@@ -137,7 +137,7 @@ If using the HTTP module then you can exclude errors by their HTTP status code b
 
 **Exclude errors that originate from a local origin**
 
-Toggle this boolean and the HTTP module will not send errors to Raygun.io if the request originated from a local origin. i.e. A way to prevent local debug/development from notifying Raygun without having to resort to Web.config transforms.
+Toggle this boolean and the HTTP module will not send errors to Raygun if the request originated from a local origin. i.e. A way to prevent local debug/development from notifying Raygun without having to resort to Web.config transforms.
 
 ```
 <RaygunSettings apikey="YOUR_APP_API_KEY" excludeErrorsFromLocal="true" />
@@ -236,7 +236,7 @@ private static void Application_ThreadException(object sender, ThreadExceptionEv
 
 ### Windows Store Apps (Windows 8.1 and Windows Phone 8.1)
 
-In the App.xaml.cs constructor (or any central entry point in your application), call the static RaygunClient.Attach method using your API key. This will catch and send all unhandled exception to Raygun.io for you.
+In the App.xaml.cs constructor (or any central entry point in your application), call the static RaygunClient.Attach method using your API key. This will catch and send all unhandled exception to Raygun for you.
 
 ```csharp
 public App()
@@ -295,7 +295,7 @@ At any point after calling the Attach method, you can use RaygunClient.Current t
 ### Xamarin for Android
 
 In the main/entry Activity of your application, use the static RaygunClient.Attach method using your app API key.
-There is also an overload for the Attach method that lets you pass in a user-identity string which is useful for tracking affected users in your Raygun.io dashboard.
+There is also an overload for the Attach method that lets you pass in a user-identity string which is useful for tracking affected users in your Raygun dashboard.
 
 ```csharp
 RaygunClient.Attach("YOUR_APP_API_KEY");
@@ -306,7 +306,7 @@ At any point after calling the Attach method, you can use RaygunClient.Current t
 ### Xamarin for iOS
 
 In the main entry point of the application, use the static RaygunClient.Attach method using your app API key.
-There is also an overload for the Attach method that lets you pass in a user-identity string which is useful for tracking affected users in your Raygun.io dashboard.
+There is also an overload for the Attach method that lets you pass in a user-identity string which is useful for tracking affected users in your Raygun dashboard.
 
 ```csharp
 static void Main(string[] args)

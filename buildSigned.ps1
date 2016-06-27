@@ -6,6 +6,8 @@ properties {
     $solution_file4 =                   "$root/Mindscape.Raygun4Net4.sln"
     $solution_file4_client_profile =    "$root/Mindscape.Raygun4Net4.ClientProfile.sln"
     $solution_file_winrt =              "$root/Mindscape.Raygun4Net.WinRT.sln"
+    $solution_file_mvc =                "$root/Mindscape.Raygun4Net.Mvc.sln"
+    $solution_file_webapi =             "$root/Mindscape.Raygun4Net.WebApi.sln"
     $configuration =                    "Sign"
     $build_dir =                        "$root\build\"
     $signed_build_dir =                 "$build_dir\signed"
@@ -13,6 +15,8 @@ properties {
     $signed_build_dir2 =                "$build_dir\signed\Net2"
     $signed_build_dir4 =                "$build_dir\signed\Net4"
     $signed_build_dir4_client_profile = "$build_dir\signed\Net4.ClientProfile"
+    $signed_build_mvc =                 "$build_dir\signed\Mvc"
+    $signed_build_webapi =              "$build_dir\signed\WebApi"
     $nuget_dir =                        "$root\.nuget"
     $env:Path +=                        ";$nuget_dir"
 }
@@ -34,6 +38,9 @@ task Compile -depends Init {
     
     exec { msbuild "$solution_file_client_profile" /m /p:OutDir=$signed_build_dir_client_profile /p:Configuration=$configuration }
     exec { msbuild "$solution_file4_client_profile" /m /p:OutDir=$signed_build_dir4_client_profile /p:Configuration=$configuration }
+    
+    exec { msbuild "$solution_file_mvc" /m /p:OutDir=$signed_build_mvc /p:Configuration=$configuration }
+    exec { msbuild "$solution_file_webapi" /m /p:OutDir=$signed_build_webapi /p:Configuration=$configuration }
 }
 
 task CompileWinRT -depends Init {

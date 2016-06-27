@@ -9,6 +9,8 @@ using System.Threading;
 using System.Reflection;
 using Mindscape.Raygun4Net.Builders;
 using System.IO;
+using System.IO.IsolatedStorage;
+using System.Text;
 
 namespace Mindscape.Raygun4Net
 {
@@ -374,45 +376,54 @@ namespace Mindscape.Raygun4Net
     {
       try
       {
-        string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\RaygunOfflineStorage";
-        if (!Directory.Exists(path))
+        using (IsolatedStorageFile isolatedStorage = GetIsolatedStorageScope())
         {
-          Directory.CreateDirectory(path);
-        }
-        int number = 1;
-        while (true)
-        {
-          bool exists = File.Exists(path + "\\RaygunErrorMessage" + number + ".txt");
-          if (!exists)
+          string directoryName = "RaygunOfflineStorage";
+          if (!isolatedStorage.DirectoryExists(directoryName))
           {
-            string nextFileName = path + "\\RaygunErrorMessage" + (number + 1) + ".txt";
-            exists = File.Exists(nextFileName);
-            if (exists)
+            isolatedStorage.CreateDirectory(directoryName);
+          }
+
+          int number = 1;
+          while (true)
+          {
+            bool exists = isolatedStorage.FileExists(directoryName + "\\RaygunErrorMessage" + number + ".txt");
+            if (!exists)
             {
-              File.Delete(nextFileName);
+              string nextFileName = directoryName + "\\RaygunErrorMessage" + (number + 1) + ".txt";
+              exists = isolatedStorage.FileExists(nextFileName);
+              if (exists)
+              {
+                isolatedStorage.DeleteFile(nextFileName);
+              }
+              break;
             }
-            break;
+            number++;
           }
-          number++;
-        }
-        if (number == 11)
-        {
-          string firstFileName = path + "\\RaygunErrorMessage1.txt";
-          if (File.Exists(firstFileName))
+
+          if (number == 11)
           {
-            File.Delete(firstFileName);
+            string firstFileName = directoryName + "\\RaygunErrorMessage1.txt";
+            if (isolatedStorage.FileExists(firstFileName))
+            {
+              isolatedStorage.DeleteFile(firstFileName);
+            }
           }
+          using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream(directoryName + "\\RaygunErrorMessage" + number + ".txt", FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage))
+          {
+            using (StreamWriter writer = new StreamWriter(isoStream, Encoding.Unicode))
+            {
+              writer.Write(message);
+              writer.Flush();
+              writer.Close();
+            }
+          }
+          System.Diagnostics.Trace.WriteLine("Saved message: " + "RaygunErrorMessage" + number + ".txt");
         }
-        File.WriteAllText(path + "\\RaygunErrorMessage" + number + ".txt", message);
-        System.Diagnostics.Debug.WriteLine("Saved message: " + "RaygunErrorMessage" + number + ".txt");
       }
       catch (Exception ex)
       {
-        System.Diagnostics.Debug.WriteLine(string.Format("Error saving message to offline storage {0}", ex.Message));
-        if (RaygunSettings.Settings.ThrowOnError)
-        {
-          throw;
-        }
+        System.Diagnostics.Trace.WriteLine(string.Format("Error saving message to isolated storage {0}", ex.Message));
       }
     }
 
@@ -424,36 +435,55 @@ namespace Mindscape.Raygun4Net
       {
         try
         {
-          string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\RaygunOfflineStorage";
-          if (Directory.Exists(path))
+          using (IsolatedStorageFile isolatedStorage = GetIsolatedStorageScope())
           {
-            foreach (string name in Directory.EnumerateFiles(path))
+            string directoryName = "RaygunOfflineStorage";
+            if (isolatedStorage.DirectoryExists(directoryName))
             {
-              string text = File.ReadAllText(name);
-
-              try
+              string[] fileNames = isolatedStorage.GetFileNames(directoryName + "\\*.txt");
+              foreach (string name in fileNames)
               {
-                Send(text);
+                IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile(directoryName + "\\" + name, FileMode.Open);
+                using (StreamReader reader = new StreamReader(isoFileStream))
+                {
+                  string text = reader.ReadToEnd();
+                  try
+                  {
+                    Send(text);
+                  }
+                  catch
+                  {
+                    // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
+                    return;
+                  }
+                  System.Diagnostics.Debug.WriteLine("Sent " + name);
+                }
+                isolatedStorage.DeleteFile(directoryName + "\\" + name);
               }
-              catch
+              if (isolatedStorage.GetFileNames(directoryName + "\\*.txt").Length == 0)
               {
-                // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
-                return;
+                System.Diagnostics.Debug.WriteLine("Successfully sent all pending messages");
+                isolatedStorage.DeleteDirectory(directoryName);
               }
-              System.Diagnostics.Debug.WriteLine("Sent " + name);
-
-              File.Delete(name);
             }
           }
         }
         catch (Exception ex)
         {
           System.Diagnostics.Debug.WriteLine(string.Format("Error sending stored messages to Raygun.io {0}", ex.Message));
-          if (RaygunSettings.Settings.ThrowOnError)
-          {
-            throw;
-          }
         }
+      }
+    }
+
+    private IsolatedStorageFile GetIsolatedStorageScope()
+    {
+      if (AppDomain.CurrentDomain != null && AppDomain.CurrentDomain.ActivationContext != null)
+      {
+        return IsolatedStorageFile.GetUserStoreForApplication();
+      }
+      else
+      {
+        return IsolatedStorageFile.GetUserStoreForAssembly();
       }
     }
   }
