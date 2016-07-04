@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -29,14 +30,10 @@ namespace Mindscape.Raygun4Net.AspNetCore
       }
       catch(Exception e)
       {
-        /*
-         * There is no IsLocal on IPAddress or anything, so this is way harder than it looks. 
-         * https://github.com/aspnet/Hosting/issues/570#issuecomment-171571555
-         * https://github.com/aspnet/HttpAbstractions/issues/536
-        if(_settings.ExcludeErrorsFromLocal && IS_LOCAL_CONNECTION)
+        if(_settings.ExcludeErrorsFromLocal && httpContext.Request.IsLocal())
         {
           throw;
-        }*/
+        }
 
         var client = _middlewareSettings.ClientProvider.GetClient(_settings);
         client.RaygunCurrentRequest(httpContext);
@@ -71,6 +68,40 @@ namespace Mindscape.Raygun4Net.AspNetCore
       services.AddTransient(_ => middlewareSettings);
 
       return services;
+    }
+  }
+
+  internal static class HttpRequestExtensions
+  {
+    /// <summary>
+    /// Returns true if the IP address of the request originator was 127.0.0.1 or if the IP address of the request was the same as the server's IP address.
+    /// </summary>
+    /// <remarks>
+    /// Credit to Filip W for the initial implementation of this method.
+    /// See http://www.strathweb.com/2016/04/request-islocal-in-asp-net-core/
+    /// </remarks>
+    /// <param name="req"></param>
+    /// <returns></returns>
+    public static bool IsLocal(this HttpRequest req)
+    {
+      var connection = req.HttpContext.Connection;
+      if (connection.RemoteIpAddress != null)
+      {
+        if (connection.LocalIpAddress != null)
+        {
+          return connection.RemoteIpAddress.Equals(connection.LocalIpAddress);
+        }
+
+        return IPAddress.IsLoopback(connection.RemoteIpAddress);
+      }
+
+      // for in memory TestServer or when dealing with default connection info
+      if (connection.RemoteIpAddress == null && connection.LocalIpAddress == null)
+      {
+        return true;
+      }
+
+      return false;
     }
   }
 }
