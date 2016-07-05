@@ -1,5 +1,18 @@
 {
   "version": "1.0.0",
+  "title": "Raygun4Net.AspNetCore",
+  "description": "Raygun provider for .NET Core projects",
+  "language": "en-US",
+  "packOptions": {
+    "iconUrl": "https://app.raygun.com/Content/Images/nuget-icon.png",
+    "licenseUrl": "https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE",
+    "requireLicenseAcceptance": false,
+    "tags": ["exception", "error"],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/MindscapeHQ/raygun4net"
+    }
+  },
 
   "dependencies": {
     "NETStandard.Library": "1.6.0",
@@ -14,7 +27,6 @@
 
   "frameworks": {
     "netstandard1.6": {
-      "imports": "dnxcore50",
       "dependencies": {
         "System.Diagnostics.StackTrace": "4.0.1"
       }
