@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
@@ -370,9 +369,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
         .SetResponseDetails(_currentResponseMessage.Value)
         .SetRequestDetails(_currentRequestMessage.Value)
         .SetEnvironmentDetails()
-#if DNX451
         .SetMachineName(Environment.MachineName)
-#endif
         .SetExceptionDetails(exception)
         .SetClientDetails()
         .SetVersion(ApplicationVersion)

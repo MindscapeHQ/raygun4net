@@ -1,7 +1,8 @@
-﻿#if DNX451
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Globalization;
+
+#if NET451
+using System.Collections.Generic;
 using System.IO;
 using System.Management;
 using System.Security;
@@ -20,10 +21,18 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
     {
       RaygunEnvironmentMessage message = new RaygunEnvironmentMessage();
 
+      try
+      {
+        DateTime now = DateTime.Now;
+        message.UtcOffset = TimeZoneInfo.Local.GetUtcOffset(now).TotalHours;
+        message.Locale = CultureInfo.CurrentCulture.DisplayName;
+      }
+      catch { }
+
       // The cross platform APIs for getting this information don't exist right now.
       // In the mean time, chuck conditionals around the whole thing.
 
-#if DNX451
+#if NET451
       // Different environments can fail to load the environment details.
       // For now if they fail to load for whatever reason then just
       // swallow the exception. A good addition would be to handle
@@ -39,15 +48,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       {
         System.Diagnostics.Trace.WriteLine("Error retrieving window dimensions: {0}", ex.Message);
       }
-
-      try
-      {
-        DateTime now = DateTime.Now;
-        message.UtcOffset = TimeZone.CurrentTimeZone.GetUtcOffset(now).TotalHours;
-        message.Locale = CultureInfo.CurrentCulture.DisplayName;
-      }
-      catch {}
-
+      
       try
       {
         ComputerInfo info = new ComputerInfo();
@@ -82,7 +83,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return message;
     }
 
-#if DNX451
+#if NET451
     private static string GetCpu()
     {
       ManagementObjectSearcher wmiProcessorSearcher = new ManagementObjectSearcher("SELECT Name FROM Win32_Processor");
