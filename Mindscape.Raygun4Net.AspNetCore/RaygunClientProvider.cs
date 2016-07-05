@@ -1,16 +1,16 @@
-﻿namespace Mindscape.Raygun4Net.AspNetCore
+﻿namespace Mindscape.Raygun4Net
 {
   public interface IRaygunAspNetCoreClientProvider
   {
-    RaygunAspNetCoreClient GetClient(RaygunSettings settings);
+    RaygunClient GetClient(RaygunSettings settings);
     RaygunSettings GetRaygunSettings(RaygunSettings baseSettings);
   }
 
   public class DefaultRaygunAspNetCoreClientProvider : IRaygunAspNetCoreClientProvider
   {
-    public virtual RaygunAspNetCoreClient GetClient(RaygunSettings settings)
+    public virtual RaygunClient GetClient(RaygunSettings settings)
     {
-      return new RaygunAspNetCoreClient(settings);
+      return new RaygunClient(settings);
     }
 
     public virtual RaygunSettings GetRaygunSettings(RaygunSettings baseSettings)

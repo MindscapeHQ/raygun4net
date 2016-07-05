@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Mindscape.Raygun4Net.AspNetCore
+namespace Mindscape.Raygun4Net
 {
   public class RaygunAspNetMiddleware
   {

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using Mindscape.Raygun4Net.AspNetCore;
+using Mindscape.Raygun4Net;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net.Builders
@@ -26,7 +26,7 @@ namespace Mindscape.Raygun4Net.Builders
         IDictionary data = new Dictionary<object, object>();
         foreach (object key in exception.Data.Keys)
         {
-          if (!RaygunAspNetCoreClient.SentKey.Equals(key))
+          if (!RaygunClient.SentKey.Equals(key))
           {
             data[key] = exception.Data[key];
           }

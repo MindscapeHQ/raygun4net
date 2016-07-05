@@ -9,12 +9,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Mindscape.Raygun4Net.AspNetCore.Builders;
+using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
 
-namespace Mindscape.Raygun4Net.AspNetCore
+namespace Mindscape.Raygun4Net
 {
-  public class RaygunAspNetCoreClient
+  public class RaygunClient
   {
     private readonly string _apiKey;
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
@@ -43,7 +43,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
     /// </summary>
     public string ApplicationVersion { get; set; }
 
-    public RaygunAspNetCoreClient(RaygunSettings settings)
+    public RaygunClient(RaygunSettings settings)
     {
       _settings = settings;
       _apiKey = settings.ApiKey;
@@ -357,7 +357,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
       return message;
     }
 
-    internal RaygunAspNetCoreClient RaygunCurrentRequest(HttpContext request)
+    internal RaygunClient RaygunCurrentRequest(HttpContext request)
     {
       _currentRequest.Value = request;
       return this;

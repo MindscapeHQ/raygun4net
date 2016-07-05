@@ -13,7 +13,7 @@ using Microsoft.VisualBasic.Devices;
 
 using Mindscape.Raygun4Net.Messages;
 
-namespace Mindscape.Raygun4Net.AspNetCore.Builders
+namespace Mindscape.Raygun4Net.Builders
 {
   internal class RaygunEnvironmentMessageBuilder
   {

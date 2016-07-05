@@ -9,7 +9,7 @@ using Mindscape.Raygun4Net.Messages;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 
-namespace Mindscape.Raygun4Net.AspNetCore.Builders
+namespace Mindscape.Raygun4Net.Builders
 {
   public class RaygunAspNetCoreRequestMessageBuilder
   {
