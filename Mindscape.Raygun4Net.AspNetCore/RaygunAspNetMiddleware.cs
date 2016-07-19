@@ -87,12 +87,7 @@ namespace Mindscape.Raygun4Net
       var connection = req.HttpContext.Connection;
       if (connection.RemoteIpAddress != null)
       {
-        if (connection.LocalIpAddress != null)
-        {
-          return connection.RemoteIpAddress.Equals(connection.LocalIpAddress);
-        }
-
-        return IPAddress.IsLoopback(connection.RemoteIpAddress);
+        return (connection.LocalIpAddress != null && connection.RemoteIpAddress.Equals(connection.LocalIpAddress)) || IPAddress.IsLoopback(connection.RemoteIpAddress);
       }
 
       // for in memory TestServer or when dealing with default connection info

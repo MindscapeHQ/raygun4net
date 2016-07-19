@@ -39,9 +39,14 @@ namespace Mindscape.Raygun4Net
     public virtual RaygunIdentifierMessage UserInfo { get; set; }
 
     /// <summary>
-    /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
+    /// Gets or sets a custom application version identifier for all error messages sent to the Raygun endpoint.
     /// </summary>
     public string ApplicationVersion { get; set; }
+
+    public RaygunClient(string apiKey)
+      : this(new RaygunSettings {ApiKey = apiKey})
+    {
+    }
 
     public RaygunClient(RaygunSettings settings)
     {
@@ -75,6 +80,38 @@ namespace Mindscape.Raygun4Net
         ApplicationVersion = settings.ApplicationVersion;
       }
       IsRawDataIgnored = settings.IsRawDataIgnored;
+    }
+
+    /// <summary>
+    /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
+    /// This can be used when a wrapper exception, e.g. TargetInvocationException or HttpUnhandledException,
+    /// contains the actual exception as the InnerException. The message and stack trace of the inner exception will then
+    /// be used by Raygun for grouping and display. The above two do not need to be added manually,
+    /// but if you have other wrapper exceptions that you want stripped you can pass them in here.
+    /// </summary>
+    /// <param name="wrapperExceptions">Exception types that you want removed and replaced with their inner exception.</param>
+    public void AddWrapperExceptions(params Type[] wrapperExceptions)
+    {
+      foreach (Type wrapper in wrapperExceptions)
+      {
+        if (!_wrapperExceptions.Contains(wrapper))
+        {
+          _wrapperExceptions.Add(wrapper);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Specifies types of wrapper exceptions that Raygun should send rather than stripping out and sending the inner exception.
+    /// This can be used to remove the default wrapper exceptions (TargetInvocationException and HttpUnhandledException).
+    /// </summary>
+    /// <param name="wrapperExceptions">Exception types that should no longer be stripped away.</param>
+    public void RemoveWrapperExceptions(params Type[] wrapperExceptions)
+    {
+      foreach (Type wrapper in wrapperExceptions)
+      {
+        _wrapperExceptions.Remove(wrapper);
+      }
     }
 
     protected virtual bool CanSend(Exception exception)
@@ -128,7 +165,7 @@ namespace Mindscape.Raygun4Net
             // Catch and send exceptions that occur in the SendingMessage event handler.
             // Set the _handlingRecursiveErrorSending flag to prevent infinite errors.
             _handlingRecursiveErrorSending = true;
-            Send(e).RunSynchronously();
+            Send(e);
             _handlingRecursiveErrorSending = false;
           }
           result = !args.Cancel;
@@ -161,7 +198,7 @@ namespace Mindscape.Raygun4Net
           catch (Exception e)
           {
             _handlingRecursiveGrouping = true;
-            await Send(e);
+            await SendAsync(e, null, null);
             _handlingRecursiveGrouping = false;
           }
           result = args.CustomGroupingKey;
@@ -215,8 +252,8 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Specifies whether or not RawData from web requests is ignored when sending reports to Raygun.io.
-    /// The default is false which means RawData will be sent to Raygun.io.
+    /// Specifies whether or not RawData from web requests is ignored when sending reports to Raygun.
+    /// The default is false which means RawData will be sent to Raygun.
     /// </summary>
     public bool IsRawDataIgnored
     {
@@ -245,33 +282,38 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Transmits an exception to Raygun.io synchronously.
+    /// Transmits an exception to Raygun synchronously.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
-    public async Task Send(Exception exception)
+    public void Send(Exception exception)
     {
-      await Send(exception, null, (IDictionary)null);
+      Send(exception, null, null);
     }
 
     /// <summary>
-    /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
+    /// Transmits an exception to Raygun synchronously specifying a list of string tags associated
     /// with the message for identification.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
-    public async Task Send(Exception exception, IList<string> tags)
+    public void Send(Exception exception, IList<string> tags)
     {
-      await Send(exception, tags, (IDictionary)null);
+      Send(exception, tags, null);
     }
 
     /// <summary>
-    /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
+    /// Transmits an exception to Raygun synchronously specifying a list of string tags associated
     /// with the message for identification, as well as sending a key-value collection of custom data.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    public async Task Send(Exception exception, IList<string> tags, IDictionary userCustomData)
+    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
+    {
+      SendAsync(exception, tags, userCustomData).RunSynchronously();
+    }
+
+    private async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       if (CanSend(exception))
       {
@@ -284,26 +326,26 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Asynchronously transmits a message to Raygun.io.
+    /// Asynchronously transmits a message to Raygun.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     public Task SendInBackground(Exception exception)
     {
-      return SendInBackground(exception, null, (IDictionary)null);
+      return SendInBackground(exception, null, null);
     }
 
     /// <summary>
-    /// Asynchronously transmits an exception to Raygun.io.
+    /// Asynchronously transmits an exception to Raygun.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     public Task SendInBackground(Exception exception, IList<string> tags)
     {
-      return SendInBackground(exception, tags, (IDictionary)null);
+      return SendInBackground(exception, tags, null);
     }
 
     /// <summary>
-    /// Asynchronously transmits an exception to Raygun.io.
+    /// Asynchronously transmits an exception to Raygun.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
@@ -329,7 +371,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Asynchronously transmits a message to Raygun.io.
+    /// Asynchronously transmits a message to Raygun.
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
@@ -425,7 +467,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Posts a RaygunMessage to the Raygun.io api endpoint.
+    /// Posts a RaygunMessage to the Raygun api endpoint.
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
@@ -449,7 +491,7 @@ namespace Mindscape.Raygun4Net
               var result = await client.SendAsync(requestMessage);
               if(!result.IsSuccessStatusCode)
               {
-                Debug.WriteLine($"Error Logging Exception to Raygun.io {result.ReasonPhrase}");
+                Debug.WriteLine($"Error Logging Exception to Raygun {result.ReasonPhrase}");
 
                 if (_settings.ThrowOnError)
                 {
@@ -459,7 +501,7 @@ namespace Mindscape.Raygun4Net
             }
             catch (Exception ex)
             {
-              Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+              Debug.WriteLine(string.Format("Error Logging Exception to Raygun {0}", ex.Message));
 
               if (_settings.ThrowOnError)
               {
