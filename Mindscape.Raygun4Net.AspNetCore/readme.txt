@@ -27,10 +27,10 @@ To configure the RaygunAspNetCoreMiddleware to handle exceptions that have been 
 
 In Startup.cs:
   1. Add using Mindscape.Raygun4Net; to your using statements.
-  2. Add app.UseRaygun(); to the Configure method after other any other ExceptionHandling methods e.g. app.UseDeveloperExceptionPage() or app.UseExceptionHandler("/Home/Error").
+  2. Add app.UseRaygun(); to the Configure method after any other ExceptionHandling methods e.g. app.UseDeveloperExceptionPage() or app.UseExceptionHandler("/Home/Error").
   3. Add services.AddRaygun(Configuration); to the ConfigureServices method.
 
-Anywhere in your code, you can also send exception reports manually by simply by creating a new instance of the RaygunClient and calling one of the Send or SendInBackground methods.
+Anywhere in your code, you can also send exception reports manually simply by creating a new instance of the RaygunClient and calling one of the Send or SendInBackground methods.
 This is most commonly used to send exceptions caught in a try/catch block.
 
 try
@@ -46,10 +46,10 @@ Configure RaygunClient or settings in RaygunAspNetCoreMiddleware
 ================================================================
 
 The AddRaygun method has an overload that takes a RaygunMiddlewareSettings object. 
-These settings control the middleware (RaygunSettings are the common settings we use across all of our providers). 
+These settings control the middleware (not to be confused with RaygunSettings which are the common settings we use across all of our .NET providers). 
 Currently there's just one property on it, ClientProvider. This gives you a hook into the loading of RaygunSettings and the construction of the RaygunAspNetCoreClient used to send errors.
 
-For example, say you want to set user details on your error reports. You’d create a custom client provider like this:
+For example, say you want to set user details on your error reports. You'd create a custom client provider like this:
 
 public class ExampleRaygunAspNetCoreClientProvider : DefaultRaygunAspNetCoreClientProvider
 {
@@ -81,8 +81,6 @@ Exclude errors by HTTP status code
 You can exclude errors by their HTTP status code by providing an array of status codes to ignore in the configuration.
 For example if you wanted to exclude errors that return the "I'm a teapot" response code (http://tools.ietf.org/html/rfc2324), you could use the configuration below.
 
-<RaygunSettings apikey="YOUR_APP_API_KEY" excludeHttpStatusCodes="418" />
-
 "RaygunSettings": {
   "ApiKey": "YOUR_APP_API_KEY",
   "ExcludedStatusCodes": [418]
@@ -103,7 +101,7 @@ Remove sensitive request data
 -----------------------------
 
 If you have sensitive data in an HTTP request that you wish to prevent being transmitted to Raygun, you can provide lists of possible keys (names) to remove.
-Keys to ignore can be specified on the RaygunSettings in project.json, (or you can use the equivalent methods on RaygunClient if you are setting things up in code).
+Keys to ignore can be specified on the RaygunSettings in appsettings.json, (or you can use the equivalent methods on RaygunClient if you are setting things up in code).
 The available options are:
 
 IgnoreFormFieldNames
