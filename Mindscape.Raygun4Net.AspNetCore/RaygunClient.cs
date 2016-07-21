@@ -310,7 +310,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      SendAsync(exception, tags, userCustomData).RunSynchronously();
+      SendAsync(exception, tags, userCustomData).Wait();
     }
 
     private async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData)

@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Raygun4Net")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Raygun4Net.AspNetCore")]
+[assembly: AssemblyDescription("Raygun provider for .NET Core projects")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Raygun")]
 [assembly: AssemblyProduct("Raygun4Net")]
-[assembly: AssemblyCopyright("Copyright © Raygun 2012-2016")]
+[assembly: AssemblyCopyright("Copyright © Raygun 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
