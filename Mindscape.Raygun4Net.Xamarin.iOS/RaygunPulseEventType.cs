@@ -6,7 +6,11 @@ namespace Mindscape.Raygun4Net
   {
     SessionStart,
 
-    SessionEnd
+    SessionEnd,
+
+    View,
+
+    Network
   }
 }
 

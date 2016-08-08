@@ -81,7 +81,7 @@ namespace Mindscape.Raygun4Net
       //Console.WriteLine("SESSION START");
       _raygunClient.SendPulseEvent(RaygunPulseEventType.SessionStart);
       if(_lastViewName != null) {
-        _raygunClient.SendPulsePageTimingEvent(_lastViewName, 0);
+        _raygunClient.SendPulseTimingEvent(_lastViewName, RaygunPulseEventType.View, 0);
       }
     }
 
@@ -100,14 +100,14 @@ namespace Mindscape.Raygun4Net
     internal static void SendRemainingViews(){
       if(_raygunClient != null) {
         foreach(string view in _timers.Keys) {
-          decimal duration = 0;
+          long duration = 0;
           Stopwatch stopwatch;
           _timers.TryGetValue(view, out stopwatch);
           if(stopwatch != null) {
             stopwatch.Stop();
             duration = stopwatch.ElapsedMilliseconds;
           }
-          _raygunClient.SendPulsePageTimingEventNow(view, duration);
+          _raygunClient.SendPulseTimingEventNow(view, RaygunPulseEventType.View, duration);
         }
 
         _raygunClient.SendPulseEventNow(RaygunPulseEventType.SessionEnd);
@@ -263,7 +263,7 @@ namespace Mindscape.Raygun4Net
 
       Stopwatch stopwatch;
       _timers.TryGetValue(pageName, out stopwatch);
-      decimal duration = 0;
+      long duration = 0;
       if(stopwatch != null) {
         stopwatch.Stop();
         duration = stopwatch.ElapsedMilliseconds;
@@ -271,7 +271,7 @@ namespace Mindscape.Raygun4Net
       }
 
       if(IsValidPageName(pageName)) {
-        _raygunClient.SendPulsePageTimingEvent(pageName, duration);
+        _raygunClient.SendPulseTimingEvent(pageName, RaygunPulseEventType.View, duration);
         //Console.WriteLine ("did appear " + obj.ToString() + " " + duration);
       }
     }
