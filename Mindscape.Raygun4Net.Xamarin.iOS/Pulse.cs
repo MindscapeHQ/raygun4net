@@ -79,22 +79,22 @@ namespace Mindscape.Raygun4Net
     private static void OnDidBecomeActive(NSNotification notification)
     {
       //Console.WriteLine("SESSION START");
-      _raygunClient.SendPulseEvent(RaygunPulseEventType.SessionStart);
+      _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
       if(_lastViewName != null) {
-        _raygunClient.SendPulseTimingEvent(_lastViewName, RaygunPulseEventType.View, 0);
+        _raygunClient.SendPulseTimingEvent(RaygunPulseEventType.ViewLoaded, _lastViewName, 0);
       }
     }
 
     private static void OnDidEnterBackground(NSNotification notification)
     {
       //Console.WriteLine("SESSION END");
-      _raygunClient.SendPulseEvent(RaygunPulseEventType.SessionEnd);
+      _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionEnd);
     }
 
     private static void OnWillResignActive(NSNotification notification)
     {
       //Console.WriteLine("SESSION END");
-      _raygunClient.SendPulseEvent(RaygunPulseEventType.SessionEnd);
+      _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionEnd);
     }
 
     internal static void SendRemainingViews(){
@@ -107,10 +107,10 @@ namespace Mindscape.Raygun4Net
             stopwatch.Stop();
             duration = stopwatch.ElapsedMilliseconds;
           }
-          _raygunClient.SendPulseTimingEventNow(view, RaygunPulseEventType.View, duration);
+          _raygunClient.SendPulseTimingEventNow(RaygunPulseEventType.ViewLoaded, view, duration);
         }
 
-        _raygunClient.SendPulseEventNow(RaygunPulseEventType.SessionEnd);
+        _raygunClient.SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionEnd);
       }
     }
 
@@ -271,7 +271,7 @@ namespace Mindscape.Raygun4Net
       }
 
       if(IsValidPageName(pageName)) {
-        _raygunClient.SendPulseTimingEvent(pageName, RaygunPulseEventType.View, duration);
+        _raygunClient.SendPulseTimingEvent(RaygunPulseEventType.ViewLoaded, pageName, duration);
         //Console.WriteLine ("did appear " + obj.ToString() + " " + duration);
       }
     }

@@ -687,29 +687,29 @@ namespace Mindscape.Raygun4Net
 
     private string _sessionId;
 
-    internal void SendPulseEventNow(RaygunPulseEventType type)
+    internal void SendPulseSessionEventNow(RaygunPulseSessionEventType eventType)
     {
-      if (type == RaygunPulseEventType.SessionStart)
+      if (eventType == RaygunPulseSessionEventType.SessionStart)
       {
         _sessionId = Guid.NewGuid().ToString();
       }
-      SendPulseEventCore(type);
+      SendPulseSessionEventCore(eventType);
     }
 
     /// <summary>
     /// Sends a Pulse event to Raygun. The message is sent on a background thread.
     /// </summary>
-    /// <param name="type">The type of event that occurred.</param>
-    public void SendPulseEvent(RaygunPulseEventType type)
+    /// <param name="eventType">The type of event that occurred.</param>
+    internal void SendPulseSessionEvent(RaygunPulseSessionEventType eventType)
     {
-      if (type == RaygunPulseEventType.SessionStart)
+      if (eventType == RaygunPulseSessionEventType.SessionStart)
       {
         _sessionId = Guid.NewGuid().ToString();
       }
-      ThreadPool.QueueUserWorkItem(c => SendPulseEventCore(type));
+      ThreadPool.QueueUserWorkItem(c => SendPulseSessionEventCore(eventType));
     }
 
-    private void SendPulseEventCore(RaygunPulseEventType type)
+    private void SendPulseSessionEventCore(RaygunPulseSessionEventType eventType)
     {
       RaygunPulseMessage message = new RaygunPulseMessage();
       RaygunPulseDataMessage data = new RaygunPulseDataMessage();
@@ -731,11 +731,11 @@ namespace Mindscape.Raygun4Net
       }
       data.User = BuildRaygunIdentifierMessage(machineName);
       message.EventData = new [] { data };
-      switch(type) {
-      case RaygunPulseEventType.SessionStart:
+      switch(eventType) {
+      case RaygunPulseSessionEventType.SessionStart:
         data.Type = "session_start";
         break;
-      case RaygunPulseEventType.SessionEnd:
+      case RaygunPulseSessionEventType.SessionEnd:
         data.Type = "session_end";
         break;
       }
@@ -743,26 +743,26 @@ namespace Mindscape.Raygun4Net
       Send(message);
     }
 
-    internal void SendPulseTimingEventNow(string name, RaygunPulseEventType eventType, long milliseconds)
+    internal void SendPulseTimingEventNow(RaygunPulseEventType eventType, string name, long milliseconds)
     {
-      SendPulseTimingEventCore(name, eventType, milliseconds);
+      SendPulseTimingEventCore(eventType, name, milliseconds);
     }
 
     /// <summary>
     /// Sends a pulse timing event to Raygun. The message is sent on a background thread.
     /// </summary>
-    /// <param name="">The name of the event.</param>
     /// <param name="eventType">The type of event that occurred.</param>
+    /// <param name="">The name of the event resource such as the view name or URL of a network call.</param>
     /// <param name="milliseconds">The duration of the event in milliseconds.</param>
-    public void SendPulseTimingEvent(string name, RaygunPulseEventType eventType, long milliseconds)
+    public void SendPulseTimingEvent(RaygunPulseEventType eventType, string name, long milliseconds)
     {
-      ThreadPool.QueueUserWorkItem(c => SendPulseTimingEventCore(name, eventType, milliseconds));
+      ThreadPool.QueueUserWorkItem(c => SendPulseTimingEventCore(eventType, name, milliseconds));
     }
 
-    private void SendPulseTimingEventCore(string name, RaygunPulseEventType eventType, long milliseconds)
+    private void SendPulseTimingEventCore(RaygunPulseEventType eventType, string name, long milliseconds)
     {
       if(_sessionId == null) {
-        SendPulseEvent(RaygunPulseEventType.SessionStart);
+        SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
       }
 
       RaygunPulseMessage message = new RaygunPulseMessage();
@@ -787,7 +787,7 @@ namespace Mindscape.Raygun4Net
 
       dataMessage.User = BuildRaygunIdentifierMessage(machineName);
 
-      string type = eventType == RaygunPulseEventType.View ? "p" : "n";
+      string type = eventType == RaygunPulseEventType.ViewLoaded ? "p" : "n";
 
       RaygunPulseData data = new RaygunPulseData(){ Name = name, Timing = new RaygunPulseTimingMessage() { Type = type, Duration = milliseconds } };
       RaygunPulseData[] dataArray = { data };
