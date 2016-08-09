@@ -453,25 +453,25 @@ namespace Mindscape.Raygun4Net
 
     private string _sessionId;
 
-    internal void SendPulseEventNow(RaygunPulseEventType type)
+    internal void SendPulseSessionEventNow(RaygunPulseSessionEventType type)
     {
-      if (type == RaygunPulseEventType.SessionStart)
+      if (type == RaygunPulseSessionEventType.SessionStart)
       {
         _sessionId = Guid.NewGuid().ToString();
       }
-      SendPulseEventCore(type);
+      SendPulseSessionEventCore(type);
     }
 
-    internal void SendPulseEvent(RaygunPulseEventType type)
+    internal void SendPulseSessionEvent(RaygunPulseSessionEventType type)
     {
-      if (type == RaygunPulseEventType.SessionStart)
+      if (type == RaygunPulseSessionEventType.SessionStart)
       {
         _sessionId = Guid.NewGuid().ToString();
       }
-      ThreadPool.QueueUserWorkItem(c => SendPulseEventCore(type));
+      ThreadPool.QueueUserWorkItem(c => SendPulseSessionEventCore(type));
     }
 
-    private void SendPulseEventCore(RaygunPulseEventType type)
+    private void SendPulseSessionEventCore(RaygunPulseSessionEventType type)
     {
       RaygunPulseMessage message = new RaygunPulseMessage();
       RaygunPulseDataMessage data = new RaygunPulseDataMessage();
@@ -486,10 +486,10 @@ namespace Mindscape.Raygun4Net
       message.EventData = new[] { data };
       switch (type)
       {
-        case RaygunPulseEventType.SessionStart:
+        case RaygunPulseSessionEventType.SessionStart:
           data.Type = "session_start";
           break;
-        case RaygunPulseEventType.SessionEnd:
+        case RaygunPulseSessionEventType.SessionEnd:
           data.Type = "session_end";
           break;
       }
@@ -511,7 +511,7 @@ namespace Mindscape.Raygun4Net
     {
       if (_sessionId == null)
       {
-        SendPulseEvent(RaygunPulseEventType.SessionStart);
+        SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
       }
 
       RaygunPulseMessage message = new RaygunPulseMessage();

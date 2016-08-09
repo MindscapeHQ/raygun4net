@@ -12,7 +12,14 @@ using Android.Widget;
 
 namespace Mindscape.Raygun4Net
 {
-  internal enum RaygunPulseEventType
+  public enum RaygunPulseEventType
+  {
+    ActivityLoaded,
+
+    NetworkCall
+  }
+
+  internal enum RaygunPulseSessionEventType
   {
     SessionStart,
 

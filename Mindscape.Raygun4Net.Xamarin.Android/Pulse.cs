@@ -31,7 +31,7 @@ namespace Mindscape.Raygun4Net
         _pulse = new Pulse();
         _mainActivity.Application.RegisterActivityLifecycleCallbacks(_pulse);
 
-        _raygunClient.SendPulseEvent(RaygunPulseEventType.SessionStart);
+        _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
         _currentActivity = _mainActivity;
         _timer.Start();
       }
@@ -59,7 +59,7 @@ namespace Mindscape.Raygun4Net
           string activityName = GetActivityName(_currentActivity);
           _raygunClient.SendPulsePageTimingEventNow(activityName, _timer.ElapsedMilliseconds);
         }
-        _raygunClient.SendPulseEventNow(RaygunPulseEventType.SessionEnd);
+        _raygunClient.SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionEnd);
       }
     }
 
@@ -67,7 +67,7 @@ namespace Mindscape.Raygun4Net
     {
       if (_currentActivity == null)
       {
-        _raygunClient.SendPulseEvent(RaygunPulseEventType.SessionStart);
+        _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
       }
 
       if (activity != _currentActivity)
@@ -82,7 +82,7 @@ namespace Mindscape.Raygun4Net
     {
       if (_currentActivity == null)
       {
-        _raygunClient.SendPulseEvent(RaygunPulseEventType.SessionStart);
+        _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
       }
 
       if (activity != _currentActivity)
@@ -97,7 +97,7 @@ namespace Mindscape.Raygun4Net
     {
       if (_currentActivity == null)
       {
-        _raygunClient.SendPulseEvent(RaygunPulseEventType.SessionStart);
+        _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
       }
 
       string activityName = GetActivityName(activity);
@@ -123,7 +123,7 @@ namespace Mindscape.Raygun4Net
       if (activity == _currentActivity)
       {
         _currentActivity = null;
-        _raygunClient.SendPulseEvent(RaygunPulseEventType.SessionEnd);
+        _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionEnd);
       }
       //Console.WriteLine("ACTIVITY STOPPED " + activity.Title);
     }
