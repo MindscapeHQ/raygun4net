@@ -101,7 +101,7 @@ namespace Mindscape.Raygun4Net
       }
 
       string activityName = GetActivityName(activity);
-      decimal duration = 0;
+      long duration = 0;
       if (activity == _currentActivity)
       {
         _timer.Stop();

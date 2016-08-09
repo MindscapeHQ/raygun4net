@@ -501,23 +501,23 @@ namespace Mindscape.Raygun4Net
       Send(message);
     }
 
-    internal void SendPulseTimingEventNow(RaygunPulseEventType eventType, string name, decimal duration)
+    internal void SendPulseTimingEventNow(RaygunPulseEventType eventType, string name, long milliseconds)
     {
-      SendPulseTimingEventCore(eventType, name, duration);
+      SendPulseTimingEventCore(eventType, name, milliseconds);
     }
 
     /// <summary>
     /// Sends a pulse timing event to Raygun. The message is sent on a background thread.
     /// </summary>
     /// <param name="eventType">The type of event that occurred.</param>
-    /// <param name="">The name of the event resource such as the activity name or URL of a network call.</param>
+    /// <param name="name">The name of the event resource such as the activity name or URL of a network call.</param>
     /// <param name="milliseconds">The duration of the event in milliseconds.</param>
-    public void SendPulseTimingEvent(RaygunPulseEventType eventType, string name, decimal duration)
+    public void SendPulseTimingEvent(RaygunPulseEventType eventType, string name, long milliseconds)
     {
-      ThreadPool.QueueUserWorkItem(c => SendPulseTimingEventCore(eventType, name, duration));
+      ThreadPool.QueueUserWorkItem(c => SendPulseTimingEventCore(eventType, name, milliseconds));
     }
 
-    private void SendPulseTimingEventCore(RaygunPulseEventType eventType, string name, decimal duration)
+    private void SendPulseTimingEventCore(RaygunPulseEventType eventType, string name, long milliseconds)
     {
       if (_sessionId == null)
       {
@@ -527,7 +527,7 @@ namespace Mindscape.Raygun4Net
       RaygunPulseMessage message = new RaygunPulseMessage();
       RaygunPulseDataMessage dataMessage = new RaygunPulseDataMessage();
       dataMessage.SessionId = _sessionId;
-      dataMessage.Timestamp = DateTime.UtcNow - TimeSpan.FromMilliseconds((long)duration);
+      dataMessage.Timestamp = DateTime.UtcNow - TimeSpan.FromMilliseconds((long)milliseconds);
       dataMessage.Version = GetVersion();
       dataMessage.OS = "Android";
       dataMessage.OSVersion = Android.OS.Build.VERSION.Release;
@@ -538,7 +538,7 @@ namespace Mindscape.Raygun4Net
 
       string type = eventType == RaygunPulseEventType.ActivityLoaded ? "p" : "n";
 
-      RaygunPulseData data = new RaygunPulseData() { Name = name, Timing = new RaygunPulseTimingMessage() { Type = type, Duration = duration } };
+      RaygunPulseData data = new RaygunPulseData() { Name = name, Timing = new RaygunPulseTimingMessage() { Type = type, Duration = milliseconds } };
       RaygunPulseData[] dataArray = { data };
       string dataStr = SimpleJson.SerializeObject(dataArray);
       dataMessage.Data = dataStr;
