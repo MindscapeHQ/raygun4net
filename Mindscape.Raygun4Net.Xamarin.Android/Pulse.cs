@@ -57,7 +57,7 @@ namespace Mindscape.Raygun4Net
         {
           _timer.Stop();
           string activityName = GetActivityName(_currentActivity);
-          _raygunClient.SendPulseTimingEventNow(activityName, _timer.ElapsedMilliseconds);
+          _raygunClient.SendPulseTimingEventNow(RaygunPulseEventType.ActivityLoaded, activityName, _timer.ElapsedMilliseconds);
         }
         _raygunClient.SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionEnd);
       }
@@ -109,7 +109,7 @@ namespace Mindscape.Raygun4Net
       }
       _currentActivity = activity;
 
-      _raygunClient.SendPulseTimingEvent(activityName, duration);
+      _raygunClient.SendPulseTimingEvent(RaygunPulseEventType.ActivityLoaded, activityName, duration);
       //Console.WriteLine("ACTIVITY RESUMED " + activity.Title + " DURATION: " + duration);
     }
 

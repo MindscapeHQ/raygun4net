@@ -462,6 +462,10 @@ namespace Mindscape.Raygun4Net
       SendPulseSessionEventCore(type);
     }
 
+    /// <summary>
+    /// Sends a Pulse session event to Raygun. The message is sent on a background thread.
+    /// </summary>
+    /// <param name="eventType">The type of session event that occurred.</param>
     internal void SendPulseSessionEvent(RaygunPulseSessionEventType type)
     {
       if (type == RaygunPulseSessionEventType.SessionStart)
@@ -497,17 +501,23 @@ namespace Mindscape.Raygun4Net
       Send(message);
     }
 
-    internal void SendPulseTimingEventNow(string name, decimal duration)
+    internal void SendPulseTimingEventNow(RaygunPulseEventType eventType, string name, decimal duration)
     {
-      SendPulseTimingEventCore(name, duration);
+      SendPulseTimingEventCore(eventType, name, duration);
     }
 
-    internal void SendPulseTimingEvent(string name, decimal duration)
+    /// <summary>
+    /// Sends a pulse timing event to Raygun. The message is sent on a background thread.
+    /// </summary>
+    /// <param name="eventType">The type of event that occurred.</param>
+    /// <param name="">The name of the event resource such as the activity name or URL of a network call.</param>
+    /// <param name="milliseconds">The duration of the event in milliseconds.</param>
+    public void SendPulseTimingEvent(RaygunPulseEventType eventType, string name, decimal duration)
     {
-      ThreadPool.QueueUserWorkItem(c => SendPulseTimingEventCore(name, duration));
+      ThreadPool.QueueUserWorkItem(c => SendPulseTimingEventCore(eventType, name, duration));
     }
 
-    private void SendPulseTimingEventCore(string name, decimal duration)
+    private void SendPulseTimingEventCore(RaygunPulseEventType eventType, string name, decimal duration)
     {
       if (_sessionId == null)
       {
@@ -526,7 +536,9 @@ namespace Mindscape.Raygun4Net
 
       dataMessage.User = UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : BuildRaygunIdentifierMessage(null));
 
-      RaygunPulseData data = new RaygunPulseData() { Name = name, Timing = new RaygunPulseTimingMessage() { Type = "p", Duration = duration } };
+      string type = eventType == RaygunPulseEventType.ActivityLoaded ? "p" : "n";
+
+      RaygunPulseData data = new RaygunPulseData() { Name = name, Timing = new RaygunPulseTimingMessage() { Type = type, Duration = duration } };
       RaygunPulseData[] dataArray = { data };
       string dataStr = SimpleJson.SerializeObject(dataArray);
       dataMessage.Data = dataStr;
