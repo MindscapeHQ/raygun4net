@@ -697,9 +697,9 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Sends a Pulse event to Raygun. The message is sent on a background thread.
+    /// Sends a Pulse session event to Raygun. The message is sent on a background thread.
     /// </summary>
-    /// <param name="eventType">The type of event that occurred.</param>
+    /// <param name="eventType">The type of session event that occurred.</param>
     internal void SendPulseSessionEvent(RaygunPulseSessionEventType eventType)
     {
       if (eventType == RaygunPulseSessionEventType.SessionStart)
@@ -752,7 +752,7 @@ namespace Mindscape.Raygun4Net
     /// Sends a pulse timing event to Raygun. The message is sent on a background thread.
     /// </summary>
     /// <param name="eventType">The type of event that occurred.</param>
-    /// <param name="">The name of the event resource such as the view name or URL of a network call.</param>
+    /// <param name="name">The name of the event resource such as the view name or URL of a network call.</param>
     /// <param name="milliseconds">The duration of the event in milliseconds.</param>
     public void SendPulseTimingEvent(RaygunPulseEventType eventType, string name, long milliseconds)
     {
