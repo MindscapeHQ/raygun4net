@@ -497,17 +497,17 @@ namespace Mindscape.Raygun4Net
       Send(message);
     }
 
-    internal void SendPulsePageTimingEventNow(string name, decimal duration)
+    internal void SendPulseTimingEventNow(string name, decimal duration)
     {
-      SendPulsePageTimingEventCore(name, duration);
+      SendPulseTimingEventCore(name, duration);
     }
 
-    internal void SendPulsePageTimingEvent(string name, decimal duration)
+    internal void SendPulseTimingEvent(string name, decimal duration)
     {
-      ThreadPool.QueueUserWorkItem(c => SendPulsePageTimingEventCore(name, duration));
+      ThreadPool.QueueUserWorkItem(c => SendPulseTimingEventCore(name, duration));
     }
 
-    private void SendPulsePageTimingEventCore(string name, decimal duration)
+    private void SendPulseTimingEventCore(string name, decimal duration)
     {
       if (_sessionId == null)
       {
