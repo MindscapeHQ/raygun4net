@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata minClientVersion="2.5">
     <id>Mindscape.Raygun4Net</id>
-    <version>5.3.1</version>
+    <version>5.4.0-beta1</version>
     <title />
     <authors>Raygun</authors>
     <owners />
@@ -13,23 +13,6 @@
     <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
   </metadata>
   <files>
-    <!-- .NET 2.0 -->
-    <file src="build\Net2\Mindscape.Raygun4Net.dll" target="lib\net20\Mindscape.Raygun4Net.dll" />
-    <file src="build\Net2\Mindscape.Raygun4Net.pdb" target="lib\net20\Mindscape.Raygun4Net.pdb" />
-    <!-- .NET 3.5 -->
-    <file src="build\Mindscape.Raygun4Net.dll" target="lib\net35\Mindscape.Raygun4Net.dll" />
-    <file src="build\Mindscape.Raygun4Net.pdb" target="lib\net35\Mindscape.Raygun4Net.pdb" />
-    <!-- .NET 3.5 Client Profile -->
-    <file src="build\Net3.ClientProfile\Mindscape.Raygun4Net.dll" target="lib\net35-client\Mindscape.Raygun4Net.dll" />
-    <file src="build\Net3.ClientProfile\Mindscape.Raygun4Net.pdb" target="lib\net35-client\Mindscape.Raygun4Net.pdb" />
-    <!-- .NET 4.0 -->
-    <file src="build\Net4\Mindscape.Raygun4Net4.dll" target="lib\net40\Mindscape.Raygun4Net4.dll" />
-    <file src="build\Net4\Mindscape.Raygun4Net4.pdb" target="lib\net40\Mindscape.Raygun4Net4.pdb" />
-    <file src="build\Net4\Mindscape.Raygun4Net.dll" target="lib\net40\Mindscape.Raygun4Net.dll" />
-    <file src="build\Net4\Mindscape.Raygun4Net.pdb" target="lib\net40\Mindscape.Raygun4Net.pdb" />
-    <!-- .NET 4.0 Client Profile -->
-    <file src="build\Net4.ClientProfile\Mindscape.Raygun4Net.dll" target="lib\net40-client\Mindscape.Raygun4Net.dll" />
-    <file src="build\Net4.ClientProfile\Mindscape.Raygun4Net.pdb" target="lib\net40-client\Mindscape.Raygun4Net.pdb" />
     <!-- Xamarin.Android -->
     <file src="build\Mindscape.Raygun4Net.Xamarin.Android.dll" target="lib\MonoAndroid2.2\Mindscape.Raygun4Net.Xamarin.Android.dll" />
     <file src="build\Mindscape.Raygun4Net.Xamarin.Android.pdb" target="lib\MonoAndroid2.2\Mindscape.Raygun4Net.Xamarin.Android.pdb" />
@@ -37,19 +20,6 @@
     <file src="build\Mindscape.Raygun4Net.Xamarin.iOS.dll" target="lib\MonoTouch4.0\Mindscape.Raygun4Net.Xamarin.iOS.dll" />
     <file src="build\Mindscape.Raygun4Net.Xamarin.iOS.dll" target="lib\MonoTouch\Mindscape.Raygun4Net.Xamarin.iOS.dll" />
     <file src="build\Mindscape.Raygun4Net.Xamarin.iOS.Unified.dll" target="lib\Xamarin.iOS10\Mindscape.Raygun4Net.Xamarin.iOS.Unified.dll" />
-    <!-- Xamarin.Mac -->
-    <file src="build\Mindscape.Raygun4Net.Xamarin.Mac.Unified.dll" target="lib\Xamarin.Mac20\Mindscape.Raygun4Net.Xamarin.Mac.Unified.dll" />
-    <!-- Windows Store universal apps (Windows 8.1 and Windows Phone 8.1) -->
-    <file src="build\Mindscape.Raygun4Net.WindowsStore.dll" target="lib\portable-net45+win81+wpa81+windows81\Mindscape.Raygun4Net.WindowsStore.dll" />
-    <file src="build\Mindscape.Raygun4Net.WindowsStore.pdb" target="lib\portable-net45+win81+wpa81+windows81\Mindscape.Raygun4Net.WindowsStore.pdb" />
-    <!-- WinRT and Windows 8 -->
-    <file src="build\Mindscape.Raygun4Net.WinRT.dll" target="lib\portable-windows8\Mindscape.Raygun4Net.WinRT.dll" />
-    <file src="build\Mindscape.Raygun4Net.WinRT.pdb" target="lib\portable-windows8\Mindscape.Raygun4Net.WinRT.pdb" />
-    <!-- Windows Phone -->
-    <file src="build\Mindscape.Raygun4Net.WindowsPhone.dll" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.dll" />
-    <file src="build\Mindscape.Raygun4Net.WindowsPhone.pdb" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.pdb" />
-    <file src="build\Mindscape.Raygun4Net.WindowsPhone.dll" target="lib\windowsphone8\Mindscape.Raygun4Net.WindowsPhone.dll" />
-    <file src="build\Mindscape.Raygun4Net.WindowsPhone.pdb" target="lib\windowsphone8\Mindscape.Raygun4Net.WindowsPhone.pdb" />
 
     <file src="readme.txt" />
   </files>
