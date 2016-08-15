@@ -20,6 +20,8 @@
     <file src="build\Mindscape.Raygun4Net.Xamarin.iOS.dll" target="lib\MonoTouch4.0\Mindscape.Raygun4Net.Xamarin.iOS.dll" />
     <file src="build\Mindscape.Raygun4Net.Xamarin.iOS.dll" target="lib\MonoTouch\Mindscape.Raygun4Net.Xamarin.iOS.dll" />
     <file src="build\Mindscape.Raygun4Net.Xamarin.iOS.Unified.dll" target="lib\Xamarin.iOS10\Mindscape.Raygun4Net.Xamarin.iOS.Unified.dll" />
+    <!-- Xamarin.Mac -->
+    <file src="build\Mindscape.Raygun4Net.Xamarin.Mac.Unified.dll" target="lib\Xamarin.Mac20\Mindscape.Raygun4Net.Xamarin.Mac.Unified.dll" />
 
     <file src="readme.txt" />
   </files>
