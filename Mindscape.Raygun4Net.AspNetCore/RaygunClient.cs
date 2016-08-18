@@ -20,7 +20,7 @@ namespace Mindscape.Raygun4Net
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private readonly List<Type> _wrapperExceptions = new List<Type>();
 
-    private readonly ThreadLocal<HttpContext> _currentRequest = new ThreadLocal<HttpContext>(() => null);
+    private readonly ThreadLocal<HttpContext> _currentHttpContext = new ThreadLocal<HttpContext>(() => null);
     private readonly ThreadLocal<RaygunRequestMessage> _currentRequestMessage = new ThreadLocal<RaygunRequestMessage>(() => null);
     private readonly ThreadLocal<RaygunResponseMessage> _currentResponseMessage = new ThreadLocal<RaygunResponseMessage>(() => null);
     private readonly RaygunSettings _settings;
@@ -198,7 +198,7 @@ namespace Mindscape.Raygun4Net
           catch (Exception e)
           {
             _handlingRecursiveGrouping = true;
-            await SendAsync(e, null, null);
+            await SendAsync(e, null, null, null);
             _handlingRecursiveGrouping = false;
           }
           result = args.CustomGroupingKey;
@@ -310,13 +310,27 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      SendAsync(exception, tags, userCustomData).Wait();
+      Send(exception, tags, userCustomData, null);
     }
 
-    private async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData)
+    /// <summary>
+    /// Transmits an exception to Raygun synchronously specifying a list of string tags associated
+    /// with the message for identification, as well as sending a key-value collection of custom data.
+    /// </summary>
+    /// <param name="exception">The exception to deliver.</param>
+    /// <param name="tags">A list of strings associated with the message.</param>
+    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
+    /// <param name="context">The current web HttpContext</param>
+    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData, HttpContext context)
+    {
+      SendAsync(exception, tags, userCustomData, context).Wait();
+    }
+
+    private async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData, HttpContext context)
     {
       if (CanSend(exception))
       {
+        _currentHttpContext.Value = context;
         _currentRequestMessage.Value = await BuildRequestMessage();
         _currentResponseMessage.Value = BuildResponseMessage();
 
@@ -387,21 +401,21 @@ namespace Mindscape.Raygun4Net
 
     private async Task<RaygunRequestMessage> BuildRequestMessage()
     {
-      var message = _currentRequest.Value != null ? await RaygunAspNetCoreRequestMessageBuilder.Build(_currentRequest.Value, _requestMessageOptions) : null;
-      _currentRequest.Value = null;
+      var message = _currentHttpContext.Value != null ? await RaygunAspNetCoreRequestMessageBuilder.Build(_currentHttpContext.Value, _requestMessageOptions) : null;
+      _currentHttpContext.Value = null;
       return message;
     }
 
     private RaygunResponseMessage BuildResponseMessage()
     {
-      var message = _currentRequest.Value != null ? RaygunAspNetCoreResponseMessageBuilder.Build(_currentRequest.Value) : null;
-      _currentRequest.Value = null;
+      var message = _currentHttpContext.Value != null ? RaygunAspNetCoreResponseMessageBuilder.Build(_currentHttpContext.Value) : null;
+      _currentHttpContext.Value = null;
       return message;
     }
 
-    internal RaygunClient RaygunCurrentRequest(HttpContext request)
+    public RaygunClient SetCurrentContext(HttpContext request)
     {
-      _currentRequest.Value = request;
+      _currentHttpContext.Value = request;
       return this;
     }
 
