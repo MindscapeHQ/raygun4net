@@ -35,8 +35,7 @@ namespace Mindscape.Raygun4Net
           throw;
         }
 
-        var client = _middlewareSettings.ClientProvider.GetClient(_settings);
-        client.SetCurrentContext(httpContext);
+        var client = _middlewareSettings.ClientProvider.GetClient(_settings, httpContext);
         await client.SendInBackground(e);
         throw;
       }

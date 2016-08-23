@@ -48,7 +48,7 @@ namespace Mindscape.Raygun4Net
     {
     }
 
-    public RaygunClient(RaygunSettings settings)
+    public RaygunClient(RaygunSettings settings, HttpContext context = null)
     {
       _settings = settings;
       _apiKey = settings.ApiKey;
@@ -80,6 +80,11 @@ namespace Mindscape.Raygun4Net
         ApplicationVersion = settings.ApplicationVersion;
       }
       IsRawDataIgnored = settings.IsRawDataIgnored;
+
+      if (context != null)
+      {
+        SetCurrentContext(context);
+      }
     }
 
     /// <summary>
