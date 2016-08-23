@@ -35,12 +35,11 @@ This is most commonly used to send exceptions caught in a try/catch block.
 
 try
 {
-  
 }
 catch (Exception e)
 {
   new RaygunClient("YOUR_APP_API_KEY").SendInBackground(e);
-}
+} 
 
 Configure RaygunClient or settings in RaygunAspNetCoreMiddleware
 ================================================================
@@ -53,14 +52,24 @@ For example, say you want to set user details on your error reports. You'd creat
 
 public class ExampleRaygunAspNetCoreClientProvider : DefaultRaygunAspNetCoreClientProvider
 {
-  public override RaygunClient GetClient(RaygunSettings settings)
+  public override RaygunClient GetClient(RaygunSettings settings, HttpContext context)
   {
-    var client = base.GetClient(settings);
-    client.UserInfo = new RaygunIdentifierMessage("123456789")
+	var client = base.GetClient(settings, context);
+    client.ApplicationVersion = "1.1.0";
+
+    var identity = context?.User?.Identity as ClaimsIdentity;
+    if (identity?.IsAuthenticated == true)
     {
-      Email = "ronald@example.com",
-      FullName = "Ronald Raygun"
-    };
+      var email = identity.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).FirstOrDefault();
+
+      client.UserInfo = new RaygunIdentifierMessage(email)
+      {
+        IsAnonymous = false,
+        Email = email,
+        FullName = identity.Name
+      };
+    }
+
     return client;
   }
 }
@@ -71,6 +80,40 @@ services.AddRaygun(Configuration, new RaygunMiddlewareSettings()
 {
   ClientProvider = new ExampleRaygunAspNetCoreClientProvider()
 });
+
+Manually sending exceptions with a custom ClientProvider
+========================================================
+
+When configuring a custom ClientProvider you will also want to leverage this ClientProvider to get an instance of the RaygunClient when manually sending an exception.
+To do this use the Dependency Injection framework to provide an instance of the IRaygunAspNetCoreClientProvider and IOptions<RaygunSettings> to your MVC Controller.
+This will then ensure that the Raygun crash report also contains any HttpContext information and will execute any code defined in your ClientProvider.GetClient() method.
+
+public class RaygunController : Controller
+{
+  private readonly IRaygunAspNetCoreClientProvider _clientProvider;
+  private readonly IOptions<RaygunSettings> _settings;
+
+  public RaygunController(IRaygunAspNetCoreClientProvider clientProvider, IOptions<RaygunSettings> settings)
+  {
+    _clientProvider = clientProvider;
+    _settings = settings;
+  }
+
+  public async Task<IActionResult> TestManualError()
+  {
+    try
+    {
+      throw new Exception("Test from .NET Core MVC app");
+    }
+    catch (Exception ex)
+    {
+      var raygunClient = _clientProvider.GetClient(_settings.Value, HttpContext);
+      await raygunClient.SendInBackground(ex);
+    }
+
+    return View();
+  }
+}
 
 Additional configuration options and features
 =============================================
