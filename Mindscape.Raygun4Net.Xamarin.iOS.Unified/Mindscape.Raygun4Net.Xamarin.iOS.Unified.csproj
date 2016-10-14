@@ -105,6 +105,7 @@
     <Folder Include="Builders\" />
     <Folder Include="Messages\" />
     <Folder Include="Properties\" />
+    <Folder Include="Batching\" />
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingNativeLibrary Include="..\Mindscape.Raygun4Net.Xamarin.iOS\libRaygun4iOS.a">
@@ -193,6 +194,9 @@
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net.Xamarin.iOS\RaygunPulseEventType.cs">
       <Link>RaygunPulseEventType.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net.Xamarin.iOS\Batching\PulseEventBatch.cs">
+      <Link>Batching\PulseEventBatch.cs</Link>
     </Compile>
   </ItemGroup>
 </Project>

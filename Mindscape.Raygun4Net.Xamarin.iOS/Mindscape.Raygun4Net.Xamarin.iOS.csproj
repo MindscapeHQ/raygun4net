@@ -35,9 +35,11 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="monotouch" />
+    <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+    <Folder Include="Batching\" />
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
@@ -102,5 +104,6 @@
     <Compile Include="Pulse.cs" />
     <Compile Include="Messages\RaygunPulseData.cs" />
     <Compile Include="Messages\RaygunPulseTimingMessage.cs" />
+    <Compile Include="Batching\PulseEventBatch.cs" />
   </ItemGroup>
 </Project>
