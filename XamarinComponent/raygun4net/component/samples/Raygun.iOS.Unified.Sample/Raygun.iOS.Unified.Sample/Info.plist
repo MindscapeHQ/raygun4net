@@ -40,5 +40,7 @@
 	</array>
 	<key>MKDirectionsApplicationSupportedModes</key>
 	<array/>
+	<key>CFBundleName</key>
+	<string>Raygun iOS Unified Sample</string>
 </dict>
 </plist>

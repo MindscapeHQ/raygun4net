@@ -124,7 +124,7 @@ namespace Mindscape.Raygun4Net.Builders
       return ret;
     }
 
-    private static string GetStringSysCtl(string propertyName)
+    internal static string GetStringSysCtl(string propertyName)
     {
       // get the length of the string that will be returned
       var pLen = Marshal.AllocHGlobal(sizeof(int));
