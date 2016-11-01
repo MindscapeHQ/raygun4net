@@ -4,8 +4,8 @@ using System.Threading;
 
 namespace Mindscape.Raygun4Net
 {
-	internal class PulseEventBatch
-	{
+  internal class PulseEventBatch
+  {
     private List<PendingEvent> _pendingEvents = new List<PendingEvent> ();
     private DateTime _lastUpdate;
     private readonly RaygunClient _raygunClient;
@@ -65,7 +65,7 @@ namespace Mindscape.Raygun4Net
         }
       }
     }
-	}
+  }
 
   internal class PendingEvent
   {
