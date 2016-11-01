@@ -37,8 +37,6 @@ namespace Mindscape.Raygun4Net
     {
       _apiKey = apiKey;
 
-      ServicePointManager.ServerCertificateValidationCallback += (o, certificate, chain, errors) => true;
-
       _wrapperExceptions.Add(typeof(TargetInvocationException));
       _wrapperExceptions.Add(typeof(System.AggregateException));
 
