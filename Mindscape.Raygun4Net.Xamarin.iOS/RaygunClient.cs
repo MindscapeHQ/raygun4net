@@ -901,40 +901,18 @@ namespace Mindscape.Raygun4Net
     {
       if (ValidateApiKey())
       {
-        //bool canSend = OnSendingMessage(raygunMessage);
-        //if (canSend)
+        string message = null;
+        try
         {
-          string message = null;
-          try
-          {
-            message = SimpleJson.SerializeObject(raygunPulseMessage);
-          }
-          catch (Exception ex)
-          {
-            System.Diagnostics.Debug.WriteLine (string.Format ("Error serializing message {0}", ex.Message));
-          }
+          message = SimpleJson.SerializeObject(raygunPulseMessage);
+        }
+        catch (Exception ex) {
+          System.Diagnostics.Debug.WriteLine(string.Format("Error serializing message {0}", ex.Message));
+        }
 
-          if (message != null)
-          {
-            SendPulseMessage (message);
-            /*try
-            {
-              SaveMessage (message);
-            }
-            catch (Exception ex)
-            {
-              System.Diagnostics.Debug.WriteLine (string.Format ("Error saving Exception to device {0}", ex.Message));
-              if (HasInternetConnection)
-              {
-                SendMessage (message);
-              }
-            }
-
-            if (HasInternetConnection)
-            {
-              SendStoredMessages ();
-            }*/
-          }
+        if (message != null)
+        {
+          SendPulseMessage(message);
         }
       }
     }
