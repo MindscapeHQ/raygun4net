@@ -534,7 +534,7 @@ namespace Mindscape.Raygun4Net
 
       dataMessage.User = UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : BuildRaygunIdentifierMessage(null));
 
-      string type = eventType == RaygunPulseEventType.ActivityLoaded ? "p" : "n";
+      string type = eventType == RaygunPulseEventType.ViewLoaded ? "p" : "n";
 
       RaygunPulseData data = new RaygunPulseData() { Name = name, Timing = new RaygunPulseTimingMessage() { Type = type, Duration = milliseconds } };
       RaygunPulseData[] dataArray = { data };

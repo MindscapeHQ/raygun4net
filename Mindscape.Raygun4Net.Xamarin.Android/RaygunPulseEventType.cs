@@ -14,7 +14,7 @@ namespace Mindscape.Raygun4Net
 {
   public enum RaygunPulseEventType
   {
-    ActivityLoaded,
+    ViewLoaded,
 
     NetworkCall
   }
