@@ -54,7 +54,7 @@ public class ExampleRaygunAspNetCoreClientProvider : DefaultRaygunAspNetCoreClie
 {
   public override RaygunClient GetClient(RaygunSettings settings, HttpContext context)
   {
-	var client = base.GetClient(settings, context);
+    var client = base.GetClient(settings, context);
     client.ApplicationVersion = "1.1.0";
 
     var identity = context?.User?.Identity as ClaimsIdentity;
