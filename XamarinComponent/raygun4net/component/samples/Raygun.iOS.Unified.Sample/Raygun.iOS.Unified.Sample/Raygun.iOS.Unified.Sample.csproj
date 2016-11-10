@@ -84,18 +84,13 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="Info.plist" />
+    <Compile Include="AppDelegate.cs" />
+    <Compile Include="Main.cs" />
+    <Compile Include="MyViewController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="..\..\Raygun.iOS.Sample\Raygun.iOS.Sample\AppDelegate.cs">
-      <Link>AppDelegate.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Raygun.iOS.Sample\Raygun.iOS.Sample\Main.cs">
-      <Link>Main.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Raygun.iOS.Sample\Raygun.iOS.Sample\MyViewController.cs">
-      <Link>MyViewController.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
+    <BundleResource Include="Resources\Default.png" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -107,18 +102,11 @@
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Resources\" />
+    <BundleResource Include="Resources\Default%402x.png" />
   </ItemGroup>
   <ItemGroup>
-    <BundleResource Include="..\..\Raygun.iOS.Sample\Raygun.iOS.Sample\Resources\Default-568h%402x.png">
-      <Link>Resources\Default-568h%402x.png</Link>
-    </BundleResource>
-    <BundleResource Include="..\..\Raygun.iOS.Sample\Raygun.iOS.Sample\Resources\Default.png">
-      <Link>Resources\Default.png</Link>
-    </BundleResource>
-    <BundleResource Include="..\..\Raygun.iOS.Sample\Raygun.iOS.Sample\Resources\Default%402x.png">
-      <Link>Resources\Default%402x.png</Link>
-    </BundleResource>
+    <BundleResource Include="Resources\Default-568h%402x.png" />
   </ItemGroup>
 </Project>
