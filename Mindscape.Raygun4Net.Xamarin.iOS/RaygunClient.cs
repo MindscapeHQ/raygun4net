@@ -71,6 +71,7 @@ namespace Mindscape.Raygun4Net
       get { return _user; }
       set
       {
+        _userChangedSinceLastPulseMessage = true;
         _user = value;
         if (_reporter != null)
         {
@@ -87,6 +88,7 @@ namespace Mindscape.Raygun4Net
       get { return _userInfo; }
       set
       {
+        _userChangedSinceLastPulseMessage = true;
         _userInfo = value;
         if (_reporter != null)
         {
@@ -709,38 +711,65 @@ namespace Mindscape.Raygun4Net
       ThreadPool.QueueUserWorkItem(c => SendPulseSessionEventCore(eventType));
     }
 
-    private void SendPulseSessionEventCore(RaygunPulseSessionEventType eventType)
+    private void SendPulseSessionEventCore (RaygunPulseSessionEventType eventType)
     {
-      RaygunPulseMessage message = new RaygunPulseMessage();
-      RaygunPulseDataMessage data = new RaygunPulseDataMessage();
+      switch (eventType) {
+      case RaygunPulseSessionEventType.SessionStart:
+        RaygunPulseMessage startMessage = BuildSessionStartMessage ();
+        Send (startMessage);
+        break;
+      case RaygunPulseSessionEventType.SessionEnd:
+        RaygunPulseMessage endMessage = BuildSessionEndMessage ();
+        Send (endMessage);
+        break;
+      }
+    }
+
+    private RaygunPulseMessage BuildSessionStartMessage()
+    {
+      RaygunPulseMessage message = new RaygunPulseMessage ();
+      RaygunPulseDataMessage data = new RaygunPulseDataMessage ();
       data.Timestamp = DateTime.UtcNow;
-      data.Version = GetVersion();
+      data.Version = GetVersion ();
 
       data.OS = UIDevice.CurrentDevice.SystemName;
       data.OSVersion = UIDevice.CurrentDevice.SystemVersion;
-      data.Platform = Mindscape.Raygun4Net.Builders.RaygunEnvironmentMessageBuilder.GetStringSysCtl("hw.machine");
+      data.Platform = Mindscape.Raygun4Net.Builders.RaygunEnvironmentMessageBuilder.GetStringSysCtl ("hw.machine");
 
       string machineName = null;
-      try
-      {
+      try {
         machineName = UIDevice.CurrentDevice.Name;
+      } catch (Exception e) {
+        System.Diagnostics.Debug.WriteLine ("Exception getting device name {0}", e.Message);
       }
-      catch (Exception e)
-      {
-        System.Diagnostics.Debug.WriteLine("Exception getting device name {0}", e.Message);
-      }
-      data.User = BuildRaygunIdentifierMessage(machineName);
+      data.User = BuildRaygunIdentifierMessage (machineName);
       message.EventData = new [] { data };
-      switch(eventType) {
-      case RaygunPulseSessionEventType.SessionStart:
-        data.Type = "session_start";
-        break;
-      case RaygunPulseSessionEventType.SessionEnd:
-        data.Type = "session_end";
-        break;
-      }
+      data.Type = "session_start";
       data.SessionId = _sessionId;
-      Send(message);
+      return message;
+    }
+
+    private RaygunPulseMessage BuildSessionEndMessage ()
+    {
+      RaygunPulseMessage message = new RaygunPulseMessage ();
+      RaygunPulseDataMessage data = new RaygunPulseDataMessage ();
+      data.Timestamp = DateTime.UtcNow;
+
+      if (_userChangedSinceLastPulseMessage) {
+        string machineName = null;
+        try {
+          machineName = UIDevice.CurrentDevice.Name;
+        } catch (Exception e) {
+          System.Diagnostics.Debug.WriteLine ("Exception getting device name {0}", e.Message);
+        }
+        data.User = BuildRaygunIdentifierMessage (machineName);
+        _userChangedSinceLastPulseMessage = false;
+      }
+
+      message.EventData = new [] { data };
+      data.Type = "session_end";
+      data.SessionId = _sessionId;
+      return message;
     }
 
     internal void SendPulseTimingEventNow(RaygunPulseEventType eventType, string name, long milliseconds)
@@ -748,6 +777,7 @@ namespace Mindscape.Raygun4Net
       SendPulseTimingEventCore(eventType, name, milliseconds);
     }
 
+    private bool _userChangedSinceLastPulseMessage;
     private PulseEventBatch _activeBatch;
 
     /// <summary>
@@ -785,11 +815,6 @@ namespace Mindscape.Raygun4Net
         SendPulseSessionEvent (RaygunPulseSessionEventType.SessionStart);
       }
 
-      string version = GetVersion ();
-      string os = UIDevice.CurrentDevice.SystemName;
-      string osVersion = UIDevice.CurrentDevice.SystemVersion;
-      string platform = Mindscape.Raygun4Net.Builders.RaygunEnvironmentMessageBuilder.GetStringSysCtl ("hw.machine");
-
       string machineName = null;
       try {
         machineName = UIDevice.CurrentDevice.Name;
@@ -806,16 +831,15 @@ namespace Mindscape.Raygun4Net
       RaygunPulseDataMessage [] eventMessages = new RaygunPulseDataMessage[batch.PendingEventCount];
       int index = 0;
       foreach (PendingEvent pendingEvent in batch.PendingEvents) {
-
         RaygunPulseDataMessage dataMessage = new RaygunPulseDataMessage ();
         dataMessage.SessionId = pendingEvent.SessionId;
         dataMessage.Timestamp = pendingEvent.Timestamp;
-        dataMessage.Version = version;
-        dataMessage.OS = os;
-        dataMessage.OSVersion = osVersion;
-        dataMessage.Platform = platform;
         dataMessage.Type = "mobile_event_timing";
-        dataMessage.User = user;
+
+        if (_userChangedSinceLastPulseMessage) {
+          dataMessage.User = user;
+          _userChangedSinceLastPulseMessage = false;
+        }
 
         string type = pendingEvent.EventType == RaygunPulseEventType.ViewLoaded ? "p" : "n";
 
@@ -842,23 +866,18 @@ namespace Mindscape.Raygun4Net
       RaygunPulseDataMessage dataMessage = new RaygunPulseDataMessage();
       dataMessage.SessionId = _sessionId;
       dataMessage.Timestamp = DateTime.UtcNow - TimeSpan.FromMilliseconds(milliseconds);
-      dataMessage.Version = GetVersion();
-      dataMessage.OS = UIDevice.CurrentDevice.SystemName;
-      dataMessage.OSVersion = UIDevice.CurrentDevice.SystemVersion;
-      dataMessage.Platform = Mindscape.Raygun4Net.Builders.RaygunEnvironmentMessageBuilder.GetStringSysCtl("hw.machine");
       dataMessage.Type = "mobile_event_timing";
 
-      string machineName = null;
-      try
-      {
-        machineName = UIDevice.CurrentDevice.Name;
+      if (_userChangedSinceLastPulseMessage) {
+        string machineName = null;
+        try {
+          machineName = UIDevice.CurrentDevice.Name;
+        } catch (Exception e) {
+          System.Diagnostics.Debug.WriteLine ("Exception getting device name {0}", e.Message);
+        }
+        dataMessage.User = BuildRaygunIdentifierMessage (machineName);
+        _userChangedSinceLastPulseMessage = false;
       }
-      catch (Exception e)
-      {
-        System.Diagnostics.Debug.WriteLine("Exception getting device name {0}", e.Message);
-      }
-
-      dataMessage.User = BuildRaygunIdentifierMessage(machineName);
 
       string type = eventType == RaygunPulseEventType.ViewLoaded ? "p" : "n";
 
