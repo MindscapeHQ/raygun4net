@@ -689,6 +689,7 @@ namespace Mindscape.Raygun4Net
     }
 
     private string _sessionId;
+    private string _lastEndedSessionId;
 
     internal void SendPulseSessionEventNow(RaygunPulseSessionEventType eventType)
     {
@@ -696,6 +697,15 @@ namespace Mindscape.Raygun4Net
       {
         _sessionId = Guid.NewGuid().ToString();
       }
+
+      if (eventType == RaygunPulseSessionEventType.SessionEnd) {
+        if (_sessionId != null && _sessionId.Equals (_lastEndedSessionId)) {
+          return;
+        } else {
+          _lastEndedSessionId = _sessionId;
+        }
+      }
+
       SendPulseSessionEventCore(eventType);
     }
 
@@ -709,6 +719,15 @@ namespace Mindscape.Raygun4Net
       {
         _sessionId = Guid.NewGuid().ToString();
       }
+
+      if (eventType == RaygunPulseSessionEventType.SessionEnd) {
+        if (_sessionId != null && _sessionId.Equals (_lastEndedSessionId)) {
+          return;
+        } else {
+          _lastEndedSessionId = _sessionId;
+        }
+      }
+
       ThreadPool.QueueUserWorkItem(c => SendPulseSessionEventCore(eventType));
     }
 
