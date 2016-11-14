@@ -448,9 +448,6 @@ namespace Mindscape.Raygun4Net
     {
       Pulse.Attach (this);
       OfflinePulseMode = offlineMode;
-      if (!offlineMode) {
-        ThreadPool.QueueUserWorkItem (state => { SendStoredPulseMessages (0); });
-      }
       return this;
     }
 
@@ -965,7 +962,7 @@ namespace Mindscape.Raygun4Net
         if (message != null)
         {
           if (CanSendPulseMessage ()) {
-            SendStoredPulseMessages (0);
+            ThreadPool.QueueUserWorkItem (state => { SendStoredPulseMessages (0); });
             bool success = SendPulseMessage (message);
             if (!success) {
               SavePulseMessage (raygunPulseMessage.EventData[0].SessionId, message);
@@ -1053,7 +1050,9 @@ namespace Mindscape.Raygun4Net
       get { return _offlinePulseMode;}
       set {
         _offlinePulseMode = value;
-        ThreadPool.QueueUserWorkItem (state => { SendStoredPulseMessages (0); });
+        if (!_offlinePulseMode) {
+          ThreadPool.QueueUserWorkItem (state => { SendStoredPulseMessages (0); });
+        }
       }
     }
 
