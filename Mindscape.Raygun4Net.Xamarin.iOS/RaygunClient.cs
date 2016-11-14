@@ -51,7 +51,6 @@ namespace Mindscape.Raygun4Net
       _wrapperExceptions.Add(typeof(AggregateException));
 
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(0); });
-      ThreadPool.QueueUserWorkItem(state => { SendStoredPulseMessages(0); });
     }
 
     private bool ValidateApiKey()
@@ -437,7 +436,21 @@ namespace Mindscape.Raygun4Net
     /// <returns>The RaygunClient to chain other methods.</returns>
     public RaygunClient AttachPulse()
     {
-      Pulse.Attach(this);
+      return AttachPulse (false);
+    }
+
+    /// <summary>
+    /// Causes Raygun to automatically send session and view events for Raygun Pulse.
+    /// </summary>
+    /// <param name="offlineMode">If true, messages will be saved to the device and won't be sent until OfflinePulseMode is set to false.</param>
+    /// <returns>The RaygunClient to chain other methods.</returns>
+    public RaygunClient AttachPulse (bool offlineMode)
+    {
+      Pulse.Attach (this);
+      OfflinePulseMode = offlineMode;
+      if (!offlineMode) {
+        ThreadPool.QueueUserWorkItem (state => { SendStoredPulseMessages (0); });
+      }
       return this;
     }
 
