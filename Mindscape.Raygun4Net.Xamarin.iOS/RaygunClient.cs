@@ -1046,7 +1046,16 @@ namespace Mindscape.Raygun4Net
       return !OfflinePulseMode && HasInternetConnection;
     }
 
-    public bool OfflinePulseMode { get; set; }
+    private bool _offlinePulseMode;
+
+    public bool OfflinePulseMode
+    {
+      get { return _offlinePulseMode;}
+      set {
+        _offlinePulseMode = value;
+        ThreadPool.QueueUserWorkItem (state => { SendStoredPulseMessages (0); });
+      }
+    }
 
     private void SendStoredMessages(int timeout)
     {
