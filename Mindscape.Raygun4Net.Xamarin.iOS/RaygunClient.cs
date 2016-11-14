@@ -1172,29 +1172,33 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    private object _pulseMessageLock = new object();
+
     private void SendStoredPulseMessages (int timeout)
     {
       if (CanSendPulseMessage()) {
         try {
-          using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication ()) {
-            if (isolatedStorage.DirectoryExists ("RaygunPulse")) {
-              string [] directoryNames = isolatedStorage.GetDirectoryNames("RaygunPulse\\*");
-              foreach (string directory in directoryNames) {
-                string [] fileNames = isolatedStorage.GetFileNames (directory + "\\*.txt");
-                foreach (string name in fileNames) {
-                  IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile (name, FileMode.Open);
-                  using (StreamReader reader = new StreamReader (isoFileStream)) {
-                    string text = reader.ReadToEnd ();
-                    bool success = SendPulseMessage(text);
-                    // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
-                    if (!success) {
-                      return;
+          lock(_pulseMessageLock) {
+            using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication ()) {
+              if (isolatedStorage.DirectoryExists ("RaygunPulse")) {
+                string [] directoryNames = isolatedStorage.GetDirectoryNames ("RaygunPulse\\*");
+                foreach (string directory in directoryNames) {
+                  string [] fileNames = isolatedStorage.GetFileNames (directory + "\\*.txt");
+                  foreach (string name in fileNames) {
+                    IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile (name, FileMode.Open);
+                    using (StreamReader reader = new StreamReader (isoFileStream)) {
+                      string text = reader.ReadToEnd ();
+                      bool success = SendPulseMessage (text);
+                      // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
+                      if (!success) {
+                        return;
+                      }
+                      System.Diagnostics.Debug.WriteLine ("Sent " + name);
                     }
-                    System.Diagnostics.Debug.WriteLine ("Sent " + name);
+                    isolatedStorage.DeleteFile (name);
                   }
-                  isolatedStorage.DeleteFile (name);
+                  isolatedStorage.DeleteDirectory (directory);
                 }
-                isolatedStorage.DeleteDirectory (directory);
               }
             }
           }
@@ -1207,31 +1211,33 @@ namespace Mindscape.Raygun4Net
     private void SavePulseMessage (string sessionId, string message)
     {
       try {
-        using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication ()) {
-          if (!isolatedStorage.DirectoryExists ("RaygunPulse")) {
-            isolatedStorage.CreateDirectory ("RaygunPulse");
-          }
-          if (!isolatedStorage.DirectoryExists ("RaygunPulse\\" + sessionId)) {
-            isolatedStorage.CreateDirectory ("RaygunPulse\\" + sessionId);
-          }
-          int number = 1;
-          while (true) {
-            bool exists = isolatedStorage.FileExists ("RaygunPulse\\" + sessionId + "\\PulseMessage" + number + ".txt");
-            if (!exists) {
-              break;
+        lock(_pulseMessageLock) {
+          using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication ()) {
+            if (!isolatedStorage.DirectoryExists ("RaygunPulse")) {
+              isolatedStorage.CreateDirectory ("RaygunPulse");
             }
-            number++;
-          }
-          using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream ("RaygunPulse\\" + sessionId + "\\PulseMessage" + number + ".txt", FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage)) {
-            using (StreamWriter writer = new StreamWriter (isoStream, Encoding.Unicode)) {
-              writer.Write (message);
-              writer.Flush ();
-              writer.Close ();
+            if (!isolatedStorage.DirectoryExists ("RaygunPulse\\" + sessionId)) {
+              isolatedStorage.CreateDirectory ("RaygunPulse\\" + sessionId);
             }
+            int number = 1;
+            while (true) {
+              bool exists = isolatedStorage.FileExists ("RaygunPulse\\" + sessionId + "\\PulseMessage" + number + ".txt");
+              if (!exists) {
+                break;
+              }
+              number++;
+            }
+            using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream ("RaygunPulse\\" + sessionId + "\\PulseMessage" + number + ".txt", FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage)) {
+              using (StreamWriter writer = new StreamWriter (isoStream, Encoding.Unicode)) {
+                writer.Write (message);
+                writer.Flush ();
+                writer.Close ();
+              }
+            }
+            System.Diagnostics.Debug.WriteLine ("Saved message: " + "PulseMessage" + number + ".txt");
+            System.Diagnostics.Debug.WriteLine (message);
+            //System.Diagnostics.Debug.WriteLine ("File Count: " + isolatedStorage.GetFileNames ("RaygunIO\\*.txt").Length);
           }
-          System.Diagnostics.Debug.WriteLine ("Saved message: " + "PulseMessage" + number + ".txt");
-          System.Diagnostics.Debug.WriteLine (message);
-          //System.Diagnostics.Debug.WriteLine ("File Count: " + isolatedStorage.GetFileNames ("RaygunIO\\*.txt").Length);
         }
       } catch (Exception ex) {
         System.Diagnostics.Debug.WriteLine (string.Format ("Error saving message to isolated storage {0}", ex.Message));
