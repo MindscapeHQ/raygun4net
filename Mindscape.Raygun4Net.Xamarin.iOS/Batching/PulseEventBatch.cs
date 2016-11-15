@@ -58,6 +58,14 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    public void DoneNow ()
+    {
+      if (!_locked) {
+        _locked = true;
+        _raygunClient.SendNow (this);
+      }
+    }
+
     public int PendingEventCount {
       get { return _pendingEvents.Count; }
     }

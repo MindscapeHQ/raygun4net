@@ -713,7 +713,7 @@ namespace Mindscape.Raygun4Net
           return;
         } else {
           if (_activeBatch != null) {
-            _activeBatch.Done ();
+            _activeBatch.DoneNow ();
           }
           _lastEndedSessionId = _sessionId;
         }
@@ -846,11 +846,11 @@ namespace Mindscape.Raygun4Net
 
     internal void Send (PulseEventBatch batch)
     {
-      ThreadPool.QueueUserWorkItem (c => SendCore(batch));
+      ThreadPool.QueueUserWorkItem (c => SendNow(batch));
       _activeBatch = null;
     }
 
-    private void SendCore (PulseEventBatch batch)
+    internal void SendNow (PulseEventBatch batch)
     {
       if (_sessionId == null) {
         SendPulseSessionEvent (RaygunPulseSessionEventType.SessionStart);
