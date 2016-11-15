@@ -10,12 +10,16 @@ namespace Mindscape.Raygun4Net
     private DateTime _lastUpdate;
     private readonly RaygunClient _raygunClient;
 
+    private readonly int _lifeSpan = 1;
+
     private bool _locked;
 
-    public PulseEventBatch (RaygunClient raygunClient)
+    public PulseEventBatch (RaygunClient raygunClient, int lifeSpan)
     {
       _raygunClient = raygunClient;
       _lastUpdate = DateTime.UtcNow;
+
+      _lifeSpan = lifeSpan;
 
       Thread t = new Thread (CheckTime);
       t.Start ();
@@ -26,7 +30,7 @@ namespace Mindscape.Raygun4Net
       while (true) {
         Thread.Sleep (1500);
 
-        if ((DateTime.UtcNow - _lastUpdate).TotalSeconds > 1 && _pendingEvents.Count > 0) {
+        if ((DateTime.UtcNow - _lastUpdate).TotalSeconds > _lifeSpan && _pendingEvents.Count > 0) {
           Done ();
           break;
         }
@@ -46,7 +50,7 @@ namespace Mindscape.Raygun4Net
       get { return _locked; }
     }
 
-    private void Done ()
+    public void Done ()
     {
       if (!_locked) {
         _locked = true;

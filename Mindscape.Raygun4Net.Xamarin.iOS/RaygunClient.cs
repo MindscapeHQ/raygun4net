@@ -712,6 +712,9 @@ namespace Mindscape.Raygun4Net
         if (_sessionId != null && _sessionId.Equals (_lastEndedSessionId)) {
           return;
         } else {
+          if (_activeBatch != null) {
+            _activeBatch.Done ();
+          }
           _lastEndedSessionId = _sessionId;
         }
       }
@@ -734,6 +737,9 @@ namespace Mindscape.Raygun4Net
         if (_sessionId != null && _sessionId.Equals (_lastEndedSessionId)) {
           return;
         } else {
+          if (_activeBatch != null) {
+            _activeBatch.Done();
+          }
           _lastEndedSessionId = _sessionId;
         }
       }
@@ -810,6 +816,11 @@ namespace Mindscape.Raygun4Net
     private bool _userChangedSinceLastPulseMessage;
     private PulseEventBatch _activeBatch;
 
+    private int GetBatchLifeSpan ()
+    {
+      return CanSendPulseMessage () ? 1 : 10;
+    }
+
     /// <summary>
     /// Sends a pulse timing event to Raygun. The message is sent on a background thread.
     /// </summary>
@@ -819,7 +830,7 @@ namespace Mindscape.Raygun4Net
     public void SendPulseTimingEvent(RaygunPulseEventType eventType, string name, long milliseconds)
     {
       if (_activeBatch == null) {
-        _activeBatch = new PulseEventBatch (this);
+        _activeBatch = new PulseEventBatch (this, GetBatchLifeSpan());
       }
 
       if (_activeBatch != null && !_activeBatch.IsLocked) {
