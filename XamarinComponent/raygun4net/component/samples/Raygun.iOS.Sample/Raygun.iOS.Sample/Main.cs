@@ -19,7 +19,7 @@ namespace Raygun.iOS.Sample
     // This is the main entry point of the application.
     static void Main(string[] args)
     {
-      RaygunClient.Attach ("YOUR_APP_API_KEY");
+      RaygunClient.Initialize("YOUR_APP_API_KEY").AttachCrashReporting().AttachPulse();
       // if you want to use a different Application Delegate class from "AppDelegate"
       // you can specify it here.
       UIApplication.Main(args, null, "AppDelegate");

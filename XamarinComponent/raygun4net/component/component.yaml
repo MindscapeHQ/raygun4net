@@ -1,6 +1,6 @@
 %YAML 1.2
 ---
-summary: Send exception messages in your Android and iOS applications to the Raygun.io cloud service.
+summary: Send exception messages in your Android and iOS applications to the Raygun cloud service.
 getting-started: GettingStarted.md
 details: Details.md
 license: License.md
@@ -11,13 +11,12 @@ publisher: Raygun
 name: Raygun4Net
 id: raygun4net
 samples: 
-  iOS Classic Sample: samples/Raygun.iOS.Sample/Raygun.iOS.Sample.sln
   iOS Unified Sample: samples/Raygun.iOS.Unified.Sample/Raygun.iOS.Unified.Sample.sln
   android Sample: samples/Raygun.Android.Sample/Raygun.Android.Sample.sln
-publisher-url: https://raygun.io
+publisher-url: https://raygun.com
 libraries: 
   ios: lib/ios/Mindscape.Raygun4Net.Xamarin.iOS.dll
   ios-unified: lib/ios-unified/Mindscape.Raygun4Net.Xamarin.iOS.Unified.dll
   android: lib/android/Mindscape.Raygun4Net.Xamarin.Android.dll
-version: 5.3.0
+version: 5.4.0
 ...

@@ -17,7 +17,7 @@ namespace Raygun.Android.Sample
     {
       base.OnCreate(bundle);
 
-      RaygunClient.Attach("YOUR_APP_API_KEY");
+      RaygunClient.Initialize("YOUR_APP_API_KEY").AttachCrashReporting().AttachPulse(this);
 
       // Set our view from the "main" layout resource
       SetContentView(Resource.Layout.Main);
