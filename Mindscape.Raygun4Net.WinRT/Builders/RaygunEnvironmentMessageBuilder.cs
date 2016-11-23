@@ -67,7 +67,7 @@ namespace Mindscape.Raygun4Net.Builders
 
             if (analyticsInfoType == null || versionInfoType == null)
             {
-                return string.Empty;
+                return null;
             }
 
             var versionInfoProperty = analyticsInfoType.GetRuntimeProperty("VersionInfo");
@@ -78,7 +78,7 @@ namespace Mindscape.Raygun4Net.Builders
             long versionBytes;
             if (!long.TryParse(familyVersion.ToString(), out versionBytes))
             {
-                return string.Empty;
+                return null;
             }
 
             var uapVersion = new Version((ushort) (versionBytes >> 48),
@@ -90,7 +90,7 @@ namespace Mindscape.Raygun4Net.Builders
         }
         catch
         {
-            return string.Empty;
+            return null;
         }
     }
   }

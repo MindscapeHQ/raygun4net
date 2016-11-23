@@ -84,7 +84,7 @@ namespace Mindscape.Raygun4Net.Builders
             long versionBytes;
             if (!long.TryParse(familyVersion.ToString(), out versionBytes))
             {
-                return string.Empty;
+                return null;
             }
 
             var uapVersion = new Version((ushort) (versionBytes >> 48),
@@ -96,7 +96,7 @@ namespace Mindscape.Raygun4Net.Builders
         }
         catch
         {
-            return string.Empty;
+            return null;
         }
     }
   }
