@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Security.ExchangeActiveSyncProvisioning;
@@ -53,7 +54,7 @@ namespace Mindscape.Raygun4Net.Builders
         var deviceInfo = new EasClientDeviceInformation();
         message.DeviceManufacturer = deviceInfo.SystemManufacturer;
         message.DeviceName = deviceInfo.SystemProductName;
-        message.OSVersion = deviceInfo.OperatingSystem;
+        message.OSVersion = GetOSVersion() ?? deviceInfo.OperatingSystem;
       }
       catch (Exception ex)
       {
@@ -61,6 +62,42 @@ namespace Mindscape.Raygun4Net.Builders
       }
 
       return message;
+    }
+
+    private static string GetOSVersion()
+    {
+        try
+        {
+            var analyticsInfoType = Type.GetType("Windows.System.Profile.AnalyticsInfo, Windows, ContentType=WindowsRuntime");
+            var versionInfoType = Type.GetType("Windows.System.Profile.AnalyticsVersionInfo, Windows, ContentType=WindowsRuntime");
+
+            if (analyticsInfoType == null || versionInfoType == null)
+            {
+                return null;
+            }
+
+            var versionInfoProperty = analyticsInfoType.GetRuntimeProperty("VersionInfo");
+            var versionInfo = versionInfoProperty.GetValue(null);
+            var versionProperty = versionInfoType.GetRuntimeProperty("DeviceFamilyVersion");
+            var familyVersion = versionProperty.GetValue(versionInfo);
+
+            long versionBytes;
+            if (!long.TryParse(familyVersion.ToString(), out versionBytes))
+            {
+                return string.Empty;
+            }
+
+            var uapVersion = new Version((ushort) (versionBytes >> 48),
+                (ushort) (versionBytes >> 32),
+                (ushort) (versionBytes >> 16),
+                (ushort) (versionBytes));
+
+            return uapVersion.ToString();
+        }
+        catch
+        {
+            return string.Empty;
+        }
     }
   }
 }
