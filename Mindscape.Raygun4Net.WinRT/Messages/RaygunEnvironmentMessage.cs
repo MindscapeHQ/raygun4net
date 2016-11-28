@@ -23,5 +23,8 @@ namespace Mindscape.Raygun4Net.Messages
     public double UtcOffset { get; set; }
 
     public string Locale { get; set; }
+
+    public string OSVersion { get; set; }
+
   }
 }
