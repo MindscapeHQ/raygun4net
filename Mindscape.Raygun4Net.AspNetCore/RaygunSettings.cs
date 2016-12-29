@@ -33,6 +33,8 @@ namespace Mindscape.Raygun4Net
 
     public bool IsRawDataIgnored { get; set; }
 
+    public bool TransformRequestStream { get; set; }
+
     public string ApplicationVersion { get; set; }
   }
 }
