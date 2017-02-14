@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Mindscape.Raygun4Net.Messages;
 using NUnit.Framework;
+using Java.Lang;
+using Java.Lang.Reflect;
+using Exception = System.Exception;
 
 namespace Mindscape.Raygun4Net.Xamarin.Android.Tests
 {
@@ -130,6 +131,20 @@ namespace Mindscape.Raygun4Net.Xamarin.Android.Tests
 
       Assert.IsTrue(_client.ExposeOnSendingMessage(message));
       Assert.AreEqual("Custom error message", message.Details.Error.Message);
+    }
+
+    [Test]
+    public void DontSendIfJavaProxyThrowable() {
+      Throwable throwable = Throwable.FromException(_exception);
+
+      Assert.IsFalse(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(throwable)));
+    }
+
+    [Test]
+    public void DontSendIfWrappedJavaProxyThrowable() {
+      Throwable throwable = new RuntimeException(new InvocationTargetException(Throwable.FromException(_exception)));
+
+      Assert.IsFalse(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(throwable)));
     }
 
     // Exception stripping tests
