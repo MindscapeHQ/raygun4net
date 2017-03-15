@@ -5,16 +5,27 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.Azure.WebJob", "Mindscape.Raygun4Net.Azure.WebJob\Mindscape.Raygun4Net.Azure.WebJob.csproj", "{CA9D9A01-C33B-4F17-AF07-0305E86764C8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net", "Mindscape.Raygun4Net\Mindscape.Raygun4Net.csproj", "{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+		Sign|Any CPU = Sign|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{CA9D9A01-C33B-4F17-AF07-0305E86764C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CA9D9A01-C33B-4F17-AF07-0305E86764C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA9D9A01-C33B-4F17-AF07-0305E86764C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA9D9A01-C33B-4F17-AF07-0305E86764C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA9D9A01-C33B-4F17-AF07-0305E86764C8}.Sign|Any CPU.ActiveCfg = Release|Any CPU
+		{CA9D9A01-C33B-4F17-AF07-0305E86764C8}.Sign|Any CPU.Build.0 = Release|Any CPU
+		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Sign|Any CPU.ActiveCfg = Sign|Any CPU
+		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Sign|Any CPU.Build.0 = Sign|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
