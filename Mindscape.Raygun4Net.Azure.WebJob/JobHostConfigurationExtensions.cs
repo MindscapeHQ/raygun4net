@@ -12,7 +12,13 @@ namespace Mindscape.Raygun4Net.Azure.WebJob
   {
     public static void UseRaygun(this JobHostConfiguration config, string apiKey)
     {
-      var processor = new RaygunExceptionHandler(apiKey);
+      var client = new RaygunClient(apiKey);
+      UseRaygun(config, client);
+    }
+
+    public static void UseRaygun(this JobHostConfiguration config, RaygunClient client)
+    {
+      var processor = new RaygunExceptionHandler(client);
       var traceMonitor = new TraceMonitor()
         .Filter(p => p.Exception != null, "Exception Handler")
         .Subscribe(processor.Process);

@@ -16,9 +16,9 @@ namespace Mindscape.Raygun4Net.Azure.WebJob
   {
     private readonly RaygunClient _client;
 
-    public RaygunExceptionHandler(string apiKey)
+    public RaygunExceptionHandler(RaygunClient client)
     {
-      _client = new RaygunClient(apiKey);
+      _client = client;
       _client.AddWrapperExceptions(typeof(FunctionInvocationException));
     }
 
