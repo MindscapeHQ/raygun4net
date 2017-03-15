@@ -113,17 +113,21 @@
     <Compile Include="RaygunExceptionHandler.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mindscape.Raygun4Net\Mindscape.Raygun4Net.csproj">
-      <Project>{495e53b3-f3af-4c4f-baaf-865efaa2f4a9}</Project>
-      <Name>Mindscape.Raygun4Net</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="readme.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mindscape.Raygun4Net.Core\Mindscape.Raygun4Net.Core.csproj">
+      <Project>{6435c84c-1dac-41fe-aa51-faa8e9a7f090}</Project>
+      <Name>Mindscape.Raygun4Net.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Mindscape.Raygun4Net4\Mindscape.Raygun4Net4.csproj">
+      <Project>{6d1c7e96-5e04-421d-8e8a-b3c8c02fd41d}</Project>
+      <Name>Mindscape.Raygun4Net4</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
