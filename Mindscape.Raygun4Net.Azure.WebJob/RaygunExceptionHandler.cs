@@ -14,15 +14,15 @@ namespace Mindscape.Raygun4Net.Azure.WebJob
   /// </summary>
   public class RaygunExceptionHandler
   {
-    public static string[] CustomTags { get; set; }
+    public static string[] Tags { get; set; }
     private readonly RaygunClient _client;
 
     public RaygunExceptionHandler(RaygunClient client)
     {
       _client = client;
       _client.AddWrapperExceptions(typeof(FunctionInvocationException));
-      if (CustomTags == null)
-        CustomTags = new string[0];
+      if (Tags == null)
+        Tags = new string[0];
     }
 
     /// <summary>
@@ -38,7 +38,7 @@ namespace Mindscape.Raygun4Net.Azure.WebJob
       foreach (var traceEvent in events)
       {
         var tags = new List<string>();
-        tags.AddRange(CustomTags);
+        tags.AddRange(Tags);
 
         // Add all trace properties to custom data
         var customData = traceEvent.Properties.ToDictionary(traceEventProperty => traceEventProperty.Key, traceEventProperty => traceEventProperty.Value);

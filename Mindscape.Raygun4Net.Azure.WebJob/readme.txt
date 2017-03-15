@@ -81,4 +81,4 @@ This can be done using the various Send and SendInBackground method overloads.
 
 If you wish to add custom tags to automatically tracked exceptions you may add them via the RaygunExceptionHandler class
 
-RaygunExceptionHandler.CustomTags = new[] {"CustomTag"};
+RaygunExceptionHandler.Tags = new[] {"CustomTag"};
