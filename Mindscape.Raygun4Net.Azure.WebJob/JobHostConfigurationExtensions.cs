@@ -19,5 +19,10 @@ namespace Mindscape.Raygun4Net.Azure.WebJob
 
       config.Tracing.Tracers.Add(traceMonitor);
     }
+
+    public static void UseRaygun(this JobHostConfiguration config)
+    {
+      UseRaygun(config, RaygunSettings.Settings.ApiKey);
+    }
   }
 }

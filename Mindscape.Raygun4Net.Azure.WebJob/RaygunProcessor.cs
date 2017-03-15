@@ -16,11 +16,6 @@ namespace Mindscape.Raygun4Net.Azure.WebJob
   {
     private readonly RaygunClient _client;
 
-    public RaygunExceptionHandler() : this("foo")
-    {
-      
-    }
-
     public RaygunExceptionHandler(string apiKey)
     {
       _client = new RaygunClient(apiKey);
