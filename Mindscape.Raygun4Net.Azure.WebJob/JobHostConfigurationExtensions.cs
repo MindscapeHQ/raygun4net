@@ -10,12 +10,6 @@ namespace Mindscape.Raygun4Net.Azure.WebJob
 {
   public static class JobHostConfigurationExtensions
   {
-    public static void UseRaygun(this JobHostConfiguration config, string apiKey)
-    {
-      var client = new RaygunClient(apiKey);
-      UseRaygun(config, client);
-    }
-
     public static void UseRaygun(this JobHostConfiguration config, RaygunClient client)
     {
       var processor = new RaygunExceptionHandler(client);
@@ -24,6 +18,12 @@ namespace Mindscape.Raygun4Net.Azure.WebJob
         .Subscribe(processor.Process);
 
       config.Tracing.Tracers.Add(traceMonitor);
+    }
+
+    public static void UseRaygun(this JobHostConfiguration config, string apiKey)
+    {
+      var client = new RaygunClient(apiKey);
+      UseRaygun(config, client);
     }
 
     public static void UseRaygun(this JobHostConfiguration config)

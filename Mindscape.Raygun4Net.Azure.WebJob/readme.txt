@@ -17,9 +17,11 @@ Add the Raygun settings configuration block from above:
 
 <RaygunSettings apikey="YOUR_APP_API_KEY" />
 
-Now you can either setup Raygun to send unhandled exceptions automatically.
+Now you can setup Raygun to send unhandled exceptions automatically.
 
 To send unhandled exceptions automatically, add a config.UseRaygun() call to your JobHostConfiguration setup (where config is your instance of JobHostConfiguration)
+
+You may optionally also pass in an already constructed RaygunClient instance if you wish to do any further customization of Raygun4Net.
 
 Remove sensitive request data
 -----------------------------
