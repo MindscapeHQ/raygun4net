@@ -4,6 +4,7 @@ properties {
     $nugetspec_signed =                 "$root\Mindscape.Raygun4Net.signed.nuspec"
     $nugetspec_core =                   "$root\Mindscape.Raygun4Net.Core.nuspec"
     $nugetspec_mvc =                    "$root\Mindscape.Raygun4Net.Mvc.nuspec"
+    $nugetspec_webjob =                 "$root\Mindscape.Raygun4Net.Azure.WebJob.nuspec"
     $nugetspec_webapi =                 "$root\Mindscape.Raygun4Net.WebApi.nuspec"
     $nugetspec_signed_core =            "$root\Mindscape.Raygun4Net.Core.Signed.nuspec"
     $nugetspec_signed_mvc =             "$root\Mindscape.Raygun4Net.Mvc.Signed.nuspec"
@@ -14,6 +15,7 @@ properties {
     $build_dir4 =                       "$build_dir\Net4"
     $build_dir4_client_profile =        "$build_dir\Net4.ClientProfile"
     $build_dir_mvc =                    "$build_dir\Mvc"
+    $build_dir_webjob =                 "$build_dir\WebJob"
     $build_dir_webapi =                 "$build_dir\WebApi"
     $signed_build_dir =                 "$build_dir\signed"
     $signed_build_dir2 =                "$build_dir\signed\Net2"
@@ -42,6 +44,7 @@ task Package -depends Init {
     exec { nuget pack $nugetspec_signed -OutputDirectory $release_dir }
     exec { nuget pack $nugetspec_core -OutputDirectory $release_dir }
     exec { nuget pack $nugetspec_mvc -OutputDirectory $release_dir }
+    exec { nuget pack $nugetspec_webjob -OutputDirectory $release_dir }
     exec { nuget pack $nugetspec_webapi -OutputDirectory $release_dir }
     exec { nuget pack $nugetspec_signed_core -OutputDirectory $release_dir }
     exec { nuget pack $nugetspec_signed_mvc -OutputDirectory $release_dir }
@@ -62,6 +65,7 @@ task Zip -depends Package {
     $versionfolder4 = $versionfolder + "\Net4"
     $versionfolder4clientprofile = $versionfolder + "\Net4.ClientProfile"
     $versionfoldermvc = $versionfolder + "\Mvc"
+    $versionfolderwebjob = $versionfolder + "\WebJob"
     $versionfolderwebapi = $versionfolder + "\WebApi"
     $versionfolderwindowsphone = $versionfolder + "\WindowsPhone"
     $versionfolderwindowsstore = $versionfolder + "\WindowsStore"
@@ -88,6 +92,7 @@ task Zip -depends Package {
     new-item $versionfolder4 -itemType directory | Out-Null
     new-item $versionfolder4clientprofile -itemType directory | Out-Null
     new-item $versionfoldermvc -itemType directory | Out-Null
+    new-item $versionfolderwebjob -itemType directory | Out-Null
     new-item $versionfolderwebapi -itemType directory | Out-Null
     new-item $versionfolderwindowsphone -itemType directory | Out-Null
     new-item $versionfolderwindowsstore -itemType directory | Out-Null
@@ -149,6 +154,11 @@ task Zip -depends Package {
     copy-item $build_dir_mvc/Mindscape.Raygun4Net.Mvc.pdb $versionfoldermvc
     copy-item $build_dir_mvc/Mindscape.Raygun4Net4.dll $versionfoldermvc
     copy-item $build_dir_mvc/Mindscape.Raygun4Net4.pdb $versionfoldermvc
+    # Azure WebJob
+    copy-item $build_dir_webjob/Mindscape.Raygun4Net.dll $versionfolderwebjob
+    copy-item $build_dir_webjob/Mindscape.Raygun4Net.pdb $versionfolderwebjob
+    copy-item $build_dir_webjob/Mindscape.Raygun4Net.Azure.WebJob.dll $versionfolderwebjob
+    copy-item $build_dir_webjob/Mindscape.Raygun4Net.Azure.WebJob.pdb $versionfolderwebjob
     # .Net WebApi
     copy-item $build_dir_webapi/Mindscape.Raygun4Net.WebApi.dll $versionfolderwebapi
     copy-item $build_dir_webapi/Mindscape.Raygun4Net.WebApi.pdb $versionfolderwebapi
