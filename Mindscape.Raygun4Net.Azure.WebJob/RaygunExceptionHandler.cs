@@ -9,15 +9,20 @@ namespace Mindscape.Raygun4Net.Azure.WebJob
 {
   /// <summary>
   /// Captures and sends exceptions to Raygun for reporting and analysis.  
+  /// 
+  /// Thanks to Bio2hazard for sending this example in to us :)
   /// </summary>
   public class RaygunExceptionHandler
   {
+    public static string[] CustomTags { get; set; }
     private readonly RaygunClient _client;
 
     public RaygunExceptionHandler(RaygunClient client)
     {
       _client = client;
       _client.AddWrapperExceptions(typeof(FunctionInvocationException));
+      if (CustomTags == null)
+        CustomTags = new string[0];
     }
 
     /// <summary>
@@ -33,6 +38,7 @@ namespace Mindscape.Raygun4Net.Azure.WebJob
       foreach (var traceEvent in events)
       {
         var tags = new List<string>();
+        tags.AddRange(CustomTags);
 
         // Add all trace properties to custom data
         var customData = traceEvent.Properties.ToDictionary(traceEventProperty => traceEventProperty.Key, traceEventProperty => traceEventProperty.Value);
