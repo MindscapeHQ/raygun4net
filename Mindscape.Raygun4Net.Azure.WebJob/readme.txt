@@ -78,3 +78,7 @@ Tags and custom data
 
 When sending exceptions manually, you can also send an arbitrary list of tags (an array of strings), and a collection of custom data (a dictionary of any objects).
 This can be done using the various Send and SendInBackground method overloads.
+
+If you wish to add custom tags to automatically tracked exceptions you may add them via the RaygunExceptionHandler class
+
+RaygunExceptionHandler.CustomTags = new[] {"CustomTag"};
