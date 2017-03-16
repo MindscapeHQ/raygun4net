@@ -247,7 +247,9 @@ namespace Mindscape.Raygun4Net
         bool canSend = OnSendingMessage(raygunMessage);
         if (canSend)
         {
-          Client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("raygun4net-winrt", "1.0.0"));
+          var uaHeader = new ProductInfoHeaderValue("raygun4net-winrt", "1.0.0");
+          if (!Client.DefaultRequestHeaders.UserAgent.Contains(uaHeader))
+            Client.DefaultRequestHeaders.UserAgent.Add(uaHeader);
 
           HttpContent httpContent = new StringContent(SimpleJson.SerializeObject(raygunMessage), Encoding.UTF8, "application/json");
           httpContent.Headers.Add("X-ApiKey", _apiKey);
