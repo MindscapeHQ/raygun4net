@@ -4,6 +4,7 @@ using Mindscape.Raygun4Net.Messages;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
+using Mindscape.Raygun4Net.Builders;
 
 namespace Mindscape.Raygun4Net.Xamarin.iOS.Tests
 {
@@ -258,6 +259,79 @@ namespace Mindscape.Raygun4Net.Xamarin.iOS.Tests
       Assert.IsTrue(exceptions.Contains(_exception));
       Assert.IsTrue(exceptions.Contains(exception2));
       Assert.IsTrue(exceptions.Contains(exception3));
+    }
+
+    private class MyTestException : Exception
+    {
+      private string myStackTrace;
+
+      public MyTestException(string message, string stackTrace) : base(message)
+      {
+        myStackTrace = stackTrace;
+      }
+
+      public override string StackTrace { get { return myStackTrace; } }
+    }
+
+    [Test]
+    public void FormatStacktraceWithDebugSymbolsTest()
+    {
+      string stackTraceStr = @" at XamarinIOSSingleViewTest.AppDelegate+<Bar>d__8.MoveNext () [0x000ad] in C:\Dev\Tests\XamarinIOSTestApplication\XamarinIOSSingleViewTest\AppDelegate.cs:68 
+--- End of stack trace from previous location where exception was thrown ---
+  at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw () [0x0000c] in /Library/Frameworks/Xamarin.iOS.framework/Versions/10.4.0.123/src/mono/mcs/class/referencesource/mscorlib/system/runtime/exceptionservices/exceptionservicescommon.cs:143 
+  at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess (System.Threading.Tasks.Task task) [0x00047] in /Library/Frameworks/Xamarin.iOS.framework/Versions/10.4.0.123/src/mono/mcs/class/referencesource/mscorlib/system/runtime/compilerservices/TaskAwaiter.cs:187 
+  at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification (System.Threading.Tasks.Task task) [0x0002e] in /Library/Frameworks/Xamarin.iOS.framework/Versions/10.4.0.123/src/mono/mcs/class/referencesource/mscorlib/system/runtime/compilerservices/TaskAwaiter.cs:156 
+  at System.Runtime.CompilerServices.TaskAwaiter.ValidateEnd (System.Threading.Tasks.Task task) [0x0000b] in /Library/Frameworks/Xamarin.iOS.framework/Versions/10.4.0.123/src/mono/mcs/class/referencesource/mscorlib/system/runtime/compilerservices/TaskAwaiter.cs:128 
+  at System.Runtime.CompilerServices.TaskAwaiter.GetResult () [0x00000] in /Library/Frameworks/Xamarin.iOS.framework/Versions/10.4.0.123/src/mono/mcs/class/referencesource/mscorlib/system/runtime/compilerservices/TaskAwaiter.cs:113 
+  at XamarinIOSSingleViewTest.AppDelegate+<Foo>d__7.MoveNext () [0x000cf] in C:\Dev\Tests\XamarinIOSTestApplication\XamarinIOSSingleViewTest\AppDelegate.cs:58";
+      
+      MyTestException exception = new MyTestException("Exception test message", stackTraceStr);
+      var message = RaygunErrorMessageBuilder.Build(exception);
+
+      foreach (var line in message.StackTrace)
+      {
+        Console.WriteLine(line.ToString() + "\n");
+      }
+
+      Assert.IsNotEmpty(message.ClassName);
+      Assert.IsNotNull(message.StackTrace);
+      Assert.IsNotEmpty(message.StackTrace);
+
+      var lineOne = message.StackTrace.FirstOrDefault();
+      Assert.IsNotNullOrEmpty(lineOne.ClassName);
+      Assert.IsNotNullOrEmpty(lineOne.MethodName);
+    }
+
+    [Test]
+    public void FormatStacktraceWithoutDebugSymbolsTest()
+    {
+      string stackTraceStr = @"  at MyStudyLife.Net.HttpApiClient+<EnsureSuccessAsync>c__async7.MoveNext () <0xc2b59c + 0x00670> in <06b44c3216694065a06dc13af99a121f#a73e7e6904809cacfd9634d844fe30fc>
+--- End of stack trace from previous location where exception was thrown ---
+  at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess (System.Threading.Tasks.Task task) <0x47ec74 + 0x00118> in <15e850188d9f425bbeae90f0bbc51e17#a73e7e6904809cacfd9634d844fe30fc>
+  at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification (System.Threading.Tasks.Task task) <0x47ebac + 0x000bf> in <15e850188d9f425bbeae90f0bbc51e17#a73e7e6904809cacfd9634d844fe30fc>
+  at System.Runtime.CompilerServices.TaskAwaiter.GetResult () <0x47eb68 + 0x0001f> in <15e850188d9f425bbeae90f0bbc51e17#a73e7e6904809cacfd9634d844fe30fc>
+  at MyStudyLife.Net.HttpApiClient+<GetClientResponse>c__async6.MoveNext () <0xb89040 + 0x00407> in <06b44c3216694065a06dc13af99a121f#a73e7e6904809cacfd9634d844fe30fc>
+--- End of stack trace from previous location where exception was thrown ---
+  at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess (System.Threading.Tasks.Task task) <0x47ec74 + 0x00118> in <15e850188d9f425bbeae90f0bbc51e17#a73e7e6904809cacfd9634d844fe30fc>
+  at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification (System.Threading.Tasks.Task task) <0x47ebac + 0x000bf> in <15e850188d9f425bbeae90f0bbc51e17#a73e7e6904809cacfd9634d844fe30fc>
+  at System.Runtime.CompilerServices.TaskAwaiter`1[TResult].GetResult () <0x47ee98 + 0x0002f> in <15e850188d9f425bbeae90f0bbc51e17#a73e7e6904809cacfd9634d844fe30fc>
+  at MyStudyLife.Net.HttpApiClient+<PostJsonAsync>c__async2.MoveNext () <0xb88598 + 0x0019b> in <06b44c3216694065a06dc13af99a121f#a73e7e6904809cacfd9634d844fe30fc>";
+
+      MyTestException exception = new MyTestException("Exception test message", stackTraceStr);
+      var message = RaygunErrorMessageBuilder.Build(exception);
+
+      foreach (var line in message.StackTrace)
+      {
+        Console.WriteLine(line.ToString() + "\n");
+      }
+
+      Assert.IsNotEmpty(message.ClassName);
+      Assert.IsNotNull(message.StackTrace);
+      Assert.IsNotEmpty(message.StackTrace);
+
+      var lineOne = message.StackTrace.FirstOrDefault();
+      Assert.IsNotNullOrEmpty(lineOne.ClassName);
+      Assert.IsNotNullOrEmpty(lineOne.MethodName);
     }
   }
 }
