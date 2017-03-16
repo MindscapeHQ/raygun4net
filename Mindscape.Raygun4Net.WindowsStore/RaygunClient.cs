@@ -27,6 +27,8 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunClient
   {
+    public static HttpClient Client {get; set;}
+    
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
     private string _version;
@@ -38,6 +40,8 @@ namespace Mindscape.Raygun4Net
     public RaygunClient(string apiKey)
     {
       _apiKey = apiKey;
+      if (Client == null)
+        Client = new HttpClient();
       
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
@@ -411,15 +415,13 @@ namespace Mindscape.Raygun4Net
 
     private async Task SendMessage(string message)
     {
-      var httpClient = new HttpClient();
-
       var request = new HttpRequestMessage(HttpMethod.Post, RaygunSettings.Settings.ApiEndpoint);
       request.Headers.Add("X-ApiKey", _apiKey);
       request.Content = new HttpStringContent(message, Windows.Storage.Streams.UnicodeEncoding.Utf8, "application/json");
 
       try
       {
-        await httpClient.SendRequestAsync(request, HttpCompletionOption.ResponseHeadersRead).AsTask().ConfigureAwait(false);
+        await Client.SendRequestAsync(request, HttpCompletionOption.ResponseHeadersRead).AsTask().ConfigureAwait(false);
       }
       catch (Exception ex)
       {
