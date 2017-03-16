@@ -17,6 +17,8 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunClient
   {
+    public static HttpClient Client {get; set;}
+    
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
 
@@ -27,7 +29,13 @@ namespace Mindscape.Raygun4Net
     public RaygunClient(string apiKey)
     {
       _apiKey = apiKey;
-      
+      if (Client == null) 
+      {
+        Client = new HttpClient(
+          new HttpClientHandler {UseDefaultCredentials = true};
+        )
+      }
+
       _wrapperExceptions.Add(typeof(TargetInvocationException));
     }
 
@@ -239,27 +247,22 @@ namespace Mindscape.Raygun4Net
         bool canSend = OnSendingMessage(raygunMessage);
         if (canSend)
         {
-          HttpClientHandler handler = new HttpClientHandler {UseDefaultCredentials = true};
+          Client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("raygun4net-winrt", "1.0.0"));
 
-          var client = new HttpClient(handler);
+          HttpContent httpContent = new StringContent(SimpleJson.SerializeObject(raygunMessage), Encoding.UTF8, "application/json");
+          httpContent.Headers.Add("X-ApiKey", _apiKey);
+
+          try
           {
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("raygun4net-winrt", "1.0.0"));
+            await PostMessageAsync(Client, httpContent, RaygunSettings.Settings.ApiEndpoint);
+          }
+          catch (Exception ex)
+          {
+            System.Diagnostics.Debug.WriteLine("Error Logging Exception to Raygun.io {0}", ex.Message);
 
-            HttpContent httpContent = new StringContent(SimpleJson.SerializeObject(raygunMessage), Encoding.UTF8, "application/json");
-            httpContent.Headers.Add("X-ApiKey", _apiKey);
-
-            try
+            if (RaygunSettings.Settings.ThrowOnError)
             {
-              await PostMessageAsync(client, httpContent, RaygunSettings.Settings.ApiEndpoint);
-            }
-            catch (Exception ex)
-            {
-              System.Diagnostics.Debug.WriteLine("Error Logging Exception to Raygun.io {0}", ex.Message);
-
-              if (RaygunSettings.Settings.ThrowOnError)
-              {
-                throw;
-              }
+              throw;
             }
           }
         }
@@ -336,9 +339,9 @@ namespace Mindscape.Raygun4Net
     private async Task PostMessageAsync(HttpClient client, HttpContent httpContent, Uri uri)
 #pragma warning restore 1998
     {
+      // Unsure why this is structured like this, don't want to change incase it's for a valid reason
       HttpResponseMessage response;
       response = client.PostAsync(uri, httpContent).Result;
-      client.Dispose();
     }
 
     public void Wrap(Action func, [Optional] List<string> tags)
