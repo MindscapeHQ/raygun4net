@@ -16,6 +16,7 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunClient
   {
+    public static HttpClient Client { get; set; }
     private readonly string _apiKey;
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private readonly List<Type> _wrapperExceptions = new List<Type>();
@@ -52,6 +53,8 @@ namespace Mindscape.Raygun4Net
     {
       _settings = settings;
       _apiKey = settings.ApiKey;
+      if (Client == null)
+        Client = new HttpClient();
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
@@ -497,35 +500,32 @@ namespace Mindscape.Raygun4Net
         bool canSend = OnSendingMessage(raygunMessage) && CanSend(raygunMessage);
         if (canSend)
         {
-          using (var client = new HttpClient())
+          HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
+
+          requestMessage.Headers.Add("X-ApiKey", _apiKey);
+
+          try
           {
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
-
-            requestMessage.Headers.Add("X-ApiKey", _apiKey);
-
-            try
+            var message = SimpleJson.SerializeObject(raygunMessage);
+            requestMessage.Content = new StringContent(message, Encoding.UTF8, "application/json");
+            var result = await Client.SendAsync(requestMessage);
+            if (!result.IsSuccessStatusCode)
             {
-              var message = SimpleJson.SerializeObject(raygunMessage);
-              requestMessage.Content = new StringContent(message, Encoding.UTF8, "application/json");
-              var result = await client.SendAsync(requestMessage);
-              if(!result.IsSuccessStatusCode)
-              {
-                Debug.WriteLine($"Error Logging Exception to Raygun {result.ReasonPhrase}");
-
-                if (_settings.ThrowOnError)
-                {
-                  throw new Exception("Could not log to Raygun");
-                }
-              }
-            }
-            catch (Exception ex)
-            {
-              Debug.WriteLine(string.Format("Error Logging Exception to Raygun {0}", ex.Message));
+              Debug.WriteLine($"Error Logging Exception to Raygun {result.ReasonPhrase}");
 
               if (_settings.ThrowOnError)
               {
-                throw;
+                throw new Exception("Could not log to Raygun");
               }
+            }
+          }
+          catch (Exception ex)
+          {
+            Debug.WriteLine(string.Format("Error Logging Exception to Raygun {0}", ex.Message));
+
+            if (_settings.ThrowOnError)
+            {
+              throw;
             }
           }
         }
