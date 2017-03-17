@@ -17,7 +17,9 @@ namespace Mindscape.Raygun4Net.WebApi
 {
   public class RaygunWebApiClient : RaygunClientBase
   {
-    public static WebClient Client { get; set; }
+    [ThreadStatic]
+    private static WebClient _client;
+    private static WebClient Client => _client ?? (_client = new WebClient());
 
     private readonly string _apiKey;
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
@@ -36,8 +38,6 @@ namespace Mindscape.Raygun4Net.WebApi
     public RaygunWebApiClient(string apiKey)
     {
       _apiKey = apiKey;
-      if (Client == null)
-        Client = new WebClient();
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
