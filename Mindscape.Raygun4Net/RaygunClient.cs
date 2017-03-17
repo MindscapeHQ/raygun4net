@@ -24,6 +24,10 @@ namespace Mindscape.Raygun4Net
     [ThreadStatic]
     private static RaygunRequestMessage _currentRequestMessage;
 
+    [ThreadStatic]
+    private static WebClient _client;
+    private static WebClient Client => _client ?? (_client = new WebClient());
+
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
     /// </summary>
@@ -450,18 +454,15 @@ namespace Mindscape.Raygun4Net
 
     private void Send(string message)
     {
-      if (ValidateApiKey())
-      {
-        using (var client = CreateWebClient())
-        {
-          client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
-        }
-      }
+      if (!ValidateApiKey()) return;
+
+      InitialiseWebClient(Client);
+
+      Client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
     }
 
-    protected WebClient CreateWebClient()
+    protected void InitialiseWebClient(WebClient client)
     {
-      var client = new WebClient();
       client.Headers.Add("X-ApiKey", _apiKey);
       client.Headers.Add("content-type", "application/json; charset=utf-8");
       client.Encoding = System.Text.Encoding.UTF8;
@@ -490,7 +491,6 @@ namespace Mindscape.Raygun4Net
           }
         }
       }
-      return client;
     }
 
     private void SaveMessage(string message)
