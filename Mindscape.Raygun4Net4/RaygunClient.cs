@@ -24,6 +24,10 @@ namespace Mindscape.Raygun4Net
     [ThreadStatic]
     private static RaygunRequestMessage _currentRequestMessage;
 
+    [ThreadStatic]
+    private static WebClient _client;
+    private static WebClient Client => _client ?? (_client = new WebClient());
+
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
     /// </summary>
@@ -498,45 +502,37 @@ namespace Mindscape.Raygun4Net
     {
       if (ValidateApiKey())
       {
-        using (var client = CreateWebClient())
+        Client.Headers.Set("X-ApiKey", _apiKey);
+        Client.Headers.Set("content-type", "application/json; charset=utf-8");
+        Client.Encoding = System.Text.Encoding.UTF8;
+
+        if (WebProxy != null)
         {
-          client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
+          Client.Proxy = WebProxy;
         }
-      }
-    }
-
-    protected WebClient CreateWebClient()
-    {
-      var client = new WebClient();
-      client.Headers.Add("X-ApiKey", _apiKey);
-      client.Headers.Add("content-type", "application/json; charset=utf-8");
-      client.Encoding = System.Text.Encoding.UTF8;
-
-      if (WebProxy != null)
-      {
-        client.Proxy = WebProxy;
-      }
-      else if (WebRequest.DefaultWebProxy != null)
-      {
-        Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(new Uri(RaygunSettings.Settings.ApiEndpoint.ToString()));
-
-        if (proxyUri != null && proxyUri.AbsoluteUri != RaygunSettings.Settings.ApiEndpoint.ToString())
+        else if (WebRequest.DefaultWebProxy != null)
         {
-          client.Proxy = new WebProxy(proxyUri, false);
+          Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(new Uri(RaygunSettings.Settings.ApiEndpoint.ToString()));
 
-          if (ProxyCredentials == null)
+          if (proxyUri != null && proxyUri.AbsoluteUri != RaygunSettings.Settings.ApiEndpoint.ToString())
           {
-            client.UseDefaultCredentials = true;
-            client.Proxy.Credentials = CredentialCache.DefaultCredentials;
-          }
-          else
-          {
-            client.UseDefaultCredentials = false;
-            client.Proxy.Credentials = ProxyCredentials;
+            Client.Proxy = new WebProxy(proxyUri, false);
+
+            if (ProxyCredentials == null)
+            {
+              Client.UseDefaultCredentials = true;
+              Client.Proxy.Credentials = CredentialCache.DefaultCredentials;
+            }
+            else
+            {
+              Client.UseDefaultCredentials = false;
+              Client.Proxy.Credentials = ProxyCredentials;
+            }
           }
         }
+
+        Client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
       }
-      return client;
     }
 
     private void SaveMessage(string message)
