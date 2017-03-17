@@ -17,6 +17,8 @@ namespace Mindscape.Raygun4Net.WebApi
 {
   public class RaygunWebApiClient : RaygunClientBase
   {
+    public static WebClient Client { get; set; }
+
     private readonly string _apiKey;
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private readonly List<Type> _wrapperExceptions = new List<Type>();
@@ -34,6 +36,8 @@ namespace Mindscape.Raygun4Net.WebApi
     public RaygunWebApiClient(string apiKey)
     {
       _apiKey = apiKey;
+      if (Client == null)
+        Client = new WebClient();
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
@@ -528,46 +532,43 @@ namespace Mindscape.Raygun4Net.WebApi
         bool canSend = OnSendingMessage(raygunMessage) && CanSend(raygunMessage);
         if (canSend)
         {
-          using (var client = new WebClient())
+          Client.Headers.Set("X-ApiKey", _apiKey);
+          Client.Headers.Set("content-type", "application/json; charset=utf-8");
+          Client.Encoding = System.Text.Encoding.UTF8;
+
+          if (WebRequest.DefaultWebProxy != null)
           {
-            client.Headers.Add("X-ApiKey", _apiKey);
-            client.Headers.Add("content-type", "application/json; charset=utf-8");
-            client.Encoding = System.Text.Encoding.UTF8;
+            Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(new Uri(RaygunSettings.Settings.ApiEndpoint.ToString()));
 
-            if (WebRequest.DefaultWebProxy != null)
+            if (proxyUri != null && proxyUri.AbsoluteUri != RaygunSettings.Settings.ApiEndpoint.ToString())
             {
-              Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(new Uri(RaygunSettings.Settings.ApiEndpoint.ToString()));
+              Client.Proxy = new WebProxy(proxyUri, false);
 
-              if (proxyUri != null && proxyUri.AbsoluteUri != RaygunSettings.Settings.ApiEndpoint.ToString())
+              if (ProxyCredentials == null)
               {
-                client.Proxy = new WebProxy(proxyUri, false);
-
-                if (ProxyCredentials == null)
-                {
-                  client.UseDefaultCredentials = true;
-                  client.Proxy.Credentials = CredentialCache.DefaultCredentials;
-                }
-                else
-                {
-                  client.UseDefaultCredentials = false;
-                  client.Proxy.Credentials = ProxyCredentials;
-                }
+                Client.UseDefaultCredentials = true;
+                Client.Proxy.Credentials = CredentialCache.DefaultCredentials;
+              }
+              else
+              {
+                Client.UseDefaultCredentials = false;
+                Client.Proxy.Credentials = ProxyCredentials;
               }
             }
+          }
 
-            try
-            {
-              var message = SimpleJson.SerializeObject(raygunMessage);
-              client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
-            }
-            catch (Exception ex)
-            {
-              System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+          try
+          {
+            var message = SimpleJson.SerializeObject(raygunMessage);
+            Client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
+          }
+          catch (Exception ex)
+          {
+            System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
 
-              if (RaygunSettings.Settings.ThrowOnError)
-              {
-                throw;
-              }
+            if (RaygunSettings.Settings.ThrowOnError)
+            {
+              throw;
             }
           }
         }
