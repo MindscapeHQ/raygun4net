@@ -532,30 +532,7 @@ namespace Mindscape.Raygun4Net.WebApi
         bool canSend = OnSendingMessage(raygunMessage) && CanSend(raygunMessage);
         if (canSend)
         {
-          Client.Headers.Set("X-ApiKey", _apiKey);
-          Client.Headers.Set("content-type", "application/json; charset=utf-8");
-          Client.Encoding = System.Text.Encoding.UTF8;
-
-          if (WebRequest.DefaultWebProxy != null)
-          {
-            Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(new Uri(RaygunSettings.Settings.ApiEndpoint.ToString()));
-
-            if (proxyUri != null && proxyUri.AbsoluteUri != RaygunSettings.Settings.ApiEndpoint.ToString())
-            {
-              Client.Proxy = new WebProxy(proxyUri, false);
-
-              if (ProxyCredentials == null)
-              {
-                Client.UseDefaultCredentials = true;
-                Client.Proxy.Credentials = CredentialCache.DefaultCredentials;
-              }
-              else
-              {
-                Client.UseDefaultCredentials = false;
-                Client.Proxy.Credentials = ProxyCredentials;
-              }
-            }
-          }
+          InitialiseWebClient(Client);
 
           try
           {
@@ -570,6 +547,34 @@ namespace Mindscape.Raygun4Net.WebApi
             {
               throw;
             }
+          }
+        }
+      }
+    }
+
+    private void InitialiseWebClient(WebClient client)
+    {
+      client.Headers.Set("X-ApiKey", _apiKey);
+      client.Headers.Set("content-type", "application/json; charset=utf-8");
+      client.Encoding = System.Text.Encoding.UTF8;
+
+      if (WebRequest.DefaultWebProxy != null)
+      {
+        Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(new Uri(RaygunSettings.Settings.ApiEndpoint.ToString()));
+
+        if (proxyUri != null && proxyUri.AbsoluteUri != RaygunSettings.Settings.ApiEndpoint.ToString())
+        {
+          client.Proxy = new WebProxy(proxyUri, false);
+
+          if (ProxyCredentials == null)
+          {
+            client.UseDefaultCredentials = true;
+            client.Proxy.Credentials = CredentialCache.DefaultCredentials;
+          }
+          else
+          {
+            client.UseDefaultCredentials = false;
+            client.Proxy.Credentials = ProxyCredentials;
           }
         }
       }
