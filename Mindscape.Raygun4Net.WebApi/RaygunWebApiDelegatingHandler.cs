@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.ComponentModel;
+using System.Linq;
 using System.Net.Http;
+using System.Text;
 
 namespace Mindscape.Raygun4Net.WebApi
 {
@@ -9,10 +11,16 @@ namespace Mindscape.Raygun4Net.WebApi
 
     protected override async System.Threading.Tasks.Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
     {
-      var body = await request.Content.ReadAsStringAsync();
+      var stream = await request.Content.ReadAsStreamAsync();
+      var lengthToRead = (int)(stream.Length < 4096 ? stream.Length : 4096);
+      var buffer = new byte[lengthToRead];
+
+      await stream.ReadAsync(buffer, 0, lengthToRead, cancellationToken);
+
+      var body = Encoding.UTF8.GetString(buffer);
       if (!string.IsNullOrEmpty(body))
       {
-        request.Properties[RequestBodyKey] = body.Length > 4096 ? body.Substring(0, 4096) : body;
+        request.Properties[RequestBodyKey] = body;
       }
 
       return await base.SendAsync(request, cancellationToken);
