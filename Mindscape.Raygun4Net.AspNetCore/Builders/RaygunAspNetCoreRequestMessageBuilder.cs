@@ -96,9 +96,15 @@ namespace Mindscape.Raygun4Net.Builders
           request.Body.Seek(0, SeekOrigin.Begin);
           string temp = new StreamReader(request.Body).ReadToEnd();
 
+          /*
+           * In ASP.NET Core it seems the request.Form property doesn't get filled in unless it's an actual urlencoded form post.
+           * because of this, the code that gets the ignored values and strips them out is not going to work at all.
+           * To further complicate matters, since we can't rely on request.Form, we'd have to deserialize the request data which could be of virtually any type.
+           */
+
           // If we made it this far, strip out any values that have been marked as ignored form fields
-          Dictionary<string, string> ignored = GetIgnoredFormValues(request.Form, options.IsFormFieldIgnored);
-          temp = StripIgnoredFormData(temp, ignored);
+          //Dictionary<string, string> ignored = GetIgnoredFormValues(request.Form, options.IsFormFieldIgnored);
+          //temp = StripIgnoredFormData(temp, ignored);
 
           if (length > temp.Length)
           {

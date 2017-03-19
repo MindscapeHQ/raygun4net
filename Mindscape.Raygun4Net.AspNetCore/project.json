@@ -30,9 +30,10 @@
     "frameworks": {
         "netstandard1.6": {
             "imports": "dnxcore50",
-            "dependencies": {
-                "System.Diagnostics.StackTrace": "4.0.1"
-            }
+          "dependencies": {
+            "System.Diagnostics.StackTrace": "4.0.1",
+            "System.Net.WebSockets": "4.0.0"
+          }
         },
         "net451": {
             "frameworkAssemblies": {

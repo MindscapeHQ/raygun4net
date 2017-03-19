@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
+using System.IO;
 
 namespace Mindscape.Raygun4Net
 {
@@ -24,8 +25,33 @@ namespace Mindscape.Raygun4Net
     }
     public async Task Invoke(HttpContext httpContext)
     {
+      MemoryStream buffer = null;
+      var stream = httpContext.Request.Body;
       try
       {
+        var contentType = httpContext.Request.ContentType;
+
+        //ignore conditions
+        var streamIsNull = stream == Stream.Null;
+        var streamIsRewindable = stream.CanSeek;
+        var isFormUrlEncoded = httpContext.Request.HasFormContentType;
+        var isTextHtml = contentType == "text/html"; //this may be better implemented as a whitelist of content types that we DO want to transform the stream for
+        var isHttpGet = httpContext.Request.Method == "GET"; //should be no request body to be concerned with
+
+        //if any of the ignore conditions apply, continue as normal
+        if (!_settings.TransformRequestStream || streamIsNull || streamIsRewindable || isFormUrlEncoded || isTextHtml || isHttpGet)
+        {
+            await _next.Invoke(httpContext);
+
+            return;
+        }
+
+        //copy rewind and replace the stream
+        buffer = new MemoryStream();
+        await stream.CopyToAsync(buffer);
+        buffer.Position = 0L;
+        httpContext.Request.Body = buffer;
+
         await _next.Invoke(httpContext);
       }
       catch(Exception e)
@@ -38,6 +64,14 @@ namespace Mindscape.Raygun4Net
         var client = _middlewareSettings.ClientProvider.GetClient(_settings, httpContext);
         await client.SendInBackground(e);
         throw;
+      }
+      finally
+      {
+        if (buffer != null)
+        {
+          buffer.Dispose();
+        }
+        httpContext.Request.Body = stream;
       }
     }
   }
