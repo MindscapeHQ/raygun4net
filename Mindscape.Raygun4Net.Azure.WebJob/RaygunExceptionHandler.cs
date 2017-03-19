@@ -37,7 +37,7 @@ namespace Mindscape.Raygun4Net.Azure.WebJob
       var events = filter.GetEvents().Where(e => e.Exception != null);
       foreach (var traceEvent in events)
       {
-        var tags = new List<string>();
+        var tags = new List<string>() { "UnhandledException" };
         tags.AddRange(Tags);
 
         // Add all trace properties to custom data
@@ -57,7 +57,7 @@ namespace Mindscape.Raygun4Net.Azure.WebJob
           tags.Add(functionDescriptor.ShortName);
         }
 
-        _client.Send(traceEvent.Exception, tags, customData);
+        _client.Send(traceEvent.Exception, tags.Distinct().ToList(), customData);
       }
     }
   }
