@@ -198,5 +198,7 @@
     <Compile Include="..\Mindscape.Raygun4Net.Xamarin.iOS\Batching\PulseEventBatch.cs">
       <Link>Batching\PulseEventBatch.cs</Link>
     </Compile>
+    <Compile Include="Batching\Session.cs" />
+    <Compile Include="Batching\SessionEvent.cs" />
   </ItemGroup>
 </Project>
