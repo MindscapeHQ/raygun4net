@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Mindscape.Raygun4Net.Messages;
 using Microsoft.AspNetCore.Http;
@@ -87,33 +88,39 @@ namespace Mindscape.Raygun4Net.Builders
       {
         // Don't send the raw request data at all if the content-type is urlencoded
         var contentType = request.ContentType;
-        if (contentType != "text/html" &&
-            (contentType == null ||
-             CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "application/x-www-form-urlencoded",
-               CompareOptions.IgnoreCase) < 0) && request.Method != "GET")
-        {
-          int length = 4096;
-          request.Body.Seek(0, SeekOrigin.Begin);
-          string temp = new StreamReader(request.Body).ReadToEnd();
+        var isTextHtml = contentType == "text/html";
+        var hasContentType = contentType != null;
+        var isGet = request.Method == "GET";
+        var isUrlEncoded = CultureInfo.InvariantCulture.CompareInfo.IndexOf(
+          contentType,
+          "application/x-www-form-urlencoded",
+          CompareOptions.IgnoreCase
+        ) >= 0;
 
-          /*
+        if (isTextHtml || isGet || (hasContentType && isUrlEncoded))
+          return null;
+
+        request.Body.Seek(0, SeekOrigin.Begin);
+
+        var requestLength = (int)request.Body.Length;
+        var length = requestLength < 4096 ? requestLength : 4096;
+
+        var reader = new StreamReader(request.Body);
+        var buffer = new char[length];
+
+        reader.ReadBlock(buffer, 0, length);
+
+        /*
            * In ASP.NET Core it seems the request.Form property doesn't get filled in unless it's an actual urlencoded form post.
            * because of this, the code that gets the ignored values and strips them out is not going to work at all.
            * To further complicate matters, since we can't rely on request.Form, we'd have to deserialize the request data which could be of virtually any type.
            */
 
-          // If we made it this far, strip out any values that have been marked as ignored form fields
-          //Dictionary<string, string> ignored = GetIgnoredFormValues(request.Form, options.IsFormFieldIgnored);
-          //temp = StripIgnoredFormData(temp, ignored);
+        // If we made it this far, strip out any values that have been marked as ignored form fields
+        //Dictionary<string, string> ignored = GetIgnoredFormValues(request.Form, options.IsFormFieldIgnored);
+        //temp = StripIgnoredFormData(temp, ignored);
 
-          if (length > temp.Length)
-          {
-            length = temp.Length;
-          }
-
-          return temp.Substring(0, length);
-        }
-        return null;
+        return new string(buffer);
       }
       catch (Exception e)
       {

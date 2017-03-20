@@ -26,31 +26,28 @@ namespace Mindscape.Raygun4Net
     public async Task Invoke(HttpContext httpContext)
     {
       MemoryStream buffer = null;
-      var stream = httpContext.Request.Body;
+      var originalRequestBody = httpContext.Request.Body;
       try
       {
         var contentType = httpContext.Request.ContentType;
 
         //ignore conditions
-        var streamIsNull = stream == Stream.Null;
-        var streamIsRewindable = stream.CanSeek;
+        var streamIsNull = originalRequestBody == Stream.Null;
+        var streamIsRewindable = originalRequestBody.CanSeek;
         var isFormUrlEncoded = httpContext.Request.HasFormContentType;
         var isTextHtml = contentType == "text/html"; //this may be better implemented as a whitelist of content types that we DO want to transform the stream for
         var isHttpGet = httpContext.Request.Method == "GET"; //should be no request body to be concerned with
 
-        //if any of the ignore conditions apply, continue as normal
-        if (!_settings.TransformRequestStream || streamIsNull || streamIsRewindable || isFormUrlEncoded || isTextHtml || isHttpGet)
+        //if any of the ignore conditions apply, don't modify the Body Stream
+        if (!(streamIsNull || streamIsRewindable || isFormUrlEncoded || isTextHtml || isHttpGet))
         {
-            await _next.Invoke(httpContext);
+          //copy, rewind and replace the stream
+          buffer = new MemoryStream();
+          await originalRequestBody.CopyToAsync(buffer);
+          buffer.Seek(0, SeekOrigin.Begin);
 
-            return;
+          httpContext.Request.Body = buffer;
         }
-
-        //copy rewind and replace the stream
-        buffer = new MemoryStream();
-        await stream.CopyToAsync(buffer);
-        buffer.Position = 0L;
-        httpContext.Request.Body = buffer;
 
         await _next.Invoke(httpContext);
       }
@@ -67,11 +64,8 @@ namespace Mindscape.Raygun4Net
       }
       finally
       {
-        if (buffer != null)
-        {
-          buffer.Dispose();
-        }
-        httpContext.Request.Body = stream;
+        buffer?.Dispose();
+        httpContext.Request.Body = originalRequestBody;
       }
     }
   }
