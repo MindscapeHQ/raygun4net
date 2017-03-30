@@ -15,6 +15,6 @@ namespace Mindscape.Raygun4Net
 
     public string ClassName { get; set; }
     public string MethodName { get; set; }
-    public int LineNumber { get; set; }
+    public int? LineNumber { get; set; }
   }
 }
