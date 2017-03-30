@@ -10,7 +10,7 @@ namespace Mindscape.Raygun4Net
   {
     public string Message { get; set; }
     public string Category { get; set; }
-    public RaygunBreadcrumbs.Level Level { get; set; }
+    public RaygunBreadcrumbs.Level Level { get; set; } = RaygunBreadcrumbs.Level.Info;
     public IDictionary CustomData { get; set; }
 
     public string ClassName { get; set; }

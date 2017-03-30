@@ -10,7 +10,6 @@ namespace Mindscape.Raygun4Net
   {
     public enum Level
     {
-      Default = 0,
       Debug,
       Info,
       Warning,
@@ -41,9 +40,6 @@ namespace Mindscape.Raygun4Net
 
     public void Record(RaygunBreadcrumb crumb)
     {
-      if (crumb.Level == Level.Default)
-        crumb.Level = Level.Info;
- 
       if (ShouldRecord(crumb))
         _storage.Store(crumb);
     }
