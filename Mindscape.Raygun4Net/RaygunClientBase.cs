@@ -53,6 +53,7 @@ namespace Mindscape.Raygun4Net
     public event EventHandler<RaygunSendingMessageEventArgs> SendingMessage;
 
     private bool _handlingRecursiveErrorSending;
+    protected static RaygunBreadcrumbs Breadcrumbs;
 
     // Returns true if the message can be sent, false if the sending is canceled.
     protected bool OnSendingMessage(RaygunMessage raygunMessage)

@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net4", "Mindscape.Raygun4Net4\Mindscape.Raygun4Net4.csproj", "{6D1C7E96-5E04-421D-8E8A-B3C8C02FD41D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net4.Tests", "Mindscape.Raygun4Net4.Tests\Mindscape.Raygun4Net4.Tests.csproj", "{046F330F-D640-452C-A0CB-C88A8E87C7F1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.Core", "Mindscape.Raygun4Net.Core\Mindscape.Raygun4Net.Core.csproj", "{6435C84C-1DAC-41FE-AA51-FAA8E9A7F090}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.Core.Tests", "Mindscape.Raygun4Net.Core.Tests\Mindscape.Raygun4Net.Core.Tests.csproj", "{5BDECE30-DA86-4435-BCBD-07135878CE70}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +36,12 @@ Global
 		{6435C84C-1DAC-41FE-AA51-FAA8E9A7F090}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6435C84C-1DAC-41FE-AA51-FAA8E9A7F090}.Sign|Any CPU.ActiveCfg = Sign|Any CPU
 		{6435C84C-1DAC-41FE-AA51-FAA8E9A7F090}.Sign|Any CPU.Build.0 = Sign|Any CPU
+		{5BDECE30-DA86-4435-BCBD-07135878CE70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BDECE30-DA86-4435-BCBD-07135878CE70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BDECE30-DA86-4435-BCBD-07135878CE70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BDECE30-DA86-4435-BCBD-07135878CE70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BDECE30-DA86-4435-BCBD-07135878CE70}.Sign|Any CPU.ActiveCfg = Release|Any CPU
+		{5BDECE30-DA86-4435-BCBD-07135878CE70}.Sign|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

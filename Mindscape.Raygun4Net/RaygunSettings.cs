@@ -106,6 +106,13 @@ namespace Mindscape.Raygun4Net
         set { this["applicationVersion"] = value; }
     }
 
+    [ConfigurationProperty("breadcrumbsLevel", IsRequired = false, DefaultValue = "Info")]
+    public RaygunBreadcrumbs.Level BreadcrumbsLevel
+    {
+      get { return (RaygunBreadcrumbs.Level) this["breadcrumbsLevel"]; }
+      set { this["breadcrumbsLevel"] = value; }
+    }
+
     /// <summary>
     /// Return false.
     /// </summary>

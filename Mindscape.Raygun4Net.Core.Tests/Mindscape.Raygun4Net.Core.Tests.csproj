@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6D1C7E96-5E04-421D-8E8A-B3C8C02FD41D}</ProjectGuid>
+    <ProjectGuid>{5BDECE30-DA86-4435-BCBD-07135878CE70}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Mindscape.Raygun4Net</RootNamespace>
-    <AssemblyName>Mindscape.Raygun4Net4</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <RootNamespace>Mindscape.Raygun4Net.Core.Tests</RootNamespace>
+    <AssemblyName>Mindscape.Raygun4Net.Core.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -29,56 +29,27 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
-    <AssemblyOriginatorKeyFile>Raygun4Net4.snk</AssemblyOriginatorKeyFile>
-    <OutputPath>bin\Sign\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Sign|AnyCPU'">
-    <OutputPath>bin\Sign\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="nunit.framework, Version=2.6.1.12217, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.2.6.1\lib\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Management" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\AssemblyVersionInfo.cs">
-      <Link>Properties\AssemblyVersionInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Builders\RaygunRequestMessageBuilder.cs">
-      <Link>Builders\RaygunRequestMessageBuilder.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\IRaygunApplication.cs">
-      <Link>IRaygunApplication.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\RaygunHttpModule.cs">
-      <Link>RaygunHttpModule.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\RaygunMessageBuilder.cs">
-      <Link>RaygunMessageBuilder.cs</Link>
-    </Compile>
-    <Compile Include="HttpBreadcrumbStorage.cs" />
+    <Compile Include="RaygunBreadcrumbsTest.cs" />
+    <Compile Include="Models\InMemoryBreadcrumbStorage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RaygunClient.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net.Core\Mindscape.Raygun4Net.Core.csproj">

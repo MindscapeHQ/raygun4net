@@ -1,0 +1,47 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Web;
+
+namespace Mindscape.Raygun4Net
+{
+  public class HttpBreadcrumbStorage : IRaygunBreadcrumbStorage
+  {
+    private const string ItemsKey = "Raygun.Breadcrumbs.Storage";
+
+    public IEnumerator<RaygunBreadcrumb> GetEnumerator()
+    {
+      return GetList().GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+      return GetEnumerator();
+    }
+
+    public void Store(RaygunBreadcrumb breadcrumb)
+    {
+      GetList().Add(breadcrumb);
+    }
+
+    public void Clear()
+    {
+      GetList().Clear();
+    }
+
+    private List<RaygunBreadcrumb> GetList()
+    {
+      SetupStorage();
+
+      return (List<RaygunBreadcrumb>) HttpContext.Current.Items[ItemsKey];
+    }
+
+    private void SetupStorage()
+    {
+      if (!HttpContext.Current.Items.Contains(ItemsKey))
+        HttpContext.Current.Items[ItemsKey] = new List<RaygunBreadcrumb>();
+    }
+  }
+}
