@@ -113,6 +113,12 @@ namespace Mindscape.Raygun4Net
       set { this["breadcrumbsLevel"] = value; }
     }
 
+    [ConfigurationProperty("breadcrumbsLocationRecordingEnabled", IsRequired = false, DefaultValue = false)]
+    public bool BreadcrumbsLocationRecordingEnabled
+    {
+      get { return (bool)this["breadcrumbsLocationRecordingEnabled"]; }
+      set { this["breadcrumbsLocationRecordingEnabled"] = value; }
+    }
     /// <summary>
     /// Return false.
     /// </summary>

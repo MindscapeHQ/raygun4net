@@ -11,7 +11,23 @@ namespace Mindscape.Raygun4Net.Core.Tests
   [TestFixture]
   public class RaygunBreadcrumbsTest
   {
-    private RaygunBreadcrumbs _breadcrumbs;
+    class BreadcrumbTest
+    {
+      private readonly RaygunBreadcrumbsTest _testClass;
+
+      public BreadcrumbTest(RaygunBreadcrumbsTest testClass)
+      {
+        _testClass = testClass;
+      }
+
+      public void Foo()
+      {
+        Action wrapper = () => _testClass._breadcrumbs.Record("foo");
+        wrapper();
+      }
+    }
+
+    internal RaygunBreadcrumbs _breadcrumbs;
 
     [SetUp]
     public void SetUp()
@@ -23,6 +39,22 @@ namespace Mindscape.Raygun4Net.Core.Tests
     public void TearDown()
     {
       RaygunSettings.Settings.BreadcrumbsLevel = RaygunBreadcrumbs.Level.Info;
+      RaygunSettings.Settings.BreadcrumbsLocationRecordingEnabled = false;
+    }
+
+    [Test]
+    public void Set_ClassName_MethodName_And_LineNumber_Automatically_If_Configured()
+    {
+      RaygunSettings.Settings.BreadcrumbsLocationRecordingEnabled = true;
+      var test = new BreadcrumbTest(this);
+
+      test.Foo();
+      var crumb = _breadcrumbs.First();
+
+      Assert.That(crumb.ClassName, Is.EqualTo("Mindscape.Raygun4Net.Core.Tests.RaygunBreadcrumbsTest+BreadcrumbTest"));
+      Assert.That(crumb.MethodName, Is.EqualTo("Foo"));
+      // Does this ever work? Can't find the line number
+      // Assert.That(crumb.LineNumber, Is.Not.Null);
     }
 
     [Test]

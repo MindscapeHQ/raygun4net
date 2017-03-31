@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Mindscape.Raygun4Net
 {
@@ -40,6 +42,25 @@ namespace Mindscape.Raygun4Net
 
     public void Record(RaygunBreadcrumb crumb)
     {
+      if (RaygunSettings.Settings.BreadcrumbsLocationRecordingEnabled)
+      {
+        // 2 because it's always going to go through RaygunClient.RecordBreadcrumb or the like
+        var frame = new StackFrame(2);
+        var method = frame.GetMethod();
+
+        crumb.ClassName = method.ReflectedType?.FullName;
+        crumb.MethodName = method.Name;
+        crumb.LineNumber = frame.GetFileLineNumber();
+        if (crumb.MethodName.Contains('<'))
+        {
+          var unmangledName = new Regex(@"<(\w+)>").Match(crumb.MethodName).Groups[1].Value;
+          crumb.MethodName = unmangledName;
+        }
+
+        if (crumb.LineNumber == 0)
+          crumb.LineNumber = null;
+      }
+
       if (ShouldRecord(crumb))
         _storage.Store(crumb);
     }
