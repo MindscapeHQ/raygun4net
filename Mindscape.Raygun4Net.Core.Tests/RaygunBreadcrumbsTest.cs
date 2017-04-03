@@ -66,6 +66,14 @@ namespace Mindscape.Raygun4Net.Core.Tests
     }
 
     [Test]
+    public void It_Sets_The_Timestamp()
+    {
+       _breadcrumbs.Record("test");
+
+      Assert.That(_breadcrumbs.First().Timestamp, Is.GreaterThan(0));
+    }
+
+    [Test]
     public void It_Sets_The_Level_To_Info_If_Not_Set()
     {
       _breadcrumbs.Record("test");
