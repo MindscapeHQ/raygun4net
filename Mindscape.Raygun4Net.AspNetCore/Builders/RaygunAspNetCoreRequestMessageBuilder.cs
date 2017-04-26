@@ -45,7 +45,7 @@ namespace Mindscape.Raygun4Net.Builders
           dictionary = ToDictionary(await request.ReadFormAsync(), options.IsFormFieldIgnored);
         }
       }
-// ReSharper disable once EmptyGeneralCatchClause
+      // ReSharper disable once EmptyGeneralCatchClause
       catch { }
       return dictionary;
     }
@@ -60,7 +60,7 @@ namespace Mindscape.Raygun4Net.Builders
           cookies = GetCookies(request.Cookies, options.IsCookieIgnored);
         }
       }
-        // ReSharper disable once EmptyGeneralCatchClause
+      // ReSharper disable once EmptyGeneralCatchClause
       catch { }
       return cookies;
     }
@@ -72,7 +72,7 @@ namespace Mindscape.Raygun4Net.Builders
       {
         queryString = ToDictionary(request.Query, f => false);
       }
-// ReSharper disable once EmptyGeneralCatchClause
+      // ReSharper disable once EmptyGeneralCatchClause
       catch { }
       return queryString;
     }
@@ -98,7 +98,9 @@ namespace Mindscape.Raygun4Net.Builders
         ) >= 0;
 
         if (isTextHtml || isGet || (hasContentType && isUrlEncoded))
+        {
           return null;
+        }
 
         request.Body.Seek(0, SeekOrigin.Begin);
 
@@ -159,10 +161,17 @@ namespace Mindscape.Raygun4Net.Builders
     private static string GetIpAddress(ConnectionInfo request)
     {
       var ip = request.RemoteIpAddress ?? request.LocalIpAddress;
-      if (ip == null) return "";
+      if (ip == null)
+      {
+        return "";
+      }
+
       int? port = request.RemotePort == 0 ? request.LocalPort : request.RemotePort;
 
-      if (port != 0) return ip + ":" + port.Value;
+      if (port != 0)
+      {
+        return ip + ":" + port.Value;
+      }
 
       return ip.ToString();
     }
@@ -182,7 +191,7 @@ namespace Mindscape.Raygun4Net.Builders
     private static IDictionary ToDictionary(IQueryCollection query, Func<string, bool> isFormFieldIgnored)
     {
       var dict = new Dictionary<string, string>();
-      foreach(var value in query.Where(v => isFormFieldIgnored(v.Key) == false))
+      foreach (var value in query.Where(v => isFormFieldIgnored(v.Key) == false))
       {
         dict[value.Key] = string.Join(",", value.Value);
       }
