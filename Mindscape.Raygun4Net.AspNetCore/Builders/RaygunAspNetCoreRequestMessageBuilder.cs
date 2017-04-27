@@ -102,7 +102,7 @@ namespace Mindscape.Raygun4Net.Builders
         Dictionary<string, string> ignoredMultiPartFormData = null;
         if (contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "multipart/form-data", CompareOptions.IgnoreCase) >= 0)
         {
-          // If we made it this far, strip out any values that have been marked as ignored form fields
+          // For multipart form data, gather up all the form names and values to be stripped out later.
           ignoredMultiPartFormData = GetIgnoredFormValues(request.Form, options.IsFormFieldIgnored);
         }
 
@@ -116,14 +116,15 @@ namespace Mindscape.Raygun4Net.Builders
         }
         length = Math.Min(length, (int)request.Body.Length);
 
+        // Read the stream
         var reader = new StreamReader(request.Body);
         var buffer = new char[length];
-
         reader.ReadBlock(buffer, 0, length);
         string rawData = new string(buffer);
 
         request.Body.Seek(0, SeekOrigin.Begin);
 
+        // Strip out ignored form fields from multipart form data payloads.
         if (ignoredMultiPartFormData != null)
         {
           rawData = StripIgnoredFormData(rawData, ignoredMultiPartFormData);

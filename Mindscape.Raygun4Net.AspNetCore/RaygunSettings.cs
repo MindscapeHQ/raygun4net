@@ -34,5 +34,7 @@ namespace Mindscape.Raygun4Net
     public bool IsRawDataIgnored { get; set; }
 
     public string ApplicationVersion { get; set; }
+    
+    public bool ReplaceUnSeekableRequestStreams { get; set; }
   }
 }

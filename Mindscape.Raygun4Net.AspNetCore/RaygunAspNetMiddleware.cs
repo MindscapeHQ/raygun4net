@@ -30,24 +30,26 @@ namespace Mindscape.Raygun4Net
       var originalRequestBody = httpContext.Request.Body;
       try
       {
-        var contentType = httpContext.Request.ContentType;
-
-        //ignore conditions
-        var streamIsNull = originalRequestBody == Stream.Null;
-        var streamIsRewindable = originalRequestBody.CanSeek;
-        var isFormUrlEncoded = contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "application/x-www-form-urlencoded", CompareOptions.IgnoreCase) >= 0;
-        var isTextHtml = contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "text/html", CompareOptions.IgnoreCase) >= 0;
-        var isHttpGet = httpContext.Request.Method == "GET"; //should be no request body to be concerned with
-
-        //if any of the ignore conditions apply, don't modify the Body Stream
-        if (!(streamIsNull || isFormUrlEncoded || streamIsRewindable || isTextHtml || isHttpGet))
+        if (_settings.ReplaceUnSeekableRequestStreams)
         {
-          //copy, rewind and replace the stream
-          buffer = new MemoryStream();
-          await originalRequestBody.CopyToAsync(buffer);
-          buffer.Seek(0, SeekOrigin.Begin);
+          var contentType = httpContext.Request.ContentType;
+          //ignore conditions
+          var streamIsNull = originalRequestBody == Stream.Null;
+          var streamIsRewindable = originalRequestBody.CanSeek;
+          var isFormUrlEncoded = contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "application/x-www-form-urlencoded", CompareOptions.IgnoreCase) >= 0;
+          var isTextHtml = contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "text/html", CompareOptions.IgnoreCase) >= 0;
+          var isHttpGet = httpContext.Request.Method == "GET"; //should be no request body to be concerned with
 
-          httpContext.Request.Body = buffer;
+          //if any of the ignore conditions apply, don't modify the Body Stream
+          if (!(streamIsNull || isFormUrlEncoded || streamIsRewindable || isTextHtml || isHttpGet))
+          {
+            //copy, rewind and replace the stream
+            buffer = new MemoryStream();
+            await originalRequestBody.CopyToAsync(buffer);
+            buffer.Seek(0, SeekOrigin.Begin);
+
+            httpContext.Request.Body = buffer;
+          }
         }
 
         await _next.Invoke(httpContext);
