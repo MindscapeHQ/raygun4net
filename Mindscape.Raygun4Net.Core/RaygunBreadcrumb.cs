@@ -13,6 +13,7 @@ namespace Mindscape.Raygun4Net
     public string Message { get; set; }
     public string Category { get; set; }
     public RaygunBreadcrumbs.Level Level { get; set; } = RaygunBreadcrumbs.Level.Info;
+    public RaygunBreadcrumbs.Type Type { get; set; } = RaygunBreadcrumbs.Type.Manual;
     public IDictionary CustomData { get; set; }
     public long Timestamp { get; set; } = (long) (DateTime.UtcNow - UnixEpoch).TotalSeconds;
 

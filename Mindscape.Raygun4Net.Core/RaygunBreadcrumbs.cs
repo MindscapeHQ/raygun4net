@@ -18,6 +18,11 @@ namespace Mindscape.Raygun4Net
       Error,
     }
 
+    public enum Type
+    {
+      Manual
+    }
+
     private readonly IRaygunBreadcrumbStorage _storage;
 
     public RaygunBreadcrumbs(IRaygunBreadcrumbStorage storage)
