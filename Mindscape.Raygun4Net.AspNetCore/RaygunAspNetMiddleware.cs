@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using System.Globalization;
+using System.Diagnostics;
 
 namespace Mindscape.Raygun4Net
 {
@@ -27,15 +28,16 @@ namespace Mindscape.Raygun4Net
     public async Task Invoke(HttpContext httpContext)
     {
       MemoryStream buffer = null;
-      var originalRequestBody = httpContext.Request.Body;
-      try
+      Stream originalRequestBody = null;
+
+      if (_settings.ReplaceUnSeekableRequestStreams)
       {
-        if (_settings.ReplaceUnSeekableRequestStreams)
+        try
         {
           var contentType = httpContext.Request.ContentType;
           //ignore conditions
-          var streamIsNull = originalRequestBody == Stream.Null;
-          var streamIsRewindable = originalRequestBody.CanSeek;
+          var streamIsNull = httpContext.Request.Body == Stream.Null;
+          var streamIsRewindable = httpContext.Request.Body.CanSeek;
           var isFormUrlEncoded = contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "application/x-www-form-urlencoded", CompareOptions.IgnoreCase) >= 0;
           var isTextHtml = contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "text/html", CompareOptions.IgnoreCase) >= 0;
           var isHttpGet = httpContext.Request.Method == "GET"; //should be no request body to be concerned with
@@ -45,13 +47,27 @@ namespace Mindscape.Raygun4Net
           {
             //copy, rewind and replace the stream
             buffer = new MemoryStream();
+            originalRequestBody = httpContext.Request.Body;
+
             await originalRequestBody.CopyToAsync(buffer);
             buffer.Seek(0, SeekOrigin.Begin);
 
             httpContext.Request.Body = buffer;
           }
         }
+        catch (Exception e)
+        {
+          Debug.WriteLine(string.Format("Error replacing request stream {0}", e.Message));
 
+          if (_settings.ThrowOnError)
+          {
+            throw;
+          }
+        }
+      }
+ 
+      try
+      {
         await _next.Invoke(httpContext);
       }
       catch (Exception e)
@@ -68,7 +84,10 @@ namespace Mindscape.Raygun4Net
       finally
       {
         buffer?.Dispose();
-        httpContext.Request.Body = originalRequestBody;
+        if (originalRequestBody != null)
+        {
+          httpContext.Request.Body = originalRequestBody;
+        }
       }
     }
   }
