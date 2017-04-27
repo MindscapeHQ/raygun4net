@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
+using System.Globalization;
 
 namespace Mindscape.Raygun4Net
 {
@@ -21,7 +22,7 @@ namespace Mindscape.Raygun4Net
       _next = next;
       _middlewareSettings = middlewareSettings;
 
-      _settings = _middlewareSettings.ClientProvider.GetRaygunSettings(settings.Value ?? new RaygunSettings());  
+      _settings = _middlewareSettings.ClientProvider.GetRaygunSettings(settings.Value ?? new RaygunSettings());
     }
     public async Task Invoke(HttpContext httpContext)
     {
@@ -34,12 +35,12 @@ namespace Mindscape.Raygun4Net
         //ignore conditions
         var streamIsNull = originalRequestBody == Stream.Null;
         var streamIsRewindable = originalRequestBody.CanSeek;
-        var isFormUrlEncoded = httpContext.Request.HasFormContentType;
-        var isTextHtml = contentType == "text/html"; //this may be better implemented as a whitelist of content types that we DO want to transform the stream for
+        var isFormUrlEncoded = contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "application/x-www-form-urlencoded", CompareOptions.IgnoreCase) >= 0;
+        var isTextHtml = contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "text/html", CompareOptions.IgnoreCase) >= 0;
         var isHttpGet = httpContext.Request.Method == "GET"; //should be no request body to be concerned with
 
         //if any of the ignore conditions apply, don't modify the Body Stream
-        if (!(streamIsNull || streamIsRewindable || isFormUrlEncoded || isTextHtml || isHttpGet))
+        if (!(streamIsNull || isFormUrlEncoded || streamIsRewindable || isTextHtml || isHttpGet))
         {
           //copy, rewind and replace the stream
           buffer = new MemoryStream();
@@ -51,9 +52,9 @@ namespace Mindscape.Raygun4Net
 
         await _next.Invoke(httpContext);
       }
-      catch(Exception e)
+      catch (Exception e)
       {
-        if(_settings.ExcludeErrorsFromLocal && httpContext.Request.IsLocal())
+        if (_settings.ExcludeErrorsFromLocal && httpContext.Request.IsLocal())
         {
           throw;
         }

@@ -86,43 +86,54 @@ namespace Mindscape.Raygun4Net.Builders
 
       try
       {
-        // Don't send the raw request data at all if the content-type is urlencoded
         var contentType = request.ContentType;
-        var isTextHtml = contentType == "text/html";
-        var hasContentType = contentType != null;
-        var isGet = request.Method == "GET";
-        var isUrlEncoded = CultureInfo.InvariantCulture.CompareInfo.IndexOf(
-          contentType,
-          "application/x-www-form-urlencoded",
-          CompareOptions.IgnoreCase
-        ) >= 0;
 
-        if (isTextHtml || isGet || (hasContentType && isUrlEncoded))
+        var streamIsNull = request.Body == Stream.Null;
+        var streamIsRewindable = request.Body.CanSeek;
+        var isTextHtml = contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "text/html", CompareOptions.IgnoreCase) >= 0;
+        var isHttpGet = request.Method == "GET";
+        var isFormUrlEncoded = contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "application/x-www-form-urlencoded", CompareOptions.IgnoreCase) >= 0;
+
+        if (streamIsNull || isTextHtml || isHttpGet || isFormUrlEncoded || !streamIsRewindable)
         {
           return null;
         }
 
-        request.Body.Seek(0, SeekOrigin.Begin);
+        Dictionary<string, string> ignoredMultiPartFormData = null;
+        if (contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "multipart/form-data", CompareOptions.IgnoreCase) >= 0)
+        {
+          // If we made it this far, strip out any values that have been marked as ignored form fields
+          ignoredMultiPartFormData = GetIgnoredFormValues(request.Form, options.IsFormFieldIgnored);
+        }
 
-        var requestLength = (int)request.Body.Length;
-        var length = requestLength < 4096 ? requestLength : 4096;
+        request.Body.Seek(0, SeekOrigin.Begin);
+        
+        // If we are ignoring form fields, increase the max ammount that we read from the stream to make sure we include the entirety of any value that may be stripped later on.
+        var length = 4096;
+        if (ignoredMultiPartFormData != null && ignoredMultiPartFormData.Count > 0)
+        {
+          length += ignoredMultiPartFormData.Values.Max(s => s == null ? 0 : s.Length);
+        }
+        length = Math.Min(length, (int)request.Body.Length);
 
         var reader = new StreamReader(request.Body);
         var buffer = new char[length];
 
         reader.ReadBlock(buffer, 0, length);
+        string rawData = new string(buffer);
 
-        /*
-           * In ASP.NET Core it seems the request.Form property doesn't get filled in unless it's an actual urlencoded form post.
-           * because of this, the code that gets the ignored values and strips them out is not going to work at all.
-           * To further complicate matters, since we can't rely on request.Form, we'd have to deserialize the request data which could be of virtually any type.
-           */
+        request.Body.Seek(0, SeekOrigin.Begin);
 
-        // If we made it this far, strip out any values that have been marked as ignored form fields
-        //Dictionary<string, string> ignored = GetIgnoredFormValues(request.Form, options.IsFormFieldIgnored);
-        //temp = StripIgnoredFormData(temp, ignored);
+        if (ignoredMultiPartFormData != null)
+        {
+          rawData = StripIgnoredFormData(rawData, ignoredMultiPartFormData);
+          if (rawData.Length > 4096)
+          {
+            rawData = rawData.Substring(0, 4096);
+          }
+        }
 
-        return new string(buffer);
+        return rawData;
       }
       catch (Exception e)
       {
@@ -130,6 +141,7 @@ namespace Mindscape.Raygun4Net.Builders
       }
     }
 
+    // This is specific to multipart/form-data
     protected static Dictionary<string, string> GetIgnoredFormValues(IFormCollection form, Func<string, bool> ignore)
     {
       Dictionary<string, string> ignoredFormValues = new Dictionary<string, string>();
@@ -143,6 +155,7 @@ namespace Mindscape.Raygun4Net.Builders
       return ignoredFormValues;
     }
 
+    // This is specific to multipart/form-data
     protected static string StripIgnoredFormData(string rawData, Dictionary<string, string> ignored)
     {
       foreach (string key in ignored.Keys)
