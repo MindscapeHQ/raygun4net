@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
+using System.IO;
+using System.Globalization;
+using System.Diagnostics;
 
 namespace Mindscape.Raygun4Net
 {
@@ -20,17 +23,56 @@ namespace Mindscape.Raygun4Net
       _next = next;
       _middlewareSettings = middlewareSettings;
 
-      _settings = _middlewareSettings.ClientProvider.GetRaygunSettings(settings.Value ?? new RaygunSettings());  
+      _settings = _middlewareSettings.ClientProvider.GetRaygunSettings(settings.Value ?? new RaygunSettings());
     }
     public async Task Invoke(HttpContext httpContext)
     {
+      MemoryStream buffer = null;
+      Stream originalRequestBody = null;
+
+      if (_settings.ReplaceUnseekableRequestStreams)
+      {
+        try
+        {
+          var contentType = httpContext.Request.ContentType;
+          //ignore conditions
+          var streamIsNull = httpContext.Request.Body == Stream.Null;
+          var streamIsRewindable = httpContext.Request.Body.CanSeek;
+          var isFormUrlEncoded = contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "application/x-www-form-urlencoded", CompareOptions.IgnoreCase) >= 0;
+          var isTextHtml = contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "text/html", CompareOptions.IgnoreCase) >= 0;
+          var isHttpGet = httpContext.Request.Method == "GET"; //should be no request body to be concerned with
+
+          //if any of the ignore conditions apply, don't modify the Body Stream
+          if (!(streamIsNull || isFormUrlEncoded || streamIsRewindable || isTextHtml || isHttpGet))
+          {
+            //copy, rewind and replace the stream
+            buffer = new MemoryStream();
+            originalRequestBody = httpContext.Request.Body;
+
+            await originalRequestBody.CopyToAsync(buffer);
+            buffer.Seek(0, SeekOrigin.Begin);
+
+            httpContext.Request.Body = buffer;
+          }
+        }
+        catch (Exception e)
+        {
+          Debug.WriteLine(string.Format("Error replacing request stream {0}", e.Message));
+
+          if (_settings.ThrowOnError)
+          {
+            throw;
+          }
+        }
+      }
+ 
       try
       {
         await _next.Invoke(httpContext);
       }
-      catch(Exception e)
+      catch (Exception e)
       {
-        if(_settings.ExcludeErrorsFromLocal && httpContext.Request.IsLocal())
+        if (_settings.ExcludeErrorsFromLocal && httpContext.Request.IsLocal())
         {
           throw;
         }
@@ -38,6 +80,14 @@ namespace Mindscape.Raygun4Net
         var client = _middlewareSettings.ClientProvider.GetClient(_settings, httpContext);
         await client.SendInBackground(e);
         throw;
+      }
+      finally
+      {
+        buffer?.Dispose();
+        if (originalRequestBody != null)
+        {
+          httpContext.Request.Body = originalRequestBody;
+        }
       }
     }
   }

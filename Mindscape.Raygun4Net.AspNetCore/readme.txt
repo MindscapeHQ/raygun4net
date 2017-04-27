@@ -118,6 +118,21 @@ public class RaygunController : Controller
 Additional configuration options and features
 =============================================
 
+Replace unseekable request streams
+----------------------------------
+
+Raygun will try to send the raw request payload with each exception report where applicable, but this is only possible with request streams that are seekable.
+If you are not seeing any raw request payloads in your exception reports where you'd expect to see them, then you can set the ReplaceUnseekableRequestStreams setting to true in your appsettings.json. This will attempt to replace any unseekable streams with a seekable copy on the request object so that Raygun can later read the raw request payload.
+
+"RaygunSettings": {
+  "ApiKey": "YOUR_APP_API_KEY",
+  "ReplaceUnseekableRequestStreams": true
+}
+
+This setting is false by default to avoid breaking changes or any unforseen issues with its initial deployment.
+
+Raygun will not attempt to send raw request payloads for GET requests, "x-www-form-urlencoded" requests or "text/html" requests.
+
 Exclude errors by HTTP status code
 ----------------------------------
 
