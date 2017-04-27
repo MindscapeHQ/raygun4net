@@ -35,6 +35,6 @@ namespace Mindscape.Raygun4Net
 
     public string ApplicationVersion { get; set; }
     
-    public bool ReplaceUnSeekableRequestStreams { get; set; }
+    public bool ReplaceUnseekableRequestStreams { get; set; }
   }
 }

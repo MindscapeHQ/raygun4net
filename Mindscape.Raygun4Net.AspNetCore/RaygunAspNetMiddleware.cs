@@ -30,7 +30,7 @@ namespace Mindscape.Raygun4Net
       MemoryStream buffer = null;
       Stream originalRequestBody = null;
 
-      if (_settings.ReplaceUnSeekableRequestStreams)
+      if (_settings.ReplaceUnseekableRequestStreams)
       {
         try
         {
