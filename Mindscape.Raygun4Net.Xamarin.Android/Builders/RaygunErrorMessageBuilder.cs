@@ -68,21 +68,40 @@ namespace Mindscape.Raygun4Net.Builders
           string methodName = null;
           string className = null;
           string stackTraceLn = stackTraceLine.Trim();
+          bool bracketAfterLineNumber = false;
+
           // Line number
           int index = stackTraceLn.LastIndexOf(":");
           if (index > 0)
           {
-            bool success = int.TryParse(stackTraceLn.Substring(index + 1), out lineNumber);
+            bracketAfterLineNumber = stackTraceLn.EndsWith(")");
+            int length = bracketAfterLineNumber ? stackTraceLn.Length - index - 2 : stackTraceLn.Length - index - 1;
+            bool success = int.TryParse(stackTraceLn.Substring(index + 1, Math.Max(0, length)), out lineNumber);
             if (success)
             {
               stackTraceLn = stackTraceLn.Substring(0, index);
             }
+            else
+            {
+              bracketAfterLineNumber = false;
+            }
           }
+
           // File name
-          index = stackTraceLn.LastIndexOf("] in ");
+          int fileSeparatorLength = 0;
+          if (bracketAfterLineNumber)
+          {
+            index = index = stackTraceLn.LastIndexOf("(");
+            fileSeparatorLength = 1;
+          }
+          if (!bracketAfterLineNumber || index < 0)
+          {
+            index = stackTraceLn.LastIndexOf("] in ");
+            fileSeparatorLength = 5;
+          }
           if (index > 0)
           {
-            fileName = stackTraceLn.Substring(index + 5);
+            fileName = stackTraceLn.Substring(index + fileSeparatorLength);
             if ("<filename unknown>".Equals(fileName))
             {
               fileName = null;
@@ -93,27 +112,49 @@ namespace Mindscape.Raygun4Net.Builders
           if (!stackTraceLn.StartsWith("at (wrapper") && !stackTraceLn.StartsWith("(wrapper"))
           {
             // Method name
-            index = stackTraceLn.LastIndexOf("(");
-            if (index > 0)
+            string parameters = "";
+            int parameterStartIndex = stackTraceLn.LastIndexOf("(");
+            if (parameterStartIndex > 0)
             {
-              index = stackTraceLn.LastIndexOf(".", index);
-              if (index > 0)
+              int parameterEndIndex = stackTraceLn.IndexOf("[0x") - 1;
+              if (parameterEndIndex < 0)
               {
-                int endIndex = stackTraceLn.IndexOf("[0x");
-                if (endIndex < 0)
+                parameterEndIndex = stackTraceLn.IndexOf("<0x") - 1;
+                if (parameterEndIndex < 0)
                 {
-                  endIndex = stackTraceLn.IndexOf("<0x");
-                  if (endIndex < 0)
-                  {
-                    endIndex = stackTraceLn.Length;
-                  }
+                  parameterEndIndex = stackTraceLn.Length - 1;
                 }
-
-                methodName = stackTraceLn.Substring(index + 1, endIndex - index - 1).Trim();
-                methodName = methodName.Replace(" (", "(");
-                stackTraceLn = stackTraceLn.Substring(0, index);
               }
+              parameters = stackTraceLn.Substring(parameterStartIndex, parameterEndIndex - parameterStartIndex + 1).Trim();
             }
+            else
+            {
+              parameterStartIndex = stackTraceLn.Length;
+            }
+
+            int methodStartIndex = stackTraceLn.IndexOf('<') + 1;
+            int methodEndIndex = methodStartIndex;
+            int methodSeparatorLength = 0;
+            if (methodStartIndex > 0)
+            {
+              methodEndIndex = stackTraceLn.IndexOf('>', methodStartIndex) - 1;
+              methodSeparatorLength = 2;
+            }
+
+            if (methodEndIndex - methodStartIndex <= 0)
+            {
+              methodStartIndex = stackTraceLn.LastIndexOf(".", parameterStartIndex) + 1;
+              methodEndIndex = parameterStartIndex - 1;
+              methodSeparatorLength = 1;
+            }
+
+            if (methodStartIndex > 0)
+            {
+              methodName = stackTraceLn.Substring(methodStartIndex, methodEndIndex - methodStartIndex + 1).Trim();
+              methodName += parameters;
+              stackTraceLn = stackTraceLn.Substring(0, methodStartIndex - methodSeparatorLength);
+            }
+
             // Class name
             index = stackTraceLn.IndexOf("at ");
             if (index >= 0)
@@ -129,7 +170,7 @@ namespace Mindscape.Raygun4Net.Builders
               FileName = fileName,
               LineNumber = lineNumber,
               MethodName = methodName,
-              ClassName = className
+              ClassName = className,
             };
 
             lines.Add(line);
