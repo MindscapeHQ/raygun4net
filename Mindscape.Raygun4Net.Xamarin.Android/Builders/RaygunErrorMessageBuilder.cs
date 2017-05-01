@@ -128,7 +128,7 @@ namespace Mindscape.Raygun4Net.Builders
 
     internal static RaygunErrorStackTraceLineMessage ParseStackTraceLine(string stackTraceLine)
     {
-      int lineNumber = 0;
+      int? lineNumber = null;
       string fileName = null;
       string methodName = null;
       string className = null;
@@ -142,9 +142,11 @@ namespace Mindscape.Raygun4Net.Builders
         {
           bracketAfterLineNumber = stackTraceLn.EndsWith(")", StringComparison.Ordinal);
           int length = bracketAfterLineNumber ? stackTraceLn.Length - index - 2 : stackTraceLn.Length - index - 1;
-          bool success = int.TryParse(stackTraceLn.Substring(index + 1, Math.Max(0, length)), out lineNumber);
+          int lineNumberInteger;
+          bool success = int.TryParse(stackTraceLn.Substring(index + 1, Math.Max(0, length)), out lineNumberInteger);
           if (success)
           {
+            lineNumber = lineNumberInteger;
             stackTraceLn = stackTraceLn.Substring(0, index);
           }
           else
@@ -227,7 +229,7 @@ namespace Mindscape.Raygun4Net.Builders
         }
       }
 
-      if (lineNumber != 0 || !String.IsNullOrWhiteSpace(methodName) || !String.IsNullOrWhiteSpace(fileName) || !String.IsNullOrWhiteSpace(className))
+      if (lineNumber != null || !String.IsNullOrWhiteSpace(methodName) || !String.IsNullOrWhiteSpace(fileName) || !String.IsNullOrWhiteSpace(className))
       {
         var line = new RaygunErrorStackTraceLineMessage
         {
@@ -240,11 +242,11 @@ namespace Mindscape.Raygun4Net.Builders
 
         return line;
       }
-      else if (!String.IsNullOrWhiteSpace(stackTraceLn))
+      else if (!String.IsNullOrWhiteSpace(stackTraceLine))
       {
         var line = new RaygunErrorStackTraceLineMessage
         {
-          Raw = stackTraceLn
+          Raw = stackTraceLine.Trim()
         };
 
         return line;

@@ -2,7 +2,7 @@
 {
   public class RaygunErrorStackTraceLineMessage
   {
-    public int LineNumber { get; set; }
+    public int? LineNumber { get; set; }
 
     public string ClassName { get; set; }
 
