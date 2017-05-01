@@ -75,10 +75,8 @@ namespace Mindscape.Raygun4Net.Builders
       #endif
 
       string stackTraceStr = exception.StackTrace;
-      if (stackTraceStr == null)
+      if (String.IsNullOrWhiteSpace(stackTraceStr))
       {
-        var line = new RaygunErrorStackTraceLineMessage { FileName = "none", LineNumber = 0 };
-        lines.Add(line);
         return lines.ToArray();
       }
 
@@ -97,8 +95,6 @@ namespace Mindscape.Raygun4Net.Builders
 
       if (frames == null || frames.Length == 0)
       {
-        var line = new RaygunErrorStackTraceLineMessage { FileName = "none", LineNumber = 0 };
-        lines.Add(line);
         return lines.ToArray();
       }
 
