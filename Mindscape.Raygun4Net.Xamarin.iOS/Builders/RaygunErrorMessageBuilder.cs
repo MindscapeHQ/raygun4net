@@ -167,34 +167,63 @@ namespace Mindscape.Raygun4Net.Builders
         }
 
         // Method name
-        index = stackTraceLn.LastIndexOf("(", StringComparison.Ordinal);
-        if (index > 0 && !stackTraceLn.StartsWith("at (", StringComparison.Ordinal))
+        if (!stackTraceLn.StartsWith("at (", StringComparison.Ordinal) && stackTraceLn.StartsWith("at ", StringComparison.Ordinal))
         {
-          index = stackTraceLn.LastIndexOf(".", index, StringComparison.Ordinal);
-          if (index > 0)
+          string parameters = "";
+          int parameterStartIndex = stackTraceLn.LastIndexOf("(", StringComparison.Ordinal);
+          if (parameterStartIndex > 0)
           {
-            int endIndex = stackTraceLn.IndexOf("[0x", StringComparison.Ordinal);
-            if (endIndex < 0)
+            int parameterEndIndex = stackTraceLn.IndexOf("[0x", StringComparison.Ordinal) - 1;
+            if (parameterEndIndex < 0)
             {
-              endIndex = stackTraceLn.Length;
+              parameterEndIndex = stackTraceLn.IndexOf("<0x", StringComparison.Ordinal) - 1;
+              if (parameterEndIndex < 0)
+              {
+                parameterEndIndex = stackTraceLn.Length - 1;
+              }
             }
-            methodName = stackTraceLn.Substring(index + 1, endIndex - index - 1).Trim();
-            methodName = methodName.Replace(" (", "(");
-            stackTraceLn = stackTraceLn.Substring(0, index);
+            parameters = stackTraceLn.Substring(parameterStartIndex, parameterEndIndex - parameterStartIndex + 1).Trim();
+          }
+          else
+          {
+            parameterStartIndex = stackTraceLn.Length;
+          }
 
-            // Memory address
-            index = methodName.LastIndexOf("<0x", StringComparison.Ordinal);
-            if (index >= 0)
-            {
-              methodName = methodName.Substring(0, index).Trim();
-            }
+          int methodStartIndex = stackTraceLn.IndexOf("<", StringComparison.Ordinal) + 1;
+          int methodEndIndex = methodStartIndex;
+          int methodSeparatorLength = 0;
+          if (methodStartIndex > 0 && methodStartIndex < parameterStartIndex)
+          {
+            methodEndIndex = stackTraceLn.IndexOf(">", methodStartIndex, StringComparison.Ordinal) - 1;
+            methodSeparatorLength = 2;
+          }
 
-            // Class name
-            index = stackTraceLn.IndexOf("at ", StringComparison.Ordinal);
-            if (index >= 0)
-            {
-              className = stackTraceLn.Substring(index + 3);
-            }
+          if (methodEndIndex - methodStartIndex <= 0)
+          {
+            methodStartIndex = stackTraceLn.LastIndexOf("..", parameterStartIndex, StringComparison.Ordinal) + 1;
+            methodEndIndex = parameterStartIndex - 1;
+            methodSeparatorLength = 1;
+          }
+
+          if (methodStartIndex <= 0)
+          {
+            methodStartIndex = stackTraceLn.LastIndexOf(".", parameterStartIndex, StringComparison.Ordinal) + 1;
+            methodEndIndex = parameterStartIndex - 1;
+            methodSeparatorLength = 1;
+          }
+
+          if (methodStartIndex > 0)
+          {
+            methodName = stackTraceLn.Substring(methodStartIndex, methodEndIndex - methodStartIndex + 1).Trim();
+            methodName += parameters;
+            stackTraceLn = stackTraceLn.Substring(0, methodStartIndex - methodSeparatorLength);
+          }
+
+          // Class name
+          index = stackTraceLn.IndexOf("at ", StringComparison.Ordinal);
+          if (index >= 0)
+          {
+            className = stackTraceLn.Substring(index + 3);
           }
         }
 
