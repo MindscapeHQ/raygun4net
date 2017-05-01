@@ -139,19 +139,21 @@ namespace Mindscape.Raygun4Net.Builders
       string[] stackTraceLines = stackTrace.Split('\n');
       foreach (string stackTraceLine in stackTraceLines)
       {
-        int lineNumber = 0;
+        int? lineNumber = null;
         string fileName = null;
         string methodName = null;
         string className = null;
-        string stackTraceLn = stackTraceLine;
+        string stackTraceLn = stackTraceLine.Trim();
 
         // Line number
-        int index = stackTraceLine.LastIndexOf(":", StringComparison.Ordinal);
+        int index = stackTraceLn.LastIndexOf(":", StringComparison.Ordinal);
         if (index > 0)
         {
-          bool success = int.TryParse(stackTraceLn.Substring(index + 1), out lineNumber);
+          int lineNumberInteger;
+          bool success = int.TryParse(stackTraceLn.Substring(index + 1), out lineNumberInteger);
           if (success)
           {
+            lineNumber = lineNumberInteger;
             stackTraceLn = stackTraceLn.Substring(0, index);
           }
         }
@@ -166,7 +168,7 @@ namespace Mindscape.Raygun4Net.Builders
 
         // Method name
         index = stackTraceLn.LastIndexOf("(", StringComparison.Ordinal);
-        if (index > 0 && !stackTraceLine.StartsWith("at (", StringComparison.Ordinal))
+        if (index > 0 && !stackTraceLn.StartsWith("at (", StringComparison.Ordinal))
         {
           index = stackTraceLn.LastIndexOf(".", index, StringComparison.Ordinal);
           if (index > 0)
@@ -196,21 +198,13 @@ namespace Mindscape.Raygun4Net.Builders
           }
         }
 
-        if (methodName == null && fileName == null)
-        {
-          if (!String.IsNullOrWhiteSpace(stackTraceLn) && stackTraceLn.StartsWith("at ", StringComparison.Ordinal))
-          {
-            stackTraceLn = stackTraceLn.Substring(3);
-          }
-          fileName = stackTraceLn;
-        }
-
         var line = new RaygunErrorStackTraceLineMessage
         {
           FileName = fileName,
           LineNumber = lineNumber,
           MethodName = methodName,
-          ClassName = className
+          ClassName = className,
+          Raw = stackTraceLine.Trim()
         };
 
         lines.Add(line);
