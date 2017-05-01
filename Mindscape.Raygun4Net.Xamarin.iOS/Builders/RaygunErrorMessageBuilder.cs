@@ -150,7 +150,7 @@ namespace Mindscape.Raygun4Net.Builders
         string stackTraceLn = stackTraceLine;
 
         // Line number
-        int index = stackTraceLine.LastIndexOf(":");
+        int index = stackTraceLine.LastIndexOf(":", StringComparison.Ordinal);
         if (index > 0)
         {
           bool success = int.TryParse(stackTraceLn.Substring(index + 1), out lineNumber);
@@ -161,7 +161,7 @@ namespace Mindscape.Raygun4Net.Builders
         }
 
         // File name
-        index = stackTraceLn.LastIndexOf(" in ");
+        index = stackTraceLn.LastIndexOf(" in ", StringComparison.Ordinal);
         if (index > 0)
         {
           fileName = stackTraceLn.Substring(index + 4);
@@ -169,13 +169,13 @@ namespace Mindscape.Raygun4Net.Builders
         }
 
         // Method name
-        index = stackTraceLn.LastIndexOf("(");
-        if (index > 0 && !stackTraceLine.StartsWith("at ("))
+        index = stackTraceLn.LastIndexOf("(", StringComparison.Ordinal);
+        if (index > 0 && !stackTraceLine.StartsWith("at (", StringComparison.Ordinal))
         {
-          index = stackTraceLn.LastIndexOf(".", index);
+          index = stackTraceLn.LastIndexOf(".", index, StringComparison.Ordinal);
           if (index > 0)
           {
-            int endIndex = stackTraceLn.IndexOf("[0x");
+            int endIndex = stackTraceLn.IndexOf("[0x", StringComparison.Ordinal);
             if (endIndex < 0)
             {
               endIndex = stackTraceLn.Length;
@@ -185,14 +185,14 @@ namespace Mindscape.Raygun4Net.Builders
             stackTraceLn = stackTraceLn.Substring(0, index);
 
             // Memory address
-            index = methodName.LastIndexOf("<0x");
+            index = methodName.LastIndexOf("<0x", StringComparison.Ordinal);
             if (index >= 0)
             {
               methodName = methodName.Substring(0, index).Trim();
             }
 
             // Class name
-            index = stackTraceLn.IndexOf("at ");
+            index = stackTraceLn.IndexOf("at ", StringComparison.Ordinal);
             if (index >= 0)
             {
               className = stackTraceLn.Substring(index + 3);
@@ -202,7 +202,7 @@ namespace Mindscape.Raygun4Net.Builders
 
         if (methodName == null && fileName == null)
         {
-          if (!String.IsNullOrWhiteSpace(stackTraceLn) && stackTraceLn.StartsWith("at "))
+          if (!String.IsNullOrWhiteSpace(stackTraceLn) && stackTraceLn.StartsWith("at ", StringComparison.Ordinal))
           {
             stackTraceLn = stackTraceLn.Substring(3);
           }
