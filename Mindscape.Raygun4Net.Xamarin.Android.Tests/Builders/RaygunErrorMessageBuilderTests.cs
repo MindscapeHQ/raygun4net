@@ -117,6 +117,20 @@ namespace Mindscape.Raygun4Net.Xamarin.Android.Tests.Builders
     }
 
     [Test]
+    public void ParseStackTraceLine_Constructor_MethodNameStartsWithPeriod()
+    {
+      string stackTraceLine = "at Raygun..ctor () in Raygun.cs:7";
+
+      var message = RaygunErrorMessageBuilder.ParseStackTraceLine(stackTraceLine);
+
+      Assert.AreEqual("Raygun", message.ClassName);
+      Assert.AreEqual(".ctor()", message.MethodName);
+      Assert.AreEqual("Raygun.cs", message.FileName);
+      Assert.AreEqual(7, message.LineNumber);
+      Assert.AreEqual(stackTraceLine, message.Raw);
+    }
+
+    [Test]
     public void ParseStackTraceLine_WrapperDynamicMethod_LineIsLoggedInRawProperty()
     {
       string stackTraceLine = "at (wrapper dynamic-method) System.Object:6b4f2c61-c425-4660-9dd5-ef82ab5b5664 (intptr,intptr)";
