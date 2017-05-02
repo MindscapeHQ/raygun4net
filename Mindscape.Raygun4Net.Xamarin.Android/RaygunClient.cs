@@ -794,20 +794,20 @@ namespace Mindscape.Raygun4Net
       RaygunErrorStackTraceLineMessage[] stackTrace = e.Message?.Details?.Error.StackTrace;
       if (stackTrace != null && stackTrace.Length > 1)
       {
-        string firstLineFileName = stackTrace[0].FileName;
+        string firstLine = stackTrace[0].Raw;
         if (
-          firstLineFileName != null &&
+          firstLine != null &&
           (
-            // Older Xamarin versions (pre Xamarin.Android 6.1?)
-            firstLineFileName.Contains("--- End of managed exception stack trace ---") ||
+            // Older Xamarin versions (pre Xamarin.Android 6.1)
+            firstLine.Contains("--- End of managed exception stack trace ---") ||
             // More recent Xamarin versions
-            firstLineFileName.Contains($"--- End of managed {e.Message.Details.Error.ClassName} stack trace ---")
+            firstLine.Contains($"--- End of managed {e.Message.Details.Error.ClassName} stack trace ---")
           )
         )
         {
           foreach (RaygunErrorStackTraceLineMessage line in stackTrace.Skip(1))
           {
-            if (line.FileName != null && line.FileName.Contains("JavaProxyThrowable"))
+            if (line.Raw != null && !line.Raw.StartsWith("at ") && line.Raw.Contains("JavaProxyThrowable"))
             {
               // Reaching this point means the exception is wrapping a managed exception that has already been sent.
               // Such exception does not contain any additional useful information, and so is a waste to send it.
