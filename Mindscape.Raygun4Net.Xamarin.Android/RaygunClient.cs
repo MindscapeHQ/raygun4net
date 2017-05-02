@@ -337,7 +337,7 @@ namespace Mindscape.Raygun4Net
         .SetUserCustomData(userCustomData)
         .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : BuildRaygunIdentifierMessage(null)))
         .Build();
-      
+
       var customGroupingKey = OnCustomGroupingKey(exception, message);
       if(string.IsNullOrEmpty(customGroupingKey) == false)
       {
@@ -791,22 +791,28 @@ namespace Mindscape.Raygun4Net
 
     private void RaygunClient_SendingMessage(object sender, RaygunSendingMessageEventArgs e)
     {
-      if (e.Message != null && e.Message.Details != null && e.Message.Details.Error != null)
+      RaygunErrorStackTraceLineMessage[] stackTrace = e.Message?.Details?.Error.StackTrace;
+      if (stackTrace != null && stackTrace.Length > 1)
       {
-        RaygunErrorStackTraceLineMessage[] stackTrace = e.Message.Details.Error.StackTrace;
-        if (stackTrace != null && stackTrace.Length > 1)
+        string firstLineFileName = stackTrace[0].FileName;
+        if (
+          firstLineFileName != null &&
+          (
+            // Older Xamarin versions (pre Xamarin.Android 6.1?)
+            firstLineFileName.Contains("--- End of managed exception stack trace ---") ||
+            // More recent Xamarin versions
+            firstLineFileName.Contains($"--- End of managed {e.Message.Details.Error.ClassName} stack trace ---")
+          )
+        )
         {
-          if (stackTrace[0].FileName != null && stackTrace[0].FileName.Contains("--- End of managed exception stack trace ---"))
+          foreach (RaygunErrorStackTraceLineMessage line in stackTrace.Skip(1))
           {
-            foreach (RaygunErrorStackTraceLineMessage line in stackTrace)
+            if (line.FileName != null && line.FileName.Contains("JavaProxyThrowable"))
             {
-              if (line.FileName != null && line.FileName.Contains("Caused by:") && line.FileName.Contains("JavaProxyThrowable"))
-              {
-                // Reaching this point means the exception is wrapping a managed exception that has already been sent.
-                // Such exception does not contain any additional useful information, and so is a waste to send it.
-                e.Cancel = true;
-                break;
-              }
+              // Reaching this point means the exception is wrapping a managed exception that has already been sent.
+              // Such exception does not contain any additional useful information, and so is a waste to send it.
+              e.Cancel = true;
+              break;
             }
           }
         }
