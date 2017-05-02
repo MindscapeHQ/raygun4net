@@ -52,6 +52,7 @@
     <Reference Include="Xamarin.Android.NUnitLite" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Builders\RaygunErrorMessageBuilderTests.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Model\FakeRaygunClient.cs" />
     <Compile Include="Model\WrapperException.cs" />

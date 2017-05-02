@@ -11,6 +11,8 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Mindscape.Raygun4Net.Messages;
+using System.Runtime.CompilerServices;
+using System.Globalization;
 
 namespace Mindscape.Raygun4Net.Builders
 {
@@ -52,10 +54,8 @@ namespace Mindscape.Raygun4Net.Builders
       var lines = new List<RaygunErrorStackTraceLineMessage>();
 
       string stackTraceStr = exception.StackTrace;
-      if (stackTraceStr == null)
+      if (String.IsNullOrWhiteSpace(stackTraceStr))
       {
-        var line = new RaygunErrorStackTraceLineMessage { FileName = "none", LineNumber = 0 };
-        lines.Add(line);
         return lines.ToArray();
       }
       try
@@ -63,89 +63,10 @@ namespace Mindscape.Raygun4Net.Builders
         string[] stackTraceLines = stackTraceStr.Split('\n');
         foreach (string stackTraceLine in stackTraceLines)
         {
-          int lineNumber = 0;
-          string fileName = null;
-          string methodName = null;
-          string className = null;
-          string stackTraceLn = stackTraceLine.Trim();
-          // Line number
-          int index = stackTraceLn.LastIndexOf(":");
-          if (index > 0)
+          RaygunErrorStackTraceLineMessage stackTraceLineMessage = ParseStackTraceLine(stackTraceLine);
+          if (stackTraceLineMessage != null)
           {
-            bool success = int.TryParse(stackTraceLn.Substring(index + 1), out lineNumber);
-            if (success)
-            {
-              stackTraceLn = stackTraceLn.Substring(0, index);
-            }
-          }
-          // File name
-          index = stackTraceLn.LastIndexOf("] in ");
-          if (index > 0)
-          {
-            fileName = stackTraceLn.Substring(index + 5);
-            if ("<filename unknown>".Equals(fileName))
-            {
-              fileName = null;
-            }
-            stackTraceLn = stackTraceLn.Substring(0, index);
-          }
-
-          if (!stackTraceLn.StartsWith("at (wrapper") && !stackTraceLn.StartsWith("(wrapper"))
-          {
-            // Method name
-            index = stackTraceLn.LastIndexOf("(");
-            if (index > 0)
-            {
-              index = stackTraceLn.LastIndexOf(".", index);
-              if (index > 0)
-              {
-                int endIndex = stackTraceLn.IndexOf("[0x");
-                if (endIndex < 0)
-                {
-                  endIndex = stackTraceLn.IndexOf("<0x");
-                  if (endIndex < 0)
-                  {
-                    endIndex = stackTraceLn.Length;
-                  }
-                }
-
-                methodName = stackTraceLn.Substring(index + 1, endIndex - index - 1).Trim();
-                methodName = methodName.Replace(" (", "(");
-                stackTraceLn = stackTraceLn.Substring(0, index);
-              }
-            }
-            // Class name
-            index = stackTraceLn.IndexOf("at ");
-            if (index >= 0)
-            {
-              className = stackTraceLn.Substring(index + 3);
-            }
-          }
-
-          if (lineNumber != 0 || !String.IsNullOrWhiteSpace(methodName) || !String.IsNullOrWhiteSpace(fileName) || !String.IsNullOrWhiteSpace(className))
-          {
-            var line = new RaygunErrorStackTraceLineMessage
-            {
-              FileName = fileName,
-              LineNumber = lineNumber,
-              MethodName = methodName,
-              ClassName = className
-            };
-
-            lines.Add(line);
-          }
-          else if (!String.IsNullOrWhiteSpace(stackTraceLn))
-          {
-            if (stackTraceLn.StartsWith("at "))
-            {
-              stackTraceLn = stackTraceLn.Substring(3);
-            }
-            var line = new RaygunErrorStackTraceLineMessage
-            {
-              FileName = stackTraceLn
-            };
-
-            lines.Add(line);
+            lines.Add(stackTraceLineMessage);
           }
         }
         if (lines.Count > 0)
@@ -162,8 +83,6 @@ namespace Mindscape.Raygun4Net.Builders
 
       if (frames == null || frames.Length == 0)
       {
-        var line = new RaygunErrorStackTraceLineMessage { FileName = "none", LineNumber = 0 };
-        lines.Add(line);
         return lines.ToArray();
       }
 
@@ -201,6 +120,148 @@ namespace Mindscape.Raygun4Net.Builders
       }
 
       return lines.ToArray();
+    }
+
+    internal static RaygunErrorStackTraceLineMessage ParseStackTraceLine(string stackTraceLine)
+    {
+      try
+      {
+        int? lineNumber = null;
+        string fileName = null;
+        string methodName = null;
+        string className = null;
+        string stackTraceLn = stackTraceLine.Trim();
+        bool bracketAfterLineNumber = false;
+
+        // Line number
+        int index = stackTraceLn.LastIndexOf(":");
+        if (index > 0)
+        {
+          bracketAfterLineNumber = stackTraceLn.EndsWith(")", StringComparison.Ordinal);
+          int length = bracketAfterLineNumber ? stackTraceLn.Length - index - 2 : stackTraceLn.Length - index - 1;
+          int lineNumberInteger;
+          bool success = int.TryParse(stackTraceLn.Substring(index + 1, Math.Max(0, length)), out lineNumberInteger);
+          if (success)
+          {
+            lineNumber = lineNumberInteger;
+            stackTraceLn = stackTraceLn.Substring(0, index);
+          }
+          else
+          {
+            bracketAfterLineNumber = false;
+          }
+        }
+
+        // File name
+        int fileSeparatorLength = 0;
+        if (bracketAfterLineNumber)
+        {
+          index = index = stackTraceLn.LastIndexOf("(", StringComparison.Ordinal);
+          fileSeparatorLength = 1;
+        }
+        if (!bracketAfterLineNumber || index < 0)
+        {
+          index = stackTraceLn.LastIndexOf(" in ", StringComparison.Ordinal);
+          fileSeparatorLength = 4;
+        }
+        if (index > 0)
+        {
+          fileName = stackTraceLn.Substring(index + fileSeparatorLength);
+          if ("<filename unknown>".Equals(fileName, StringComparison.Ordinal))
+          {
+            fileName = null;
+          }
+          stackTraceLn = stackTraceLn.Substring(0, index);
+        }
+
+        // Method name
+        if (!stackTraceLn.StartsWith("at (wrapper", StringComparison.Ordinal) && stackTraceLn.StartsWith("at ", StringComparison.Ordinal))
+        {
+          string parameters = "";
+          int parameterStartIndex = stackTraceLn.LastIndexOf("(", StringComparison.Ordinal);
+          if (parameterStartIndex > 0)
+          {
+            int parameterEndIndex = stackTraceLn.IndexOf("[0x", StringComparison.Ordinal) - 1;
+            if (parameterEndIndex < 0)
+            {
+              parameterEndIndex = stackTraceLn.IndexOf("<0x", StringComparison.Ordinal) - 1;
+              if (parameterEndIndex < 0)
+              {
+                parameterEndIndex = stackTraceLn.Length - 1;
+              }
+            }
+            parameters = stackTraceLn.Substring(parameterStartIndex, parameterEndIndex - parameterStartIndex + 1).Trim();
+          }
+          else
+          {
+            parameterStartIndex = stackTraceLn.Length;
+          }
+
+          int methodStartIndex = stackTraceLn.IndexOf("<", StringComparison.Ordinal) + 1;
+          int methodEndIndex = methodStartIndex;
+          int methodSeparatorLength = 0;
+          if (methodStartIndex > 0 && methodStartIndex < parameterStartIndex)
+          {
+            methodEndIndex = stackTraceLn.IndexOf(">", methodStartIndex, StringComparison.Ordinal) - 1;
+            methodSeparatorLength = 2;
+          }
+
+          if (methodEndIndex - methodStartIndex <= 0)
+          {
+            methodStartIndex = stackTraceLn.LastIndexOf("..", parameterStartIndex, StringComparison.Ordinal) + 1;
+            methodEndIndex = parameterStartIndex - 1;
+            methodSeparatorLength = 1;
+          }
+
+          if (methodStartIndex <= 0)
+          {
+            methodStartIndex = stackTraceLn.LastIndexOf(".", parameterStartIndex, StringComparison.Ordinal) + 1;
+            methodEndIndex = parameterStartIndex - 1;
+            methodSeparatorLength = 1;
+          }
+
+          if (methodStartIndex > 0)
+          {
+            methodName = stackTraceLn.Substring(methodStartIndex, methodEndIndex - methodStartIndex + 1).Trim();
+            methodName += parameters;
+            stackTraceLn = stackTraceLn.Substring(0, methodStartIndex - methodSeparatorLength);
+          }
+
+          // Class name
+          index = stackTraceLn.IndexOf("at ", StringComparison.Ordinal);
+          if (index >= 0)
+          {
+            className = stackTraceLn.Substring(index + 3);
+          }
+        }
+
+        if (lineNumber != null || !String.IsNullOrWhiteSpace(methodName) || !String.IsNullOrWhiteSpace(fileName) || !String.IsNullOrWhiteSpace(className))
+        {
+          var line = new RaygunErrorStackTraceLineMessage
+          {
+            FileName = fileName,
+            LineNumber = lineNumber,
+            MethodName = methodName,
+            ClassName = className,
+            Raw = stackTraceLine.Trim()
+          };
+          
+          return line;
+        }
+        else if (!String.IsNullOrWhiteSpace(stackTraceLine))
+        {
+          return new RaygunErrorStackTraceLineMessage { Raw = stackTraceLine.Trim() };
+        }
+      }
+      catch
+      {
+        if (!String.IsNullOrWhiteSpace(stackTraceLine))
+        {
+          return new RaygunErrorStackTraceLineMessage { Raw = stackTraceLine.Trim() };
+        }
+      }
+
+      return null;
     }
   }
 }
