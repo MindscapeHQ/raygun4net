@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Mindscape.Raygun4Net.Messages;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using System.Text;
 
 namespace Mindscape.Raygun4Net.Builders
 {
@@ -116,10 +117,10 @@ namespace Mindscape.Raygun4Net.Builders
         length = Math.Min(length, (int)request.Body.Length);
 
         // Read the stream
-        var reader = new StreamReader(request.Body);
-        var buffer = new char[length];
-        reader.ReadBlock(buffer, 0, length);
-        string rawData = new string(buffer);
+        
+        var buffer = new byte[length];
+        request.Body.Read(buffer, 0, length);
+        string rawData = Encoding.UTF8.GetString(buffer);
 
         request.Body.Seek(0, SeekOrigin.Begin);
 
