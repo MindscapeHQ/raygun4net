@@ -57,7 +57,8 @@ namespace Mindscape.Raygun4Net.WebApi
         _raygunMessage.Details.Response = new RaygunResponseMessage
         {
           StatusCode = (int)error.StatusCode, 
-          StatusDescription = error.ReasonPhrase
+          StatusDescription = error.ReasonPhrase,
+          Content = error.Content
         };
       }
 
@@ -71,7 +72,7 @@ namespace Mindscape.Raygun4Net.WebApi
           task.Wait();
           content = task.Result;
         }
-        catch(Exception) {}
+        catch { }
 
         _raygunMessage.Details.Response = new RaygunResponseMessage
         {
