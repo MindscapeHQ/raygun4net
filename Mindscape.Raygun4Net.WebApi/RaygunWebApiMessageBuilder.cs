@@ -64,18 +64,20 @@ namespace Mindscape.Raygun4Net.WebApi
       var responseException = exception as HttpResponseException;
       if (responseException != null)
       {
+        string content = null;
         try
         {
           var task = responseException.Response.Content.ReadAsStringAsync();
           task.Wait();
-          responseException.Data["Content"] = task.Result;
+          content = task.Result;
         }
         catch(Exception) {}
 
         _raygunMessage.Details.Response = new RaygunResponseMessage
         {
           StatusCode = (int)responseException.Response.StatusCode,
-          StatusDescription = responseException.Response.ReasonPhrase
+          StatusDescription = responseException.Response.ReasonPhrase,
+          Content = content
         };
       }
 
