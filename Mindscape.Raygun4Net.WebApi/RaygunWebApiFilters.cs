@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Filters;
@@ -68,14 +69,7 @@ namespace Mindscape.Raygun4Net.WebApi
     {
       ReasonPhrase = response.ReasonPhrase;
       StatusCode = response.StatusCode;
-      
-      try
-      {
-        var task = response.Content.ReadAsStringAsync();
-        task.Wait();
-        Content = task.Result;
-      }
-      catch { }
+      Content = response.Content.ReadAsString();
     }
 
     public HttpStatusCode StatusCode { get; set; }
