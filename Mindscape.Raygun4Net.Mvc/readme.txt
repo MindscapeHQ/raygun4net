@@ -133,6 +133,15 @@ Tags and custom data
 When sending exceptions manually, you can also send an arbitrary list of tags (an array of strings), and a collection of custom data (a dictionary of any objects).
 This can be done using the various Send and SendInBackground method overloads.
 
+Breadcrumbs
+-----------
+
+Breadcrumbs let you provide logging points in your code that will be collected and sent along with any exception sent to Raygun. This lets you have a better understanding of the events that happened in the system that lead up to the exception.
+
+To record a Breadcrumb you can use the RecordBreadcrumb(string message) method to record a breadcrumb with a custom message but other properties set to default. If you wish to customize the other properties such as Level, Category or attach CustomData to the Breadcrumb you can construct a Breadcrumb object your self and pass it to RecordBreadcrumb.
+
+There are two settings related to Breadcrumbs in the RaygunSettings configuration, "breadcrumbsLevel" which can be set to Debug, Info, Warning, or Error and is the same as a log level in something like log4net and "breadcrumbsLocationRecordingEnabled" which when set to true will include the class and method where the breadcrumb was logged from. This has a performance cost associated with it so it is only recommended to be enabled when needed.
+
 WebApi support
 ==============
 
