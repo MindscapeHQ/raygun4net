@@ -1,24 +1,37 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Mindscape.Raygun4Net
 {
   public class RaygunBreadcrumb
   {
+    public RaygunBreadcrumb()
+    {
+      CustomData = new Dictionary<string, object>();
+      Level = RaygunBreadcrumbs.Level.Info;
+      Type = RaygunBreadcrumbs.Type.Manual.ToString();
+      Timestamp = (long)(DateTime.UtcNow - UnixEpoch).TotalMilliseconds;
+    }
+
     private static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
     public string Message { get; set; }
+
     public string Category { get; set; }
-    public RaygunBreadcrumbs.Level Level { get; set; } = RaygunBreadcrumbs.Level.Info;
-    public RaygunBreadcrumbs.Type Type { get; set; } = RaygunBreadcrumbs.Type.Manual;
-    public IDictionary CustomData { get; set; }
-    public long Timestamp { get; set; } = (long) (DateTime.UtcNow - UnixEpoch).TotalSeconds;
+
+    public RaygunBreadcrumbs.Level Level { get; set; }
+
+    // This is a string due to serialization of enums in SimpleJson to the numeric value.
+    public string Type { get; set; }
+
+    public IDictionary<string, object> CustomData { get; set; }
+
+    public long Timestamp { get; set; }
 
     public string ClassName { get; set; }
+
     public string MethodName { get; set; }
+
     public int? LineNumber { get; set; }
   }
 }

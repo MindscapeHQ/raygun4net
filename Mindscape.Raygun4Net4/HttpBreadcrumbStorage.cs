@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Web;
 
 namespace Mindscape.Raygun4Net
@@ -40,8 +37,10 @@ namespace Mindscape.Raygun4Net
 
     private void SetupStorage()
     {
-      if (!HttpContext.Current.Items.Contains(ItemsKey))
+      if (HttpContext.Current != null && !HttpContext.Current.Items.Contains(ItemsKey))
+      {
         HttpContext.Current.Items[ItemsKey] = new List<RaygunBreadcrumb>();
+      }
     }
   }
 }
