@@ -37,7 +37,7 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
 
     private void SetupStorage()
     {
-      if (HttpContext.Current != null && !HttpContext.Current.Items.Contains(ItemsKey))
+      if (!HttpContext.Current.Items.Contains(ItemsKey))
       {
         HttpContext.Current.Items[ItemsKey] = new List<RaygunBreadcrumb>();
       }

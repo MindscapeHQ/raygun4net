@@ -27,7 +27,7 @@ namespace Mindscape.Raygun4Net
     [ThreadStatic]
     private static List<RaygunBreadcrumb> _currentBreadcrumbs;
 
-    private static readonly RaygunBreadcrumbs _breadcrumbs = new RaygunBreadcrumbs(new HttpBreadcrumbStorage());
+    private static readonly RaygunBreadcrumbs _breadcrumbs = new RaygunBreadcrumbs(new DefaultBreadcrumbStorage());
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
