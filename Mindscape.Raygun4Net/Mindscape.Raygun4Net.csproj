@@ -59,6 +59,12 @@
     <Compile Include="..\AssemblyVersionInfo.cs">
       <Link>Properties\AssemblyVersionInfo.cs</Link>
     </Compile>
+    <Compile Include="Breadcrumbs\Enums.cs" />
+    <Compile Include="Breadcrumbs\HttpBreadcrumbStorage.cs" />
+    <Compile Include="Breadcrumbs\InMemoryBreadcrumbStorage.cs" />
+    <Compile Include="Breadcrumbs\IRaygunBreadcrumbStorage.cs" />
+    <Compile Include="Breadcrumbs\RaygunBreadcrumb.cs" />
+    <Compile Include="Breadcrumbs\RaygunBreadcrumbs.cs" />
     <Compile Include="Builders\RaygunEnvironmentMessageBuilder.cs" />
     <Compile Include="Builders\RaygunErrorMessageBuilder.cs" />
     <Compile Include="Builders\RaygunErrorMessageBuilderBase.cs" />

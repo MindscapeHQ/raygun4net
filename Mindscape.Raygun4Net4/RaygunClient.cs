@@ -12,6 +12,7 @@ using Mindscape.Raygun4Net.Builders;
 using System.IO;
 using System.IO.IsolatedStorage;
 using System.Text;
+using Mindscape.Raygun4Net.Breadcrumbs;
 
 namespace Mindscape.Raygun4Net
 {
@@ -214,6 +215,11 @@ namespace Mindscape.Raygun4Net
     public static void RecordBreadcrumb(RaygunBreadcrumb crumb)
     {
       _breadcrumbs.Record(crumb);
+    }
+
+    public static void ClearBreadcrumbs()
+    {
+      _breadcrumbs.Clear();
     }
 
     /// <summary>

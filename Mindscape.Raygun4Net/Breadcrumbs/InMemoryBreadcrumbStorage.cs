@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Mindscape.Raygun4Net.Core.Tests.Models
+namespace Mindscape.Raygun4Net.Breadcrumbs
 {
   public class InMemoryBreadcrumbStorage : IRaygunBreadcrumbStorage
   {

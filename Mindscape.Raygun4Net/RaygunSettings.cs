@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.Linq;
+using Mindscape.Raygun4Net.Breadcrumbs;
 
 namespace Mindscape.Raygun4Net
 {
@@ -107,9 +108,9 @@ namespace Mindscape.Raygun4Net
     }
 
     [ConfigurationProperty("breadcrumbsLevel", IsRequired = false, DefaultValue = "Info")]
-    public RaygunBreadcrumbs.Level BreadcrumbsLevel
+    public BreadcrumbLevel BreadcrumbsLevel
     {
-      get { return (RaygunBreadcrumbs.Level) this["breadcrumbsLevel"]; }
+      get { return (BreadcrumbLevel) this["breadcrumbsLevel"]; }
       set { this["breadcrumbsLevel"] = value; }
     }
 

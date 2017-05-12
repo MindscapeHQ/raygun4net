@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Mindscape.Raygun4Net.Breadcrumbs;
 
 namespace Mindscape.Raygun4Net
 {
@@ -8,8 +9,8 @@ namespace Mindscape.Raygun4Net
     public RaygunBreadcrumb()
     {
       CustomData = new Dictionary<string, object>();
-      Level = RaygunBreadcrumbs.Level.Info;
-      Type = RaygunBreadcrumbs.Type.Manual.ToString();
+      Level = BreadcrumbLevel.Info;
+      Type = BreadcrumbType.Manual.ToString();
       Timestamp = (long)(DateTime.UtcNow - UnixEpoch).TotalMilliseconds;
     }
 
@@ -19,7 +20,7 @@ namespace Mindscape.Raygun4Net
 
     public string Category { get; set; }
 
-    public RaygunBreadcrumbs.Level Level { get; set; }
+    public BreadcrumbLevel Level { get; set; }
 
     // This is a string due to serialization of enums in SimpleJson to the numeric value.
     public string Type { get; set; }

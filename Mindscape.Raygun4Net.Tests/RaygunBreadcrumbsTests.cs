@@ -1,21 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Mindscape.Raygun4Net.Core.Tests.Models;
+using Mindscape.Raygun4Net.Breadcrumbs;
 using NUnit.Framework;
 
-namespace Mindscape.Raygun4Net.Core.Tests
+namespace Mindscape.Raygun4Net.Tests
 {
   [TestFixture]
-  public class RaygunBreadcrumbsTest
+  public class RaygunBreadcrumbsTests
   {
     class BreadcrumbTest
     {
-      private readonly RaygunBreadcrumbsTest _testClass;
+      private readonly RaygunBreadcrumbsTests _testClass;
 
-      public BreadcrumbTest(RaygunBreadcrumbsTest testClass)
+      public BreadcrumbTest(RaygunBreadcrumbsTests testClass)
       {
         _testClass = testClass;
       }
@@ -51,7 +49,7 @@ namespace Mindscape.Raygun4Net.Core.Tests
       test.Foo();
       var crumb = _breadcrumbs.First();
 
-      Assert.That(crumb.ClassName, Is.EqualTo("Mindscape.Raygun4Net.Core.Tests.RaygunBreadcrumbsTest+BreadcrumbTest"));
+      Assert.That(crumb.ClassName, Is.EqualTo("Mindscape.Raygun4Net.Tests.RaygunBreadcrumbsTests+BreadcrumbTest"));
       Assert.That(crumb.MethodName, Is.EqualTo("Foo"));
       // Does this ever work? Can't find the line number
       // Assert.That(crumb.LineNumber, Is.Not.Null);
@@ -68,7 +66,7 @@ namespace Mindscape.Raygun4Net.Core.Tests
     [Test]
     public void It_Sets_The_Timestamp()
     {
-       _breadcrumbs.Record("test");
+      _breadcrumbs.Record("test");
 
       Assert.That(_breadcrumbs.First().Timestamp, Is.GreaterThan(0));
     }

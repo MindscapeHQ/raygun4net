@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Web;
 
-namespace Mindscape.Raygun4Net
+namespace Mindscape.Raygun4Net.Breadcrumbs
 {
   public class HttpBreadcrumbStorage : IRaygunBreadcrumbStorage
   {

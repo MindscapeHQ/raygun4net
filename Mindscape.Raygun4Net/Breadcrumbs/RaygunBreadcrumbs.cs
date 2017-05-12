@@ -5,23 +5,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Mindscape.Raygun4Net
+namespace Mindscape.Raygun4Net.Breadcrumbs
 {
   public class RaygunBreadcrumbs : IEnumerable<RaygunBreadcrumb>
   {
-    public enum Level
-    {
-      Debug,
-      Info,
-      Warning,
-      Error,
-    }
-
-    public enum Type
-    {
-      Manual
-    }
-
     private readonly IRaygunBreadcrumbStorage _storage;
 
     public RaygunBreadcrumbs(IRaygunBreadcrumbStorage storage)

@@ -76,7 +76,7 @@
     <Compile Include="..\Mindscape.Raygun4Net\RaygunMessageBuilder.cs">
       <Link>RaygunMessageBuilder.cs</Link>
     </Compile>
-    <Compile Include="HttpBreadcrumbStorage.cs" />
+    <Compile Include="Breadcrumbs\HttpBreadcrumbStorage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaygunClient.cs" />
   </ItemGroup>

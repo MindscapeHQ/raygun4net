@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using Mindscape.Raygun4Net.Breadcrumbs;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
