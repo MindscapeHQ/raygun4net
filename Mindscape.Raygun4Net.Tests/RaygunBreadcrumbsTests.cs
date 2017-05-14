@@ -36,7 +36,7 @@ namespace Mindscape.Raygun4Net.Tests
     [TearDown]
     public void TearDown()
     {
-      RaygunSettings.Settings.BreadcrumbsLevel = RaygunBreadcrumbs.Level.Info;
+      RaygunSettings.Settings.BreadcrumbsLevel = BreadcrumbLevel.Info;
       RaygunSettings.Settings.BreadcrumbsLocationRecordingEnabled = false;
     }
 
@@ -76,15 +76,15 @@ namespace Mindscape.Raygun4Net.Tests
     {
       _breadcrumbs.Record("test");
 
-      Assert.That(_breadcrumbs.First().Level, Is.EqualTo(RaygunBreadcrumbs.Level.Info));
+      Assert.That(_breadcrumbs.First().Level, Is.EqualTo(BreadcrumbLevel.Info));
     }
 
     [Test]
     public void It_Does_Not_Record_A_Breadcrumb_When_The_Breadcrumb_Level_Is_Too_High()
     {
-      RaygunSettings.Settings.BreadcrumbsLevel = RaygunBreadcrumbs.Level.Error;
+      RaygunSettings.Settings.BreadcrumbsLevel = BreadcrumbLevel.Error;
 
-      _breadcrumbs.Record(new RaygunBreadcrumb() { Message = "test", Level = RaygunBreadcrumbs.Level.Info });
+      _breadcrumbs.Record(new RaygunBreadcrumb() { Message = "test", Level = BreadcrumbLevel.Info });
 
       Assert.That(_breadcrumbs, Is.Empty);
     }
