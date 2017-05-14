@@ -12,6 +12,7 @@ using Mindscape.Raygun4Net.Builders;
 using System.IO;
 using System.IO.IsolatedStorage;
 using System.Text;
+using Mindscape.Raygun4Net.Breadcrumbs;
 
 namespace Mindscape.Raygun4Net
 {
@@ -23,6 +24,10 @@ namespace Mindscape.Raygun4Net
 
     [ThreadStatic]
     private static RaygunRequestMessage _currentRequestMessage;
+    [ThreadStatic]
+    private static List<RaygunBreadcrumb> _currentBreadcrumbs;
+
+    private static readonly RaygunBreadcrumbs _breadcrumbs = new RaygunBreadcrumbs(new DefaultBreadcrumbStorage());
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -34,6 +39,7 @@ namespace Mindscape.Raygun4Net
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
       _wrapperExceptions.Add(typeof(HttpUnhandledException));
+
 
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormFieldNames))
       {
@@ -201,6 +207,21 @@ namespace Mindscape.Raygun4Net
       return base.CanSend(exception);
     }
 
+    public static void RecordBreadcrumb(string message)
+    {
+      _breadcrumbs.Record(message);
+    }
+
+    public static void RecordBreadcrumb(RaygunBreadcrumb crumb)
+    {
+      _breadcrumbs.Record(crumb);
+    }
+
+    public static void ClearBreadcrumbs()
+    {
+      _breadcrumbs.Clear();
+    }
+
     /// <summary>
     /// Transmits an exception to Raygun.io synchronously, using the version number of the originating assembly.
     /// </summary>
@@ -248,6 +269,7 @@ namespace Mindscape.Raygun4Net
       if (CanSend(exception))
       {
         _currentRequestMessage = BuildRequestMessage();
+        _currentBreadcrumbs = _breadcrumbs.ToList();
 
         StripAndSend(exception, tags, userCustomData, userInfo, null);
         FlagAsSent(exception);
@@ -298,12 +320,18 @@ namespace Mindscape.Raygun4Net
         // We need to process the HttpRequestMessage on the current thread,
         // otherwise it will be disposed while we are using it on the other thread.
         RaygunRequestMessage currentRequestMessage = BuildRequestMessage();
+        // We need to retrieve the breadcrumbs on the current thread as the HttpContext.Current
+        // will be null on the other thread
+        var currentBreadcrumbs = _breadcrumbs.ToList();
         var currentTime = DateTime.UtcNow;
+
         ThreadPool.QueueUserWorkItem(c =>
         {
           try
           {
             _currentRequestMessage = currentRequestMessage;
+            _currentBreadcrumbs = currentBreadcrumbs;
+
             StripAndSend(exception, tags, userCustomData, userInfo, currentTime);
           }
           catch (Exception)
@@ -378,6 +406,7 @@ namespace Mindscape.Raygun4Net
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
         .SetUser(userInfoMessage ?? UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
+        .SetBreadcrumbs(_currentBreadcrumbs)
         .Build();
 
       var customGroupingKey = OnCustomGroupingKey(exception, message);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using Mindscape.Raygun4Net.Breadcrumbs;
 
 namespace Mindscape.Raygun4Net
 {
@@ -84,6 +85,27 @@ namespace Mindscape.Raygun4Net
     {
         get { return (string)this["applicationVersion"]; }
         set { this["applicationVersion"] = value; }
+    }
+
+    [ConfigurationProperty("throwOnError", IsRequired = false, DefaultValue = false)]
+    public bool ThrowOnError
+    {
+      get { return (bool) this["throwOnError"]; }
+      set { this["throwOnError"] = value; }
+    }
+
+    [ConfigurationProperty("breadcrumbsLevel", IsRequired = false, DefaultValue = "Info")]
+    public BreadcrumbLevel BreadcrumbsLevel
+    {
+      get { return (BreadcrumbLevel) this["breadcrumbsLevel"]; }
+      set { this["breadcrumbsLevel"] = value; }
+    }
+
+    [ConfigurationProperty("breadcrumbsLocationRecordingEnabled", IsRequired = false, DefaultValue = false)]
+    public bool BreadcrumbsLocationRecordingEnabled
+    {
+      get { return (bool) this["breadcrumbsLocationRecordingEnabled"]; }
+      set { this["breadcrumbsLocationRecordingEnabled"] = value; }
     }
   }
 }

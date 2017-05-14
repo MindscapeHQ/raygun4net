@@ -64,6 +64,12 @@
     <Compile Include="..\AssemblyVersionInfo.cs">
       <Link>Properties\AssemblyVersionInfo.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\DefaultBreadcrumbStorage.cs">
+      <Link>Breadcrumbs\DefaultBreadcrumbStorage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\HttpBreadcrumbStorage.cs">
+      <Link>Breadcrumbs\HttpBreadcrumbStorage.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Builders\RaygunRequestMessageBuilder.cs">
       <Link>Builders\RaygunRequestMessageBuilder.cs</Link>
     </Compile>

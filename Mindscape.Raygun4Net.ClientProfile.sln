@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{9EB26D75-825A-403C-90D3-F61398CBBD7C}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
@@ -8,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{9EB26D
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.ClientProfile", "Mindscape.Raygun4Net.ClientProfile\Mindscape.Raygun4Net.ClientProfile.csproj", "{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.ClientProfile", "Mindscape.Raygun4Net.ClientProfile\Mindscape.Raygun4Net.ClientProfile.csproj", "{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.ClientProfile.Tests", "Mindscape.Raygun4Net.ClientProfile.Tests\Mindscape.Raygun4Net.ClientProfile.Tests.csproj", "{30696896-9463-441E-9789-C79F6BF7B793}"
 EndProject
@@ -28,21 +30,21 @@ Global
 		Sign|x86 = Sign|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Release|ARM.ActiveCfg = Release|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Release|x64.ActiveCfg = Release|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Release|x86.ActiveCfg = Release|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Sign|Any CPU.ActiveCfg = Sign|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Sign|Any CPU.Build.0 = Sign|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Sign|ARM.ActiveCfg = Sign|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Sign|x64.ActiveCfg = Sign|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Sign|x86.ActiveCfg = Sign|Any CPU
+		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Release|ARM.ActiveCfg = Release|Any CPU
+		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Release|x64.ActiveCfg = Release|Any CPU
+		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Release|x86.ActiveCfg = Release|Any CPU
+		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Sign|Any CPU.ActiveCfg = Sign|Any CPU
+		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Sign|Any CPU.Build.0 = Sign|Any CPU
+		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Sign|ARM.ActiveCfg = Sign|Any CPU
+		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Sign|x64.ActiveCfg = Sign|Any CPU
+		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Sign|x86.ActiveCfg = Sign|Any CPU
 		{30696896-9463-441E-9789-C79F6BF7B793}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{30696896-9463-441E-9789-C79F6BF7B793}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{30696896-9463-441E-9789-C79F6BF7B793}.Debug|ARM.ActiveCfg = Debug|Any CPU

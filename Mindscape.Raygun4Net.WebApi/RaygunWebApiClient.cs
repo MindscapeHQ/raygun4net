@@ -425,7 +425,7 @@ namespace Mindscape.Raygun4Net.WebApi
       return message;
     }
 
-    internal RaygunWebApiClient CurrentHttpRequest(HttpRequestMessage request)
+    public RaygunWebApiClient SetCurrentHttpRequest(HttpRequestMessage request)
     {
       _currentWebRequest.Value = request;
       return this;

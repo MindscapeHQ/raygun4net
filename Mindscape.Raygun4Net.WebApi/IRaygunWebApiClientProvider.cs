@@ -40,7 +40,7 @@ namespace Mindscape.Raygun4Net.WebApi
         {
           client.ApplicationVersion = _applicationVersionFromAttach;
         }
-        client.CurrentHttpRequest(currentRequest);
+        client.SetCurrentHttpRequest(currentRequest);
       }
 
       return client;
