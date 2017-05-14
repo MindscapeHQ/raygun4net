@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata minClientVersion="2.5">
     <id>Mindscape.Raygun4Net.Mvc.Signed</id>
-    <version>5.4.1</version>
+    <version>5.5.0</version>
     <title />
     <authors>Raygun</authors>
     <owners />
@@ -12,7 +12,7 @@
     <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
     <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
     <dependencies>
-      <dependency id="Mindscape.Raygun4Net.Core.Signed" version="5.4.1" />
+      <dependency id="Mindscape.Raygun4Net.Core.Signed" version="5.5.0" />
     </dependencies>
   </metadata>
   <files>
