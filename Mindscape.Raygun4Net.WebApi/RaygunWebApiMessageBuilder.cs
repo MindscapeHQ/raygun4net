@@ -54,22 +54,24 @@ namespace Mindscape.Raygun4Net.WebApi
       var error = exception as RaygunWebApiHttpException;
       if (error != null)
       {
+        string content = RaygunSettings.Settings.IsResponseContentIgnored ? null : error.Content;
         _raygunMessage.Details.Response = new RaygunResponseMessage
         {
           StatusCode = (int)error.StatusCode, 
           StatusDescription = error.ReasonPhrase,
-          Content = error.Content
+          Content = content
         };
       }
 
       var responseException = exception as HttpResponseException;
       if (responseException != null)
       {
+        string content = RaygunSettings.Settings.IsResponseContentIgnored ? null : responseException.Response.Content.ReadAsString();
         _raygunMessage.Details.Response = new RaygunResponseMessage
         {
           StatusCode = (int)responseException.Response.StatusCode,
           StatusDescription = responseException.Response.ReasonPhrase,
-          Content = responseException.Response.Content.ReadAsString()
+          Content = content
         };
       }
 

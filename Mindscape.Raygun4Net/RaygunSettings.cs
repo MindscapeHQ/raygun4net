@@ -99,6 +99,13 @@ namespace Mindscape.Raygun4Net
       set { this["isRawDataIgnored"] = value; }
     }
 
+    [ConfigurationProperty("isResponseContentIgnored", IsRequired = false, DefaultValue = true)]
+    public bool IsResponseContentIgnored
+    {
+      get { return (bool)this["isResponseContentIgnored"]; }
+      set { this["isResponseContentIgnored"] = value; }
+    }
+
     [ConfigurationProperty("applicationVersion", IsRequired = false, DefaultValue = "")]
     public string ApplicationVersion
     {
