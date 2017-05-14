@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Filters;
@@ -46,9 +47,8 @@ namespace Mindscape.Raygun4Net.WebApi
       if (context != null && context.Exception == null && context.Response != null && (int)context.Response.StatusCode >= 400)
       {
         Exception e = new RaygunWebApiHttpException(
-          context.Response.StatusCode,
-          context.Response.ReasonPhrase,
-          string.Format("HTTP {0} returned while handling Request {2} {1}", (int)context.Response.StatusCode, context.Request.RequestUri, context.Request.Method));
+          string.Format("HTTP {0} returned while handling Request {2} {1}", (int)context.Response.StatusCode, context.Request.RequestUri, context.Request.Method),
+          context.Response);
 
         _clientCreator.GenerateRaygunWebApiClient(context.Request).SendInBackground(e);
       }
@@ -57,15 +57,25 @@ namespace Mindscape.Raygun4Net.WebApi
 
   public class RaygunWebApiHttpException : Exception
   {
-    public HttpStatusCode StatusCode { get; set; }
-
-    public string ReasonPhrase { get; set; }
-
     public RaygunWebApiHttpException(HttpStatusCode statusCode, string reasonPhrase, string message)
       : base(message)
     {
       ReasonPhrase = reasonPhrase;
       StatusCode = statusCode;
     }
+
+    public RaygunWebApiHttpException(string message, HttpResponseMessage response) :
+      base(message)
+    {
+      ReasonPhrase = response.ReasonPhrase;
+      StatusCode = response.StatusCode;
+      Content = response.Content.ReadAsString();
+    }
+
+    public HttpStatusCode StatusCode { get; set; }
+
+    public string ReasonPhrase { get; set; }
+
+    public string Content { get; set; }
   }
 }
