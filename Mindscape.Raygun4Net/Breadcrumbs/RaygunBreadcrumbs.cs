@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Mindscape.Raygun4Net.Breadcrumbs
@@ -44,7 +43,7 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
           crumb.ClassName = method.ReflectedType?.FullName;
           crumb.MethodName = method.Name;
           crumb.LineNumber = frame.GetFileLineNumber();
-          if (crumb.MethodName.Contains('<'))
+          if (crumb.MethodName.Contains("<"))
           {
             var unmangledName = new Regex(@"<(\w+)>").Match(crumb.MethodName).Groups[1].Value;
             crumb.MethodName = unmangledName;
