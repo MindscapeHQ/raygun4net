@@ -1,5 +1,5 @@
 {
-  "copyright": "Copyright (c) Raygun 2016",
+  "copyright": "Copyright (c) Raygun 2016-2017",
   "version": "5.5.0",
   "title": "Raygun4Net.AspNetCore",
   "description": "Raygun provider for .NET Core projects",
