@@ -3,29 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Mindscape.Raygun4Net.Breadcrumbs;
 using NUnit.Framework;
+using Tests.Model;
 
 namespace Mindscape.Raygun4Net.Tests
 {
   [TestFixture]
   public class RaygunBreadcrumbsTests
   {
-    class BreadcrumbTest
-    {
-      private readonly RaygunBreadcrumbsTests _testClass;
-
-      public BreadcrumbTest(RaygunBreadcrumbsTests testClass)
-      {
-        _testClass = testClass;
-      }
-
-      public void Foo()
-      {
-        Action wrapper = () => _testClass._breadcrumbs.Record("foo");
-        wrapper();
-      }
-    }
-
-    internal RaygunBreadcrumbs _breadcrumbs;
+    private RaygunBreadcrumbs _breadcrumbs;
 
     [SetUp]
     public void SetUp()
@@ -44,21 +29,19 @@ namespace Mindscape.Raygun4Net.Tests
     public void Set_ClassName_MethodName_And_LineNumber_Automatically_If_Configured()
     {
       RaygunSettings.Settings.BreadcrumbsLocationRecordingEnabled = true;
-      var test = new BreadcrumbTest(this);
+      var test = new BreadcrumbTestRecorder(_breadcrumbs);
 
-      test.Foo();
+      test.Record();
       var crumb = _breadcrumbs.First();
 
-      Assert.That(crumb.ClassName, Is.EqualTo("Mindscape.Raygun4Net.Tests.RaygunBreadcrumbsTests+BreadcrumbTest"));
-      Assert.That(crumb.MethodName, Is.EqualTo("Foo"));
-      // Does this ever work? Can't find the line number
-      // Assert.That(crumb.LineNumber, Is.Not.Null);
+      Assert.That(crumb.ClassName, Is.EqualTo("Tests.Model.BreadcrumbTestRecorder"));
+      Assert.That(crumb.MethodName, Is.EqualTo("Record"));
     }
 
     [Test]
     public void You_Can_Record_A_Breadcrumb()
     {
-      _breadcrumbs.Record("test");
+      _breadcrumbs.Record(new RaygunBreadcrumb() { Message = "test" });
 
       Assert.That(_breadcrumbs.First().Message, Is.EqualTo("test"));
     }
@@ -66,7 +49,7 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void It_Sets_The_Timestamp()
     {
-      _breadcrumbs.Record("test");
+      _breadcrumbs.Record(new RaygunBreadcrumb() { Message = "test" });
 
       Assert.That(_breadcrumbs.First().Timestamp, Is.GreaterThan(0));
     }
@@ -74,7 +57,7 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void It_Sets_The_Level_To_Info_If_Not_Set()
     {
-      _breadcrumbs.Record("test");
+      _breadcrumbs.Record(new RaygunBreadcrumb() { Message = "test" });
 
       Assert.That(_breadcrumbs.First().Level, Is.EqualTo(RaygunBreadcrumbLevel.Info));
     }

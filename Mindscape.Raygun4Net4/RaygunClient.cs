@@ -209,7 +209,7 @@ namespace Mindscape.Raygun4Net
 
     public static void RecordBreadcrumb(string message)
     {
-      _breadcrumbs.Record(message);
+      _breadcrumbs.Record(new RaygunBreadcrumb { Message = message });
     }
 
     public static void RecordBreadcrumb(RaygunBreadcrumb crumb)

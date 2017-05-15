@@ -24,19 +24,14 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
     {
       return _storage.GetEnumerator();
     }
-
-    public void Record(string message)
-    {
-      Record(new RaygunBreadcrumb { Message = message });
-    }
-
+    
     public void Record(RaygunBreadcrumb crumb)
     {
       if (RaygunSettings.Settings.BreadcrumbsLocationRecordingEnabled)
       {
         try
         {
-          for(int i = 1; i <= 4; i++)
+          for(int i = 1; i <= 3; i++)
           {
             PopulateLocation(crumb, i);
             if (crumb.ClassName == null || !crumb.ClassName.StartsWith("Mindscape.Raygun4Net"))
@@ -65,7 +60,7 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
       var frame = new StackFrame(stackTraceFrame);
       var method = frame.GetMethod();
 
-      crumb.ClassName = method.ReflectedType?.FullName;
+      crumb.ClassName = method.ReflectedType == null ? null : method.ReflectedType.FullName;
       crumb.MethodName = method.Name;
       crumb.LineNumber = frame.GetFileLineNumber();
       if (crumb.MethodName.Contains("<"))
