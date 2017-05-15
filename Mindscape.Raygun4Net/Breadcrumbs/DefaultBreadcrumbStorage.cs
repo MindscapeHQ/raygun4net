@@ -4,7 +4,7 @@ using System.Web;
 
 namespace Mindscape.Raygun4Net.Breadcrumbs
 {
-  public class DefaultBreadcrumbStorage : IRaygunBreadcrumbStorage
+  internal class DefaultBreadcrumbStorage : IRaygunBreadcrumbStorage
   {
     private readonly IRaygunBreadcrumbStorage _internalStorage;
 

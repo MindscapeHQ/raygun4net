@@ -4,7 +4,7 @@ using System.Web;
 
 namespace Mindscape.Raygun4Net.Breadcrumbs
 {
-  public class HttpBreadcrumbStorage : IRaygunBreadcrumbStorage
+  internal class HttpBreadcrumbStorage : IRaygunBreadcrumbStorage
   {
     private const string ItemsKey = "Raygun.Breadcrumbs.Storage";
 

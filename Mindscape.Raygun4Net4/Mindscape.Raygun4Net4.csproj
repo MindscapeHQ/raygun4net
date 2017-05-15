@@ -70,6 +70,15 @@
     <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\HttpBreadcrumbStorage.cs">
       <Link>Breadcrumbs\HttpBreadcrumbStorage.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\InMemoryBreadcrumbStorage.cs">
+      <Link>Breadcrumbs\InMemoryBreadcrumbStorage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\IRaygunBreadcrumbStorage.cs">
+      <Link>Breadcrumbs\IRaygunBreadcrumbStorage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\RaygunBreadcrumbs.cs">
+      <Link>Breadcrumbs\RaygunBreadcrumbs.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Builders\RaygunRequestMessageBuilder.cs">
       <Link>Builders\RaygunRequestMessageBuilder.cs</Link>
     </Compile>

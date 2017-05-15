@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace Mindscape.Raygun4Net.Breadcrumbs
 {
-  public class RaygunBreadcrumbs : IEnumerable<RaygunBreadcrumb>
+  internal class RaygunBreadcrumbs : IEnumerable<RaygunBreadcrumb>
   {
     private readonly IRaygunBreadcrumbStorage _storage;
 
