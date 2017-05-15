@@ -1,6 +1,6 @@
 ﻿namespace Mindscape.Raygun4Net.Breadcrumbs
 {
-  public enum BreadcrumbLevel
+  public enum RaygunBreadcrumbLevel
   {
     Debug,
     Info,
@@ -8,7 +8,7 @@
     Error,
   }
 
-  public enum BreadcrumbType
+  public enum RaygunBreadcrumbType
   {
     Manual
   }

@@ -115,9 +115,9 @@ namespace Mindscape.Raygun4Net
     }
 
     [ConfigurationProperty("breadcrumbsLevel", IsRequired = false, DefaultValue = "Info")]
-    public BreadcrumbLevel BreadcrumbsLevel
+    public RaygunBreadcrumbLevel BreadcrumbsLevel
     {
-      get { return (BreadcrumbLevel) this["breadcrumbsLevel"]; }
+      get { return (RaygunBreadcrumbLevel) this["breadcrumbsLevel"]; }
       set { this["breadcrumbsLevel"] = value; }
     }
 
