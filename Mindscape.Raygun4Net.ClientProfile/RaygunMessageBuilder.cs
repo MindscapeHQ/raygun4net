@@ -108,10 +108,5 @@ namespace Mindscape.Raygun4Net
       }
       return this;
     }
-
-    public IRaygunMessageBuilder SetBreadcrumbs(List<RaygunBreadcrumb> breadcrumbs)
-    {
-      throw new NotImplementedException();
-    }
   }
 }

@@ -395,7 +395,10 @@ namespace Mindscape.Raygun4Net
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfoMessage, DateTime? currentTime)
     {
-      var message = RaygunMessageBuilder.New
+      RaygunMessageBuilder builder = RaygunMessageBuilder.New;
+      builder.SetBreadcrumbs(_currentBreadcrumbs);
+
+      var message = builder
         .SetHttpDetails(_currentRequestMessage)
         .SetTimeStamp(currentTime)
         .SetEnvironmentDetails()
@@ -406,7 +409,6 @@ namespace Mindscape.Raygun4Net
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
         .SetUser(userInfoMessage ?? UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
-        .SetBreadcrumbs(_currentBreadcrumbs)
         .Build();
 
       var customGroupingKey = OnCustomGroupingKey(exception, message);

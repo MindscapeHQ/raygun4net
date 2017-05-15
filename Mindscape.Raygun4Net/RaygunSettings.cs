@@ -127,6 +127,7 @@ namespace Mindscape.Raygun4Net
       get { return (bool)this["breadcrumbsLocationRecordingEnabled"]; }
       set { this["breadcrumbsLocationRecordingEnabled"] = value; }
     }
+
     /// <summary>
     /// Return false.
     /// </summary>

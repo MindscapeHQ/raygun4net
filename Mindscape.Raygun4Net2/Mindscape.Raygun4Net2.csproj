@@ -57,14 +57,8 @@
     <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\Enums.cs">
       <Link>Breadcrumbs\Enums.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\IRaygunBreadcrumbStorage.cs">
-      <Link>Breadcrumbs\IRaygunBreadcrumbStorage.cs</Link>
-    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\RaygunBreadcrumb.cs">
       <Link>Breadcrumbs\RaygunBreadcrumb.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\RaygunBreadcrumbs.cs">
-      <Link>Breadcrumbs\RaygunBreadcrumbs.cs</Link>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Builders\RaygunErrorMessageBuilderBase.cs">
       <Link>Builders\RaygunErrorMessageBuilderBase.cs</Link>
