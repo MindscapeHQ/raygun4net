@@ -47,7 +47,7 @@ namespace Mindscape.Raygun4Net.Azure.WebJob
         if (traceEvent.Properties.ContainsKey("MS_FunctionInvocationId") && !string.IsNullOrEmpty(httpHost))
         {
           var functionInvocationId = traceEvent.Properties["MS_FunctionInvocationId"];
-          customData["Dashboard URL"] = $"https://{httpHost}/azurejobs/#/functions/invocations/{functionInvocationId}";
+          customData["Dashboard URL"] = "https://" + httpHost + "/azurejobs/#/functions/invocations/" + functionInvocationId;
         }
 
         // If the FunctionDescriptor is available to us, we can use it to tag the executed function in raygun
