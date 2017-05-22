@@ -13,7 +13,7 @@ The main classes can be found in the Mindscape.Raygun4Net namespace.
 Usage
 ======
 
-In your project.json file, add "Mindscape.Raygun4Net.AspNetCore": "5.3.1.0" to your dependencies.
+In your project.json file, add "Mindscape.Raygun4Net.AspNetCore": "5.5.0.0" to your dependencies.
 
 Run dotnet.exe restore or restore packages within Visual Studio to download the package.
 

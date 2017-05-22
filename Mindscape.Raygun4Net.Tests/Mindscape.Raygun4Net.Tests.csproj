@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C6935911-2385-4788-B249-DB5CE1E3C1FE}</ProjectGuid>
+    <ProjectGuid>{30696896-9463-441E-9789-C79F6BF7B793}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Mindscape.Raygun4Net.Tests</RootNamespace>
@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\BreadcrumbTestRecorder.cs" />
     <Compile Include="Model\CyclicObject.cs" />
     <Compile Include="Model\FakeException.cs" />
     <Compile Include="Model\FakeHttpApplication.cs" />

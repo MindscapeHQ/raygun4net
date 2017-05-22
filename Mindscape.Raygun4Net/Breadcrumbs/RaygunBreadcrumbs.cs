@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace Mindscape.Raygun4Net.Breadcrumbs
 {
-  public class RaygunBreadcrumbs : IEnumerable<RaygunBreadcrumb>
+  internal class RaygunBreadcrumbs : IEnumerable<RaygunBreadcrumb>
   {
     private readonly IRaygunBreadcrumbStorage _storage;
 
@@ -24,34 +24,20 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
     {
       return _storage.GetEnumerator();
     }
-
-    public void Record(string message)
-    {
-      Record(new RaygunBreadcrumb { Message = message });
-    }
-
+    
     public void Record(RaygunBreadcrumb crumb)
     {
       if (RaygunSettings.Settings.BreadcrumbsLocationRecordingEnabled)
       {
         try
         {
-          // 2 because it's always going to go through RaygunClient.RecordBreadcrumb or the like
-          var frame = new StackFrame(2);
-          var method = frame.GetMethod();
-
-          crumb.ClassName = method.ReflectedType?.FullName;
-          crumb.MethodName = method.Name;
-          crumb.LineNumber = frame.GetFileLineNumber();
-          if (crumb.MethodName.Contains("<"))
+          for(int i = 1; i <= 3; i++)
           {
-            var unmangledName = new Regex(@"<(\w+)>").Match(crumb.MethodName).Groups[1].Value;
-            crumb.MethodName = unmangledName;
-          }
-
-          if (crumb.LineNumber == 0)
-          {
-            crumb.LineNumber = null;
+            PopulateLocation(crumb, i);
+            if (crumb.ClassName == null || !crumb.ClassName.StartsWith("Mindscape.Raygun4Net"))
+            {
+              break;
+            }
           }
         }
         catch (Exception)
@@ -66,6 +52,26 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
       if (ShouldRecord(crumb))
       {
         _storage.Store(crumb);
+      }
+    }
+
+    private void PopulateLocation(RaygunBreadcrumb crumb, int stackTraceFrame)
+    {
+      var frame = new StackFrame(stackTraceFrame);
+      var method = frame.GetMethod();
+
+      crumb.ClassName = method.ReflectedType == null ? null : method.ReflectedType.FullName;
+      crumb.MethodName = method.Name;
+      crumb.LineNumber = frame.GetFileLineNumber();
+      if (crumb.MethodName.Contains("<"))
+      {
+        var unmangledName = new Regex(@"<(\w+)>").Match(crumb.MethodName).Groups[1].Value;
+        crumb.MethodName = unmangledName;
+      }
+
+      if (crumb.LineNumber == 0)
+      {
+        crumb.LineNumber = null;
       }
     }
 

@@ -863,28 +863,31 @@ namespace Mindscape.Raygun4Net
 
     private void RaygunClient_SendingMessage(object sender, RaygunSendingMessageEventArgs e)
     {
-      RaygunErrorStackTraceLineMessage[] stackTrace = e.Message?.Details?.Error.StackTrace;
-      if (stackTrace != null && stackTrace.Length > 1)
+      if (e.Message != null && e.Message.Details != null && e.Message.Details.Error != null)
       {
-        string firstLine = stackTrace[0].Raw;
-        if (
-          firstLine != null &&
-          (
-            // Older Xamarin versions (pre Xamarin.Android 6.1)
-            firstLine.Contains("--- End of managed exception stack trace ---") ||
-            // More recent Xamarin versions
-            firstLine.Contains($"--- End of managed {e.Message.Details.Error.ClassName} stack trace ---")
-          )
-        )
+        RaygunErrorStackTraceLineMessage[] stackTrace = e.Message.Details.Error.StackTrace;
+        if (stackTrace != null && stackTrace.Length > 1)
         {
-          foreach (RaygunErrorStackTraceLineMessage line in stackTrace.Skip(1))
+          string firstLine = stackTrace[0].Raw;
+          if (
+            firstLine != null &&
+            (
+              // Older Xamarin versions (pre Xamarin.Android 6.1)
+              firstLine.Contains("--- End of managed exception stack trace ---") ||
+              // More recent Xamarin versions
+              firstLine.Contains("--- End of managed " + e.Message.Details.Error.ClassName + " stack trace ---")
+            )
+          )
           {
-            if (line.Raw != null && !line.Raw.StartsWith("at ") && line.Raw.Contains("JavaProxyThrowable"))
+            foreach (RaygunErrorStackTraceLineMessage line in stackTrace.Skip(1))
             {
-              // Reaching this point means the exception is wrapping a managed exception that has already been sent.
-              // Such exception does not contain any additional useful information, and so is a waste to send it.
-              e.Cancel = true;
-              break;
+              if (line.Raw != null && !line.Raw.StartsWith("at ") && line.Raw.Contains("JavaProxyThrowable"))
+              {
+                // Reaching this point means the exception is wrapping a managed exception that has already been sent.
+                // Such exception does not contain any additional useful information, and so is a waste to send it.
+                e.Cancel = true;
+                break;
+              }
             }
           }
         }

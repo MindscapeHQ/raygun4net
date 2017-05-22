@@ -88,12 +88,6 @@
     <Compile Include="..\Mindscape.Raygun4Net.Core\Messages\RaygunErrorMessage.cs">
       <Link>Messages\RaygunErrorMessage.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\Enums.cs">
-      <Link>Breadcrumbs\Enums.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\RaygunBreadcrumb.cs">
-      <Link>Breadcrumbs\RaygunBreadcrumb.cs</Link>
-    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
       <Link>IRaygunMessageBuilder.cs</Link>
     </Compile>

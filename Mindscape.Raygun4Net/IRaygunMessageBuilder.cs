@@ -26,7 +26,5 @@ namespace Mindscape.Raygun4Net
     IRaygunMessageBuilder SetUser(RaygunIdentifierMessage user);
 
     IRaygunMessageBuilder SetTimeStamp(DateTime? currentTime);
-
-    IRaygunMessageBuilder SetBreadcrumbs(List<RaygunBreadcrumb> breadcrumbs);
   }
 }
