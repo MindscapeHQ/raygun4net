@@ -749,6 +749,7 @@ namespace Mindscape.Raygun4Net
     }
 
     private PulseEventBatch _activeBatch;
+    private static readonly object _batchLock = new object();
 
     /// <summary>
     /// Sends a pulse timing event to Raygun. The message is sent on a background thread.
@@ -762,14 +763,21 @@ namespace Mindscape.Raygun4Net
         _activeBatch = new PulseEventBatch (this);
       }
 
-      if (_activeBatch != null && !_activeBatch.IsLocked) {
-        if (_sessionId == null) {
-          SendPulseSessionEvent (RaygunPulseSessionEventType.SessionStart);
+      lock(_batchLock)
+      {
+        if (_activeBatch != null && !_activeBatch.IsLocked)
+        {
+          if (_sessionId == null)
+          {
+            SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
+          }
+          PendingEvent pendingEvent = new PendingEvent(eventType, name, milliseconds, _sessionId);
+          _activeBatch.Add(pendingEvent);
         }
-        PendingEvent pendingEvent = new PendingEvent (eventType, name, milliseconds, _sessionId);
-        _activeBatch.Add (pendingEvent);
-      } else {
-        ThreadPool.QueueUserWorkItem (c => SendPulseTimingEventCore (eventType, name, milliseconds));
+        else
+        {
+          ThreadPool.QueueUserWorkItem(c => SendPulseTimingEventCore(eventType, name, milliseconds));
+        }
       }
     }
 
