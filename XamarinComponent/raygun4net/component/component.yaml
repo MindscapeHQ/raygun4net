@@ -18,5 +18,5 @@ libraries:
   ios: lib/ios/Mindscape.Raygun4Net.Xamarin.iOS.dll
   ios-unified: lib/ios-unified/Mindscape.Raygun4Net.Xamarin.iOS.Unified.dll
   android: lib/android/Mindscape.Raygun4Net.Xamarin.Android.dll
-version: 5.5.0
+version: 5.5.1
 ...
