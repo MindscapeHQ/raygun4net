@@ -37,11 +37,14 @@ namespace Mindscape.Raygun4Net
 
     public void Add(PendingEvent pendingEvent)
     {
-      _lastUpdate = DateTime.UtcNow;
-      _pendingEvents.Add(pendingEvent);
-      if (_pendingEvents.Count >= 50)
+      if (!_locked)
       {
-        Done();
+        _lastUpdate = DateTime.UtcNow;
+        _pendingEvents.Add(pendingEvent);
+        if (_pendingEvents.Count >= 50)
+        {
+          Done();
+        }
       }
     }
 

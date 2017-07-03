@@ -749,6 +749,7 @@ namespace Mindscape.Raygun4Net
     }
 
     private PulseEventBatch _activeBatch;
+    private static readonly object _batchLock = new object();
 
     /// <summary>
     /// Sends a pulse timing event to Raygun. The message is sent on a background thread.
@@ -758,18 +759,33 @@ namespace Mindscape.Raygun4Net
     /// <param name="milliseconds">The duration of the event in milliseconds.</param>
     public void SendPulseTimingEvent(RaygunPulseEventType eventType, string name, long milliseconds)
     {
-      if (_activeBatch == null) {
-        _activeBatch = new PulseEventBatch (this);
-      }
+      lock (_batchLock)
+      {
+        try
+        {
+          if (_activeBatch == null)
+          {
+            _activeBatch = new PulseEventBatch(this);
+          }
 
-      if (_activeBatch != null && !_activeBatch.IsLocked) {
-        if (_sessionId == null) {
-          SendPulseSessionEvent (RaygunPulseSessionEventType.SessionStart);
+          if (_activeBatch != null && !_activeBatch.IsLocked)
+          {
+            if (_sessionId == null)
+            {
+              SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
+            }
+            PendingEvent pendingEvent = new PendingEvent(eventType, name, milliseconds, _sessionId);
+            _activeBatch.Add(pendingEvent);
+          }
+          else
+          {
+            ThreadPool.QueueUserWorkItem(c => SendPulseTimingEventCore(eventType, name, milliseconds));
+          }
         }
-        PendingEvent pendingEvent = new PendingEvent (eventType, name, milliseconds, _sessionId);
-        _activeBatch.Add (pendingEvent);
-      } else {
-        ThreadPool.QueueUserWorkItem (c => SendPulseTimingEventCore (eventType, name, milliseconds));
+        catch (Exception e)
+        {
+          System.Diagnostics.Debug.WriteLine(string.Format("Error sending pulse timing event to Raygun: {0}", e.Message));
+        }
       }
     }
 
@@ -781,55 +797,67 @@ namespace Mindscape.Raygun4Net
 
     private void SendCore (PulseEventBatch batch)
     {
-      if (_sessionId == null) {
-        SendPulseSessionEvent (RaygunPulseSessionEventType.SessionStart);
+      try
+      {
+        if (_sessionId == null)
+        {
+          SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
+        }
+
+        string version = GetVersion();
+        string os = UIDevice.CurrentDevice.SystemName;
+        string osVersion = UIDevice.CurrentDevice.SystemVersion;
+        string platform = Mindscape.Raygun4Net.Builders.RaygunEnvironmentMessageBuilder.GetStringSysCtl("hw.machine");
+
+        string machineName = null;
+        try
+        {
+          machineName = UIDevice.CurrentDevice.Name;
+        }
+        catch (Exception e)
+        {
+          System.Diagnostics.Debug.WriteLine("Exception getting device name {0}", e.Message);
+        }
+
+        RaygunIdentifierMessage user = BuildRaygunIdentifierMessage(machineName);
+
+        RaygunPulseMessage message = new RaygunPulseMessage();
+
+        Debug.WriteLine("BatchSize: " + batch.PendingEventCount);
+
+        RaygunPulseDataMessage[] eventMessages = new RaygunPulseDataMessage[batch.PendingEventCount];
+        int index = 0;
+        foreach (PendingEvent pendingEvent in batch.PendingEvents)
+        {
+
+          RaygunPulseDataMessage dataMessage = new RaygunPulseDataMessage();
+          dataMessage.SessionId = pendingEvent.SessionId;
+          dataMessage.Timestamp = pendingEvent.Timestamp;
+          dataMessage.Version = version;
+          dataMessage.OS = os;
+          dataMessage.OSVersion = osVersion;
+          dataMessage.Platform = platform;
+          dataMessage.Type = "mobile_event_timing";
+          dataMessage.User = user;
+
+          string type = pendingEvent.EventType == RaygunPulseEventType.ViewLoaded ? "p" : "n";
+
+          RaygunPulseData data = new RaygunPulseData() { Name = pendingEvent.Name, Timing = new RaygunPulseTimingMessage() { Type = type, Duration = pendingEvent.Duration } };
+          RaygunPulseData[] dataArray = { data };
+          string dataStr = SimpleJson.SerializeObject(dataArray);
+          dataMessage.Data = dataStr;
+
+          eventMessages[index] = dataMessage;
+          index++;
+        }
+        message.EventData = eventMessages;
+
+        Send(message);
       }
-
-      string version = GetVersion ();
-      string os = UIDevice.CurrentDevice.SystemName;
-      string osVersion = UIDevice.CurrentDevice.SystemVersion;
-      string platform = Mindscape.Raygun4Net.Builders.RaygunEnvironmentMessageBuilder.GetStringSysCtl ("hw.machine");
-
-      string machineName = null;
-      try {
-        machineName = UIDevice.CurrentDevice.Name;
-      } catch (Exception e) {
-        System.Diagnostics.Debug.WriteLine ("Exception getting device name {0}", e.Message);
+      catch (Exception e)
+      {
+        System.Diagnostics.Debug.WriteLine(string.Format("Error sending pulse event batch to Raygun: {0}", e.Message));
       }
-
-      RaygunIdentifierMessage user = BuildRaygunIdentifierMessage (machineName);
-
-      RaygunPulseMessage message = new RaygunPulseMessage ();
-
-      Debug.WriteLine ("BatchSize: " + batch.PendingEventCount);
-
-      RaygunPulseDataMessage [] eventMessages = new RaygunPulseDataMessage[batch.PendingEventCount];
-      int index = 0;
-      foreach (PendingEvent pendingEvent in batch.PendingEvents) {
-
-        RaygunPulseDataMessage dataMessage = new RaygunPulseDataMessage ();
-        dataMessage.SessionId = pendingEvent.SessionId;
-        dataMessage.Timestamp = pendingEvent.Timestamp;
-        dataMessage.Version = version;
-        dataMessage.OS = os;
-        dataMessage.OSVersion = osVersion;
-        dataMessage.Platform = platform;
-        dataMessage.Type = "mobile_event_timing";
-        dataMessage.User = user;
-
-        string type = pendingEvent.EventType == RaygunPulseEventType.ViewLoaded ? "p" : "n";
-
-        RaygunPulseData data = new RaygunPulseData () { Name = pendingEvent.Name, Timing = new RaygunPulseTimingMessage () { Type = type, Duration = pendingEvent.Duration } };
-        RaygunPulseData [] dataArray = { data };
-        string dataStr = SimpleJson.SerializeObject (dataArray);
-        dataMessage.Data = dataStr;
-
-        eventMessages [index] = dataMessage;
-        index++;
-      }
-      message.EventData = eventMessages;
-
-      Send (message);
     }
 
     private void SendPulseTimingEventCore(RaygunPulseEventType eventType, string name, long milliseconds)
