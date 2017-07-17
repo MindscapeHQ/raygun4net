@@ -12,6 +12,8 @@ namespace Mindscape.Raygun4Net.WebApi
   {
     private readonly IRaygunWebApiClientProvider _clientCreator;
 
+    private static readonly Task CompletedTask = Task.FromResult(false);
+
     internal RaygunWebApiExceptionFilter(IRaygunWebApiClientProvider clientCreator)
     {
       _clientCreator = clientCreator;
@@ -19,15 +21,22 @@ namespace Mindscape.Raygun4Net.WebApi
 
     public override void OnException(HttpActionExecutedContext context)
     {
+      if (context.Exception is OperationCanceledException)
+      {
+        return;
+      }
       _clientCreator.GenerateRaygunWebApiClient(context.Request).SendInBackground(context.Exception);
     }
 
-#pragma warning disable 1998
-    public override async Task OnExceptionAsync(HttpActionExecutedContext context, CancellationToken cancellationToken)
+    public override Task OnExceptionAsync(HttpActionExecutedContext context, CancellationToken cancellationToken)
     {
+      if (context.Exception is OperationCanceledException)
+      {
+        return CompletedTask;
+      }
       _clientCreator.GenerateRaygunWebApiClient(context.Request).SendInBackground(context.Exception);
+      return CompletedTask;
     }
-#pragma warning restore 1998
   }
 
   public class RaygunWebApiActionFilter : ActionFilterAttribute
