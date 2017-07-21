@@ -30,6 +30,11 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
 
     private List<RaygunBreadcrumb> GetList()
     {
+      if (HttpContext.Current == null)
+      {
+        return new List<RaygunBreadcrumb>();
+      }
+
       SetupStorage();
 
       return (List<RaygunBreadcrumb>) HttpContext.Current.Items[ItemsKey];
