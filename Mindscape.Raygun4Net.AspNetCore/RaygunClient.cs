@@ -335,7 +335,11 @@ namespace Mindscape.Raygun4Net
     {
       if (CanSend(exception))
       {
-        _currentHttpContext.Value = context;
+        if (context != null)
+        {
+          _currentHttpContext.Value = context;
+        }
+
         _currentRequestMessage.Value = await BuildRequestMessage();
         _currentResponseMessage.Value = BuildResponseMessage();
 
