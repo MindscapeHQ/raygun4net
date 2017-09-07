@@ -306,7 +306,6 @@ At any point after calling the Attach method, you can use RaygunClient.Current t
 ### Xamarin for iOS
 
 In the main entry point of the application, use the static RaygunClient.Attach method using your app API key.
-There is also an overload for the Attach method that lets you pass in a user-identity string which is useful for tracking affected users in your Raygun dashboard.
 
 ```csharp
 static void Main(string[] args)
@@ -316,6 +315,19 @@ static void Main(string[] args)
   UIApplication.Main(args, null, "AppDelegate");
 }
 ```
+
+There is also an overload for the Attach method that lets you enable native iOS crash reporting.
+
+```csharp
+static void Main(string[] args)
+{
+  RaygunClient.Attach("YOUR_APP_API_KEY", true, true);
+
+  UIApplication.Main(args, null, "AppDelegate");
+}
+```
+
+The first boolean parameter is simply to enable the native iOS error reporting. The second boolean parameter is whether or not to hijack some of the native signals – this is to solve the well known iOS crash reporter issue where null reference exceptions within a try/catch block can cause the application to crash. By setting the second boolean parameter to true, the managed code will take over the SIGBUS and SIGSEGV iOS signals which solves the null reference issue. Doing this however prevents SIGBUS and SIGSEGV native errors from being detected, meaning they don’t get sent to Raygun. This is why we provide this as an option – so if you don’t have any issues with null reference exceptions occurring within try/catch blocks and you want to maximize the native errors that you can be notified of, then set the second boolean parameter to false.
 
 At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages or changing options such as the User identity string.
 
