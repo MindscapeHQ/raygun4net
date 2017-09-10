@@ -54,12 +54,11 @@ namespace Mindscape.Raygun4Net.WebApi
       var error = exception as RaygunWebApiHttpException;
       if (error != null)
       {
-        string content = RaygunSettings.Settings.IsResponseContentIgnored ? null : error.Content;
         _raygunMessage.Details.Response = new RaygunResponseMessage
         {
           StatusCode = (int)error.StatusCode, 
           StatusDescription = error.ReasonPhrase,
-          Content = content
+          Content = error.Content,
         };
       }
 

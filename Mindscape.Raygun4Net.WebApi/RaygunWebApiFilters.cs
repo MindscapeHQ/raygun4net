@@ -69,7 +69,7 @@ namespace Mindscape.Raygun4Net.WebApi
     {
       ReasonPhrase = response.ReasonPhrase;
       StatusCode = response.StatusCode;
-      Content = response.Content.ReadAsString();
+      Content = RaygunSettings.Settings.IsResponseContentIgnored ? null : response.Content.ReadAsString();
     }
 
     public HttpStatusCode StatusCode { get; set; }
