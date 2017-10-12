@@ -22,7 +22,6 @@ namespace Mindscape.Raygun4Net.WebApi
     private readonly List<Type> _wrapperExceptions = new List<Type>();
 
     private readonly ThreadLocal<HttpRequestMessage> _currentWebRequest = new ThreadLocal<HttpRequestMessage>(() => null);
-    private readonly ThreadLocal<RaygunRequestMessage> _currentRequestMessage = new ThreadLocal<RaygunRequestMessage>(() => null);
 
     private static RaygunWebApiExceptionFilter _exceptionFilter;
     private static RaygunWebApiActionFilter _actionFilter;
@@ -354,8 +353,6 @@ namespace Mindscape.Raygun4Net.WebApi
     {
       if (CanSend(exception))
       {
-        _currentRequestMessage.Value = BuildRequestMessage();
-
         StripAndSend(exception, tags, userCustomData);
         FlagAsSent(exception);
       }
@@ -390,15 +387,9 @@ namespace Mindscape.Raygun4Net.WebApi
     {
       if (CanSend(exception))
       {
-        // We need to process the HttpRequestMessage on the current thread,
-        // otherwise it will be disposed while we are using it on the other thread.
-        RaygunRequestMessage currentRequestMessage = BuildRequestMessage();
         DateTime currentTime = DateTime.UtcNow;
-
-        ThreadPool.QueueUserWorkItem(c => {
-          _currentRequestMessage.Value = currentRequestMessage;
-          StripAndSend(exception, tags, userCustomData, currentTime);
-        });
+        
+        StripAndSendInBackground(exception, tags, userCustomData, currentTime);
         FlagAsSent(exception);
       }
     }
@@ -439,7 +430,7 @@ namespace Mindscape.Raygun4Net.WebApi
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime = null)
     {
       var message = RaygunWebApiMessageBuilder.New
-        .SetHttpDetails(_currentRequestMessage.Value)
+        .SetHttpDetails(BuildRequestMessage())
         .SetTimeStamp(currentTime)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
@@ -455,6 +446,25 @@ namespace Mindscape.Raygun4Net.WebApi
       {
         message.Details.GroupingKey = customGroupingKey;
       }
+
+      var initializers = GetRaygunMessageInitializers();
+      foreach (var initializer in initializers)
+      {
+        try
+        {
+          initializer.Initialize(message);
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Trace.WriteLine(string.Format("Error Initializing RaygunMessage {0}", ex.Message));
+
+          if (RaygunSettings.Settings.ThrowOnError)
+          {
+            throw;
+          }
+        }
+      }
+
       return message;
     }
 
@@ -464,6 +474,21 @@ namespace Mindscape.Raygun4Net.WebApi
       {
         Send(BuildMessage(e, tags, userCustomData, currentTime));
       }
+    }
+
+    private void StripAndSendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime = null)
+    {
+      var messages = new List<RaygunMessage>();
+      foreach (Exception e in StripWrapperExceptions(exception))
+      {
+        messages.Add(BuildMessage(e, tags, userCustomData, currentTime));
+      }
+      // Could use SendInBackground here, but like this we queue multiple sends on a single thread
+      ThreadPool.QueueUserWorkItem(c => {
+        foreach (var message in messages)   {
+          Send(message);
+        }
+      });
     }
 
     protected IEnumerable<Exception> StripWrapperExceptions(Exception exception)
