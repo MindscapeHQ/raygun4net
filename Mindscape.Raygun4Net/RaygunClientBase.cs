@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using Mindscape.Raygun4Net.Messages;
 
@@ -113,6 +114,44 @@ namespace Mindscape.Raygun4Net
         }
       }
       return result;
+    }
+
+    /// <summary>
+    /// List of registered <see cref="IRaygunMessageInitializer"/> objects.
+    /// </summary>
+    private List<IRaygunMessageInitializer> RaygunMessageInitializers { get; set; } = new List<IRaygunMessageInitializer>();
+
+    /// <summary>
+    /// Return a copy of the registered <see cref="IRaygunMessageInitializer"/> objects.
+    /// </summary>
+    /// <remarks>
+    /// Ensures that changes made to the collection during processing does not cause problems.
+    /// </remarks>
+    protected virtual List<IRaygunMessageInitializer> GetRaygunMessageInitializers()
+    {
+      return new List<IRaygunMessageInitializer>(RaygunMessageInitializers);
+    }
+
+    /// <summary>
+    /// Register a <see cref="IRaygunMessageInitializer"/> to initialize properties on the <see cref="RaygunMessage"/>.
+    /// </summary>
+    /// <param name="raygunMessageInitializer">The <see cref="IRaygunMessageInitializer"/> to register.</param>
+    public virtual void AddMessageInitializer(IRaygunMessageInitializer raygunMessageInitializer)
+    {
+      if (RaygunMessageInitializers == null)
+      {
+        RaygunMessageInitializers = new List<IRaygunMessageInitializer>();
+      }
+      RaygunMessageInitializers.Add(raygunMessageInitializer);
+    }
+
+    /// <summary>
+    /// Removes a <see cref="IRaygunMessageInitializer"/> from the list of registered <see cref="IRaygunMessageInitializer"/> objects.
+    /// </summary>
+    /// <param name="raygunMessageInitializer">The <see cref="IRaygunMessageInitializer"/> to remove.</param>
+    public virtual bool RemoveMessageInitializer(IRaygunMessageInitializer raygunMessageInitializer)
+    {
+      return RaygunMessageInitializers.Remove(raygunMessageInitializer);
     }
 
     /// <summary>

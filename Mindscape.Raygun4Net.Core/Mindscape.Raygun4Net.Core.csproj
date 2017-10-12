@@ -121,6 +121,7 @@
       <Link>SimpleJson.cs</Link>
     </Compile>
     <Compile Include="Builders\RaygunErrorMessageBuilder.cs" />
+    <Compile Include="IRaygunMessageInitializer.cs" />
     <Compile Include="Messages\RaygunErrorMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
