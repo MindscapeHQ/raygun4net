@@ -315,36 +315,49 @@ namespace Mindscape.Raygun4Net
     /// <param name="userInfo">Information about the user including the identity string.</param>
     public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo)
     {
-      if (CanSend(exception))
+      try
       {
-        // We need to process the HttpRequestMessage on the current thread,
-        // otherwise it will be disposed while we are using it on the other thread.
-        RaygunRequestMessage currentRequestMessage = BuildRequestMessage();
-        // We need to retrieve the breadcrumbs on the current thread as the HttpContext.Current
-        // will be null on the other thread
-        var currentBreadcrumbs = _breadcrumbs.ToList();
-        var currentTime = DateTime.UtcNow;
-
-        ThreadPool.QueueUserWorkItem(c =>
+        if (CanSend(exception))
         {
-          try
-          {
-            _currentRequestMessage = currentRequestMessage;
-            _currentBreadcrumbs = currentBreadcrumbs;
+          // We need to process the HttpRequestMessage on the current thread,
+          // otherwise it will be disposed while we are using it on the other thread.
+          RaygunRequestMessage currentRequestMessage = BuildRequestMessage();
+          // We need to retrieve the breadcrumbs on the current thread as the HttpContext.Current
+          // will be null on the other thread
+          var currentBreadcrumbs = _breadcrumbs.ToList();
+          var currentTime = DateTime.UtcNow;
 
-            StripAndSend(exception, tags, userCustomData, userInfo, currentTime);
-          }
-          catch (Exception)
-          {
-            // This will swallow any unhandled exceptions unless we explicitly want to throw on error.
-            // Otherwise this can bring the whole process down.
-            if (RaygunSettings.Settings.ThrowOnError)
+          ThreadPool.QueueUserWorkItem(
+            c =>
             {
-              throw;
-            }
-          }
-        });
-        FlagAsSent(exception);
+              try
+              {
+                _currentRequestMessage = currentRequestMessage;
+                _currentBreadcrumbs = currentBreadcrumbs;
+
+                StripAndSend(exception, tags, userCustomData, userInfo, currentTime);
+              }
+              catch (Exception)
+              {
+                // This will swallow any unhandled exceptions unless we explicitly want to throw on error.
+                // Otherwise this can bring the whole process down.
+                if (RaygunSettings.Settings.ThrowOnError)
+                {
+                  throw;
+                }
+              }
+            });
+          FlagAsSent(exception);
+        }
+      }
+      catch (Exception)
+      {
+         // This will swallow any unhandled exceptions unless we explicitly want to throw on error.
+         // Otherwise this can bring the whole process down.
+         if (RaygunSettings.Settings.ThrowOnError)
+         {
+           throw;
+         }
       }
     }
 
