@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\FakeRaygunWebApiClient.cs" />
+    <Compile Include="Model\TestRaygunMessageInitializer.cs" />
     <Compile Include="Model\WrapperException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaygunWebApiClientTests.cs" />
