@@ -99,7 +99,7 @@ namespace Mindscape.Raygun4Net
       return app.UseMiddleware<RaygunAspNetMiddleware>();
     }
 
-    public static IServiceCollection AddRaygun(this IServiceCollection services, IConfigurationRoot configuration)
+    public static IServiceCollection AddRaygun(this IServiceCollection services, IConfiguration configuration)
     {
       services.Configure<RaygunSettings>(configuration.GetSection("RaygunSettings"));
 
