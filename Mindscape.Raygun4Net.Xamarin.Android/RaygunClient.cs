@@ -26,8 +26,79 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunClient : RaygunClientBase
   {
+    private const string RaygunSharedPrefsFile = "io.raygun.pref";
+    private const string RaygunUserIdentifierDefaultsKey = "io.raygun.identifier";
+
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
+    private string _user;
+    private RaygunIdentifierMessage _userInfo;
+
+    public override string User
+    {
+      get { return _user; }
+      set
+      {
+        _user = value;
+        SetUserInfo(new RaygunIdentifierMessage(_user));
+      }
+    }
+
+    public override RaygunIdentifierMessage UserInfo
+    {
+      get { return _userInfo; }
+      set { SetUserInfo(value); }
+    }
+
+    private void SetUserInfo(RaygunIdentifierMessage userInfo)
+    {
+      if (string.IsNullOrWhiteSpace(userInfo?.Identifier) || userInfo.Identifier.Length == 0)
+      {
+        userInfo = new RaygunIdentifierMessage(GetAnonymousIdentifier()) { IsAnonymous = true };
+      }
+
+      if (_userInfo != null)
+      {
+        // Is this a different user?
+        if (_userInfo.Identifier != userInfo.Identifier)
+        {
+          // Has a current session?
+          if (string.IsNullOrEmpty(_sessionId))
+          {
+            SendPulseSessionEvent(RaygunPulseSessionEventType.SessionEnd);
+          }
+        }
+      }
+
+      _userInfo = userInfo;
+    }
+
+    private string GetAnonymousIdentifier()
+    {
+      string uniqueId = null;
+
+      // Check for a previously saved user id.
+      var sharedPrefs = Context.GetSharedPreferences(RaygunSharedPrefsFile, FileCreationMode.Private);
+
+      if (sharedPrefs.Contains(RaygunUserIdentifierDefaultsKey))
+      {
+        uniqueId = sharedPrefs.GetString(RaygunUserIdentifierDefaultsKey, null);
+      }
+
+      if (string.IsNullOrEmpty(uniqueId))
+      {
+        string deviceId = DeviceId;
+
+        uniqueId = !string.IsNullOrWhiteSpace(deviceId) ? deviceId  : Guid.NewGuid().ToString();
+
+        // Save the new user id.
+        var prefEditor = sharedPrefs.Edit();
+        prefEditor.PutString(RaygunUserIdentifierDefaultsKey, uniqueId);
+        prefEditor.Commit();
+      }
+
+      return uniqueId;
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
