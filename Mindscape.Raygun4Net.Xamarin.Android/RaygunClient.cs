@@ -36,7 +36,7 @@ namespace Mindscape.Raygun4Net
 
     public override string User
     {
-      get { return _user; }
+      get { return _user ?? GetAnonymousIdentifier(); }
       set
       {
         _user = value;
@@ -46,8 +46,40 @@ namespace Mindscape.Raygun4Net
 
     public override RaygunIdentifierMessage UserInfo
     {
-      get { return _userInfo; }
+      get { return _userInfo ?? GetAnonymousUserInfo(); }
       set { SetUserInfo(value); }
+    }
+
+    private RaygunIdentifierMessage GetAnonymousUserInfo()
+    {
+      return new RaygunIdentifierMessage(GetAnonymousIdentifier()) { IsAnonymous = true };
+    }
+
+    private string GetAnonymousIdentifier()
+    {
+      string uniqueId = null;
+
+      // Check for a previously saved user id.
+      var sharedPrefs = Context.GetSharedPreferences(RaygunSharedPrefsFile, FileCreationMode.Private);
+
+      if (sharedPrefs.Contains(RaygunUserIdentifierDefaultsKey))
+      {
+        uniqueId = sharedPrefs.GetString(RaygunUserIdentifierDefaultsKey, null);
+      }
+
+      if (string.IsNullOrEmpty(uniqueId))
+      {
+        string deviceId = DeviceId;
+
+        uniqueId = !string.IsNullOrWhiteSpace(deviceId) ? deviceId : Guid.NewGuid().ToString();
+
+        // Save the new user id.
+        var prefEditor = sharedPrefs.Edit();
+        prefEditor.PutString(RaygunUserIdentifierDefaultsKey, uniqueId);
+        prefEditor.Commit();
+      }
+
+      return uniqueId;
     }
 
     private void SetUserInfo(RaygunIdentifierMessage userInfo)
@@ -71,33 +103,6 @@ namespace Mindscape.Raygun4Net
       }
 
       _userInfo = userInfo;
-    }
-
-    private string GetAnonymousIdentifier()
-    {
-      string uniqueId = null;
-
-      // Check for a previously saved user id.
-      var sharedPrefs = Context.GetSharedPreferences(RaygunSharedPrefsFile, FileCreationMode.Private);
-
-      if (sharedPrefs.Contains(RaygunUserIdentifierDefaultsKey))
-      {
-        uniqueId = sharedPrefs.GetString(RaygunUserIdentifierDefaultsKey, null);
-      }
-
-      if (string.IsNullOrEmpty(uniqueId))
-      {
-        string deviceId = DeviceId;
-
-        uniqueId = !string.IsNullOrWhiteSpace(deviceId) ? deviceId  : Guid.NewGuid().ToString();
-
-        // Save the new user id.
-        var prefEditor = sharedPrefs.Edit();
-        prefEditor.PutString(RaygunUserIdentifierDefaultsKey, uniqueId);
-        prefEditor.Commit();
-      }
-
-      return uniqueId;
     }
 
     /// <summary>
@@ -406,7 +411,7 @@ namespace Mindscape.Raygun4Net
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
-        .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : BuildRaygunIdentifierMessage(null)))
+        .SetUser(UserInfo)
         .Build();
 
       var customGroupingKey = OnCustomGroupingKey(exception, message);
@@ -415,15 +420,6 @@ namespace Mindscape.Raygun4Net
         message.Details.GroupingKey = customGroupingKey;
       }
       return message;
-    }
-
-    private RaygunIdentifierMessage BuildRaygunIdentifierMessage(string machineName)
-    {
-      string deviceId = DeviceId;
-      return !String.IsNullOrWhiteSpace (deviceId) ? new RaygunIdentifierMessage (deviceId) {
-        IsAnonymous = true,
-        FullName = machineName
-      } : null;
     }
 
     private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
@@ -554,8 +550,8 @@ namespace Mindscape.Raygun4Net
       data.OS = "Android";
       data.OSVersion = Android.OS.Build.VERSION.Release;
       data.Platform = string.Format("{0} {1}", Android.OS.Build.Manufacturer, Android.OS.Build.Model);
+      data.User = UserInfo;
 
-      data.User = UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : BuildRaygunIdentifierMessage(null));
       message.EventData = new[] { data };
       switch (type)
       {
@@ -636,14 +632,14 @@ namespace Mindscape.Raygun4Net
         string osVersion = Android.OS.Build.VERSION.Release;
         string platform = string.Format("{0} {1}", Android.OS.Build.Manufacturer, Android.OS.Build.Model);
 
-        RaygunIdentifierMessage user = BuildRaygunIdentifierMessage(null);
-
+        RaygunIdentifierMessage user = UserInfo;
         RaygunPulseMessage message = new RaygunPulseMessage();
 
         System.Diagnostics.Debug.WriteLine("BatchSize: " + batch.PendingEventCount);
 
         RaygunPulseDataMessage[] eventMessages = new RaygunPulseDataMessage[batch.PendingEventCount];
         int index = 0;
+
         foreach (PendingEvent pendingEvent in batch.PendingEvents)
         {
           RaygunPulseDataMessage dataMessage = new RaygunPulseDataMessage();
@@ -692,8 +688,7 @@ namespace Mindscape.Raygun4Net
       dataMessage.OSVersion = Android.OS.Build.VERSION.Release;
       dataMessage.Platform = string.Format("{0} {1}", Android.OS.Build.Manufacturer, Android.OS.Build.Model);
       dataMessage.Type = "mobile_event_timing";
-
-      dataMessage.User = UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : BuildRaygunIdentifierMessage(null));
+      dataMessage.User = UserInfo;
 
       string type = eventType == RaygunPulseEventType.ViewLoaded ? "p" : "n";
 
