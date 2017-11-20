@@ -30,12 +30,22 @@ namespace Mindscape.Raygun4Net
     private const string RaygunUserIdentifierDefaultsKey = "io.raygun.identifier";
 
     private static RaygunClient _client;
-
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
+
     private string _user;
     private RaygunIdentifierMessage _userInfo;
     private string _sessionId;
+    private PulseEventBatch _activeBatch;
+    private static readonly object _batchLock = new object();
+
+    /// <summary>
+    /// Gets the <see cref="RaygunClient"/> created by the Attach method.
+    /// </summary>
+    public static RaygunClient Current
+    {
+      get { return _client; }
+    }
 
     internal static Context Context
     {
@@ -111,7 +121,7 @@ namespace Mindscape.Raygun4Net
 
     private RaygunIdentifierMessage GetAnonymousUserInfo()
     {
-      return new RaygunIdentifierMessage(GetAnonymousIdentifier()) { IsAnonymous = true };
+      return new RaygunIdentifierMessage(GetAnonymousIdentifier()) { IsAnonymous = true, UUID = DeviceId };
     }
 
     private string GetAnonymousIdentifier()
@@ -139,6 +149,32 @@ namespace Mindscape.Raygun4Net
       }
 
       return uniqueId;
+    }
+
+    private string GetVersion()
+    {
+      string version = ApplicationVersion;
+      if (String.IsNullOrWhiteSpace(version))
+      {
+        try
+        {
+          Context context = RaygunClient.Context;
+          PackageManager manager = context.PackageManager;
+          PackageInfo info = manager.GetPackageInfo(context.PackageName, 0);
+          version = info.VersionCode + " / " + info.VersionName;
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Debug.WriteLine("Error retrieving package version {0}", ex.Message);
+        }
+      }
+
+      if (String.IsNullOrWhiteSpace(version))
+      {
+        version = "Not supplied";
+      }
+
+      return version;
     }
 
     /// <summary>
@@ -171,6 +207,8 @@ namespace Mindscape.Raygun4Net
       }
       return true;
     }
+
+    #region Crash Reporting
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
@@ -285,13 +323,7 @@ namespace Mindscape.Raygun4Net
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
 
-    /// <summary>
-    /// Gets the <see cref="RaygunClient"/> created by the Attach method.
-    /// </summary>
-    public static RaygunClient Current
-    {
-      get { return _client; }
-    }
+    #endregion
 
     /// <summary>
     /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
@@ -426,14 +458,14 @@ namespace Mindscape.Raygun4Net
         .SetMachineName("Unknown")
         .SetExceptionDetails(exception)
         .SetClientDetails()
-        .SetVersion(ApplicationVersion)
+        .SetVersion(GetVersion())
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
         .SetUser(UserInfo)
         .Build();
 
       var customGroupingKey = OnCustomGroupingKey(exception, message);
-      if(string.IsNullOrEmpty(customGroupingKey) == false)
+      if (string.IsNullOrEmpty(customGroupingKey) == false)
       {
         message.Details.GroupingKey = customGroupingKey;
       }
@@ -534,6 +566,56 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    #region Real User Monitoring
+
+    private string GenerateNewSessionId()
+    {
+      return Guid.NewGuid().ToString();
+    }
+
+    public void EnsurePulseSessionStarted()
+    {
+      if (string.IsNullOrEmpty(_sessionId))
+      {
+        SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionStart);
+      }
+    }
+
+    public void EnsurePulseSessionEnded()
+    {
+      if (!string.IsNullOrEmpty(_sessionId))
+      {
+        SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionEnd);
+      }
+    }
+
+    private RaygunPulseMessage BuildPulseMessage(RaygunPulseSessionEventType type)
+    {
+      var msg = new RaygunPulseMessage();
+      var data = new RaygunPulseDataMessage();
+
+      data.Timestamp = DateTime.UtcNow;
+      data.Version   = GetVersion();
+      data.OS        = "Android";
+      data.OSVersion = Android.OS.Build.VERSION.Release;
+      data.Platform  = string.Format("{0} {1}", Android.OS.Build.Manufacturer, Android.OS.Build.Model);
+      data.User      = UserInfo;
+
+      msg.EventData = new[] { data };
+      switch (type)
+      {
+        case RaygunPulseSessionEventType.SessionStart:
+          data.Type = "session_start";
+          break;
+        case RaygunPulseSessionEventType.SessionEnd:
+          data.Type = "session_end";
+          break;
+      }
+      data.SessionId = _sessionId;
+
+      return msg;
+    }
+
     internal void SendPulseSessionEventNow(RaygunPulseSessionEventType type)
     {
       if (type == RaygunPulseSessionEventType.SessionStart)
@@ -574,50 +656,6 @@ namespace Mindscape.Raygun4Net
     {
       SendPulseTimingEventCore(eventType, name, milliseconds);
     }
-
-    private string GenerateNewSessionId()
-    {
-      return Guid.NewGuid().ToString();
-    }
-
-    private void EnsurePulseSessionStarted()
-    {
-      if (string.IsNullOrEmpty(_sessionId))
-      {
-        SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
-      }
-    }
-
-    private RaygunPulseMessage BuildPulseMessage(RaygunPulseSessionEventType type)
-    {
-      var msg  = new RaygunPulseMessage();
-      var data = new RaygunPulseDataMessage();
-
-      data.Timestamp = DateTime.UtcNow;
-      data.Version   = GetVersion();
-
-      data.OS        = "Android";
-      data.OSVersion = Android.OS.Build.VERSION.Release;
-      data.Platform  = string.Format("{0} {1}", Android.OS.Build.Manufacturer, Android.OS.Build.Model);
-      data.User      = UserInfo;
-
-      msg.EventData = new[] { data };
-      switch (type)
-      {
-        case RaygunPulseSessionEventType.SessionStart:
-          data.Type = "session_start";
-          break;
-        case RaygunPulseSessionEventType.SessionEnd:
-          data.Type = "session_end";
-          break;
-      }
-      data.SessionId = _sessionId;
-
-      return msg;
-    }
-
-    private PulseEventBatch _activeBatch;
-    private static readonly object _batchLock = new object();
 
     /// <summary>
     /// Sends a pulse timing event to Raygun. The message is sent on a background thread.
@@ -667,12 +705,11 @@ namespace Mindscape.Raygun4Net
       {
         EnsurePulseSessionStarted();
 
-        string version = GetVersion();
-        string os = "Android";
+        string version   = GetVersion();
+        string os        = "Android";
         string osVersion = Android.OS.Build.VERSION.Release;
-        string platform = string.Format("{0} {1}", Android.OS.Build.Manufacturer, Android.OS.Build.Model);
+        string platform  = string.Format("{0} {1}", Android.OS.Build.Manufacturer, Android.OS.Build.Model);
 
-        RaygunIdentifierMessage user = UserInfo;
         RaygunPulseMessage message = new RaygunPulseMessage();
 
         System.Diagnostics.Debug.WriteLine("BatchSize: " + batch.PendingEventCount);
@@ -685,16 +722,20 @@ namespace Mindscape.Raygun4Net
           RaygunPulseDataMessage dataMessage = new RaygunPulseDataMessage();
           dataMessage.SessionId = pendingEvent.SessionId;
           dataMessage.Timestamp = pendingEvent.Timestamp;
-          dataMessage.Version = version;
-          dataMessage.OS = os;
+          dataMessage.Version   = version;
+          dataMessage.OS        = os;
           dataMessage.OSVersion = osVersion;
-          dataMessage.Platform = platform;
-          dataMessage.Type = "mobile_event_timing";
-          dataMessage.User = user;
+          dataMessage.Platform  = platform;
+          dataMessage.Type      = "mobile_event_timing";
+          dataMessage.User      = UserInfo;
 
           string type = pendingEvent.EventType == RaygunPulseEventType.ViewLoaded ? "p" : "n";
 
-          RaygunPulseData data = new RaygunPulseData() { Name = pendingEvent.Name, Timing = new RaygunPulseTimingMessage() { Type = type, Duration = pendingEvent.Duration } };
+          RaygunPulseData data = new RaygunPulseData()
+          {
+            Name = pendingEvent.Name, Timing = new RaygunPulseTimingMessage() { Type = type, Duration = pendingEvent.Duration }
+          };
+
           RaygunPulseData[] dataArray = { data };
           string dataStr = SimpleJson.SerializeObject(dataArray);
           dataMessage.Data = dataStr;
@@ -718,18 +759,23 @@ namespace Mindscape.Raygun4Net
 
       RaygunPulseMessage message = new RaygunPulseMessage();
       RaygunPulseDataMessage dataMessage = new RaygunPulseDataMessage();
+
       dataMessage.SessionId = _sessionId;
       dataMessage.Timestamp = DateTime.UtcNow - TimeSpan.FromMilliseconds((long)milliseconds);
-      dataMessage.Version = GetVersion();
-      dataMessage.OS = "Android";
+      dataMessage.Version   = GetVersion();
+      dataMessage.OS        = "Android";
       dataMessage.OSVersion = Android.OS.Build.VERSION.Release;
-      dataMessage.Platform = string.Format("{0} {1}", Android.OS.Build.Manufacturer, Android.OS.Build.Model);
-      dataMessage.Type = "mobile_event_timing";
-      dataMessage.User = UserInfo;
+      dataMessage.Platform  = string.Format("{0} {1}", Android.OS.Build.Manufacturer, Android.OS.Build.Model);
+      dataMessage.Type      = "mobile_event_timing";
+      dataMessage.User      = UserInfo;
 
       string type = eventType == RaygunPulseEventType.ViewLoaded ? "p" : "n";
 
-      RaygunPulseData data = new RaygunPulseData() { Name = name, Timing = new RaygunPulseTimingMessage() { Type = type, Duration = milliseconds } };
+      RaygunPulseData data = new RaygunPulseData()
+      {
+        Name = name, Timing = new RaygunPulseTimingMessage() { Type = type, Duration = milliseconds }
+      };
+
       RaygunPulseData[] dataArray = { data };
       string dataStr = SimpleJson.SerializeObject(dataArray);
       dataMessage.Data = dataStr;
@@ -737,32 +783,6 @@ namespace Mindscape.Raygun4Net
       message.EventData = new[] { dataMessage };
 
       Send(message);
-    }
-
-    private string GetVersion()
-    {
-      string version = ApplicationVersion;
-      if (String.IsNullOrWhiteSpace(version))
-      {
-        try
-        {
-          Context context = RaygunClient.Context;
-          PackageManager manager = context.PackageManager;
-          PackageInfo info = manager.GetPackageInfo(context.PackageName, 0);
-          version = info.VersionCode + " / " + info.VersionName;
-        }
-        catch (Exception ex)
-        {
-          System.Diagnostics.Debug.WriteLine("Error retrieving package version {0}", ex.Message);
-        }
-      }
-
-      if (String.IsNullOrWhiteSpace(version))
-      {
-        version = "Not supplied";
-      }
-
-      return version;
     }
 
     private void Send(RaygunPulseMessage raygunPulseMessage)
@@ -806,6 +826,8 @@ namespace Mindscape.Raygun4Net
       }
       return true;
     }
+
+    #endregion
 
     private bool SendMessage(string message)
     {

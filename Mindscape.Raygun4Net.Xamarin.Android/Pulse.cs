@@ -31,7 +31,7 @@ namespace Mindscape.Raygun4Net
         _pulse = new Pulse();
         _mainActivity.Application.RegisterActivityLifecycleCallbacks(_pulse);
 
-        _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
+        _raygunClient.EnsurePulseSessionStarted();
         _currentActivity = _mainActivity;
         _timer.Start();
       }
@@ -59,7 +59,7 @@ namespace Mindscape.Raygun4Net
           string activityName = GetActivityName(_currentActivity);
           _raygunClient.SendPulseTimingEventNow(RaygunPulseEventType.ViewLoaded, activityName, _timer.ElapsedMilliseconds);
         }
-        _raygunClient.SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionEnd);
+        _raygunClient.EnsurePulseSessionEnded();
       }
     }
 
@@ -67,7 +67,7 @@ namespace Mindscape.Raygun4Net
     {
       if (_currentActivity == null)
       {
-        _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
+        _raygunClient.EnsurePulseSessionStarted();
       }
 
       if (activity != _currentActivity)
@@ -82,7 +82,7 @@ namespace Mindscape.Raygun4Net
     {
       if (_currentActivity == null)
       {
-        _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
+        _raygunClient.EnsurePulseSessionStarted();
       }
 
       if (activity != _currentActivity)
@@ -97,7 +97,7 @@ namespace Mindscape.Raygun4Net
     {
       if (_currentActivity == null)
       {
-        _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
+        _raygunClient.EnsurePulseSessionStarted();
       }
 
       string activityName = GetActivityName(activity);
@@ -123,7 +123,7 @@ namespace Mindscape.Raygun4Net
       if (activity == _currentActivity)
       {
         _currentActivity = null;
-        _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionEnd);
+        _raygunClient.EnsurePulseSessionEnded();
       }
       //Console.WriteLine("ACTIVITY STOPPED " + activity.Title);
     }
