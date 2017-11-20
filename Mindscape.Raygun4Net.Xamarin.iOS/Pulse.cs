@@ -29,7 +29,7 @@ namespace Mindscape.Raygun4Net
 
     internal static void Attach(RaygunClient raygunClient)
     {
-      if(_raygunClient == null && raygunClient != null)
+      if (_raygunClient == null && raygunClient != null)
       {
         _raygunClient = raygunClient;
 
@@ -51,7 +51,8 @@ namespace Mindscape.Raygun4Net
 
     internal static void Detach()
     {
-      if(_raygunClient != null) {
+      if (_raygunClient != null) 
+      {
         DetachNotifications();
 
         Restore(new UIViewController(), "loadView", original_loadView_impl);
@@ -65,72 +66,81 @@ namespace Mindscape.Raygun4Net
 
     private static void DetachNotifications()
     {
-      if(_didBecomeActiveObserver != null) {
+      if (_didBecomeActiveObserver != null)
+      {
         _didBecomeActiveObserver.Dispose();
       }
-      if(_didEnterBackgroundObserver != null) {
+
+      if (_didEnterBackgroundObserver != null)
+      {
         _didEnterBackgroundObserver.Dispose();
       }
-      if(_willResignActiveObserver != null) {
+
+      if (_willResignActiveObserver != null)
+      {
         _willResignActiveObserver.Dispose();
       }
     }
 
     private static void OnDidBecomeActive(NSNotification notification)
     {
-      //Console.WriteLine("SESSION START");
-      _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
-      if(_lastViewName != null) {
+      _raygunClient.EnsurePulseSessionStarted();
+
+      if (_lastViewName != null) 
+      {
         _raygunClient.SendPulseTimingEvent(RaygunPulseEventType.ViewLoaded, _lastViewName, 0);
       }
     }
 
     private static void OnDidEnterBackground(NSNotification notification)
     {
-      //Console.WriteLine("SESSION END");
-      _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionEnd);
+      _raygunClient.EnsurePulseSessionEnded();
     }
 
     private static void OnWillResignActive(NSNotification notification)
     {
-      //Console.WriteLine("SESSION END");
-      _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionEnd);
+      _raygunClient.EnsurePulseSessionEnded();
     }
 
-    internal static void SendRemainingViews(){
-      if(_raygunClient != null) {
-        foreach(string view in _timers.Keys) {
+    internal static void SendRemainingViews() 
+    {
+      if (_raygunClient != null) 
+      {
+        foreach(string view in _timers.Keys) 
+        {
           long duration = 0;
           Stopwatch stopwatch;
           _timers.TryGetValue(view, out stopwatch);
-          if(stopwatch != null) {
+
+          if (stopwatch != null) 
+          {
             stopwatch.Stop();
             duration = stopwatch.ElapsedMilliseconds;
           }
           _raygunClient.SendPulseTimingEventNow(RaygunPulseEventType.ViewLoaded, view, duration);
         }
 
-        _raygunClient.SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionEnd);
+        _raygunClient.EnsurePulseSessionEnded();
       }
     }
 
     // Swizzling
 
     [DllImport ("/usr/lib/libobjc.dylib")]
-    extern static IntPtr class_getInstanceMethod (IntPtr classHandle, IntPtr Selector);
+    extern static IntPtr class_getInstanceMethod(IntPtr classHandle, IntPtr Selector);
 
     [DllImport ("/usr/lib/libobjc.dylib")]
-    extern static IntPtr imp_implementationWithBlock (ref BlockLiteral block);
+    extern static IntPtr imp_implementationWithBlock(ref BlockLiteral block);
 
     [DllImport ("/usr/lib/libobjc.dylib")]
-    extern static void method_setImplementation (IntPtr method, IntPtr imp);
+    extern static void method_setImplementation(IntPtr method, IntPtr imp);
 
     [DllImport ("/usr/lib/libobjc.dylib")]
-    extern static IntPtr method_getImplementation (IntPtr method);
+    extern static IntPtr method_getImplementation(IntPtr method);
 
-    delegate void CaptureDelegate (IntPtr block, IntPtr self);
+    delegate void CaptureDelegate(IntPtr block, IntPtr self);
 
-    delegate void CaptureBooleanDelegate (IntPtr block, IntPtr self, bool b);
+    delegate void CaptureBooleanDelegate(IntPtr block, IntPtr self, bool b);
 
     [MonoNativeFunctionWrapper]
     public delegate void OriginalDelegate(IntPtr self);
@@ -142,7 +152,8 @@ namespace Mindscape.Raygun4Net
     {
       var method = class_getInstanceMethod (obj.ClassHandle, new Selector (selector).Handle);
       originalImpl = method_getImplementation (method);
-      if(originalImpl != IntPtr.Zero) {
+      if (originalImpl != IntPtr.Zero) 
+      {
         var block_value = new BlockLiteral();
         block_value.SetupBlock(captureDelegate, null);
         var imp = imp_implementationWithBlock(ref block_value);
@@ -154,7 +165,8 @@ namespace Mindscape.Raygun4Net
     {
       var method = class_getInstanceMethod (obj.ClassHandle, new Selector (selector).Handle);
       originalImpl = method_getImplementation (method);
-      if(originalImpl != IntPtr.Zero) {
+      if (originalImpl != IntPtr.Zero)
+      {
         var block_value = new BlockLiteral();
         block_value.SetupBlock(captureDelegate, null);
         var imp = imp_implementationWithBlock(ref block_value);
@@ -164,7 +176,8 @@ namespace Mindscape.Raygun4Net
 
     private static void Restore(NSObject obj, string selector, IntPtr originalImpl)
     {
-      if(originalImpl != IntPtr.Zero) {
+      if (originalImpl != IntPtr.Zero) 
+      {
         var method = class_getInstanceMethod(obj.ClassHandle, new Selector(selector).Handle);
         method_setImplementation(method, originalImpl);
       }
@@ -175,20 +188,20 @@ namespace Mindscape.Raygun4Net
     private static IntPtr original_loadView_impl;
 
     [MonoPInvokeCallback (typeof (CaptureDelegate))]
-    static void LoadViewCapture (IntPtr block, IntPtr self)
+    static void LoadViewCapture(IntPtr block, IntPtr self)
     {
       NSObject obj = Runtime.GetNSObject(self);
       string pageName = GetPageName(obj.ToString());
-      //Console.WriteLine ("Start load " + obj.ToString());
 
-      if(IsValidPageName(pageName)) {
+      if (IsValidPageName(pageName)) 
+      {
         Stopwatch stopwatch;
         _timers.TryGetValue(pageName, out stopwatch);
-        if(stopwatch == null) {
+        if (stopwatch == null) 
+        {
           stopwatch = new Stopwatch();
           _timers[pageName] = stopwatch;
           stopwatch.Start();
-          //Console.WriteLine ("Started timer in load-view");
         }
       }
 
@@ -201,20 +214,20 @@ namespace Mindscape.Raygun4Net
     private static IntPtr original_viewDidLoad_impl;
 
     [MonoPInvokeCallback (typeof (CaptureDelegate))]
-    static void ViewDidLoadCapture (IntPtr block, IntPtr self)
+    static void ViewDidLoadCapture(IntPtr block, IntPtr self)
     {
       NSObject obj = Runtime.GetNSObject(self);
       string pageName = GetPageName(obj.ToString());
-      //Console.WriteLine ("Start load " + obj.ToString());
 
-      if(IsValidPageName(pageName)) {
+      if (IsValidPageName(pageName)) 
+      {
         Stopwatch stopwatch;
         _timers.TryGetValue(pageName, out stopwatch);
-        if(stopwatch == null) {
+        if (stopwatch == null) 
+        {
           stopwatch = new Stopwatch();
           _timers[pageName] = stopwatch;
           stopwatch.Start();
-          //Console.WriteLine ("Started timer in did-load");
         }
       }
 
@@ -227,19 +240,20 @@ namespace Mindscape.Raygun4Net
     private static IntPtr original_viewWillAppear_impl;
 
     [MonoPInvokeCallback (typeof (CaptureBooleanDelegate))]
-    static void ViewWillAppearCapture (IntPtr block, IntPtr self, bool animated)
+    static void ViewWillAppearCapture(IntPtr block, IntPtr self, bool animated)
     {
       NSObject obj = Runtime.GetNSObject(self);
       string pageName = GetPageName(obj.ToString());
 
-      if(IsValidPageName(pageName)) {
+      if (IsValidPageName(pageName)) 
+      {
         Stopwatch stopwatch;
         _timers.TryGetValue(pageName, out stopwatch);
-        if(stopwatch == null) {
+        if (stopwatch == null) 
+        {
           stopwatch = new Stopwatch();
           _timers[pageName] = stopwatch;
           stopwatch.Start();
-          //Console.WriteLine ("Started timer in will-appear");
         }
       }
 
@@ -252,7 +266,7 @@ namespace Mindscape.Raygun4Net
     private static IntPtr original_viewDidAppear_impl;
 
     [MonoPInvokeCallback (typeof (CaptureBooleanDelegate))]
-    static void ViewDidAppearCapture (IntPtr block, IntPtr self, bool animated)
+    static void ViewDidAppearCapture(IntPtr block, IntPtr self, bool animated)
     {
       var orig = (OriginalBooleanDelegate) Marshal.GetDelegateForFunctionPointer(original_viewDidAppear_impl, typeof(OriginalBooleanDelegate));
       orig(self, animated);
@@ -264,15 +278,17 @@ namespace Mindscape.Raygun4Net
       Stopwatch stopwatch;
       _timers.TryGetValue(pageName, out stopwatch);
       long duration = 0;
-      if(stopwatch != null) {
+
+      if (stopwatch != null) 
+      {
         stopwatch.Stop();
         duration = stopwatch.ElapsedMilliseconds;
         _timers.Remove(pageName);
       }
 
-      if(IsValidPageName(pageName)) {
+      if (IsValidPageName(pageName)) 
+      {
         _raygunClient.SendPulseTimingEvent(RaygunPulseEventType.ViewLoaded, pageName, duration);
-        //Console.WriteLine ("did appear " + obj.ToString() + " " + duration);
       }
     }
 
@@ -282,18 +298,27 @@ namespace Mindscape.Raygun4Net
     {
       string pageName = objectName.Replace("<", string.Empty).Replace(">", string.Empty);
       int index = pageName.IndexOf('_');
-      if(index >= 0 && index < pageName.Length) {
+
+      if (index >= 0 && index < pageName.Length) 
+      {
         pageName = pageName.Substring(index + 1);
       }
+
       index = pageName.IndexOf(':');
-      if(index >= 0 && index < pageName.Length) {
+
+      if (index >= 0 && index < pageName.Length) 
+      {
         pageName = pageName.Substring(0, index);
       }
       return pageName;
     }
 
-    private static bool IsValidPageName(string pageName){
-      if(!"UINavigationController".Equals(pageName) && !"UIInputWindowController".Equals(pageName) && !"UIStatusBarViewController".Equals(pageName)) {
+    private static bool IsValidPageName(string pageName) 
+    {
+      if (!"UINavigationController".Equals(pageName) && 
+          !"UIInputWindowController".Equals(pageName) && 
+          !"UIStatusBarViewController".Equals(pageName)) 
+      {
         return true;
       }
       return false;
