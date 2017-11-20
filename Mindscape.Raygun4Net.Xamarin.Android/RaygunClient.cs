@@ -33,9 +33,9 @@ namespace Mindscape.Raygun4Net
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
 
+    private string _sessionId;
     private string _user;
     private RaygunIdentifierMessage _userInfo;
-    private string _sessionId;
     private PulseEventBatch _activeBatch;
     private static readonly object _batchLock = new object();
 
@@ -101,15 +101,15 @@ namespace Mindscape.Raygun4Net
 
       // Has the user changed ?
       if (_userInfo != null 
-       && _userInfo.Identifier != userInfo.Identifier  // Different user
-       && _userInfo.IsAnonymous == false) // Previous user was not anonymous.
+       && _userInfo.Identifier != userInfo.Identifier
+       && _userInfo.IsAnonymous == false)
       {
         if (!string.IsNullOrEmpty(_sessionId))
         {
-          SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionEnd); // End current user's session
+          SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionEnd);
           _userInfo = userInfo;
           _user = userInfo.Identifier;
-          SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionStart); // Start new session for new user.
+          SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionStart);
         }
       }
       else
