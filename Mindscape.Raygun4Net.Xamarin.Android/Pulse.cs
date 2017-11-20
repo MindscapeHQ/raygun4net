@@ -75,7 +75,6 @@ namespace Mindscape.Raygun4Net
         _currentActivity = activity;
         _timer.Restart();
       }
-      //Console.WriteLine("ACTIVITY CREATED " + activity.Title);
     }
 
     public void OnActivityStarted(Activity activity)
@@ -90,7 +89,6 @@ namespace Mindscape.Raygun4Net
         _currentActivity = activity;
         _timer.Restart();
       }
-      //Console.WriteLine("ACTIVITY STARTED " + activity.Title);
     }
 
     public void OnActivityResumed(Activity activity)
@@ -110,12 +108,10 @@ namespace Mindscape.Raygun4Net
       _currentActivity = activity;
 
       _raygunClient.SendPulseTimingEvent(RaygunPulseEventType.ViewLoaded, activityName, duration);
-      //Console.WriteLine("ACTIVITY RESUMED " + activity.Title + " DURATION: " + duration);
     }
 
     public void OnActivityPaused(Activity activity)
     {
-      //Console.WriteLine("ACTIVITY PAUSED " + activity.Title);
     }
 
     public void OnActivityStopped(Activity activity)
@@ -125,17 +121,14 @@ namespace Mindscape.Raygun4Net
         _currentActivity = null;
         _raygunClient.EnsurePulseSessionEnded();
       }
-      //Console.WriteLine("ACTIVITY STOPPED " + activity.Title);
     }
 
     public void OnActivityDestroyed(Activity activity)
     {
-      //Console.WriteLine("ACTIVITY DESTROYED " + activity.Title);
     }
 
     public void OnActivitySaveInstanceState(Activity activity, Bundle outState)
     {
-
     }
 
     private static string GetActivityName(Activity activity)
