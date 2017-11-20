@@ -106,10 +106,10 @@ namespace Mindscape.Raygun4Net
       {
         if (!string.IsNullOrEmpty(_sessionId))
         {
-          SendPulseSessionEvent(RaygunPulseSessionEventType.SessionEnd); // End current user's session
+          SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionEnd); // End current user's session
           _userInfo = userInfo;
           _user = userInfo.Identifier;
-          SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart); // Start new session for new user.
+          SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionStart); // Start new session for new user.
         }
       }
       else
