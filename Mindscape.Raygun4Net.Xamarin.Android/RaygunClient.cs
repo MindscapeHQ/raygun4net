@@ -94,6 +94,13 @@ namespace Mindscape.Raygun4Net
 
     private void SetUserInfo(RaygunIdentifierMessage userInfo)
     {
+      if (_activeBatch != null)
+      {
+        // Each batch is tied to the UserInfo at the time it's created.
+        // So when the user info changes, we end any current batch, so the next one can pick up the new user info.
+        _activeBatch.Done();
+      }
+
       if (string.IsNullOrWhiteSpace(userInfo?.Identifier) || string.IsNullOrEmpty(userInfo.Identifier))
       {
         userInfo = GetAnonymousUserInfo();
@@ -727,7 +734,7 @@ namespace Mindscape.Raygun4Net
           dataMessage.OSVersion = osVersion;
           dataMessage.Platform  = platform;
           dataMessage.Type      = "mobile_event_timing";
-          dataMessage.User      = UserInfo;
+          dataMessage.User      = batch.UserInfo;
 
           string type = pendingEvent.EventType == RaygunPulseEventType.ViewLoaded ? "p" : "n";
 
