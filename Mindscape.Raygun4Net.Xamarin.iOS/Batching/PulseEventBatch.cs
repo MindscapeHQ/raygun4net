@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
 {
@@ -9,12 +10,14 @@ namespace Mindscape.Raygun4Net
     private List<PendingEvent> _pendingEvents = new List<PendingEvent>();
     private DateTime _lastUpdate;
     private readonly RaygunClient _raygunClient;
+    private readonly RaygunIdentifierMessage _userInfo;
 
     private bool _locked;
 
     public PulseEventBatch(RaygunClient raygunClient)
     {
       _raygunClient = raygunClient;
+      _userInfo = _raygunClient.UserInfo;
       _lastUpdate = DateTime.UtcNow;
 
       Thread t = new Thread(CheckTime);
@@ -53,7 +56,12 @@ namespace Mindscape.Raygun4Net
       get { return _locked; }
     }
 
-    private void Done()
+    public RaygunIdentifierMessage UserInfo
+    {
+      get { return _userInfo; }
+    }
+
+    public void Done()
     {
       if (!_locked)
       {

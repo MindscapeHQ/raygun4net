@@ -31,7 +31,7 @@ namespace Mindscape.Raygun4Net
         _pulse = new Pulse();
         _mainActivity.Application.RegisterActivityLifecycleCallbacks(_pulse);
 
-        _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
+        _raygunClient.EnsurePulseSessionStarted();
         _currentActivity = _mainActivity;
         _timer.Start();
       }
@@ -59,7 +59,7 @@ namespace Mindscape.Raygun4Net
           string activityName = GetActivityName(_currentActivity);
           _raygunClient.SendPulseTimingEventNow(RaygunPulseEventType.ViewLoaded, activityName, _timer.ElapsedMilliseconds);
         }
-        _raygunClient.SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionEnd);
+        _raygunClient.EnsurePulseSessionEnded();
       }
     }
 
@@ -67,7 +67,7 @@ namespace Mindscape.Raygun4Net
     {
       if (_currentActivity == null)
       {
-        _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
+        _raygunClient.EnsurePulseSessionStarted();
       }
 
       if (activity != _currentActivity)
@@ -75,14 +75,13 @@ namespace Mindscape.Raygun4Net
         _currentActivity = activity;
         _timer.Restart();
       }
-      //Console.WriteLine("ACTIVITY CREATED " + activity.Title);
     }
 
     public void OnActivityStarted(Activity activity)
     {
       if (_currentActivity == null)
       {
-        _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
+        _raygunClient.EnsurePulseSessionStarted();
       }
 
       if (activity != _currentActivity)
@@ -90,14 +89,13 @@ namespace Mindscape.Raygun4Net
         _currentActivity = activity;
         _timer.Restart();
       }
-      //Console.WriteLine("ACTIVITY STARTED " + activity.Title);
     }
 
     public void OnActivityResumed(Activity activity)
     {
       if (_currentActivity == null)
       {
-        _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionStart);
+        _raygunClient.EnsurePulseSessionStarted();
       }
 
       string activityName = GetActivityName(activity);
@@ -110,12 +108,10 @@ namespace Mindscape.Raygun4Net
       _currentActivity = activity;
 
       _raygunClient.SendPulseTimingEvent(RaygunPulseEventType.ViewLoaded, activityName, duration);
-      //Console.WriteLine("ACTIVITY RESUMED " + activity.Title + " DURATION: " + duration);
     }
 
     public void OnActivityPaused(Activity activity)
     {
-      //Console.WriteLine("ACTIVITY PAUSED " + activity.Title);
     }
 
     public void OnActivityStopped(Activity activity)
@@ -123,19 +119,16 @@ namespace Mindscape.Raygun4Net
       if (activity == _currentActivity)
       {
         _currentActivity = null;
-        _raygunClient.SendPulseSessionEvent(RaygunPulseSessionEventType.SessionEnd);
+        _raygunClient.EnsurePulseSessionEnded();
       }
-      //Console.WriteLine("ACTIVITY STOPPED " + activity.Title);
     }
 
     public void OnActivityDestroyed(Activity activity)
     {
-      //Console.WriteLine("ACTIVITY DESTROYED " + activity.Title);
     }
 
     public void OnActivitySaveInstanceState(Activity activity, Bundle outState)
     {
-
     }
 
     private static string GetActivityName(Activity activity)
