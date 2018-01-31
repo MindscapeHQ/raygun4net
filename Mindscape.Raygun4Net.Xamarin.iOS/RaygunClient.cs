@@ -1018,7 +1018,7 @@ namespace Mindscape.Raygun4Net
 
     		try
     		{
-    			client.UploadString(RaygunSettings.Settings.PulseEndpoint, message);
+    			client.UploadStringAsync(RaygunSettings.Settings.PulseEndpoint, message);
     		}
     		catch (Exception ex)
     		{
