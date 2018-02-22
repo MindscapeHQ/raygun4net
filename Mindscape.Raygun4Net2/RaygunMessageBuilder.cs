@@ -174,5 +174,12 @@ namespace Mindscape.Raygun4Net
       }
       return this;
     }
+
+    public IRaygunMessageBuilder SetContextId(string contextId)
+    {
+      _raygunMessage.Details.ContextId = contextId;
+
+      return this;
+    }
   }
 }

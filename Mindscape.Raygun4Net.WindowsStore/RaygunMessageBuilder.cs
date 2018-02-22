@@ -90,5 +90,12 @@ namespace Mindscape.Raygun4Net
       }
       return this;
     }
+
+    public IRaygunMessageBuilder SetContextId(string contextId)
+    {
+      // No-op for WindowsStore provider
+
+      return this;
+    }
   }
 }
