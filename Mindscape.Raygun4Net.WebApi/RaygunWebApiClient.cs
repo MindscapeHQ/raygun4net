@@ -455,6 +455,7 @@ namespace Mindscape.Raygun4Net.WebApi
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
+        .SetContextId(ContextId)
         .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
         .Build();
       var customGroupingKey = OnCustomGroupingKey(exception, message);
