@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Mindscape.Raygun4Net.NetCore</RootNamespace>
+    <AssemblyName>Mindscape.Raygun4Net.NetCore</AssemblyName>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Builders\*.cs" />
+    <Compile Include="Messages\*.cs" />
+    <Compile Include="IRaygunMessageBuilder.cs" />
+    <Compile Include="RaygunClient.cs" />
+    <Compile Include="RaygunCustomGroupingKeyEventArgs.cs" />
+    <Compile Include="RaygunSendingMessageEventArgs.cs" />
+    <Compile Include="RaygunSettings.cs" />
+    <Compile Include="SimpleJson.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+  </ItemGroup>
+</Project>
