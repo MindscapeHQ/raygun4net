@@ -13,10 +13,11 @@ namespace Mindscape.Raygun4Net.NetCore
       Exception = exception;
       Message = message;
     }
-
+    
     public Exception Exception { get; private set; }
+    
     public RaygunMessage Message { get; private set; }
 
-    public string CustomGroupingKey { get; set; }
+    public string CustomGroupingKey { get; set; }    
   }
 }

@@ -1,6 +1,4 @@
-﻿using Mindscape.Raygun4Net.NetCore.Builders;
-using Mindscape.Raygun4Net.NetCore.Messages;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,6 +7,8 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Mindscape.Raygun4Net.NetCore.Builders;
+using Mindscape.Raygun4Net.NetCore.Messages;
 
 namespace Mindscape.Raygun4Net.NetCore
 {
@@ -16,29 +16,12 @@ namespace Mindscape.Raygun4Net.NetCore
   {
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
-
     private readonly RaygunSettings _settings;
 
-
     protected internal const string SentKey = "AlreadySentByRaygun";
-
-    /// <summary>
-    /// Gets or sets the user identity string.
-    /// </summary>
-    public virtual string User { get; set; }
-
-    /// <summary>
-    /// Gets or sets information about the user including the identity string.
-    /// </summary>
-    public virtual RaygunIdentifierMessage UserInfo { get; set; }
-
-    /// <summary>
-    /// Gets or sets a custom application version identifier for all error messages sent to the Raygun endpoint.
-    /// </summary>
-    public string ApplicationVersion { get; set; }
-
+    
     public RaygunClient(string apiKey)
-      : this(new RaygunSettings {ApiKey = apiKey})
+      : this(new RaygunSettings { ApiKey = apiKey })
     {
     }
 
@@ -54,6 +37,21 @@ namespace Mindscape.Raygun4Net.NetCore
         ApplicationVersion = settings.ApplicationVersion;
       }
     }
+
+    /// <summary>
+    /// Gets or sets the user identity string.
+    /// </summary>
+    public virtual string User { get; set; }
+
+    /// <summary>
+    /// Gets or sets information about the user including the identity string.
+    /// </summary>
+    public virtual RaygunIdentifierMessage UserInfo { get; set; }
+
+    /// <summary>
+    /// Gets or sets a custom application version identifier for all error messages sent to the Raygun endpoint.
+    /// </summary>
+    public string ApplicationVersion { get; set; }
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
@@ -99,6 +97,7 @@ namespace Mindscape.Raygun4Net.NetCore
         try
         {
           Type[] genericTypes = exception.Data.GetType().GetTypeInfo().GenericTypeArguments;
+          
           if (genericTypes.Length == 0 || genericTypes[0].GetTypeInfo().IsAssignableFrom(typeof(string)))
           {
             exception.Data[SentKey] = true;
@@ -106,7 +105,7 @@ namespace Mindscape.Raygun4Net.NetCore
         }
         catch (Exception ex)
         {
-          Debug.WriteLine(String.Format("Failed to flag exception as sent: {0}", ex.Message));
+          Debug.WriteLine($"Failed to flag exception as sent: {ex.Message}");
         }
       }
     }
@@ -126,9 +125,11 @@ namespace Mindscape.Raygun4Net.NetCore
       if (!_handlingRecursiveErrorSending)
       {
         EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
+        
         if (handler != null)
         {
           RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage);
+          
           try
           {
             handler(this, args);
@@ -138,9 +139,12 @@ namespace Mindscape.Raygun4Net.NetCore
             // Catch and send exceptions that occur in the SendingMessage event handler.
             // Set the _handlingRecursiveErrorSending flag to prevent infinite errors.
             _handlingRecursiveErrorSending = true;
+            
             Send(e);
+            
             _handlingRecursiveErrorSending = false;
           }
+          
           result = !args.Cancel;
         }
       }
@@ -148,22 +152,25 @@ namespace Mindscape.Raygun4Net.NetCore
       return result;
     }
 
-
     /// <summary>
     /// Raised before a message is sent. This can be used to add a custom grouping key to a RaygunMessage before sending it to the Raygun service.
     /// </summary>
     public event EventHandler<RaygunCustomGroupingKeyEventArgs> CustomGroupingKey;
 
     private bool _handlingRecursiveGrouping;
+    
     protected async Task<string> OnCustomGroupingKey(Exception exception, RaygunMessage message)
     {
       string result = null;
+      
       if (!_handlingRecursiveGrouping)
       {
         var handler = CustomGroupingKey;
+        
         if (handler != null)
         {
           var args = new RaygunCustomGroupingKeyEventArgs(exception, message);
+          
           try
           {
             handler(this, args);
@@ -171,12 +178,16 @@ namespace Mindscape.Raygun4Net.NetCore
           catch (Exception e)
           {
             _handlingRecursiveGrouping = true;
+            
             await SendAsync(e, null, null);
+            
             _handlingRecursiveGrouping = false;
           }
+          
           result = args.CustomGroupingKey;
         }
       }
+      
       return result;
     }
     
@@ -187,6 +198,7 @@ namespace Mindscape.Raygun4Net.NetCore
         Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
         return false;
       }
+      
       return true;
     }
 
@@ -269,7 +281,9 @@ namespace Mindscape.Raygun4Net.NetCore
         {
           await StripAndSend(exception, tags, userCustomData);
         });
+        
         FlagAsSent(exception);
+        
         await task;
       }
     }
@@ -303,6 +317,7 @@ namespace Mindscape.Raygun4Net.NetCore
         .Build();
 
       var customGroupingKey = await OnCustomGroupingKey(exception, message);
+      
       if (string.IsNullOrEmpty(customGroupingKey) == false)
       {
         message.Details.GroupingKey = customGroupingKey;
@@ -324,6 +339,7 @@ namespace Mindscape.Raygun4Net.NetCore
       if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {
         AggregateException aggregate = exception as AggregateException;
+        
         if (aggregate != null)
         {
           foreach (Exception e in aggregate.InnerExceptions)
@@ -358,11 +374,12 @@ namespace Mindscape.Raygun4Net.NetCore
       if (ValidateApiKey())
       {
         bool canSend = OnSendingMessage(raygunMessage) && CanSend(raygunMessage);
+        
         if (canSend)
         {
           using (var client = new HttpClient())
           {
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
 
             requestMessage.Headers.Add("X-ApiKey", _apiKey);
 
@@ -370,8 +387,10 @@ namespace Mindscape.Raygun4Net.NetCore
             {
               var message = SimpleJson.SerializeObject(raygunMessage);
               requestMessage.Content = new StringContent(message, Encoding.UTF8, "application/json");
+              
               var result = await client.SendAsync(requestMessage);
-              if(!result.IsSuccessStatusCode)
+              
+              if (!result.IsSuccessStatusCode)
               {
                 Debug.WriteLine($"Error Logging Exception to Raygun {result.ReasonPhrase}");
 
@@ -383,7 +402,7 @@ namespace Mindscape.Raygun4Net.NetCore
             }
             catch (Exception ex)
             {
-              Debug.WriteLine(string.Format("Error Logging Exception to Raygun {0}", ex.Message));
+              Debug.WriteLine($"Error Logging Exception to Raygun {ex.Message}");
 
               if (_settings.ThrowOnError)
               {
@@ -395,5 +414,4 @@ namespace Mindscape.Raygun4Net.NetCore
       }
     }
   }
-
 }

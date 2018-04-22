@@ -7,13 +7,13 @@ namespace Mindscape.Raygun4Net.NetCore.Builders
 {
   public class RaygunNetCoreMessageBuilder : IRaygunMessageBuilder
   {
+    private readonly RaygunMessage _raygunMessage;
+    private readonly RaygunSettings _settings;
+    
     public static RaygunNetCoreMessageBuilder New(RaygunSettings settings)
     {
       return new RaygunNetCoreMessageBuilder(settings);
     }
-
-    private readonly RaygunMessage _raygunMessage;
-    private readonly RaygunSettings _settings;
 
     private RaygunNetCoreMessageBuilder(RaygunSettings settings)
     {

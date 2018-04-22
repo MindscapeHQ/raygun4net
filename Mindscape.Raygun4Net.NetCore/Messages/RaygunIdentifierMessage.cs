@@ -6,7 +6,7 @@
     {
       Identifier = user;
     }
-
+    
     /// <summary>
     /// Unique Identifier for this user. Set this to the identifier you use internally to look up users,
     /// or a correlation id for anonymous users if you have one. It doesn't have to be unique, but we will
@@ -39,12 +39,12 @@
     /// Device Identifier. Could be used to identify users across apps.
     /// </summary>
     public string UUID { get; set; }
-
+    
     public override string ToString()
     {
       // This exists because Reflection in Xamarin can't seem to obtain the Getter methods unless the getter is used somewhere in the code.
       // The getter of all properties is required to serialize the Raygun messages to JSON.
-      return string.Format("[RaygunIdentifierMessage: Identifier={0}, IsAnonymous={1}, Email={2}, FullName={3}, FirstName={4}, UUID={5}]", Identifier, IsAnonymous, Email, FullName, FirstName, UUID);
+      return $"[RaygunIdentifierMessage: Identifier={Identifier}, IsAnonymous={IsAnonymous}, Email={Email}, FullName={FullName}, FirstName={FirstName}, UUID={UUID}]";
     }
   }
 }

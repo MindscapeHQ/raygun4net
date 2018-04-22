@@ -23,6 +23,7 @@ namespace Mindscape.Raygun4Net.NetCore.Builders
       if (exception.Data != null)
       {
         IDictionary data = new Dictionary<object, object>();
+        
         foreach (object key in exception.Data.Keys)
         {
           if (!RaygunClient.SentKey.Equals(key))
@@ -30,14 +31,17 @@ namespace Mindscape.Raygun4Net.NetCore.Builders
             data[key] = exception.Data[key];
           }
         }
+        
         message.Data = data;
       }
 
       AggregateException ae = exception as AggregateException;
+      
       if (ae != null && ae.InnerExceptions != null)
       {
         message.InnerErrors = new RaygunErrorMessage[ae.InnerExceptions.Count];
         int index = 0;
+        
         foreach (Exception e in ae.InnerExceptions)
         {
           message.InnerErrors[index] = Build(e);
@@ -52,7 +56,6 @@ namespace Mindscape.Raygun4Net.NetCore.Builders
       return message;
     }
 
-    
     private static RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
     {
       var lines = new List<RaygunErrorStackTraceLineMessage>();
@@ -64,6 +67,7 @@ namespace Mindscape.Raygun4Net.NetCore.Builders
       {
         var line = new RaygunErrorStackTraceLineMessage { FileName = "none", LineNumber = 0 };
         lines.Add(line);
+        
         return lines.ToArray();
       }
 
@@ -100,6 +104,5 @@ namespace Mindscape.Raygun4Net.NetCore.Builders
 
       return lines.ToArray();
     }
-    
   }
 }

@@ -12,7 +12,7 @@ namespace Mindscape.Raygun4Net.NetCore
     {
       Message = message;
     }
-
+    
     public RaygunMessage Message { get; private set; }
   }
 }
