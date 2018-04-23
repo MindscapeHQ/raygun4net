@@ -5,6 +5,7 @@
     <AssemblyName>Mindscape.Raygun4Net.NetCore</AssemblyName>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <TargetFrameworks>netstandard2.0;netstandard1.6</TargetFrameworks>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Builders\*.cs" />
@@ -15,6 +16,7 @@
     <Compile Include="RaygunSendingMessageEventArgs.cs" />
     <Compile Include="RaygunSettings.cs" />
     <Compile Include="SimpleJson.cs" />
+    <Compile Include="Properties\*.cs" />
   </ItemGroup>
   <!-- .NET Standard 2.0 references, compilation flags and build options -->
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
