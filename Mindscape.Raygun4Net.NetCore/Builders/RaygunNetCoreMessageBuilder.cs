@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Mindscape.Raygun4Net.Messages;
 
-namespace Mindscape.Raygun4Net.Builders
+namespace Mindscape.Raygun4Net
 {
   public class RaygunNetCoreMessageBuilder : IRaygunMessageBuilder
   {

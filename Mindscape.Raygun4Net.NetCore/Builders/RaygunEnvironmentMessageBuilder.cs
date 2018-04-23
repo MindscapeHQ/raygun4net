@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
-using Mindscape.Raygun4Net.Messages;
+using System.Runtime.InteropServices;
 
-namespace Mindscape.Raygun4Net.Builders
+namespace Mindscape.Raygun4Net
 {
   internal class RaygunEnvironmentMessageBuilder
   {
     public static RaygunEnvironmentMessage Build(RaygunSettings settings)
     {
       RaygunEnvironmentMessage message = new RaygunEnvironmentMessage();
+      
+      // The cross platform APIs for getting this information don't exist right now.
 
       try
       {

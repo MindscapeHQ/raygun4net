@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
 {
