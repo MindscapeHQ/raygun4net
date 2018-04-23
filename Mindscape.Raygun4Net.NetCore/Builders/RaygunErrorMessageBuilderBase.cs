@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Text;
 
-namespace Mindscape.Raygun4Net.NetCore.Builders
+namespace Mindscape.Raygun4Net.Builders
 {
   public abstract class RaygunErrorMessageBuilderBase
   {

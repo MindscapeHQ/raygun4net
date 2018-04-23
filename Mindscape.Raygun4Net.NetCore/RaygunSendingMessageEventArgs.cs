@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
-using Mindscape.Raygun4Net.NetCore.Messages;
+using Mindscape.Raygun4Net.Messages;
 
-namespace Mindscape.Raygun4Net.NetCore
+namespace Mindscape.Raygun4Net
 {
   /// <summary>
   /// Can be used to modify the message before sending, or to cancel the send operation.

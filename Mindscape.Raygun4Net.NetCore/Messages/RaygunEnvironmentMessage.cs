@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Mindscape.Raygun4Net.NetCore.Messages
+namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunEnvironmentMessage
   {

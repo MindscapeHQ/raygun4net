@@ -7,10 +7,10 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Mindscape.Raygun4Net.NetCore.Builders;
-using Mindscape.Raygun4Net.NetCore.Messages;
+using Mindscape.Raygun4Net.Builders;
+using Mindscape.Raygun4Net.Messages;
 
-namespace Mindscape.Raygun4Net.NetCore
+namespace Mindscape.Raygun4Net
 {
   public class RaygunClient
   {

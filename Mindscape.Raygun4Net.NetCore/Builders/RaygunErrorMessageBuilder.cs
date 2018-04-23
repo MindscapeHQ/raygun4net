@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using Mindscape.Raygun4Net.NetCore.Messages;
+using Mindscape.Raygun4Net.Messages;
 
-namespace Mindscape.Raygun4Net.NetCore.Builders
+namespace Mindscape.Raygun4Net.Builders
 {
   public class RaygunErrorMessageBuilder : RaygunErrorMessageBuilderBase
   {

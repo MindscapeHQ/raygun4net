@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
-using Mindscape.Raygun4Net.NetCore.Messages;
+using Mindscape.Raygun4Net.Messages;
 
-namespace Mindscape.Raygun4Net.NetCore.Builders
+namespace Mindscape.Raygun4Net.Builders
 {
   internal class RaygunEnvironmentMessageBuilder
   {

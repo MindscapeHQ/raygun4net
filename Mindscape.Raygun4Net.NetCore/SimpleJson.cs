@@ -67,12 +67,12 @@ using System.Dynamic;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
-using Mindscape.Raygun4Net.NetCore.Reflection;
+using Mindscape.Raygun4Net.Reflection;
 
 // ReSharper disable LoopCanBeConvertedToQuery
 // ReSharper disable RedundantExplicitArrayCreation
 // ReSharper disable SuggestUseVarKeywordEvident
-namespace Mindscape.Raygun4Net.NetCore
+namespace Mindscape.Raygun4Net
 {
   /// <summary>
   /// Represents the json array.
@@ -492,7 +492,7 @@ namespace Mindscape.Raygun4Net.NetCore
   }
 }
 
-namespace Mindscape.Raygun4Net.NetCore
+namespace Mindscape.Raygun4Net
 {
   /// <summary>
   /// This class encodes and decodes JSON strings.

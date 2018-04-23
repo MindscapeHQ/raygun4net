@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Mindscape.Raygun4Net.NetCore
+namespace Mindscape.Raygun4Net
 {
   public class RaygunSettings
   {
