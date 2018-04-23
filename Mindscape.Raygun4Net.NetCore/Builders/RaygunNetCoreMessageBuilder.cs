@@ -83,12 +83,10 @@ namespace Mindscape.Raygun4Net.NetCore.Builders
         _raygunMessage.Details.Version = _settings.ApplicationVersion;
       }
       else
-      {
-        _raygunMessage.Details.Version = "Not supplied";
+      {  
+        #if NETSTANDARD2_0
+        var entryAssembly = System.Reflection.Assembly.GetEntryAssembly();
 
-        // Requires something equivalent to GetEntryAssembly to exist in DNXCORE50.
-        /*
-        var entryAssembly = Assembly.GetEntryAssembly();
         if (entryAssembly != null)
         {
           _raygunMessage.Details.Version = entryAssembly.GetName().Version.ToString();
@@ -97,8 +95,11 @@ namespace Mindscape.Raygun4Net.NetCore.Builders
         {
           _raygunMessage.Details.Version = "Not supplied";
         }
-        */
+        #else
+        _raygunMessage.Details.Version = "Not supplied";
+        #endif
       }
+      
       return this;
     }
   }
