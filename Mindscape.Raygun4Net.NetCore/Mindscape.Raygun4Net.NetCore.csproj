@@ -7,6 +7,17 @@
     <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
+  <!-- NuGet Options -->
+  <PropertyGroup>
+    <Authors>Raygun</Authors>
+    <Description>.NetStandard library for targeting .Net Core applications</Description>
+    <PackageId>Mindscape.Raygun4Net.NetCore</PackageId>
+    <PackageVersion>5.6.0</PackageVersion>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseUrl>https://github.com/MindscapeHQ/raygun4net/LICENSE.txt</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/MindscapeHQ/raygun4net</PackageProjectUrl>
+    <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="Builders\*.cs" />
     <Compile Include="Messages\*.cs" />
