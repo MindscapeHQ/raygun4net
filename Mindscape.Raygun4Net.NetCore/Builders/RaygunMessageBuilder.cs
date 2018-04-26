@@ -4,17 +4,17 @@ using System.Collections.Generic;
 
 namespace Mindscape.Raygun4Net
 {
-  public class RaygunNetCoreMessageBuilder : IRaygunMessageBuilder
+  public class RaygunMessageBuilder : IRaygunMessageBuilder
   {
     private readonly RaygunMessage _raygunMessage;
     private readonly RaygunSettings _settings;
     
-    public static RaygunNetCoreMessageBuilder New(RaygunSettings settings)
+    public static RaygunMessageBuilder New(RaygunSettings settings)
     {
-      return new RaygunNetCoreMessageBuilder(settings);
+      return new RaygunMessageBuilder(settings);
     }
 
-    private RaygunNetCoreMessageBuilder(RaygunSettings settings)
+    private RaygunMessageBuilder(RaygunSettings settings)
     {
       _raygunMessage = new RaygunMessage();
       _settings = settings;
@@ -23,6 +23,15 @@ namespace Mindscape.Raygun4Net
     public RaygunMessage Build()
     {
       return _raygunMessage;
+    }
+    
+    public IRaygunMessageBuilder SetTimeStamp(DateTime? currentTime)
+    {
+      if (currentTime != null)
+      {
+        _raygunMessage.OccurredOn = currentTime.Value;
+      }
+      return this;
     }
 
     public IRaygunMessageBuilder SetMachineName(string machineName)

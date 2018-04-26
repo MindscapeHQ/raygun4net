@@ -299,11 +299,11 @@ namespace Mindscape.Raygun4Net
     internal void FlagExceptionAsSent(Exception exception)
     {
       FlagAsSent(exception);
-    }    
-
+    }
+    
     protected async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      var message = RaygunNetCoreMessageBuilder.New(_settings)
+      var message = RaygunMessageBuilder.New(_settings)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)
