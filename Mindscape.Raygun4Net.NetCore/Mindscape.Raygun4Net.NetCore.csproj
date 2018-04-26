@@ -41,8 +41,8 @@
     <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD1_6</DefineConstants>
   </PropertyGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
-  	<PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
-  	<PackageReference Include="System.ComponentModel" Version="4.3.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="System.ComponentModel" Version="4.3.0" />
     <PackageReference Include="System.Diagnostics.StackTrace" Version="4.0.1" />
   </ItemGroup>
 </Project>
