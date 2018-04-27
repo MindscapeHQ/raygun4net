@@ -37,7 +37,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         public void FormatGenericExceptionClassName()
         {
             var message = RaygunErrorMessageBuilder.Build(new GenericException<Dictionary<string, List<object>>>());
-            Assert.AreEqual("Mindscape.Raygun4Net.Tests.Model.GenericException<Dictionary<String,List<Object>>>", message.ClassName);
+            Assert.AreEqual("Mindscape.Raygun4Net.NetCore.Tests.GenericException<Dictionary<String,List<Object>>>", message.ClassName);
         }
 
         [Test]
