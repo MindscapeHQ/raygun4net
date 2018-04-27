@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Mindscape.Raygun4Net.NetCore</RootNamespace>
+    <AssemblyName>Mindscape.Raygun4Net.NetCore</AssemblyName>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <TargetFrameworks>netstandard2.0;netstandard1.6</TargetFrameworks>
+    <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+  <!-- NuGet Options -->
+  <PropertyGroup>
+    <Authors>Raygun</Authors>
+    <Description>.NetStandard library for targeting .Net Core applications</Description>
+    <PackageId>Mindscape.Raygun4Net.NetCore</PackageId>
+    <PackageVersion>5.5.4</PackageVersion>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseUrl>https://github.com/MindscapeHQ/raygun4net/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/MindscapeHQ/raygun4net</PackageProjectUrl>
+    <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Builders\*.cs" />
+    <Compile Include="Messages\*.cs" />
+    <Compile Include="IRaygunMessageBuilder.cs" />
+    <Compile Include="RaygunClient.cs" />
+    <Compile Include="RaygunCustomGroupingKeyEventArgs.cs" />
+    <Compile Include="RaygunSendingMessageEventArgs.cs" />
+    <Compile Include="RaygunSettings.cs" />
+    <Compile Include="SimpleJson.cs" />
+    <Compile Include="Properties\*.cs" />
+  </ItemGroup>
+  <!-- .NET Standard 2.0 references, compilation flags and build options -->
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
+    <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+  </ItemGroup>
+  <!-- .NET Standard 1.6 references, compilation flags and build options -->
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
+    <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD1_6</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="System.ComponentModel" Version="4.3.0" />
+    <PackageReference Include="System.Diagnostics.StackTrace" Version="4.0.1" />
+  </ItemGroup>
+</Project>
