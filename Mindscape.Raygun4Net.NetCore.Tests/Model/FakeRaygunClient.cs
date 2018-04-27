@@ -50,5 +50,10 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         {
             FlagAsSent(exception);
         }
+
+        public IEnumerable<Exception> ExposeStripWrapperExceptions(Exception exception)
+        {
+            return StripWrapperExceptions(exception);
+        }
     }
 }

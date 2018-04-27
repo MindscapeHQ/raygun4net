@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using NUnit.Framework;
@@ -129,8 +130,10 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     {
       TargetInvocationException wrapper = new TargetInvocationException(_exception);
 
-      RaygunMessage message = _client.ExposeBuildMessage(wrapper);
-      Assert.AreEqual("System.NullReferenceException", message.Details.Error.ClassName);
+      var exceptions = _client.ExposeStripWrapperExceptions(wrapper);
+      
+      Assert.AreEqual(1, exceptions.Count());
+      Assert.AreEqual("System.NullReferenceException", exceptions.ElementAt(0).GetType().FullName);
     }
 
     [Test]
@@ -140,15 +143,9 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
 
       WrapperException wrapper = new WrapperException(_exception);
 
-      RaygunMessage message = _client.ExposeBuildMessage(wrapper);
-      Assert.AreEqual("System.NullReferenceException", message.Details.Error.ClassName);
-    }
-
-    [Test]
-    public void DontStripNull()
-    {
-      RaygunMessage message = _client.ExposeBuildMessage(null);
-      Assert.IsNull(message.Details.Error);
+      var exceptions = _client.ExposeStripWrapperExceptions(wrapper);
+      Assert.AreEqual(1, exceptions.Count());
+      Assert.AreEqual("System.NullReferenceException", exceptions.ElementAt(0).GetType().FullName);
     }
 
     [Test]
@@ -158,8 +155,10 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
 
       TargetInvocationException wrapper = new TargetInvocationException(_exception);
 
-      RaygunMessage message = _client.ExposeBuildMessage(wrapper);
-      Assert.AreEqual("System.Reflection.TargetInvocationException", message.Details.Error.ClassName);
+      var exceptions = _client.ExposeStripWrapperExceptions(wrapper);
+      Assert.AreEqual(1, exceptions.Count());
+      Assert.AreEqual("System.Reflection.TargetInvocationException", exceptions.ElementAt(0).GetType().FullName);
+      Assert.AreEqual("System.NullReferenceException", exceptions.ElementAt(0).InnerException.GetType().FullName);
     }
 
     // Validation tests

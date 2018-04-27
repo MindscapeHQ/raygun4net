@@ -36,13 +36,6 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public void OccurredOnIsNow()
-    {
-      RaygunMessage message = _builder.Build();
-      Assert.IsTrue((DateTime.UtcNow - message.OccurredOn).TotalSeconds < 1);
-    }
-
-    [Test]
     public void SetTimeStamp()
     {
       DateTime time = new DateTime(2015, 2, 16);
