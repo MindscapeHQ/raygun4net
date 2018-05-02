@@ -15,6 +15,7 @@ namespace Mindscape.Raygun4Net
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
     private readonly RaygunSettings _settings;
+    private readonly RaygunBreadcrumbs _breadcrumbs;
 
     protected internal const string SentKey = "AlreadySentByRaygun";
     
@@ -34,22 +35,45 @@ namespace Mindscape.Raygun4Net
       {
         ApplicationVersion = settings.ApplicationVersion;
       }
+      
+      #if NETCORE_WEB
+      var breadcrumbStorage = new RaygunHttpContextBreadcrumbStorage();
+      #else
+      var breadcrumbStorage = new RaygunInMemoryBreadcrumbStorage();
+      #endif
+
+      _breadcrumbs = new RaygunBreadcrumbs(_settings, breadcrumbStorage);
     }
 
     /// <summary>
     /// Gets or sets the user identity string.
     /// </summary>
-    public virtual string User { get; set; }
+    public string User { get; set; }
 
     /// <summary>
     /// Gets or sets information about the user including the identity string.
     /// </summary>
-    public virtual RaygunIdentifierMessage UserInfo { get; set; }
+    public RaygunIdentifierMessage UserInfo { get; set; }
 
     /// <summary>
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun endpoint.
     /// </summary>
     public string ApplicationVersion { get; set; }
+    
+    public void RecordBreadcrumb(string message)
+    {
+      _breadcrumbs.Store(new RaygunBreadcrumb { Message = message });
+    }
+
+    public void RecordBreadcrumb(RaygunBreadcrumb crumb)
+    {
+      _breadcrumbs.Store(crumb);
+    }
+
+    public void ClearBreadcrumbs()
+    {
+      _breadcrumbs.Clear();
+    }
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
@@ -83,7 +107,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    protected virtual bool CanSend(Exception exception)
+    protected bool CanSend(Exception exception)
     {
       return exception == null || exception.Data == null || !exception.Data.Contains(SentKey) || false.Equals(exception.Data[SentKey]);
     }
@@ -312,6 +336,7 @@ namespace Mindscape.Raygun4Net
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
         .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
+        .SetBreadcrumbs(_breadcrumbs.ToList())
         .Build();
 
       var customGroupingKey = await OnCustomGroupingKey(exception, message);

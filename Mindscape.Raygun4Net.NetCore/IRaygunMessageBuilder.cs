@@ -23,5 +23,7 @@ namespace Mindscape.Raygun4Net
     IRaygunMessageBuilder SetTags(IList<string> tags);
 
     IRaygunMessageBuilder SetUser(RaygunIdentifierMessage user);
+    
+    IRaygunMessageBuilder SetBreadcrumbs(IList<RaygunBreadcrumb> crumbs);
   }
 }

@@ -110,5 +110,12 @@ namespace Mindscape.Raygun4Net
       
       return this;
     }
+    
+    public IRaygunMessageBuilder SetBreadcrumbs(IList<RaygunBreadcrumb> crumbs)
+    {
+      _raygunMessage.Details.Breadcrumbs = crumbs;
+
+      return this;
+    }
   }
 }
