@@ -19,6 +19,7 @@
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Breadcrumbs\*.cs" />
     <Compile Include="Builders\*.cs" />
     <Compile Include="Messages\*.cs" />
     <Compile Include="IRaygunMessageBuilder.cs" />
