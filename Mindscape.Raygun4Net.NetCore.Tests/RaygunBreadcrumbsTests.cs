@@ -8,11 +8,6 @@ namespace Mindscape.Raygun4Net.Tests
   [TestFixture]
   public class RaygunBreadcrumbsTests
   {
-    [SetUp]
-    public void SetUp()
-    {
-    }
-
     private RaygunBreadcrumbs GetBreadcrumbs(bool locationRecording = false, RaygunBreadcrumbLevel level = RaygunBreadcrumbLevel.Info)
     {
       var settings = new RaygunSettings() { BreadcrumbsLocationRecordingEnabled = locationRecording, BreadcrumbsLevel = level };
