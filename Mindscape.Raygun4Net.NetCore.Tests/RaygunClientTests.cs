@@ -17,7 +17,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     [SetUp]
     public void SetUp()
     {
-      _client = new FakeRaygunClient();
+      _client = new FakeRaygunClient("_API_KEY_");
     }
 
     // User tests
@@ -166,7 +166,8 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     [Test]
     public void NoAPIKeyIsInvalid()
     {
-      Assert.IsFalse(_client.ExposeValidateApiKey());
+      var client = new FakeRaygunClient();
+      Assert.IsFalse(client.ExposeValidateApiKey());
     }
 
     [Test]
@@ -345,12 +346,6 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       Exception exception = new InvalidOperationException("You cannot do that");
       _client.ExposeFlagAsSent(exception);
       Assert.IsFalse(_client.ExposeCanSend(exception));
-    }
-
-    [Test]
-    public void CanSendIfExceptionIsUnknown()
-    {
-      Assert.IsTrue(_client.ExposeCanSend(null));
     }
 
     [Test]

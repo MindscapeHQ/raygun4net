@@ -9,7 +9,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     [TestFixture]
     public class RaygunClientBaseTests
     {
-        private FakeRaygunClient _client = new FakeRaygunClient();
+        private FakeRaygunClient _client = new FakeRaygunClient("_API_KEY_");
 
         [Test]
         public void FlagAsSentDoesNotCrash_DataDoesNotSupportStringKeys()
