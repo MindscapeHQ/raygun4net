@@ -53,7 +53,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public void SerializeEnumMemberVariableToString()
+    public void SerializeEnumPropertyToString()
     {
       var model = new TestModel() { Type = ModelType.Complex };
       var json = SimpleJson.SerializeObject(model);
