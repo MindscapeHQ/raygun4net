@@ -30,20 +30,20 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         [Test]
         public void ExceptionBuilds()
         {
-            Assert.That(() => RaygunErrorMessageBuilder.Build(_exception), Throws.Nothing);
+            Assert.That(() => RaygunErrorMessageBuilder.New().Build(_exception), Throws.Nothing);
         }
 
         [Test]
         public void FormatGenericExceptionClassName()
         {
-            var message = RaygunErrorMessageBuilder.Build(new GenericException<Dictionary<string, List<object>>>());
+            var message = RaygunErrorMessageBuilder.New().Build(new GenericException<Dictionary<string, List<object>>>());
             Assert.AreEqual("Mindscape.Raygun4Net.NetCore.Tests.GenericException<Dictionary<String,List<Object>>>", message.ClassName);
         }
 
         [Test]
         public void IncludeNamespaceInExceptionClassName()
         {
-            var message = RaygunErrorMessageBuilder.Build(_exception);
+            var message = RaygunErrorMessageBuilder.New().Build(_exception);
             Assert.AreEqual("System.InvalidOperationException", message.ClassName);
         }
     }

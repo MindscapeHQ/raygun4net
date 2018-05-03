@@ -36,13 +36,13 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         [Test]
         public void ExceptionBuilds()
         {
-            Assert.That(() => RaygunErrorMessageBuilder.Build(_exception), Throws.Nothing);
+            Assert.That(() => RaygunErrorMessageBuilder.New().Build(_exception), Throws.Nothing);
         }
 
         [Test]
         public void ErrorMessageHasInnerError()
         {
-            var errorMessage = RaygunErrorMessageBuilder.Build(_exception);
+            var errorMessage = RaygunErrorMessageBuilder.New().Build(_exception);
 
             Assert.That(errorMessage.InnerError, Is.Not.Null);
         }
