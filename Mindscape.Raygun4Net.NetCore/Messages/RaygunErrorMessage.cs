@@ -16,6 +16,10 @@ namespace Mindscape.Raygun4Net
 
     public RaygunErrorStackTraceLineMessage[] StackTrace { get; set; }
 
+    public RaygunErrorMessage()
+    {
+    }
+    
     public override string ToString()
     {
       // This exists because Reflection in Xamarin can't seem to obtain the Getter methods unless the getter is used somewhere in the code.

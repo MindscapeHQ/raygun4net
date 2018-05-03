@@ -4,15 +4,15 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunMessage
   {
+    public DateTime OccurredOn { get; set; }
+
+    public RaygunMessageDetails Details { get; set; }
+    
     public RaygunMessage()
     {
       OccurredOn = DateTime.UtcNow;
       Details = new RaygunMessageDetails();
     }
-    
-    public DateTime OccurredOn { get; set; }
-
-    public RaygunMessageDetails Details { get; set; }
     
     public override string ToString()
     {

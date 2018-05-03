@@ -2,11 +2,6 @@
 {
   public class RaygunIdentifierMessage
   {
-    public RaygunIdentifierMessage(string user)
-    {
-      Identifier = user;
-    }
-    
     /// <summary>
     /// Unique Identifier for this user. Set this to the identifier you use internally to look up users,
     /// or a correlation id for anonymous users if you have one. It doesn't have to be unique, but we will
@@ -39,6 +34,11 @@
     /// Device Identifier. Could be used to identify users across apps.
     /// </summary>
     public string UUID { get; set; }
+    
+    public RaygunIdentifierMessage(string user)
+    {
+      Identifier = user;
+    }
     
     public override string ToString()
     {
