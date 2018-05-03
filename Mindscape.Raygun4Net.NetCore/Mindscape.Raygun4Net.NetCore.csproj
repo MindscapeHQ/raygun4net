@@ -22,6 +22,7 @@
     <Compile Include="Breadcrumbs\*.cs" />
     <Compile Include="Builders\*.cs" />
     <Compile Include="Messages\*.cs" />
+    <Compile Include="IRaygunClient.cs" />
     <Compile Include="IRaygunMessageBuilder.cs" />
     <Compile Include="RaygunClient.cs" />
     <Compile Include="RaygunCustomGroupingKeyEventArgs.cs" />
