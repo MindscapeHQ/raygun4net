@@ -41,6 +41,25 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       _siblingObject.Array[0] = _siblingObject.Child;
     }
 
+    private class TestModel
+    {
+      public ModelType Type { get; set; }
+    }
+
+    private enum ModelType
+    {
+      None = 0,
+      Complex
+    }
+
+    [Test]
+    public void SerializeEnumMemberVariableToString()
+    {
+      var model = new TestModel() { Type = ModelType.Complex };
+      var json = SimpleJson.SerializeObject(model);
+      Assert.AreEqual(json, "{\"Type\":\"Complex\"}");
+    }
+
     [Test]
     public void SerializeNonStringDictionary()
     {

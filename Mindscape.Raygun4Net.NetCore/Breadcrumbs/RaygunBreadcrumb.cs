@@ -9,7 +9,6 @@ namespace Mindscape.Raygun4Net
     
     public RaygunBreadcrumbLevel Level { get; set; } = RaygunBreadcrumbLevel.Info;
 
-    // FIX: This is a string due to serialization of enums in SimpleJson to the numeric value.
     public RaygunBreadcrumbType Type { get; set; } = RaygunBreadcrumbType.Manual;
     
     public string Message { get; set; }

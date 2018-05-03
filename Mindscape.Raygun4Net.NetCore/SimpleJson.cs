@@ -1543,7 +1543,7 @@ namespace Mindscape.Raygun4Net
 
     protected virtual object SerializeEnum(Enum p)
     {
-      return Convert.ToDouble(p, CultureInfo.InvariantCulture);
+      return p.ToString();
     }
 
     [SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate", Justification = "Need to support .NET 2")]
