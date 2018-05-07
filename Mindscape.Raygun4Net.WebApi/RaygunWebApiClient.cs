@@ -132,9 +132,12 @@ namespace Mindscape.Raygun4Net.WebApi
       {
         applicationVersion = applicationVersionFromAttach;
       }
-      
-      config.MessageHandlers.Add(new RaygunWebApiDelegatingHandler());
-      
+
+      if (RaygunSettings.Settings.IsRawDataIgnored == false)
+      {
+        config.MessageHandlers.Add(new RaygunWebApiDelegatingHandler());
+      }
+
       var clientCreator = new RaygunWebApiClientProvider(generateRaygunClientWithMessage, applicationVersion);
 
       config.Services.Add(typeof(IExceptionLogger), new RaygunWebApiExceptionLogger(clientCreator));
