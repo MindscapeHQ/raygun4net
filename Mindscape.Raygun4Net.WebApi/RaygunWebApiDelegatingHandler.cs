@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -11,21 +13,11 @@ namespace Mindscape.Raygun4Net.WebApi
 
     protected override async System.Threading.Tasks.Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
     {
-      var stream = await request.Content.ReadAsStreamAsync();
-      if (stream != null && stream.CanSeek)
+      // ReadAsStringAsync is always readable as it calls LoadIntoBufferAsync internally.
+      var body = await request.Content.ReadAsStringAsync();
+      if (!string.IsNullOrEmpty(body))
       {
-        var lengthToRead = (int)(stream.Length < 4096 ? stream.Length : 4096);
-        var buffer = new byte[lengthToRead];
-
-        await stream.ReadAsync(buffer, 0, lengthToRead, cancellationToken);
-
-        var body = Encoding.UTF8.GetString(buffer);
-        if (!string.IsNullOrEmpty(body))
-        {
-          request.Properties[RequestBodyKey] = body;
-        }
-
-        stream.Seek(0, System.IO.SeekOrigin.Begin);
+        request.Properties[RequestBodyKey] = body;
       }
 
       return await base.SendAsync(request, cancellationToken);
