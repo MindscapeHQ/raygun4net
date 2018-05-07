@@ -1,13 +1,8 @@
-﻿using System.ComponentModel;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
+﻿using System.Net.Http;
 
 namespace Mindscape.Raygun4Net.WebApi
 {
-  public class RaygunWebApiDelegatingHandler : DelegatingHandler
+    public class RaygunWebApiDelegatingHandler : DelegatingHandler
   {
     public const string RequestBodyKey = "Raygun.RequestBody";
 
