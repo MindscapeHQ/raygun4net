@@ -7,6 +7,8 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunHttpModule : IHttpModule
   {
+    public static bool Enabled = true;
+
     private bool ExcludeErrorsBasedOnHttpStatusCode { get; set; }
     private bool ExcludeErrorsFromLocal { get; set; }
 
@@ -14,6 +16,8 @@ namespace Mindscape.Raygun4Net
 
     public void Init(HttpApplication context)
     {
+      if (!Enabled) return;
+
       context.Error += SendError;
       HttpStatusCodesToExclude = RaygunSettings.Settings.ExcludedStatusCodes;
       ExcludeErrorsBasedOnHttpStatusCode = HttpStatusCodesToExclude.Any();
