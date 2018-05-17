@@ -5,7 +5,6 @@ using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using Mindscape.Raygun4Net.Messages;
@@ -14,7 +13,7 @@ namespace Mindscape.Raygun4Net.Builders
 {
   public class RaygunRequestMessageBuilder
   {
-    private static readonly Regex IpAddressRegex = new Regex(@"\A(?:\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b)(:[1-9][0-9]{0,4})?\z", RegexOptions.Compiled);
+    private static readonly Regex IpAddressRegex = new Regex(@"\A(?:\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b)(:[1-9][0-9]{0,4})?\z", RegexOptions.Compiled);
 
     public static RaygunRequestMessage Build(HttpRequest request, RaygunRequestMessageOptions options)
     {
@@ -27,7 +26,7 @@ namespace Mindscape.Raygun4Net.Builders
         message.HostName = request.Url.Host;
         message.Url = request.Url.AbsolutePath;
         message.HttpMethod = request.RequestType;
-        message.IPAddress = GetIpAddress(request);
+        message.IPAddress = GetIpAddress(request, options.IsRequestIpAddressMasked);
       }
       catch (Exception e)
       {
@@ -160,7 +159,7 @@ namespace Mindscape.Raygun4Net.Builders
       return rawData;
     }
 
-    private static string GetIpAddress(HttpRequest request)
+    private static string GetIpAddress(HttpRequest request, bool isMasked)
     {
       string strIp = null;
 
@@ -205,6 +204,11 @@ namespace Mindscape.Raygun4Net.Builders
         System.Diagnostics.Trace.WriteLine("Failed to get IP address: {0}", ex.Message);
       }
 
+      if (isMasked)
+      {
+        strIp = MaskIpAddress(strIp);
+      }
+
       return strIp;
     }
 
@@ -215,6 +219,21 @@ namespace Mindscape.Raygun4Net.Builders
         return IpAddressRegex.IsMatch(strIp.Trim());
       }
       return false;
+    }
+
+    private static string MaskIpAddress(string strIp)
+    {
+      if (strIp != null)
+      {
+        var match = IpAddressRegex.Match(strIp);
+        if (match.Success && match.Groups.Count > 1)
+        {
+            var group = match.Groups[1];
+            strIp = strIp.Substring(0, group.Index) + "0" + strIp.Substring(group.Index + group.Length);
+        }
+      }
+
+      return strIp;
     }
 
     private static IList GetCookies(HttpCookieCollection cookieCollection, Func<string, bool> ignore)

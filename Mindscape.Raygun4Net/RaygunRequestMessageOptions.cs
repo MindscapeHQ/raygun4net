@@ -11,7 +11,9 @@ namespace Mindscape.Raygun4Net
     private readonly List<string> _ignoreCookieNames = new List<string>();
     private readonly List<string> _ignoreServerVariableNames = new List<string>();
     private bool _isRawDataIgnored;
-    
+    private bool _isRequestIpAddressMasked;
+
+
     public RaygunRequestMessageOptions() { }
 
     public RaygunRequestMessageOptions(IEnumerable<string> formFieldNames, IEnumerable<string> headerNames, IEnumerable<string> cookieNames, IEnumerable<string> serverVariableNames)
@@ -31,6 +33,17 @@ namespace Mindscape.Raygun4Net
       {
         _isRawDataIgnored = value;
       }
+    }
+    
+    // Masking
+
+    public bool IsRequestIpAddressMasked
+    {
+        get { return _isRequestIpAddressMasked; }
+        set
+        {
+            _isRequestIpAddressMasked = value;
+        }
     }
 
     // Form fields

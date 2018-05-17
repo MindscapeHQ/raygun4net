@@ -62,6 +62,7 @@ namespace Mindscape.Raygun4Net
         IgnoreServerVariableNames(ignoredNames);
       }
       IsRawDataIgnored = RaygunSettings.Settings.IsRawDataIgnored;
+      IsRequestIpAddressMasked = RaygunSettings.Settings.IsRequestIpAddressMasked;
 
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
@@ -183,6 +184,19 @@ namespace Mindscape.Raygun4Net
       {
         _requestMessageOptions.IsRawDataIgnored = value;
       }
+    }
+
+    /// <summary>
+    /// Specifies whether or not the request IpAddress has the last octet zeroed. This may be
+    /// required to comply with the European GDPR laws.
+    /// </summary>
+    public bool IsRequestIpAddressMasked
+    {
+        get { return _requestMessageOptions.IsRequestIpAddressMasked; }
+        set
+        {
+            _requestMessageOptions.IsRequestIpAddressMasked = value;
+        }
     }
 
     protected override bool CanSend(Exception exception)
