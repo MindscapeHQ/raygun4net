@@ -3,7 +3,7 @@
     <RootNamespace>Mindscape.Raygun4Net.NetCore</RootNamespace>
     <AssemblyName>Mindscape.Raygun4Net.NetCore</AssemblyName>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <TargetFrameworks>netstandard2.0;netstandard1.6</TargetFrameworks>
+    <TargetFrameworks>netstandard1.6;netstandard2.0</TargetFrameworks>
     <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>

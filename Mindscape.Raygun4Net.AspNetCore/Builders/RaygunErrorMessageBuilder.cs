@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Mindscape.Raygun4Net.AspNetCore.Builders
 {
-  public class RaygunErrorMessageBuilder : RaygunErrorMessageBuilderBase
+  public class RaygunErrorMessageBuilder : AspNetCore.Builders.RaygunErrorMessageBuilderBase
   {
     public static RaygunErrorMessage Build(Exception exception)
     {

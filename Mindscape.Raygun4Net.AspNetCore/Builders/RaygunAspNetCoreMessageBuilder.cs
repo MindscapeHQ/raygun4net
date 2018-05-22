@@ -6,15 +6,15 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
 {
   public class RaygunAspNetCoreMessageBuilder : IRaygunMessageBuilder
   {
-    public static RaygunAspNetCoreMessageBuilder New(RaygunSettings settings)
+    public static RaygunAspNetCoreMessageBuilder New(Raygun4Net.RaygunSettings settings)
     {
       return new RaygunAspNetCoreMessageBuilder(settings);
     }
 
     private readonly RaygunMessage _raygunMessage;
-    private readonly RaygunSettings _settings;
+    private readonly Raygun4Net.RaygunSettings _settings;
 
-    private RaygunAspNetCoreMessageBuilder(RaygunSettings settings)
+    private RaygunAspNetCoreMessageBuilder(Raygun4Net.RaygunSettings settings)
     {
       _raygunMessage = new RaygunMessage();
       _settings = settings;
@@ -41,7 +41,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
     {
       if (exception != null)
       {
-        _raygunMessage.Details.Error = RaygunErrorMessageBuilder.Build(exception);
+        _raygunMessage.Details.Error = AspNetCore.Builders.RaygunErrorMessageBuilder.Build(exception);
       }
 
       return this;

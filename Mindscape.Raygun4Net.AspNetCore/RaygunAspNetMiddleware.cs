@@ -9,8 +9,9 @@ using System.IO;
 using System.Globalization;
 using System.Diagnostics;
 using Microsoft.Extensions.Configuration;
+using Mindscape.Raygun4Net.AspNetCore;
 
-namespace Mindscape.Raygun4Net.AspNetCore.Builders
+namespace Mindscape.Raygun4Net
 {
   public class RaygunAspNetMiddleware
   {
@@ -99,7 +100,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return app.UseMiddleware<RaygunAspNetMiddleware>();
     }
 
-    public static IServiceCollection AddRaygun(this IServiceCollection services, IConfigurationRoot configuration)
+    public static IServiceCollection AddRaygun(this IServiceCollection services, IConfiguration configuration)
     {
       services.Configure<AspNetCore.RaygunSettings>(configuration.GetSection("RaygunSettings"));
 
