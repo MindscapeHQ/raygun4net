@@ -4,7 +4,7 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunSettings
   {
-    private const string DefaultApiEndPoint = "https://api.raygun.com/entries";
+    internal const string DefaultApiEndPoint = "https://api.raygun.com/entries";
 
     public RaygunSettings()
     {

@@ -14,7 +14,7 @@ namespace Mindscape.Raygun4Net
   {
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
-    private readonly RaygunSettings _settings;
+    internal readonly RaygunSettings _settings;
 
     protected internal const string SentKey = "AlreadySentByRaygun";
     
@@ -200,7 +200,7 @@ namespace Mindscape.Raygun4Net
       return true;
     }
 
-    protected bool CanSend(RaygunMessage message)
+    protected virtual bool CanSend(RaygunMessage message)
     {
       return true;
     }
@@ -237,7 +237,7 @@ namespace Mindscape.Raygun4Net
       SendAsync(exception, tags, userCustomData).Wait();
     }
     
-    private async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData)
+    protected virtual async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       if (CanSend(exception))
       {
@@ -271,7 +271,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    public async Task SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
+    public virtual async Task SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       if (CanSend(exception))
       {
@@ -301,7 +301,7 @@ namespace Mindscape.Raygun4Net
       FlagAsSent(exception);
     }
     
-    protected async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    protected virtual async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       var message = RaygunMessageBuilder.New(_settings)
         .SetEnvironmentDetails()
@@ -324,7 +324,7 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 
-    private async Task StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
+    internal async Task StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       foreach (Exception e in StripWrapperExceptions(exception))
       {

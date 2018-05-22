@@ -1,4 +1,6 @@
-﻿namespace Mindscape.Raygun4Net
+﻿using Mindscape.Raygun4Net.AspNetCore;
+
+namespace Mindscape.Raygun4Net
 {
   public class RaygunMiddlewareSettings
   {

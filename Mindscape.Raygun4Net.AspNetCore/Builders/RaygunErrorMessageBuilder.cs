@@ -3,10 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using Mindscape.Raygun4Net;
-using Mindscape.Raygun4Net.Messages;
 
-namespace Mindscape.Raygun4Net.Builders
+namespace Mindscape.Raygun4Net.AspNetCore.Builders
 {
   public class RaygunErrorMessageBuilder : RaygunErrorMessageBuilderBase
   {
@@ -26,7 +24,7 @@ namespace Mindscape.Raygun4Net.Builders
         IDictionary data = new Dictionary<object, object>();
         foreach (object key in exception.Data.Keys)
         {
-          if (!RaygunClient.SentKey.Equals(key))
+          if (!Raygun4Net.RaygunClient.SentKey.Equals(key))
           {
             data[key] = exception.Data[key];
           }

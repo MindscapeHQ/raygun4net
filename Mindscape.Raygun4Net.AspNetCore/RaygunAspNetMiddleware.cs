@@ -3,27 +3,27 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Net;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using System.Globalization;
 using System.Diagnostics;
+using Microsoft.Extensions.Configuration;
 
-namespace Mindscape.Raygun4Net
+namespace Mindscape.Raygun4Net.AspNetCore.Builders
 {
   public class RaygunAspNetMiddleware
   {
     private readonly RequestDelegate _next;
     private readonly RaygunMiddlewareSettings _middlewareSettings;
-    private readonly RaygunSettings _settings;
+    private readonly AspNetCore.RaygunSettings _settings;
 
-    public RaygunAspNetMiddleware(RequestDelegate next, IOptions<RaygunSettings> settings, RaygunMiddlewareSettings middlewareSettings)
+    public RaygunAspNetMiddleware(RequestDelegate next, IOptions<AspNetCore.RaygunSettings> settings, RaygunMiddlewareSettings middlewareSettings)
     {
       _next = next;
       _middlewareSettings = middlewareSettings;
 
-      _settings = _middlewareSettings.ClientProvider.GetRaygunSettings(settings.Value ?? new RaygunSettings());
+      _settings = _middlewareSettings.ClientProvider.GetRaygunSettings(settings.Value ?? new AspNetCore.RaygunSettings());
     }
     public async Task Invoke(HttpContext httpContext)
     {
@@ -92,7 +92,7 @@ namespace Mindscape.Raygun4Net
     }
   }
 
-  public static class IApplicationBuilderExtensions
+  public static class ApplicationBuilderExtensions
   {
     public static IApplicationBuilder UseRaygun(this IApplicationBuilder app)
     {
@@ -101,7 +101,7 @@ namespace Mindscape.Raygun4Net
 
     public static IServiceCollection AddRaygun(this IServiceCollection services, IConfigurationRoot configuration)
     {
-      services.Configure<RaygunSettings>(configuration.GetSection("RaygunSettings"));
+      services.Configure<AspNetCore.RaygunSettings>(configuration.GetSection("RaygunSettings"));
 
       services.AddTransient<IRaygunAspNetCoreClientProvider>(_ => new DefaultRaygunAspNetCoreClientProvider());
       services.AddSingleton<RaygunMiddlewareSettings>();
@@ -111,7 +111,7 @@ namespace Mindscape.Raygun4Net
 
     public static IServiceCollection AddRaygun(this IServiceCollection services, IConfiguration configuration, RaygunMiddlewareSettings middlewareSettings)
     {
-      services.Configure<RaygunSettings>(configuration.GetSection("RaygunSettings"));
+      services.Configure<AspNetCore.RaygunSettings>(configuration.GetSection("RaygunSettings"));
 
       services.AddTransient(_ => middlewareSettings.ClientProvider ?? new DefaultRaygunAspNetCoreClientProvider());
       services.AddTransient(_ => middlewareSettings);

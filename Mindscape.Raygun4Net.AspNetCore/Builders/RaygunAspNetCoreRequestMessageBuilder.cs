@@ -5,12 +5,11 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Mindscape.Raygun4Net.Messages;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using System.Text;
 
-namespace Mindscape.Raygun4Net.Builders
+namespace Mindscape.Raygun4Net.AspNetCore.Builders
 {
   public class RaygunAspNetCoreRequestMessageBuilder
   {

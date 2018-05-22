@@ -21,3 +21,5 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("a5a4b4f9-058f-489e-9bd2-2d540247ead8")]
+
+[assembly: InternalsVisibleTo("Mindscape.Raygun4Net.AspNetCore")]
