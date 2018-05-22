@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.AspNet
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.NetCore", "Mindscape.Raygun4Net.NetCore\Mindscape.Raygun4Net.NetCore.csproj", "{F44BC9AE-1FAC-446C-BC78-86724E261CB3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.AspNetCore2.Tests", "Mindscape.Raygun4Net.AspNetCore2.Tests\Mindscape.Raygun4Net.AspNetCore2.Tests.csproj", "{1B8F6225-7D9C-4D4A-A2AD-8F78F8FA8B8B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,18 @@ Global
 		{F44BC9AE-1FAC-446C-BC78-86724E261CB3}.Release|x64.Build.0 = Release|Any CPU
 		{F44BC9AE-1FAC-446C-BC78-86724E261CB3}.Release|x86.ActiveCfg = Release|Any CPU
 		{F44BC9AE-1FAC-446C-BC78-86724E261CB3}.Release|x86.Build.0 = Release|Any CPU
+		{1B8F6225-7D9C-4D4A-A2AD-8F78F8FA8B8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B8F6225-7D9C-4D4A-A2AD-8F78F8FA8B8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B8F6225-7D9C-4D4A-A2AD-8F78F8FA8B8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B8F6225-7D9C-4D4A-A2AD-8F78F8FA8B8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B8F6225-7D9C-4D4A-A2AD-8F78F8FA8B8B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1B8F6225-7D9C-4D4A-A2AD-8F78F8FA8B8B}.Debug|x64.Build.0 = Debug|Any CPU
+		{1B8F6225-7D9C-4D4A-A2AD-8F78F8FA8B8B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1B8F6225-7D9C-4D4A-A2AD-8F78F8FA8B8B}.Debug|x86.Build.0 = Debug|Any CPU
+		{1B8F6225-7D9C-4D4A-A2AD-8F78F8FA8B8B}.Release|x64.ActiveCfg = Release|Any CPU
+		{1B8F6225-7D9C-4D4A-A2AD-8F78F8FA8B8B}.Release|x64.Build.0 = Release|Any CPU
+		{1B8F6225-7D9C-4D4A-A2AD-8F78F8FA8B8B}.Release|x86.ActiveCfg = Release|Any CPU
+		{1B8F6225-7D9C-4D4A-A2AD-8F78F8FA8B8B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
