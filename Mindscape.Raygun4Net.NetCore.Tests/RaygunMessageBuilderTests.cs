@@ -43,13 +43,6 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       Assert.AreEqual(time, message.OccurredOn);
     }
 
-    [Test]
-    public void SetNullTimeStamp()
-    {
-      RaygunMessage message = _builder.SetTimeStamp(null).Build();
-      Assert.IsTrue((DateTime.UtcNow - message.OccurredOn).TotalSeconds < 1);
-    }
-
     // Response tests
 
     [Test]

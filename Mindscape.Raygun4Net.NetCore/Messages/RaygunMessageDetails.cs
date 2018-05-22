@@ -26,5 +26,7 @@ namespace Mindscape.Raygun4Net
     public RaygunRequestMessage Request { get; set; }
 
     public RaygunResponseMessage Response { get; set; }
+    
+    public IList<RaygunBreadcrumb> Breadcrumbs { get; set; }
   }
 }

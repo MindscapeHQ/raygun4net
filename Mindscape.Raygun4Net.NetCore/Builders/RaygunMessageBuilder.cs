@@ -42,7 +42,7 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetEnvironmentDetails()
     {
-      _raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.Build(_settings);
+      _raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.New().Build(_settings);
       return this;
     }
 
@@ -50,7 +50,7 @@ namespace Mindscape.Raygun4Net
     {
       if (exception != null)
       {
-        _raygunMessage.Details.Error = RaygunErrorMessageBuilder.Build(exception);
+        _raygunMessage.Details.Error = RaygunErrorMessageBuilder.New().Build(exception);
       }
 
       return this;
@@ -108,6 +108,13 @@ namespace Mindscape.Raygun4Net
         #endif
       }
       
+      return this;
+    }
+    
+    public IRaygunMessageBuilder SetBreadcrumbs(IList<RaygunBreadcrumb> crumbs)
+    {
+      _raygunMessage.Details.Breadcrumbs = crumbs;
+
       return this;
     }
   }
