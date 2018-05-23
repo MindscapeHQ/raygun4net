@@ -17,14 +17,14 @@ namespace Mindscape.Raygun4Net
   {
     private readonly RequestDelegate _next;
     private readonly RaygunMiddlewareSettings _middlewareSettings;
-    private readonly AspNetCore.RaygunSettings _settings;
+    private readonly RaygunSettings _settings;
 
-    public RaygunAspNetMiddleware(RequestDelegate next, IOptions<AspNetCore.RaygunSettings> settings, RaygunMiddlewareSettings middlewareSettings)
+    public RaygunAspNetMiddleware(RequestDelegate next, IOptions<RaygunSettings> settings, RaygunMiddlewareSettings middlewareSettings)
     {
       _next = next;
       _middlewareSettings = middlewareSettings;
 
-      _settings = _middlewareSettings.ClientProvider.GetRaygunSettings(settings.Value ?? new AspNetCore.RaygunSettings());
+      _settings = _middlewareSettings.ClientProvider.GetRaygunSettings(settings.Value ?? new RaygunSettings());
     }
     public async Task Invoke(HttpContext httpContext)
     {
@@ -102,7 +102,7 @@ namespace Mindscape.Raygun4Net
 
     public static IServiceCollection AddRaygun(this IServiceCollection services, IConfiguration configuration)
     {
-      services.Configure<AspNetCore.RaygunSettings>(configuration.GetSection("RaygunSettings"));
+      services.Configure<RaygunSettings>(configuration.GetSection("RaygunSettings"));
 
       services.AddTransient<IRaygunAspNetCoreClientProvider>(_ => new DefaultRaygunAspNetCoreClientProvider());
       services.AddSingleton<RaygunMiddlewareSettings>();
@@ -112,7 +112,7 @@ namespace Mindscape.Raygun4Net
 
     public static IServiceCollection AddRaygun(this IServiceCollection services, IConfiguration configuration, RaygunMiddlewareSettings middlewareSettings)
     {
-      services.Configure<AspNetCore.RaygunSettings>(configuration.GetSection("RaygunSettings"));
+      services.Configure<RaygunSettings>(configuration.GetSection("RaygunSettings"));
 
       services.AddTransient(_ => middlewareSettings.ClientProvider ?? new DefaultRaygunAspNetCoreClientProvider());
       services.AddTransient(_ => middlewareSettings);

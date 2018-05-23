@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Mindscape.Raygun4Net.AspNetCore.Builders;
 
-namespace Mindscape.Raygun4Net.AspNetCore
+namespace Mindscape.Raygun4Net
 {
-  public class RaygunClient : Raygun4Net.RaygunClient
+  public class RaygunClient : RaygunClientBase
   {
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     
@@ -18,11 +18,11 @@ namespace Mindscape.Raygun4Net.AspNetCore
     private readonly ThreadLocal<RaygunResponseMessage> _currentResponseMessage = new ThreadLocal<RaygunResponseMessage>(() => null);
     
     public RaygunClient(string apiKey)
-      : this(new AspNetCore.RaygunSettings {ApiKey = apiKey})
+      : this(new RaygunSettings {ApiKey = apiKey})
     {
     }
 
-    public RaygunClient(AspNetCore.RaygunSettings settings, HttpContext context = null)
+    public RaygunClient(RaygunSettings settings, HttpContext context = null)
     : base(settings)
     {
       if (settings.IgnoreFormFieldNames != null)
@@ -57,9 +57,9 @@ namespace Mindscape.Raygun4Net.AspNetCore
       }
     }
 
-    AspNetCore.RaygunSettings GetSettings()
+    RaygunSettings GetSettings()
     {
-      return (AspNetCore.RaygunSettings) _settings;
+      return (RaygunSettings) _settings;
     }
 
     /// <summary>
@@ -118,7 +118,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
         _requestMessageOptions.IsRawDataIgnored = value;
       }
     }
-    
+
     protected override bool CanSend(RaygunMessage message)
     {
       if (message != null && message.Details != null && message.Details.Response != null)
@@ -176,7 +176,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
 
     protected override async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      var message = RaygunAspNetCoreMessageBuilder.New(GetSettings())
+      var message = new RaygunMessageBuilder(GetSettings())
         .SetResponseDetails(_currentResponseMessage.Value)
         .SetRequestDetails(_currentRequestMessage.Value)
         .SetEnvironmentDetails()

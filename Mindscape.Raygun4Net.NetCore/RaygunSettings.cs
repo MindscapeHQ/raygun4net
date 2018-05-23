@@ -1,22 +1,7 @@
-﻿using System;
-
-namespace Mindscape.Raygun4Net
+﻿namespace Mindscape.Raygun4Net
 {
-  public class RaygunSettings
-  {
-    internal const string DefaultApiEndPoint = "https://api.raygun.com/entries";
-
-    public RaygunSettings()
+    public class RaygunSettings : RaygunSettingsBase
     {
-      ApiEndpoint = new Uri(DefaultApiEndPoint);
+        
     }
-
-    public string ApiKey { get; set; }
-
-    public Uri ApiEndpoint { get; set; }
-
-    public bool ThrowOnError { get; set; }
-
-    public string ApplicationVersion { get; set; }
-  }
 }

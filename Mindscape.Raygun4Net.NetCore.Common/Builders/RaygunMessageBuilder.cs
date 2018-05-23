@@ -2,19 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Mindscape.Raygun4Net.AspNetCore.Builders
+namespace Mindscape.Raygun4Net
 {
-  public class RaygunAspNetCoreMessageBuilder : IRaygunMessageBuilder
+  public class RaygunMessageBuilder : IRaygunMessageBuilder
   {
-    public static RaygunAspNetCoreMessageBuilder New(Raygun4Net.RaygunSettings settings)
-    {
-      return new RaygunAspNetCoreMessageBuilder(settings);
-    }
-
-    private readonly RaygunMessage _raygunMessage;
-    private readonly Raygun4Net.RaygunSettings _settings;
-
-    private RaygunAspNetCoreMessageBuilder(Raygun4Net.RaygunSettings settings)
+    protected readonly RaygunMessage _raygunMessage;
+    protected readonly RaygunSettingsBase _settings;
+    
+    public RaygunMessageBuilder(RaygunSettingsBase settings)
     {
       _raygunMessage = new RaygunMessage();
       _settings = settings;
@@ -23,6 +18,15 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
     public RaygunMessage Build()
     {
       return _raygunMessage;
+    }
+    
+    public IRaygunMessageBuilder SetTimeStamp(DateTime? currentTime)
+    {
+      if (currentTime != null)
+      {
+        _raygunMessage.OccurredOn = currentTime.Value;
+      }
+      return this;
     }
 
     public IRaygunMessageBuilder SetMachineName(string machineName)
@@ -41,7 +45,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
     {
       if (exception != null)
       {
-        _raygunMessage.Details.Error = AspNetCore.Builders.RaygunErrorMessageBuilder.Build(exception);
+        _raygunMessage.Details.Error = RaygunErrorMessageBuilderBase.Build(exception);
       }
 
       return this;
@@ -70,19 +74,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       _raygunMessage.Details.User = user;
       return this;
     }
-
-    public RaygunAspNetCoreMessageBuilder SetRequestDetails(RaygunRequestMessage message)
-    {
-      _raygunMessage.Details.Request = message;
-      return this;
-    }
-
-    public RaygunAspNetCoreMessageBuilder SetResponseDetails(RaygunResponseMessage message)
-    {
-      _raygunMessage.Details.Response = message;
-      return this;
-    }
-
+   
     public IRaygunMessageBuilder SetVersion(string version)
     {
       if (!String.IsNullOrEmpty(version))
@@ -94,12 +86,10 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
         _raygunMessage.Details.Version = _settings.ApplicationVersion;
       }
       else
-      {
-        _raygunMessage.Details.Version = "Not supplied";
+      {  
+        #if NETSTANDARD2_0
+        var entryAssembly = System.Reflection.Assembly.GetEntryAssembly();
 
-        // Requires something equivalent to GetEntryAssembly to exist in DNXCORE50.
-        /*
-        var entryAssembly = Assembly.GetEntryAssembly();
         if (entryAssembly != null)
         {
           _raygunMessage.Details.Version = entryAssembly.GetName().Version.ToString();
@@ -108,8 +98,23 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
         {
           _raygunMessage.Details.Version = "Not supplied";
         }
-        */
+        #else
+        _raygunMessage.Details.Version = "Not supplied";
+        #endif
       }
+      
+      return this;
+    }
+    
+    public IRaygunMessageBuilder SetRequestDetails(RaygunRequestMessage message)
+    {
+      _raygunMessage.Details.Request = message;
+      return this;
+    }
+
+    public IRaygunMessageBuilder SetResponseDetails(RaygunResponseMessage message)
+    {
+      _raygunMessage.Details.Response = message;
       return this;
     }
   }

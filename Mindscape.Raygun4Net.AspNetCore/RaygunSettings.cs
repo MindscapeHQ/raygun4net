@@ -1,14 +1,9 @@
 ﻿using System;
 
-namespace Mindscape.Raygun4Net.AspNetCore
+namespace Mindscape.Raygun4Net
 {
-  public class RaygunSettings : Raygun4Net.RaygunSettings
+  public class RaygunSettings : RaygunSettingsBase
   {
-    public RaygunSettings()
-    {
-      ApiEndpoint = new Uri(DefaultApiEndPoint);
-    }
-
     public bool MediumTrust { get; set; }
 
     public int[] ExcludedStatusCodes { get; set; }

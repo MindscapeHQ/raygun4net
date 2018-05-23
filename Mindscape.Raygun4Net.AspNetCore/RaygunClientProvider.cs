@@ -4,24 +4,24 @@ namespace Mindscape.Raygun4Net
 {
   public interface IRaygunAspNetCoreClientProvider
   {
-    AspNetCore.RaygunClient GetClient(AspNetCore.RaygunSettings settings);
-    Mindscape.Raygun4Net.AspNetCore.RaygunClient GetClient(AspNetCore.RaygunSettings settings, HttpContext context);
-    AspNetCore.RaygunSettings GetRaygunSettings(AspNetCore.RaygunSettings baseSettings);
+    RaygunClient GetClient(RaygunSettings settings);
+    RaygunClient GetClient(RaygunSettings settings, HttpContext context);
+    RaygunSettings GetRaygunSettings(RaygunSettings baseSettings);
   }
 
   public class DefaultRaygunAspNetCoreClientProvider : IRaygunAspNetCoreClientProvider
   {
-    public virtual Mindscape.Raygun4Net.AspNetCore.RaygunClient GetClient(AspNetCore.RaygunSettings settings)
+    public virtual RaygunClient GetClient(RaygunSettings settings)
     {
       return GetClient(settings, null);
     }
 
-    public virtual Mindscape.Raygun4Net.AspNetCore.RaygunClient GetClient(AspNetCore.RaygunSettings settings, HttpContext context)
+    public virtual RaygunClient GetClient(RaygunSettings settings, HttpContext context)
     {
-      return new Mindscape.Raygun4Net.AspNetCore.RaygunClient(settings, context);
+      return new RaygunClient(settings, context);
     }
 
-    public virtual AspNetCore.RaygunSettings GetRaygunSettings(AspNetCore.RaygunSettings baseSettings)
+    public virtual RaygunSettings GetRaygunSettings(RaygunSettings baseSettings)
     {
       return baseSettings;
     }
