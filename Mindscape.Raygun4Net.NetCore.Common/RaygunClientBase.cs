@@ -298,7 +298,7 @@ namespace Mindscape.Raygun4Net
     
     protected virtual async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      var message = new RaygunMessageBuilder(_settings)
+      var message = RaygunMessageBuilder.New(_settings)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)

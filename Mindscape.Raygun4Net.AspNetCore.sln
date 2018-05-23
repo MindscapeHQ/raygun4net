@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.26114.2
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.AspNetCore", "Mindscape.Raygun4Net.AspNetCore\Mindscape.Raygun4Net.AspNetCore.csproj", "{F0EFD4AB-961E-4A70-9F5E-BA18671EE13E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.NetCore", "Mindscape.Raygun4Net.NetCore\Mindscape.Raygun4Net.NetCore.csproj", "{F44BC9AE-1FAC-446C-BC78-86724E261CB3}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.AspNetCore2.Tests", "Mindscape.Raygun4Net.AspNetCore2.Tests\Mindscape.Raygun4Net.AspNetCore2.Tests.csproj", "{1B8F6225-7D9C-4D4A-A2AD-8F78F8FA8B8B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.NetCore.Common", "Mindscape.Raygun4Net.NetCore.Common\Mindscape.Raygun4Net.NetCore.Common.csproj", "{A069590F-1E39-4EFF-AEB3-437E4538DA8E}"
@@ -33,18 +31,6 @@ Global
 		{F0EFD4AB-961E-4A70-9F5E-BA18671EE13E}.Release|x64.Build.0 = Release|Any CPU
 		{F0EFD4AB-961E-4A70-9F5E-BA18671EE13E}.Release|x86.ActiveCfg = Release|Any CPU
 		{F0EFD4AB-961E-4A70-9F5E-BA18671EE13E}.Release|x86.Build.0 = Release|Any CPU
-		{F44BC9AE-1FAC-446C-BC78-86724E261CB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F44BC9AE-1FAC-446C-BC78-86724E261CB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F44BC9AE-1FAC-446C-BC78-86724E261CB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F44BC9AE-1FAC-446C-BC78-86724E261CB3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F44BC9AE-1FAC-446C-BC78-86724E261CB3}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{F44BC9AE-1FAC-446C-BC78-86724E261CB3}.Debug|x64.Build.0 = Debug|Any CPU
-		{F44BC9AE-1FAC-446C-BC78-86724E261CB3}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{F44BC9AE-1FAC-446C-BC78-86724E261CB3}.Debug|x86.Build.0 = Debug|Any CPU
-		{F44BC9AE-1FAC-446C-BC78-86724E261CB3}.Release|x64.ActiveCfg = Release|Any CPU
-		{F44BC9AE-1FAC-446C-BC78-86724E261CB3}.Release|x64.Build.0 = Release|Any CPU
-		{F44BC9AE-1FAC-446C-BC78-86724E261CB3}.Release|x86.ActiveCfg = Release|Any CPU
-		{F44BC9AE-1FAC-446C-BC78-86724E261CB3}.Release|x86.Build.0 = Release|Any CPU
 		{1B8F6225-7D9C-4D4A-A2AD-8F78F8FA8B8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1B8F6225-7D9C-4D4A-A2AD-8F78F8FA8B8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B8F6225-7D9C-4D4A-A2AD-8F78F8FA8B8B}.Release|Any CPU.ActiveCfg = Release|Any CPU

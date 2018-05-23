@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Mindscape.Raygun4Net
 {
-  public abstract class RaygunErrorMessageBuilderBase
+  public class RaygunErrorMessageBuilder
   {
     protected static string FormatTypeName(Type type, bool fullName)
     {

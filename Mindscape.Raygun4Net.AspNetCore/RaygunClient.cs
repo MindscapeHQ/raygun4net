@@ -176,7 +176,7 @@ namespace Mindscape.Raygun4Net
 
     protected override async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      var message = new RaygunMessageBuilder(GetSettings())
+      var message = RaygunMessageBuilder.New(GetSettings())
         .SetResponseDetails(_currentResponseMessage.Value)
         .SetRequestDetails(_currentRequestMessage.Value)
         .SetEnvironmentDetails()
