@@ -14,14 +14,16 @@ namespace Mindscape.Raygun4Net.AspNetCore2.Tests
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddRaygun(Configuration);
+            services.AddRaygun(Configuration, new RaygunMiddlewareSettings()
+            {
+                // adds an optional example of over riding the client provider
+                ClientProvider = new ExampleRaygunAspNetCoreClientProvider()
+            });
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
