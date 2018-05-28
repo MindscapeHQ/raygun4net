@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Mindscape.Raygun4Net.AspNetCore.Builders;
 
-namespace Mindscape.Raygun4Net
+namespace Mindscape.Raygun4Net.AspNetCore
 {
   public class RaygunClient : RaygunClientBase
   {

@@ -19,14 +19,8 @@
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Builders\*.cs" />
-    <Compile Include="Messages\*.cs" />
-    <Compile Include="IRaygunMessageBuilder.cs" />
     <Compile Include="RaygunClient.cs" />
-    <Compile Include="RaygunCustomGroupingKeyEventArgs.cs" />
-    <Compile Include="RaygunSendingMessageEventArgs.cs" />
     <Compile Include="RaygunSettings.cs" />
-    <Compile Include="SimpleJson.cs" />
     <Compile Include="Properties\*.cs" />
   </ItemGroup>
   <!-- .NET Standard 2.0 references, compilation flags and build options -->

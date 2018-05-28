@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace Mindscape.Raygun4Net
+namespace Mindscape.Raygun4Net.AspNetCore
 {
   public interface IRaygunAspNetCoreClientProvider
   {

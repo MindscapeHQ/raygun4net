@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Mindscape.Raygun4Net.AspNetCore;
 
 namespace Mindscape.Raygun4Net.AspNetCore2.Tests
 {
@@ -22,6 +23,9 @@ namespace Mindscape.Raygun4Net.AspNetCore2.Tests
                 // adds an optional example of over riding the client provider
                 ClientProvider = new ExampleRaygunAspNetCoreClientProvider()
             });
+            
+            // because we're using a library that uses Raygun, we need to initalize that too
+            TestLib.RaygunClientFactory.Initialize(Configuration["RaygunSettings:ApiKey"]);
         }
         
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

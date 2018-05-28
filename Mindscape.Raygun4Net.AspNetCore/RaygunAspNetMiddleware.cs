@@ -1,17 +1,16 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using System;
+﻿using System;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
 using System.Net;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.DependencyInjection;
-using System.IO;
-using System.Globalization;
-using System.Diagnostics;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using Mindscape.Raygun4Net.AspNetCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
-namespace Mindscape.Raygun4Net
+namespace Mindscape.Raygun4Net.AspNetCore
 {
   public class RaygunAspNetMiddleware
   {
