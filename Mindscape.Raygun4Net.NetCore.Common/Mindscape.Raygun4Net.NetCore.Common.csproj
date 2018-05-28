@@ -2,6 +2,16 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard1.6;netstandard2.0</TargetFrameworks>
   </PropertyGroup>
+  <PropertyGroup>
+    <Authors>Raygun</Authors>
+    <Description>.NetStandard library .NetCore applications</Description>
+    <PackageId>Mindscape.Raygun4Net.NetCore.Common</PackageId>
+    <PackageVersion>6.0.0</PackageVersion>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseUrl>https://github.com/MindscapeHQ/raygun4net/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/MindscapeHQ/raygun4net</PackageProjectUrl>
+    <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
+  </PropertyGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="System.ComponentModel" Version="4.3.0" />
