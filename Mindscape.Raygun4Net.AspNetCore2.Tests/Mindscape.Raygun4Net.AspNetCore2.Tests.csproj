@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.8" />
+    <PackageReference Include="Mindscape.Raygun4Net.AspNetCore" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.4" />
@@ -11,6 +12,5 @@
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net.AspNetCore2.Tests.TestLib\Mindscape.Raygun4Net.AspNetCore2.Tests.TestLib.csproj" />
     <ProjectReference Include="..\Mindscape.Raygun4Net.AspNetCore\Mindscape.Raygun4Net.AspNetCore.csproj" />
-    <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore.Common\Mindscape.Raygun4Net.NetCore.Common.csproj" />
   </ItemGroup>
 </Project>
