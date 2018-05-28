@@ -11,6 +11,5 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net.AspNetCore2.Tests.TestLib\Mindscape.Raygun4Net.AspNetCore2.Tests.TestLib.csproj" />
-    <ProjectReference Include="..\Mindscape.Raygun4Net.AspNetCore\Mindscape.Raygun4Net.AspNetCore.csproj" />
   </ItemGroup>
 </Project>

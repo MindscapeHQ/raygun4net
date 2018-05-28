@@ -3,6 +3,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Mindscape.Raygun4Net.NetCore" Version="6.0.0" />
+    <PackageReference Include="Mindscape.Raygun4Net.NetCore" Version="6.0.0-alpha" />
   </ItemGroup>
 </Project>
