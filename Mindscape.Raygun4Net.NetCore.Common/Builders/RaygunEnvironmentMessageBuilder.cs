@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.InteropServices;
 
 namespace Mindscape.Raygun4Net
 {
-  internal class RaygunEnvironmentMessageBuilder
+  public class RaygunEnvironmentMessageBuilder
   {
-    public static RaygunEnvironmentMessage Build(RaygunSettings settings)
+    public static RaygunEnvironmentMessage Build(RaygunSettingsBase settings)
     {
       RaygunEnvironmentMessage message = new RaygunEnvironmentMessage();
       

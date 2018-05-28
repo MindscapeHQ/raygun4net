@@ -3,7 +3,7 @@
     <RootNamespace>Mindscape.Raygun4Net.NetCore</RootNamespace>
     <AssemblyName>Mindscape.Raygun4Net.NetCore</AssemblyName>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <TargetFrameworks>netstandard2.0;netstandard1.6</TargetFrameworks>
+    <TargetFrameworks>netstandard1.6;netstandard2.0</TargetFrameworks>
     <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
@@ -12,21 +12,15 @@
     <Authors>Raygun</Authors>
     <Description>.NetStandard library for targeting .Net Core applications</Description>
     <PackageId>Mindscape.Raygun4Net.NetCore</PackageId>
-    <PackageVersion>5.5.4</PackageVersion>
+    <PackageVersion>6.0.0</PackageVersion>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseUrl>https://github.com/MindscapeHQ/raygun4net/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/MindscapeHQ/raygun4net</PackageProjectUrl>
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Builders\*.cs" />
-    <Compile Include="Messages\*.cs" />
-    <Compile Include="IRaygunMessageBuilder.cs" />
     <Compile Include="RaygunClient.cs" />
-    <Compile Include="RaygunCustomGroupingKeyEventArgs.cs" />
-    <Compile Include="RaygunSendingMessageEventArgs.cs" />
     <Compile Include="RaygunSettings.cs" />
-    <Compile Include="SimpleJson.cs" />
     <Compile Include="Properties\*.cs" />
   </ItemGroup>
   <!-- .NET Standard 2.0 references, compilation flags and build options -->
@@ -44,5 +38,8 @@
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="System.ComponentModel" Version="4.3.0" />
     <PackageReference Include="System.Diagnostics.StackTrace" Version="4.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Mindscape.Raygun4Net.NetCore.Common" Version="6.0.0" />
   </ItemGroup>
 </Project>

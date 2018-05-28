@@ -1,0 +1,17 @@
+﻿@page
+@using Mindscape.Raygun4Net.AspNetCore2.Tests.Pages
+@model Mindscape.Raygun4Net.AspNetCore2.Tests.Pages.ErrorModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<h1 class="text-danger">Error.</h1>
+<h2 class="text-danger">An error occurred while processing your request.</h2>
+
+@if (Model.ShowRequestId)
+{
+    <p>
+        But thats what we wanted right? Check your Raygun console to see if this error has shown up. If it's not there check that you've set the api key!
+    </p>
+}
+

@@ -7,14 +7,14 @@ namespace Mindscape.Raygun4Net
   public class RaygunMessageBuilder : IRaygunMessageBuilder
   {
     private readonly RaygunMessage _raygunMessage;
-    private readonly RaygunSettings _settings;
+    private readonly RaygunSettingsBase _settings;
     
-    public static RaygunMessageBuilder New(RaygunSettings settings)
-    {
-      return new RaygunMessageBuilder(settings);
+    public static RaygunMessageBuilder New(RaygunSettingsBase settings)
+    {	
+      return new RaygunMessageBuilder(settings);	
     }
-
-    private RaygunMessageBuilder(RaygunSettings settings)
+    
+    private RaygunMessageBuilder(RaygunSettingsBase settings)
     {
       _raygunMessage = new RaygunMessage();
       _settings = settings;
@@ -108,6 +108,18 @@ namespace Mindscape.Raygun4Net
         #endif
       }
       
+      return this;
+    }
+    
+    public IRaygunMessageBuilder SetRequestDetails(RaygunRequestMessage message)
+    {
+      _raygunMessage.Details.Request = message;
+      return this;
+    }
+
+    public IRaygunMessageBuilder SetResponseDetails(RaygunResponseMessage message)
+    {
+      _raygunMessage.Details.Response = message;
       return this;
     }
   }

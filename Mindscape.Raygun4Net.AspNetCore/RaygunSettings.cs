@@ -1,23 +1,8 @@
-﻿using System;
-
-namespace Mindscape.Raygun4Net
+﻿namespace Mindscape.Raygun4Net.AspNetCore
 {
-  public class RaygunSettings
+  public class RaygunSettings : RaygunSettingsBase
   {
-    private const string DefaultApiEndPoint = "https://api.raygun.com/entries";
-
-    public RaygunSettings()
-    {
-      ApiEndpoint = new Uri(DefaultApiEndPoint);
-    }
-
-    public string ApiKey { get; set; }
-
-    public Uri ApiEndpoint { get; set; }
-
     public bool MediumTrust { get; set; }
-
-    public bool ThrowOnError { get; set; }
 
     public int[] ExcludedStatusCodes { get; set; }
 
@@ -32,8 +17,6 @@ namespace Mindscape.Raygun4Net
     public string[] IgnoreServerVariableNames { get; set; }
 
     public bool IsRawDataIgnored { get; set; }
-
-    public string ApplicationVersion { get; set; }
     
     public bool ReplaceUnseekableRequestStreams { get; set; }
   }
