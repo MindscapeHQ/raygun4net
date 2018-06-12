@@ -9,7 +9,6 @@ properties {
     $solution_file_webjob =          "$root/Mindscape.Raygun4Net.Azure.WebJob.sln"
     $solution_file_webapi =          "$root/Mindscape.Raygun4Net.WebApi.sln"
     $solution_file_winrt =           "$root/Mindscape.Raygun4Net.WinRT.sln"
-    $solution_file_windows_phone =   "$root/Mindscape.Raygun4Net.WindowsPhone.sln"
     $configuration =                 "Release"
     $build_dir =                     "$root\build\"
     $build_dir_client_profile =      "$build_dir\Net3.ClientProfile"
@@ -25,7 +24,7 @@ properties {
     $env:Path +=                     ";$nunit_dir;$tools_dir;$nuget_dir"
 }
 
-task default -depends Compile, CompileWinRT, CompileWindowsPhone
+task default -depends Compile, CompileWinRT
 
 task Clean {
     remove-item -force -recurse $build_dir -ErrorAction SilentlyContinue | Out-Null
@@ -57,11 +56,7 @@ task CompileWinRT -depends Init {
     remove-item -force -recurse $build_dir/Mindscape.Raygun4Net.WinRT.Tests -ErrorAction SilentlyContinue | Out-Null
 }
 
-task CompileWindowsPhone -depends Init {
-    exec { msbuild "$solution_file_windows_phone" /m /p:OutDir=$build_dir /p:Configuration=$Configuration }
-}
-
-task Test -depends Compile, CompileWinRT, CompileWindowsPhone, CompileWindowsStore {
+task Test -depends Compile, CompileWinRT {
     $test_assemblies = Get-ChildItem $build_dir -Include *Tests.dll -Name
 
     Push-Location -Path $build_dir
