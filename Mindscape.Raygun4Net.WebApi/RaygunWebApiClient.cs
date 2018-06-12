@@ -133,8 +133,7 @@ namespace Mindscape.Raygun4Net.WebApi
         applicationVersion = applicationVersionFromAttach;
       }
 
-      var owinAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName.StartsWith("Owin"));
-      if (owinAssembly == null)
+      if (RaygunSettings.Settings.IsRawDataIgnored == false)
       {
         config.MessageHandlers.Add(new RaygunWebApiDelegatingHandler());
       }
