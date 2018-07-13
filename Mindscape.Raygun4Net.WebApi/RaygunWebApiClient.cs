@@ -26,6 +26,7 @@ namespace Mindscape.Raygun4Net.WebApi
 
     private static RaygunWebApiExceptionFilter _exceptionFilter;
     private static RaygunWebApiActionFilter _actionFilter;
+    private static RaygunWebApiDelegatingHandler _delegatingHandler;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClientBase" /> class.
@@ -135,7 +136,8 @@ namespace Mindscape.Raygun4Net.WebApi
 
       if (RaygunSettings.Settings.IsRawDataIgnored == false)
       {
-        config.MessageHandlers.Add(new RaygunWebApiDelegatingHandler());
+        _delegatingHandler = new RaygunWebApiDelegatingHandler();
+        config.MessageHandlers.Add(_delegatingHandler);
       }
 
       var clientCreator = new RaygunWebApiClientProvider(generateRaygunClientWithMessage, applicationVersion);
@@ -170,6 +172,12 @@ namespace Mindscape.Raygun4Net.WebApi
         if (exceptionLoggerIndex != -1)
         {
           config.Services.RemoveAt(typeof(IExceptionLogger), exceptionLoggerIndex);
+        }
+
+        if (_delegatingHandler != null)
+        {
+          config.MessageHandlers.Remove(_delegatingHandler);
+          _delegatingHandler = null;
         }
 
         config.Filters.Remove(_exceptionFilter);
