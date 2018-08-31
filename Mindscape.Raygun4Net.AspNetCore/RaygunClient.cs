@@ -9,7 +9,7 @@ using Mindscape.Raygun4Net.AspNetCore.Builders;
 
 namespace Mindscape.Raygun4Net.AspNetCore
 {
-  public class RaygunClient : RaygunClientBase
+  public class RaygunClient : RaygunClientBase, IDisposable
   {
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     
@@ -55,6 +55,13 @@ namespace Mindscape.Raygun4Net.AspNetCore
       {
         SetCurrentContext(context);
       }
+    }
+    
+    public void Dispose()
+    {
+      _currentHttpContext.Dispose();
+      _currentRequestMessage.Dispose();
+      _currentResponseMessage.Dispose();
     }
 
     RaygunSettings GetSettings()
@@ -136,12 +143,12 @@ namespace Mindscape.Raygun4Net.AspNetCore
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public override async Task SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      if (CanSend(exception))
+      if (!CanSend(exception))
       {
         // We need to process the Request on the current thread,
         // otherwise it will be disposed while we are using it on the other thread.
-        RaygunRequestMessage currentRequestMessage = await BuildRequestMessage();
-        RaygunResponseMessage currentResponseMessage = BuildResponseMessage();
+        var currentRequestMessage = await BuildRequestMessage();
+        var currentResponseMessage = BuildResponseMessage();
 
         var task = Task.Run(async () =>
         {
@@ -150,7 +157,6 @@ namespace Mindscape.Raygun4Net.AspNetCore
           await StripAndSend(exception, tags, userCustomData);
         });
         FlagAsSent(exception);
-        await task;
       }
     }
 
@@ -198,5 +204,4 @@ namespace Mindscape.Raygun4Net.AspNetCore
       return message;
     }
   }
-
 }
