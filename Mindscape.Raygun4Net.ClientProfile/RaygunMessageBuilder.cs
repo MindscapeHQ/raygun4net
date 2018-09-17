@@ -108,5 +108,12 @@ namespace Mindscape.Raygun4Net
       }
       return this;
     }
+
+    public IRaygunMessageBuilder SetContextId(string contextId)
+    {
+      // No-op for ClientProfile provider
+
+      return this;
+    }
   }
 }

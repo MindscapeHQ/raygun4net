@@ -421,6 +421,7 @@ namespace Mindscape.Raygun4Net
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
+        .SetContextId(ContextId)
         .SetUser(userInfoMessage ?? UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
         .Build();
 

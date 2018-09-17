@@ -49,6 +49,11 @@ namespace Mindscape.Raygun4Net
       if (exception != null)
       {
         _raygunMessage.Details.Error = RaygunErrorMessageBuilder.Build(exception);
+
+        if (_raygunMessage.Details.Error != null)
+        {
+          AssignCorrelationId(_raygunMessage.Details);
+        }
       }
 
       HttpException error = exception as HttpException;
@@ -90,6 +95,19 @@ namespace Mindscape.Raygun4Net
       }
 
       return this;
+    }
+
+    private void AssignCorrelationId(RaygunMessageDetails details)
+    {
+      if (details != null && details.Error != null)
+      {
+        details.CorrelationId = GenerateCorrelationId(details.Error.ClassName);
+      }
+    }
+
+    private string GenerateCorrelationId(string className)
+    {
+      return Guid.NewGuid().ToString();
     }
 
     public IRaygunMessageBuilder SetClientDetails()
@@ -172,6 +190,13 @@ namespace Mindscape.Raygun4Net
       {
         _raygunMessage.OccurredOn = currentTime.Value;
       }
+      return this;
+    }
+
+    public IRaygunMessageBuilder SetContextId(string contextId)
+    {
+      _raygunMessage.Details.ContextId = contextId;
+
       return this;
     }
   }

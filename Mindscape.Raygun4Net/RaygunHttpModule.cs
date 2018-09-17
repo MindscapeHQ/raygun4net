@@ -15,6 +15,7 @@ namespace Mindscape.Raygun4Net
     public void Init(HttpApplication context)
     {
       context.Error += SendError;
+
       HttpStatusCodesToExclude = RaygunSettings.Settings.ExcludedStatusCodes;
       ExcludeErrorsBasedOnHttpStatusCode = HttpStatusCodesToExclude.Any();
       ExcludeErrorsFromLocal = RaygunSettings.Settings.ExcludeErrorsFromLocal;
@@ -56,7 +57,19 @@ namespace Mindscape.Raygun4Net
     protected RaygunClient GetRaygunClient(HttpApplication application)
     {
       var raygunApplication = application as IRaygunApplication;
-      return raygunApplication != null ? raygunApplication.GenerateRaygunClient() : new RaygunClient();
+      return raygunApplication != null ? raygunApplication.GenerateRaygunClient() : GenerateDefaultRaygunClient(application);
+    }
+
+    private RaygunClient GenerateDefaultRaygunClient(HttpApplication application)
+    {
+      var instance = new RaygunClient();
+
+      if (HttpContext.Current != null && HttpContext.Current.Session != null)
+      {
+        instance.ContextId = HttpContext.Current.Session.SessionID;
+      }
+
+      return instance;
     }
 
     protected bool CanSend(Exception exception)

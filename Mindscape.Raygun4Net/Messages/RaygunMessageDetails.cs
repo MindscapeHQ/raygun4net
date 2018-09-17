@@ -11,6 +11,10 @@ namespace Mindscape.Raygun4Net.Messages
 
     public string Version { get; set; }
 
+    public string CorrelationId { get; set; }
+
+    public string ContextId { get; set; }
+
     public RaygunErrorMessage Error { get; set; }
 
     public RaygunEnvironmentMessage Environment { get; set; }
