@@ -3,6 +3,7 @@ properties {
     $configuration =                 "Release"
     $build_dir =                     "$root\build\"
     $build_dir_net_core =            "$build_dir\NetCore"
+	$build_dir_aspnet_core  =        "$build_dir\ASPNetCore"
 	$build_dir_net_core_common  =    "$build_dir\NetCoreCommon"
     $nunit_dir =                     "$root\packages\NUnit.Runners.2.6.2\tools\"
     $tools_dir =                     "$root\tools"
@@ -14,11 +15,13 @@ task default -depends Compile
 
 task Clean {
     remove-item -force -recurse $build_dir_net_core -ErrorAction SilentlyContinue | Out-Null
+    remove-item -force -recurse $build_dir_aspnet_core -ErrorAction SilentlyContinue | Out-Null
 	remove-item -force -recurse $build_dir_net_core_common -ErrorAction SilentlyContinue | Out-Null
 }
 
 task Init -depends Clean {
     new-item $build_dir_net_core -itemType directory | Out-Null
+    new-item $build_dir_aspnet_core -itemType directory | Out-Null
 	new-item $build_dir_net_core_common -itemType directory | Out-Null
 }
 
@@ -28,4 +31,7 @@ task Compile -depends Init {
 	
 	exec { dotnet pack .\Mindscape.Raygun4Net.NetCore\ --output build\NetCore --configuration Release }
     move-item -Path $root\Mindscape.Raygun4Net.NetCore\build\NetCore\* -Destination $build_dir_net_core
+	
+	exec { dotnet pack .\Mindscape.Raygun4Net.AspNetCore\ --output build\AspNetCore --configuration Release }
+    move-item -Path $root\Mindscape.Raygun4Net.AspNetCore\build\AspNetCore\* -Destination $build_dir_aspnet_core
 }

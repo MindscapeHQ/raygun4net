@@ -6,7 +6,7 @@
     <Authors>Raygun</Authors>
     <Description>.NetStandard library .NetCore applications</Description>
     <PackageId>Mindscape.Raygun4Net.NetCore.Common</PackageId>
-    <PackageVersion>6.0.0</PackageVersion>
+    <PackageVersion>6.0.1</PackageVersion>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseUrl>https://github.com/MindscapeHQ/raygun4net/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/MindscapeHQ/raygun4net</PackageProjectUrl>
@@ -16,4 +16,13 @@
     <PackageReference Include="System.ComponentModel" Version="4.3.0" />
     <PackageReference Include="System.Diagnostics.StackTrace" Version="4.0.1" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
+    <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
+    <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD1_6</DefineConstants>
+  </PropertyGroup>
 </Project>

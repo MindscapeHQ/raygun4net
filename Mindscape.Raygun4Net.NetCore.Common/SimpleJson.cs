@@ -42,13 +42,13 @@
 // usually already defined in properties
 //#define NETFX_CORE;
 
-// If you are targetting WinStore, WP8, NET4.5+ PCL, or .NET Core make sure to #define SIMPLE_JSON_TYPEINFO;
+// If you are targetting WinStore, WP8 and NET4.5+ PCL make sure to #define SIMPLE_JSON_TYPEINFO;
 
-#define SIMPLE_JSON_TYPEINFO
+// #define SIMPLE_JSON_TYPEINFO
 
 // original json parsing code from http://techblog.procurios.nl/k/618/news/view/14605/14863/How-do-I-write-my-own-parser-for-JSON.html
 
-#if NETFX_CORE
+#if NETSTANDARD1_6
 #define SIMPLE_JSON_TYPEINFO
 #endif
 
@@ -66,6 +66,7 @@ using System.Dynamic;
 #endif
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text;
 using Mindscape.Raygun4Net.Reflection;
 
@@ -74,10 +75,10 @@ using Mindscape.Raygun4Net.Reflection;
 // ReSharper disable SuggestUseVarKeywordEvident
 namespace Mindscape.Raygun4Net
 {
-  /// <summary>
-  /// Represents the json array.
-  /// </summary>
-  [GeneratedCode("simple-json", "1.0.0")]
+    /// <summary>
+    /// Represents the json array.
+    /// </summary>
+    [GeneratedCode("simple-json", "1.0.0")]
     [EditorBrowsable(EditorBrowsableState.Never)]
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
 #if SIMPLE_JSON_OBJARRAYINTERNAL
@@ -483,13 +484,6 @@ namespace Mindscape.Raygun4Net
         }
 #endif
     }
-
-  public class JsonSerializationException : Exception
-  {
-    public JsonSerializationException(string message) : base(message)
-    {
-    }
-  }
 }
 
 namespace Mindscape.Raygun4Net
@@ -551,7 +545,7 @@ namespace Mindscape.Raygun4Net
       object obj;
       if (TryDeserializeObject(json, out obj))
         return obj;
-      throw new JsonSerializationException("Invalid JSON string");
+      throw new SerializationException("Invalid JSON string");
     }
 
     /// <summary>
@@ -1028,7 +1022,6 @@ namespace Mindscape.Raygun4Net
 
       if (visited.Contains(value))
       {
-        visited.Pop();
         return SerializeString(CYCLIC_MESSAGE, builder); ;
       }
 
@@ -1040,41 +1033,49 @@ namespace Mindscape.Raygun4Net
         success = SerializeString(stringValue, builder);
       else
       {
-        IDictionary dict = value as IDictionary;
-        if (dict != null)
+        if (value.GetType().IsArray)
         {
-          success = SerializeObject(jsonSerializerStrategy, dict.Keys, dict.Values, builder, visited);
+          success = SerializeArray(jsonSerializerStrategy, value as IEnumerable, builder, visited);
         }
         else
         {
-          IDictionary<string, object> stringObjectDictionary = value as IDictionary<string, object>;
-          if (stringObjectDictionary != null)
+          IDictionary dict = value as IDictionary;
+          if (dict != null)
           {
-            success = SerializeObject(jsonSerializerStrategy, stringObjectDictionary.Keys, stringObjectDictionary.Values, builder, visited);
+            success = SerializeObject(jsonSerializerStrategy, dict.Keys, dict.Values, builder, visited);
           }
           else
           {
-            IDictionary<string, string> stringDictionary = value as IDictionary<string, string>;
-            if (stringDictionary != null)
+            IDictionary<string, object> stringObjectDictionary = value as IDictionary<string, object>;
+            if (stringObjectDictionary != null)
             {
-              success = SerializeObject(jsonSerializerStrategy, stringDictionary.Keys, stringDictionary.Values, builder, visited);
+              success = SerializeObject(jsonSerializerStrategy, stringObjectDictionary.Keys, stringObjectDictionary.Values, builder, visited);
             }
             else
             {
-              IEnumerable enumerableValue = value as IEnumerable;
-              if (enumerableValue != null)
-                success = SerializeArray(jsonSerializerStrategy, enumerableValue, builder, visited);
-              else if (IsNumeric (value))
-                success = SerializeNumber(value, builder);
-              else if (value is bool)
-                builder.Append ((bool)value ? "true" : "false");
-              else if (value == null)
-                builder.Append("null");
-              else {
-                object serializedObject;
-                success = jsonSerializerStrategy.TrySerializeNonPrimitiveObject(value, out serializedObject);
-                if (success)
-                  SerializeValue(jsonSerializerStrategy, serializedObject, builder, visited);
+              IDictionary<string, string> stringDictionary = value as IDictionary<string, string>;
+              if (stringDictionary != null)
+              {
+                success = SerializeObject(jsonSerializerStrategy, stringDictionary.Keys, stringDictionary.Values, builder, visited);
+              }
+              else
+              {
+                IEnumerable enumerableValue = value as IEnumerable;
+                if (enumerableValue != null)
+                  success = SerializeArray(jsonSerializerStrategy, enumerableValue, builder, visited);
+                else if (IsNumeric(value))
+                  success = SerializeNumber(value, builder);
+                else if (value is bool)
+                  builder.Append((bool)value ? "true" : "false");
+                else if (value == null)
+                  builder.Append("null");
+                else
+                {
+                  object serializedObject;
+                  success = jsonSerializerStrategy.TrySerializeNonPrimitiveObject(value, out serializedObject);
+                  if (success)
+                    SerializeValue(jsonSerializerStrategy, serializedObject, builder, visited);
+                }
               }
             }
           }
@@ -1558,6 +1559,8 @@ namespace Mindscape.Raygun4Net
         output = ((Guid)input).ToString("D");
       else if (input is Uri)
         output = input.ToString();
+      else if (input is Type)
+        output = ((Type)input).AssemblyQualifiedName;
       else
       {
         Enum inputEnum = input as Enum;
