@@ -48,9 +48,9 @@
 
 // original json parsing code from http://techblog.procurios.nl/k/618/news/view/14605/14863/How-do-I-write-my-own-parser-for-JSON.html
 
-//#if NETSTANDARD1_6
+#if NETSTANDARD1_6
 #define SIMPLE_JSON_TYPEINFO
-//#endif
+#endif
 
 using System;
 using System.CodeDom.Compiler;
