@@ -17,6 +17,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.2" />
-    <PackageReference Include="Mindscape.Raygun4Net.NetCore.Common" Version="6.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore.Common\Mindscape.Raygun4Net.NetCore.Common.csproj" />
   </ItemGroup>
 </Project>
