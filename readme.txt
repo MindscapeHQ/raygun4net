@@ -282,17 +282,15 @@ static void Main(string[] args)
 }
 
 The first boolean parameter is simply to enable the native iOS crash reporting.
-The second boolean parameter is whether or not to hijack some of the native signals – this is to solve the well known iOS crash reporter issue where null reference exceptions within a try/catch block can cause the application to crash.
+The second boolean parameter is whether or not to hijack some of the native signals Â– this is to solve the well known iOS crash reporter issue where null reference exceptions within a try/catch block can cause the application to crash.
 By setting the second boolean parameter to true, the managed code will take over the SIGBUS and SIGSEGV iOS signals which solves the null reference issue.
-Doing this however prevents SIGBUS and SIGSEGV native errors from being detected, meaning they don’t get sent to Raygun.
-This is why we provide this as an option – so if you don’t have any issues with null reference exceptions occurring within try/catch blocks and you want to maximize the native errors that you can be notified of, then set the second boolean parameter to false.
+Doing this however prevents SIGBUS and SIGSEGV native errors from being detected, meaning they donÂ’t get sent to Raygun.
+This is why we provide this as an option Â– so if you donÂ’t have any issues with null reference exceptions occurring within try/catch blocks and you want to maximize the native errors that you can be notified of, then set the second boolean parameter to false.
 
 At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages or changing options such as the User identity string.
 
 Xamarin for Mac
 ====================
-Xamarin for Mac support is not included in the NuGet package or the Raygun4Net Xamarin Component. Instead, download the .zip of assemblies from the latest release on GitHub: https://github.com/MindscapeHQ/raygun4net/releases (Click the green button). Then copy and reference the Mindscape.Raygun4Net.Xamarin.Mac.dll into your Xamarin.Mac project.
-
 In the main entry point of the application, use the static RaygunClient.Attach method using your app API key.
 
 static void Main(string[] args)
