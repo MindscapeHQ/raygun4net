@@ -451,21 +451,27 @@ namespace Mindscape.Raygun4Net
 
         if (hijackNativeSignals)
         {
-          IntPtr sigbus = Marshal.AllocHGlobal (512);
-          IntPtr sigsegv = Marshal.AllocHGlobal (512);
+          //
+          // Solution taken from: https://www.mono-project.com/docs/advanced/signals/
+          //
 
-          // Store Mono SIGSEGV and SIGBUS handlers
-          sigaction (Signal.SIGBUS, IntPtr.Zero, sigbus);
-          sigaction (Signal.SIGSEGV, IntPtr.Zero, sigsegv);
+          try
+          {
 
-          _client.NativeClient = NativeRaygunClient.SharedReporterWithApiKey(apiKey);
+          }
+          finally
+          {
+            Mono.Runtime.RemoveSignalHandlers();
 
-          // Restore Mono SIGSEGV and SIGBUS handlers
-          sigaction (Signal.SIGBUS, sigbus, IntPtr.Zero);
-          sigaction (Signal.SIGSEGV, sigsegv, IntPtr.Zero);
-
-          Marshal.FreeHGlobal (sigbus);
-          Marshal.FreeHGlobal (sigsegv);
+            try
+            {
+              _client.NativeClient = NativeRaygunClient.SharedReporterWithApiKey(apiKey);
+            }
+            finally
+            {
+              Mono.Runtime.InstallSignalHandlers();
+            }
+          }
         }
         else
         {
