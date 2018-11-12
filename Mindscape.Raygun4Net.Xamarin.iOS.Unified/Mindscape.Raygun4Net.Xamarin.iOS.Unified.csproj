@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\NuGet.Build.Packaging.0.1.157-dev\build\NuGet.Build.Packaging.props" Condition="Exists('..\packages\NuGet.Build.Packaging.0.1.157-dev\build\NuGet.Build.Packaging.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">iPhoneSimulator</Platform>
@@ -11,6 +12,14 @@
     <AssemblyName>Mindscape.Raygun4Net.Xamarin.iOS.Unified</AssemblyName>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
+    <PackOnBuild>true</PackOnBuild>
+    <PackageId>Mindscape.Raygun4Net.Xamarin.iOS.Unified</PackageId>
+    <PackageVersion>5.5.6</PackageVersion>
+    <Authors>Raygun</Authors>
+    <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
+    <PackageLicenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/MindscapeHQ/raygun4net</PackageProjectUrl>
+    <Description>Raygun provider for Xamarin iOS projects</Description>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>true</DebugSymbols>
@@ -199,6 +208,9 @@
       <Link>Batching\PulseEventBatch.cs</Link>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <BundleResource Include="packages.config" />
+  </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
@@ -209,4 +221,5 @@
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
+  <Import Project="..\packages\NuGet.Build.Packaging.0.1.157-dev\build\NuGet.Build.Packaging.targets" Condition="Exists('..\packages\NuGet.Build.Packaging.0.1.157-dev\build\NuGet.Build.Packaging.targets')" />
 </Project>
