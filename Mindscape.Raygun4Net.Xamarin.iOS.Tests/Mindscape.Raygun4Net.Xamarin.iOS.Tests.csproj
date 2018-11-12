@@ -56,12 +56,6 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <ProjectReference Include="..\Mindscape.Raygun4Net.Xamarin.iOS\Mindscape.Raygun4Net.Xamarin.iOS.csproj">
-      <Project>{E8B3C09D-8598-41AE-988F-20ABD4ED378B}</Project>
-      <Name>Mindscape.Raygun4Net.Xamarin.iOS</Name>
-    </ProjectReference>
-  </ItemGroup>
   <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
