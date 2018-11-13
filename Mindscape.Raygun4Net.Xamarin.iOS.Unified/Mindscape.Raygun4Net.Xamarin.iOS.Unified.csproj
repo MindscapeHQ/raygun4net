@@ -135,9 +135,6 @@
       <Link>RaygunSendingMessageEventArgs.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="..\AssemblyVersionInfo.cs">
-      <Link>Properties\AssemblyVersionInfo.cs</Link>
-    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunClientMessage.cs">
       <Link>Messages\RaygunClientMessage.cs</Link>
     </Compile>
@@ -207,6 +204,7 @@
     <Compile Include="..\Mindscape.Raygun4Net.Xamarin.iOS\Batching\PulseEventBatch.cs">
       <Link>Batching\PulseEventBatch.cs</Link>
     </Compile>
+    <Compile Include="Properties\AssemblyVersionInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="packages.config" />
