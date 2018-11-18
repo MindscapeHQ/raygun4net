@@ -56,10 +56,6 @@ typedef BOOL (^RaygunBeforeSendMessage)(RaygunMessage *message);
 
 @property (nonatomic, readonly, copy) NSArray<RaygunBreadcrumb *> *breadcrumbs;
 
-
-// Testing Native Exceptions
-- (void)crash;
-
 /*
  * Returns the shared Raygun client
  *
