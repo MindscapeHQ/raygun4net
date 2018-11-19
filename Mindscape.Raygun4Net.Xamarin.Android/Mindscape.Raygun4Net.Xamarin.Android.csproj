@@ -58,9 +58,6 @@
     <Compile Include="..\Mindscape.Raygun4Net\Builders\RaygunErrorMessageBuilderBase.cs">
       <Link>Builders\RaygunErrorMessageBuilderBase.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
-      <Link>IRaygunMessageBuilder.cs</Link>
-    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunClientMessage.cs">
       <Link>Messages\RaygunClientMessage.cs</Link>
     </Compile>
@@ -102,6 +99,7 @@
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunIdentifierMessage.cs">
       <Link>Messages\RaygunIdentifierMessage.cs</Link>
     </Compile>
+    <Compile Include="IRaygunMessageBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
