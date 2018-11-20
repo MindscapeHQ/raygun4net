@@ -14,26 +14,24 @@ using MonoTouch.UIKit;
 namespace Mindscape.Raygun4Net.Xamarin.iOS
 {
   [BaseType (typeof (NSObject))]
-  internal interface Raygun {
+  internal interface RaygunClient {
 
-    [Static, Export ("sharedReporterWithApiKey:")]
-    Raygun SharedReporterWithApiKey (string apiKey);
+    [Static, Export ("sharedInstanceWithApiKey:")]
+    RaygunClient SharedInstanceWithApiKey (string apiKey);
 
-    [Export ("identify:")]
-    void Identify ([NullAllowed] string userId);
+    [Export("enableCrashReporting")]
+    void EnableCrashReporting();
 
-    [Export ("identifyWithUserInfo:")]
-    void IdentifyWithUserInfo ([NullAllowed] RaygunUserInfo userInfo);
+    [Export("userInformation", ArgumentSemantic.Strong)]
+    [NullAllowed]
+    RaygunUserInformation UserInformation { get; set; }
 
     [Export ("crash")]
     void Crash();
-
-    [Export ("nextReportUUID")]
-    string NextReportUUID { get; }
   }
 
   [BaseType (typeof (NSObject))]
-  internal interface RaygunUserInfo {
+  internal interface RaygunUserInformation {
     [Export ("identifier")]
     [NullAllowed]
     string Identifier { get; set; }
