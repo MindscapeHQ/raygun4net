@@ -12,12 +12,15 @@ namespace Mindscape.Raygun4Net.WebApi
     protected override async System.Threading.Tasks.Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
     {
       // ReadAsByteArrayAsync is always readable as it calls LoadIntoBufferAsync internally.
-      var bytes = await request.Content.ReadAsByteArrayAsync();
-      if (bytes != null && bytes.Length > 0)
+      if (request != null && request.Content != null)
       {
-        // Only take first 4096 bytes
-        var bytesToSend = bytes.Take(MaxBytesToCapture).ToArray();
-        request.Properties[RequestBodyKey] = Encoding.UTF8.GetString(bytesToSend);
+        var bytes = await request.Content.ReadAsByteArrayAsync();
+        if (bytes != null && bytes.Length > 0)
+        {
+          // Only take first 4096 bytes
+          var bytesToSend = bytes.Take(MaxBytesToCapture).ToArray();
+          request.Properties[RequestBodyKey] = Encoding.UTF8.GetString(bytesToSend);
+        }
       }
 
       return await base.SendAsync(request, cancellationToken);
