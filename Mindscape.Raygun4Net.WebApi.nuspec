@@ -3,11 +3,12 @@
   <metadata minClientVersion="2.5">
     <id>Mindscape.Raygun4Net.WebApi</id>
     <version>5.6.1</version>
-    <title />
+    <title>Raygun for ASP.NET Web API</title>
     <authors>Raygun</authors>
     <owners />
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Raygun provider for ASP.NET WebApi projects</description>
+	<summary>Raygun provider for ASP.NET Web API projects</summary>
+    <description>Raygun provider for ASP.NET Web API projects</description>
     <iconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</iconUrl>
     <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
     <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
