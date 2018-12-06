@@ -337,14 +337,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="apiKey">Your app api key.</param>
     public static void Attach(string apiKey)
     {
-      Detach();
-      if (_client == null)
-      {
-        _client = new RaygunClient(apiKey);
-      }
-      AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-      TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-      AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
+      Attach(apiKey, null);
     }
 
     /// <summary>
@@ -355,13 +348,15 @@ namespace Mindscape.Raygun4Net
     public static void Attach(string apiKey, string user)
     {
       Detach();
-      if (_client == null)
+
+      var client = Initialize(apiKey);
+
+      if (user != null)
       {
-        _client = new RaygunClient(apiKey) { User = user };
+        client.User = user;
       }
-      AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-      TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-      AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
+
+      SetUnhandledExceptionHandlers();
     }
 
     /// <summary>
@@ -385,9 +380,9 @@ namespace Mindscape.Raygun4Net
     public RaygunClient AttachCrashReporting()
     {
       RaygunClient.DetachCrashReporting();
-      AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-      TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-      AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
+
+      SetUnhandledExceptionHandlers();
+
       return this;
     }
 
@@ -407,9 +402,7 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     public static void Detach()
     {
-      AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
-      TaskScheduler.UnobservedTaskException -= TaskScheduler_UnobservedTaskException;
-      AndroidEnvironment.UnhandledExceptionRaiser -= AndroidEnvironment_UnhandledExceptionRaiser;
+      RemoveUnhandledExceptionHandlers();
     }
 
     /// <summary>
@@ -417,9 +410,7 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     public static void DetachCrashReporting()
     {
-      AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
-      TaskScheduler.UnobservedTaskException -= TaskScheduler_UnobservedTaskException;
-      AndroidEnvironment.UnhandledExceptionRaiser -= AndroidEnvironment_UnhandledExceptionRaiser;
+      RemoveUnhandledExceptionHandlers();
     }
 
     /// <summary>
@@ -428,6 +419,20 @@ namespace Mindscape.Raygun4Net
     public static void DetachPulse()
     {
       Pulse.Detach();
+    }
+
+    private static void SetUnhandledExceptionHandlers()
+    {
+      AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+      TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+      AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
+    }
+
+    private static void RemoveUnhandledExceptionHandlers()
+    {
+      AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
+      TaskScheduler.UnobservedTaskException -= TaskScheduler_UnobservedTaskException;
+      AndroidEnvironment.UnhandledExceptionRaiser -= AndroidEnvironment_UnhandledExceptionRaiser;
     }
 
     private static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
