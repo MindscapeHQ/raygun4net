@@ -200,6 +200,9 @@ namespace Mindscape.Raygun4Net
       SendingMessage += RaygunClient_SendingMessage;
 
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
+
+      var clientVersion = new AssemblyName(GetType().Assembly.FullName).Version.ToString();
+      RaygunLogger.Debug(string.Format("Configuring Raygun ({0})", clientVersion));
     }
 
     private bool ValidateApiKey()
