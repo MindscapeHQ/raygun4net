@@ -15,11 +15,10 @@
     <FileAlignment>512</FileAlignment>
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <AndroidUseLatestPlatformSdk>False</AndroidUseLatestPlatformSdk>
-    <TargetFrameworkVersion>v4.0.3</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>
     <PackOnBuild>true</PackOnBuild>
     <PackageId>Mindscape.Raygun4Net.Xamarin.Android</PackageId>
-    <PackageVersion>5.6.0</PackageVersion>
+    <PackageVersion>5.7.0</PackageVersion>
     <Authors>Raygun</Authors>
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
     <PackageLicenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</PackageLicenseUrl>
