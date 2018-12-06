@@ -1,24 +1,19 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
-using System.Runtime.InteropServices;
 using Mindscape.Raygun4Net.Messages;
 
 using System.Threading;
 using System.Reflection;
 using Android.Content;
-using Android.Views;
 using Android.Runtime;
 using Android.App;
 using Android.Net;
 using Java.IO;
-using Android.OS;
 using System.Text;
 using System.Threading.Tasks;
-using Android.Bluetooth;
 using Android.Provider;
 using Android.Content.PM;
 
@@ -62,7 +57,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception ex)
         {
-          System.Diagnostics.Debug.WriteLine("Failed to get device id: {0}", ex.Message);
+          RaygunLogger.Warning(string.Format("Failed to get device id: {0}", ex.Message));
         }
         return null;
       }
@@ -172,7 +167,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception ex)
         {
-          System.Diagnostics.Debug.WriteLine("Error retrieving package version {0}", ex.Message);
+          RaygunLogger.Warning(string.Format("Error retrieving package version {0}", ex.Message));
         }
       }
 
@@ -183,6 +178,8 @@ namespace Mindscape.Raygun4Net
 
       return version;
     }
+
+    #region Initializers
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -209,11 +206,13 @@ namespace Mindscape.Raygun4Net
     {
       if (string.IsNullOrEmpty(_apiKey))
       {
-        System.Diagnostics.Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
+        RaygunLogger.Error("ApiKey has not been provided, exception will not be logged");
         return false;
       }
       return true;
     }
+
+    #endregion
 
     #region Crash Reporting
 
@@ -540,19 +539,19 @@ namespace Mindscape.Raygun4Net
               {
                 var message = SimpleJson.SerializeObject(raygunMessage);
                 client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
-                System.Diagnostics.Debug.WriteLine("Sending message to Raygun.io");
+                RaygunLogger.Debug("Sending message to Raygun.io");
               }
               catch (Exception ex)
               {
-                System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+                RaygunLogger.Error(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
                 try
                 {
                   SaveMessage(SimpleJson.SerializeObject(raygunMessage));
-                  System.Diagnostics.Debug.WriteLine("Exception has been saved to the device to try again later.");
+                  RaygunLogger.Info("Exception has been saved to the device to try again later.");
                 }
                 catch (Exception e)
                 {
-                  System.Diagnostics.Debug.WriteLine(string.Format("Error saving Exception to device {0}", e.Message));
+                  RaygunLogger.Error(string.Format("Error saving Exception to device {0}", e.Message));
                 }
               }
             }
@@ -566,7 +565,7 @@ namespace Mindscape.Raygun4Net
             }
             catch (Exception ex)
             {
-              System.Diagnostics.Debug.WriteLine(string.Format("Error saving Exception to device {0}", ex.Message));
+              RaygunLogger.Error(string.Format("Error saving Exception to device {0}", ex.Message));
             }
           }
         }
@@ -695,7 +694,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception e)
         {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error sending pulse timing event to Raygun: {0}", e.Message));
+          RaygunLogger.Error(string.Format("Error sending pulse timing event to Raygun: {0}", e.Message));
         }
       }
     }
@@ -719,7 +718,7 @@ namespace Mindscape.Raygun4Net
 
         RaygunPulseMessage message = new RaygunPulseMessage();
 
-        System.Diagnostics.Debug.WriteLine("BatchSize: " + batch.PendingEventCount);
+        RaygunLogger.Debug("BatchSize: " + batch.PendingEventCount);
 
         RaygunPulseDataMessage[] eventMessages = new RaygunPulseDataMessage[batch.PendingEventCount];
         int index = 0;
@@ -756,7 +755,7 @@ namespace Mindscape.Raygun4Net
       }
       catch (Exception e)
       {
-        System.Diagnostics.Debug.WriteLine(string.Format("Error sending pulse event batch to Raygun: {0}", e.Message));
+        RaygunLogger.Error(string.Format("Error sending pulse event batch to Raygun: {0}", e.Message));
       }
     }
 
@@ -803,7 +802,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception ex)
         {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error serializing message {0}", ex.Message));
+          RaygunLogger.Error(string.Format("Error serializing message {0}", ex.Message));
         }
 
         if (message != null)
@@ -827,7 +826,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception ex)
         {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Pulse message to Raygun.io {0}", ex.Message));
+          RaygunLogger.Error(string.Format("Error Logging Pulse message to Raygun.io {0}", ex.Message));
           return false;
         }
       }
@@ -850,7 +849,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception ex)
         {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+          RaygunLogger.Error(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
           return false;
         }
       }
@@ -917,14 +916,15 @@ namespace Mindscape.Raygun4Net
                 stream.Close();
               }
             }
-            System.Diagnostics.Debug.WriteLine("Saved message: " + "RaygunErrorMessage" + number + ".txt");
-            System.Diagnostics.Debug.WriteLine("File Count: " + dir.List().Length);
+
+            RaygunLogger.Debug("Saved message: " + "RaygunErrorMessage" + number + ".txt");
+            RaygunLogger.Debug("File Count: " + dir.List().Length);
           }
         }
       }
       catch (Exception ex)
       {
-        System.Diagnostics.Debug.WriteLine(string.Format("Error saving message to isolated storage {0}", ex.Message));
+        RaygunLogger.Error(string.Format("Error saving message to isolated storage {0}", ex.Message));
       }
     }
 
@@ -961,7 +961,8 @@ namespace Mindscape.Raygun4Net
                         {
                           return;
                         }
-                        System.Diagnostics.Debug.WriteLine("Sent " + file.Name);
+
+                        RaygunLogger.Debug("Sent " + file.Name);
                       }
                     }
                   }
@@ -973,7 +974,7 @@ namespace Mindscape.Raygun4Net
             {
               if (files.Length > 0)
               {
-                System.Diagnostics.Debug.WriteLine("Successfully sent all pending messages");
+                RaygunLogger.Debug("Successfully sent all pending messages");
               }
               dir.Delete();
             }
@@ -981,7 +982,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception ex)
         {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error sending stored messages to Raygun.io {0}", ex.Message));
+          RaygunLogger.Error(string.Format("Error sending stored messages to Raygun.io {0}", ex.Message));
         }
       }
     }
