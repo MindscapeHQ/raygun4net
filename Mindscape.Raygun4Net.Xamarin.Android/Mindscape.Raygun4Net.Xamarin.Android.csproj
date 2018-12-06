@@ -25,6 +25,9 @@
     <PackageLicenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/MindscapeHQ/raygun4net</PackageProjectUrl>
     <Description>Raygun provider for Xamarin Android projects</Description>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <Summary>Raygun provider for Xamarin Android projects</Summary>
+    <Title>Raygun for Xamarin Android</Title>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
