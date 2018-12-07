@@ -33,6 +33,7 @@ namespace Mindscape.Raygun4Net
     private RaygunIdentifierMessage _userInfo;
     private PulseEventBatch _activeBatch;
     private static readonly object _batchLock = new object();
+    private static bool _exceptionHandlersSet;
 
     /// <summary>
     /// Gets the <see cref="RaygunClient"/> created by the Attach method.
@@ -426,16 +427,27 @@ namespace Mindscape.Raygun4Net
 
     private static void SetUnhandledExceptionHandlers()
     {
-      AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-      TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-      AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
+      if (!_exceptionHandlersSet)
+      {
+        _exceptionHandlersSet = true;
+        RaygunLogger.Debug("Adding exception handlers");
+        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+        AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
+       
+      }
     }
 
     private static void RemoveUnhandledExceptionHandlers()
     {
-      AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
-      TaskScheduler.UnobservedTaskException -= TaskScheduler_UnobservedTaskException;
-      AndroidEnvironment.UnhandledExceptionRaiser -= AndroidEnvironment_UnhandledExceptionRaiser;
+      if (_exceptionHandlersSet)
+      {
+        _exceptionHandlersSet = false;
+        RaygunLogger.Debug("Removing exception handlers");
+        AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
+        TaskScheduler.UnobservedTaskException -= TaskScheduler_UnobservedTaskException;
+        AndroidEnvironment.UnhandledExceptionRaiser -= AndroidEnvironment_UnhandledExceptionRaiser;
+      }
     }
 
     private static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
