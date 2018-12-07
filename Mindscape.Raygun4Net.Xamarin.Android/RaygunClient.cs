@@ -11,8 +11,7 @@ using Android.Content;
 using Android.Runtime;
 using Android.App;
 using Android.Net;
-using Java.IO;
-using System.Text;
+
 using System.Threading.Tasks;
 using Android.Provider;
 using Android.Content.PM;
@@ -34,6 +33,7 @@ namespace Mindscape.Raygun4Net
     private PulseEventBatch _activeBatch;
     private static readonly object _batchLock = new object();
     private static bool _exceptionHandlersSet;
+    private RaygunFileManager _fileManager;
 
     /// <summary>
     /// Gets the <see cref="RaygunClient"/> created by the Attach method.
@@ -190,6 +190,8 @@ namespace Mindscape.Raygun4Net
     {
       _apiKey = apiKey;
 
+      _fileManager = new RaygunFileManager();
+
       // Setting default user information.
       var anonUser = GetAnonymousUserInfo();
       _userInfo = anonUser;
@@ -287,6 +289,10 @@ namespace Mindscape.Raygun4Net
         StripAndSend(exception, tags, userCustomData);
         FlagAsSent(exception);
       }
+      else
+      {
+        RaygunLogger.Debug("Not sending exception");
+      }
     }
 
     /// <summary>
@@ -321,6 +327,10 @@ namespace Mindscape.Raygun4Net
         ThreadPool.QueueUserWorkItem(c => StripAndSend(exception, tags, userCustomData));
         FlagAsSent(exception);
       }
+      else
+      {
+        RaygunLogger.Debug("Not sending exception in background");
+      }
     }
 
     /// <summary>
@@ -331,6 +341,14 @@ namespace Mindscape.Raygun4Net
     public void SendInBackground(RaygunMessage raygunMessage)
     {
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+    }
+
+    private void SendStoredMessages()
+    {
+      if (HasInternetConnection)
+      {
+        _fileManager.SendStoredMessages(Context);
+      }
     }
 
     #endregion
@@ -479,6 +497,7 @@ namespace Mindscape.Raygun4Net
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       JNIEnv.ExceptionClear();
+
       var message = RaygunMessageBuilder.New
         .SetEnvironmentDetails()
         .SetMachineName("Unknown")
@@ -491,10 +510,12 @@ namespace Mindscape.Raygun4Net
         .Build();
 
       var customGroupingKey = OnCustomGroupingKey(exception, message);
+
       if (string.IsNullOrEmpty(customGroupingKey) == false)
       {
         message.Details.GroupingKey = customGroupingKey;
       }
+
       return message;
     }
 
@@ -557,36 +578,20 @@ namespace Mindscape.Raygun4Net
 
               try
               {
+                RaygunLogger.Debug("Sending message to Raygun.io");
                 var message = SimpleJson.SerializeObject(raygunMessage);
                 client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
-                RaygunLogger.Debug("Sending message to Raygun.io");
               }
               catch (Exception ex)
               {
-                RaygunLogger.Error(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
-                try
-                {
-                  SaveMessage(SimpleJson.SerializeObject(raygunMessage));
-                  RaygunLogger.Info("Exception has been saved to the device to try again later.");
-                }
-                catch (Exception e)
-                {
-                  RaygunLogger.Error(string.Format("Error saving Exception to device {0}", e.Message));
-                }
+                RaygunLogger.Error(string.Format("Error Logging Exception to Raygun API due to {0}", ex.Message));
+                _fileManager.SaveMessage(raygunMessage, Context);
               }
             }
           }
           else
           {
-            try
-            {
-              var message = SimpleJson.SerializeObject(raygunMessage);
-              SaveMessage(message);
-            }
-            catch (Exception ex)
-            {
-              RaygunLogger.Error(string.Format("Error saving Exception to device {0}", ex.Message));
-            }
+            _fileManager.SaveMessage(raygunMessage, Context);
           }
         }
       }
@@ -855,7 +860,7 @@ namespace Mindscape.Raygun4Net
 
     #endregion
 
-    private bool SendMessage(string message)
+    internal bool SendMessage(string message)
     {
       using (var client = new WebClient())
       {
@@ -890,145 +895,6 @@ namespace Mindscape.Raygun4Net
           }
         }
         return false;
-      }
-    }
-
-    private void SaveMessage(string message)
-    {
-      try
-      {
-        if (Context != null)
-        {
-          using (File dir = Context.GetDir("RaygunIO", FileCreationMode.Private))
-          {
-            int number = 1;
-            string[] files = dir.List();
-            while (true)
-            {
-              bool exists = FileExists(files, "RaygunErrorMessage" + number + ".txt");
-              if (!exists)
-              {
-                string nextFileName = "RaygunErrorMessage" + (number + 1) + ".txt";
-                exists = FileExists(files, nextFileName);
-                if (exists)
-                {
-                  DeleteFile(dir, nextFileName);
-                }
-                break;
-              }
-              number++;
-            }
-            if (number == 11)
-            {
-              string firstFileName = "RaygunErrorMessage1.txt";
-              if (FileExists(files, firstFileName))
-              {
-                DeleteFile(dir, firstFileName);
-              }
-            }
-
-            using (File file = new File(dir, "RaygunErrorMessage" + number + ".txt"))
-            {
-              using (FileOutputStream stream = new FileOutputStream(file))
-              {
-                stream.Write(Encoding.ASCII.GetBytes(message));
-                stream.Flush();
-                stream.Close();
-              }
-            }
-
-            RaygunLogger.Debug("Saved message: " + "RaygunErrorMessage" + number + ".txt");
-            RaygunLogger.Debug("File Count: " + dir.List().Length);
-          }
-        }
-      }
-      catch (Exception ex)
-      {
-        RaygunLogger.Error(string.Format("Error saving message to isolated storage {0}", ex.Message));
-      }
-    }
-
-    private void SendStoredMessages()
-    {
-      if (HasInternetConnection)
-      {
-        try
-        {
-          using (File dir = Context.GetDir("RaygunIO", FileCreationMode.Private))
-          {
-            File[] files = dir.ListFiles();
-            foreach (File file in files)
-            {
-              if (file.Name.StartsWith("RaygunErrorMessage"))
-              {
-                using (FileInputStream stream = new FileInputStream(file))
-                {
-                  using (InputStreamInvoker isi = new InputStreamInvoker(stream))
-                  {
-                    using (InputStreamReader streamReader = new Java.IO.InputStreamReader(isi))
-                    {
-                      using (BufferedReader bufferedReader = new BufferedReader(streamReader))
-                      {
-                        StringBuilder stringBuilder = new StringBuilder();
-                        string line;
-                        while ((line = bufferedReader.ReadLine()) != null)
-                        {
-                          stringBuilder.Append(line);
-                        }
-                        bool success = SendMessage(stringBuilder.ToString());
-                        // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
-                        if (!success)
-                        {
-                          return;
-                        }
-
-                        RaygunLogger.Debug("Sent " + file.Name);
-                      }
-                    }
-                  }
-                }
-                file.Delete();
-              }
-            }
-            if (dir.List().Length == 0)
-            {
-              if (files.Length > 0)
-              {
-                RaygunLogger.Debug("Successfully sent all pending messages");
-              }
-              dir.Delete();
-            }
-          }
-        }
-        catch (Exception ex)
-        {
-          RaygunLogger.Error(string.Format("Error sending stored messages to Raygun.io {0}", ex.Message));
-        }
-      }
-    }
-
-    private bool FileExists(string[] files, string fileName)
-    {
-      foreach (string str in files)
-      {
-        if (fileName.Equals(str))
-        {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    private void DeleteFile(File dir, string fileName)
-    {
-      File[] files = dir.ListFiles();
-      foreach (File file in files)
-      {
-        if (fileName.Equals(file.Name))
-        {
-          file.Delete();
-          return;
-        }
       }
     }
 

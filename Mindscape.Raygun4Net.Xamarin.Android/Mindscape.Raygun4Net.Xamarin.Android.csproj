@@ -108,6 +108,7 @@
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="RaygunLogger.cs" />
     <Compile Include="Messages\RaygunClientMessage.cs" />
+    <Compile Include="RaygunFileManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
