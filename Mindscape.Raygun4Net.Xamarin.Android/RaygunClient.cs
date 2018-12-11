@@ -509,28 +509,31 @@ namespace Mindscape.Raygun4Net
         // Get all stored crash reports.
         var reports = _fileManager.GetAllStoredCrashReports();
 
+        reportsSent = reports.Count;
+
         // Go through each crash report.
         foreach (var report in reports)
         {
-          try
-          {
-            ++reportsSent;
-
-            // Send the crash report to the API
-            var statusCode = MakePostRequestToUrl(RaygunSettings.Settings.ApiEndpoint, report.Data);
-
-            RaygunLogger.LogResponseStatusCode(statusCode);
-
-            // Remove the stored crash report if it was sent successfully.
-            if (statusCode == (int)RaygunResponseStatusCode.Accepted)
+          // Run in a background thread.
+          Task.Run(async () => {
+            try
             {
-              _fileManager.RemoveFile(report.Path); // We can delete the file from disk now.
+              // Send the crash report to the API
+              var statusCode = await PerformWebRequestAsync(RaygunSettings.Settings.ApiEndpoint, report.Data);
+
+              RaygunLogger.LogResponseStatusCode(statusCode);
+
+              // Remove the stored crash report if it was sent successfully.
+              if (statusCode == (int)RaygunResponseStatusCode.Accepted)
+              {
+                _fileManager.RemoveFile(report.Path); // We can delete the file from disk now.
+              }
             }
-          }
-          catch (Exception e)
-          {
-            RaygunLogger.Error("Failed to send stored crash report due to error: " + e.Message);
-          }
+            catch (Exception e)
+            {
+              RaygunLogger.Error("Failed to send stored crash report due to error: " + e.Message);
+            }
+          });
         }
       }
 
@@ -635,7 +638,12 @@ namespace Mindscape.Raygun4Net
           var jsonData = SimpleJson.SerializeObject(raygunMessage);
 
           // Send the data to the API endpoint.
-          var statusCode = MakePostRequestToUrl(RaygunSettings.Settings.ApiEndpoint, jsonData);
+          var request = PerformWebRequestAsync(RaygunSettings.Settings.ApiEndpoint, jsonData);
+
+          request.Wait(); // Synchronous!
+
+          // Take the result of the web request.
+          var statusCode = request.Result;
 
           RaygunLogger.LogResponseStatusCode(statusCode);
 
@@ -664,7 +672,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private int MakePostRequestToUrl(System.Uri url, string data)
+    private async Task<int> PerformWebRequestAsync(System.Uri url, string data)
     {
       RaygunLogger.Verbose("Sending JSON -------------------------------");
       RaygunLogger.Verbose(data);
@@ -678,14 +686,10 @@ namespace Mindscape.Raygun4Net
         // Add API key to headers.
         content.Headers.Add("X-ApiKey", _apiKey);
 
-        // Create the post task.
-        var postTask = client.PostAsync(url, content);
-
-        // Wait for it to complete.
-        postTask.Wait();
+        // Perform the request.
+        var response = await client.PostAsync(url, content);
 
         // Return the response.
-        var response = postTask.Result;
         return (int)response.StatusCode;
       }
     }
