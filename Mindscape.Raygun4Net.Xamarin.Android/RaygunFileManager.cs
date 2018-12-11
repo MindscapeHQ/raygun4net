@@ -14,6 +14,23 @@ namespace Mindscape.Raygun4Net
     private const int MAX_STORED_REPORTS = 64;
     private int currentFileCounter = 0;
 
+    public void Intialise()
+    {
+      try
+      {
+        var crashReportDirectory = GetCrashReportDirectory();
+
+        if (!Directory.Exists(crashReportDirectory))
+        {
+          Directory.CreateDirectory(crashReportDirectory);
+        }
+      }
+      catch (Exception e)
+      {
+        RaygunLogger.Error("Failed to initialise file manager due to error: " + e.Message);
+      }
+    }
+
     public void SaveCrashReport(RaygunMessage crashReport)
     {
       try

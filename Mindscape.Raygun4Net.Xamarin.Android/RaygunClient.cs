@@ -188,6 +188,7 @@ namespace Mindscape.Raygun4Net
       _apiKey = apiKey;
 
       _fileManager = new RaygunFileManager();
+      _fileManager.Intialise();
 
       // Setting default user information.
       var anonUser = GetAnonymousUserInfo();
@@ -634,6 +635,9 @@ namespace Mindscape.Raygun4Net
       {
         // Create the request contnet.
         HttpContent content = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
+
+        // Add API key to headers.
+        content.Headers.Add("X-ApiKey", _apiKey);
 
         // Create the post task.
         var postTask = client.PostAsync(url, content);
