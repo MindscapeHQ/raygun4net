@@ -35,14 +35,14 @@ namespace Mindscape.Raygun4Net
     {
       switch (statusCode)
       {
-        case (int)RaygunResponseStatusCode.RaygunResponseStatusCodeAccepted:
+        case (int)RaygunResponseStatusCode.Accepted:
           Debug(RaygunResponseStatusCodeConverter.ToString(statusCode));
           break;
 
-        case (int)RaygunResponseStatusCode.RaygunResponseStatusCodeBadMessage:    // Fall through
-        case (int)RaygunResponseStatusCode.RaygunResponseStatusCodeInvalidApiKey: // Fall through
-        case (int)RaygunResponseStatusCode.RaygunResponseStatusCodeLargePayload:  // Fall through
-        case (int)RaygunResponseStatusCode.RaygunResponseStatusCodeRateLimited:   // Fall through
+        case (int)RaygunResponseStatusCode.BadMessage:    // Fall through
+        case (int)RaygunResponseStatusCode.InvalidApiKey: // Fall through
+        case (int)RaygunResponseStatusCode.LargePayload:  // Fall through
+        case (int)RaygunResponseStatusCode.RateLimited:   // Fall through
           Error(RaygunResponseStatusCodeConverter.ToString(statusCode));
           break;
 

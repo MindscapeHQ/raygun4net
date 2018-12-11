@@ -505,7 +505,7 @@ namespace Mindscape.Raygun4Net
             RaygunLogger.LogResponseStatusCode(statusCode);
 
             // Remove the stored crash report if it was sent successfully.
-            if (statusCode == (int)RaygunResponseStatusCode.RaygunResponseStatusCodeAccepted)
+            if (statusCode == (int)RaygunResponseStatusCode.Accepted)
             {
               _fileManager.RemoveFile(report.Path); // We can delete the file from disk now.
             }
@@ -615,7 +615,7 @@ namespace Mindscape.Raygun4Net
           RaygunLogger.LogResponseStatusCode(statusCode);
 
           // Save the message if the application is currently being rate limited.
-          if (statusCode == (int)RaygunResponseStatusCode.RaygunResponseStatusCodeRateLimited)
+          if (statusCode == (int)RaygunResponseStatusCode.RateLimited)
           {
             _fileManager.SaveCrashReport(raygunMessage);
           }
