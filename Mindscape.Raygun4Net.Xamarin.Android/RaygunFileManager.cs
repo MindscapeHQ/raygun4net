@@ -10,8 +10,9 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunFileManager
   {
+    public const int MAX_STORED_REPORTS = 64;
     private const string RAYGUN_DIRECTORY = "RaygunIO";
-    private const int MAX_STORED_REPORTS = 64;
+
     private int currentFileCounter = 0;
 
     public void Intialise()
@@ -31,15 +32,15 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    public void SaveCrashReport(RaygunMessage crashReport)
+    public string SaveCrashReport(RaygunMessage crashReport, int maxReportsStored)
     {
       try
       {
         // Can only save the report if we havnt reached the report count limit.
-        if (IsFileLimitReached(MAX_STORED_REPORTS))
+        if (IsFileLimitReached(Math.Min(maxReportsStored, MAX_STORED_REPORTS)))
         {
           RaygunLogger.Warning("Failed to store crash report - Reached max crash reports stored on device");
-          return;
+          return null;
         }
 
         // Convert to JSON text.
@@ -49,14 +50,14 @@ namespace Mindscape.Raygun4Net
         var fileName = GetUniqueAcendingJsonName();
 
         // Save the report to disk.
-        var filePath = StoreCrashReport(fileName, reportJson);
-
-        RaygunLogger.Debug("Saved message: " + filePath);
+        return StoreCrashReport(fileName, reportJson);
       }
       catch (Exception ex)
       {
         RaygunLogger.Error(string.Format("Failed to store crash report - Error saving message to isolated storage {0}", ex.Message));
       }
+
+      return null;
     }
 
     private string StoreCrashReport(string fileName, string data)
@@ -169,7 +170,7 @@ namespace Mindscape.Raygun4Net
 
     private string GetUniqueAcendingJsonName()
     {
-      return string.Format("{0}-{1}-{2}.json", DateTime.UtcNow.ToLongTimeString(), currentFileCounter++, Guid.NewGuid().ToString());
+      return string.Format("{0}-{1}-{2}.json", DateTime.UtcNow.Ticks, currentFileCounter++, Guid.NewGuid().ToString());
     }
   }
 }

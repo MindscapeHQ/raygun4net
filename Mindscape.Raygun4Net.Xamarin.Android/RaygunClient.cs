@@ -45,6 +45,11 @@ namespace Mindscape.Raygun4Net
       get { return Application.Context; }
     }
 
+    public int MaxReportsStoredOnDevice
+    {
+      get; set;
+    }
+
     private string DeviceId
     {
       get
@@ -190,6 +195,8 @@ namespace Mindscape.Raygun4Net
       _fileManager = new RaygunFileManager();
       _fileManager.Intialise();
 
+      MaxReportsStoredOnDevice = RaygunFileManager.MAX_STORED_REPORTS;
+
       // Setting default user information.
       var anonUser = GetAnonymousUserInfo();
       _userInfo = anonUser;
@@ -271,6 +278,8 @@ namespace Mindscape.Raygun4Net
     /// <returns>The RaygunClient to chain other methods.</returns>
     public RaygunClient AttachCrashReporting()
     {
+      RaygunLogger.Debug("Enabling Crash Reporting");
+
       RaygunClient.DetachCrashReporting();
 
       SetUnhandledExceptionHandlers();
@@ -285,7 +294,10 @@ namespace Mindscape.Raygun4Net
     /// <returns>The RaygunClient to chain other methods.</returns>
     public RaygunClient AttachPulse(Activity mainActivity)
     {
+      RaygunLogger.Debug("Enabling Real User Monitoring");
+
       Pulse.Attach(this, mainActivity);
+
       return this;
     }
 
@@ -490,6 +502,8 @@ namespace Mindscape.Raygun4Net
 
     private void SendAllStoredCrashReports()
     {
+      int reportsSent = 0;
+
       if (HasInternetConnection)
       {
         // Get all stored crash reports.
@@ -500,6 +514,8 @@ namespace Mindscape.Raygun4Net
         {
           try
           {
+            ++reportsSent;
+
             // Send the crash report to the API
             var statusCode = MakePostRequestToUrl(RaygunSettings.Settings.ApiEndpoint, report.Data);
 
@@ -517,6 +533,8 @@ namespace Mindscape.Raygun4Net
           }
         }
       }
+
+      RaygunLogger.Debug(string.Format("Attempted to send {0} stored crash report(s)", reportsSent));
     }
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
@@ -601,7 +619,13 @@ namespace Mindscape.Raygun4Net
         // No internet then we store the report.
         if (!HasInternetConnection)
         {
-          _fileManager.SaveCrashReport(raygunMessage);
+          var path = _fileManager.SaveCrashReport(raygunMessage, MaxReportsStoredOnDevice);
+
+          if (!string.IsNullOrEmpty(path))
+          {
+            RaygunLogger.Debug("Saved crash report to: " + path);
+          }
+
           return;
         }
 
@@ -618,19 +642,34 @@ namespace Mindscape.Raygun4Net
           // Save the message if the application is currently being rate limited.
           if (statusCode == (int)RaygunResponseStatusCode.RateLimited)
           {
-            _fileManager.SaveCrashReport(raygunMessage);
+            var path = _fileManager.SaveCrashReport(raygunMessage, MaxReportsStoredOnDevice);
+
+            if (!string.IsNullOrEmpty(path))
+            {
+              RaygunLogger.Debug("Saved crash report to: " + path);
+            }
           }
         }
         catch (Exception e)
         {
           RaygunLogger.Error(string.Format("Error Logging Exception to Raygun API due to {0}", e.Message));
-          _fileManager.SaveCrashReport(raygunMessage);
+
+          var path = _fileManager.SaveCrashReport(raygunMessage, MaxReportsStoredOnDevice);
+
+          if (!string.IsNullOrEmpty(path))
+          {
+            RaygunLogger.Debug("Saved crash report to: " + path);
+          }
         }
       }
     }
 
     private int MakePostRequestToUrl(System.Uri url, string data)
     {
+      RaygunLogger.Verbose("Sending JSON -------------------------------");
+      RaygunLogger.Verbose(data);
+      RaygunLogger.Verbose("--------------------------------------------");
+
       using (var client = new HttpClient())
       {
         // Create the request contnet.
