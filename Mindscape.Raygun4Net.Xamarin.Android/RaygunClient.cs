@@ -195,7 +195,7 @@ namespace Mindscape.Raygun4Net
       _fileManager = new RaygunFileManager();
       _fileManager.Intialise();
 
-      MaxReportsStoredOnDevice = RaygunFileManager.MAX_STORED_REPORTS;
+      MaxReportsStoredOnDevice = RaygunFileManager.MAX_STORED_REPORTS_UPPER_LIMIT;
 
       // Setting default user information.
       var anonUser = GetAnonymousUserInfo();

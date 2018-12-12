@@ -10,7 +10,7 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunFileManager
   {
-    public const int MAX_STORED_REPORTS = 64;
+    public const int MAX_STORED_REPORTS_UPPER_LIMIT = 64;
     private const string RAYGUN_DIRECTORY = "RaygunIO";
 
     private int currentFileCounter = 0;
@@ -34,10 +34,11 @@ namespace Mindscape.Raygun4Net
 
     public string SaveCrashReport(RaygunMessage crashReport, int maxReportsStored)
     {
+      RaygunLogger.Debug("Test: SaveCrashReport maxReports:" + maxReportsStored.ToString());
       try
       {
         // Can only save the report if we havnt reached the report count limit.
-        if (IsFileLimitReached(Math.Min(maxReportsStored, MAX_STORED_REPORTS)))
+        if (IsFileLimitReached(Math.Min(maxReportsStored, MAX_STORED_REPORTS_UPPER_LIMIT)))
         {
           RaygunLogger.Warning("Failed to store crash report - Reached max crash reports stored on device");
           return null;
