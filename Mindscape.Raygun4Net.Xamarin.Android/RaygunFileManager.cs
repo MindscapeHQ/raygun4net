@@ -34,7 +34,6 @@ namespace Mindscape.Raygun4Net
 
     public string SaveCrashReport(RaygunMessage crashReport, int maxReportsStored)
     {
-      RaygunLogger.Debug("Test: SaveCrashReport maxReports:" + maxReportsStored.ToString());
       try
       {
         // Can only save the report if we havnt reached the report count limit.
