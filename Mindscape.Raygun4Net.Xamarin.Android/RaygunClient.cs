@@ -502,24 +502,47 @@ namespace Mindscape.Raygun4Net
 
     private void SendAllStoredCrashReports()
     {
-      int reportsSent = 0;
-
-      if (HasInternetConnection)
+      if (!HasInternetConnection)
       {
-        // Get all stored crash reports.
-        var reports = _fileManager.GetAllStoredCrashReports();
+        RaygunLogger.Debug("Not sending stored crash reports due to no internet connection");
+        return;
+      }
 
-        reportsSent = reports.Count;
+      // Get all stored crash reports.
+      var reports = _fileManager.GetAllStoredCrashReports();
 
-        // Go through each crash report.
-        foreach (var report in reports)
+      RaygunLogger.Debug(string.Format("Attempting to send {0} stored crash report(s)", reports.Count));
+
+      // Quick escape if there's no crash reports.
+      if (reports.Count == 0)
+      {
+        return;
+      }
+
+      // Run on another thread.
+      Task.Run(async () => {
+        // Use a single HttpClient for all requests.
+        using (var client = new HttpClient())
         {
-          // Run in a background thread.
-          Task.Run(async () => {
+          foreach (var report in reports)
+          {
             try
             {
-              // Send the crash report to the API
-              var statusCode = await PerformWebRequestAsync(RaygunSettings.Settings.ApiEndpoint, report.Data);
+              RaygunLogger.Verbose("Sending JSON -------------------------------");
+              RaygunLogger.Verbose(report.Data);
+              RaygunLogger.Verbose("--------------------------------------------");
+
+              // Create the request contnet.
+              HttpContent content = new StringContent(report.Data, System.Text.Encoding.UTF8, "application/json");
+
+              // Add API key to headers.
+              content.Headers.Add("X-ApiKey", _apiKey);
+
+              // Perform the request.
+              var response = await client.PostAsync(RaygunSettings.Settings.ApiEndpoint, content);
+
+              // Check the response.
+              var statusCode = (int)response.StatusCode;
 
               RaygunLogger.LogResponseStatusCode(statusCode);
 
@@ -533,11 +556,9 @@ namespace Mindscape.Raygun4Net
             {
               RaygunLogger.Error("Failed to send stored crash report due to error: " + e.Message);
             }
-          });
+          }
         }
-      }
-
-      RaygunLogger.Debug(string.Format("Attempted to send {0} stored crash report(s)", reportsSent));
+      });
     }
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
@@ -617,10 +638,38 @@ namespace Mindscape.Raygun4Net
      
       bool canSend = OnSendingMessage(raygunMessage);
 
-      if (canSend)
+      if (!canSend)
       {
-        // No internet then we store the report.
-        if (!HasInternetConnection)
+        RaygunLogger.Debug("Sending message cancelled");
+        return;
+      }
+
+      var internet = HasInternetConnection;
+
+      // No internet then we store the report.
+      if (!HasInternetConnection)
+      {
+        var path = _fileManager.SaveCrashReport(raygunMessage, MaxReportsStoredOnDevice);
+
+        if (!string.IsNullOrEmpty(path))
+        {
+          RaygunLogger.Debug("Saved crash report to: " + path);
+        }
+
+        return;
+      }
+
+      try
+      {
+        // Create the json data.
+        var jsonData = SimpleJson.SerializeObject(raygunMessage);
+
+        var statusCode = SendMessage(jsonData);
+
+        RaygunLogger.LogResponseStatusCode(statusCode);
+
+        // Save the message if the application is currently being rate limited.
+        if (statusCode == (int)RaygunResponseStatusCode.RateLimited)
         {
           var path = _fileManager.SaveCrashReport(raygunMessage, MaxReportsStoredOnDevice);
 
@@ -628,70 +677,52 @@ namespace Mindscape.Raygun4Net
           {
             RaygunLogger.Debug("Saved crash report to: " + path);
           }
-
-          return;
         }
+      }
+      catch (Exception e)
+      {
+        RaygunLogger.Error(string.Format("Error Logging Exception to Raygun API due to {0}", e.Message));
 
-        try
+        var path = _fileManager.SaveCrashReport(raygunMessage, MaxReportsStoredOnDevice);
+
+        if (!string.IsNullOrEmpty(path))
         {
-          // Create the json data.
-          var jsonData = SimpleJson.SerializeObject(raygunMessage);
-
-          // Send the data to the API endpoint.
-          var request = PerformWebRequestAsync(RaygunSettings.Settings.ApiEndpoint, jsonData);
-
-          request.Wait(); // Synchronous!
-
-          // Take the result of the web request.
-          var statusCode = request.Result;
-
-          RaygunLogger.LogResponseStatusCode(statusCode);
-
-          // Save the message if the application is currently being rate limited.
-          if (statusCode == (int)RaygunResponseStatusCode.RateLimited)
-          {
-            var path = _fileManager.SaveCrashReport(raygunMessage, MaxReportsStoredOnDevice);
-
-            if (!string.IsNullOrEmpty(path))
-            {
-              RaygunLogger.Debug("Saved crash report to: " + path);
-            }
-          }
-        }
-        catch (Exception e)
-        {
-          RaygunLogger.Error(string.Format("Error Logging Exception to Raygun API due to {0}", e.Message));
-
-          var path = _fileManager.SaveCrashReport(raygunMessage, MaxReportsStoredOnDevice);
-
-          if (!string.IsNullOrEmpty(path))
-          {
-            RaygunLogger.Debug("Saved crash report to: " + path);
-          }
+          RaygunLogger.Debug("Saved crash report to: " + path);
         }
       }
     }
 
-    private async Task<int> PerformWebRequestAsync(System.Uri url, string data)
+    internal int SendMessage(string message)
     {
       RaygunLogger.Verbose("Sending JSON -------------------------------");
-      RaygunLogger.Verbose(data);
+      RaygunLogger.Verbose(message);
       RaygunLogger.Verbose("--------------------------------------------");
 
-      using (var client = new HttpClient())
+      using (var client = new WebClient())
       {
-        // Create the request contnet.
-        HttpContent content = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
+        client.Headers.Add("X-ApiKey", _apiKey);
+        client.Headers.Add("content-type", "application/json; charset=utf-8");
+        client.Encoding = System.Text.Encoding.UTF8;
 
-        // Add API key to headers.
-        content.Headers.Add("X-ApiKey", _apiKey);
+        try
+        {
+          client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
+        }
+        catch (Exception e)
+        {
+          RaygunLogger.Error(string.Format("Error Logging Exception to Raygun.io {0}", e.Message));
 
-        // Perform the request.
-        var response = await client.PostAsync(url, content);
+          if (e.GetType().Name == "WebException")
+          {
+            WebException we = (WebException)e;
+            HttpWebResponse response = (HttpWebResponse)we.Response;
 
-        // Return the response.
-        return (int)response.StatusCode;
+            return (int)response.StatusCode;
+          }
+        }
       }
+
+      return (int)HttpStatusCode.Accepted;
     }
 
     private void RaygunClient_SendingMessage(object sender, RaygunSendingMessageEventArgs e)
