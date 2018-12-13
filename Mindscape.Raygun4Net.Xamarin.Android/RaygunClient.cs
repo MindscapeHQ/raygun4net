@@ -644,8 +644,6 @@ namespace Mindscape.Raygun4Net
         return;
       }
 
-      var internet = HasInternetConnection;
-
       // No internet then we store the report.
       if (!HasInternetConnection)
       {

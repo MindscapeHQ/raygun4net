@@ -84,8 +84,11 @@ namespace Mindscape.Raygun4Net
         // Get the paths to all the files in the crash report directory.
         var files = Directory.GetFiles(GetCrashReportDirectory());
 
-        foreach (var filePath in files)
+        foreach (var file in files)
         {
+          // Generate the full file path.
+          var filePath = Path.Combine(GetCrashReportDirectory(), file);
+
           // Read the content of the file on disk.
           var raygunFile = ReadCrashReportFromDisk(filePath);
          
@@ -104,11 +107,8 @@ namespace Mindscape.Raygun4Net
       return allReports;
     }
 
-    private RaygunFile ReadCrashReportFromDisk(string fileName)
+    private RaygunFile ReadCrashReportFromDisk(string filePath)
     {
-      // Generate the full file path.
-      var filePath = Path.Combine(GetCrashReportDirectory(), fileName);
-
       // Check a file exists with this path.
       if (filePath == null || !File.Exists(filePath))
       {
