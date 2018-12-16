@@ -15,16 +15,18 @@
     <FileAlignment>512</FileAlignment>
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <AndroidUseLatestPlatformSdk>False</AndroidUseLatestPlatformSdk>
-    <TargetFrameworkVersion>v4.0.3</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>
     <PackOnBuild>true</PackOnBuild>
     <PackageId>Mindscape.Raygun4Net.Xamarin.Android</PackageId>
-    <PackageVersion>5.6.0</PackageVersion>
+    <PackageVersion>5.7.0</PackageVersion>
     <Authors>Raygun</Authors>
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
     <PackageLicenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/MindscapeHQ/raygun4net</PackageProjectUrl>
     <Description>Raygun provider for Xamarin Android projects</Description>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <Summary>Raygun provider for Xamarin Android projects</Summary>
+    <Title>Raygun for Xamarin Android</Title>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -53,6 +55,8 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Mindscape.Raygun4Net.Core\Messages\RaygunErrorMessage.cs">
@@ -66,9 +70,6 @@
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Builders\RaygunErrorMessageBuilderBase.cs">
       <Link>Builders\RaygunErrorMessageBuilderBase.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunClientMessage.cs">
-      <Link>Messages\RaygunClientMessage.cs</Link>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunErrorStackTraceLineMessage.cs">
       <Link>Messages\RaygunErrorStackTraceLineMessage.cs</Link>
@@ -107,6 +108,11 @@
     </Compile>
     <Compile Include="IRaygunMessageBuilder.cs" />
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
+    <Compile Include="RaygunLogger.cs" />
+    <Compile Include="Messages\RaygunClientMessage.cs" />
+    <Compile Include="RaygunFileManager.cs" />
+    <Compile Include="RaygunFile.cs" />
+    <Compile Include="RaygunResponseStatusCode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
