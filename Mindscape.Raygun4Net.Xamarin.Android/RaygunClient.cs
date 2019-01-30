@@ -355,6 +355,11 @@ namespace Mindscape.Raygun4Net
       {
         Current.Send(e.Exception);
       }
+
+      if (RaygunSettings.Settings.SetUnobservedTaskExceptionsAsObserved)
+      {
+        e.SetObserved();
+      }
     }
 
     private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
