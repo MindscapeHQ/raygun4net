@@ -152,6 +152,17 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    public void RemoveFiles(List<RaygunFile> files)
+    {
+      foreach (var file in files)
+      {
+        if (file != null)
+        {
+          RemoveFile(file.Path);
+        }
+      }
+    }
+
     private bool IsFileLimitReached(int maxCount)
     {
       return NumberOfCrashReportsOnDisk() >= maxCount;

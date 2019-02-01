@@ -18,5 +18,7 @@ namespace Mindscape.Raygun4Net
 
     public Uri ApiEndpoint { get; set; }
     public Uri PulseEndpoint { get; set; }
+
+    public bool SetUnobservedTaskExceptionsAsObserved { get; set; }
   }
 }

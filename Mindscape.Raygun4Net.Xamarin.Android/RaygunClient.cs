@@ -355,6 +355,11 @@ namespace Mindscape.Raygun4Net
       {
         Current.Send(e.Exception);
       }
+
+      if (RaygunSettings.Settings.SetUnobservedTaskExceptionsAsObserved)
+      {
+        e.SetObserved();
+      }
     }
 
     private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -519,46 +524,82 @@ namespace Mindscape.Raygun4Net
         return;
       }
 
-      // Run on another thread.
-      Task.Run(async () => {
-        // Use a single HttpClient for all requests.
-        using (var client = new HttpClient())
+      try
+      {
+        Task.Run(async () =>
         {
-          foreach (var report in reports)
+          // Use a single HttpClient for all requests.
+          using (var client = new HttpClient())
           {
+            foreach (var report in reports)
+            {
+              await SendStoredReportAsync(client, report);
+            }
+          }
+        }).ContinueWith(t =>
+        {
+          if (t.IsFaulted)
+          {
+            RaygunLogger.Error("Fault occurred when sending stored reports - clearing stored reports");
+
             try
             {
-              RaygunLogger.Verbose("Sending JSON -------------------------------");
-              RaygunLogger.Verbose(report.Data);
-              RaygunLogger.Verbose("--------------------------------------------");
-
-              // Create the request contnet.
-              HttpContent content = new StringContent(report.Data, System.Text.Encoding.UTF8, "application/json");
-
-              // Add API key to headers.
-              content.Headers.Add("X-ApiKey", _apiKey);
-
-              // Perform the request.
-              var response = await client.PostAsync(RaygunSettings.Settings.ApiEndpoint, content);
-
-              // Check the response.
-              var statusCode = (int)response.StatusCode;
-
-              RaygunLogger.LogResponseStatusCode(statusCode);
-
-              // Remove the stored crash report if it was sent successfully.
-              if (statusCode == (int)RaygunResponseStatusCode.Accepted)
-              {
-                _fileManager.RemoveFile(report.Path); // We can delete the file from disk now.
-              }
+              // If there was an issue then clear the stored reports.
+              _fileManager.RemoveFiles(reports);
             }
             catch (Exception e)
             {
-              RaygunLogger.Error("Failed to send stored crash report due to error: " + e.Message);
+              RaygunLogger.Error("Failed to remove stored report due to error: " + e.Message);
             }
           }
+
+          // Consume all errors as we dont want them being sent.
+          t.Exception.Handle((e) => 
+          {
+            RaygunLogger.Error("Error occurred while sending stored reports: " + e.Message);
+            return true; // Handled
+          });
+
+        });
+      }
+      catch (Exception e)
+      {
+        RaygunLogger.Error("Failed to send stored reports due to error: " + e.Message);
+      }
+    }
+
+    private async Task SendStoredReportAsync(HttpClient client, RaygunFile report)
+    {
+      try
+      {
+        RaygunLogger.Verbose("Sending JSON -------------------------------");
+        RaygunLogger.Verbose(report.Data);
+        RaygunLogger.Verbose("--------------------------------------------");
+
+        // Create the request contnet.
+        HttpContent content = new StringContent(report.Data, System.Text.Encoding.UTF8, "application/json");
+
+        // Add API key to headers.
+        content.Headers.Add("X-ApiKey", _apiKey);
+
+        // Perform the request.
+        var response = await client.PostAsync(RaygunSettings.Settings.ApiEndpoint, content);
+
+        // Check the response.
+        var statusCode = (int)response.StatusCode;
+
+        RaygunLogger.LogResponseStatusCode(statusCode);
+
+        // Remove the stored crash report if it was sent successfully.
+        if (statusCode == (int)RaygunResponseStatusCode.Accepted)
+        {
+          _fileManager.RemoveFile(report.Path); // We can delete the file from disk now.
         }
-      });
+      }
+      catch (Exception e)
+      {
+        RaygunLogger.Error("Failed to send stored crash report due to error: " + e.Message);
+      }
     }
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
