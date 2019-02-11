@@ -5,6 +5,7 @@ namespace Mindscape.Raygun4Net.Xamarin.iOS.Unified
   {
     Error,
     Warning,
+    Info,
     Debug,
     Verbose
   }
