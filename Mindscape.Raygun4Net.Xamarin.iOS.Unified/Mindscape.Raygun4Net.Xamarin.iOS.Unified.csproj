@@ -198,6 +198,9 @@
       <Link>Batching\PulseEventBatch.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
+    <Compile Include="RaygunLogger.cs" />
+    <Compile Include="RaygunResponseSatusCode.cs" />
+    <Compile Include="RaygunLogLevel.cs" />
   </ItemGroup>
   <ItemGroup>
     <NativeReference Include="native\raygun4apple.framework">
