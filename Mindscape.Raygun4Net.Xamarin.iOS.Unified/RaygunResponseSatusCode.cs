@@ -1,5 +1,5 @@
 ﻿using System;
-namespace Mindscape.Raygun4Net.Xamarin.iOS.Unified
+namespace Mindscape.Raygun4Net
 {
   public enum RaygunResponseStatusCode
   {
