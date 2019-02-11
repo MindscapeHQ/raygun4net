@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Foundation;
 using ObjCRuntime;
 
-namespace Mindscape.Raygun4Net.Xamarin.iOS.Unified
+namespace Mindscape.Raygun4Net
 {
   public class RaygunLogger
   {
