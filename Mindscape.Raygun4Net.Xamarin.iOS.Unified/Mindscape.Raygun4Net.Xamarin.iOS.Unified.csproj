@@ -108,6 +108,8 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.iOS" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.ObjCBinding.CSharp.targets" />
   <ItemGroup>
@@ -201,6 +203,8 @@
     <Compile Include="RaygunLogger.cs" />
     <Compile Include="RaygunResponseSatusCode.cs" />
     <Compile Include="RaygunLogLevel.cs" />
+    <Compile Include="RaygunFile.cs" />
+    <Compile Include="RaygunFileManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <NativeReference Include="native\raygun4apple.framework">
