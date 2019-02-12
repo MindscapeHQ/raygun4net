@@ -12,7 +12,11 @@ namespace Mindscape.Raygun4Net
     {
       get
       {
-        return settings ?? (settings = new RaygunSettings { ApiEndpoint = new Uri(DefaultApiEndPoint), PulseEndpoint = new Uri(DefaultPulseEndPoint) });
+        return settings ?? (settings = new RaygunSettings {
+          ApiEndpoint = new Uri(DefaultApiEndPoint), 
+          PulseEndpoint = new Uri(DefaultPulseEndPoint), 
+          LogLevel = RaygunLogLevel.Warning
+        });
       }
     }
 
@@ -21,5 +25,7 @@ namespace Mindscape.Raygun4Net
     public Uri PulseEndpoint{ get; set; }
 
     public bool SetUnobservedTaskExceptionsAsObserved { get; set; }
+
+    public RaygunLogLevel LogLevel { get; set; }
   }
 }
