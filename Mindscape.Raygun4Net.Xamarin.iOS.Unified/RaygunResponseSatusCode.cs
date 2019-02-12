@@ -3,11 +3,12 @@ namespace Mindscape.Raygun4Net
 {
   public enum RaygunResponseStatusCode
   {
-    Accepted      = 202,
-    BadMessage    = 400,
-    InvalidApiKey = 403,
-    LargePayload  = 413,
-    RateLimited   = 429,
+    Accepted       = 202,
+    BadMessage     = 400,
+    InvalidApiKey  = 403,
+    RequestTimeout = 408,
+    LargePayload   = 413,
+    RateLimited    = 429,
   }
 
   public class RaygunResponseStatusCodeConverter
@@ -17,19 +18,22 @@ namespace Mindscape.Raygun4Net
       switch (statusCode)
       {
         case (int)RaygunResponseStatusCode.Accepted:
-          return "Request succeeded";
+          return "(202) Request succeeded";
 
         case (int)RaygunResponseStatusCode.BadMessage:
-          return "Bad message - could not parse the provided JSON. Check all fields are present, especially both occurredOn (ISO 8601 DateTime) and details { } at the top level";
+          return "(400) Bad message - Could not parse the provided JSON.";
 
         case (int)RaygunResponseStatusCode.InvalidApiKey:
-          return "Invalid API Key - The value specified in the header X-ApiKey did not match with an application in Raygun";
+          return "(403) Invalid API Key - The value specified in the header X-ApiKey did not match with an application in Raygun";
+
+        case (int)RaygunResponseStatusCode.RequestTimeout:
+          return "(408) Request timed out - Look to increase the time out value in the RaygunSettings";
 
         case (int)RaygunResponseStatusCode.LargePayload:
-          return "Request entity too large - The maximum size of a JSON payload is 128KB";
+          return "(413) Request entity too large - The maximum size of a JSON payload is 128KB";
 
         case (int)RaygunResponseStatusCode.RateLimited:
-          return "Too Many Requests - Plan limit exceeded for month or plan expired";
+          return "(429) Too Many Requests - Plan limit exceeded for month or plan expired";
 
         default:
           return "Response status code: " + statusCode.ToString();
