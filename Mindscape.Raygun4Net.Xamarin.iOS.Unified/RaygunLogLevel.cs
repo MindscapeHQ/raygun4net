@@ -3,7 +3,7 @@ namespace Mindscape.Raygun4Net
 {
   public enum RaygunLogLevel
   {
-    Error,
+    Error = 0,
     Warning,
     Info,
     Debug,

@@ -39,15 +39,19 @@ namespace Mindscape.Raygun4Net
 
     private static void Log(RaygunLogLevel level, string message)
     {
-      try
+      // Ensure we only print messages within our log level.
+      if (level <= RaygunSettings.Settings.LogLevel)
       {
-        using (var ns = new NSString(message))
+        try
         {
-          NSLog(format.Handle, ns.Handle);
+          using (var ns = new NSString(message))
+          {
+            NSLog(format.Handle, ns.Handle);
+          }
         }
-      }
-      catch (Exception)
-      {
+        catch (Exception)
+        {
+        }
       }
     }
 
@@ -61,6 +65,7 @@ namespace Mindscape.Raygun4Net
 
         case (int)RaygunResponseStatusCode.BadMessage:    // Fall through
         case (int)RaygunResponseStatusCode.InvalidApiKey: // Fall through
+        case (int)RaygunResponseStatusCode.RequestTimeout:// Fall through
         case (int)RaygunResponseStatusCode.LargePayload:  // Fall through
         case (int)RaygunResponseStatusCode.RateLimited:   // Fall through
           Error(RaygunResponseStatusCodeConverter.ToString(statusCode));
