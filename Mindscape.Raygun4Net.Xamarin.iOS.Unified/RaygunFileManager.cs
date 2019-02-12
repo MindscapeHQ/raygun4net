@@ -66,7 +66,7 @@ namespace Mindscape.Raygun4Net
       // Write data to file path.
       using (var writer = File.Create(filePath))
       {
-        var bytes = Encoding.ASCII.GetBytes(data);
+        var bytes = Encoding.UTF8.GetBytes(data);
         writer.Write(bytes, 0, bytes.Length);
       }
 
