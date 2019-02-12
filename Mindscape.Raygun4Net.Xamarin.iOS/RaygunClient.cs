@@ -277,7 +277,7 @@ namespace Mindscape.Raygun4Net
       try
       {
         var clientVersion = new AssemblyName(GetType().Assembly.FullName).Version.ToString();
-        RaygunLogger.Debug(string.Format("Configuring Raygun ({0})", clientVersion));
+        RaygunLogger.Info(string.Format("Configuring Raygun ({0})", clientVersion));
       }
       catch
       {
@@ -605,7 +605,7 @@ namespace Mindscape.Raygun4Net
       // Get all stored crash reports.
       var reports = _fileManager.GetAllStoredCrashReports();
 
-      RaygunLogger.Debug(string.Format("Attempting to send {0} stored crash report(s)", reports.Count));
+      RaygunLogger.Info(string.Format("Attempting to send {0} stored crash report(s)", reports.Count));
 
       // Quick escape if there's no crash reports.
       if (reports.Count == 0)
@@ -627,7 +627,7 @@ namespace Mindscape.Raygun4Net
           }
         }).ContinueWith(t =>
         {
-          if (t.IsFaulted)
+          if (t != null && t.IsFaulted)
           {
             RaygunLogger.Error("Fault occurred when sending stored reports - clearing stored reports");
 
@@ -642,13 +642,15 @@ namespace Mindscape.Raygun4Net
             }
           }
 
-          // Consume all errors as we dont want them being sent.
-          t.Exception.Handle((e) =>
+          if (t != null && t.Exception != null)
           {
-            RaygunLogger.Error("Error occurred while sending stored reports: " + e.Message);
-            return true; // Handled
-          });
-
+            // Consume all errors as we dont want them being sent.
+            t.Exception.Handle((e) =>
+            {
+              RaygunLogger.Error("Error occurred while sending stored reports: " + e.Message);
+              return true; // Handled
+            });
+          }
         });
       }
       catch (Exception e)
@@ -687,7 +689,17 @@ namespace Mindscape.Raygun4Net
       }
       catch (Exception e)
       {
-        RaygunLogger.Error("Failed to send stored crash report due to error: " + e.Message);
+        RaygunLogger.Error(string.Format("Failed to send stored crash report due to error {0}: {1}", e.GetType().Name, e.Message));
+
+        const string TaskCanceledEx = "TaskCanceledException";
+        if (e.GetType().Name == TaskCanceledEx || e.InnerException.GetType().Name == TaskCanceledEx)
+        {
+          RaygunLogger.LogResponseStatusCode((int)HttpStatusCode.RequestTimeout);
+        }
+        else
+        {
+          RaygunLogger.LogResponseStatusCode((int)HttpStatusCode.BadRequest);
+        }
       }
     }
 
@@ -707,6 +719,7 @@ namespace Mindscape.Raygun4Net
         .Build();
 
       var customGroupingKey = OnCustomGroupingKey(exception, message);
+
       if (string.IsNullOrEmpty(customGroupingKey) == false)
       {
         message.Details.GroupingKey = customGroupingKey;
@@ -813,7 +826,7 @@ namespace Mindscape.Raygun4Net
       }
       catch (Exception e)
       {
-        RaygunLogger.Error(string.Format("Error Logging Exception to Raygun API due to {0}", e.Message));
+        RaygunLogger.Error(string.Format("Failed to send message due to error {0}: {1}", e.GetType().Name, e.Message));
 
         var path = _fileManager.SaveCrashReport(raygunMessage, MaxReportsStoredOnDevice);
 
@@ -837,7 +850,10 @@ namespace Mindscape.Raygun4Net
         try
         {
           // Set the timeout
-          client.Timeout = TimeSpan.FromMilliseconds(timeout);
+          if (timeout > 0)
+          {
+            client.Timeout = TimeSpan.FromMilliseconds(timeout);
+          }
 
           // Create the request contnet.
           HttpContent content = new StringContent(message, System.Text.Encoding.UTF8, "application/json");
@@ -857,8 +873,18 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception e)
         {
-          RaygunLogger.Error(string.Format("Error Logging Exception to Raygun.io {0}", e.Message));
-          statusCode = (int)HttpStatusCode.BadRequest;
+          RaygunLogger.Error(string.Format("Failed to send message due to error {0}: {1}", e.GetType().Name, e.Message));
+
+          // Was this due to the request timing out?
+          const string TaskCanceledEx = "TaskCanceledException";
+          if (e.GetType().Name == TaskCanceledEx || e.InnerException.GetType().Name == TaskCanceledEx)
+          {
+            statusCode = (int)HttpStatusCode.RequestTimeout;
+          }
+          else
+          {
+            statusCode = (int)HttpStatusCode.BadRequest;
+          }
         }
       }
 
