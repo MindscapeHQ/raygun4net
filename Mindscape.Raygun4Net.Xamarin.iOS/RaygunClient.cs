@@ -813,8 +813,10 @@ namespace Mindscape.Raygun4Net
 
         RaygunLogger.LogResponseStatusCode(statusCode);
 
-        // Save the message if the application is currently being rate limited.
-        if (statusCode == (int)RaygunResponseStatusCode.RateLimited)
+        // Save the message if the application is currently being rate limited or there was a timeout.
+        if (statusCode == (int)RaygunResponseStatusCode.RateLimited || 
+            statusCode == (int)RaygunResponseStatusCode.RequestTimeout ||
+            statusCode == (int)RaygunResponseStatusCode.GatewayTimeout)
         {
           var path = _fileManager.SaveCrashReport(raygunMessage, MaxReportsStoredOnDevice);
 
