@@ -14,13 +14,12 @@
     <SchemaVersion>2.0</SchemaVersion>
     <PackOnBuild>true</PackOnBuild>
     <PackageId>Mindscape.Raygun4Net.Xamarin.iOS.Unified</PackageId>
-    <PackageVersion>6.0.1</PackageVersion>
+    <PackageVersion>6.0.2</PackageVersion>
     <Authors>Raygun</Authors>
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
     <PackageLicenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/MindscapeHQ/raygun4net</PackageProjectUrl>
     <Description>Raygun provider for Xamarin iOS projects</Description>
-    <PackageReleaseNotes>- Removed code sign from native framework (raygun4apple). </PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>true</DebugSymbols>
@@ -108,6 +107,8 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.iOS" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.ObjCBinding.CSharp.targets" />
   <ItemGroup>
@@ -198,6 +199,11 @@
       <Link>Batching\PulseEventBatch.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
+    <Compile Include="RaygunLogger.cs" />
+    <Compile Include="RaygunResponseSatusCode.cs" />
+    <Compile Include="RaygunLogLevel.cs" />
+    <Compile Include="RaygunFile.cs" />
+    <Compile Include="RaygunFileManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <NativeReference Include="native\raygun4apple.framework">
