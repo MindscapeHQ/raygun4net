@@ -9,6 +9,7 @@ namespace Mindscape.Raygun4Net
     RequestTimeout = 408,
     LargePayload   = 413,
     RateLimited    = 429,
+    GatewayTimeout = 504,
   }
 
   public class RaygunResponseStatusCodeConverter
@@ -34,6 +35,9 @@ namespace Mindscape.Raygun4Net
 
         case (int)RaygunResponseStatusCode.RateLimited:
           return "(429) Too Many Requests - Plan limit exceeded for month or plan expired";
+
+        case (int)RaygunResponseStatusCode.GatewayTimeout:
+          return "(504) Gateway Timeout";
 
         default:
           return "Response status code: " + statusCode.ToString();
