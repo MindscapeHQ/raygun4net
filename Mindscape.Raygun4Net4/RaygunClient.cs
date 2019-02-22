@@ -40,7 +40,11 @@ namespace Mindscape.Raygun4Net
       _wrapperExceptions.Add(typeof(TargetInvocationException));
       _wrapperExceptions.Add(typeof(HttpUnhandledException));
 
-
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreSensitiveFieldNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreSensitiveFieldNames.Split(',');
+        IgnoreSensitiveFieldNames(ignoredNames);
+      }
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormFieldNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreFormFieldNames.Split(',');
@@ -126,6 +130,15 @@ namespace Mindscape.Raygun4Net
       {
         _wrapperExceptions.Remove(wrapper);
       }
+    }
+
+    /// <summary>
+    /// Ignores the sensitive field names.
+    /// </summary>
+    /// <param name="names">Names.</param>
+    public void IgnoreSensitiveFieldNames(params string[] names)
+    {
+      _requestMessageOptions.AddSensitiveFieldNames(names);
     }
 
     /// <summary>

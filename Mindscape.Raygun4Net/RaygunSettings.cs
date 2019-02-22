@@ -65,6 +65,13 @@ namespace Mindscape.Raygun4Net
       set { this["excludeErrorsFromLocal"] = value; }
     }
 
+    [ConfigurationProperty("ignoreSensitiveFieldNames", IsRequired = false, DefaultValue = "")]
+    public string IgnoreSensitiveFieldNames
+    {
+      get { return (string)this["ignoreSensitiveFieldNames"]; }
+      set { this["ignoreSensitiveFieldNames"] = value; }
+    }
+
     [ConfigurationProperty("ignoreFormFieldNames", IsRequired = false, DefaultValue = "")]
     public string IgnoreFormFieldNames
     {
