@@ -37,7 +37,7 @@ namespace Mindscape.Raygun4Net.Builders
       // Query string
       try
       {
-        message.QueryString = ToDictionary(request.QueryString, null);
+        message.QueryString = ToDictionary(request.QueryString, options.IsQueryParameterIgnored, options.IsSensitveFieldIgnored);
       }
       catch (Exception e)
       {
@@ -50,7 +50,7 @@ namespace Mindscape.Raygun4Net.Builders
       // Headers
       try
       {
-        message.Headers = ToDictionary(request.Headers, options.IsHeaderIgnored);
+        message.Headers = ToDictionary(request.Headers, options.IsHeaderIgnored, options.IsSensitveFieldIgnored);
         message.Headers.Remove("Cookie");
       }
       catch (Exception e)
@@ -64,7 +64,7 @@ namespace Mindscape.Raygun4Net.Builders
       // Form fields
       try
       {
-        message.Form = ToDictionary(request.Form, options.IsFormFieldIgnored, true);
+        message.Form = ToDictionary(request.Form, options.IsFormFieldIgnored, options.IsSensitveFieldIgnored, true);
       }
       catch (Exception e)
       {
@@ -87,7 +87,7 @@ namespace Mindscape.Raygun4Net.Builders
       // Server variables
       try
       {
-        message.Data = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored);
+        message.Data = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored, options.IsSensitveFieldIgnored);
         message.Data.Remove("ALL_HTTP");
         message.Data.Remove("HTTP_COOKIE");
         message.Data.Remove("ALL_RAW");
@@ -134,9 +134,16 @@ namespace Mindscape.Raygun4Net.Builders
         }
       }
 
-      // Sensitive values
+      // Sensitive Raw Data
 
-      StripSensitiveValues(message, options);
+      try
+      {
+        message.RawData = StripSensitiveRawData(message.RawData, options.IsSensitveFieldIgnored);
+      }
+      catch (Exception e)
+      {
+        System.Diagnostics.Trace.WriteLine("Failed to strip sensitive values from the raw data due to: {0}", e.Message);
+      }
 
       return message;
     }
@@ -230,20 +237,13 @@ namespace Mindscape.Raygun4Net.Builders
         .ToList();
     }
 
-    private static IDictionary ToDictionary(NameValueCollection nameValueCollection, Func<string, bool> ignore, bool truncateValues = false)
+    private static IDictionary ToDictionary(NameValueCollection nameValueCollection, Func<string, bool> ignore, Func<string, bool> isSensitive, bool truncateValues = false)
     {
       IEnumerable<string> keys;
 
       try
       {
-        if (ignore == null)
-        {
-          keys = nameValueCollection.AllKeys.Where(k => k != null);
-        }
-        else
-        {
-          keys = nameValueCollection.AllKeys.Where(k => !ignore(k));
-        }
+        keys = nameValueCollection.AllKeys.Where(k => !ignore(k) && !isSensitive(k));
       }
       catch (Exception e)
       {
@@ -281,77 +281,6 @@ namespace Mindscape.Raygun4Net.Builders
       }
 
       return dictionary;
-    }
-
-    private static void StripSensitiveValues(RaygunRequestMessage message, RaygunRequestMessageOptions options)
-    {
-      if (!options.HasSensitiveFieldsToIgnore())
-      {
-        return; // Quick escape
-      }
-
-      try
-      {
-        message.QueryString = StripSensitiveFields(message.QueryString, options.IsSensitveFieldIgnored);
-      }
-      catch (Exception e)
-      {
-        System.Diagnostics.Trace.WriteLine("Failed to strip sensitive values from the query string due to: {0}", e.Message);
-      }
-
-      try
-      {
-        message.Headers = StripSensitiveFields(message.Headers, options.IsSensitveFieldIgnored);
-      }
-      catch (Exception e)
-      {
-        System.Diagnostics.Trace.WriteLine("Failed to strip sensitive values from the headers due to: {0}", e.Message);
-      }
-
-      try
-      {
-        message.Form = StripSensitiveFields(message.Form, options.IsSensitveFieldIgnored);
-      }
-      catch (Exception e)
-      {
-        System.Diagnostics.Trace.WriteLine("Failed to strip sensitive values from the form due to: {0}", e.Message);
-      }
-
-      try
-      {
-        message.Data = StripSensitiveFields(message.Data, options.IsSensitveFieldIgnored);
-      }
-      catch (Exception e)
-      {
-        System.Diagnostics.Trace.WriteLine("Failed to strip sensitive values from the data due to: {0}", e.Message);
-      }
-
-      try
-      {
-        message.RawData = StripSensitiveRawData(message.RawData, options.IsSensitveFieldIgnored);
-      }
-      catch (Exception e)
-      {
-        System.Diagnostics.Trace.WriteLine("Failed to strip sensitive values from the raw data due to: {0}", e.Message);
-      }
-    }
-
-    private static IDictionary StripSensitiveFields(IDictionary data, Func<string, bool> ignore)
-    {
-      var keys = data.Keys;
-
-      // Loop through all keys in the dictionary
-      foreach (var key in keys)
-      {
-        // Check if it should be removed
-        if (ignore(key as string))
-        {
-          // Remove it
-          data.Remove(key);
-        }
-      }
-
-      return data;
     }
 
     private static string StripSensitiveRawData(string rawData, Func<string, bool> ignore)
