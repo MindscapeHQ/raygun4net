@@ -7,6 +7,7 @@ namespace Mindscape.Raygun4Net
   public class RaygunRequestMessageOptions
   {
     private readonly List<string> _ignoredSensitiveFieldNames = new List<string>();
+    private readonly List<string> _ignoredQueryParameterNames = new List<string>();
     private readonly List<string> _ignoredFormFieldNames = new List<string>();
     private readonly List<string> _ignoreHeaderNames = new List<string>();
     private readonly List<string> _ignoreCookieNames = new List<string>();
@@ -15,9 +16,10 @@ namespace Mindscape.Raygun4Net
     
     public RaygunRequestMessageOptions() { }
 
-    public RaygunRequestMessageOptions(IEnumerable<string> sensitiveFieldNames, IEnumerable<string> formFieldNames, IEnumerable<string> headerNames, IEnumerable<string> cookieNames, IEnumerable<string> serverVariableNames)
+    public RaygunRequestMessageOptions(IEnumerable<string> sensitiveFieldNames, IEnumerable<string> queryParameterNames, IEnumerable<string> formFieldNames, IEnumerable<string> headerNames, IEnumerable<string> cookieNames, IEnumerable<string> serverVariableNames)
     {
       Add(_ignoredSensitiveFieldNames, sensitiveFieldNames);
+      Add(_ignoredQueryParameterNames, queryParameterNames);
       Add(_ignoredFormFieldNames, formFieldNames);
       Add(_ignoreHeaderNames, headerNames);
       Add(_ignoreCookieNames, cookieNames);
@@ -47,9 +49,16 @@ namespace Mindscape.Raygun4Net
       return IsIgnored(name, _ignoredSensitiveFieldNames);
     }
 
-    public bool HasSensitiveFieldsToIgnore()
+    // Query Parameters
+
+    public void AddQueryParameterNames(params string[] names)
     {
-      return _ignoredSensitiveFieldNames.Count > 0;
+      Add(_ignoredQueryParameterNames, names);
+    }
+
+    public bool IsQueryParameterIgnored(string name)
+    {
+      return IsIgnored(name, _ignoredQueryParameterNames);
     }
 
     // Form fields

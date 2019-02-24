@@ -72,6 +72,13 @@ namespace Mindscape.Raygun4Net
       set { this["ignoreSensitiveFieldNames"] = value; }
     }
 
+    [ConfigurationProperty("ignoreQueryParameterNames", IsRequired = false, DefaultValue = "")]
+    public string IgnoreQueryParameterNames
+    {
+      get { return (string)this["ignoreQueryParameterNames"]; }
+      set { this["ignoreQueryParameterNames"] = value; }
+    }
+
     [ConfigurationProperty("ignoreFormFieldNames", IsRequired = false, DefaultValue = "")]
     public string IgnoreFormFieldNames
     {

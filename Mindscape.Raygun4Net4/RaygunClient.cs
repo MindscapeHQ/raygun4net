@@ -45,6 +45,11 @@ namespace Mindscape.Raygun4Net
         var ignoredNames = RaygunSettings.Settings.IgnoreSensitiveFieldNames.Split(',');
         IgnoreSensitiveFieldNames(ignoredNames);
       }
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreQueryParameterNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreQueryParameterNames.Split(',');
+        IgnoreQueryParameterNames(ignoredNames);
+      }
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormFieldNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreFormFieldNames.Split(',');
@@ -139,6 +144,15 @@ namespace Mindscape.Raygun4Net
     public void IgnoreSensitiveFieldNames(params string[] names)
     {
       _requestMessageOptions.AddSensitiveFieldNames(names);
+    }
+
+    /// <summary>
+    /// Ignores the query parameter names.
+    /// </summary>
+    /// <param name="names">Names.</param>
+    public void IgnoreQueryParameterNames(params string[] names)
+    {
+      _requestMessageOptions.AddQueryParameterNames(names);
     }
 
     /// <summary>
