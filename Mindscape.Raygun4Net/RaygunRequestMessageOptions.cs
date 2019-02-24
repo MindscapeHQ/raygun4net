@@ -47,6 +47,11 @@ namespace Mindscape.Raygun4Net
       return IsIgnored(name, _ignoredSensitiveFieldNames);
     }
 
+    public bool HasSensitiveFieldsToIgnore()
+    {
+      return _ignoredSensitiveFieldNames.Count > 0;
+    }
+
     // Form fields
 
     public void AddFormFieldNames(params string[] names)
