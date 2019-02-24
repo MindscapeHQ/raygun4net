@@ -134,6 +134,10 @@ namespace Mindscape.Raygun4Net.Builders
         }
       }
 
+      // Sensitive values
+
+      StripSensitiveValues(message, options);
+
       return message;
     }
 
@@ -277,6 +281,82 @@ namespace Mindscape.Raygun4Net.Builders
       }
 
       return dictionary;
+    }
+
+    private static void StripSensitiveValues(RaygunRequestMessage message, RaygunRequestMessageOptions options)
+    {
+      if (!options.HasSensitiveFieldsToIgnore())
+      {
+        return; // Quick escape
+      }
+
+      try
+      {
+        message.QueryString = StripSensitiveFields(message.QueryString, options.IsSensitveFieldIgnored);
+      }
+      catch (Exception e)
+      {
+        System.Diagnostics.Trace.WriteLine("Failed to strip sensitive values from the query string due to: {0}", e.Message);
+      }
+
+      try
+      {
+        message.Headers = StripSensitiveFields(message.Headers, options.IsSensitveFieldIgnored);
+      }
+      catch (Exception e)
+      {
+        System.Diagnostics.Trace.WriteLine("Failed to strip sensitive values from the headers due to: {0}", e.Message);
+      }
+
+      try
+      {
+        message.Form = StripSensitiveFields(message.Form, options.IsSensitveFieldIgnored);
+      }
+      catch (Exception e)
+      {
+        System.Diagnostics.Trace.WriteLine("Failed to strip sensitive values from the form due to: {0}", e.Message);
+      }
+
+      try
+      {
+        message.Data = StripSensitiveFields(message.Data, options.IsSensitveFieldIgnored);
+      }
+      catch (Exception e)
+      {
+        System.Diagnostics.Trace.WriteLine("Failed to strip sensitive values from the data due to: {0}", e.Message);
+      }
+
+      try
+      {
+        message.RawData = StripSensitiveRawData(message.RawData, options.IsSensitveFieldIgnored);
+      }
+      catch (Exception e)
+      {
+        System.Diagnostics.Trace.WriteLine("Failed to strip sensitive values from the raw data due to: {0}", e.Message);
+      }
+    }
+
+    private static IDictionary StripSensitiveFields(IDictionary data, Func<string, bool> ignore)
+    {
+      var keys = data.Keys;
+
+      // Loop through all keys in the dictionary
+      foreach (var key in keys)
+      {
+        // Check if it should be removed
+        if (ignore(key as string))
+        {
+          // Remove it
+          data.Remove(key);
+        }
+      }
+
+      return data;
+    }
+
+    private static string StripSensitiveRawData(string rawData, Func<string, bool> ignore)
+    {
+      return rawData;
     }
   }
 }
