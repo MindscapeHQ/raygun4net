@@ -13,6 +13,7 @@ using System.IO;
 using System.IO.IsolatedStorage;
 using System.Text;
 using Mindscape.Raygun4Net.Breadcrumbs;
+using Mindscape.Raygun4Net.Filters;
 
 namespace Mindscape.Raygun4Net
 {
@@ -210,6 +211,15 @@ namespace Mindscape.Raygun4Net
       {
         _requestMessageOptions.IsRawDataIgnored = value;
       }
+    }
+
+    /// <summary>
+    /// Adds a request data filter.
+    /// </summary>
+    /// <param name="filter">Filter.</param>
+    public void AddRequestDataFilter(IRaygunRequestDataFilter filter)
+    {
+      _requestMessageOptions.AddRequestDataFilter(filter);
     }
 
     protected override bool CanSend(Exception exception)

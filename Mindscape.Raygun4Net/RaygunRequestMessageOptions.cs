@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using Mindscape.Raygun4Net.Filters;
 
 namespace Mindscape.Raygun4Net
 {
@@ -13,7 +12,9 @@ namespace Mindscape.Raygun4Net
     private readonly List<string> _ignoreCookieNames = new List<string>();
     private readonly List<string> _ignoreServerVariableNames = new List<string>();
     private bool _isRawDataIgnored;
-    
+
+    private List<IRaygunRequestDataFilter> _requestDataFilters = new List<IRaygunRequestDataFilter>();
+
     public RaygunRequestMessageOptions() { }
 
     public RaygunRequestMessageOptions(IEnumerable<string> sensitiveFieldNames, IEnumerable<string> queryParameterNames, IEnumerable<string> formFieldNames, IEnumerable<string> headerNames, IEnumerable<string> cookieNames, IEnumerable<string> serverVariableNames)
@@ -107,6 +108,18 @@ namespace Mindscape.Raygun4Net
     public bool IsServerVariableIgnored(string name)
     {
       return IsIgnored(name, _ignoreServerVariableNames);
+    }
+
+    // Filters
+
+    public void AddRequestDataFilter(IRaygunRequestDataFilter filter)
+    {
+      _requestDataFilters.Add(filter);
+    }
+
+    public List<IRaygunRequestDataFilter> GetRequestDataFilters()
+    {
+      return _requestDataFilters;
     }
 
     // Core methods:
