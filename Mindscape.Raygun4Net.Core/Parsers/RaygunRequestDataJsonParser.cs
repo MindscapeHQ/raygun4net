@@ -10,7 +10,7 @@ namespace Mindscape.Raygun4Net.Parsers
     {
       try
       {
-        return SimpleJson.DeserializeObject<Dictionary<string, string>>(data) as IDictionary;
+        return SimpleJson.DeserializeObject<Dictionary<string, object>>(data) as IDictionary;
       }
       catch
       {
