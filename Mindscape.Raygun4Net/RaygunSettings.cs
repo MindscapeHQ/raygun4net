@@ -114,6 +114,13 @@ namespace Mindscape.Raygun4Net
       set { this["isRawDataIgnored"] = value; }
     }
 
+    [ConfigurationProperty("isSensitiveRawDataIgnoredOnParseFailure", IsRequired = false, DefaultValue = false)]
+    public bool IsSensitiveRawDataIgnoredOnParseFailure
+    {
+      get { return (bool)this["isSensitiveRawDataIgnoredOnParseFailure"]; }
+      set { this["isSensitiveRawDataIgnoredOnParseFailure"] = value; }
+    }
+
     [ConfigurationProperty("isResponseContentIgnored", IsRequired = false, DefaultValue = true)]
     public bool IsResponseContentIgnored
     {

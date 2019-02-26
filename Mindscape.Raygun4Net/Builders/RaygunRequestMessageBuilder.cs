@@ -9,13 +9,15 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using Mindscape.Raygun4Net.Messages;
-using Mindscape.Raygun4Net.Filters;
+using Mindscape.Raygun4Net.Parsers;
 
 namespace Mindscape.Raygun4Net.Builders
 {
   public class RaygunRequestMessageBuilder
   {
     private static readonly Regex IpAddressRegex = new Regex(@"\A(?:\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b)(:[1-9][0-9]{0,4})?\z", RegexOptions.Compiled);
+
+    private const int MAX_RAW_DATA_LENGTH = 4096; // bytes
 
     public static RaygunRequestMessage Build(HttpRequest request, RaygunRequestMessageOptions options)
     {
@@ -120,7 +122,7 @@ namespace Mindscape.Raygun4Net.Builders
 
       try
       {
-        queryString = ToDictionary(request.QueryString, options.IsQueryParameterIgnored, options.IsSensitveFieldIgnored);
+        queryString = ToDictionary(request.QueryString, options.IsQueryParameterIgnored, options.IsSensitiveFieldIgnored);
       }
       catch (Exception e)
       {
@@ -140,7 +142,7 @@ namespace Mindscape.Raygun4Net.Builders
     {
       return Enumerable.Range(0, request.Cookies.Count)
             .Select(i => request.Cookies[i])
-            .Where(c => !options.IsCookieIgnored(c.Name) && !options.IsSensitveFieldIgnored(c.Name))
+            .Where(c => !options.IsCookieIgnored(c.Name) && !options.IsSensitiveFieldIgnored(c.Name))
             .Select(c => new Mindscape.Raygun4Net.Messages.RaygunRequestMessage.Cookie(c.Name, c.Value))
             .ToList();
     }
@@ -156,7 +158,7 @@ namespace Mindscape.Raygun4Net.Builders
       IDictionary serverVariables = new Dictionary<string, string>();
       try
       {
-        serverVariables = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored, options.IsSensitveFieldIgnored);
+        serverVariables = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored, options.IsSensitiveFieldIgnored);
         serverVariables.Remove("ALL_HTTP");
         serverVariables.Remove("HTTP_COOKIE");
         serverVariables.Remove("ALL_RAW");
@@ -181,7 +183,7 @@ namespace Mindscape.Raygun4Net.Builders
 
       try
       {
-        form = ToDictionary(request.Form, options.IsFormFieldIgnored, options.IsSensitveFieldIgnored, true);
+        form = ToDictionary(request.Form, options.IsFormFieldIgnored, options.IsSensitiveFieldIgnored, true);
       }
       catch (Exception e)
       {
@@ -203,7 +205,7 @@ namespace Mindscape.Raygun4Net.Builders
 
       try
       {
-        headers = ToDictionary(request.Headers, options.IsHeaderIgnored, options.IsSensitveFieldIgnored);
+        headers = ToDictionary(request.Headers, options.IsHeaderIgnored, options.IsSensitiveFieldIgnored);
         headers.Remove("Cookie");
       }
       catch (Exception e)
@@ -259,26 +261,50 @@ namespace Mindscape.Raygun4Net.Builders
           rawData = StripIgnoredFormData(rawData, ignoredMultiPartFormData);
         }
 
-        // Filter out any sensitive values.
-        foreach (var filter in options.GetRequestDataFilters())
+        // Begin filtering out sensitive values
+
+        // Find the parser we want to use
+        var parser = DetermineParser(options);
+
+        // Parse the raw data into a dictionary
+        var dict = parser.ToDictionary(rawData);
+
+        // Invalidate the raw data if we fail to parse and we know there is sensitive values present
+        if (dict == null)
         {
-          rawData = filter.Apply(rawData);
+          if (options.IsSensitiveRawDataIgnoredOnParseFailure && DataContains(rawData, options.SensitiveFieldNames()))
+          {
+            return null;
+          }
         }
 
+        // Filter the dictionary of sensitive values
+        dict = Filter(dict, options.IsSensitiveFieldIgnored);
+
+        // Convert the dictionary back into a string
+        rawData = Serialize(dict);
+
         // Ensure the raw data string is not too large (over 4096 bytes).
-        if (rawData.Length <= 4096)
+        var length = rawData?.Length ?? 0;
+
+        if (length <= MAX_RAW_DATA_LENGTH)
         {
           return rawData;
         }
         else
         {
-          return rawData.Substring(0, 4096);
+          return rawData.Substring(0, MAX_RAW_DATA_LENGTH);
         }
       }
       catch (Exception e)
       {
         return "Failed to retrieve raw data: " + e.Message;
       }
+    }
+
+    private static IRaygunRequestDataParser DetermineParser(RaygunRequestMessageOptions options)
+    {
+      return new RaygunRequestDataJsonParser();
     }
 
     protected static Dictionary<string, string> GetIgnoredFormValues(NameValueCollection form, Func<string, bool> ignore)
@@ -302,6 +328,42 @@ namespace Mindscape.Raygun4Net.Builders
         rawData = rawData.Replace(toRemove, "");
       }
       return rawData;
+    }
+
+    private static bool DataContains(string data, List<string> values)
+    {
+      bool exists = false;
+
+      foreach (var value in values)
+      {
+        if (data.Contains(value))
+        {
+          exists = true;
+          break;
+        }
+      }
+
+      return exists;
+    }
+
+    private static IDictionary Filter(IDictionary data, Func<string, bool> ignore)
+    {
+      var keys = data.Keys;
+
+      foreach (var key in keys)
+      {
+        if (ignore(key as string))
+        {
+          data.Remove(key);
+        }
+      }
+
+      return data;
+    }
+
+    private static string Serialize(IDictionary data)
+    {
+      return SimpleJson.SerializeObject(data);
     }
 
     private static IDictionary ToDictionary(NameValueCollection nameValueCollection, Func<string, bool> ignore, Func<string, bool> isSensitive, bool truncateValues = false)

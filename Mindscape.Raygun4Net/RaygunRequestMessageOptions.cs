@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Mindscape.Raygun4Net.Filters;
+using Mindscape.Raygun4Net.Parsers;
 
 namespace Mindscape.Raygun4Net
 {
@@ -12,8 +12,9 @@ namespace Mindscape.Raygun4Net
     private readonly List<string> _ignoreCookieNames = new List<string>();
     private readonly List<string> _ignoreServerVariableNames = new List<string>();
     private bool _isRawDataIgnored;
+    private bool _isSensitiveRawDataIgnoredOnParseFailure;
 
-    private List<IRaygunRequestDataFilter> _requestDataFilters = new List<IRaygunRequestDataFilter>();
+    private List<IRaygunRequestDataParser> _requestDataParsers = new List<IRaygunRequestDataParser>();
 
     public RaygunRequestMessageOptions() { }
 
@@ -38,6 +39,15 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    public bool IsSensitiveRawDataIgnoredOnParseFailure
+    {
+      get { return _isSensitiveRawDataIgnoredOnParseFailure; }
+      set
+      {
+        _isSensitiveRawDataIgnoredOnParseFailure = value;
+      }
+    }
+
     // Sensitive Fields
 
     public void AddSensitiveFieldNames(params string[] names)
@@ -45,9 +55,14 @@ namespace Mindscape.Raygun4Net
       Add(_ignoredSensitiveFieldNames, names);
     }
 
-    public bool IsSensitveFieldIgnored(string name)
+    public bool IsSensitiveFieldIgnored(string name)
     {
       return IsIgnored(name, _ignoredSensitiveFieldNames);
+    }
+
+    public List<string> SensitiveFieldNames()
+    {
+      return _ignoredSensitiveFieldNames;
     }
 
     // Query Parameters
@@ -110,16 +125,19 @@ namespace Mindscape.Raygun4Net
       return IsIgnored(name, _ignoreServerVariableNames);
     }
 
-    // Filters
+    // Parsers
 
-    public void AddRequestDataFilter(IRaygunRequestDataFilter filter)
+    public void AddRequestDataParser(IRaygunRequestDataParser parser)
     {
-      _requestDataFilters.Add(filter);
+      if (parser != null)
+      {
+        _requestDataParsers.Add(parser);
+      }
     }
 
-    public List<IRaygunRequestDataFilter> GetRequestDataFilters()
+    public List<IRaygunRequestDataParser> RequestDataParsers()
     {
-      return _requestDataFilters;
+      return _requestDataParsers;
     }
 
     // Core methods:

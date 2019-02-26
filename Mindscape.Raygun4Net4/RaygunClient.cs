@@ -13,7 +13,7 @@ using System.IO;
 using System.IO.IsolatedStorage;
 using System.Text;
 using Mindscape.Raygun4Net.Breadcrumbs;
-using Mindscape.Raygun4Net.Filters;
+using Mindscape.Raygun4Net.Parsers;
 
 namespace Mindscape.Raygun4Net
 {
@@ -72,6 +72,7 @@ namespace Mindscape.Raygun4Net
         IgnoreServerVariableNames(ignoredNames);
       }
       IsRawDataIgnored = RaygunSettings.Settings.IsRawDataIgnored;
+      IsSensitiveRawDataIgnoredOnParseFailure = RaygunSettings.Settings.IsSensitiveRawDataIgnoredOnParseFailure;
 
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
@@ -214,12 +215,25 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Adds a request data filter.
+    /// Specifies whether or not RawData from web requests is ignored when sensitive values are seen and unable to be removed due to failing to parse the contents.
+    /// The default is false which means RawData will be sent to Raygun.io.
     /// </summary>
-    /// <param name="filter">Filter.</param>
-    public void AddRequestDataFilter(IRaygunRequestDataFilter filter)
+    public bool IsSensitiveRawDataIgnoredOnParseFailure
     {
-      _requestMessageOptions.AddRequestDataFilter(filter);
+      get { return _requestMessageOptions.IsSensitiveRawDataIgnoredOnParseFailure; }
+      set
+      {
+        _requestMessageOptions.IsSensitiveRawDataIgnoredOnParseFailure = value;
+      }
+    }
+
+    /// <summary>
+    /// Adds a request data parser.
+    /// </summary>
+    /// <param name="parser">Parser.</param>
+    public void AddRequestDataParser(IRaygunRequestDataParser parser)
+    {
+      _requestMessageOptions.AddRequestDataParser(parser);
     }
 
     protected override bool CanSend(Exception exception)
