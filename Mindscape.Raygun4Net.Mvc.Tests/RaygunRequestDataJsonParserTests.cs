@@ -36,7 +36,6 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       Assert.AreEqual(dict["ProjectId"], null);
       Assert.AreEqual(dict["Enabled"], false);
     }
-
   }
 }
 
