@@ -222,7 +222,7 @@ namespace Mindscape.Raygun4Net.Builders
     /// <returns>The raw data.</returns>
     /// <param name="request">Request.</param>
     /// <param name="options">Options.</param>
-    private static string GetRawData(HttpRequest request, RaygunRequestMessageOptions options)
+    public static string GetRawData(HttpRequest request, RaygunRequestMessageOptions options)
     {
       if (options.IsRawDataIgnored)
       {
@@ -261,28 +261,8 @@ namespace Mindscape.Raygun4Net.Builders
           rawData = StripIgnoredFormData(rawData, ignoredMultiPartFormData);
         }
 
-        // Begin filtering out sensitive values
-
-        // Find the parser we want to use
-        var parser = DetermineParser(options);
-
-        // Parse the raw data into a dictionary
-        var dict = parser.ToDictionary(rawData);
-
-        // Invalidate the raw data if we fail to parse and we know there is sensitive values present
-        if (dict == null)
-        {
-          if (options.IsSensitiveRawDataIgnoredOnParseFailure && DataContains(rawData, options.SensitiveFieldNames()))
-          {
-            return null;
-          }
-        }
-
-        // Filter the dictionary of sensitive values
-        dict = Filter(dict, options.IsSensitiveFieldIgnored);
-
-        // Convert the dictionary back into a string
-        rawData = Serialize(dict);
+        // Filter out sensitive values
+        rawData = FilterRawData(rawData, options);
 
         // Ensure the raw data string is not too large (over 4096 bytes).
         var length = rawData?.Length ?? 0;
@@ -300,11 +280,6 @@ namespace Mindscape.Raygun4Net.Builders
       {
         return "Failed to retrieve raw data: " + e.Message;
       }
-    }
-
-    private static IRaygunRequestDataParser DetermineParser(RaygunRequestMessageOptions options)
-    {
-      return new RaygunRequestDataJsonParser();
     }
 
     protected static Dictionary<string, string> GetIgnoredFormValues(NameValueCollection form, Func<string, bool> ignore)
@@ -330,7 +305,36 @@ namespace Mindscape.Raygun4Net.Builders
       return rawData;
     }
 
-    private static bool DataContains(string data, List<string> values)
+    public static string FilterRawData(string rawData, RaygunRequestMessageOptions options)
+    {
+      // Find the parser we want to use
+      var parser = DetermineParser(options);
+
+      // Parse the raw data into a dictionary
+      var dict = parser.ToDictionary(rawData);
+
+      // Invalidate the raw data if we fail to parse and we know there is sensitive values present
+      if (dict == null)
+      {
+        if (options.IsSensitiveRawDataIgnoredOnParseFailure && DataContains(rawData, options.SensitiveFieldNames()))
+        {
+          return null;
+        }
+      }
+
+      // Filter the dictionary of sensitive values
+      dict = FilterValues(dict, options.IsSensitiveFieldIgnored);
+
+      // Convert the dictionary back into a string
+      return Serialize(dict);
+    }
+
+    private static IRaygunRequestDataParser DetermineParser(RaygunRequestMessageOptions options)
+    {
+      return new RaygunRequestDataJsonParser();
+    }
+
+    public static bool DataContains(string data, List<string> values)
     {
       bool exists = false;
 
@@ -346,13 +350,15 @@ namespace Mindscape.Raygun4Net.Builders
       return exists;
     }
 
-    private static IDictionary Filter(IDictionary data, Func<string, bool> ignore)
+    public static IDictionary FilterValues(IDictionary data, Func<string, bool> ignore)
     {
-      var keys = data.Keys;
+      // Make a copy of the strings.
+      var keys = new string[data.Keys.Count];
+      data.Keys.CopyTo(keys, 0);
 
       foreach (var key in keys)
       {
-        if (ignore(key as string))
+        if (ignore(key))
         {
           data.Remove(key);
         }

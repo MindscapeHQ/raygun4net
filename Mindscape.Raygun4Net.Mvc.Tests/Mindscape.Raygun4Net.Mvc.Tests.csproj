@@ -82,6 +82,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaygunClientTests.cs" />
     <Compile Include="RaygunHttpModuleTests.cs" />
+    <Compile Include="RaygunRequestMessageBuilderTests.cs" />
     <Compile Include="RaygunRequestDataJsonParserTests.cs" />
   </ItemGroup>
   <ItemGroup>
