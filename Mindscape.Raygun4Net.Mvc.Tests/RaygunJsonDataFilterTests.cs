@@ -23,6 +23,23 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       Assert.IsNotNull(data);
       Assert.AreEqual(data, "{\"Password\":\"[FILTERED]\"}");
     }
+
+    [Test]
+    public void CanParseWhenJsonHasLeadingWhiteSpace()
+    {
+      Assert.True(_filter.CanParse("   {\"Password\":\"ABC123\"}"));
+    }
+
+    [Test]
+    public void CanParseWhenJsonArrayHasLeadingWhiteSpace()
+    {
+      Assert.True(_filter.CanParse("   [{\"Password\":\"ABC123\"}]"));
+    }
+
+    [Test]
+    public void CanNotParseWhenJsonDoesNotStartWithSquareOrCurlyBrace()
+    {
+      Assert.False(_filter.CanParse("([{\"Password\":\"ABC123\"}]"));
+    }
   }
 }
-

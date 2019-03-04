@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace Mindscape.Raygun4Net.Filters
@@ -7,7 +8,21 @@ namespace Mindscape.Raygun4Net.Filters
   {
     public bool CanParse(string data)
     {
-      throw new NotImplementedException();
+      if (!string.IsNullOrEmpty(data))
+      {
+        int index = data.TakeWhile(c => char.IsWhiteSpace(c)).Count();
+
+        if (index < data.Length)
+        {
+          var firstChar = data.ElementAt(index);
+          if (firstChar.Equals('{') || firstChar.Equals('['))
+          {
+            return true;
+          }
+        }
+      }
+
+      return false;
     }
 
     public string Filter(string data, IList<string> sensitiveValues)
