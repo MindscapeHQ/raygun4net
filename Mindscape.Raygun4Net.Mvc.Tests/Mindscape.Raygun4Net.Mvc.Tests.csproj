@@ -83,7 +83,7 @@
     <Compile Include="RaygunClientTests.cs" />
     <Compile Include="RaygunHttpModuleTests.cs" />
     <Compile Include="RaygunRequestMessageBuilderTests.cs" />
-    <Compile Include="RaygunRequestDataJsonParserTests.cs" />
+    <Compile Include="RaygunJsonDataFilterTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

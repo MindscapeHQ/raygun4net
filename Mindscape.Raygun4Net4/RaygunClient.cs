@@ -13,7 +13,7 @@ using System.IO;
 using System.IO.IsolatedStorage;
 using System.Text;
 using Mindscape.Raygun4Net.Breadcrumbs;
-using Mindscape.Raygun4Net.Parsers;
+using Mindscape.Raygun4Net.Filters;
 
 namespace Mindscape.Raygun4Net
 {
@@ -46,33 +46,43 @@ namespace Mindscape.Raygun4Net
         var ignoredNames = RaygunSettings.Settings.IgnoreSensitiveFieldNames.Split(',');
         IgnoreSensitiveFieldNames(ignoredNames);
       }
+
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreQueryParameterNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreQueryParameterNames.Split(',');
         IgnoreQueryParameterNames(ignoredNames);
       }
+
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormFieldNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreFormFieldNames.Split(',');
         IgnoreFormFieldNames(ignoredNames);
       }
+
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreHeaderNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreHeaderNames.Split(',');
         IgnoreHeaderNames(ignoredNames);
       }
+
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreCookieNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreCookieNames.Split(',');
         IgnoreCookieNames(ignoredNames);
       }
+
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreServerVariableNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreServerVariableNames.Split(',');
         IgnoreServerVariableNames(ignoredNames);
       }
+
       IsRawDataIgnored = RaygunSettings.Settings.IsRawDataIgnored;
-      IsSensitiveRawDataIgnoredOnParseFailure = RaygunSettings.Settings.IsSensitiveRawDataIgnoredOnParseFailure;
+      IsRawDataIgnoredWhenFilteringFailed = RaygunSettings.Settings.IsRawDataIgnoredWhenFilteringFailed;
+
+      UseJsonRawDataFilter = RaygunSettings.Settings.UseJsonRawDataFilter;
+      UseXmlRawDataFilter = RaygunSettings.Settings.UseXmlRawDataFilter;
+      UseKeyPairRawDataFilter = RaygunSettings.Settings.UseKeyPairRawDataFilter;
 
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
@@ -208,32 +218,47 @@ namespace Mindscape.Raygun4Net
     public bool IsRawDataIgnored
     {
       get { return _requestMessageOptions.IsRawDataIgnored; }
-      set
-      {
-        _requestMessageOptions.IsRawDataIgnored = value;
-      }
+      set { _requestMessageOptions.IsRawDataIgnored = value; }
     }
 
     /// <summary>
     /// Specifies whether or not RawData from web requests is ignored when sensitive values are seen and unable to be removed due to failing to parse the contents.
-    /// The default is false which means RawData will be sent to Raygun.io.
+    /// The default is false which means RawData will not be ignored when filtering fails.
     /// </summary>
-    public bool IsSensitiveRawDataIgnoredOnParseFailure
+    public bool IsRawDataIgnoredWhenFilteringFailed
     {
-      get { return _requestMessageOptions.IsSensitiveRawDataIgnoredOnParseFailure; }
+      get { return _requestMessageOptions.IsRawDataIgnoredWhenFilteringFailed; }
       set
       {
-        _requestMessageOptions.IsSensitiveRawDataIgnoredOnParseFailure = value;
+        _requestMessageOptions.IsRawDataIgnoredWhenFilteringFailed = value;
       }
     }
 
-    /// <summary>
-    /// Adds a request data parser.
-    /// </summary>
-    /// <param name="parser">Parser.</param>
-    public void AddRequestDataParser(IRaygunRequestDataParser parser)
+    public bool UseJsonRawDataFilter
     {
-      _requestMessageOptions.AddRequestDataParser(parser);
+      get { return _requestMessageOptions.UseJsonRawDataFilter; }
+      set { _requestMessageOptions.UseJsonRawDataFilter = value; }
+    }
+
+    public bool UseXmlRawDataFilter
+    {
+      get { return _requestMessageOptions.UseXmlRawDataFilter; }
+      set { _requestMessageOptions.UseXmlRawDataFilter = value; }
+    }
+
+    public bool UseKeyPairRawDataFilter
+    {
+      get { return _requestMessageOptions.UseKeyPairRawDataFilter; }
+      set { _requestMessageOptions.UseKeyPairRawDataFilter = value; }
+    }
+
+    /// <summary>
+    /// Adds a raw data filter.
+    /// </summary>
+    /// <param name="filter">Filter.</param>
+    public void AddRawDataFilter(IRaygunDataFilter filter)
+    {
+      _requestMessageOptions.AddRawDataFilter(filter);
     }
 
     protected override bool CanSend(Exception exception)

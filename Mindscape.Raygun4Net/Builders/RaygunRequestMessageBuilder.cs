@@ -9,7 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using Mindscape.Raygun4Net.Messages;
-using Mindscape.Raygun4Net.Parsers;
+using Mindscape.Raygun4Net.Filters;
 
 namespace Mindscape.Raygun4Net.Builders
 {
@@ -261,8 +261,8 @@ namespace Mindscape.Raygun4Net.Builders
           rawData = StripIgnoredFormData(rawData, ignoredMultiPartFormData);
         }
 
-        // Filter out sensitive values
-        rawData = FilterRawData(rawData, options);
+        // Filter out sensitive values.
+        rawData = StripSensitiveValues(rawData, options);
 
         // Ensure the raw data string is not too large (over 4096 bytes).
         var length = rawData?.Length ?? 0;
@@ -305,33 +305,56 @@ namespace Mindscape.Raygun4Net.Builders
       return rawData;
     }
 
-    public static string FilterRawData(string rawData, RaygunRequestMessageOptions options)
+    public static string StripSensitiveValues(string rawData, RaygunRequestMessageOptions options)
     {
-      // Find the parser we want to use
-      var parser = DetermineParser(options);
+      // Find the parser we want to use.
+      var filters = GetRawDataFilters(options);
 
-      // Parse the raw data into a dictionary
-      var dict = parser.ToDictionary(rawData);
-
-      // Invalidate the raw data if we fail to parse and we know there is sensitive values present
-      if (dict == null)
+      foreach (var filter in filters)
       {
-        if (options.IsSensitiveRawDataIgnoredOnParseFailure && DataContains(rawData, options.SensitiveFieldNames()))
+        // Parse the raw data into a dictionary.
+        if (filter.CanParse(rawData))
         {
-          return null;
+          return filter.Filter(rawData, options.SensitiveFieldNames());
         }
       }
 
-      // Filter the dictionary of sensitive values
-      dict = FilterValues(dict, options.IsSensitiveFieldIgnored);
-
-      // Convert the dictionary back into a string
-      return Serialize(dict);
+      // We have failed to parse and filter the raw data, so check if the data contains sesnsitive values and should be dropped.
+      if (options.IsRawDataIgnoredWhenFilteringFailed && DataContains(rawData, options.SensitiveFieldNames()))
+      {
+        return null;
+      }
+      else
+      {
+        return rawData;
+      }
     }
 
-    private static IRaygunRequestDataParser DetermineParser(RaygunRequestMessageOptions options)
+    private static IList<IRaygunDataFilter> GetRawDataFilters(RaygunRequestMessageOptions options)
     {
-      return new RaygunRequestDataJsonParser();
+      var parsers = new List<IRaygunDataFilter>();
+
+      if (options.GetRawDataFilters() != null && options.GetRawDataFilters().Count > 0)
+      {
+        parsers.AddRange(options.GetRawDataFilters());
+      }
+
+      if (options.UseJsonRawDataFilter)
+      {
+        parsers.Add(new RaygunJsonDataFilter());
+      }
+
+      if (options.UseXmlRawDataFilter)
+      {
+        parsers.Add(new RaygunXmlDataFilter());
+      }
+
+      if (options.UseKeyPairRawDataFilter)
+      {
+        parsers.Add(new RaygunKeyPairDataFilter());
+      }
+
+      return parsers;
     }
 
     public static bool DataContains(string data, List<string> values)
@@ -348,28 +371,6 @@ namespace Mindscape.Raygun4Net.Builders
       }
 
       return exists;
-    }
-
-    public static IDictionary FilterValues(IDictionary data, Func<string, bool> ignore)
-    {
-      // Make a copy of the strings.
-      var keys = new string[data.Keys.Count];
-      data.Keys.CopyTo(keys, 0);
-
-      foreach (var key in keys)
-      {
-        if (ignore(key))
-        {
-          data.Remove(key);
-        }
-      }
-
-      return data;
-    }
-
-    private static string Serialize(IDictionary data)
-    {
-      return SimpleJson.SerializeObject(data);
     }
 
     private static IDictionary ToDictionary(NameValueCollection nameValueCollection, Func<string, bool> ignore, Func<string, bool> isSensitive, bool truncateValues = false)

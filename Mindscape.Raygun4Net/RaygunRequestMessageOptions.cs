@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Mindscape.Raygun4Net.Parsers;
+using Mindscape.Raygun4Net.Filters;
 
 namespace Mindscape.Raygun4Net
 {
@@ -12,9 +12,12 @@ namespace Mindscape.Raygun4Net
     private readonly List<string> _ignoreCookieNames = new List<string>();
     private readonly List<string> _ignoreServerVariableNames = new List<string>();
     private bool _isRawDataIgnored;
-    private bool _isSensitiveRawDataIgnoredOnParseFailure;
+    private bool _isRawDataIgnoredWhenFilteringFailed;
+    private bool _useJsonRawDataFilter;
+    private bool _useXmlRawDataFilter;
+    private bool _useKeyPairRawDataFilter;
 
-    private List<IRaygunRequestDataParser> _requestDataParsers = new List<IRaygunRequestDataParser>();
+    private List<IRaygunDataFilter> _rawDataFilters = new List<IRaygunDataFilter>();
 
     public RaygunRequestMessageOptions() { }
 
@@ -39,13 +42,53 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    public bool IsSensitiveRawDataIgnoredOnParseFailure
+    public bool IsRawDataIgnoredWhenFilteringFailed
     {
-      get { return _isSensitiveRawDataIgnoredOnParseFailure; }
+      get { return _isRawDataIgnoredWhenFilteringFailed; }
       set
       {
-        _isSensitiveRawDataIgnoredOnParseFailure = value;
+        _isRawDataIgnoredWhenFilteringFailed = value;
       }
+    }
+
+    public bool UseJsonRawDataFilter
+    {
+      get { return _useJsonRawDataFilter; }
+      set
+      {
+        _useJsonRawDataFilter = value;
+      }
+    }
+
+    public bool UseXmlRawDataFilter
+    {
+      get { return _useXmlRawDataFilter; }
+      set
+      {
+        _useXmlRawDataFilter = value;
+      }
+    }
+
+    public bool UseKeyPairRawDataFilter
+    {
+      get { return _useKeyPairRawDataFilter; }
+      set
+      {
+        _useKeyPairRawDataFilter = value;
+      }
+    }
+
+    public void AddRawDataFilter(IRaygunDataFilter filter)
+    {
+      if (filter != null)
+      {
+        _rawDataFilters.Add(filter);
+      }
+    }
+
+    public List<IRaygunDataFilter> GetRawDataFilters()
+    {
+      return _rawDataFilters;
     }
 
     // Sensitive Fields
@@ -124,22 +167,7 @@ namespace Mindscape.Raygun4Net
     {
       return IsIgnored(name, _ignoreServerVariableNames);
     }
-
-    // Parsers
-
-    public void AddRequestDataParser(IRaygunRequestDataParser parser)
-    {
-      if (parser != null)
-      {
-        _requestDataParsers.Add(parser);
-      }
-    }
-
-    public List<IRaygunRequestDataParser> RequestDataParsers()
-    {
-      return _requestDataParsers;
-    }
-
+       
     // Core methods:
 
     private void Add(List<string> list, IEnumerable<string> names)

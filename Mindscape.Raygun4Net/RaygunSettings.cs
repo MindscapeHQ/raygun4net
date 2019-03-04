@@ -114,11 +114,32 @@ namespace Mindscape.Raygun4Net
       set { this["isRawDataIgnored"] = value; }
     }
 
-    [ConfigurationProperty("isSensitiveRawDataIgnoredOnParseFailure", IsRequired = false, DefaultValue = false)]
-    public bool IsSensitiveRawDataIgnoredOnParseFailure
+    [ConfigurationProperty("useJsonRawDataFilter", IsRequired = false, DefaultValue = true)]
+    public bool UseJsonRawDataFilter
     {
-      get { return (bool)this["isSensitiveRawDataIgnoredOnParseFailure"]; }
-      set { this["isSensitiveRawDataIgnoredOnParseFailure"] = value; }
+      get { return (bool)this["useJsonRawDataFilter"]; }
+      set { this["useJsonRawDataFilter"] = value; }
+    }
+
+    [ConfigurationProperty("useXmlRawDataFilter", IsRequired = false, DefaultValue = false)]
+    public bool UseXmlRawDataFilter
+    {
+      get { return (bool)this["useXmlRawDataFilter"]; }
+      set { this["useXmlRawDataFilter"] = value; }
+    }
+
+    [ConfigurationProperty("useKeyPairRawDataFilter", IsRequired = false, DefaultValue = false)]
+    public bool UseKeyPairRawDataFilter
+    {
+      get { return (bool)this["useKeyPairRawDataFilter"]; }
+      set { this["useKeyPairRawDataFilter"] = value; }
+    }
+
+    [ConfigurationProperty("isRawDataIgnoredWhenFilteringFailed", IsRequired = false, DefaultValue = false)]
+    public bool IsRawDataIgnoredWhenFilteringFailed
+    {
+      get { return (bool)this["isRawDataIgnoredWhenFilteringFailed"]; }
+      set { this["isRawDataIgnoredWhenFilteringFailed"] = value; }
     }
 
     [ConfigurationProperty("isResponseContentIgnored", IsRequired = false, DefaultValue = true)]
