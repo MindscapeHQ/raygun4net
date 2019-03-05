@@ -13,7 +13,6 @@ namespace Mindscape.Raygun4Net
     private readonly List<string> _ignoreServerVariableNames = new List<string>();
     private bool _isRawDataIgnored;
     private bool _isRawDataIgnoredWhenFilteringFailed;
-    private bool _useJsonRawDataFilter;
     private bool _useXmlRawDataFilter;
     private bool _useKeyPairRawDataFilter;
 
@@ -48,15 +47,6 @@ namespace Mindscape.Raygun4Net
       set
       {
         _isRawDataIgnoredWhenFilteringFailed = value;
-      }
-    }
-
-    public bool UseJsonRawDataFilter
-    {
-      get { return _useJsonRawDataFilter; }
-      set
-      {
-        _useJsonRawDataFilter = value;
       }
     }
 

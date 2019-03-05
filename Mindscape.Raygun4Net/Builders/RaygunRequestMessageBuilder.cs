@@ -339,11 +339,6 @@ namespace Mindscape.Raygun4Net.Builders
         parsers.AddRange(options.GetRawDataFilters());
       }
 
-      if (options.UseJsonRawDataFilter)
-      {
-        parsers.Add(new RaygunJsonDataFilter());
-      }
-
       if (options.UseXmlRawDataFilter)
       {
         parsers.Add(new RaygunXmlDataFilter());

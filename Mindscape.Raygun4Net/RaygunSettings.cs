@@ -114,13 +114,6 @@ namespace Mindscape.Raygun4Net
       set { this["isRawDataIgnored"] = value; }
     }
 
-    [ConfigurationProperty("useJsonRawDataFilter", IsRequired = false, DefaultValue = true)]
-    public bool UseJsonRawDataFilter
-    {
-      get { return (bool)this["useJsonRawDataFilter"]; }
-      set { this["useJsonRawDataFilter"] = value; }
-    }
-
     [ConfigurationProperty("useXmlRawDataFilter", IsRequired = false, DefaultValue = false)]
     public bool UseXmlRawDataFilter
     {

@@ -80,7 +80,6 @@ namespace Mindscape.Raygun4Net
       IsRawDataIgnored = RaygunSettings.Settings.IsRawDataIgnored;
       IsRawDataIgnoredWhenFilteringFailed = RaygunSettings.Settings.IsRawDataIgnoredWhenFilteringFailed;
 
-      UseJsonRawDataFilter = RaygunSettings.Settings.UseJsonRawDataFilter;
       UseXmlRawDataFilter = RaygunSettings.Settings.UseXmlRawDataFilter;
       UseKeyPairRawDataFilter = RaygunSettings.Settings.UseKeyPairRawDataFilter;
 
@@ -232,12 +231,6 @@ namespace Mindscape.Raygun4Net
       {
         _requestMessageOptions.IsRawDataIgnoredWhenFilteringFailed = value;
       }
-    }
-
-    public bool UseJsonRawDataFilter
-    {
-      get { return _requestMessageOptions.UseJsonRawDataFilter; }
-      set { _requestMessageOptions.UseJsonRawDataFilter = value; }
     }
 
     public bool UseXmlRawDataFilter
