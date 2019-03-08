@@ -18,6 +18,8 @@ namespace Mindscape.Raygun4Net.Builders
     private static readonly Regex IpAddressRegex = new Regex(@"\A(?:\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b)(:[1-9][0-9]{0,4})?\z", RegexOptions.Compiled);
 
     private const int MAX_RAW_DATA_LENGTH = 4096; // bytes
+    private const int MAX_KEY_LENGTH = 256; // Characters
+    private const int MAX_VALUE_LENGTH = 256; // Characters
 
     public static RaygunRequestMessage Build(HttpRequest request, RaygunRequestMessageOptions options)
     {
@@ -248,6 +250,12 @@ namespace Mindscape.Raygun4Net.Builders
         request.InputStream.Seek(0, SeekOrigin.Begin);
         string rawData = new StreamReader(request.InputStream).ReadToEnd();
 
+        // Early escape if theres no data.
+        if (string.IsNullOrEmpty(rawData))
+        {
+          return null;
+        }
+
         Dictionary<string, string> ignoredMultiPartFormData = null;
         if (contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "multipart/form-data", CompareOptions.IgnoreCase) >= 0)
         {
@@ -307,6 +315,12 @@ namespace Mindscape.Raygun4Net.Builders
 
     public static string StripSensitiveValues(string rawData, RaygunRequestMessageOptions options)
     {
+      // Early escape if theres no data.
+      if (string.IsNullOrEmpty(rawData))
+      {
+        return null;
+      }
+
       // Find the parser we want to use.
       var filters = GetRawDataFilters(options);
 
@@ -315,7 +329,12 @@ namespace Mindscape.Raygun4Net.Builders
         // Parse the raw data into a dictionary.
         if (filter.CanParse(rawData))
         {
-          return filter.Filter(rawData, options.SensitiveFieldNames());
+          var filteredData = filter.Filter(rawData, options.SensitiveFieldNames());
+
+          if (!string.IsNullOrEmpty(filteredData))
+          {
+            return filteredData;
+          }
         }
       }
 
@@ -392,14 +411,14 @@ namespace Mindscape.Raygun4Net.Builders
 
           if (truncateValues)
           {
-            if (keyToSend.Length > 256)
+            if (keyToSend.Length > MAX_KEY_LENGTH)
             {
-              keyToSend = keyToSend.Substring(0, 256);
+              keyToSend = keyToSend.Substring(0, MAX_KEY_LENGTH);
             }
 
-            if (valueToSend != null && valueToSend.Length > 256)
+            if (valueToSend != null && valueToSend.Length > MAX_VALUE_LENGTH)
             {
-              valueToSend = valueToSend.Substring(0, 256);
+              valueToSend = valueToSend.Substring(0, MAX_VALUE_LENGTH);
             }
           }
 
