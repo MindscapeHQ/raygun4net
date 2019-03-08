@@ -10,6 +10,20 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
   public class RaygunXmlDataFilterTests : RaygunDataFilterTestsBaseFixture
   {
     [Test]
+    public void FilteringIsAppliedToElementsWithSensitiveKeysWithValuesIgnoringCase()
+    {
+      var filter = new RaygunXmlDataFilter();
+
+      var xml = LoadPayload("BasicWithValues.xml");
+
+      var filteredData = filter.Filter(xml, new List<string>() { "PaSsWoRd" });
+
+      Assert.NotNull(filteredData);
+      Assert.NotNull(XDocument.Parse(filteredData));// Check if it can still be parsed.
+      Assert.AreEqual(filteredData, "<user>\n  <name>Ronald</name>\n  <password>[FILTERED]</password>\n</user>");
+    }
+
+    [Test]
     public void FilteringIsAppliedToElementsWithSensitiveKeysWithValues()
     {
       var filter = new RaygunXmlDataFilter();

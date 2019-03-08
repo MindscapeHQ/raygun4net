@@ -39,9 +39,8 @@ namespace Mindscape.Raygun4Net.Filters
 
         return doc.ToString();
       }
-      catch(Exception e)
+      catch
       {
-        Console.Write(e.Message);
         return null;
       }
     }
@@ -64,7 +63,7 @@ namespace Mindscape.Raygun4Net.Filters
     private void FilterElement(XElement element, IList<string> sensitiveFields)
     {
       // Check if a value is set first and then if this element should be filtered.
-      if (!string.IsNullOrEmpty(element.Value) && sensitiveFields.Contains(element.Name.LocalName))
+      if (!string.IsNullOrEmpty(element.Value) && sensitiveFields.Any(f => f.Equals(element.Name.LocalName, StringComparison.OrdinalIgnoreCase)))
       {
         element.Value = FILTERED_VALUE;
       }
@@ -74,7 +73,7 @@ namespace Mindscape.Raygun4Net.Filters
         foreach (var attribute in element.Attributes())
         {
           // Check if a value is set first and then if this attribute should be filtered.
-          if (!string.IsNullOrEmpty(attribute.Value) && sensitiveFields.Contains(attribute.Name.LocalName))
+          if (!string.IsNullOrEmpty(attribute.Value) && sensitiveFields.Any(f => f.Equals(attribute.Name.LocalName, StringComparison.OrdinalIgnoreCase)))
           {
             attribute.Value = FILTERED_VALUE;
           }
