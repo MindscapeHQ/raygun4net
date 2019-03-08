@@ -227,18 +227,23 @@ namespace Mindscape.Raygun4Net
     public bool IsRawDataIgnoredWhenFilteringFailed
     {
       get { return _requestMessageOptions.IsRawDataIgnoredWhenFilteringFailed; }
-      set
-      {
-        _requestMessageOptions.IsRawDataIgnoredWhenFilteringFailed = value;
-      }
+      set { _requestMessageOptions.IsRawDataIgnoredWhenFilteringFailed = value; }
     }
 
+    /// <summary>
+    /// Specifies whether or not RawData from web requests is filtered of sensitive values using an XML parser.
+    /// </summary>
+    /// <value><c>true</c> if use xml raw data filter; otherwise, <c>false</c>.</value>
     public bool UseXmlRawDataFilter
     {
       get { return _requestMessageOptions.UseXmlRawDataFilter; }
       set { _requestMessageOptions.UseXmlRawDataFilter = value; }
     }
 
+    /// <summary>
+    /// Specifies whether or not RawData from web requests is filtered of sensitive values using an KeyPair parser.
+    /// </summary>
+    /// <value><c>true</c> if use key pair raw data filter; otherwise, <c>false</c>.</value>
     public bool UseKeyPairRawDataFilter
     {
       get { return _requestMessageOptions.UseKeyPairRawDataFilter; }
