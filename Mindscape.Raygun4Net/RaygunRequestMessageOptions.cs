@@ -20,7 +20,12 @@ namespace Mindscape.Raygun4Net
 
     public RaygunRequestMessageOptions() { }
 
-    public RaygunRequestMessageOptions(IEnumerable<string> sensitiveFieldNames, IEnumerable<string> queryParameterNames, IEnumerable<string> formFieldNames, IEnumerable<string> headerNames, IEnumerable<string> cookieNames, IEnumerable<string> serverVariableNames)
+    public RaygunRequestMessageOptions(IEnumerable<string> sensitiveFieldNames, 
+                                       IEnumerable<string> queryParameterNames, 
+                                       IEnumerable<string> formFieldNames, 
+                                       IEnumerable<string> headerNames, 
+                                       IEnumerable<string> cookieNames, 
+                                       IEnumerable<string> serverVariableNames)
     {
       Add(_ignoredSensitiveFieldNames, sensitiveFieldNames);
       Add(_ignoredQueryParameterNames, queryParameterNames);
@@ -30,42 +35,30 @@ namespace Mindscape.Raygun4Net
       Add(_ignoreServerVariableNames, serverVariableNames);
     }
 
-    // RawData
+    // Raw Data
 
     public bool IsRawDataIgnored
     {
       get { return _isRawDataIgnored; }
-      set
-      {
-        _isRawDataIgnored = value;
-      }
+      set { _isRawDataIgnored = value; }
     }
 
     public bool IsRawDataIgnoredWhenFilteringFailed
     {
       get { return _isRawDataIgnoredWhenFilteringFailed; }
-      set
-      {
-        _isRawDataIgnoredWhenFilteringFailed = value;
-      }
+      set { _isRawDataIgnoredWhenFilteringFailed = value; }
     }
 
     public bool UseXmlRawDataFilter
     {
       get { return _useXmlRawDataFilter; }
-      set
-      {
-        _useXmlRawDataFilter = value;
-      }
+      set { _useXmlRawDataFilter = value; }
     }
 
     public bool UseKeyPairRawDataFilter
     {
       get { return _useKeyPairRawDataFilter; }
-      set
-      {
-        _useKeyPairRawDataFilter = value;
-      }
+      set { _useKeyPairRawDataFilter = value; }
     }
 
     public void AddRawDataFilter(IRaygunDataFilter filter)
