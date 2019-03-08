@@ -9,23 +9,6 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
   public class RaygunRequestMessageBuilderTests
   {
     [Test]
-    public void FilterJsonRawDataOfSensitiveValues()
-    {
-      var rawData = "{\"UserName\":\"Raygun\",\"Password\":\"123456\"}";
-
-      var options = new RaygunRequestMessageOptions();
-      options.AddSensitiveFieldNames("password");
-
-      Assert.AreEqual(rawData.Length, 41);
-
-      var filteredData = RaygunRequestMessageBuilder.StripSensitiveValues(rawData, options);
-
-      Assert.NotNull(filteredData);
-      Assert.AreEqual(filteredData.Length, 21);
-      Assert.AreEqual(filteredData, "{\"UserName\":\"Raygun\"}");
-    }
-
-    [Test]
     public void RawDataRemainsUnchangedWhenParsingFails()
     {
       var rawData = "I am unchanged!";

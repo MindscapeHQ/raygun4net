@@ -34,12 +34,14 @@ namespace Mindscape.Raygun4Net.Filters
       {
         var doc = XDocument.Parse(data);
 
+        // Begin the filtering.
         FilterElementsRecursive(doc.Descendants(), sensitiveFields);
 
         return doc.ToString();
       }
-      catch
+      catch(Exception e)
       {
+        Console.Write(e.Message);
         return null;
       }
     }
@@ -50,18 +52,33 @@ namespace Mindscape.Raygun4Net.Filters
       {
         if (element.HasElements)
         {
+          // Keep searching for the outer leaf.
           FilterElementsRecursive(element.Descendants(), sensitiveFields);
         }
 
+        // Remove sensitive values.
         FilterElement(element, sensitiveFields);
       }
     }
 
     private void FilterElement(XElement element, IList<string> sensitiveFields)
     {
-      if (sensitiveFields.Contains(element.Name.LocalName))
+      // Check if a value is set first and then if this element should be filtered.
+      if (!string.IsNullOrEmpty(element.Value) && sensitiveFields.Contains(element.Name.LocalName))
       {
         element.Value = FILTERED_VALUE;
+      }
+
+      if (element.HasAttributes)
+      {
+        foreach (var attribute in element.Attributes())
+        {
+          // Check if a value is set first and then if this attribute should be filtered.
+          if (!string.IsNullOrEmpty(attribute.Value) && sensitiveFields.Contains(attribute.Name.LocalName))
+          {
+            attribute.Value = FILTERED_VALUE;
+          }
+        }
       }
     }
   }

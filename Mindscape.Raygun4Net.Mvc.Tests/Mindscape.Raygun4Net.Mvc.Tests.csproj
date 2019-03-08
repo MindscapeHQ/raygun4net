@@ -107,7 +107,10 @@
     <Folder Include="Payloads\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Payloads\basic.xml" />
+    <EmbeddedResource Include="Payloads\BasicWithValues.xml" />
+    <EmbeddedResource Include="Payloads\AttributedWithValues.xml" />
+    <EmbeddedResource Include="Payloads\BasicWithoutValues.xml" />
+    <EmbeddedResource Include="Payloads\AttributedWithoutValues.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
