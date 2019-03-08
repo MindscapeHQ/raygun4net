@@ -10,6 +10,18 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
   public class RaygunXmlDataFilterTests : RaygunDataFilterTestsBaseFixture
   {
     [Test]
+    public void CanParseValidXml()
+    {
+      Assert.True(new RaygunXmlDataFilter().CanParse("<root></root>"));
+    }
+
+    [Test]
+    public void CanNotParseInvalidXml()
+    {
+      Assert.False(new RaygunXmlDataFilter().CanParse("{}"));
+    }
+
+    [Test]
     public void FilteringIsAppliedToElementsWithSensitiveKeysWithValuesIgnoringCase()
     {
       var filter = new RaygunXmlDataFilter();
