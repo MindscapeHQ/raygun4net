@@ -28,14 +28,14 @@ namespace Mindscape.Raygun4Net.Filters
       return false;
     }
 
-    public string Filter(string data, IList<string> sensitiveFields)
+    public string Filter(string data, IList<string> ignoredKeys)
     {
       try
       {
         var doc = XDocument.Parse(data);
 
         // Begin the filtering.
-        FilterElementsRecursive(doc.Descendants(), sensitiveFields);
+        FilterElementsRecursive(doc.Descendants(), ignoredKeys);
 
         return doc.ToString();
       }
@@ -45,25 +45,25 @@ namespace Mindscape.Raygun4Net.Filters
       }
     }
 
-    private void FilterElementsRecursive(IEnumerable<XElement> decendants, IList<string> sensitiveFields)
+    private void FilterElementsRecursive(IEnumerable<XElement> decendants, IList<string> ignoredKeys)
     {
       foreach (XElement element in decendants)
       {
         if (element.HasElements)
         {
           // Keep searching for the outer leaf.
-          FilterElementsRecursive(element.Descendants(), sensitiveFields);
+          FilterElementsRecursive(element.Descendants(), ignoredKeys);
         }
 
         // Remove sensitive values.
-        FilterElement(element, sensitiveFields);
+        FilterElement(element, ignoredKeys);
       }
     }
 
-    private void FilterElement(XElement element, IList<string> sensitiveFields)
+    private void FilterElement(XElement element, IList<string> ignoredKeys)
     {
       // Check if a value is set first and then if this element should be filtered.
-      if (!string.IsNullOrEmpty(element.Value) && sensitiveFields.Any(f => f.Equals(element.Name.LocalName, StringComparison.OrdinalIgnoreCase)))
+      if (!string.IsNullOrEmpty(element.Value) && ignoredKeys.Any(f => f.Equals(element.Name.LocalName, StringComparison.OrdinalIgnoreCase)))
       {
         element.Value = FILTERED_VALUE;
       }
@@ -73,7 +73,7 @@ namespace Mindscape.Raygun4Net.Filters
         foreach (var attribute in element.Attributes())
         {
           // Check if a value is set first and then if this attribute should be filtered.
-          if (!string.IsNullOrEmpty(attribute.Value) && sensitiveFields.Any(f => f.Equals(attribute.Name.LocalName, StringComparison.OrdinalIgnoreCase)))
+          if (!string.IsNullOrEmpty(attribute.Value) && ignoredKeys.Any(f => f.Equals(attribute.Name.LocalName, StringComparison.OrdinalIgnoreCase)))
           {
             attribute.Value = FILTERED_VALUE;
           }
