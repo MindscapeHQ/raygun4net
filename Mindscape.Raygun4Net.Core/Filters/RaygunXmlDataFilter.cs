@@ -63,7 +63,7 @@ namespace Mindscape.Raygun4Net.Filters
     private void FilterElement(XElement element, IList<string> ignoredKeys)
     {
       // Check if a value is set first and then if this element should be filtered.
-      if (!string.IsNullOrEmpty(element.Value) && ignoredKeys.Any(f => f.Equals(element.Name.LocalName, StringComparison.OrdinalIgnoreCase)))
+      if (!string.IsNullOrWhiteSpace(element.Value) && ignoredKeys.Any(f => f.Equals(element.Name.LocalName, StringComparison.OrdinalIgnoreCase)))
       {
         element.Value = FILTERED_VALUE;
       }
@@ -73,7 +73,7 @@ namespace Mindscape.Raygun4Net.Filters
         foreach (var attribute in element.Attributes())
         {
           // Check if a value is set first and then if this attribute should be filtered.
-          if (!string.IsNullOrEmpty(attribute.Value) && ignoredKeys.Any(f => f.Equals(attribute.Name.LocalName, StringComparison.OrdinalIgnoreCase)))
+          if (!string.IsNullOrWhiteSpace(attribute.Value) && ignoredKeys.Any(f => f.Equals(attribute.Name.LocalName, StringComparison.OrdinalIgnoreCase)))
           {
             attribute.Value = FILTERED_VALUE;
           }
