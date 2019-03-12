@@ -85,6 +85,7 @@
     <Compile Include="RaygunRequestMessageBuilderTests.cs" />
     <Compile Include="RaygunXmlDataFilterTests.cs" />
     <Compile Include="RaygunDataFilterTestsBaseFixture.cs" />
+    <Compile Include="RaygunKeyValuePairDataFilterTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

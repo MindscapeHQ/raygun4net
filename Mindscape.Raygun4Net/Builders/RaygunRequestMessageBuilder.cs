@@ -363,9 +363,9 @@ namespace Mindscape.Raygun4Net.Builders
         parsers.Add(new RaygunXmlDataFilter());
       }
 
-      if (options.UseKeyPairRawDataFilter)
+      if (options.UseKeyValuePairRawDataFilter)
       {
-        parsers.Add(new RaygunKeyPairDataFilter());
+        parsers.Add(new RaygunKeyValuePairDataFilter());
       }
 
       return parsers;

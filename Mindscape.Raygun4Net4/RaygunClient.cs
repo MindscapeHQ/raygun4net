@@ -81,7 +81,7 @@ namespace Mindscape.Raygun4Net
       IsRawDataIgnoredWhenFilteringFailed = RaygunSettings.Settings.IsRawDataIgnoredWhenFilteringFailed;
 
       UseXmlRawDataFilter = RaygunSettings.Settings.UseXmlRawDataFilter;
-      UseKeyPairRawDataFilter = RaygunSettings.Settings.UseKeyPairRawDataFilter;
+      UseKeyValuePairRawDataFilter = RaygunSettings.Settings.UseKeyValuePairRawDataFilter;
 
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
@@ -241,13 +241,13 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Specifies whether or not RawData from web requests is filtered of sensitive values using an KeyPair parser.
+    /// Specifies whether or not RawData from web requests is filtered of sensitive values using an KeyValuePair parser.
     /// </summary>
     /// <value><c>true</c> if use key pair raw data filter; otherwise, <c>false</c>.</value>
-    public bool UseKeyPairRawDataFilter
+    public bool UseKeyValuePairRawDataFilter
     {
-      get { return _requestMessageOptions.UseKeyPairRawDataFilter; }
-      set { _requestMessageOptions.UseKeyPairRawDataFilter = value; }
+      get { return _requestMessageOptions.UseKeyValuePairRawDataFilter; }
+      set { _requestMessageOptions.UseKeyValuePairRawDataFilter = value; }
     }
 
     /// <summary>

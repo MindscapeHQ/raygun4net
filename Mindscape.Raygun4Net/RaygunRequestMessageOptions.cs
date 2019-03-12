@@ -14,7 +14,7 @@ namespace Mindscape.Raygun4Net
     private bool _isRawDataIgnored;
     private bool _isRawDataIgnoredWhenFilteringFailed;
     private bool _useXmlRawDataFilter;
-    private bool _useKeyPairRawDataFilter;
+    private bool _useKeyValuePairRawDataFilter;
 
     private List<IRaygunDataFilter> _rawDataFilters = new List<IRaygunDataFilter>();
 
@@ -55,10 +55,10 @@ namespace Mindscape.Raygun4Net
       set { _useXmlRawDataFilter = value; }
     }
 
-    public bool UseKeyPairRawDataFilter
+    public bool UseKeyValuePairRawDataFilter
     {
-      get { return _useKeyPairRawDataFilter; }
-      set { _useKeyPairRawDataFilter = value; }
+      get { return _useKeyValuePairRawDataFilter; }
+      set { _useKeyValuePairRawDataFilter = value; }
     }
 
     public void AddRawDataFilter(IRaygunDataFilter filter)

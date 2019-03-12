@@ -121,11 +121,11 @@ namespace Mindscape.Raygun4Net
       set { this["useXmlRawDataFilter"] = value; }
     }
 
-    [ConfigurationProperty("useKeyPairRawDataFilter", IsRequired = false, DefaultValue = false)]
-    public bool UseKeyPairRawDataFilter
+    [ConfigurationProperty("useKeyValuePairRawDataFilter", IsRequired = false, DefaultValue = false)]
+    public bool UseKeyValuePairRawDataFilter
     {
-      get { return (bool)this["useKeyPairRawDataFilter"]; }
-      set { this["useKeyPairRawDataFilter"] = value; }
+      get { return (bool)this["useKeyValuePairRawDataFilter"]; }
+      set { this["useKeyValuePairRawDataFilter"] = value; }
     }
 
     [ConfigurationProperty("isRawDataIgnoredWhenFilteringFailed", IsRequired = false, DefaultValue = false)]
