@@ -272,10 +272,14 @@ namespace Mindscape.Raygun4Net.Builders
         // Filter out sensitive values.
         rawData = StripSensitiveValues(rawData, options);
 
-        // Ensure the raw data string is not too large (over 4096 bytes).
-        var length = rawData?.Length ?? 0;
+        // Early escape if theres no data.
+        if (string.IsNullOrEmpty(rawData))
+        {
+          return null;
+        }
 
-        if (length <= MAX_RAW_DATA_LENGTH)
+        // Ensure the raw data string is not too large (over 4096 bytes).
+        if (rawData.Length <= MAX_RAW_DATA_LENGTH)
         {
           return rawData;
         }
