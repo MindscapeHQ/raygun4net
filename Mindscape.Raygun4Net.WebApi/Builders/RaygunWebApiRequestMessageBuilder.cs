@@ -252,7 +252,7 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       return parsers;
     }
 
-    private static bool DataContains(string data, List<string> values)
+    public static bool DataContains(string data, List<string> values)
     {
       bool exists = false;
 

@@ -4,7 +4,7 @@ using Mindscape.Raygun4Net.Filters;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace Mindscape.Raygun4Net.Mvc.Tests
+namespace Mindscape.Raygun4Net.WebApi.Tests
 {
   [TestFixture]
   public class RaygunXmlDataFilterTests : RaygunDataFilterTestsBaseFixture
