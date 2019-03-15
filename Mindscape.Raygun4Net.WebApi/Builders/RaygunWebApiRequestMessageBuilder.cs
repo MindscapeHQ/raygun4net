@@ -180,7 +180,7 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
 
         object body;
         // Check to see if we stored the body?
-        if (request.Properties.TryGetValue(RaygunWebApiDelegatingHandler.REUEST_BODY_KEY, out body))
+        if (request.Properties.TryGetValue(RaygunWebApiDelegatingHandler.REQUEST_BODY_KEY, out body))
         {
           rawData = body.ToString();
         }
