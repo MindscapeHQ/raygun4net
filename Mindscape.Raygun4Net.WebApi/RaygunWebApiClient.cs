@@ -45,6 +45,12 @@ namespace Mindscape.Raygun4Net.WebApi
         IgnoreSensitiveFieldNames(ignoredNames);
       }
 
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreQueryParameterNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreQueryParameterNames.Split(',');
+        IgnoreQueryParameterNames(ignoredNames);
+      }
+
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormFieldNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreFormFieldNames.Split(',');
