@@ -102,9 +102,6 @@
     <Compile Include="..\Mindscape.Raygun4Net\RaygunCustomGroupingKeyEventArgs.cs">
       <Link>RaygunCustomGroupingKeyEventArgs.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\RaygunRequestMessageOptions.cs">
-      <Link>RaygunRequestMessageOptions.cs</Link>
-    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\RaygunSendingMessageEventArgs.cs">
       <Link>RaygunSendingMessageEventArgs.cs</Link>
     </Compile>
@@ -119,6 +116,7 @@
     <Compile Include="RaygunHttpModule.cs" />
     <Compile Include="RaygunMessageBuilder.cs" />
     <Compile Include="RaygunSettings.cs" />
+    <Compile Include="RaygunRequestMessageOptions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
