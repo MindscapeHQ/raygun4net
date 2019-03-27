@@ -90,6 +90,9 @@
     <Compile Include="RaygunSendingMessageEventArgs.cs" />
     <Compile Include="RaygunSettings.cs" />
     <Compile Include="SimpleJson.cs" />
+    <Compile Include="Filters\IRaygunDataFilter.cs" />
+    <Compile Include="Filters\RaygunKeyValuePairDataFilter.cs" />
+    <Compile Include="Filters\RaygunXmlDataFilter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

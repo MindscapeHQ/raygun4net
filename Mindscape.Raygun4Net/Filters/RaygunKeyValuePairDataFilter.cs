@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Linq;
 
 namespace Mindscape.Raygun4Net.Filters
 {
@@ -57,12 +56,23 @@ namespace Mindscape.Raygun4Net.Filters
 
     private bool ShouldIgnore(string[] kvp, IList<string> ignoredKeys)
     {
-      bool hasKey   = !string.IsNullOrWhiteSpace(kvp[0]);
-      bool hasValue = !string.IsNullOrWhiteSpace(kvp[1]);
+      bool hasKey   = !string.IsNullOrEmpty(kvp[0]);
+      bool hasValue = !string.IsNullOrEmpty(kvp[1]);
 
-      bool isIgnoredKey = ignoredKeys.Any(f => f.Equals(kvp[0], StringComparison.OrdinalIgnoreCase));
+      return hasKey && hasValue && Contains(ignoredKeys, kvp[0]);
+    }
 
-      return hasKey && hasValue && isIgnoredKey;
+    private bool Contains(IList<string> ignoredKeys, string key)
+    {
+      foreach (var ignoredKey in ignoredKeys)
+      {
+        if (ignoredKey.Equals(key, StringComparison.OrdinalIgnoreCase))
+        {
+          return true;
+        }
+      }
+
+      return false;
     }
   }
 }
