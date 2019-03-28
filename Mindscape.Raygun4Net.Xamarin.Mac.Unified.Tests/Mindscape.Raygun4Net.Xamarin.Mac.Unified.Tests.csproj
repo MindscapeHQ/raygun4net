@@ -46,9 +46,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.Mac" />
-    <Reference Include="Mindscape.Raygun4Net.Xamarin.Mac.Unified">
-      <HintPath>..\Mindscape.Raygun4Net.Xamarin.Mac.Unified\bin\Release\Mindscape.Raygun4Net.Xamarin.Mac.Unified.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
@@ -65,5 +62,11 @@
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mindscape.Raygun4Net.Xamarin.Mac.Unified\Mindscape.Raygun4Net.Xamarin.Mac.Unified.csproj">
+      <Project>{0D23E598-3C00-4337-A75D-DAB723724A58}</Project>
+      <Name>Mindscape.Raygun4Net.Xamarin.Mac.Unified</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>
