@@ -1,10 +1,10 @@
 properties {
-    $root =                        $psake.build_script_dir
+    $root =                          $psake.build_script_dir
     $solution_file =                 "$root/Mindscape.Raygun4Net.sln"
-    $solution_file_client_profile =  "$root/Mindscape.Raygun4Net.ClientProfile.sln"
-    $solution_file2 =                "$root/Mindscape.Raygun4Net2.sln"
+	$solution_file2 =                "$root/Mindscape.Raygun4Net2.sln"
     $solution_file4 =                "$root/Mindscape.Raygun4Net4.sln"
-    $solution_file4_client_profile = "$root/Mindscape.Raygun4Net4.ClientProfile.sln"
+	$solution_file4_client_profile = "$root/Mindscape.Raygun4Net4.ClientProfile.sln"
+    $solution_file_client_profile =  "$root/Mindscape.Raygun4Net.ClientProfile.sln"
     $solution_file_mvc =             "$root/Mindscape.Raygun4Net.Mvc.sln"
     $solution_file_webjob =          "$root/Mindscape.Raygun4Net.Azure.WebJob.sln"
     $solution_file_webapi =          "$root/Mindscape.Raygun4Net.WebApi.sln"
