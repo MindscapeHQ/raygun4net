@@ -22,7 +22,7 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
         }
       }
 
-      throw new ArgumentException($"Could not find resource {resourceName}");
+      throw new ArgumentException("Could not find resource " + resourceName);
     }
   }
 }
