@@ -91,7 +91,7 @@ namespace Mindscape.Raygun4Net.Tests
       request.Form.Add("TestFormField3", "FormFieldValue");
       Assert.AreEqual(3, request.Form.Count);
 
-      var options = new RaygunRequestMessageOptions(new string[] { "TestFormField2" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "TestFormField2" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
       var message = RaygunRequestMessageBuilder.Build(request, options);
 
       Assert.AreEqual(2, message.Form.Count);
@@ -109,7 +109,7 @@ namespace Mindscape.Raygun4Net.Tests
       request.Form.Add("TestFormField3", "FormFieldValue");
       Assert.AreEqual(3, request.Form.Count);
 
-      var options = new RaygunRequestMessageOptions(new string[] { "TestFormField1", "TestFormField3" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "TestFormField1", "TestFormField3" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
       var message = RaygunRequestMessageBuilder.Build(request, options);
 
       Assert.AreEqual(1, message.Form.Count);
@@ -126,7 +126,7 @@ namespace Mindscape.Raygun4Net.Tests
       request.Form.Add("TestFormField3", "FormFieldValue");
       Assert.AreEqual(3, request.Form.Count);
 
-      var options = new RaygunRequestMessageOptions(new string[] { "*" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "*" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
       var message = RaygunRequestMessageBuilder.Build(request, options);
 
       Assert.AreEqual(0, message.Form.Count);
@@ -142,7 +142,7 @@ namespace Mindscape.Raygun4Net.Tests
       request.Form.Add("FormFieldTest", "FormFieldValue");
       Assert.AreEqual(3, request.Form.Count);
 
-      var options = new RaygunRequestMessageOptions(new string[] { "formfield*" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "formfield*" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
       var message = RaygunRequestMessageBuilder.Build(request, options);
 
       Assert.AreEqual(2, message.Form.Count);
@@ -160,7 +160,7 @@ namespace Mindscape.Raygun4Net.Tests
       request.Form.Add("FormFieldTest", "FormFieldValue");
       Assert.AreEqual(3, request.Form.Count);
 
-      var options = new RaygunRequestMessageOptions(new string[] { "*formfield" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "*formfield" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
       var message = RaygunRequestMessageBuilder.Build(request, options);
 
       Assert.AreEqual(2, message.Form.Count);
@@ -178,7 +178,7 @@ namespace Mindscape.Raygun4Net.Tests
       request.Form.Add("FormFieldTest", "FormFieldValue");
       Assert.AreEqual(3, request.Form.Count);
 
-      var options = new RaygunRequestMessageOptions(new string[] { "*formfield*" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "*formfield*" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
       var message = RaygunRequestMessageBuilder.Build(request, options);
 
       Assert.AreEqual(0, message.Form.Count);
@@ -192,7 +192,7 @@ namespace Mindscape.Raygun4Net.Tests
       request.Form.Add("TESTFORMFIELD", "FormFieldValue");
       Assert.AreEqual(1, request.Form.Count);
 
-      var options = new RaygunRequestMessageOptions(new string[] { "testformfield" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "testformfield" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
       var message = RaygunRequestMessageBuilder.Build(request, options);
 
       Assert.AreEqual(0, message.Form.Count);
@@ -249,7 +249,7 @@ namespace Mindscape.Raygun4Net.Tests
       request.Cookies.Add(new HttpCookie("TestCookie3", "CookieValue"));
       Assert.AreEqual(3, request.Cookies.Count);
 
-      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "TestCookie2" }, Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "TestCookie2" }, Enumerable.Empty<string>());
       var message = RaygunRequestMessageBuilder.Build(request, options);
 
       Assert.AreEqual(2, message.Cookies.Count);
@@ -266,7 +266,7 @@ namespace Mindscape.Raygun4Net.Tests
       request.Cookies.Add(new HttpCookie("TestCookie2", "CookieValue"));
       Assert.AreEqual(3, request.Cookies.Count);
 
-      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "TestCookie1" }, Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "TestCookie1" }, Enumerable.Empty<string>());
       var message = RaygunRequestMessageBuilder.Build(request, options);
 
       Assert.AreEqual(1, message.Cookies.Count);
@@ -282,7 +282,7 @@ namespace Mindscape.Raygun4Net.Tests
       request.Cookies.Add(new HttpCookie("TestCookie3", "CookieValue"));
       Assert.AreEqual(3, request.Cookies.Count);
 
-      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "TestCookie1", "TestCookie3" }, Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "TestCookie1", "TestCookie3" }, Enumerable.Empty<string>());
       var message = RaygunRequestMessageBuilder.Build(request, options);
 
       Assert.AreEqual(1, message.Cookies.Count);
@@ -298,7 +298,7 @@ namespace Mindscape.Raygun4Net.Tests
       request.Cookies.Add(new HttpCookie("TestCookie3", "CookieValue"));
       Assert.AreEqual(3, request.Cookies.Count);
 
-      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "*" }, Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "*" }, Enumerable.Empty<string>());
       var message = RaygunRequestMessageBuilder.Build(request, options);
 
       Assert.AreEqual(0, message.Cookies.Count);
@@ -313,7 +313,7 @@ namespace Mindscape.Raygun4Net.Tests
       request.Cookies.Add(new HttpCookie("CookieTest", "CookieValue"));
       Assert.AreEqual(3, request.Cookies.Count);
 
-      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "cookie*" }, Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "cookie*" }, Enumerable.Empty<string>());
       var message = RaygunRequestMessageBuilder.Build(request, options);
 
       Assert.AreEqual(2, message.Cookies.Count);
@@ -330,7 +330,7 @@ namespace Mindscape.Raygun4Net.Tests
       request.Cookies.Add(new HttpCookie("CookieTest", "CookieValue"));
       Assert.AreEqual(3, request.Cookies.Count);
 
-      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "*cookie" }, Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "*cookie" }, Enumerable.Empty<string>());
       var message = RaygunRequestMessageBuilder.Build(request, options);
 
       Assert.AreEqual(2, message.Cookies.Count);
@@ -347,7 +347,7 @@ namespace Mindscape.Raygun4Net.Tests
       request.Cookies.Add(new HttpCookie("CookieTest", "CookieValue"));
       Assert.AreEqual(3, request.Cookies.Count);
 
-      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "*cookie*" }, Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "*cookie*" }, Enumerable.Empty<string>());
       var message = RaygunRequestMessageBuilder.Build(request, options);
 
       Assert.AreEqual(0, message.Cookies.Count);
@@ -362,7 +362,7 @@ namespace Mindscape.Raygun4Net.Tests
       request.Cookies.Add(new HttpCookie("testcookie", "CookieValue"));
       Assert.AreEqual(3, request.Cookies.Count);
 
-      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "TeStCoOkIe" }, Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "TeStCoOkIe" }, Enumerable.Empty<string>());
       var message = RaygunRequestMessageBuilder.Build(request, options);
 
       Assert.AreEqual(0, message.Cookies.Count);
@@ -386,7 +386,7 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void GetIgnoredFormValues()
     {
-      var options = new RaygunRequestMessageOptions(new string[] { "Password" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "Password" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
       NameValueCollection form = new NameValueCollection();
       form.Add("Key", "Value");
       form.Add("Password", "p");
@@ -401,7 +401,7 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void GetIgnoredFormValues_MultipleIgnores()
     {
-      var options = new RaygunRequestMessageOptions(new string[] { "Password", "SensitiveNumber" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
+      var options = new RaygunRequestMessageOptions(Enumerable.Empty<string>(), Enumerable.Empty<string>(), new string[] { "Password", "SensitiveNumber" }, Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<string>());
       NameValueCollection form = new NameValueCollection();
       form.Add("SensitiveNumber", "7");
       form.Add("Key", "Value");
