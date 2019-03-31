@@ -1,14 +1,14 @@
 properties {
-    $root =                              $psake.build_script_dir
-    $solution_file =                 "$root/Mindscape.Raygun4Net.WebApi.sln"
-    $configurationRelease =   "Release"
-	$configurationSign =         "Sign"
-    $build_dir =                       "$root\build\WebApi"
-	$build_dir_signed =          "$root\build\signed\WebApi"
-    $nunit_dir =                      "$root\packages\NUnit.Runners.2.6.2\tools\"
-    $tools_dir =                       "$root\tools"
-    $nuget_dir =                     "$root\.nuget"
-    $env:Path +=                    ";$nunit_dir;$tools_dir;$nuget_dir"
+    $root =                 $psake.build_script_dir
+    $solution_file =        "$root/Mindscape.Raygun4Net.WebApi.sln"
+    $configurationRelease = "Release"
+	$configurationSign =    "Sign"
+    $build_dir =            "$root\build\WebApi"
+	$build_dir_signed =     "$root\build\signed\WebApi"
+    $nunit_dir =            "$root\packages\NUnit.Runners.2.6.2\tools\"
+    $tools_dir =            "$root\tools"
+    $nuget_dir =            "$root\.nuget"
+    $env:Path +=            ";$nunit_dir;$tools_dir;$nuget_dir"
 }
 
 task default -depends Compile
