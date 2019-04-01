@@ -37,7 +37,7 @@ task Compile -depends Init {
     exec { msbuild "$solution_file_net2" /m /p:OutDir=$signed_build_dir_net2 /p:Configuration=$configuration }
     exec { msbuild "$solution_file_net4" /m /p:OutDir=$signed_build_dir_net4 /p:Configuration=$configuration }
     exec { msbuild "$solution_file_net3_client_profile" /m /p:OutDir=$signed_build_dir_net3_client_profile /p:Configuration=$configuration }
-    exec { msbuild "$solution_file)net4_client_profile" /m /p:OutDir=$signed_build_dir_net4_client_profile /p:Configuration=$configuration }
+    exec { msbuild "$solution_file_net4_client_profile" /m /p:OutDir=$signed_build_dir_net4_client_profile /p:Configuration=$configuration }
     exec { msbuild "$solution_file_mvc" /m /p:OutDir=$signed_build_dir_mvc /p:Configuration=$configuration }
     exec { msbuild "$solution_file_webapi" /m /p:OutDir=$signed_build_dir_webapi /p:Configuration=$configuration }
 }
