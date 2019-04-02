@@ -2,7 +2,7 @@ properties {
     $root = $psake.build_script_dir
     $solution_file = "$root/Mindscape.Raygun4Net.WindowsPhone.sln"
     $configuration = "Release"
-    $build_dir = "$root\build\WindowsPhone\"
+    $build_dir = "$root\build\windowsphone\"
     $nunit_dir = "$root\packages\NUnit.Runners.2.6.2\tools\"
     $tools_dir = "$root\tools"
     $nuget_dir = "$root\.nuget"

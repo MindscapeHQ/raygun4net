@@ -1,14 +1,14 @@
 properties {
-    $root =                          $psake.build_script_dir
-    $configuration =                 "Release"
-    $build_dir =                     "$root\build\"
-    $build_dir_net_core =            "$build_dir\NetCore"
-	$build_dir_aspnet_core  =        "$build_dir\ASPNetCore"
-	$build_dir_net_core_common  =    "$build_dir\NetCoreCommon"
-    $nunit_dir =                     "$root\packages\NUnit.Runners.2.6.2\tools\"
-    $tools_dir =                     "$root\tools"
-    $nuget_dir =                     "$root\.nuget"
-    $env:Path +=                     ";$nunit_dir;$tools_dir;$nuget_dir"
+    $root =                       $psake.build_script_dir
+    $configuration =              "Release"
+    $build_dir =                  "$root\build\"
+    $build_dir_net_core =         "$build_dir\netcore"
+	$build_dir_aspnet_core  =     "$build_dir\asp-netcore"
+	$build_dir_net_core_common  = "$build_dir\netcore-common"
+    $nunit_dir =                  "$root\packages\NUnit.Runners.2.6.2\tools\"
+    $tools_dir =                  "$root\tools"
+    $nuget_dir =                  "$root\.nuget"
+    $env:Path +=                  ";$nunit_dir;$tools_dir;$nuget_dir"
 }
 
 task default -depends Compile
