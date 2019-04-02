@@ -1,11 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>Raygun4Net.snk</AssemblyOriginatorKeyFile>
-    <OutputPath>bin\Sign\</OutputPath>
-	<DefineConstants>SIGN</DefineConstants>
-  </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -39,6 +33,17 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+	<Optimize>true</Optimize> 
+    <OutputPath>bin\Sign\</OutputPath>
+	<DefineConstants>SIGN;TRACE</DefineConstants>
+	<ErrorReport>prompt</ErrorReport>
+	<WarningLevel>4</WarningLevel>
+	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	<SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>Raygun4Net.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualBasic" />
