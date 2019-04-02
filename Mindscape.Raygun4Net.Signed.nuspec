@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata minClientVersion="2.5">
     <id>Mindscape.Raygun4Net.Signed</id>
-    <version>5.6.0</version>
+    <version>5.7.0</version>
     <title />
     <authors>Raygun</authors>
     <owners />
@@ -14,25 +14,32 @@
   </metadata>
   <files>
     <!-- .NET 2.0 -->
-    <file src="build\signed\Net2\Mindscape.Raygun4Net.dll" target="lib\net20\Mindscape.Raygun4Net.dll" />
+    <file src="build\signed\net20\Mindscape.Raygun4Net.dll" target="lib\net20\Mindscape.Raygun4Net.dll" />
+	<file src="build\signed\net20\Mindscape.Raygun4Net.pdb" target="lib\net20\Mindscape.Raygun4Net.pdb" />
     <!-- .NET 3.5 -->
-    <file src="build\signed\Mindscape.Raygun4Net.dll" target="lib\net35\Mindscape.Raygun4Net.dll" />
+    <file src="build\signed\net35\Mindscape.Raygun4Net.dll" target="lib\net35\Mindscape.Raygun4Net.dll" />
+	<file src="build\signed\net35\Mindscape.Raygun4Net.pdb" target="lib\net35\Mindscape.Raygun4Net.pdb" />
     <!-- .NET 3.5 Client Profile -->
-    <file src="build\signed\Net3.ClientProfile\Mindscape.Raygun4Net.dll" target="lib\net35-client\Mindscape.Raygun4Net.dll" />
+    <file src="build\signed\net35-client\Mindscape.Raygun4Net.dll" target="lib\net35-client\Mindscape.Raygun4Net.dll" />
+	<file src="build\signed\net35-client\Mindscape.Raygun4Net.pdb" target="lib\net35-client\Mindscape.Raygun4Net.pdb" />
     <!-- .NET 4.0 -->
-    <file src="build\signed\Net4\Mindscape.Raygun4Net4.dll" target="lib\net40\Mindscape.Raygun4Net4.dll" />
-    <file src="build\signed\Net4\Mindscape.Raygun4Net.dll" target="lib\net40\Mindscape.Raygun4Net.dll" />
+	<file src="build\signed\net40\Mindscape.Raygun4Net.dll" target="lib\net40\Mindscape.Raygun4Net.dll" />
+	<file src="build\signed\net40\Mindscape.Raygun4Net.pdb" target="lib\net40\Mindscape.Raygun4Net.pdb" />
+    <file src="build\signed\net40\Mindscape.Raygun4Net4.dll" target="lib\net40\Mindscape.Raygun4Net4.dll" />
+	<file src="build\signed\net40\Mindscape.Raygun4Net4.pdb" target="lib\net40\Mindscape.Raygun4Net4.pdb" />
     <!-- .NET 4.0 Client Profile -->
-    <file src="build\signed\Net4.ClientProfile\Mindscape.Raygun4Net.dll" target="lib\net40-client\Mindscape.Raygun4Net.dll" />
+    <file src="build\signed\net40-client\Mindscape.Raygun4Net.dll" target="lib\net40-client\Mindscape.Raygun4Net.dll" />
+	<file src="build\signed\net40-client\Mindscape.Raygun4Net.pdb" target="lib\net40-client\Mindscape.Raygun4Net.pdb" />
+	<!-- WinRT and Windows 8 -->
+    <file src="build\signed\winrt\Mindscape.Raygun4Net.WinRT.dll" target="lib\portable-windows8\Mindscape.Raygun4Net.WinRT.dll" />
+	<file src="build\signed\winrt\Mindscape.Raygun4Net.WinRT.pdb" target="lib\portable-windows8\Mindscape.Raygun4Net.WinRT.pdb" />
     <!-- Windows Store universal apps (Windows 8.1 and Windows Phone 8.1) -->
-    <file src="build\signed\WindowsStore\Mindscape.Raygun4Net.WindowsStore.dll" target="lib\portable-net45+win81+wpa81+windows81\Mindscape.Raygun4Net.WindowsStore.dll" />
-    <!-- WinRT and Windows 8 -->
-    <file src="build\signed\WinRT\Mindscape.Raygun4Net.WinRT.dll" target="lib\portable-windows8\Mindscape.Raygun4Net.WinRT.dll" />
+    <file src="build\signed\uwp\Mindscape.Raygun4Net.WindowsStore.dll" target="lib\portable-net45+win81+wpa81+windows81\Mindscape.Raygun4Net.WindowsStore.dll" /> 
     <!-- Windows Phone -->
-    <file src="build\WindowsPhone\Mindscape.Raygun4Net.WindowsPhone.dll" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.dll" />
-    <file src="build\WindowsPhone\Mindscape.Raygun4Net.WindowsPhone.pdb" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.pdb" />
-    <file src="build\WindowsPhone\Mindscape.Raygun4Net.WindowsPhone.dll" target="lib\windowsphone8\Mindscape.Raygun4Net.WindowsPhone.dll" />
-    <file src="build\WindowsPhone\Mindscape.Raygun4Net.WindowsPhone.pdb" target="lib\windowsphone8\Mindscape.Raygun4Net.WindowsPhone.pdb" />
+    <file src="build\windowsphone\Mindscape.Raygun4Net.WindowsPhone.dll" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.dll" />
+    <file src="build\windowsphone\Mindscape.Raygun4Net.WindowsPhone.pdb" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.pdb" />
+    <file src="build\windowsphone\Mindscape.Raygun4Net.WindowsPhone.dll" target="lib\windowsphone8\Mindscape.Raygun4Net.WindowsPhone.dll" />
+    <file src="build\windowsphone\Mindscape.Raygun4Net.WindowsPhone.pdb" target="lib\windowsphone8\Mindscape.Raygun4Net.WindowsPhone.pdb" />
 
     <file src="readme.txt" />
   </files>
