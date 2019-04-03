@@ -7,7 +7,7 @@
     <authors>Raygun</authors>
     <owners />
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-	<summary>Raygun provider for ASP.NET Web API projects</summary>
+    <summary>Raygun provider for ASP.NET Web API projects</summary>
     <description>Raygun provider for ASP.NET Web API projects</description>
     <iconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</iconUrl>
     <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>

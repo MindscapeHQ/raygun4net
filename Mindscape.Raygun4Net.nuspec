@@ -30,7 +30,7 @@
     <!-- .NET 4.0 Client Profile -->
     <file src="build\net40-client\Mindscape.Raygun4Net.dll" target="lib\net40-client\Mindscape.Raygun4Net.dll" />
     <file src="build\net40-client\Mindscape.Raygun4Net.pdb" target="lib\net40-client\Mindscape.Raygun4Net.pdb" />
-	<!-- WinRT and Windows 8 -->
+    <!-- WinRT and Windows 8 -->
     <file src="build\winrt\Mindscape.Raygun4Net.WinRT.dll" target="lib\portable-windows8\Mindscape.Raygun4Net.WinRT.dll" />
     <file src="build\winrt\Mindscape.Raygun4Net.WinRT.pdb" target="lib\portable-windows8\Mindscape.Raygun4Net.WinRT.pdb" />
     <!-- Windows Store universal apps (Windows 8.1 and Windows Phone 8.1) -->

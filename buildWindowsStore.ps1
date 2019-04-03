@@ -1,11 +1,11 @@
 properties {
     $root =                        $psake.build_script_dir
     $windows_store_solution_file =   "$root/Mindscape.Raygun4Net.WindowsStore.sln"
-	$configuration =                 "Release"
-	$signed_configuration =          "Sign"
-	$build_dir =                     "$root\build\uwp"
-	$signed_build_dir =              "$root\build\signed\uwp"
-	$msbuild12 =                     "${env:ProgramFiles(x86)}\msbuild\12.0\bin\msbuild.exe"
+    $configuration =                 "Release"
+    $signed_configuration =          "Sign"
+    $build_dir =                     "$root\build\uwp"
+    $signed_build_dir =              "$root\build\signed\uwp"
+    $msbuild12 =                     "${env:ProgramFiles(x86)}\msbuild\12.0\bin\msbuild.exe"
 }
 
 task default -depends CompileWindowsStore, CompileWindowsStoreSigned

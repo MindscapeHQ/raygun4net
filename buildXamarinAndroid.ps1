@@ -1,8 +1,8 @@
 properties {
     $root =          $psake.build_script_dir
     $solution_file = "$root/Mindscape.Raygun4Net.Xamarin.Android.sln"
-	$configuration = "Release"
-	$build_dir =     "$root\build\"
+    $configuration = "Release"
+    $build_dir =     "$root\build\"
 }
 
 task default -depends CompileXamarinAndroid
