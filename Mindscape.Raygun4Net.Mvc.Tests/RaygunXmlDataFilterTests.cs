@@ -32,7 +32,7 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
 
       Assert.NotNull(filteredData);
       Assert.NotNull(XDocument.Parse(filteredData));// Check if it can still be parsed.
-      Assert.AreEqual(filteredData, "<user>\n  <name>Ronald</name>\n  <password>[FILTERED]</password>\n</user>");
+      Assert.AreEqual(filteredData, "<user><name>Ronald</name><password>[FILTERED]</password></user>");
     }
 
     [Test]
@@ -46,7 +46,7 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
 
       Assert.NotNull(filteredData);
       Assert.NotNull(XDocument.Parse(filteredData));// Check if it can still be parsed.
-      Assert.AreEqual(filteredData, "<user>\n  <name>Ronald</name>\n  <password>[FILTERED]</password>\n</user>");
+      Assert.AreEqual(filteredData, "<user><name>Ronald</name><password>[FILTERED]</password></user>");
     }
 
     [Test]
@@ -60,7 +60,7 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
 
       Assert.NotNull(filteredData);
       Assert.NotNull(XDocument.Parse(filteredData));// Check if it can still be parsed.
-      Assert.AreEqual(filteredData, "<user>\n  <name>Ronald</name>\n  <password></password>\n</user>");
+      Assert.AreEqual(filteredData, "<user><name>Ronald</name><password></password></user>");
     }
 
     [Test]
@@ -74,7 +74,7 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
 
       Assert.NotNull(filteredData);
       Assert.NotNull(XDocument.Parse(filteredData));// Check if it can still be parsed.
-      Assert.AreEqual(filteredData, "<root>\n  <raygunsettings apikey=\"123456\" />\n  <user name=\"Raygun\" password=\"[FILTERED]\" />\n</root>");
+      Assert.AreEqual(filteredData, "<root><raygunsettings apikey=\"123456\" /><user name=\"Raygun\" password=\"[FILTERED]\" /></root>");
     }
 
     [Test]
@@ -88,7 +88,7 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
 
       Assert.NotNull(filteredData);
       Assert.NotNull(XDocument.Parse(filteredData));// Check if it can still be parsed.
-      Assert.AreEqual(filteredData, "<root>\n  <raygunsettings apikey=\"123456\" />\n  <user name=\"Raygun\" password=\"\" />\n</root>");
+      Assert.AreEqual(filteredData, "<root><raygunsettings apikey=\"123456\" /><user name=\"Raygun\" password=\"\" /></root>");
     }
   }
 }
