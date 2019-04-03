@@ -57,18 +57,5 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       Assert.NotNull(filteredData);
       Assert.AreEqual(filteredData, "user=raygun&password=[FILTERED]");
     }
-
-    [Test]
-    public void FilteringIsAppliedToPairsWithSensitiveKeysWhileIgnoringCase2()
-    {
-      var filter = new RaygunKeyValuePairDataFilter();
-
-      var rawData = "user=raygun&password= ";
-
-      var filteredData = filter.Filter(rawData, new List<string>() { "password" });
-
-      Assert.NotNull(filteredData);
-      Assert.AreEqual(filteredData, "user=raygun&password= ");
-    }
   }
 }
