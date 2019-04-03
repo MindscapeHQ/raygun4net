@@ -37,7 +37,7 @@ namespace Mindscape.Raygun4Net.Filters
         // Begin the filtering.
         FilterElementsRecursive(doc.Descendants(), ignoredKeys);
 
-        return doc.ToString();
+        return doc.ToString(SaveOptions.DisableFormatting);
       }
       catch
       {
