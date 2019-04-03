@@ -1,10 +1,10 @@
 properties {
     $root =             $psake.build_script_dir
-	$nuget_dir =        "$root\.nuget"
-	$release_dir =      "$root\release\"
+    $nuget_dir =        "$root\.nuget"
+    $release_dir =      "$root\release\"
     $build_dir =        "$root\build\webapi"
     $build_dir_signed = "$root\build\signed\webapi"
-	$nuspec =           "$root\Mindscape.Raygun4Net.WebApi.nuspec"
+    $nuspec =           "$root\Mindscape.Raygun4Net.WebApi.nuspec"
     $nuspec_signed =    "$root\Mindscape.Raygun4Net.WebApi.Signed.nuspec"
     $env:Path +=        ";$nuget_dir"
 }
@@ -47,12 +47,12 @@ task Zip -depends Package {
     copy-item $build_dir/Mindscape.Raygun4Net.dll $versionfolderwebapi
     copy-item $build_dir/Mindscape.Raygun4Net.pdb $versionfolderwebapi
     
-	# Signed .NET Web API
+    # Signed .NET Web API
     copy-item $build_dir_signed/Mindscape.Raygun4Net.WebApi.dll $signedfolderwebapi
     copy-item $build_dir_signed/Mindscape.Raygun4Net.WebApi.pdb $signedfolderwebapi
     copy-item $build_dir_signed/Mindscape.Raygun4Net.dll $signedfolderwebapi
     copy-item $build_dir_signed/Mindscape.Raygun4Net.pdb $signedfolderwebapi
-	
+    
     $zipFullName = $release_dir + $version + ".zip"
     Get-ChildItem $outerfolder | Add-Zip $zipFullName
 }
