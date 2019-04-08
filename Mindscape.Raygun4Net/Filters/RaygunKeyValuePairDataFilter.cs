@@ -32,16 +32,15 @@ namespace Mindscape.Raygun4Net.Filters
             stringBuilder.Append("&");
           }
 
+          stringBuilder.Append(pair[0]);
+          stringBuilder.Append("=");
+
           if (ShouldIgnore(pair, ignoredKeys))
           {
-            stringBuilder.Append(pair[0]);
-            stringBuilder.Append("=");
             stringBuilder.Append(FILTERED_VALUE);
           }
           else
           {
-            stringBuilder.Append(pair[0]);
-            stringBuilder.Append("=");
             stringBuilder.Append(pair[1]);
           }
         }
