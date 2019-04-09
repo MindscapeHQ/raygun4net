@@ -295,18 +295,22 @@ namespace Mindscape.Raygun4Net.WebApi
     }
 
     /// <summary>
-    /// Ignores the sensitive field names.
+    /// Adds a list of keys to remove from the following sections of the <see cref="RaygunRequestMessage" />
+    /// <see cref="RaygunRequestMessage.Headers" />
+    /// <see cref="RaygunRequestMessage.QueryString" />
+    /// <see cref="RaygunRequestMessage.Form" />
+    /// <see cref="RaygunRequestMessage.RawData" />
     /// </summary>
-    /// <param name="names">Names.</param>
+    /// <param name="names">Keys to be stripped from the <see cref="RaygunRequestMessage" />.</param>
     public void IgnoreSensitiveFieldNames(params string[] names)
     {
       _requestMessageOptions.AddSensitiveFieldNames(names);
     }
 
     /// <summary>
-    /// Ignores the query parameter names.
+    /// Adds a list of keys to remove from the <see cref="RaygunRequestMessage.QueryString" /> property of the <see cref="RaygunRequestMessage" />
     /// </summary>
-    /// <param name="names">Names.</param>
+    /// <param name="names">Keys to be stripped from the <see cref="RaygunRequestMessage.QueryString" /></param>
     public void IgnoreQueryParameterNames(params string[] names)
     {
       _requestMessageOptions.AddQueryParameterNames(names);
