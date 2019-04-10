@@ -342,7 +342,7 @@ namespace Mindscape.Raygun4Net.Builders
         }
       }
 
-      // We have failed to parse and filter the raw data, so check if the data contains sesnsitive values and should be dropped.
+      // We have failed to parse and filter the raw data, so check if the data contains sensitive values and should be dropped.
       if (options.IsRawDataIgnoredWhenFilteringFailed && DataContains(rawData, options.SensitiveFieldNames()))
       {
         return null;
