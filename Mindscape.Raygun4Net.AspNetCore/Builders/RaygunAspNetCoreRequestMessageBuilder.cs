@@ -311,11 +311,11 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return form;
     }
 
-    private static IDictionary ToDictionary(IQueryCollection query, Func<string, bool> isFormFieldIgnored, Func<string, bool> isSensitive)
+    private static IDictionary ToDictionary(IQueryCollection query, Func<string, bool> isQueryStringVariableIgnored, Func<string, bool> isSensitive)
     {
       var dict = new Dictionary<string, string>();
 
-      foreach (var value in query.Where(v => isFormFieldIgnored(v.Key) == false && isSensitive(v.Key) == false))
+      foreach (var value in query.Where(v => isQueryStringVariableIgnored(v.Key) == false && isSensitive(v.Key) == false))
       {
         dict[value.Key] = string.Join(",", value.Value);
       }
