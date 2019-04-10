@@ -176,7 +176,7 @@ These options are not case sensitive.
 
 Note: The IgnoreSensitiveFieldNames will be applied to ALL fields in the RaygunRequestMessage. 
 
-We provide extra options for removing sensitive data from the request raw data. This come in the form of filters as implemented by the IRaygunDataFilter interface.
+We provide extra options for removing sensitive data from the request raw data. This comes in the form of filters as implemented by the IRaygunDataFilter interface.
 These filters read the raw data and strip values whose keys match those found in the RaygunSettings IgnoreSensitiveFieldNames property.
 
 We currently provide two implementations with this provider.
