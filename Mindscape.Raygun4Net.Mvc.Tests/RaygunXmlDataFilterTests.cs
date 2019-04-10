@@ -26,7 +26,7 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
     {
       var filter = new RaygunXmlDataFilter();
 
-      var xml = LoadResource("BasicWithValues.xml");
+      var xml = LoadPayload("BasicWithValues.xml");
 
       var filteredData = filter.Filter(xml, new List<string>() { "PaSsWoRd" });
 
@@ -40,7 +40,7 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
     {
       var filter = new RaygunXmlDataFilter();
 
-      var xml = LoadResource("BasicWithValues.xml");
+      var xml = LoadPayload("BasicWithValues.xml");
 
       var filteredData = filter.Filter(xml, new List<string>() { "password" });
 
@@ -54,7 +54,7 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
     {
       var filter = new RaygunXmlDataFilter();
 
-      var xml = LoadResource("BasicWithoutValues.xml");
+      var xml = LoadPayload("BasicWithoutValues.xml");
 
       var filteredData = filter.Filter(xml, new List<string>() { "password" });
 
@@ -68,7 +68,7 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
     {
       var filter = new RaygunXmlDataFilter();
 
-      var xml = LoadResource("AttributedWithValues.xml");
+      var xml = LoadPayload("AttributedWithValues.xml");
 
       var filteredData = filter.Filter(xml, new List<string>() { "password" });
 
@@ -82,7 +82,7 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
     {
       var filter = new RaygunXmlDataFilter();
 
-      var xml = LoadResource("AttributedWithoutValues.xml");
+      var xml = LoadPayload("AttributedWithoutValues.xml");
 
       var filteredData = filter.Filter(xml, new List<string>() { "password" });
 

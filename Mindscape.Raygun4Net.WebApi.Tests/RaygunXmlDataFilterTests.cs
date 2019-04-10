@@ -26,13 +26,13 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
     {
       var filter = new RaygunXmlDataFilter();
 
-      var xml = LoadResource("BasicWithValues.xml");
+      var xml = LoadPayload("BasicWithValues.xml");
 
       var filteredData = filter.Filter(xml, new List<string>() { "PaSsWoRd" });
 
       Assert.NotNull(filteredData);
       Assert.NotNull(XDocument.Parse(filteredData));// Check if it can still be parsed.
-      Assert.AreEqual(filteredData, "<user>\n  <name>Ronald</name>\n  <password>[FILTERED]</password>\n</user>");
+      Assert.AreEqual(filteredData, "<user><name>Ronald</name><password>[FILTERED]</password></user>");
     }
 
     [Test]
@@ -40,13 +40,13 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
     {
       var filter = new RaygunXmlDataFilter();
 
-      var xml = LoadResource("BasicWithValues.xml");
+      var xml = LoadPayload("BasicWithValues.xml");
 
       var filteredData = filter.Filter(xml, new List<string>() { "password" });
 
       Assert.NotNull(filteredData);
       Assert.NotNull(XDocument.Parse(filteredData));// Check if it can still be parsed.
-      Assert.AreEqual(filteredData, "<user>\n  <name>Ronald</name>\n  <password>[FILTERED]</password>\n</user>");
+      Assert.AreEqual(filteredData, "<user><name>Ronald</name><password>[FILTERED]</password></user>");
     }
 
     [Test]
@@ -54,13 +54,13 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
     {
       var filter = new RaygunXmlDataFilter();
 
-      var xml = LoadResource("BasicWithoutValues.xml");
+      var xml = LoadPayload("BasicWithoutValues.xml");
 
       var filteredData = filter.Filter(xml, new List<string>() { "password" });
 
       Assert.NotNull(filteredData);
       Assert.NotNull(XDocument.Parse(filteredData));// Check if it can still be parsed.
-      Assert.AreEqual(filteredData, "<user>\n  <name>Ronald</name>\n  <password></password>\n</user>");
+      Assert.AreEqual(filteredData, "<user><name>Ronald</name><password></password></user>");
     }
 
     [Test]
@@ -68,13 +68,13 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
     {
       var filter = new RaygunXmlDataFilter();
 
-      var xml = LoadResource("AttributedWithValues.xml");
+      var xml = LoadPayload("AttributedWithValues.xml");
 
       var filteredData = filter.Filter(xml, new List<string>() { "password" });
 
       Assert.NotNull(filteredData);
       Assert.NotNull(XDocument.Parse(filteredData));// Check if it can still be parsed.
-      Assert.AreEqual(filteredData, "<root>\n  <raygunsettings apikey=\"123456\" />\n  <user name=\"Raygun\" password=\"[FILTERED]\" />\n</root>");
+      Assert.AreEqual(filteredData, "<root><raygunsettings apikey=\"123456\" /><user name=\"Raygun\" password=\"[FILTERED]\" /></root>");
     }
 
     [Test]
@@ -82,13 +82,13 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
     {
       var filter = new RaygunXmlDataFilter();
 
-      var xml = LoadResource("AttributedWithoutValues.xml");
+      var xml = LoadPayload("AttributedWithoutValues.xml");
 
       var filteredData = filter.Filter(xml, new List<string>() { "password" });
 
       Assert.NotNull(filteredData);
       Assert.NotNull(XDocument.Parse(filteredData));// Check if it can still be parsed.
-      Assert.AreEqual(filteredData, "<root>\n  <raygunsettings apikey=\"123456\" />\n  <user name=\"Raygun\" password=\"\" />\n</root>");
+      Assert.AreEqual(filteredData, "<root><raygunsettings apikey=\"123456\" /><user name=\"Raygun\" password=\"\" /></root>");
     }
   }
 }
