@@ -1,19 +1,34 @@
 ﻿using System.Collections.Generic;
+using Mindscape.Raygun4Net.Filters;
 
 namespace Mindscape.Raygun4Net.AspNetCore
 {
   public class RaygunRequestMessageOptions
   {
+    private readonly List<string> _ignoredSensitiveFieldNames = new List<string>();
+    private readonly List<string> _ignoredQueryParameterNames = new List<string>();
     private readonly List<string> _ignoredFormFieldNames = new List<string>();
     private readonly List<string> _ignoreHeaderNames = new List<string>();
     private readonly List<string> _ignoreCookieNames = new List<string>();
     private readonly List<string> _ignoreServerVariableNames = new List<string>();
     private bool _isRawDataIgnored;
-    
+    private bool _isRawDataIgnoredWhenFilteringFailed;
+    private bool _useXmlRawDataFilter;
+    private bool _useKeyValuePairRawDataFilter;
+
+    private List<IRaygunDataFilter> _rawDataFilters = new List<IRaygunDataFilter>();
+
     public RaygunRequestMessageOptions() { }
 
-    public RaygunRequestMessageOptions(IEnumerable<string> formFieldNames, IEnumerable<string> headerNames, IEnumerable<string> cookieNames, IEnumerable<string> serverVariableNames)
+    public RaygunRequestMessageOptions(IEnumerable<string> sensitiveFieldNames,
+                                       IEnumerable<string> queryParameterNames, 
+                                       IEnumerable<string> formFieldNames,
+                                       IEnumerable<string> headerNames,
+                                       IEnumerable<string> cookieNames,
+                                       IEnumerable<string> serverVariableNames)
     {
+      Add(_ignoredSensitiveFieldNames, sensitiveFieldNames);
+      Add(_ignoredQueryParameterNames, queryParameterNames);
       Add(_ignoredFormFieldNames, formFieldNames);
       Add(_ignoreHeaderNames, headerNames);
       Add(_ignoreCookieNames, cookieNames);
@@ -29,6 +44,66 @@ namespace Mindscape.Raygun4Net.AspNetCore
       {
         _isRawDataIgnored = value;
       }
+    }
+
+    public bool IsRawDataIgnoredWhenFilteringFailed
+    {
+      get { return _isRawDataIgnoredWhenFilteringFailed; }
+      set { _isRawDataIgnoredWhenFilteringFailed = value; }
+    }
+
+    public bool UseXmlRawDataFilter
+    {
+      get { return _useXmlRawDataFilter; }
+      set { _useXmlRawDataFilter = value; }
+    }
+
+    public bool UseKeyValuePairRawDataFilter
+    {
+      get { return _useKeyValuePairRawDataFilter; }
+      set { _useKeyValuePairRawDataFilter = value; }
+    }
+
+    public void AddRawDataFilter(IRaygunDataFilter filter)
+    {
+      if (filter != null)
+      {
+        _rawDataFilters.Add(filter);
+      }
+    }
+
+    public List<IRaygunDataFilter> GetRawDataFilters()
+    {
+      return _rawDataFilters;
+    }
+
+    // Sensitive Fields
+
+    public void AddSensitiveFieldNames(params string[] names)
+    {
+      Add(_ignoredSensitiveFieldNames, names);
+    }
+
+    public bool IsSensitiveFieldIgnored(string name)
+    {
+      return IsIgnored(name, _ignoredSensitiveFieldNames);
+    }
+
+    public List<string> SensitiveFieldNames()
+    {
+      return _ignoredSensitiveFieldNames;
+    }
+
+    // Query Parameters
+
+    public void AddQueryParameterNames(params string[] names)
+    {
+      Add(_ignoredQueryParameterNames, names);
+    }
+
+    public bool IsQueryParameterIgnored(string name)
+    {
+      return IsIgnored(name, _ignoredQueryParameterNames);
     }
 
     // Form fields

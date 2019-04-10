@@ -9,6 +9,7 @@ using System.Web.Http.ExceptionHandling;
 using Mindscape.Raygun4Net.WebApi.Builders;
 using System.Collections.Generic;
 using Mindscape.Raygun4Net.Messages;
+using Mindscape.Raygun4Net.Filters;
 using System.Net;
 using System.Collections;
 using System.Linq;
@@ -38,31 +39,52 @@ namespace Mindscape.Raygun4Net.WebApi
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreSensitiveFieldNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreSensitiveFieldNames.Split(',');
+        IgnoreSensitiveFieldNames(ignoredNames);
+      }
+
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreQueryParameterNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreQueryParameterNames.Split(',');
+        IgnoreQueryParameterNames(ignoredNames);
+      }
+
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormFieldNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreFormFieldNames.Split(',');
         IgnoreFormFieldNames(ignoredNames);
       }
+
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreHeaderNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreHeaderNames.Split(',');
         IgnoreHeaderNames(ignoredNames);
       }
+
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreCookieNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreCookieNames.Split(',');
         IgnoreCookieNames(ignoredNames);
       }
+
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreServerVariableNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreServerVariableNames.Split(',');
         IgnoreServerVariableNames(ignoredNames);
       }
+
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.ApplicationVersion))
       {
         ApplicationVersion = RaygunSettings.Settings.ApplicationVersion;
       }
+
       IsRawDataIgnored = RaygunSettings.Settings.IsRawDataIgnored;
+      IsRawDataIgnoredWhenFilteringFailed = RaygunSettings.Settings.IsRawDataIgnoredWhenFilteringFailed;
+
+      UseXmlRawDataFilter = RaygunSettings.Settings.UseXmlRawDataFilter;
+      UseKeyValuePairRawDataFilter = RaygunSettings.Settings.UseKeyValuePairRawDataFilter;
     }
 
     /// <summary>
@@ -273,6 +295,28 @@ namespace Mindscape.Raygun4Net.WebApi
     }
 
     /// <summary>
+    /// Adds a list of keys to remove from the following sections of the <see cref="RaygunRequestMessage" />
+    /// <see cref="RaygunRequestMessage.Headers" />
+    /// <see cref="RaygunRequestMessage.QueryString" />
+    /// <see cref="RaygunRequestMessage.Form" />
+    /// <see cref="RaygunRequestMessage.RawData" />
+    /// </summary>
+    /// <param name="names">Keys to be stripped from the <see cref="RaygunRequestMessage" />.</param>
+    public void IgnoreSensitiveFieldNames(params string[] names)
+    {
+      _requestMessageOptions.AddSensitiveFieldNames(names);
+    }
+
+    /// <summary>
+    /// Adds a list of keys to remove from the <see cref="RaygunRequestMessage.QueryString" /> property of the <see cref="RaygunRequestMessage" />
+    /// </summary>
+    /// <param name="names">Keys to be stripped from the <see cref="RaygunRequestMessage.QueryString" /></param>
+    public void IgnoreQueryParameterNames(params string[] names)
+    {
+      _requestMessageOptions.AddQueryParameterNames(names);
+    }
+
+    /// <summary>
     /// Adds a list of keys to ignore when attaching the Form data of an HTTP POST request. This allows
     /// you to remove sensitive data from the transmitted copy of the Form on the HttpRequest by specifying the keys you want removed.
     /// This method is only effective in a web context.
@@ -323,10 +367,48 @@ namespace Mindscape.Raygun4Net.WebApi
     public bool IsRawDataIgnored
     {
       get { return _requestMessageOptions.IsRawDataIgnored; }
-      set
-      {
-        _requestMessageOptions.IsRawDataIgnored = value;
-      }
+      set { _requestMessageOptions.IsRawDataIgnored = value; }
+    }
+
+    /// <summary>
+    /// Specifies whether or not RawData from web requests is ignored when sensitive values are seen and unable to be removed due to failing to parse the contents.
+    /// The default is false which means RawData will not be ignored when filtering fails.
+    /// </summary>
+    public bool IsRawDataIgnoredWhenFilteringFailed
+    {
+      get { return _requestMessageOptions.IsRawDataIgnoredWhenFilteringFailed; }
+      set { _requestMessageOptions.IsRawDataIgnoredWhenFilteringFailed = value; }
+    }
+
+    /// <summary>
+    /// Specifies whether or not RawData from web requests is filtered of sensitive values using an XML parser.
+    /// </summary>
+    /// <value><c>true</c> if use xml raw data filter; otherwise, <c>false</c>.</value>
+    public bool UseXmlRawDataFilter
+    {
+      get { return _requestMessageOptions.UseXmlRawDataFilter; }
+      set { _requestMessageOptions.UseXmlRawDataFilter = value; }
+    }
+
+    /// <summary>
+    /// Specifies whether or not RawData from web requests is filtered of sensitive values using an KeyValuePair parser.
+    /// </summary>
+    /// <value><c>true</c> if use key pair raw data filter; otherwise, <c>false</c>.</value>
+    public bool UseKeyValuePairRawDataFilter
+    {
+      get { return _requestMessageOptions.UseKeyValuePairRawDataFilter; }
+      set { _requestMessageOptions.UseKeyValuePairRawDataFilter = value; }
+    }
+
+    /// <summary>
+    /// Add an <see cref="IRaygunDataFilter"/> implementation to be used when capturing the raw data
+    /// of a HTTP request. This filter will be passed the request raw data and is expected to remove 
+    /// or replace values whose keys are found in the list supplied to the Filter method.
+    /// </summary>
+    /// <param name="filter">Custom raw data filter implementation.</param>
+    public void AddRawDataFilter(IRaygunDataFilter filter)
+    {
+      _requestMessageOptions.AddRawDataFilter(filter);
     }
 
     /// <summary>

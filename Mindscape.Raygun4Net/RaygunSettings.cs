@@ -65,6 +65,20 @@ namespace Mindscape.Raygun4Net
       set { this["excludeErrorsFromLocal"] = value; }
     }
 
+    [ConfigurationProperty("ignoreSensitiveFieldNames", IsRequired = false, DefaultValue = "")]
+    public string IgnoreSensitiveFieldNames
+    {
+      get { return (string)this["ignoreSensitiveFieldNames"]; }
+      set { this["ignoreSensitiveFieldNames"] = value; }
+    }
+
+    [ConfigurationProperty("ignoreQueryParameterNames", IsRequired = false, DefaultValue = "")]
+    public string IgnoreQueryParameterNames
+    {
+      get { return (string)this["ignoreQueryParameterNames"]; }
+      set { this["ignoreQueryParameterNames"] = value; }
+    }
+
     [ConfigurationProperty("ignoreFormFieldNames", IsRequired = false, DefaultValue = "")]
     public string IgnoreFormFieldNames
     {
@@ -98,6 +112,27 @@ namespace Mindscape.Raygun4Net
     {
       get { return (bool)this["isRawDataIgnored"]; }
       set { this["isRawDataIgnored"] = value; }
+    }
+
+    [ConfigurationProperty("useXmlRawDataFilter", IsRequired = false, DefaultValue = false)]
+    public bool UseXmlRawDataFilter
+    {
+      get { return (bool)this["useXmlRawDataFilter"]; }
+      set { this["useXmlRawDataFilter"] = value; }
+    }
+
+    [ConfigurationProperty("useKeyValuePairRawDataFilter", IsRequired = false, DefaultValue = false)]
+    public bool UseKeyValuePairRawDataFilter
+    {
+      get { return (bool)this["useKeyValuePairRawDataFilter"]; }
+      set { this["useKeyValuePairRawDataFilter"] = value; }
+    }
+
+    [ConfigurationProperty("isRawDataIgnoredWhenFilteringFailed", IsRequired = false, DefaultValue = false)]
+    public bool IsRawDataIgnoredWhenFilteringFailed
+    {
+      get { return (bool)this["isRawDataIgnoredWhenFilteringFailed"]; }
+      set { this["isRawDataIgnoredWhenFilteringFailed"] = value; }
     }
 
     [ConfigurationProperty("isResponseContentIgnored", IsRequired = false, DefaultValue = true)]

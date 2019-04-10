@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace Mindscape.Raygun4Net.Breadcrumbs
 {
-  internal class RaygunBreadcrumbs : IEnumerable<RaygunBreadcrumb>
+  public class RaygunBreadcrumbs : IEnumerable<RaygunBreadcrumb>
   {
     private readonly IRaygunBreadcrumbStorage _storage;
 
@@ -34,7 +34,7 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
           for(int i = 1; i <= 3; i++)
           {
             PopulateLocation(crumb, i);
-            if (crumb.ClassName == null || !crumb.ClassName.StartsWith("Mindscape.Raygun4Net"))
+            if (crumb.ClassName == null || !crumb.ClassName.StartsWith("Mindscape.Raygun4Net", StringComparison.OrdinalIgnoreCase))
             {
               break;
             }

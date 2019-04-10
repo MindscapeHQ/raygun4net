@@ -7,7 +7,7 @@
     <Authors>Raygun</Authors>
     <Description>.NetStandard library for targeting ASP.Net Core applications</Description>
     <PackageId>Mindscape.Raygun4Net.AspNetCore</PackageId>
-    <PackageVersion>6.0.1</PackageVersion>
+    <PackageVersion>6.1.0</PackageVersion>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseUrl>https://github.com/MindscapeHQ/raygun4net/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/MindscapeHQ/raygun4net</PackageProjectUrl>
@@ -17,6 +17,17 @@
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Mindscape.Raygun4Net\Filters\IRaygunDataFilter.cs">
+      <Link>Filters\IRaygunDataFilter.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Filters\RaygunXmlDataFilter.cs">
+      <Link>Filters\RaygunXmlDataFilter.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Filters\RaygunKeyValuePairDataFilter.cs">
+      <Link>Filters\RaygunKeyValuePairDataFilter.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore.Common\Mindscape.Raygun4Net.NetCore.Common.csproj" />

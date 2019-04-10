@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using Mindscape.Raygun4Net.Messages;
+using Mindscape.Raygun4Net.Filters;
 
 namespace Mindscape.Raygun4Net.Builders
 {
@@ -16,148 +17,37 @@ namespace Mindscape.Raygun4Net.Builders
   {
     private static readonly Regex IpAddressRegex = new Regex(@"\A(?:\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b)(:[1-9][0-9]{0,4})?\z", RegexOptions.Compiled);
 
+    private const int MAX_RAW_DATA_LENGTH = 4096; // bytes
+    private const int MAX_KEY_LENGTH = 256; // Characters
+    private const int MAX_VALUE_LENGTH = 256; // Characters
+
     public static RaygunRequestMessage Build(HttpRequest request, RaygunRequestMessageOptions options)
     {
-      RaygunRequestMessage message = new RaygunRequestMessage();
-
       options = options ?? new RaygunRequestMessageOptions();
+
+      RaygunRequestMessage message = new RaygunRequestMessage()
+      {
+        IPAddress   = GetIpAddress(request),
+        QueryString = GetQueryString(request, options),
+        Cookies     = GetCookies(request, options),
+        Data        = GetServerVariables(request, options),
+        Form        = GetForm(request, options),
+        RawData     = GetRawData(request, options),
+        Headers     = GetHeaders(request, options)
+      };
 
       try
       {
-        message.HostName = request.Url.Host;
-        message.Url = request.Url.AbsolutePath;
+        message.HostName   = request.Url.Host;
+        message.Url        = request.Url.AbsolutePath;
         message.HttpMethod = request.RequestType;
-        message.IPAddress = GetIpAddress(request);
       }
       catch (Exception e)
       {
         System.Diagnostics.Trace.WriteLine("Failed to get basic request info: {0}", e.Message);
       }
 
-      // Query string
-      try
-      {
-        message.QueryString = ToDictionary(request.QueryString, null);
-      }
-      catch (Exception e)
-      {
-        if (message.QueryString == null)
-        {
-          message.QueryString = new Dictionary<string, string>() { { "Failed to retrieve", e.Message } };
-        }
-      }
-
-      // Headers
-      try
-      {
-        message.Headers = ToDictionary(request.Headers, options.IsHeaderIgnored);
-        message.Headers.Remove("Cookie");
-      }
-      catch (Exception e)
-      {
-        if (message.Headers == null)
-        {
-          message.Headers = new Dictionary<string, string>() { { "Failed to retrieve", e.Message } };
-        }
-      }
-
-      // Form fields
-      try
-      {
-        message.Form = ToDictionary(request.Form, options.IsFormFieldIgnored, true);
-      }
-      catch (Exception e)
-      {
-        if (message.Form == null)
-        {
-          message.Form = new Dictionary<string, string>() { { "Failed to retrieve", e.Message } };
-        }
-      }
-
-      // Cookies
-      try
-      {
-        message.Cookies = GetCookies(request.Cookies, options.IsCookieIgnored);
-      }
-      catch (Exception e)
-      {
-        System.Diagnostics.Trace.WriteLine("Failed to get cookies: {0}", e.Message);
-      }
-
-      // Server variables
-      try
-      {
-        message.Data = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored);
-        message.Data.Remove("ALL_HTTP");
-        message.Data.Remove("HTTP_COOKIE");
-        message.Data.Remove("ALL_RAW");
-      }
-      catch (Exception e)
-      {
-        if (message.Data == null)
-        {
-          message.Data = new Dictionary<string, string>() { { "Failed to retrieve", e.Message } };
-        }
-      }
-
-      // Raw data
-      if (!options.IsRawDataIgnored)
-      {
-        try
-        {
-          // Don't send the raw request data at all if the content-type is urlencoded
-          var contentType = request.Headers["Content-Type"];
-          if (contentType != "text/html" && (contentType == null || CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "application/x-www-form-urlencoded", CompareOptions.IgnoreCase) < 0) && request.RequestType != "GET")
-          {
-            int length = 4096;
-            request.InputStream.Seek(0, SeekOrigin.Begin);
-            string temp = new StreamReader(request.InputStream).ReadToEnd();
-
-            // If we made it this far, strip out any values that have been marked as ignored form fields
-            Dictionary<string, string> ignored = GetIgnoredFormValues(request.Form, options.IsFormFieldIgnored);
-            temp = StripIgnoredFormData(temp, ignored);
-
-            if (length > temp.Length)
-            {
-              length = temp.Length;
-            }
-
-            message.RawData = temp.Substring(0, length);
-          }
-        }
-        catch (Exception e)
-        {
-          if (message.RawData == null)
-          {
-            message.RawData = "Failed to retrieve raw data: " + e.Message;
-          }
-        }
-      }
-
       return message;
-    }
-
-    protected static Dictionary<string, string> GetIgnoredFormValues(NameValueCollection form, Func<string, bool> ignore)
-    {
-      Dictionary<string, string> ignoredFormValues = new Dictionary<string, string>();
-      foreach (string key in form.Keys)
-      {
-        if (ignore(key))
-        {
-          ignoredFormValues.Add(key, form[key]);
-        }
-      }
-      return ignoredFormValues;
-    }
-
-    protected static string StripIgnoredFormData(string rawData, Dictionary<string, string> ignored)
-    {
-      foreach (string key in ignored.Keys)
-      {
-        string toRemove = "name=\"" + key + "\"\r\n\r\n" + ignored[key];
-        rawData = rawData.Replace(toRemove, "");
-      }
-      return rawData;
     }
 
     private static string GetIpAddress(HttpRequest request)
@@ -217,29 +107,256 @@ namespace Mindscape.Raygun4Net.Builders
       return false;
     }
 
-    private static IList GetCookies(HttpCookieCollection cookieCollection, Func<string, bool> ignore)
+    private static IDictionary GetQueryString(HttpRequest request, RaygunRequestMessageOptions options)
     {
-      return Enumerable.Range(0, cookieCollection.Count)
-        .Select(i => cookieCollection[i])
-        .Where(c => !ignore(c.Name))
-        .Select(c => new Mindscape.Raygun4Net.Messages.RaygunRequestMessage.Cookie(c.Name, c.Value))
-        .ToList();
+      IDictionary queryString = null;
+
+      try
+      {
+        queryString = ToDictionary(request.QueryString, options.IsQueryParameterIgnored, options.IsSensitiveFieldIgnored);
+      }
+      catch (Exception e)
+      {
+        queryString = new Dictionary<string, string>() { { "Failed to retrieve", e.Message } };
+      }
+
+      return queryString;
     }
 
-    private static IDictionary ToDictionary(NameValueCollection nameValueCollection, Func<string, bool> ignore, bool truncateValues = false)
+    private static IList GetCookies(HttpRequest request, RaygunRequestMessageOptions options)
+    {
+      return Enumerable.Range(0, request.Cookies.Count)
+            .Select(i => request.Cookies[i])
+            .Where(c => !options.IsCookieIgnored(c.Name) && !options.IsSensitiveFieldIgnored(c.Name))
+            .Select(c => new Mindscape.Raygun4Net.Messages.RaygunRequestMessage.Cookie(c.Name, c.Value))
+            .ToList();
+    }
+
+    private static IDictionary GetServerVariables(HttpRequest request, RaygunRequestMessageOptions options)
+    {
+      IDictionary serverVariables = new Dictionary<string, string>();
+      try
+      {
+        serverVariables = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored, options.IsSensitiveFieldIgnored);
+        serverVariables.Remove("ALL_HTTP");
+        serverVariables.Remove("HTTP_COOKIE");
+        serverVariables.Remove("ALL_RAW");
+      }
+      catch (Exception e)
+      {
+        serverVariables = new Dictionary<string, string>() { { "Failed to retrieve", e.Message } };
+      }
+
+      return serverVariables;
+    }
+
+    private static IDictionary GetForm(HttpRequest request, RaygunRequestMessageOptions options)
+    {
+      IDictionary form = new Dictionary<string, string>();
+
+      try
+      {
+        form = ToDictionary(request.Form, options.IsFormFieldIgnored, options.IsSensitiveFieldIgnored, true);
+      }
+      catch (Exception e)
+      {
+        form = new Dictionary<string, string>() { { "Failed to retrieve", e.Message } };
+      }
+
+      return form;
+    }
+
+    private static IDictionary GetHeaders(HttpRequest request, RaygunRequestMessageOptions options)
+    {
+      IDictionary headers = new Dictionary<string, string>();
+
+      try
+      {
+        headers = ToDictionary(request.Headers, options.IsHeaderIgnored, options.IsSensitiveFieldIgnored);
+        headers.Remove("Cookie");
+      }
+      catch (Exception e)
+      {
+        headers = new Dictionary<string, string>() { { "Failed to retrieve", e.Message } };
+      }
+
+      return headers;
+    }
+
+    public static string GetRawData(HttpRequest request, RaygunRequestMessageOptions options)
+    {
+      if (options.IsRawDataIgnored)
+      {
+        return null;
+      }
+
+      try
+      {
+        // Don't send the raw request data at all if the content-type is urlencoded
+        var contentType        = request.Headers["Content-Type"];
+        var isTextHtml         = contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "text/html", CompareOptions.IgnoreCase) >= 0;
+        var isFormUrlEncoded   = contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "application/x-www-form-urlencoded", CompareOptions.IgnoreCase) >= 0;
+        var isHttpGet          = request.RequestType == "GET";
+        var streamIsNull       = request.InputStream == Stream.Null;
+        var streamIsRewindable = request.InputStream.CanSeek;
+
+        if (streamIsNull || !streamIsRewindable || isHttpGet || isFormUrlEncoded || isTextHtml)
+        {
+          return null;
+        }
+
+        // Read the stream
+        request.InputStream.Seek(0, SeekOrigin.Begin);
+        string rawData = new StreamReader(request.InputStream).ReadToEnd();
+
+        // Early escape if theres no data.
+        if (string.IsNullOrEmpty(rawData))
+        {
+          return null;
+        }
+
+        Dictionary<string, string> ignoredMultiPartFormData = null;
+        if (contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "multipart/form-data", CompareOptions.IgnoreCase) >= 0)
+        {
+          // For multipart form data, gather up all the form names and values to be stripped out later.
+          ignoredMultiPartFormData = GetIgnoredFormValues(request.Form, options.IsFormFieldIgnored);
+        }
+
+        // Strip out ignored form fields from multipart form data payloads.
+        if (ignoredMultiPartFormData != null)
+        {
+          rawData = StripIgnoredFormData(rawData, ignoredMultiPartFormData);
+        }
+
+        // Filter out sensitive values.
+        rawData = StripSensitiveValues(rawData, options);
+
+        // Early escape if theres no data.
+        if (string.IsNullOrEmpty(rawData))
+        {
+          return null;
+        }
+
+        // Ensure the raw data string is not too large (over 4096 bytes).
+        if (rawData.Length <= MAX_RAW_DATA_LENGTH)
+        {
+          return rawData;
+        }
+        else
+        {
+          return rawData.Substring(0, MAX_RAW_DATA_LENGTH);
+        }
+      }
+      catch (Exception e)
+      {
+        return "Failed to retrieve raw data: " + e.Message;
+      }
+    }
+
+    protected static Dictionary<string, string> GetIgnoredFormValues(NameValueCollection form, Func<string, bool> ignore)
+    {
+      Dictionary<string, string> ignoredFormValues = new Dictionary<string, string>();
+      foreach (string key in form.Keys)
+      {
+        if (ignore(key))
+        {
+          ignoredFormValues.Add(key, form[key]);
+        }
+      }
+      return ignoredFormValues;
+    }
+
+    protected static string StripIgnoredFormData(string rawData, Dictionary<string, string> ignored)
+    {
+      foreach (string key in ignored.Keys)
+      {
+        string toRemove = "name=\"" + key + "\"\r\n\r\n" + ignored[key];
+        rawData = rawData.Replace(toRemove, "");
+      }
+      return rawData;
+    }
+
+    public static string StripSensitiveValues(string rawData, RaygunRequestMessageOptions options)
+    {
+      // Early escape if theres no data.
+      if (string.IsNullOrEmpty(rawData))
+      {
+        return null;
+      }
+
+      // Find the parser we want to use.
+      var filters = GetRawDataFilters(options);
+
+      foreach (var filter in filters)
+      {
+        // Parse the raw data into a dictionary.
+        if (filter.CanParse(rawData))
+        {
+          var filteredData = filter.Filter(rawData, options.SensitiveFieldNames());
+
+          if (!string.IsNullOrEmpty(filteredData))
+          {
+            return filteredData;
+          }
+        }
+      }
+
+      // We have failed to parse and filter the raw data, so check if the data contains sensitive values and should be dropped.
+      if (options.IsRawDataIgnoredWhenFilteringFailed && DataContains(rawData, options.SensitiveFieldNames()))
+      {
+        return null;
+      }
+      else
+      {
+        return rawData;
+      }
+    }
+
+    private static IList<IRaygunDataFilter> GetRawDataFilters(RaygunRequestMessageOptions options)
+    {
+      var parsers = new List<IRaygunDataFilter>();
+
+      if (options.GetRawDataFilters() != null && options.GetRawDataFilters().Count > 0)
+      {
+        parsers.AddRange(options.GetRawDataFilters());
+      }
+
+      if (options.UseXmlRawDataFilter)
+      {
+        parsers.Add(new RaygunXmlDataFilter());
+      }
+
+      if (options.UseKeyValuePairRawDataFilter)
+      {
+        parsers.Add(new RaygunKeyValuePairDataFilter());
+      }
+
+      return parsers;
+    }
+
+    public static bool DataContains(string data, List<string> values)
+    {
+      bool exists = false;
+
+      foreach (var value in values)
+      {
+        if (data.Contains(value))
+        {
+          exists = true;
+          break;
+        }
+      }
+
+      return exists;
+    }
+
+    private static IDictionary ToDictionary(NameValueCollection nameValueCollection, Func<string, bool> ignore, Func<string, bool> isSensitive, bool truncateValues = false)
     {
       IEnumerable<string> keys;
 
       try
       {
-        if (ignore == null)
-        {
-          keys = nameValueCollection.AllKeys.Where(k => k != null);
-        }
-        else
-        {
-          keys = nameValueCollection.AllKeys.Where(k => !ignore(k));
-        }
+        keys = nameValueCollection.AllKeys.Where(k => !ignore(k) && !isSensitive(k));
       }
       catch (Exception e)
       {
@@ -257,14 +374,14 @@ namespace Mindscape.Raygun4Net.Builders
 
           if (truncateValues)
           {
-            if (keyToSend.Length > 256)
+            if (keyToSend.Length > MAX_KEY_LENGTH)
             {
-              keyToSend = keyToSend.Substring(0, 256);
+              keyToSend = keyToSend.Substring(0, MAX_KEY_LENGTH);
             }
 
-            if (valueToSend != null && valueToSend.Length > 256)
+            if (valueToSend != null && valueToSend.Length > MAX_VALUE_LENGTH)
             {
-              valueToSend = valueToSend.Substring(0, 256);
+              valueToSend = valueToSend.Substring(0, MAX_VALUE_LENGTH);
             }
           }
 

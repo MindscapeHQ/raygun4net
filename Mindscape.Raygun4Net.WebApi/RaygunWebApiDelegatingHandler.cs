@@ -6,8 +6,8 @@ namespace Mindscape.Raygun4Net.WebApi
 {
   public class RaygunWebApiDelegatingHandler : DelegatingHandler
   {
-    public const string RequestBodyKey = "Raygun.RequestBody";
-    private const int MaxBytesToCapture = 4096;
+    public const string REQUEST_BODY_KEY = "Raygun.RequestBody";
+    private const int MAX_BYTES_TO_CAPTURE = 4096;
 
     protected override async System.Threading.Tasks.Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
     {
@@ -18,8 +18,8 @@ namespace Mindscape.Raygun4Net.WebApi
         if (bytes != null && bytes.Length > 0)
         {
           // Only take first 4096 bytes
-          var bytesToSend = bytes.Take(MaxBytesToCapture).ToArray();
-          request.Properties[RequestBodyKey] = Encoding.UTF8.GetString(bytesToSend);
+          var bytesToSend = bytes.Take(MAX_BYTES_TO_CAPTURE).ToArray();
+          request.Properties[REQUEST_BODY_KEY] = Encoding.UTF8.GetString(bytesToSend);
         }
       }
 

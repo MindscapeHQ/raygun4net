@@ -86,6 +86,8 @@ If you have sensitive data in an HTTP request that you wish to prevent being tra
 Keys to ignore can be specified on the RaygunSettings tag in web.config, (or you can use the equivalent methods on RaygunWebApiClient if you are setting things up in code).
 The available options are:
 
+ignoreSensitiveFieldNames
+ignoreQueryParameterNames
 ignoreFormFieldNames
 ignoreHeaderNames
 ignoreCookieNames
@@ -95,6 +97,20 @@ These can be set to be a comma separated list of keys to ignore. Setting an opti
 Placing * before, after or at both ends of a key will perform an ends-with, starts-with or contains operation respectively.
 For example, ignoreFormFieldNames="*password*" will cause Raygun to ignore all form fields that contain "password" anywhere in the name.
 These options are not case sensitive.
+
+Note: The IgnoreSensitiveFieldNames will be applied to ALL fields in the RaygunRequestMessage. 
+
+We provide extra options for removing sensitive data from the request raw data. This comes in the form of filters as implemented by the IRaygunDataFilter interface.
+These filters read the raw data and strip values whose keys match those found in the RaygunSettings IgnoreSensitiveFieldNames property.
+
+We currently provide two implementations with this provider.
+
+RaygunKeyValuePairDataFilter e.g. filtering "user=raygun&password=pewpew"
+RaygunXmlDataFilter e.g. filtering "<password>pewpew</password>"
+
+These filters are initially disabled and can be enbled through the RaygunSettings class.
+
+You may also implement the IRaygunDataFilter and pass this to the RaygunClient to use when filtering raw data.
 
 Modify or cancel message
 ------------------------

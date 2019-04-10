@@ -18,10 +18,10 @@
   </metadata>
   <files>
     <!-- .NET 4.0+ -->
-    <file src="build\WebJob\Mindscape.Raygun4Net.Azure.WebJob.dll" target="lib\net40\Mindscape.Raygun4Net.Azure.WebJob.dll" />
-    <file src="build\WebJob\Mindscape.Raygun4Net.Azure.WebJob.pdb" target="lib\net40\Mindscape.Raygun4Net.Azure.WebJob.pdb" />
-    <file src="build\WebJob\Mindscape.Raygun4Net4.dll"             target="lib\net40\Mindscape.Raygun4Net4.dll" />
-    <file src="build\WebJob\Mindscape.Raygun4Net4.pdb"             target="lib\net40\Mindscape.Raygun4Net4.pdb" />
+    <file src="build\webjob\Mindscape.Raygun4Net.Azure.WebJob.dll" target="lib\net40\Mindscape.Raygun4Net.Azure.WebJob.dll" />
+    <file src="build\webjob\Mindscape.Raygun4Net.Azure.WebJob.pdb" target="lib\net40\Mindscape.Raygun4Net.Azure.WebJob.pdb" />
+    <file src="build\webjob\Mindscape.Raygun4Net4.dll"             target="lib\net40\Mindscape.Raygun4Net4.dll" />
+    <file src="build\webjob\Mindscape.Raygun4Net4.pdb"             target="lib\net40\Mindscape.Raygun4Net4.pdb" />
     
     <file src="Mindscape.Raygun4Net.Azure.WebJob\readme.txt" />
   </files>
