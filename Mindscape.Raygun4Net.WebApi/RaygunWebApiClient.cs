@@ -401,9 +401,11 @@ namespace Mindscape.Raygun4Net.WebApi
     }
 
     /// <summary>
-    /// Adds a raw data filter.
+    /// Add an <see cref="IRaygunDataFilter"/> implementation to be used when capturing the raw data
+    /// of a HTTP request. This filter will be passed the request raw data and is expected to remove 
+    /// or replace values whose keys are found in the list supplied to the Filter method.
     /// </summary>
-    /// <param name="filter">Filter.</param>
+    /// <param name="filter">Custom raw data filter implementation.</param>
     public void AddRawDataFilter(IRaygunDataFilter filter)
     {
       _requestMessageOptions.AddRawDataFilter(filter);
