@@ -43,11 +43,6 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       return message;
     }
 
-    /// <summary>
-    /// Gets the ip address.
-    /// </summary>
-    /// <returns>The ip address.</returns>
-    /// <param name="request">Request.</param>
     private static string GetIPAddress(HttpRequestMessage request)
     {
       try
@@ -80,12 +75,6 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       return null;
     }
 
-    /// <summary>
-    /// Gets the query string.
-    /// </summary>
-    /// <returns>The query string.</returns>
-    /// <param name="request">Request.</param>
-    /// <param name="options">Options.</param>
     private static IDictionary GetQueryString(HttpRequestMessage request, RaygunRequestMessageOptions options)
     {
       IDictionary queryString = null;
@@ -102,12 +91,6 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       return queryString;
     }
 
-    /// <summary>
-    /// Gets the form.
-    /// </summary>
-    /// <returns>The form.</returns>
-    /// <param name="request">Request.</param>
-    /// <param name="options">Options.</param>
     private static IDictionary GetForm(HttpRequestMessage request, RaygunRequestMessageOptions options)
     {
       IDictionary form = new Dictionary<string, string>();
@@ -124,12 +107,6 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       return form;
     }
 
-    /// <summary>
-    /// Gets the headers.
-    /// </summary>
-    /// <returns>The headers.</returns>
-    /// <param name="request">Request.</param>
-    /// <param name="options">Options.</param>
     private static IDictionary GetHeaders(HttpRequestMessage request, RaygunRequestMessageOptions options)
     {
       IDictionary headers = new Dictionary<string, string>();
@@ -161,12 +138,6 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       return headers;
     }
 
-    /// <summary>
-    /// Gets the raw data.
-    /// </summary>
-    /// <returns>The raw data.</returns>
-    /// <param name="request">Request.</param>
-    /// <param name="options">Options.</param>
     public static string GetRawData(HttpRequestMessage request, RaygunRequestMessageOptions options)
     {
       if (options.IsRawDataIgnored)

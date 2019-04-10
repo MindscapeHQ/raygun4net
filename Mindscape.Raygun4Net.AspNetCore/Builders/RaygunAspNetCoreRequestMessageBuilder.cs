@@ -39,11 +39,6 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return message;
     }
 
-    /// <summary>
-    /// Gets the ip address.
-    /// </summary>
-    /// <returns>The ip address.</returns>
-    /// <param name="connection">Connection information for the current request.</param>
     private static string GetIpAddress(ConnectionInfo connection)
     {
       var ip = connection.RemoteIpAddress ?? connection.LocalIpAddress;
@@ -63,11 +58,6 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return ip.ToString();
     }
 
-    /// <summary>
-    /// Gets the query string.
-    /// </summary>
-    /// <returns>The query string.</returns>
-    /// <param name="request">Request.</param>
     private static IDictionary GetQueryString(HttpRequest request, RaygunRequestMessageOptions options)
     {
       IDictionary queryString = null;
@@ -84,12 +74,6 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return queryString;
     }
 
-    /// <summary>
-    /// Gets the cookies.
-    /// </summary>
-    /// <returns>The cookies.</returns>
-    /// <param name="request">Request.</param>
-    /// <param name="options">Options.</param>
     private static IList GetCookies(HttpRequest request, RaygunRequestMessageOptions options)
     {
       IList cookies = null;
@@ -107,12 +91,6 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return cookies;
     }
 
-    /// <summary>
-    /// Gets the raw data.
-    /// </summary>
-    /// <returns>The raw data.</returns>
-    /// <param name="request">Request.</param>
-    /// <param name="options">Options.</param>
     private static string GetRawData(HttpRequest request, RaygunRequestMessageOptions options)
     {
       if (options.IsRawDataIgnored)
@@ -296,12 +274,6 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return exists;
     }
 
-    /// <summary>
-    /// Gets the headers.
-    /// </summary>
-    /// <returns>The headers.</returns>
-    /// <param name="request">Request.</param>
-    /// <param name="ignored">Ignored.</param>
     private static IDictionary GetHeaders(HttpRequest request, RaygunRequestMessageOptions options)
     {
       IDictionary headers = new Dictionary<string, string>();
@@ -320,12 +292,6 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return headers;
     }
 
-    /// <summary>
-    /// Gets the form.
-    /// </summary>
-    /// <returns>The form.</returns>
-    /// <param name="request">Request.</param>
-    /// <param name="options">Options.</param>
     private static async Task<IDictionary> GetForm(HttpRequest request, RaygunRequestMessageOptions options)
     {
       IDictionary form = null;

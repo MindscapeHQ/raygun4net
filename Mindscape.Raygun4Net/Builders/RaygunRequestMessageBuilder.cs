@@ -50,11 +50,6 @@ namespace Mindscape.Raygun4Net.Builders
       return message;
     }
 
-    /// <summary>
-    /// Gets the ip address.
-    /// </summary>
-    /// <returns>The ip address.</returns>
-    /// <param name="request">Request.</param>
     private static string GetIpAddress(HttpRequest request)
     {
       string strIp = null;
@@ -112,12 +107,6 @@ namespace Mindscape.Raygun4Net.Builders
       return false;
     }
 
-    /// <summary>
-    /// Gets the query string.
-    /// </summary>
-    /// <returns>The query string.</returns>
-    /// <param name="request">Request.</param>
-    /// <param name="options">Options.</param>
     private static IDictionary GetQueryString(HttpRequest request, RaygunRequestMessageOptions options)
     {
       IDictionary queryString = null;
@@ -134,12 +123,6 @@ namespace Mindscape.Raygun4Net.Builders
       return queryString;
     }
 
-    /// <summary>
-    /// Gets the cookies.
-    /// </summary>
-    /// <returns>The cookies.</returns>
-    /// <param name="request">Request.</param>
-    /// <param name="options">Options.</param>
     private static IList GetCookies(HttpRequest request, RaygunRequestMessageOptions options)
     {
       return Enumerable.Range(0, request.Cookies.Count)
@@ -149,12 +132,6 @@ namespace Mindscape.Raygun4Net.Builders
             .ToList();
     }
 
-    /// <summary>
-    /// Gets the server variables.
-    /// </summary>
-    /// <returns>The server variables.</returns>
-    /// <param name="request">Request.</param>
-    /// <param name="options">Options.</param>
     private static IDictionary GetServerVariables(HttpRequest request, RaygunRequestMessageOptions options)
     {
       IDictionary serverVariables = new Dictionary<string, string>();
@@ -173,12 +150,6 @@ namespace Mindscape.Raygun4Net.Builders
       return serverVariables;
     }
 
-    /// <summary>
-    /// Gets the form.
-    /// </summary>
-    /// <returns>The form.</returns>
-    /// <param name="request">Request.</param>
-    /// <param name="options">Options.</param>
     private static IDictionary GetForm(HttpRequest request, RaygunRequestMessageOptions options)
     {
       IDictionary form = new Dictionary<string, string>();
@@ -195,12 +166,6 @@ namespace Mindscape.Raygun4Net.Builders
       return form;
     }
 
-    /// <summary>
-    /// Gets the headers.
-    /// </summary>
-    /// <returns>The headers.</returns>
-    /// <param name="request">Request.</param>
-    /// <param name="options">Options.</param>
     private static IDictionary GetHeaders(HttpRequest request, RaygunRequestMessageOptions options)
     {
       IDictionary headers = new Dictionary<string, string>();
@@ -218,12 +183,6 @@ namespace Mindscape.Raygun4Net.Builders
       return headers;
     }
 
-    /// <summary>
-    /// Gets the raw data.
-    /// </summary>
-    /// <returns>The raw data.</returns>
-    /// <param name="request">Request.</param>
-    /// <param name="options">Options.</param>
     public static string GetRawData(HttpRequest request, RaygunRequestMessageOptions options)
     {
       if (options.IsRawDataIgnored)
