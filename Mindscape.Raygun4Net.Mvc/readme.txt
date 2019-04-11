@@ -106,9 +106,7 @@ We currently provide two implementations with this provider.
 RaygunKeyValuePairDataFilter e.g. filtering "user=raygun&password=pewpew"
 RaygunXmlDataFilter e.g. filtering "<password>pewpew</password>"
 
-These filters are initially disabled and can be enbled through the RaygunSettings class.
-
-You may also implement the IRaygunDataFilter and pass this to the RaygunClient to use when filtering raw data.
+These filters are initially disabled and can be enbled through the RaygunSettings class. You may also provide your own implementation of the IRaygunDataFilter and pass this to the RaygunClient to use when filtering raw data. An example for implementing an JSON filter can be found at the end of this readme.
 
 Modify or cancel message
 ------------------------
@@ -163,3 +161,82 @@ WebApi support
 
 Do you also need WebApi Raygun support for your project? Simply install the Mindscape.Raygun4Net.WebApi NuGet package which will work happily with this MVC package.
 The WebApi package is able to send additional exceptions to Raygun that occur in WebApi projects and can only be detected in specific ways which the package will do for you.
+
+Example JSON Data Filter
+========================
+
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Mindscape.Raygun4Net.Filters;
+
+public class RaygunJsonDataFilter : IRaygunDataFilter
+{
+  private const string FILTERED_VALUE = "[FILTERED]";
+
+  public bool CanParse(string data)
+  {
+    if (!string.IsNullOrEmpty(data))
+    {
+      int index = data.TakeWhile(c => char.IsWhiteSpace(c)).Count();
+      if (index < data.Length)
+      {
+        if (data.ElementAt(index).Equals('{'))
+        {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  public string Filter(string data, IList<string> ignoredKeys)
+  {
+    try
+    {
+      JObject jObject = JObject.Parse(data);
+
+      FilterTokensRecursive(jObject.Children(), ignoredKeys);
+
+      return jObject.ToString(Formatting.None, null);
+    }
+    catch
+    {
+      return null;
+    }
+  }
+
+  private void FilterTokensRecursive(IEnumerable<JToken> tokens, IList<string> ignoredKeys)
+  {
+    foreach (JToken token in tokens)
+    {
+      if (token is JProperty)
+      {
+        var property = token as JProperty;
+
+        if (ShouldIgnore(property, ignoredKeys))
+        {
+          property.Value = FILTERED_VALUE;
+        }
+        else if (property.Value.Type == JTokenType.Object)
+        {
+          FilterTokensRecursive(property.Value.Children(), ignoredKeys);
+        }
+      }
+    }
+  }
+
+  private bool ShouldIgnore(JProperty property, IList<string> ignoredKeys)
+  {
+    bool hasValue = property.Value.Type != JTokenType.Null;
+
+    if (property.Value.Type == JTokenType.String)
+    {
+      hasValue = !string.IsNullOrEmpty(property.Value.ToString());
+    }
+
+    return hasValue && !string.IsNullOrEmpty(property.Name) && ignoredKeys.Any(f => f.Equals(property.Name, StringComparison.OrdinalIgnoreCase));
+  }
+}
