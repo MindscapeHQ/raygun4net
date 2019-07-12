@@ -22,20 +22,22 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
         case DataSamplingMethod.Thumbprint:
           {
             var amount = GetSamplingSetting<int>(configuration, "SampleAmount");
-            var intervalOption = GetSamplingSetting<double>(configuration, "SampleIntervalOption");
-            
+            var intervalOption = GetSamplingSetting<int>(configuration, "SamplingOption");
+            var intervalAmount = GetSamplingSetting<double>(configuration, "SampleInterval");
+
             TimeSpan interval;
 
             switch ((SamplingOption)intervalOption)
             {
               case SamplingOption.Seconds:
-                interval = TimeSpan.FromSeconds(intervalOption ?? 1);
+                interval = TimeSpan.FromSeconds(intervalAmount ?? 1);
                 break;
               case SamplingOption.Hours:
-                interval = TimeSpan.FromHours(intervalOption ?? 1);
+                interval = TimeSpan.FromHours(intervalAmount ?? 1);
                 break;
+              case SamplingOption.Minutes:
               default:
-                interval = TimeSpan.FromMinutes(intervalOption ?? 1);
+                interval = TimeSpan.FromMinutes(intervalAmount ?? 1);
                 break;
             }
 

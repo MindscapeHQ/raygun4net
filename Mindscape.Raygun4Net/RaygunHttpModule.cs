@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Web;
 using Mindscape.Raygun4Net.ProfilingSupport;
 
@@ -70,68 +69,39 @@ namespace Mindscape.Raygun4Net
 
         _samplingManager = new SamplingManager();
       }
-    }    
-   
+    }
+
+    private static string settingsFilePath =
+      Path.Combine(
+        Path.Combine(
+          Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            "Raygun"),
+          "AgentSettings"),
+        "agent-configuration.json");
+
     public void RefreshAgentSettings()
     {
       while (true)
       {
         try
-        {          
-          var settingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Raygun", "AgentSettings", "agent-configuration.json");
-
+        {
           if (File.Exists(settingsFilePath))
           {
             var settingsText = File.ReadAllText(settingsFilePath);
-            var siteName = System.Web.Hosting.HostingEnvironment.SiteName;
-            var settings = SimpleJson.DeserializeObject(settingsText) as JsonObject;
-            var siteSettings = settings["ApiKeyConfiguration"] as JsonArray;
+            //var siteName = System.Web.Hosting.HostingEnvironment.SiteName;
+            var siteName = "TESTING";
 
-            if (settings != null && !String.IsNullOrEmpty(siteName))
-            {
-              foreach (JsonObject siteSetting in siteSettings)
-              {
-                if ((string)siteSetting["Identifier"] == siteName)
-                {
-                  var samplingMethod = (DataSamplingMethod)(long)siteSetting["SamplingMethod"];
-                  var policy = new SamplingPolicy(samplingMethod, (string)siteSetting["SamplingConfig"]);
-                  var overrides = new List<UrlSamplingOverride>();
-                  var overrideJsonArray = (JsonArray)siteSetting["SamplingOverrides"];
-
-                  if (overrideJsonArray != null && overrideJsonArray.Count > 0)
-                  {
-                    foreach (JsonObject overrideSetting in overrideJsonArray)
-                    {
-                      var overrideType = (int)overrideSetting["Type"];
-
-                      // Type 0: URL overrides
-                      if (overrideType == 0)
-                      {
-                        var overrideConfigurationData = (string)overrideSetting["OverrideData"];
-                        var overrideSettingConfiguration = SimpleJson.DeserializeObject(overrideConfigurationData) as JsonObject;
-
-                        if (overrideSettingConfiguration != null)
-                        {
-                          var overrideUrl = (string)overrideSettingConfiguration["Url"];
-                          var overridePolicyType = (SamplingOption)overrideSettingConfiguration["SampleIntervalOption"];
-                          var overridePolicy = new SamplingPolicy(overridePolicyType == SamplingOption.Traces ? DataSamplingMethod.Simple : DataSamplingMethod.Thumbprint, overrideConfigurationData);
-                          var samplingOverride = new UrlSamplingOverride(overrideUrl, overridePolicy);
-                        }
-                      }
-                    }
-                  }
-
-                  _samplingManager.SetSamplingPolicy(policy, overrides);
-                }
-              }
-            }
+            var samplingSetting = SettingsManager.FetchSamplingSettings(settingsText, siteName);
+            if (samplingSetting != null)
+              _samplingManager.SetSamplingPolicy(samplingSetting.Policy, samplingSetting.Overrides);
           }
         }
-        catch (ThreadAbortException)
+        catch (ThreadAbortException /*threadEx*/)
         {
           return;
         }
-        catch (Exception)
+        catch (Exception /*ex*/)
         {
         }
 

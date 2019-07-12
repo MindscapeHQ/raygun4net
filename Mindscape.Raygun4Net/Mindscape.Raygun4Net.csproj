@@ -92,6 +92,8 @@
     <Compile Include="ProfilingSupport\SamplingOption.cs" />
     <Compile Include="ProfilingSupport\SamplingOverride.cs" />
     <Compile Include="ProfilingSupport\SamplingPolicy.cs" />
+    <Compile Include="ProfilingSupport\SamplingSetting.cs" />
+    <Compile Include="ProfilingSupport\SettingsManager.cs" />
     <Compile Include="ProfilingSupport\TokenBucket.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Messages\RaygunErrorMessage.cs" />

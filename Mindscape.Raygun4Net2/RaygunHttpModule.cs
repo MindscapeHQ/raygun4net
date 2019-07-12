@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
+using System.Threading;
 using System.Web;
+using Mindscape.Raygun4Net.ProfilingSupport;
 
 namespace Mindscape.Raygun4Net
 {
   public class RaygunHttpModule : IHttpModule
   {
+    private static TimeSpan AgentPollingDelay = new TimeSpan(0, 5, 0);
+    private static ISamplingManager _samplingManager;
+
     private bool ExcludeErrorsBasedOnHttpStatusCode { get; set; }
     private bool ExcludeErrorsFromLocal { get; set; }
 
@@ -15,6 +20,9 @@ namespace Mindscape.Raygun4Net
     public void Init(HttpApplication context)
     {
       context.Error += SendError;
+      context.BeginRequest += BeginRequest;
+      context.EndRequest += EndRequest;
+
       HttpStatusCodesToExclude = new int[0];
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.ExcludeHttpStatusCodesList))
       {
@@ -32,6 +40,75 @@ namespace Mindscape.Raygun4Net
       }
       ExcludeErrorsBasedOnHttpStatusCode = HttpStatusCodesToExclude.Length > 0;
       ExcludeErrorsFromLocal = RaygunSettings.Settings.ExcludeErrorsFromLocal;
+
+      InitProfilingSupport();
+    }
+
+    private void BeginRequest(object sender, EventArgs e)
+    {
+      if (_samplingManager != null)
+      {
+        var application = (HttpApplication)sender;
+
+        if (!_samplingManager.TakeSample(application.Request.Url))
+        {
+          APM.Disable();
+        }
+      }
+    }
+
+    private void EndRequest(object sender, EventArgs e)
+    {
+      if (_samplingManager != null)
+      {
+        APM.Enable();
+      }
+    }
+    private void InitProfilingSupport()
+    {
+      if (APM.ProfilerAttached)
+      {
+        new Thread(new ThreadStart(RefreshAgentSettings)).Start();
+
+        _samplingManager = new SamplingManager();
+      }
+    }
+
+    private static string settingsFilePath =
+      Path.Combine(
+        Path.Combine(
+          Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            "Raygun"),
+          "AgentSettings"),
+        "agent-configuration.json");
+
+    public void RefreshAgentSettings()
+    {
+      while (true)
+      {
+        try
+        {
+          if (File.Exists(settingsFilePath))
+          {
+            var settingsText = File.ReadAllText(settingsFilePath);
+            var siteName = System.Web.Hosting.HostingEnvironment.SiteName;
+
+            var samplingSetting = SettingsManager.FetchSamplingSettings(settingsText, siteName);
+            if (samplingSetting != null)
+              _samplingManager.SetSamplingPolicy(samplingSetting.Policy, samplingSetting.Overrides);
+          }
+        }
+        catch (ThreadAbortException)
+        {
+          return;
+        }
+        catch (Exception)
+        {
+        }
+
+        Thread.Sleep(AgentPollingDelay);
+      }
     }
 
     public void Dispose()

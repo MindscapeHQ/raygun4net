@@ -120,6 +120,12 @@
     <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SamplingPolicy.cs">
       <Link>ProfilingSupport\SamplingPolicy.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SamplingSetting.cs">
+      <Link>ProfilingSupport\SamplingSetting.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SettingsManager.cs">
+      <Link>ProfilingSupport\SettingsManager.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\TokenBucket.cs">
       <Link>ProfilingSupport\TokenBucket.cs</Link>
     </Compile>
