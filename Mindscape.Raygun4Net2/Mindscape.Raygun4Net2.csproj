@@ -44,6 +44,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="Portable.ConcurrentDictionary, Version=1.0.4.0, Culture=neutral, PublicKeyToken=8b3524163ea7a2b3, processorArchitecture=MSIL">
+      <HintPath>..\packages\Portable.ConcurrentDictionary.1.0.4\lib\net20\Portable.ConcurrentDictionary.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
@@ -96,6 +99,30 @@
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunResponseMessage.cs">
       <Link>Messages\RaygunResponseMessage.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\APM.cs">
+      <Link>ProfilingSupport\APM.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\ISamplingManager.cs">
+      <Link>ProfilingSupport\ISamplingManager.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\ISamplingOverride.cs">
+      <Link>ProfilingSupport\ISamplingOverride.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SamplingManager.cs">
+      <Link>ProfilingSupport\SamplingManager.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SamplingOption.cs">
+      <Link>ProfilingSupport\SamplingOption.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SamplingOverride.cs">
+      <Link>ProfilingSupport\SamplingOverride.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SamplingPolicy.cs">
+      <Link>ProfilingSupport\SamplingPolicy.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\TokenBucket.cs">
+      <Link>ProfilingSupport\TokenBucket.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\RaygunClientBase.cs">
       <Link>RaygunClientBase.cs</Link>
     </Compile>
@@ -117,6 +144,9 @@
     <Compile Include="RaygunMessageBuilder.cs" />
     <Compile Include="RaygunSettings.cs" />
     <Compile Include="RaygunRequestMessageOptions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

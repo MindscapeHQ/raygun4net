@@ -81,20 +81,36 @@
     <Compile Include="..\Mindscape.Raygun4Net\IRaygunApplication.cs">
       <Link>IRaygunApplication.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\APM.cs">
+      <Link>ProfilingSupport\APM.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\ISamplingManager.cs">
+      <Link>ProfilingSupport\ISamplingManager.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\ISamplingOverride.cs">
+      <Link>ProfilingSupport\ISamplingOverride.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SamplingManager.cs">
+      <Link>ProfilingSupport\SamplingManager.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SamplingOption.cs">
+      <Link>ProfilingSupport\SamplingOption.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SamplingOverride.cs">
+      <Link>ProfilingSupport\SamplingOverride.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SamplingPolicy.cs">
+      <Link>ProfilingSupport\SamplingPolicy.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\TokenBucket.cs">
+      <Link>ProfilingSupport\TokenBucket.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\RaygunHttpModule.cs">
       <Link>RaygunHttpModule.cs</Link>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\RaygunMessageBuilder.cs">
       <Link>RaygunMessageBuilder.cs</Link>
     </Compile>
-    <Compile Include="ProfilingSupport\APM.cs" />
-    <Compile Include="ProfilingSupport\ISamplingManager.cs" />
-    <Compile Include="ProfilingSupport\ISamplingOverride.cs" />
-    <Compile Include="ProfilingSupport\SamplingManager.cs" />
-    <Compile Include="ProfilingSupport\SamplingOption.cs" />
-    <Compile Include="ProfilingSupport\SamplingOverride.cs" />
-    <Compile Include="ProfilingSupport\SamplingPolicy.cs" />
-    <Compile Include="ProfilingSupport\TokenBucket.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaygunClient.cs" />
     <Compile Include="WebClientHelper.cs" />
