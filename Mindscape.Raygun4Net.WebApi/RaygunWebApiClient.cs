@@ -18,6 +18,8 @@ namespace Mindscape.Raygun4Net.WebApi
 {
   public class RaygunWebApiClient : RaygunClientBase
   {
+    internal const string UnhandledExceptionTag = "UnhandledException";
+
     private readonly string _apiKey;
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private readonly List<Type> _wrapperExceptions = new List<Type>();
