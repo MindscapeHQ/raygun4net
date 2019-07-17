@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web;
@@ -41,7 +42,7 @@ namespace Mindscape.Raygun4Net
       if (CanSend(lastError))
       {
         var client = GetRaygunClient(application);
-        client.SendInBackground(lastError);
+        client.SendInBackground(lastError, new List<string> {RaygunClient.UnhandledExceptionTag});
       }
     }
 
@@ -50,7 +51,7 @@ namespace Mindscape.Raygun4Net
       if (CanSend(exception))
       {
         var client = GetRaygunClient(application);
-        client.SendInBackground(exception);
+        client.SendInBackground(exception, new List<string> { RaygunClient.UnhandledExceptionTag });
       }
     }
 

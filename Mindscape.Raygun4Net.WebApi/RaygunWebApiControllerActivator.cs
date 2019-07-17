@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
@@ -25,13 +26,13 @@ namespace Mindscape.Raygun4Net.WebApi
       catch(InvalidOperationException ex)
       {
         var client = _clientCreator.GenerateRaygunWebApiClient(request);
-        client.SendInBackground(ex.InnerException);
+        client.SendInBackground(ex.InnerException, new List<string> {RaygunWebApiClient.UnhandledExceptionTag});
         client.FlagExceptionAsSent(ex); // Stops us re-sending the outer exception
         throw;
       }
       catch(Exception ex)
       {
-        _clientCreator.GenerateRaygunWebApiClient(request).SendInBackground(ex);
+        _clientCreator.GenerateRaygunWebApiClient(request).SendInBackground(ex, new List<string> { RaygunWebApiClient.UnhandledExceptionTag });
         throw;
       }
     }

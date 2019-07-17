@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Collections.Generic;
+using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
@@ -24,7 +25,7 @@ namespace Mindscape.Raygun4Net.WebApi
       }
       catch (HttpResponseException ex)
       {
-        _clientCreator.GenerateRaygunWebApiClient(controllerContext.Request).SendInBackground(ex);
+        _clientCreator.GenerateRaygunWebApiClient(controllerContext.Request).SendInBackground(ex, new List<string> { RaygunWebApiClient.UnhandledExceptionTag });
         throw;
       }
     }
@@ -59,7 +60,7 @@ namespace Mindscape.Raygun4Net.WebApi
       }
       catch (HttpResponseException ex)
       {
-        _clientCreator.GenerateRaygunWebApiClient(request).SendInBackground(ex);
+        _clientCreator.GenerateRaygunWebApiClient(request).SendInBackground(ex, new List<string> { RaygunWebApiClient.UnhandledExceptionTag });
         throw;
       }
     }

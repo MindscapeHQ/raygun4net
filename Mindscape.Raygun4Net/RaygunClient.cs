@@ -17,6 +17,8 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunClient : RaygunClientBase
   {
+    internal const string UnhandledExceptionTag = "UnhandledException";
+
     private readonly string _apiKey;
     private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private readonly List<Type> _wrapperExceptions = new List<Type>();
