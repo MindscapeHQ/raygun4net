@@ -60,6 +60,7 @@
     <Compile Include="Model\FakeRaygunRequestMessageBuilder.cs" />
     <Compile Include="Model\GenericException.cs" />
     <Compile Include="Model\WrapperException.cs" />
+    <Compile Include="ProfilingSupport\SettingsManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaygunBreadcrumbsTests.cs" />
     <Compile Include="RaygunClientBaseTests.cs" />

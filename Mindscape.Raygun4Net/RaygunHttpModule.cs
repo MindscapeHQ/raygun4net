@@ -92,7 +92,7 @@ namespace Mindscape.Raygun4Net
             //var siteName = System.Web.Hosting.HostingEnvironment.SiteName;
             var siteName = "TESTING";
 
-            var samplingSetting = SettingsManager.FetchSamplingSettings(settingsText, siteName);
+            var samplingSetting = SettingsManager.ParseSamplingSettings(settingsText, siteName);
             if (samplingSetting != null)
               _samplingManager.SetSamplingPolicy(samplingSetting.Policy, samplingSetting.Overrides);
           }

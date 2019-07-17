@@ -94,7 +94,7 @@ namespace Mindscape.Raygun4Net
             var settingsText = File.ReadAllText(settingsFilePath);
             var siteName = System.Web.Hosting.HostingEnvironment.SiteName;
 
-            var samplingSetting = SettingsManager.FetchSamplingSettings(settingsText, siteName);
+            var samplingSetting = SettingsManager.ParseSamplingSettings(settingsText, siteName);
             if (samplingSetting != null)
               _samplingManager.SetSamplingPolicy(samplingSetting.Policy, samplingSetting.Overrides);
           }

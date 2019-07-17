@@ -5,19 +5,57 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
 {
   public static class SettingsManager
   {
-    public static SamplingSetting FetchSamplingSettings(string settingsText, string siteName)
+    //This method will not parse the entire JSON structure, it only looks at the following fields:
+    //{
+    //  ...
+    //  "ApiKeyConfiguration": [
+    //    {
+    //      ...
+    //      "SamplingMethod": 2,
+    //      "SamplingConfig": "{\"SampleAmount\":7,\"SampleIntervalAmount\":2,\"SampleIntervalOption\":2}",
+    //      "SamplingOverrides": [
+    //        {
+    //          "Type": 0,
+    //          "OverrideData": "{\"SampleAmount\":5,\"SampleBucketSize\":10,\"SampleOption\":\"Traces\",\"Url\":\"test-traces.com\"}"
+    //        },
+    //        ...
+    //      ]
+    //    }
+    //  ]
+    //}
+    public static SamplingSetting ParseSamplingSettings(string settingsText, string identifier)
     {
-      var settings = SimpleJson.DeserializeObject(settingsText) as JsonObject;
-      var siteSettings = settings["ApiKeyConfiguration"] as JsonArray;
-
-      if (settings == null || String.IsNullOrEmpty(siteName))
+      var settings = SimpleJson.DeserializeObject(settingsText) as JsonObject;      
+      if (settings == null)
       {
-        return null;
+        throw new InvalidOperationException("InvalidJson was provided: " + settingsText);
       }
 
+      if (String.IsNullOrEmpty(identifier))
+      {
+        throw new ArgumentException("A site name must be provided", nameof(identifier));
+      }
+
+      if (settings.ContainsKey("ApiKeyConfiguration") == false)
+      {
+        throw new InvalidOperationException(
+          string.Format("Expected property \"ApiKeyConfiguration\" in the JSON values: {0}", settingsText));
+      }
+
+      var siteSettings = settings["ApiKeyConfiguration"] as JsonArray;
       foreach (JsonObject siteSetting in siteSettings)
       {
-        if ((string)siteSetting["Identifier"] != siteName)
+        var expectedKeys = new[] { "Identifier", "SamplingMethod", "SamplingConfig", "SamplingOverrides" };
+        foreach (var expectedKey in expectedKeys)
+        {
+          if (siteSetting.ContainsKey(expectedKey) == false)
+          {
+            throw new InvalidOperationException(
+              string.Format("Expected all the following properties {0} in the JSON values: {1}", String.Join(", ", expectedKeys), settingsText));
+          }
+        }
+
+        if ((string)siteSetting["Identifier"] != identifier)
         {
           continue;
         }
@@ -29,7 +67,7 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
 
         if (overrideJsonArray == null || overrideJsonArray.Count == 0)
         {
-          continue;
+          return new SamplingSetting(policy, overrides);
         }
 
         foreach (JsonObject overrideSetting in overrideJsonArray)
@@ -44,8 +82,16 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
 
             if (overrideSettingConfiguration != null)
             {
+              if (overrideSettingConfiguration.ContainsKey("Url") == false || 
+                  overrideSettingConfiguration.ContainsKey("SampleOption") == false)
+              {
+                throw new InvalidOperationException(
+                  string.Format("Expected properties \"Url\" and \"SampleOption\" in the JSON values: {0}", overrideSettingConfiguration));
+              }
+
               var overrideUrl = (string)overrideSettingConfiguration["Url"];
-              var overridePolicyType = (SamplingOption)(long)overrideSettingConfiguration["SamplingOption"];
+              var overridePolicyTypeRaw = (string)overrideSettingConfiguration["SampleOption"];
+              var overridePolicyType = (SamplingOption)Enum.Parse(typeof(SamplingOption), overridePolicyTypeRaw);
               var dataSamplingMethod =
                 overridePolicyType == SamplingOption.Traces ? DataSamplingMethod.Simple : DataSamplingMethod.Thumbprint;
 
@@ -54,9 +100,9 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
               overrides.Add(samplingOverride);
             }
           }
-
-          return new SamplingSetting(policy, overrides);
         }
+
+        return new SamplingSetting(policy, overrides);
       }
 
       return null;
