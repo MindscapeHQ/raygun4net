@@ -19,15 +19,9 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.2" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Mindscape.Raygun4Net\Filters\IRaygunDataFilter.cs">
-      <Link>Filters\IRaygunDataFilter.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Filters\RaygunXmlDataFilter.cs">
-      <Link>Filters\RaygunXmlDataFilter.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Filters\RaygunKeyValuePairDataFilter.cs">
-      <Link>Filters\RaygunKeyValuePairDataFilter.cs</Link>
-    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Filters\IRaygunDataFilter.cs" Link="Filters\IRaygunDataFilter.cs" />
+    <Compile Include="..\Mindscape.Raygun4Net\Filters\RaygunXmlDataFilter.cs" Link="Filters\RaygunXmlDataFilter.cs" />
+    <Compile Include="..\Mindscape.Raygun4Net\Filters\RaygunKeyValuePairDataFilter.cs" Link="Filters\RaygunKeyValuePairDataFilter.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore.Common\Mindscape.Raygun4Net.NetCore.Common.csproj" />

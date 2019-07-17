@@ -3,12 +3,15 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Mindscape.Raygun4Net.ProfilingSupport;
 
 namespace Mindscape.Raygun4Net.AspNetCore
 {
@@ -18,13 +21,21 @@ namespace Mindscape.Raygun4Net.AspNetCore
     private readonly RaygunMiddlewareSettings _middlewareSettings;
     private readonly RaygunSettings _settings;
 
+    private static TimeSpan AgentPollingDelay = new TimeSpan(0, 5, 0);
+    private static ISamplingManager _samplingManager;
+
     public RaygunAspNetMiddleware(RequestDelegate next, IOptions<RaygunSettings> settings, RaygunMiddlewareSettings middlewareSettings)
     {
       _next = next;
       _middlewareSettings = middlewareSettings;
 
       _settings = _middlewareSettings.ClientProvider.GetRaygunSettings(settings.Value ?? new RaygunSettings());
+
+#if NETSTANDARD2_0 // TODO make it work for NETSTANDARD 1.6?
+      InitProfilingSupport();
+#endif
     }
+
     public async Task Invoke(HttpContext httpContext)
     {
       MemoryStream buffer = null;
@@ -68,7 +79,27 @@ namespace Mindscape.Raygun4Net.AspNetCore
  
       try
       {
+        if (_samplingManager != null)
+        {
+          var request = httpContext.Request;
+          Uri uri;
+          if (request.QueryString.HasValue)
+            uri = new Uri($"{request.Scheme}://{request.Host}{request.Path}{request.QueryString.Value}");
+          else
+            uri = new Uri($"{request.Scheme}://{request.Host}{request.Path}");
+
+          if (!_samplingManager.TakeSample(uri))
+          {
+            APM.Disable();
+          }
+        }
+
         await _next.Invoke(httpContext);
+
+        if (_samplingManager != null)
+        {
+          APM.Enable();
+        }
       }
       catch (Exception e)
       {
@@ -90,6 +121,55 @@ namespace Mindscape.Raygun4Net.AspNetCore
         }
       }
     }
+
+#if NETSTANDARD2_0 // TODO make it work for NETSTANDARD 1.6?
+    private void InitProfilingSupport()
+    {
+      if (APM.ProfilerAttached)
+      {
+        new Thread(new ThreadStart(RefreshAgentSettings)).Start();
+        _samplingManager = new SamplingManager();
+      }
+    }
+
+    private static string settingsFilePath =
+      Path.Combine(
+        Path.Combine(
+          Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            "Raygun"),
+          "AgentSettings"),
+        "agent-configuration.json");
+
+    private void RefreshAgentSettings()
+    {
+      while (true)
+      {
+        try
+        {
+          if (File.Exists(settingsFilePath))
+          {
+            var settingsText = File.ReadAllText(settingsFilePath);
+            // In .NET Core, siteName is instead the name on the main dll, i.e. MyApp.dll
+            var siteName = Path.GetFileName(Assembly.GetEntryAssembly().Location);
+
+            var samplingSetting = SettingsManager.ParseSamplingSettings(settingsText, siteName);
+            if (samplingSetting != null)
+              _samplingManager.SetSamplingPolicy(samplingSetting.Policy, samplingSetting.Overrides);
+          }
+        }
+        catch (ThreadAbortException /*threadEx*/)
+        {
+          return;
+        }
+        catch (Exception /*ex*/)
+        {
+        }
+
+        Thread.Sleep(AgentPollingDelay);
+      }
+    }
+#endif // NETSTANDARD2_0
   }
 
   public static class ApplicationBuilderExtensions
