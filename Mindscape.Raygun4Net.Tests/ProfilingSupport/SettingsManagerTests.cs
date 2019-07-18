@@ -51,7 +51,7 @@ namespace Mindscape.Raygun4Net.Tests.ProfilingSupport
       var overrideTraces = result.Overrides[0];
       Assert.NotNull(overrideTraces);
       Assert.AreEqual(typeof(UrlSamplingOverride), overrideTraces.GetType()); // "Type": 0,
-      Assert.AreEqual("http://test-traces.com", overrideTraces.Url);
+      Assert.AreEqual(new Uri("http://test-traces.com"), overrideTraces.Url);
       CheckPolicyAndSampler(overrideTraces.Policy,
         expectedSamplingMethod: DataSamplingMethod.Simple,
         expectedConfig: "{ \"SampleOption\":\"Traces\", \"Url\":\"http://test-traces.com\", \"SampleAmount\":5, \"SampleBucketSize\":10 }",
@@ -65,7 +65,7 @@ namespace Mindscape.Raygun4Net.Tests.ProfilingSupport
       var overrideSeconds = result.Overrides[1];
       Assert.NotNull(overrideSeconds);
       Assert.AreEqual(typeof(UrlSamplingOverride), overrideSeconds.GetType()); // "Type": 0,
-      Assert.AreEqual("http://test-seconds.com", overrideSeconds.Url);
+      Assert.AreEqual(new Uri("http://test-seconds.com"), overrideSeconds.Url);
       CheckPolicyAndSampler(overrideSeconds.Policy,
         expectedSamplingMethod: DataSamplingMethod.Thumbprint,
         expectedConfig: "{ \"SampleOption\":\"Seconds\", \"Url\":\"http://test-seconds.com\", \"SampleAmount\":1, \"SampleBucketSize\":5 }",
