@@ -68,7 +68,10 @@ namespace Mindscape.Raygun4Net
     {
       if (APM.ProfilerAttached)
       {
-        new Thread(new ThreadStart(RefreshAgentSettings)).Start();
+        var thread = new Thread(new ThreadStart(RefreshAgentSettings));
+        // ensure that our thread *doesn't* keep the application alive!
+        thread.IsBackground = true;
+        thread.Start();
 
         _samplingManager = new SamplingManager();
       }
