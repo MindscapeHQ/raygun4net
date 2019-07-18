@@ -84,11 +84,20 @@
     <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\APM.cs">
       <Link>ProfilingSupport\APM.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\DataSamplingMethod.cs">
+      <Link>ProfilingSupport\DataSamplingMethod.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\IDataSampler.cs">
+      <Link>ProfilingSupport\IDataSampler.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\ISamplingManager.cs">
       <Link>ProfilingSupport\ISamplingManager.cs</Link>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\ISamplingOverride.cs">
       <Link>ProfilingSupport\ISamplingOverride.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\PerUriRateSampler.cs">
+      <Link>ProfilingSupport\PerUriRateSampler.cs</Link>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SamplingManager.cs">
       <Link>ProfilingSupport\SamplingManager.cs</Link>
@@ -107,6 +116,9 @@
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SettingsManager.cs">
       <Link>ProfilingSupport\SettingsManager.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SimpleRateSampler.cs">
+      <Link>ProfilingSupport\SimpleRateSampler.cs</Link>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\TokenBucket.cs">
       <Link>ProfilingSupport\TokenBucket.cs</Link>

@@ -47,9 +47,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="Portable.ConcurrentDictionary, Version=1.0.4.0, Culture=neutral, PublicKeyToken=8b3524163ea7a2b3, processorArchitecture=MSIL">
-      <HintPath>..\packages\Portable.ConcurrentDictionary.1.0.4\lib\net35\Portable.ConcurrentDictionary.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -86,14 +83,19 @@
     <Compile Include="Messages\RaygunIdentifierMessage.cs" />
     <Compile Include="Messages\RaygunResponseMessage.cs" />
     <Compile Include="ProfilingSupport\APM.cs" />
+    <Compile Include="ProfilingSupport\ConcurrentDictionary.cs" />
+    <Compile Include="ProfilingSupport\DataSamplingMethod.cs" />
+    <Compile Include="ProfilingSupport\IDataSampler.cs" />
     <Compile Include="ProfilingSupport\ISamplingManager.cs" />
     <Compile Include="ProfilingSupport\ISamplingOverride.cs" />
+    <Compile Include="ProfilingSupport\PerUriRateSampler.cs" />
     <Compile Include="ProfilingSupport\SamplingManager.cs" />
     <Compile Include="ProfilingSupport\SamplingOption.cs" />
     <Compile Include="ProfilingSupport\SamplingOverride.cs" />
     <Compile Include="ProfilingSupport\SamplingPolicy.cs" />
     <Compile Include="ProfilingSupport\SamplingSetting.cs" />
     <Compile Include="ProfilingSupport\SettingsManager.cs" />
+    <Compile Include="ProfilingSupport\SimpleRateSampler.cs" />
     <Compile Include="ProfilingSupport\TokenBucket.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Messages\RaygunErrorMessage.cs" />
