@@ -39,6 +39,13 @@ namespace Mindscape.Raygun4Net.Tests.ProfilingSupport
         expectedConfig: "{ \"SampleAmount\":1, \"SampleIntervalAmount\":1, \"SampleIntervalOption\":2 }",
         expectedSamplerType: typeof(PerUriRateSampler));
 
+      var perUriRateSampler = result.Policy.Sampler as PerUriRateSampler;
+      Assert.NotNull(perUriRateSampler);
+      Assert.AreEqual(1, perUriRateSampler.MaxPerInterval);
+      Assert.AreEqual(0, perUriRateSampler.Interval.Seconds);
+      Assert.AreEqual(1, perUriRateSampler.Interval.Minutes); // "SampleIntervalOptions": 2 => Minutes
+      Assert.AreEqual(0, perUriRateSampler.Interval.Hours);
+
       Assert.AreEqual(2, result.Overrides.Count);
 
       var overrideTraces = result.Overrides[0];
@@ -50,6 +57,11 @@ namespace Mindscape.Raygun4Net.Tests.ProfilingSupport
         expectedConfig: "{ \"SampleOption\":\"Traces\", \"Url\":\"http://test-traces.com\", \"SampleAmount\":5, \"SampleBucketSize\":10 }",
         expectedSamplerType: typeof(SimpleRateSampler)); // "SampleOption":"Traces" implies SimpleRateSampler
 
+      var simpleRateSamplerOverride = overrideTraces.Policy.Sampler as SimpleRateSampler;
+      Assert.NotNull(simpleRateSamplerOverride);
+      Assert.AreEqual(5, simpleRateSamplerOverride.Take);
+      Assert.AreEqual(10, simpleRateSamplerOverride.Limit);
+
       var overrideSeconds = result.Overrides[1];
       Assert.NotNull(overrideSeconds);
       Assert.AreEqual(typeof(UrlSamplingOverride), overrideSeconds.GetType()); // "Type": 0,
@@ -58,6 +70,13 @@ namespace Mindscape.Raygun4Net.Tests.ProfilingSupport
         expectedSamplingMethod: DataSamplingMethod.Thumbprint,
         expectedConfig: "{ \"SampleOption\":\"Seconds\", \"Url\":\"http://test-seconds.com\", \"SampleAmount\":1, \"SampleBucketSize\":5 }",
         expectedSamplerType: typeof(PerUriRateSampler)); // "SampleOption":"Seconds" (or Minutes/Hours) implies SimpleRateSampler
+
+      var perUriRateSamplerOverride = overrideSeconds.Policy.Sampler as PerUriRateSampler;
+      Assert.NotNull(perUriRateSamplerOverride);
+      Assert.AreEqual(1, perUriRateSamplerOverride.MaxPerInterval);
+      Assert.AreEqual(5, perUriRateSamplerOverride.Interval.Seconds);
+      Assert.AreEqual(0, perUriRateSamplerOverride.Interval.Minutes);
+      Assert.AreEqual(0, perUriRateSamplerOverride.Interval.Hours);
     }
 
     [Test]
@@ -86,7 +105,12 @@ namespace Mindscape.Raygun4Net.Tests.ProfilingSupport
         expectedSamplingMethod: DataSamplingMethod.Simple,
         expectedConfig: "{ \"SampleAmount\": 1, \"SampleBucketSize\": 2 }",
         expectedSamplerType: typeof(SimpleRateSampler));
-  
+
+      var simpleRateSampler = result.Policy.Sampler as SimpleRateSampler;
+      Assert.NotNull(simpleRateSampler);
+      Assert.AreEqual(1, simpleRateSampler.Take);
+      Assert.AreEqual(2, simpleRateSampler.Limit);
+
       // We only sample overides with "Type": 1 (UrlOverrides), all others are ignored
       Assert.AreEqual(0, result.Overrides.Count);
     }
