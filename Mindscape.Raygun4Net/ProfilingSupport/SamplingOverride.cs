@@ -6,12 +6,13 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
   {
     public UrlSamplingOverride(string url, SamplingPolicy policy)
     {
-      // Store as System.Uri becase that's what we use when we do the comparision (in SamplingManager)
-      Url = new Uri(url); 
+      // We can't store 'url' in a 'System.Uri' because it's come from user input and
+      // so it might not be in the correct format (i.e. new Uri(url) might throw!)
+      Url = url;
       Policy = policy;
     }
 
-    public Uri Url { get; private set; }
+    public string Url { get; private set; }
     public SamplingPolicy Policy { get; private set; }
   }
 }

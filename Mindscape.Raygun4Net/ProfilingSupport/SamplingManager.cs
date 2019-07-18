@@ -28,7 +28,11 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
       // Check overrides first
       foreach (var samplingOveride in Overrides)
       {
-        if (uri.ToString().Equals(samplingOveride.Url.ToString(), StringComparison.OrdinalIgnoreCase))
+        // Use a case-insensitive 'contains', because 'samplingOveride.Url' is from user input,
+        // i.e. we don't know if it has 'http://', ends with '/', etc, so we do the best we can
+        var url = uri.ToString();
+        if (url.Length >= samplingOveride.Url.Length && samplingOveride.Url.Length > 0 &&
+            url.IndexOf(samplingOveride.Url, StringComparison.OrdinalIgnoreCase) >= 0)
         {
           activePolicy = samplingOveride.Policy;
           break;

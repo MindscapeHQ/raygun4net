@@ -1,8 +1,8 @@
-﻿using Mindscape.Raygun4Net.ProfilingSupport;
-using NUnit.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Mindscape.Raygun4Net.ProfilingSupport;
+using NUnit.Framework;
 
 namespace Mindscape.Raygun4Net.Tests.ProfilingSupport
 {
@@ -39,7 +39,7 @@ namespace Mindscape.Raygun4Net.Tests.ProfilingSupport
       var overrideConfig = "{ \"SampleAmount\":1, \"SampleBucketSize\":3 }";
 
       var overrideSamplingPolicy = new SamplingPolicy(DataSamplingMethod.Simple, overrideConfig);
-      var urlSamplingOverride = new UrlSamplingOverride("http://test-override.com/", overrideSamplingPolicy);      
+      var urlSamplingOverride = new UrlSamplingOverride("http://test-override.com", overrideSamplingPolicy);      
       samplingManager.SetSamplingPolicy(defaultSamplingPolicy, new List<UrlSamplingOverride>(new[] { urlSamplingOverride }));
 
       var defaultSampler = defaultSamplingPolicy.Sampler as SimpleRateSampler;
