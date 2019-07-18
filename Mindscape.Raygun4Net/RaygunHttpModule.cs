@@ -18,7 +18,7 @@ namespace Mindscape.Raygun4Net
     private bool ExcludeErrorsFromLocal { get; set; }
 
     private int[] HttpStatusCodesToExclude { get; set; }
-    
+
     public void Init(HttpApplication context)
     {
       context.Error += SendError;
@@ -92,8 +92,7 @@ namespace Mindscape.Raygun4Net
           if (File.Exists(settingsFilePath))
           {
             var settingsText = File.ReadAllText(settingsFilePath);
-            //var siteName = System.Web.Hosting.HostingEnvironment.SiteName;
-            var siteName = "TESTING";
+            var siteName = System.Web.Hosting.HostingEnvironment.SiteName;
 
             var samplingSetting = SettingsManager.ParseSamplingSettings(settingsText, siteName);
             if (samplingSetting != null)

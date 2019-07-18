@@ -153,7 +153,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
           if (File.Exists(settingsFilePath))
           {
             var settingsText = File.ReadAllText(settingsFilePath);
-            // In .NET Core, siteName is instead the name on the main dll, i.e. MyApp.dll
+            // In .NET Core, siteName needs to be the the name of the main dll, i.e. MyApp.dll
             var siteName = Path.GetFileName(Assembly.GetEntryAssembly().Location);
 
             var samplingSetting = SettingsManager.ParseSamplingSettings(settingsText, siteName);

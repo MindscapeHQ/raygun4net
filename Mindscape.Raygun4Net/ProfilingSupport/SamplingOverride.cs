@@ -4,6 +4,9 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
 {
   public class UrlSamplingOverride : ISamplingOverride
   {
+    public string Url { get; private set; }
+    public SamplingPolicy Policy { get; private set; }
+
     public UrlSamplingOverride(string url, SamplingPolicy policy)
     {
       // We can't store 'url' in a 'System.Uri' because it's come from user input and
@@ -11,8 +14,5 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
       Url = url;
       Policy = policy;
     }
-
-    public string Url { get; private set; }
-    public SamplingPolicy Policy { get; private set; }
   }
 }

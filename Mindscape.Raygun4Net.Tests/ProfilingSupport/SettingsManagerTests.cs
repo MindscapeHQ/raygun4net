@@ -267,7 +267,7 @@ namespace Mindscape.Raygun4Net.Tests.ProfilingSupport
   ]
 }";
 
-      // \"Url\":\"http://test-traces.com\", is MISSING
+      // "Url":"http://test-traces.com", is MISSING
       var result = SettingsManager.ParseSamplingSettings(settingsJson, "TESTING");
     }
 
