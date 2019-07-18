@@ -143,12 +143,6 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       Assert.AreEqual(2, GlobalFilters.Filters.Count);
     }
 
-    [Test]
-    public void CanLoadSettingsFile()
-    {
-      _module.RefreshAgentSettings();
-    }
-
     private static bool HasRaygunFilter
     {
       get
