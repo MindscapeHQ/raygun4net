@@ -56,7 +56,7 @@ namespace Mindscape.Raygun4Net
     private void EndRequest(object sender, EventArgs e)
     {
       if (_samplingManager != null)
-      {        
+      {
         APM.Enable();
       }
     }
@@ -83,7 +83,7 @@ namespace Mindscape.Raygun4Net
           "AgentSettings"),
         "agent-configuration.json");
 
-    public void RefreshAgentSettings()
+    private void RefreshAgentSettings()
     {
       while (true)
       {
@@ -99,11 +99,11 @@ namespace Mindscape.Raygun4Net
               _samplingManager.SetSamplingPolicy(samplingSetting.Policy, samplingSetting.Overrides);
           }
         }
-        catch (ThreadAbortException /*threadEx*/)
+        catch (ThreadAbortException)
         {
           return;
         }
-        catch (Exception /*ex*/)
+        catch (Exception)
         {
         }
 

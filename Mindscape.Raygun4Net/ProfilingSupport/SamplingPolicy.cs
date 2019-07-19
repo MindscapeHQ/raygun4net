@@ -66,7 +66,6 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
             }
             else
             {
-              // throw an exception?
               throw new InvalidOperationException("Unexpected JSON values for a policy: " + configuration);
             }
 

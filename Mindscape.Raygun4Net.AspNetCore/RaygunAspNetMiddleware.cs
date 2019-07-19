@@ -135,14 +135,9 @@ namespace Mindscape.Raygun4Net.AspNetCore
       }
     }
 
-    private static string settingsFilePath =
-      Path.Combine(
-        Path.Combine(
-          Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-            "Raygun"),
-          "AgentSettings"),
-        "agent-configuration.json");
+    private static string settingsFilePath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+        "Raygun", "AgentSettings", "agent-configuration.json");
 
     private void RefreshAgentSettings()
     {

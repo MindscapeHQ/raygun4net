@@ -64,6 +64,7 @@ namespace Mindscape.Raygun4Net
         APM.Enable();
       }
     }
+
     private void InitProfilingSupport()
     {
       if (APM.ProfilerAttached)
@@ -86,7 +87,7 @@ namespace Mindscape.Raygun4Net
           "AgentSettings"),
         "agent-configuration.json");
 
-    public void RefreshAgentSettings()
+    private void RefreshAgentSettings()
     {
       while (true)
       {
