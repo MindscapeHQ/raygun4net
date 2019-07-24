@@ -31,9 +31,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
 
       _settings = _middlewareSettings.ClientProvider.GetRaygunSettings(settings.Value ?? new RaygunSettings());
 
-#if NETSTANDARD2_0 // TODO make it work for NETSTANDARD 1.6?
       InitProfilingSupport();
-#endif
     }
 
     public async Task Invoke(HttpContext httpContext)
@@ -122,21 +120,24 @@ namespace Mindscape.Raygun4Net.AspNetCore
       }
     }
 
-#if NETSTANDARD2_0 // TODO make it work for NETSTANDARD 1.6?
     private void InitProfilingSupport()
     {
       if (APM.ProfilerAttached)
       {
-        var thread = new Thread(new ThreadStart(RefreshAgentSettings));
-        // ensure that our thread *doesn't* keep the application alive!
-        thread.IsBackground = true;
-        thread.Start();
         _samplingManager = new SamplingManager();
+
+        // See http://blog.i3arnon.com/2015/07/02/task-run-long-running/ for why TaskCreationOptions.LongRunning is needed
+        _settingsTask = new Task(() => RefreshAgentSettings(), TaskCreationOptions.LongRunning);
+        _settingsTask.Start();
       }
     }
 
     private static string settingsFilePath = Path.Combine(
+#if NETSTANDARD1_6
+        @"C:\ProgramData\Raygun\AgentSettings\", // the best we can do under .NET Std 1.6|
+#else
         Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+#endif
         "Raygun", "AgentSettings", "agent-configuration.json");
 
     private void RefreshAgentSettings()
@@ -156,18 +157,19 @@ namespace Mindscape.Raygun4Net.AspNetCore
               _samplingManager.SetSamplingPolicy(samplingSetting.Policy, samplingSetting.Overrides);
           }
         }
+#if NETSTANDARD2_0
         catch (ThreadAbortException /*threadEx*/)
         {
           return;
         }
+#endif
         catch (Exception /*ex*/)
         {
         }
 
-        Thread.Sleep(AgentPollingDelay);
+        Task.Delay(AgentPollingDelay).Wait();
       }
     }
-#endif // NETSTANDARD2_0
   }
 
   public static class ApplicationBuilderExtensions
