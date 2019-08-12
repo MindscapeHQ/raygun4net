@@ -1,9 +1,9 @@
 ﻿using Mindscape.Raygun4Net.Messages;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
+using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Mindscape.Raygun4Net.Builders
 {
@@ -62,7 +62,7 @@ namespace Mindscape.Raygun4Net.Builders
       return stringBuilder.ToString();
     }
 
-    private static RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
+    /*private static RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
     {
       var lines = new List<RaygunErrorStackTraceLineMessage>();
 
@@ -102,6 +102,117 @@ namespace Mindscape.Raygun4Net.Builders
       }
 
       return lines.ToArray();
+    }*/
+
+    private static RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
+    {
+      var lines = new List<RaygunErrorStackTraceLineMessage>();
+
+      var stackTrace = new StackTrace(exception, true);
+      var frames = stackTrace.GetFrames();
+
+      if (frames == null || frames.Length == 0)
+      {
+        var line = new RaygunErrorStackTraceLineMessage { FileName = "none", LineNumber = 0 };
+        lines.Add(line);
+
+        return lines.ToArray();
+      }
+
+      foreach (StackFrame frame in frames)
+      {
+        MethodBase method = frame.GetMethod();
+
+        if (method != null)
+        {
+          int lineNumber = frame.GetFileLineNumber();
+
+          if (lineNumber == 0)
+          {
+            lineNumber = frame.GetILOffset();
+          }
+
+          var methodName = GenerateMethodName(method);
+
+          string file = frame.GetFileName();
+
+          string className = method.DeclaringType != null ? method.DeclaringType.FullName : "(unknown)";
+
+          var line = new RaygunErrorStackTraceLineMessage
+          {
+            FileName = file,
+            LineNumber = lineNumber,
+            MethodName = methodName,
+            ClassName = className
+          };
+
+          lines.Add(line);
+        }
+      }
+
+      return lines.ToArray();
+    }
+
+    protected static string GenerateMethodName(MethodBase method)
+    {
+      var stringBuilder = new StringBuilder();
+
+      stringBuilder.Append(method.Name);
+
+      bool first = true;
+
+      if (method is MethodInfo && method.IsGenericMethod)
+      {
+        Type[] genericArguments = method.GetGenericArguments();
+        stringBuilder.Append("[");
+
+        for (int i = 0; i < genericArguments.Length; i++)
+        {
+          if (!first)
+          {
+            stringBuilder.Append(",");
+          }
+          else
+          {
+            first = false;
+          }
+
+          stringBuilder.Append(genericArguments[i].Name);
+        }
+
+        stringBuilder.Append("]");
+      }
+
+      stringBuilder.Append("(");
+
+      ParameterInfo[] parameters = method.GetParameters();
+
+      first = true;
+
+      for (int i = 0; i < parameters.Length; ++i)
+      {
+        if (!first)
+        {
+          stringBuilder.Append(", ");
+        }
+        else
+        {
+          first = false;
+        }
+
+        string type = "<UnknownType>";
+
+        if (parameters[i].ParameterType != null)
+        {
+          type = parameters[i].ParameterType.Name;
+        }
+
+        stringBuilder.Append(type + " " + parameters[i].Name);
+      }
+
+      stringBuilder.Append(")");
+
+      return stringBuilder.ToString();
     }
   }
 }
