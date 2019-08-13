@@ -172,6 +172,7 @@ namespace Mindscape.Raygun4Net.Builders
           // Assume 32 bit for now:
           int debugDirectoryEntriesOffset = signatureOffset + 4 + 20 + 144;
 
+          // TODO: this address can be 0 if there is no debug information:
           byte[] debugVirtualAddressArray = new byte[4];
           Marshal.Copy(nativeImageBase + debugDirectoryEntriesOffset, debugVirtualAddressArray, 0, 4);
           int debugVirtualAddress = BitConverter.ToInt32(debugVirtualAddressArray, 0);
@@ -182,11 +183,39 @@ namespace Mindscape.Raygun4Net.Builders
 
           DirectoryEntry debugDataDirectoryEntry = new DirectoryEntry(debugVirtualAddress, debugSize);
 
+          byte[] stampArray = new byte[4];
+          Marshal.Copy(nativeImageBase + debugVirtualAddress + 4, stampArray, 0, 4);
+          int stamp = BitConverter.ToInt32(stampArray, 0);
+
+          byte[] majorVersionArray = new byte[2];
+          Marshal.Copy(nativeImageBase + debugVirtualAddress + 8, majorVersionArray, 0, 2);
+          short majorVersion = BitConverter.ToInt16(majorVersionArray, 0);
+
+          byte[] minorVersionArray = new byte[2];
+          Marshal.Copy(nativeImageBase + debugVirtualAddress + 10, minorVersionArray, 0, 2);
+          short minorVersion = BitConverter.ToInt16(minorVersionArray, 0);
+
+          byte[] typeArray = new byte[4];
+          Marshal.Copy(nativeImageBase + debugVirtualAddress + 12, typeArray, 0, 4);
+          int type = BitConverter.ToInt32(typeArray, 0);
+
+          byte[] sizeOfDataArray = new byte[4];
+          Marshal.Copy(nativeImageBase + debugVirtualAddress + 16, sizeOfDataArray, 0, 4);
+          int sizeOfData = BitConverter.ToInt32(sizeOfDataArray, 0);
+
+          byte[] addressOfRawDataArray = new byte[4];
+          Marshal.Copy(nativeImageBase + debugVirtualAddress + 20, addressOfRawDataArray, 0, 4);
+          int addressOfRawData = BitConverter.ToInt32(addressOfRawDataArray, 0);
+
+          byte[] pointerToRawDataArray = new byte[4];
+          Marshal.Copy(nativeImageBase + debugVirtualAddress + 24, pointerToRawDataArray, 0, 4);
+          int pointerToRawData = BitConverter.ToInt32(pointerToRawDataArray, 0);
+
           var line = new RaygunErrorStackTraceLineMessage
           {
             NativeIP = nativeIP.ToString(),
             NativeImageBase = nativeImageBase.ToString(),
-            Temp = debugVirtualAddress + " " + debugSize
+            Temp = debugVirtualAddress + " " + debugSize + " " + stamp + " " + majorVersion + " " + minorVersion + " " + type + " " + sizeOfData + " " + addressOfRawData + " " + pointerToRawData
           };
 
           lines.Add(line);
