@@ -14,7 +14,7 @@
 
     public string NativeImageBase { get; set; }
 
-    public string Signature { get; set; }
+    public string Temp { get; set; }
 
     public string Raw { get; set; }
 

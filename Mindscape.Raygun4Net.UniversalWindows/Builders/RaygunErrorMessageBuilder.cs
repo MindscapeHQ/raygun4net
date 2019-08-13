@@ -156,15 +156,37 @@ namespace Mindscape.Raygun4Net.Builders
           // Signature (4 bytes, offset to this can be found at 0x3c)
           // COFF File Header (20 bytes)
           // Optional header (variable size)
+          //   Standard fields
+          //   Windows-specific fields
+          //   Data directories (position 28/112)
+          //     ...
+          //     Debug (8 bytes, position 114/160) <-- I want this
+          //     ...
 
-          byte[] signature = new byte[4];
-          Marshal.Copy(nativeImageBase + 0x3c, signature, 0, 4);
+          // TODO: use SizeOfOptionalHeader and NumberOfRvaAndSizes before tapping into data directories
+
+          byte[] signatureArray = new byte[4];
+          Marshal.Copy(nativeImageBase + 0x3c, signatureArray, 0, 4);
+          int signatureOffset = BitConverter.ToInt32(signatureArray, 0); // relative to image base
+
+          // Assume 32 bit for now:
+          int debugDirectoryEntriesOffset = signatureOffset + 4 + 20 + 144;
+
+          byte[] debugVirtualAddressArray = new byte[4];
+          Marshal.Copy(nativeImageBase + debugDirectoryEntriesOffset, debugVirtualAddressArray, 0, 4);
+          int debugVirtualAddress = BitConverter.ToInt32(debugVirtualAddressArray, 0);
+
+          byte[] debugSizeArray = new byte[4];
+          Marshal.Copy(nativeImageBase + debugDirectoryEntriesOffset + 4, debugSizeArray, 0, 4);
+          int debugSize = BitConverter.ToInt32(debugSizeArray, 0);
+
+          DirectoryEntry debugDataDirectoryEntry = new DirectoryEntry(debugVirtualAddress, debugSize);
 
           var line = new RaygunErrorStackTraceLineMessage
           {
             NativeIP = nativeIP.ToString(),
             NativeImageBase = nativeImageBase.ToString(),
-            Signature = BitConverter.ToInt32(signature, 0).ToString()
+            Temp = debugVirtualAddress + " " + debugSize
           };
 
           lines.Add(line);
