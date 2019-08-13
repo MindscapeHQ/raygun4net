@@ -3,7 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Reflection.PortableExecutable;
+using System.Runtime.InteropServices;
 using System.Text;
+using Windows.Devices.PointOfService.Provider;
 
 namespace Mindscape.Raygun4Net.Builders
 {
@@ -137,13 +140,21 @@ namespace Mindscape.Raygun4Net.Builders
         return lines.ToArray();
       }
 
-      
-
       foreach (StackFrame frame in frames)
       {
         if (frame.HasNativeImage())
         {
           raygunErrorMessage.Message = "Has native image";
+          IntPtr nativeIP = frame.GetNativeIP();
+          IntPtr nativeImageBase = frame.GetNativeImageBase();
+
+          var line = new RaygunErrorStackTraceLineMessage
+          {
+            NativeIP = nativeIP.ToString(),
+            NativeImageBase = nativeImageBase.ToString()
+          };
+          
+          
         }
 
         MethodBase method = frame.GetMethod();
@@ -162,16 +173,6 @@ namespace Mindscape.Raygun4Net.Builders
           string file = frame.GetFileName();
 
           string className = method.DeclaringType != null ? method.DeclaringType.FullName : "(unknown)";
-
-          var line = new RaygunErrorStackTraceLineMessage
-          {
-            FileName = file,
-            LineNumber = lineNumber,
-            MethodName = methodName,
-            ClassName = className
-          };
-
-          lines.Add(line);
         }
       }
 
