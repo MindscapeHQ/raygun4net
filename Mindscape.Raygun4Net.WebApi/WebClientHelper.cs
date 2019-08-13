@@ -1,10 +1,12 @@
 using System;
 using System.Net;
 
-namespace Mindscape.Raygun4Net.WebApi
+namespace Mindscape.Raygun4Net
 {
+
     public static class WebClientHelper
     {
+        [ThreadStatic]
         private static WebClient _client;
 
         private static WebClient Client => _client ?? (_client = new WebClient());
