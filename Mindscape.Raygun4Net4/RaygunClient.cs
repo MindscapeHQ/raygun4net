@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using Mindscape.Raygun4Net.Messages;
@@ -609,8 +610,15 @@ namespace Mindscape.Raygun4Net
           }
           catch (Exception ex)
           {
-            SaveMessage(message);
-            System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+            try
+            {
+              SaveMessage(message);
+              Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+            }
+            catch
+            {
+              //ignored
+            }
 
             if (RaygunSettings.Settings.ThrowOnError)
             {
