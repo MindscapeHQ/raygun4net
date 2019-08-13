@@ -265,5 +265,14 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
       Assert.IsTrue(ex1.Data["Type"].ToString().Contains("FakeRaygunWebApiClient"));
       Assert.IsTrue(ex2.Data["Type"].ToString().Contains("WrapperException"));
     }
+
+    [Test]
+    public void CanUseInitializerToSetData()
+    {
+      _client.AddMessageInitializer(new TestRaygunMessageInitializer());
+      var message = _client.ExposeBuildMessage(_exception, null, null);
+
+      Assert.IsTrue(message.Details.UserCustomData.Contains("initializerTestData"));
+    }
   }
 }
