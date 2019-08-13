@@ -15,10 +15,28 @@ namespace Mindscape.Raygun4Net.Builders
 
       var exceptionType = exception.GetType();
 
-      message.Message = exception.Message;
+      if (string.IsNullOrWhiteSpace(exception.StackTrace))
+      {
+        message.Message = "StackTrace is null";
+      }
+      else
+      {
+        char[] delim = { '\r', '\n' };
+        var frames = exception.StackTrace.Split(delim, StringSplitOptions.RemoveEmptyEntries);
+        if (frames.Length == 0)
+        {
+          message.Message = "No frames";
+        }
+        else
+        {
+          message.Message = exception.StackTrace;
+
+        }
+      }
+      
       message.ClassName = FormatTypeName(exceptionType, true);
 
-      message.StackTrace = BuildStackTrace(exception);
+      message.StackTrace = BuildStackTrace(message, exception);
       message.Data = exception.Data;
 
       AggregateException ae = exception as AggregateException;
@@ -104,10 +122,10 @@ namespace Mindscape.Raygun4Net.Builders
       return lines.ToArray();
     }*/
 
-    private static RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
+    private static RaygunErrorStackTraceLineMessage[] BuildStackTrace(RaygunErrorMessage raygunErrorMessage, Exception exception)
     {
       var lines = new List<RaygunErrorStackTraceLineMessage>();
-
+      
       var stackTrace = new StackTrace(exception, true);
       var frames = stackTrace.GetFrames();
 
@@ -119,8 +137,15 @@ namespace Mindscape.Raygun4Net.Builders
         return lines.ToArray();
       }
 
+      
+
       foreach (StackFrame frame in frames)
       {
+        if (frame.HasNativeImage())
+        {
+          raygunErrorMessage.Message = "Has native image";
+        }
+
         MethodBase method = frame.GetMethod();
 
         if (method != null)
