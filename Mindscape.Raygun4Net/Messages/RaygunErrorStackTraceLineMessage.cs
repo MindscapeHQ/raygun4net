@@ -14,6 +14,8 @@
 
     public string NativeImageBase { get; set; }
 
+    public string Signature { get; set; }
+
     public string Raw { get; set; }
 
     public override string ToString()

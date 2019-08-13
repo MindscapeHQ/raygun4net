@@ -148,13 +148,26 @@ namespace Mindscape.Raygun4Net.Builders
           IntPtr nativeIP = frame.GetNativeIP();
           IntPtr nativeImageBase = frame.GetNativeImageBase();
 
+          // PE Format:
+          // -----------
+          // https://docs.microsoft.com/en-us/windows/win32/debug/pe-format
+          // -----------
+          // MS-DOS Stub
+          // Signature (4 bytes, offset to this can be found at 0x3c)
+          // COFF File Header (20 bytes)
+          // Optional header (variable size)
+
+          byte[] signature = new byte[4];
+          Marshal.Copy(nativeImageBase + 0x3c, signature, 0, 4);
+
           var line = new RaygunErrorStackTraceLineMessage
           {
             NativeIP = nativeIP.ToString(),
-            NativeImageBase = nativeImageBase.ToString()
+            NativeImageBase = nativeImageBase.ToString(),
+            Signature = BitConverter.ToInt32(signature, 0).ToString()
           };
-          
-          
+
+          lines.Add(line);
         }
 
         MethodBase method = frame.GetMethod();
