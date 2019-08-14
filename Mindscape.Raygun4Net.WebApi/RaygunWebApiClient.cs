@@ -237,6 +237,7 @@ namespace Mindscape.Raygun4Net.WebApi
         System.Diagnostics.Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
         return false;
       }
+
       return true;
     }
 
@@ -252,6 +253,7 @@ namespace Mindscape.Raygun4Net.WebApi
       {
         return false;
       }
+
       return base.CanSend(exception);
     }
 
@@ -261,6 +263,7 @@ namespace Mindscape.Raygun4Net.WebApi
       {
         return !RaygunSettings.Settings.ExcludedStatusCodes.Contains(message.Details.Response.StatusCode);
       }
+
       return true;
     }
 
@@ -419,7 +422,7 @@ namespace Mindscape.Raygun4Net.WebApi
     /// <param name="exception">The exception to deliver.</param>
     public override void Send(Exception exception)
     {
-      Send(exception, null, (IDictionary)null);
+      Send(exception, null, (IDictionary) null);
     }
 
     /// <summary>
@@ -430,7 +433,7 @@ namespace Mindscape.Raygun4Net.WebApi
     /// <param name="tags">A list of strings associated with the message.</param>
     public void Send(Exception exception, IList<string> tags)
     {
-      Send(exception, tags, (IDictionary)null);
+      Send(exception, tags, (IDictionary) null);
     }
 
     /// <summary>
@@ -458,7 +461,7 @@ namespace Mindscape.Raygun4Net.WebApi
     /// <param name="exception">The exception to deliver.</param>
     public void SendInBackground(Exception exception)
     {
-      SendInBackground(exception, null, (IDictionary)null);
+      SendInBackground(exception, null, (IDictionary) null);
     }
 
     /// <summary>
@@ -468,7 +471,7 @@ namespace Mindscape.Raygun4Net.WebApi
     /// <param name="tags">A list of strings associated with the message.</param>
     public void SendInBackground(Exception exception, IList<string> tags)
     {
-      SendInBackground(exception, tags, (IDictionary)null);
+      SendInBackground(exception, tags, (IDictionary) null);
     }
 
     /// <summary>
@@ -486,7 +489,8 @@ namespace Mindscape.Raygun4Net.WebApi
         RaygunRequestMessage currentRequestMessage = BuildRequestMessage();
         DateTime currentTime = DateTime.UtcNow;
 
-        ThreadPool.QueueUserWorkItem(c => {
+        ThreadPool.QueueUserWorkItem(c =>
+        {
           _currentRequestMessage.Value = currentRequestMessage;
           StripAndSend(exception, tags, userCustomData, currentTime);
         });
@@ -547,6 +551,7 @@ namespace Mindscape.Raygun4Net.WebApi
       {
         message.Details.GroupingKey = customGroupingKey;
       }
+
       return message;
     }
 
@@ -585,11 +590,15 @@ namespace Mindscape.Raygun4Net.WebApi
               {
                 e.Data["Type"] = rtle.Types[index];
               }
-              catch { }
+              catch
+              {
+              }
+
               foreach (Exception ex in StripWrapperExceptions(e))
               {
                 yield return ex;
               }
+
               index++;
             }
           }
@@ -615,53 +624,33 @@ namespace Mindscape.Raygun4Net.WebApi
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public override void Send(RaygunMessage raygunMessage)
     {
-      if (ValidateApiKey())
+      try
       {
-        bool canSend = OnSendingMessage(raygunMessage) && CanSend(raygunMessage);
-        if (canSend)
+        if (ValidateApiKey())
         {
-          using (var client = new WebClient())
+
+          bool canSend = OnSendingMessage(raygunMessage) && CanSend(raygunMessage);
+          if (canSend)
           {
-            client.Headers.Add("X-ApiKey", _apiKey);
-            client.Headers.Add("content-type", "application/json; charset=utf-8");
-            client.Encoding = System.Text.Encoding.UTF8;
-
-            if (WebRequest.DefaultWebProxy != null)
-            {
-              Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(new Uri(RaygunSettings.Settings.ApiEndpoint.ToString()));
-
-              if (proxyUri != null && proxyUri.AbsoluteUri != RaygunSettings.Settings.ApiEndpoint.ToString())
-              {
-                client.Proxy = new WebProxy(proxyUri, false);
-
-                if (ProxyCredentials == null)
-                {
-                  client.UseDefaultCredentials = true;
-                  client.Proxy.Credentials = CredentialCache.DefaultCredentials;
-                }
-                else
-                {
-                  client.UseDefaultCredentials = false;
-                  client.Proxy.Credentials = ProxyCredentials;
-                }
-              }
-            }
-
-            try
-            {
-              var message = SimpleJson.SerializeObject(raygunMessage);
-              client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
-            }
-            catch (Exception ex)
-            {
-              System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
-
-              if (RaygunSettings.Settings.ThrowOnError)
-              {
-                throw;
-              }
-            }
+            var message = SimpleJson.SerializeObject(raygunMessage);
+            WebClientHelper.Send(message, _apiKey, ProxyCredentials);
           }
+        }
+      }
+      catch (Exception ex)
+      {
+        try
+        {
+          System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+        }
+        catch
+        {
+          // ignored
+        }
+
+        if (RaygunSettings.Settings.ThrowOnError)
+        {
+          throw;
         }
       }
     }
