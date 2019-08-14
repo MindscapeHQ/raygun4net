@@ -84,7 +84,6 @@
     <Compile Include="RaygunWebApiExceptionLogger.cs" />
     <Compile Include="RaygunWebApiFilters.cs" />
     <Compile Include="RaygunWebApiMessageBuilder.cs" />
-    <Compile Include="WebClientHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

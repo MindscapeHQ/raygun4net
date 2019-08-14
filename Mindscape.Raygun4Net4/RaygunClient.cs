@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using Mindscape.Raygun4Net.Messages;
@@ -606,19 +605,12 @@ namespace Mindscape.Raygun4Net
         {
           try
           {
-           WebClientHelper.Send(message,_apiKey, ProxyCredentials);
+            Send(message);
           }
           catch (Exception ex)
           {
-            try
-            {
-              SaveMessage(message);
-              Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
-            }
-            catch
-            {
-              //ignored
-            }
+            SaveMessage(message);
+            System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
 
             if (RaygunSettings.Settings.ThrowOnError)
             {
@@ -630,6 +622,52 @@ namespace Mindscape.Raygun4Net
         }
       }
     }
+
+    private void Send(string message)
+    {
+      if (ValidateApiKey())
+      {
+        using (var client = CreateWebClient())
+        {
+          client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
+        }
+      }
+    }
+
+    protected WebClient CreateWebClient()
+    {
+      var client = new WebClient();
+      client.Headers.Add("X-ApiKey", _apiKey);
+      client.Headers.Add("content-type", "application/json; charset=utf-8");
+      client.Encoding = System.Text.Encoding.UTF8;
+
+      if (WebProxy != null)
+      {
+        client.Proxy = WebProxy;
+      }
+      else if (WebRequest.DefaultWebProxy != null)
+      {
+        Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(new Uri(RaygunSettings.Settings.ApiEndpoint.ToString()));
+
+        if (proxyUri != null && proxyUri.AbsoluteUri != RaygunSettings.Settings.ApiEndpoint.ToString())
+        {
+          client.Proxy = new WebProxy(proxyUri, false);
+
+          if (ProxyCredentials == null)
+          {
+            client.UseDefaultCredentials = true;
+            client.Proxy.Credentials = CredentialCache.DefaultCredentials;
+          }
+          else
+          {
+            client.UseDefaultCredentials = false;
+            client.Proxy.Credentials = ProxyCredentials;
+          }
+        }
+      }
+      return client;
+    }
+
     private void SaveMessage(string message)
     {
       try
@@ -707,7 +745,7 @@ namespace Mindscape.Raygun4Net
                   string text = reader.ReadToEnd();
                   try
                   {
-                    WebClientHelper.Send(text,_apiKey, ProxyCredentials);
+                    Send(text);
                   }
                   catch
                   {

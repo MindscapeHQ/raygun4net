@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Text;
 
@@ -24,16 +23,7 @@ namespace Mindscape.Raygun4Net.WebApi
         }
       }
 
-      var response = await base.SendAsync(request, cancellationToken);
-      if (cancellationToken.IsCancellationRequested)
-      {
-        return new HttpResponseMessage(HttpStatusCode.InternalServerError)
-        {
-          ReasonPhrase = "The request was cancelled by the client"
-        };
-      }
-
-      return response;
+      return await base.SendAsync(request, cancellationToken);
     }
   }
 }
