@@ -183,6 +183,8 @@ namespace Mindscape.Raygun4Net.Builders
 
           DirectoryEntry debugDataDirectoryEntry = new DirectoryEntry(debugVirtualAddress, debugSize);
 
+          // A debug directory:
+
           byte[] stampArray = new byte[4];
           Marshal.Copy(nativeImageBase + debugVirtualAddress + 4, stampArray, 0, 4);
           int stamp = BitConverter.ToInt32(stampArray, 0);
@@ -211,11 +213,28 @@ namespace Mindscape.Raygun4Net.Builders
           Marshal.Copy(nativeImageBase + debugVirtualAddress + 24, pointerToRawDataArray, 0, 4);
           int pointerToRawData = BitConverter.ToInt32(pointerToRawDataArray, 0);
 
+          // Debug information:
+          // Reference: http://www.godevtool.com/Other/pdb.htm
+
+          byte[] debugSignatureArray = new byte[4];
+          Marshal.Copy(nativeImageBase + addressOfRawData, debugSignatureArray, 0, 4);
+          int debugSignature = BitConverter.ToInt32(debugSignatureArray, 0);
+
+          byte[] debugGuidArray = new byte[16];
+          Marshal.Copy(nativeImageBase + addressOfRawData + 4, debugGuidArray, 0, 16);
+
+          // age
+
+          byte[] fileNameArray = new byte[sizeOfData - 24];
+          Marshal.Copy(nativeImageBase + addressOfRawData + 24, fileNameArray, 0, sizeOfData - 24);
+          
+          string pdbFileName = Encoding.UTF8.GetString(fileNameArray, 0, fileNameArray.Length);
+
           var line = new RaygunErrorStackTraceLineMessage
           {
             NativeIP = nativeIP.ToString(),
             NativeImageBase = nativeImageBase.ToString(),
-            Temp = debugVirtualAddress + " " + debugSize + " " + stamp + " " + majorVersion + " " + minorVersion + " " + type + " " + sizeOfData + " " + addressOfRawData + " " + pointerToRawData
+            Temp = debugVirtualAddress + " " + debugSize + " " + stamp + " " + majorVersion + " " + minorVersion + " " + type + " " + sizeOfData + " " + addressOfRawData + " " + pointerToRawData + " " + debugSignature + " " + pdbFileName
           };
 
           lines.Add(line);
