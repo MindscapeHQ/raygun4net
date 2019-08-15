@@ -171,78 +171,43 @@ namespace Mindscape.Raygun4Net.Builders
           //     ...
 
           // TODO: use SizeOfOptionalHeader and NumberOfRvaAndSizes before tapping into data directories
-
-          byte[] signatureArray = new byte[4];
-          Marshal.Copy(nativeImageBase + 0x3c, signatureArray, 0, 4);
-          int signatureOffset = BitConverter.ToInt32(signatureArray, 0); // relative to image base
+          
+          int signatureOffset = CopyInt32(nativeImageBase + 0x3c); // relative to image base
 
           // Assume 32 bit for now:
           int debugDirectoryEntriesOffset = signatureOffset + 4 + 20 + 144;
-
-          byte[] addressOfEntryPointArray = new byte[4];
-          Marshal.Copy(nativeImageBase + signatureOffset + 4 + 20 + 16, addressOfEntryPointArray, 0, 4);
-          int addressOfEntryPoint = BitConverter.ToInt32(addressOfEntryPointArray, 0);
-
-          byte[] baseOfCodeArray = new byte[4];
-          Marshal.Copy(nativeImageBase + signatureOffset + 4 + 20 + 20, baseOfCodeArray, 0, 4);
-          int baseOfCode = BitConverter.ToInt32(baseOfCodeArray, 0);
-
-          byte[] sizeOfCodeArray = new byte[4];
-          Marshal.Copy(nativeImageBase + signatureOffset + 4 + 20 + 4, sizeOfCodeArray, 0, 4);
-          int sizeOfCode = BitConverter.ToInt32(sizeOfCodeArray, 0);
-
-          byte[] sizeOfImageArray = new byte[4];
-          Marshal.Copy(nativeImageBase + signatureOffset + 4 + 20 + 56, sizeOfImageArray, 0, 4);
-          int sizeOfImage = BitConverter.ToInt32(sizeOfImageArray, 0);
+          
+          int addressOfEntryPoint = CopyInt32(nativeImageBase + signatureOffset + 4 + 20 + 16);
+          
+          int baseOfCode = CopyInt32(nativeImageBase + signatureOffset + 4 + 20 + 20);
+          
+          int sizeOfCode = CopyInt32(nativeImageBase + signatureOffset + 4 + 20 + 4);
+          
+          int sizeOfImage = CopyInt32(nativeImageBase + signatureOffset + 4 + 20 + 56);
 
 
           // TODO: this address can be 0 if there is no debug information:
-          byte[] debugVirtualAddressArray = new byte[4];
-          Marshal.Copy(nativeImageBase + debugDirectoryEntriesOffset, debugVirtualAddressArray, 0, 4);
-          int debugVirtualAddress = BitConverter.ToInt32(debugVirtualAddressArray, 0);
-
-          byte[] debugSizeArray = new byte[4];
-          Marshal.Copy(nativeImageBase + debugDirectoryEntriesOffset + 4, debugSizeArray, 0, 4);
-          int debugSize = BitConverter.ToInt32(debugSizeArray, 0);
-
-          DirectoryEntry debugDataDirectoryEntry = new DirectoryEntry(debugVirtualAddress, debugSize);
-
+          int debugVirtualAddress = CopyInt32(nativeImageBase + debugDirectoryEntriesOffset);
+          
+          int debugSize = CopyInt32(nativeImageBase + debugDirectoryEntriesOffset + 4);
+          
           // A debug directory:
-
-          byte[] stampArray = new byte[4];
-          Marshal.Copy(nativeImageBase + debugVirtualAddress + 4, stampArray, 0, 4);
-          int stamp = BitConverter.ToInt32(stampArray, 0);
-
-          byte[] majorVersionArray = new byte[2];
-          Marshal.Copy(nativeImageBase + debugVirtualAddress + 8, majorVersionArray, 0, 2);
-          short majorVersion = BitConverter.ToInt16(majorVersionArray, 0);
-
-          byte[] minorVersionArray = new byte[2];
-          Marshal.Copy(nativeImageBase + debugVirtualAddress + 10, minorVersionArray, 0, 2);
-          short minorVersion = BitConverter.ToInt16(minorVersionArray, 0);
-
-          byte[] typeArray = new byte[4];
-          Marshal.Copy(nativeImageBase + debugVirtualAddress + 12, typeArray, 0, 4);
-          int type = BitConverter.ToInt32(typeArray, 0);
-
-          byte[] sizeOfDataArray = new byte[4];
-          Marshal.Copy(nativeImageBase + debugVirtualAddress + 16, sizeOfDataArray, 0, 4);
-          int sizeOfData = BitConverter.ToInt32(sizeOfDataArray, 0);
-
-          byte[] addressOfRawDataArray = new byte[4];
-          Marshal.Copy(nativeImageBase + debugVirtualAddress + 20, addressOfRawDataArray, 0, 4);
-          int addressOfRawData = BitConverter.ToInt32(addressOfRawDataArray, 0);
-
-          byte[] pointerToRawDataArray = new byte[4];
-          Marshal.Copy(nativeImageBase + debugVirtualAddress + 24, pointerToRawDataArray, 0, 4);
-          int pointerToRawData = BitConverter.ToInt32(pointerToRawDataArray, 0);
+          
+          int stamp = CopyInt32(nativeImageBase + debugVirtualAddress + 4);
+          
+          int type = CopyInt32(nativeImageBase + debugVirtualAddress + 12);
+          
+          int sizeOfData = CopyInt32(nativeImageBase + debugVirtualAddress + 16);
+          
+          int addressOfRawData = CopyInt32(nativeImageBase + debugVirtualAddress + 20);
+          
+          int pointerToRawData = CopyInt32(nativeImageBase + debugVirtualAddress + 24);
 
           // Debug information:
           // Reference: http://www.godevtool.com/Other/pdb.htm
 
-          byte[] debugSignatureArray = new byte[4];
-          Marshal.Copy(nativeImageBase + addressOfRawData, debugSignatureArray, 0, 4);
-          int debugSignature = BitConverter.ToInt32(debugSignatureArray, 0);
+          // TODO: check that this is "RSDS" before looking into subsequent values
+          int debugSignature = CopyInt32(nativeImageBase + addressOfRawData);
 
           byte[] debugGuidArray = new byte[16];
           Marshal.Copy(nativeImageBase + addressOfRawData + 4, debugGuidArray, 0, 16);
@@ -258,7 +223,7 @@ namespace Mindscape.Raygun4Net.Builders
           {
             NativeIP = nativeIP.ToInt64().ToString(),
             NativeImageBase = nativeImageBase.ToInt64().ToString(),
-            Temp = debugVirtualAddress + " " + debugSize + " " + stamp + " " + majorVersion + " " + minorVersion + " " + type + " " + sizeOfData + " " + addressOfRawData + " " + pointerToRawData + " " + debugSignature + " " + pdbFileName,
+            Temp = debugVirtualAddress + " " + debugSize + " " + stamp + " " + type + " " + sizeOfData + " " + addressOfRawData + " " + pointerToRawData + " " + debugSignature + " " + pdbFileName,
             Temp2 = addressOfEntryPoint + " " + baseOfCode + " " + sizeOfCode + " " + sizeOfImage
           };
 
@@ -285,6 +250,13 @@ namespace Mindscape.Raygun4Net.Builders
       }
 
       return lines.ToArray();
+    }
+
+    private static int CopyInt32(IntPtr address)
+    {
+      byte[] byteArray = new byte[4];
+      Marshal.Copy(address, byteArray, 0, 4);
+      return BitConverter.ToInt32(byteArray, 0);
     }
 
     protected static string GenerateMethodName(MethodBase method)
