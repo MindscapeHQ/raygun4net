@@ -38,7 +38,15 @@ namespace Mindscape.Raygun4Net.Builders
       
       message.ClassName = FormatTypeName(exceptionType, true);
 
-      message.StackTrace = BuildStackTrace(message, exception);
+      try
+      {
+        message.StackTrace = BuildStackTrace(message, exception);
+      }
+      catch (Exception e)
+      {
+        Debug.WriteLine(string.Format($"Failed to get native stack trace information: {e.Message}"));
+      }
+
       message.Data = exception.Data;
 
       AggregateException ae = exception as AggregateException;
