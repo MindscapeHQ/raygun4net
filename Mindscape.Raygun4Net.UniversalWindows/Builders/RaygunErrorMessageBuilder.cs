@@ -11,6 +11,13 @@ namespace Mindscape.Raygun4Net.Builders
 {
   public class RaygunErrorMessageBuilder
   {
+    private const int SIGNATURE_OFFSET_OFFSET = 60;
+    private const int SIGNATURE_SIZE = 4;
+    private const int COFF_FILE_HEADER_SIZE = 20;
+
+    private const int DEBUG_DATA_DIRECTORY_OFFSET_32 = 144;
+    private const int DEBUG_DATA_DIRECTORY_OFFSET_64 = 160;
+
     public static RaygunErrorMessage Build(Exception exception)
     {
       RaygunErrorMessage message = new RaygunErrorMessage();
@@ -165,36 +172,35 @@ namespace Mindscape.Raygun4Net.Builders
           // Optional header (variable size)
           //   Standard fields
           //   Windows-specific fields
-          //   Data directories (position 28/112)
+          //   Data directories (position 96/112)
           //     ...
-          //     Debug (8 bytes, position 114/160) <-- I want this
+          //     Debug (8 bytes, position 144/160) <-- I want this
           //     ...
 
           // TODO: use SizeOfOptionalHeader and NumberOfRvaAndSizes before tapping into data directories
           
-          int signatureOffset = CopyInt32(nativeImageBase + 0x3c); // relative to image base
+          // All offset values are relative to the nativeImageBase
+          int signatureOffset = CopyInt32(nativeImageBase + SIGNATURE_OFFSET_OFFSET);
 
-          // Assume 32 bit for now:
-          int debugDirectoryEntriesOffset = signatureOffset + 4 + 20 + 144;
-          
-          int addressOfEntryPoint = CopyInt32(nativeImageBase + signatureOffset + 4 + 20 + 16);
-          
-          int baseOfCode = CopyInt32(nativeImageBase + signatureOffset + 4 + 20 + 20);
-          
-          int sizeOfCode = CopyInt32(nativeImageBase + signatureOffset + 4 + 20 + 4);
-          
-          int sizeOfImage = CopyInt32(nativeImageBase + signatureOffset + 4 + 20 + 56);
+          int optionalHeaderOffset = signatureOffset + SIGNATURE_SIZE + COFF_FILE_HEADER_SIZE;
 
+          short magic = CopyInt16(nativeImageBase + optionalHeaderOffset);
 
+          int sizeOfCode = CopyInt32(nativeImageBase + optionalHeaderOffset + 4);
+          int baseOfCode = CopyInt32(nativeImageBase + optionalHeaderOffset + 20);
+
+          int debugDataDirectoryOffset = optionalHeaderOffset + (magic == (short)PEMagic.PE32 ? DEBUG_DATA_DIRECTORY_OFFSET_32 : DEBUG_DATA_DIRECTORY_OFFSET_64);
+          
           // TODO: this address can be 0 if there is no debug information:
-          int debugVirtualAddress = CopyInt32(nativeImageBase + debugDirectoryEntriesOffset);
+          int debugVirtualAddress = CopyInt32(nativeImageBase + debugDataDirectoryOffset);
           
-          int debugSize = CopyInt32(nativeImageBase + debugDirectoryEntriesOffset + 4);
+          int debugSize = CopyInt32(nativeImageBase + debugDataDirectoryOffset + 4);
           
           // A debug directory:
           
           int stamp = CopyInt32(nativeImageBase + debugVirtualAddress + 4);
           
+          // TODO: check that this is 2
           int type = CopyInt32(nativeImageBase + debugVirtualAddress + 12);
           
           int sizeOfData = CopyInt32(nativeImageBase + debugVirtualAddress + 16);
@@ -224,7 +230,7 @@ namespace Mindscape.Raygun4Net.Builders
             NativeIP = nativeIP.ToInt64().ToString(),
             NativeImageBase = nativeImageBase.ToInt64().ToString(),
             Temp = debugVirtualAddress + " " + debugSize + " " + stamp + " " + type + " " + sizeOfData + " " + addressOfRawData + " " + pointerToRawData + " " + debugSignature + " " + pdbFileName,
-            Temp2 = addressOfEntryPoint + " " + baseOfCode + " " + sizeOfCode + " " + sizeOfImage
+            Temp2 = baseOfCode + " " + sizeOfCode
           };
 
           lines.Add(line);
@@ -250,6 +256,13 @@ namespace Mindscape.Raygun4Net.Builders
       }
 
       return lines.ToArray();
+    }
+
+    private static short CopyInt16(IntPtr address)
+    {
+      byte[] byteArray = new byte[2];
+      Marshal.Copy(address, byteArray, 0, 2);
+      return BitConverter.ToInt16(byteArray, 0);
     }
 
     private static int CopyInt32(IntPtr address)
