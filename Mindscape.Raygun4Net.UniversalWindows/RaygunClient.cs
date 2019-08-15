@@ -186,32 +186,50 @@ namespace Mindscape.Raygun4Net
     private static RaygunClient _client;
 
     /// <summary>
-    /// Gets the <see cref="RaygunClient"/> created by the Attach method.
+    /// Gets the <see cref="RaygunClient"/> created by the Initialize method.
     /// </summary>
     public static RaygunClient Current
     {
       get { return _client; }
+      private set { _client = value; }
+    }
+
+    /// <summary>
+    /// Creates a new RaygunClient with the given apikey.
+    /// The RaygunClient is set on the Current property, and then returned.
+    /// Calling this method a second time does nothing.
+    /// </summary>
+    /// <param name="apiKey">Your Raygun application API key.</param>
+    /// <returns>The initialized RaygunClient instance.</returns>
+    public static RaygunClient Initialize(string apiKey)
+    {
+      if (Current == null)
+      {
+        Current = new RaygunClient(apiKey);
+      }
+
+      return Current;
     }
 
     /// <summary>
     /// Causes Raygun to listen to and send all unhandled exceptions.
     /// </summary>
-    /// <param name="apiKey">Your app api key.</param>
-    public static void Attach(string apiKey)
+    public RaygunClient EnableCrashReporting()
     {
-      Detach();
-      _client = new RaygunClient(apiKey);
+      DisableCrashReporting();
 
       if (Application.Current != null)
       {
         Application.Current.UnhandledException += Current_UnhandledException;
       }
+
+      return Current;
     }
 
     /// <summary>
-    /// Detaches Raygun from listening to unhandled exceptions.
+    /// Stops Raygun from listening to unhandled exceptions.
     /// </summary>
-    public static void Detach()
+    public void DisableCrashReporting()
     {
       if (Application.Current != null)
       {
