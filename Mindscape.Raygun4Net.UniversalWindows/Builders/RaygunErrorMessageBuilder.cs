@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
 using System.Text;
-using Windows.Devices.PointOfService.Provider;
 
 namespace Mindscape.Raygun4Net.Builders
 {
@@ -172,6 +171,23 @@ namespace Mindscape.Raygun4Net.Builders
           // Assume 32 bit for now:
           int debugDirectoryEntriesOffset = signatureOffset + 4 + 20 + 144;
 
+          byte[] addressOfEntryPointArray = new byte[4];
+          Marshal.Copy(nativeImageBase + signatureOffset + 4 + 20 + 16, addressOfEntryPointArray, 0, 4);
+          int addressOfEntryPoint = BitConverter.ToInt32(addressOfEntryPointArray, 0);
+
+          byte[] baseOfCodeArray = new byte[4];
+          Marshal.Copy(nativeImageBase + signatureOffset + 4 + 20 + 20, baseOfCodeArray, 0, 4);
+          int baseOfCode = BitConverter.ToInt32(baseOfCodeArray, 0);
+
+          byte[] sizeOfCodeArray = new byte[4];
+          Marshal.Copy(nativeImageBase + signatureOffset + 4 + 20 + 4, sizeOfCodeArray, 0, 4);
+          int sizeOfCode = BitConverter.ToInt32(sizeOfCodeArray, 0);
+
+          byte[] sizeOfImageArray = new byte[4];
+          Marshal.Copy(nativeImageBase + signatureOffset + 4 + 20 + 56, sizeOfImageArray, 0, 4);
+          int sizeOfImage = BitConverter.ToInt32(sizeOfImageArray, 0);
+
+
           // TODO: this address can be 0 if there is no debug information:
           byte[] debugVirtualAddressArray = new byte[4];
           Marshal.Copy(nativeImageBase + debugDirectoryEntriesOffset, debugVirtualAddressArray, 0, 4);
@@ -232,9 +248,10 @@ namespace Mindscape.Raygun4Net.Builders
 
           var line = new RaygunErrorStackTraceLineMessage
           {
-            NativeIP = nativeIP.ToString(),
-            NativeImageBase = nativeImageBase.ToString(),
-            Temp = debugVirtualAddress + " " + debugSize + " " + stamp + " " + majorVersion + " " + minorVersion + " " + type + " " + sizeOfData + " " + addressOfRawData + " " + pointerToRawData + " " + debugSignature + " " + pdbFileName
+            NativeIP = nativeIP.ToInt64().ToString(),
+            NativeImageBase = nativeImageBase.ToInt64().ToString(),
+            Temp = debugVirtualAddress + " " + debugSize + " " + stamp + " " + majorVersion + " " + minorVersion + " " + type + " " + sizeOfData + " " + addressOfRawData + " " + pointerToRawData + " " + debugSignature + " " + pdbFileName,
+            Temp2 = addressOfEntryPoint + " " + baseOfCode + " " + sizeOfCode + " " + sizeOfImage
           };
 
           lines.Add(line);
