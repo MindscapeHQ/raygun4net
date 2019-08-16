@@ -17,6 +17,7 @@ namespace Mindscape.Raygun4Net.Builders
 
     private const int DEBUG_DATA_DIRECTORY_OFFSET_32 = 144;
     private const int DEBUG_DATA_DIRECTORY_OFFSET_64 = 160;
+    private const int DEBUG_DIRECTORY_SIZE = 28;
 
     public static RaygunErrorMessage Build(Exception exception)
     {
@@ -185,45 +186,51 @@ namespace Mindscape.Raygun4Net.Builders
 
             // TODO: this address can be 0 if there is no debug information:
             int debugVirtualAddress = CopyInt32(nativeImageBase + debugDataDirectoryOffset);
-
-            // TODO: dividing this by 28 can result in there being multiple debug directories, the Raygun payload should include info for all of these in case we need them:
+            
             int debugSize = CopyInt32(nativeImageBase + debugDataDirectoryOffset + 4);
 
-            // A debug directory:
-
-            int stamp = CopyInt32(nativeImageBase + debugVirtualAddress + 4);
-
-            // TODO: check that this is 2
-            int type = CopyInt32(nativeImageBase + debugVirtualAddress + 12);
-
-            int sizeOfData = CopyInt32(nativeImageBase + debugVirtualAddress + 16);
-
-            int addressOfRawData = CopyInt32(nativeImageBase + debugVirtualAddress + 20);
-
-            int pointerToRawData = CopyInt32(nativeImageBase + debugVirtualAddress + 24);
-
-            // Debug information:
-            // Reference: http://www.godevtool.com/Other/pdb.htm
-
-            // TODO: check that this is "RSDS" before looking into subsequent values
-            int debugSignature = CopyInt32(nativeImageBase + addressOfRawData);
-
-            byte[] debugGuidArray = new byte[16];
-            Marshal.Copy(nativeImageBase + addressOfRawData + 4, debugGuidArray, 0, 16);
-
-            // age
-
-            byte[] fileNameArray = new byte[sizeOfData - 24];
-            Marshal.Copy(nativeImageBase + addressOfRawData + 24, fileNameArray, 0, sizeOfData - 24);
-
-            string pdbFileName = Encoding.UTF8.GetString(fileNameArray, 0, fileNameArray.Length);
+            int debugDirectoryCount = debugSize / DEBUG_DIRECTORY_SIZE;
 
             RaygunImageMessage image = new RaygunImageMessage
             {
               BaseAddress = nativeImageBaseLong,
-              DebugInfo = new RaygunDebugInfoMessage[] {new RaygunDebugInfoMessage() {PdbFileName = pdbFileName}}
+              DebugInfo = new RaygunDebugInfoMessage[debugDirectoryCount]
             };
 
+            for (int i = 0; i < debugDirectoryCount; i++)
+            {
+              int debugDirectoryAddress = debugVirtualAddress + (i * DEBUG_DIRECTORY_SIZE);
+
+              int stamp = CopyInt32(nativeImageBase + debugDirectoryAddress + 4);
+
+              // TODO: check that this is 2
+              int type = CopyInt32(nativeImageBase + debugDirectoryAddress + 12);
+
+              int sizeOfData = CopyInt32(nativeImageBase + debugDirectoryAddress + 16);
+
+              int addressOfRawData = CopyInt32(nativeImageBase + debugDirectoryAddress + 20);
+
+              int pointerToRawData = CopyInt32(nativeImageBase + debugDirectoryAddress + 24);
+
+              // Debug information:
+              // Reference: http://www.godevtool.com/Other/pdb.htm
+
+              // TODO: check that this is "RSDS" before looking into subsequent values
+              int debugSignature = CopyInt32(nativeImageBase + addressOfRawData);
+
+              byte[] debugGuidArray = new byte[16];
+              Marshal.Copy(nativeImageBase + addressOfRawData + 4, debugGuidArray, 0, 16);
+
+              // age
+
+              byte[] fileNameArray = new byte[sizeOfData - 24];
+              Marshal.Copy(nativeImageBase + addressOfRawData + 24, fileNameArray, 0, sizeOfData - 24);
+
+              string pdbFileName = Encoding.UTF8.GetString(fileNameArray, 0, fileNameArray.Length);
+
+              image.DebugInfo[i] = new RaygunDebugInfoMessage {PdbFileName = pdbFileName};
+            }
+            
             images.Add(image);
           }
           
