@@ -167,7 +167,7 @@ namespace Mindscape.Raygun4Net.Builders
             //   Windows-specific fields
             //   Data directories (position 96/112)
             //     ...
-            //     Debug (8 bytes, position 144/160) <-- I want this
+            //     Debug (8 bytes, position 144/160)
             //     ...
 
             // TODO: use SizeOfOptionalHeader and NumberOfRvaAndSizes before tapping into data directories
@@ -178,10 +178,7 @@ namespace Mindscape.Raygun4Net.Builders
             int optionalHeaderOffset = signatureOffset + SIGNATURE_SIZE + COFF_FILE_HEADER_SIZE;
 
             short magic = CopyInt16(nativeImageBase + optionalHeaderOffset);
-
-            int sizeOfCode = CopyInt32(nativeImageBase + optionalHeaderOffset + 4);
-            int baseOfCode = CopyInt32(nativeImageBase + optionalHeaderOffset + 20);
-
+            
             int debugDataDirectoryOffset = optionalHeaderOffset + (magic == (short) PEMagic.PE32 ? DEBUG_DATA_DIRECTORY_OFFSET_32 : DEBUG_DATA_DIRECTORY_OFFSET_64);
 
             // TODO: this address can be 0 if there is no debug information:
@@ -200,18 +197,14 @@ namespace Mindscape.Raygun4Net.Builders
             for (int i = 0; i < debugDirectoryCount; i++)
             {
               int debugDirectoryAddress = debugVirtualAddress + (i * DEBUG_DIRECTORY_SIZE);
-
-              int stamp = CopyInt32(nativeImageBase + debugDirectoryAddress + 4);
-
+              
               // TODO: check that this is 2
               int type = CopyInt32(nativeImageBase + debugDirectoryAddress + 12);
 
               int sizeOfData = CopyInt32(nativeImageBase + debugDirectoryAddress + 16);
 
               int addressOfRawData = CopyInt32(nativeImageBase + debugDirectoryAddress + 20);
-
-              int pointerToRawData = CopyInt32(nativeImageBase + debugDirectoryAddress + 24);
-
+              
               // Debug information:
               // Reference: http://www.godevtool.com/Other/pdb.htm
 
