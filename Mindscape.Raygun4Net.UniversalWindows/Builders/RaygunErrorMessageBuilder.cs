@@ -11,7 +11,7 @@ namespace Mindscape.Raygun4Net.Builders
 {
   public class RaygunErrorMessageBuilder
   {
-    private const int SIGNATURE_OFFSET_OFFSET = 60;
+    private const int SIGNATURE_OFFSET_OFFSET = 60; // 0x3c
     private const int SIGNATURE_SIZE = 4;
     private const int COFF_FILE_HEADER_SIZE = 20;
 
@@ -23,26 +23,8 @@ namespace Mindscape.Raygun4Net.Builders
       RaygunErrorMessage message = new RaygunErrorMessage();
 
       var exceptionType = exception.GetType();
-
-      if (string.IsNullOrWhiteSpace(exception.StackTrace))
-      {
-        message.Message = "StackTrace is null";
-      }
-      else
-      {
-        char[] delim = { '\r', '\n' };
-        var frames = exception.StackTrace.Split(delim, StringSplitOptions.RemoveEmptyEntries);
-        if (frames.Length == 0)
-        {
-          message.Message = "No frames";
-        }
-        else
-        {
-          message.Message = exception.StackTrace;
-
-        }
-      }
       
+      message.Message = exception.Message;
       message.ClassName = FormatTypeName(exceptionType, true);
 
       try
@@ -138,7 +120,7 @@ namespace Mindscape.Raygun4Net.Builders
       return lines.ToArray();
     }
 
-    private static RaygunErrorStackTraceLineMessage[] BuildStackTrace(RaygunErrorMessage raygunErrorMessage, Exception exception)
+    private static RaygunErrorStackTraceLineMessage[] BuildNativeStackTrace(Exception exception)
     {
       var lines = new List<RaygunErrorStackTraceLineMessage>();
       
@@ -157,7 +139,6 @@ namespace Mindscape.Raygun4Net.Builders
       {
         if (frame.HasNativeImage())
         {
-          raygunErrorMessage.Message = "Has native image";
           IntPtr nativeIP = frame.GetNativeIP();
           IntPtr nativeImageBase = frame.GetNativeImageBase();
 
