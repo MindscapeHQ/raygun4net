@@ -47,7 +47,7 @@ namespace Mindscape.Raygun4Net.Builders
 
       try
       {
-        message.StackTrace = BuildStackTrace(message, exception);
+        message.StackTrace = BuildStackTrace(exception);
       }
       catch (Exception e)
       {
@@ -97,13 +97,13 @@ namespace Mindscape.Raygun4Net.Builders
       return stringBuilder.ToString();
     }
 
-    /*private static RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
+    private static RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
     {
       var lines = new List<RaygunErrorStackTraceLineMessage>();
 
       if (exception.StackTrace != null)
       {
-        char[] delim = { '\r', '\n' };
+        char[] delim = {'\r', '\n'};
         var frames = exception.StackTrace.Split(delim, StringSplitOptions.RemoveEmptyEntries);
         foreach (string line in frames)
         {
@@ -114,8 +114,10 @@ namespace Mindscape.Raygun4Net.Builders
             stackTraceLine = stackTraceLine.Substring(3);
           }
 
-          string className = stackTraceLine;
-          string methodName = null;
+          RaygunErrorStackTraceLineMessage stackTraceLineMessage = new RaygunErrorStackTraceLineMessage
+          {
+            Raw = stackTraceLine
+          };
 
           // Extract the method name and class name if possible:
           int index = stackTraceLine.IndexOf("(");
@@ -124,20 +126,17 @@ namespace Mindscape.Raygun4Net.Builders
             index = stackTraceLine.LastIndexOf(".", index);
             if (index > 0)
             {
-              className = stackTraceLine.Substring(0, index);
-              methodName = stackTraceLine.Substring(index + 1);
+              stackTraceLineMessage.ClassName = stackTraceLine.Substring(0, index);
+              stackTraceLineMessage.MethodName = stackTraceLine.Substring(index + 1);
             }
           }
 
-          RaygunErrorStackTraceLineMessage stackTraceLineMessage = new RaygunErrorStackTraceLineMessage();
-          stackTraceLineMessage.ClassName = className;
-          stackTraceLineMessage.MethodName = methodName;
           lines.Add(stackTraceLineMessage);
         }
       }
 
       return lines.ToArray();
-    }*/
+    }
 
     private static RaygunErrorStackTraceLineMessage[] BuildStackTrace(RaygunErrorMessage raygunErrorMessage, Exception exception)
     {
@@ -233,25 +232,34 @@ namespace Mindscape.Raygun4Net.Builders
             Temp2 = baseOfCode + " " + sizeOfCode
           };
 
+          
+
           lines.Add(line);
         }
-
-        MethodBase method = frame.GetMethod();
-
-        if (method != null)
+        else
         {
-          int lineNumber = frame.GetFileLineNumber();
+          var line = new RaygunErrorStackTraceLineMessage
+            { };
 
-          if (lineNumber == 0)
+          MethodBase method = frame.GetMethod();
+
+          if (method != null)
           {
-            lineNumber = frame.GetILOffset();
+            int lineNumber = frame.GetFileLineNumber();
+
+            if (lineNumber == 0)
+            {
+              line.LineNumber = frame.GetFileLineNumber();
+            }
+
+            line.MethodName = GenerateMethodName(method);
+
+            line.FileName = frame.GetFileName();
+
+            line.ClassName = method.DeclaringType != null ? method.DeclaringType.FullName : "(unknown)";
           }
 
-          var methodName = GenerateMethodName(method);
-
-          string file = frame.GetFileName();
-
-          string className = method.DeclaringType != null ? method.DeclaringType.FullName : "(unknown)";
+          lines.Add(line);
         }
       }
 
