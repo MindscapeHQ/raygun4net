@@ -17,5 +17,7 @@ namespace Mindscape.Raygun4Net.Messages
     public RaygunErrorStackTraceLineMessage[] StackTrace { get; set; }
 
     public RaygunErrorNativeStackTraceLineMessage[] NativeStackTrace { get; set; }
+
+    public RaygunImageMessage[] Images { get; set; }
   }
 }

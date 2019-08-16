@@ -26,6 +26,8 @@ namespace Mindscape.Raygun4Net.Builders
       message.Message = exception.Message;
       message.ClassName = FormatTypeName(exceptionType, true);
 
+      List<RaygunImageMessage> images = new List<RaygunImageMessage>();
+
       try
       {
         message.StackTrace = BuildStackTrace(exception);
@@ -37,7 +39,7 @@ namespace Mindscape.Raygun4Net.Builders
 
       try
       {
-        message.NativeStackTrace = BuildNativeStackTrace(exception);
+        message.NativeStackTrace = BuildNativeStackTrace(images, exception);
       }
       catch (Exception e)
       {
@@ -60,6 +62,11 @@ namespace Mindscape.Raygun4Net.Builders
       else if (exception.InnerException != null)
       {
         message.InnerError = Build(exception.InnerException);
+      }
+
+      if (images.Count > 0)
+      {
+        message.Images = images.ToArray();
       }
 
       return message;
@@ -128,7 +135,7 @@ namespace Mindscape.Raygun4Net.Builders
       return lines.Count == 0 ? null : lines.ToArray();
     }
 
-    private static RaygunErrorNativeStackTraceLineMessage[] BuildNativeStackTrace(Exception exception)
+    private static RaygunErrorNativeStackTraceLineMessage[] BuildNativeStackTrace(List<RaygunImageMessage> images, Exception exception)
     {
       var lines = new List<RaygunErrorNativeStackTraceLineMessage>();
       
@@ -174,6 +181,7 @@ namespace Mindscape.Raygun4Net.Builders
           // TODO: this address can be 0 if there is no debug information:
           int debugVirtualAddress = CopyInt32(nativeImageBase + debugDataDirectoryOffset);
           
+          // TODO: dividing this by 28 can result in there being multiple debug directories, the Raygun payload should include info for all of these in case we need them:
           int debugSize = CopyInt32(nativeImageBase + debugDataDirectoryOffset + 4);
           
           // A debug directory:
@@ -205,6 +213,14 @@ namespace Mindscape.Raygun4Net.Builders
           
           string pdbFileName = Encoding.UTF8.GetString(fileNameArray, 0, fileNameArray.Length);
 
+          RaygunImageMessage image = new RaygunImageMessage
+          {
+            BaseAddress = nativeImageBase.ToInt64(),
+            DebugInfo = new RaygunDebugInfoMessage[] {new RaygunDebugInfoMessage(){PdbFileName = pdbFileName}}
+          };
+
+          images.Add(image);
+          
           var line = new RaygunErrorNativeStackTraceLineMessage
           {
             IP = nativeIP.ToInt64(),
