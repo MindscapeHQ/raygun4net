@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -149,82 +150,87 @@ namespace Mindscape.Raygun4Net.Builders
           IntPtr nativeIP = frame.GetNativeIP();
           IntPtr nativeImageBase = frame.GetNativeImageBase();
 
-          // PE Format:
-          // -----------
-          // https://docs.microsoft.com/en-us/windows/win32/debug/pe-format
-          // -----------
-          // MS-DOS Stub
-          // Signature (4 bytes, offset to this can be found at 0x3c)
-          // COFF File Header (20 bytes)
-          // Optional header (variable size)
-          //   Standard fields
-          //   Windows-specific fields
-          //   Data directories (position 96/112)
-          //     ...
-          //     Debug (8 bytes, position 144/160) <-- I want this
-          //     ...
-
-          // TODO: use SizeOfOptionalHeader and NumberOfRvaAndSizes before tapping into data directories
+          long nativeImageBaseLong = nativeImageBase.ToInt64();
           
-          // All offset values are relative to the nativeImageBase
-          int signatureOffset = CopyInt32(nativeImageBase + SIGNATURE_OFFSET_OFFSET);
-
-          int optionalHeaderOffset = signatureOffset + SIGNATURE_SIZE + COFF_FILE_HEADER_SIZE;
-
-          short magic = CopyInt16(nativeImageBase + optionalHeaderOffset);
-
-          int sizeOfCode = CopyInt32(nativeImageBase + optionalHeaderOffset + 4);
-          int baseOfCode = CopyInt32(nativeImageBase + optionalHeaderOffset + 20);
-
-          int debugDataDirectoryOffset = optionalHeaderOffset + (magic == (short)PEMagic.PE32 ? DEBUG_DATA_DIRECTORY_OFFSET_32 : DEBUG_DATA_DIRECTORY_OFFSET_64);
-          
-          // TODO: this address can be 0 if there is no debug information:
-          int debugVirtualAddress = CopyInt32(nativeImageBase + debugDataDirectoryOffset);
-          
-          // TODO: dividing this by 28 can result in there being multiple debug directories, the Raygun payload should include info for all of these in case we need them:
-          int debugSize = CopyInt32(nativeImageBase + debugDataDirectoryOffset + 4);
-          
-          // A debug directory:
-          
-          int stamp = CopyInt32(nativeImageBase + debugVirtualAddress + 4);
-          
-          // TODO: check that this is 2
-          int type = CopyInt32(nativeImageBase + debugVirtualAddress + 12);
-          
-          int sizeOfData = CopyInt32(nativeImageBase + debugVirtualAddress + 16);
-          
-          int addressOfRawData = CopyInt32(nativeImageBase + debugVirtualAddress + 20);
-          
-          int pointerToRawData = CopyInt32(nativeImageBase + debugVirtualAddress + 24);
-
-          // Debug information:
-          // Reference: http://www.godevtool.com/Other/pdb.htm
-
-          // TODO: check that this is "RSDS" before looking into subsequent values
-          int debugSignature = CopyInt32(nativeImageBase + addressOfRawData);
-
-          byte[] debugGuidArray = new byte[16];
-          Marshal.Copy(nativeImageBase + addressOfRawData + 4, debugGuidArray, 0, 16);
-
-          // age
-
-          byte[] fileNameArray = new byte[sizeOfData - 24];
-          Marshal.Copy(nativeImageBase + addressOfRawData + 24, fileNameArray, 0, sizeOfData - 24);
-          
-          string pdbFileName = Encoding.UTF8.GetString(fileNameArray, 0, fileNameArray.Length);
-
-          RaygunImageMessage image = new RaygunImageMessage
+          if (images.All(i => i.BaseAddress != nativeImageBaseLong))
           {
-            BaseAddress = nativeImageBase.ToInt64(),
-            DebugInfo = new RaygunDebugInfoMessage[] {new RaygunDebugInfoMessage(){PdbFileName = pdbFileName}}
-          };
+            // PE Format:
+            // -----------
+            // https://docs.microsoft.com/en-us/windows/win32/debug/pe-format
+            // -----------
+            // MS-DOS Stub
+            // Signature (4 bytes, offset to this can be found at 0x3c)
+            // COFF File Header (20 bytes)
+            // Optional header (variable size)
+            //   Standard fields
+            //   Windows-specific fields
+            //   Data directories (position 96/112)
+            //     ...
+            //     Debug (8 bytes, position 144/160) <-- I want this
+            //     ...
 
-          images.Add(image);
+            // TODO: use SizeOfOptionalHeader and NumberOfRvaAndSizes before tapping into data directories
+
+            // All offset values are relative to the nativeImageBase
+            int signatureOffset = CopyInt32(nativeImageBase + SIGNATURE_OFFSET_OFFSET);
+
+            int optionalHeaderOffset = signatureOffset + SIGNATURE_SIZE + COFF_FILE_HEADER_SIZE;
+
+            short magic = CopyInt16(nativeImageBase + optionalHeaderOffset);
+
+            int sizeOfCode = CopyInt32(nativeImageBase + optionalHeaderOffset + 4);
+            int baseOfCode = CopyInt32(nativeImageBase + optionalHeaderOffset + 20);
+
+            int debugDataDirectoryOffset = optionalHeaderOffset + (magic == (short) PEMagic.PE32 ? DEBUG_DATA_DIRECTORY_OFFSET_32 : DEBUG_DATA_DIRECTORY_OFFSET_64);
+
+            // TODO: this address can be 0 if there is no debug information:
+            int debugVirtualAddress = CopyInt32(nativeImageBase + debugDataDirectoryOffset);
+
+            // TODO: dividing this by 28 can result in there being multiple debug directories, the Raygun payload should include info for all of these in case we need them:
+            int debugSize = CopyInt32(nativeImageBase + debugDataDirectoryOffset + 4);
+
+            // A debug directory:
+
+            int stamp = CopyInt32(nativeImageBase + debugVirtualAddress + 4);
+
+            // TODO: check that this is 2
+            int type = CopyInt32(nativeImageBase + debugVirtualAddress + 12);
+
+            int sizeOfData = CopyInt32(nativeImageBase + debugVirtualAddress + 16);
+
+            int addressOfRawData = CopyInt32(nativeImageBase + debugVirtualAddress + 20);
+
+            int pointerToRawData = CopyInt32(nativeImageBase + debugVirtualAddress + 24);
+
+            // Debug information:
+            // Reference: http://www.godevtool.com/Other/pdb.htm
+
+            // TODO: check that this is "RSDS" before looking into subsequent values
+            int debugSignature = CopyInt32(nativeImageBase + addressOfRawData);
+
+            byte[] debugGuidArray = new byte[16];
+            Marshal.Copy(nativeImageBase + addressOfRawData + 4, debugGuidArray, 0, 16);
+
+            // age
+
+            byte[] fileNameArray = new byte[sizeOfData - 24];
+            Marshal.Copy(nativeImageBase + addressOfRawData + 24, fileNameArray, 0, sizeOfData - 24);
+
+            string pdbFileName = Encoding.UTF8.GetString(fileNameArray, 0, fileNameArray.Length);
+
+            RaygunImageMessage image = new RaygunImageMessage
+            {
+              BaseAddress = nativeImageBaseLong,
+              DebugInfo = new RaygunDebugInfoMessage[] {new RaygunDebugInfoMessage() {PdbFileName = pdbFileName}}
+            };
+
+            images.Add(image);
+          }
           
           var line = new RaygunErrorNativeStackTraceLineMessage
           {
             IP = nativeIP.ToInt64(),
-            ImageBase = nativeImageBase.ToInt64()
+            ImageBase = nativeImageBaseLong
           };
           
           lines.Add(line);
