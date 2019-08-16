@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
 using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -39,7 +38,7 @@ namespace Mindscape.Raygun4Net.Builders
       message.Data = exception.Data;
 
       AggregateException ae = exception as AggregateException;
-      if (ae != null && ae.InnerExceptions != null)
+      if (ae?.InnerExceptions != null)
       {
         message.InnerErrors = new RaygunErrorMessage[ae.InnerExceptions.Count];
         int index = 0;
@@ -85,8 +84,8 @@ namespace Mindscape.Raygun4Net.Builders
 
       if (exception.StackTrace != null)
       {
-        char[] delim = {'\r', '\n'};
-        var frames = exception.StackTrace.Split(delim, StringSplitOptions.RemoveEmptyEntries);
+        char[] separators = {'\r', '\n'};
+        var frames = exception.StackTrace.Split(separators, StringSplitOptions.RemoveEmptyEntries);
         foreach (string line in frames)
         {
           // Trim the stack trace line
@@ -217,31 +216,6 @@ namespace Mindscape.Raygun4Net.Builders
 
           lines.Add(line);
         }
-        else
-        {
-          var line = new RaygunErrorStackTraceLineMessage
-            { };
-
-          MethodBase method = frame.GetMethod();
-
-          if (method != null)
-          {
-            int lineNumber = frame.GetFileLineNumber();
-
-            if (lineNumber == 0)
-            {
-              line.LineNumber = frame.GetFileLineNumber();
-            }
-
-            line.MethodName = GenerateMethodName(method);
-
-            line.FileName = frame.GetFileName();
-
-            line.ClassName = method.DeclaringType != null ? method.DeclaringType.FullName : "(unknown)";
-          }
-
-          lines.Add(line);
-        }
       }
 
       return lines.ToArray();
@@ -259,68 +233,6 @@ namespace Mindscape.Raygun4Net.Builders
       byte[] byteArray = new byte[4];
       Marshal.Copy(address, byteArray, 0, 4);
       return BitConverter.ToInt32(byteArray, 0);
-    }
-
-    protected static string GenerateMethodName(MethodBase method)
-    {
-      var stringBuilder = new StringBuilder();
-
-      stringBuilder.Append(method.Name);
-
-      bool first = true;
-
-      if (method is MethodInfo && method.IsGenericMethod)
-      {
-        Type[] genericArguments = method.GetGenericArguments();
-        stringBuilder.Append("[");
-
-        for (int i = 0; i < genericArguments.Length; i++)
-        {
-          if (!first)
-          {
-            stringBuilder.Append(",");
-          }
-          else
-          {
-            first = false;
-          }
-
-          stringBuilder.Append(genericArguments[i].Name);
-        }
-
-        stringBuilder.Append("]");
-      }
-
-      stringBuilder.Append("(");
-
-      ParameterInfo[] parameters = method.GetParameters();
-
-      first = true;
-
-      for (int i = 0; i < parameters.Length; ++i)
-      {
-        if (!first)
-        {
-          stringBuilder.Append(", ");
-        }
-        else
-        {
-          first = false;
-        }
-
-        string type = "<UnknownType>";
-
-        if (parameters[i].ParameterType != null)
-        {
-          type = parameters[i].ParameterType.Name;
-        }
-
-        stringBuilder.Append(type + " " + parameters[i].Name);
-      }
-
-      stringBuilder.Append(")");
-
-      return stringBuilder.ToString();
     }
   }
 }
