@@ -220,15 +220,18 @@ namespace Mindscape.Raygun4Net.Builders
 
               byte[] debugGuidArray = new byte[16];
               Marshal.Copy(nativeImageBase + addressOfRawData + 4, debugGuidArray, 0, 16);
-
-              // age
-
+              Guid debugGuid = new Guid(debugGuidArray);
+              
               byte[] fileNameArray = new byte[sizeOfData - 24];
               Marshal.Copy(nativeImageBase + addressOfRawData + 24, fileNameArray, 0, sizeOfData - 24);
 
               string pdbFileName = Encoding.UTF8.GetString(fileNameArray, 0, fileNameArray.Length);
 
-              image.DebugInfo[i] = new RaygunDebugInfoMessage {PdbFileName = pdbFileName};
+              image.DebugInfo[i] = new RaygunDebugInfoMessage
+              {
+                PdbFileName = pdbFileName,
+                Guid = debugGuid.ToString()
+              };
             }
             
             images.Add(image);
