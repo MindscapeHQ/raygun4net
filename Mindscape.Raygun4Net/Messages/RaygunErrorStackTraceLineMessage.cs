@@ -10,14 +10,6 @@
 
     public string MethodName { get; set; }
 
-    public string NativeIP { get; set; }
-
-    public string NativeImageBase { get; set; }
-
-    public string Temp { get; set; }
-
-    public string Temp2 { get; set; }
-
     public string Raw { get; set; }
 
     public override string ToString()

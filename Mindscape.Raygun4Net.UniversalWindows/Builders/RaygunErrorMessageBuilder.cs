@@ -32,6 +32,15 @@ namespace Mindscape.Raygun4Net.Builders
       }
       catch (Exception e)
       {
+        Debug.WriteLine(string.Format($"Failed to get managed stack trace information: {e.Message}"));
+      }
+
+      try
+      {
+        message.NativeStackTrace = BuildNativeStackTrace(exception);
+      }
+      catch (Exception e)
+      {
         Debug.WriteLine(string.Format($"Failed to get native stack trace information: {e.Message}"));
       }
 
@@ -116,23 +125,15 @@ namespace Mindscape.Raygun4Net.Builders
         }
       }
 
-      return lines.ToArray();
+      return lines.Count == 0 ? null : lines.ToArray();
     }
 
-    private static RaygunErrorStackTraceLineMessage[] BuildNativeStackTrace(Exception exception)
+    private static RaygunErrorNativeStackTraceLineMessage[] BuildNativeStackTrace(Exception exception)
     {
-      var lines = new List<RaygunErrorStackTraceLineMessage>();
+      var lines = new List<RaygunErrorNativeStackTraceLineMessage>();
       
       var stackTrace = new StackTrace(exception, true);
       var frames = stackTrace.GetFrames();
-
-      if (frames == null || frames.Length == 0)
-      {
-        var line = new RaygunErrorStackTraceLineMessage { FileName = "none", LineNumber = 0 };
-        lines.Add(line);
-
-        return lines.ToArray();
-      }
 
       foreach (StackFrame frame in frames)
       {
@@ -204,21 +205,17 @@ namespace Mindscape.Raygun4Net.Builders
           
           string pdbFileName = Encoding.UTF8.GetString(fileNameArray, 0, fileNameArray.Length);
 
-          var line = new RaygunErrorStackTraceLineMessage
+          var line = new RaygunErrorNativeStackTraceLineMessage
           {
-            NativeIP = nativeIP.ToInt64().ToString(),
-            NativeImageBase = nativeImageBase.ToInt64().ToString(),
-            Temp = debugVirtualAddress + " " + debugSize + " " + stamp + " " + type + " " + sizeOfData + " " + addressOfRawData + " " + pointerToRawData + " " + debugSignature + " " + pdbFileName,
-            Temp2 = baseOfCode + " " + sizeOfCode
+            IP = nativeIP.ToInt64(),
+            ImageBase = nativeImageBase.ToInt64()
           };
-
           
-
           lines.Add(line);
         }
       }
 
-      return lines.ToArray();
+      return lines.Count == 0 ? null : lines.ToArray();
     }
 
     private static short CopyInt16(IntPtr address)
