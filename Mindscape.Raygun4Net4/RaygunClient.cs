@@ -26,10 +26,8 @@ namespace Mindscape.Raygun4Net
     private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private readonly List<Type> _wrapperExceptions = new List<Type>();
 
-    [ThreadStatic]
-    private static RaygunRequestMessage _currentRequestMessage;
-    [ThreadStatic]
-    private static List<RaygunBreadcrumb> _currentBreadcrumbs;
+    [ThreadStatic] private static RaygunRequestMessage _currentRequestMessage;
+    [ThreadStatic] private static List<RaygunBreadcrumb> _currentBreadcrumbs;
 
     private static readonly RaygunBreadcrumbs _breadcrumbs = new RaygunBreadcrumbs(new DefaultBreadcrumbStorage());
 
@@ -105,6 +103,7 @@ namespace Mindscape.Raygun4Net
         System.Diagnostics.Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
         return false;
       }
+
       return true;
     }
 
@@ -289,12 +288,13 @@ namespace Mindscape.Raygun4Net
           }
         }
       }
+
       return base.CanSend(exception);
     }
 
     public static void RecordBreadcrumb(string message)
     {
-      _breadcrumbs.Record(new RaygunBreadcrumb { Message = message });
+      _breadcrumbs.Record(new RaygunBreadcrumb {Message = message});
     }
 
     public static void RecordBreadcrumb(RaygunBreadcrumb crumb)
@@ -313,7 +313,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     public override void Send(Exception exception)
     {
-      Send(exception, null, (IDictionary)null, null);
+      Send(exception, null, (IDictionary) null, null);
     }
 
     /// <summary>
@@ -324,7 +324,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message.</param>
     public void Send(Exception exception, IList<string> tags)
     {
-      Send(exception, tags, (IDictionary)null, null);
+      Send(exception, tags, (IDictionary) null, null);
     }
 
     /// <summary>
@@ -367,7 +367,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     public void SendInBackground(Exception exception)
     {
-      SendInBackground(exception, null, (IDictionary)null, null);
+      SendInBackground(exception, null, (IDictionary) null, null);
     }
 
     /// <summary>
@@ -377,7 +377,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message.</param>
     public void SendInBackground(Exception exception, IList<string> tags)
     {
-      SendInBackground(exception, tags, (IDictionary)null, null);
+      SendInBackground(exception, tags, (IDictionary) null, null);
     }
 
     /// <summary>
@@ -437,12 +437,12 @@ namespace Mindscape.Raygun4Net
       }
       catch (Exception)
       {
-         // This will swallow any unhandled exceptions unless we explicitly want to throw on error.
-         // Otherwise this can bring the whole process down.
-         if (RaygunSettings.Settings.ThrowOnError)
-         {
-           throw;
-         }
+        // This will swallow any unhandled exceptions unless we explicitly want to throw on error.
+        // Otherwise this can bring the whole process down.
+        if (RaygunSettings.Settings.ThrowOnError)
+        {
+          throw;
+        }
       }
     }
 
@@ -554,11 +554,15 @@ namespace Mindscape.Raygun4Net
               {
                 e.Data["Type"] = rtle.Types[index];
               }
-              catch { }
+              catch
+              {
+              }
+
               foreach (Exception ex in StripWrapperExceptions(e))
               {
                 yield return ex;
               }
+
               index++;
             }
           }
@@ -606,7 +610,7 @@ namespace Mindscape.Raygun4Net
         {
           try
           {
-           WebClientHelper.Send(message,_apiKey, ProxyCredentials);
+            WebClientHelper.Send(message, _apiKey, ProxyCredentials);
           }
           catch (Exception ex)
           {
@@ -630,6 +634,7 @@ namespace Mindscape.Raygun4Net
         }
       }
     }
+
     private void SaveMessage(string message)
     {
       try
@@ -654,8 +659,10 @@ namespace Mindscape.Raygun4Net
               {
                 isolatedStorage.DeleteFile(nextFileName);
               }
+
               break;
             }
+
             number++;
           }
 
@@ -667,6 +674,7 @@ namespace Mindscape.Raygun4Net
               isolatedStorage.DeleteFile(firstFileName);
             }
           }
+
           using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream(directoryName + "\\RaygunErrorMessage" + number + ".txt", FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage))
           {
             using (StreamWriter writer = new StreamWriter(isoStream, Encoding.Unicode))
@@ -676,6 +684,7 @@ namespace Mindscape.Raygun4Net
               writer.Close();
             }
           }
+
           System.Diagnostics.Trace.WriteLine("Saved message: " + "RaygunErrorMessage" + number + ".txt");
         }
       }
@@ -707,17 +716,20 @@ namespace Mindscape.Raygun4Net
                   string text = reader.ReadToEnd();
                   try
                   {
-                    WebClientHelper.Send(text,_apiKey, ProxyCredentials);
+                    WebClientHelper.Send(text, _apiKey, ProxyCredentials);
                   }
                   catch
                   {
                     // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
                     return;
                   }
+
                   System.Diagnostics.Debug.WriteLine("Sent " + name);
                 }
+
                 isolatedStorage.DeleteFile(directoryName + "\\" + name);
               }
+
               if (isolatedStorage.GetFileNames(directoryName + "\\*.txt").Length == 0)
               {
                 System.Diagnostics.Debug.WriteLine("Successfully sent all pending messages");

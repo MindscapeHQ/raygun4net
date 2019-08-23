@@ -72,6 +72,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Mindscape.Raygun4Net4\WebClientHelper.cs">
+      <Link>WebClientHelper.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="Extensions\RaygunHttpContentExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -84,7 +87,6 @@
     <Compile Include="RaygunWebApiExceptionLogger.cs" />
     <Compile Include="RaygunWebApiFilters.cs" />
     <Compile Include="RaygunWebApiMessageBuilder.cs" />
-    <Compile Include="WebClientHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

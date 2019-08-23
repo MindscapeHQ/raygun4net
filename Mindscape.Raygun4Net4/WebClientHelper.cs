@@ -3,16 +3,13 @@ using System.Net;
 
 namespace Mindscape.Raygun4Net
 {
-
     public static class WebClientHelper
     {
-        [ThreadStatic]
-        private static WebClient _client;
+        [ThreadStatic] private static WebClient _client;
 
         private static WebClient Client => _client ?? (_client = new WebClient());
         private static readonly Uri ProxyUri;
-
-
+        
         static WebClientHelper()
         {
             ProxyUri = WebRequest.DefaultWebProxy.GetProxy(new Uri(RaygunSettings.Settings.ApiEndpoint.ToString()));
@@ -27,7 +24,6 @@ namespace Mindscape.Raygun4Net
 
             if (WebRequest.DefaultWebProxy != null)
             {
-
                 if (ProxyUri != null && ProxyUri.AbsoluteUri != RaygunSettings.Settings.ApiEndpoint.ToString())
                 {
                     Client.Proxy = new WebProxy(ProxyUri, false);

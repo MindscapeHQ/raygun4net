@@ -36,13 +36,13 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
-	<Optimize>true</Optimize> 
+    <Optimize>true</Optimize>
     <OutputPath>bin\Sign\</OutputPath>
-	<DefineConstants>SIGN;TRACE</DefineConstants>
-	<ErrorReport>prompt</ErrorReport>
-	<WarningLevel>4</WarningLevel>
-	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	<SignAssembly>true</SignAssembly>
+    <DefineConstants>SIGN;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Raygun4Net.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
