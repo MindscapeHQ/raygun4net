@@ -610,7 +610,10 @@ namespace Mindscape.Raygun4Net
         {
           try
           {
-            WebClientHelper.Send(message, _apiKey, ProxyCredentials);
+            if (ValidateApiKey())
+            {
+              WebClientHelper.Send(message, _apiKey, ProxyCredentials);
+            }
           }
           catch (Exception ex)
           {
