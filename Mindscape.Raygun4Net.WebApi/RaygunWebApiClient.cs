@@ -230,17 +230,6 @@ namespace Mindscape.Raygun4Net.WebApi
       }
     }
 
-    protected bool ValidateApiKey()
-    {
-      if (string.IsNullOrEmpty(_apiKey))
-      {
-        System.Diagnostics.Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
-        return false;
-      }
-
-      return true;
-    }
-
     /// <summary>
     /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
     /// and requires credentials.
@@ -626,15 +615,11 @@ namespace Mindscape.Raygun4Net.WebApi
     {
       try
       {
-        if (ValidateApiKey())
+        bool canSend = OnSendingMessage(raygunMessage) && CanSend(raygunMessage);
+        if (canSend)
         {
-
-          bool canSend = OnSendingMessage(raygunMessage) && CanSend(raygunMessage);
-          if (canSend)
-          {
-            var message = SimpleJson.SerializeObject(raygunMessage);
-            WebClientHelper.Send(message, _apiKey, ProxyCredentials);
-          }
+          var message = SimpleJson.SerializeObject(raygunMessage);
+          WebClientHelper.Send(message, _apiKey, ProxyCredentials);
         }
       }
       catch (Exception ex)

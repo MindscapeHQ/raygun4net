@@ -610,10 +610,12 @@ namespace Mindscape.Raygun4Net
         {
           try
           {
-            if (ValidateApiKey())
-            {
+              if (WebProxy != null)
+              {
+                WebClientHelper.WebProxy = WebProxy;
+              }
+              
               WebClientHelper.Send(message, _apiKey, ProxyCredentials);
-            }
           }
           catch (Exception ex)
           {
@@ -719,6 +721,11 @@ namespace Mindscape.Raygun4Net
                   string text = reader.ReadToEnd();
                   try
                   {
+                    if (WebProxy != null)
+                    {
+                      WebClientHelper.WebProxy = WebProxy;
+                    }
+                    
                     WebClientHelper.Send(text, _apiKey, ProxyCredentials);
                   }
                   catch
