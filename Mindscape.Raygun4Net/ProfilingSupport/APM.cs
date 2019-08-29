@@ -38,7 +38,7 @@ namespace Mindscape.Raygun4Net
         // Look for .NET FRAMEWORK compatible Environment Variables
         return
           Environment.GetEnvironmentVariable("COR_PROFILER") == "{e2338988-38cc-48cd-a6b6-b441c31f34f1}" &&
-          Environment.GetEnvironmentVariable("COR_PROFILER") == "1";
+          Environment.GetEnvironmentVariable("COR_ENABLE_PROFILING") == "1";
 #endif
       }
     }
