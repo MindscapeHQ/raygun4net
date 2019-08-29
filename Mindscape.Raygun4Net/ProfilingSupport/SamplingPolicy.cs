@@ -22,8 +22,8 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
             var json = SimpleJson.DeserializeObject(configuration) as JsonObject;
             if (json.ContainsKey("SampleAmount") == false || json.ContainsKey("SampleBucketSize") == false)
             {
-              throw new InvalidOperationException(
-                "Expected \"SampleAmount\" and \"SampleBucketSize\" propertiesy in the JSON values for the policy: " + configuration);
+              System.Diagnostics.Trace.WriteLine("Expected \"SampleAmount\" and \"SampleBucketSize\" properties in the JSON values for the policy: " + configuration);
+              return;
             }
 
             var amount = GetSamplingSetting<int>(configuration, "SampleAmount");
@@ -32,18 +32,20 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
             Sampler = new SimpleRateSampler(amount ?? 1, bucketSize ?? 1);
           }
           break;
+        
         case DataSamplingMethod.Thumbprint:
           {
             // From the 'default value ("SamplingMethod": 2, is parsed before this method)
             // "SamplingConfig": "{ "SampleAmount":1, "SampleIntervalAmount":5, "SampleIntervalOption":1 }",
             //    OR
-            // From override data ("SampleOption":"Minuntes" and "Url": ".." can be ignored, they're parsed before this method/0
+            // From override data ("SampleOption":"Minutes" and "Url": ".." can be ignored, they're parsed before this method/0
             // "OverrideData": "{ "SampleAmount":1, "SampleBucketSize":5, "SampleOption":"Seconds", "Url":"test-seconds.com" }"
 
             var json = SimpleJson.DeserializeObject(configuration) as JsonObject;
             if (json.ContainsKey("SampleAmount") == false)
             {
-              throw new InvalidOperationException("Expected \"SampleAmount\" property in the JSON values for the policy: " + configuration);
+              System.Diagnostics.Trace.WriteLine("Expected \"SampleAmount\" property in the JSON values for the policy: " + configuration);
+              return;
             }
 
             // This is consistent across 'default' and 'override' value
@@ -66,7 +68,8 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
             }
             else
             {
-              throw new InvalidOperationException("Unexpected JSON values for a policy: " + configuration);
+              System.Diagnostics.Trace.WriteLine("Unexpected JSON values for a policy: " + configuration);
+              return;
             }
 
             TimeSpan interval;

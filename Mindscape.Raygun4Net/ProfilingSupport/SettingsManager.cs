@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Mindscape.Raygun4Net.ProfilingSupport
 {
@@ -28,31 +29,30 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
       var settings = SimpleJson.DeserializeObject(settingsText) as JsonObject;      
       if (settings == null)
       {
-        throw new InvalidOperationException("InvalidJson was provided: " + settingsText);
+        System.Diagnostics.Trace.WriteLine("Invalid Json was provided: " + settingsText);
+        return null;
       }
 
       if (String.IsNullOrEmpty(identifier))
       {
-        throw new ArgumentException("A site name must be provided", nameof(identifier));
+        System.Diagnostics.Trace.WriteLine($"A site name must be provided for {nameof(identifier)}");
+        return null;
       }
 
       if (settings.ContainsKey("ApiKeyConfiguration") == false)
       {
-        throw new InvalidOperationException(
-          string.Format("Expected property \"ApiKeyConfiguration\" in the JSON values: {0}", settingsText));
+        System.Diagnostics.Trace.WriteLine($"Expected property \"ApiKeyConfiguration\" in the JSON values: {settingsText}");
+        return null;
       }
 
       var siteSettings = settings["ApiKeyConfiguration"] as JsonArray;
       foreach (JsonObject siteSetting in siteSettings)
       {
         var expectedKeys = new[] { "Identifier", "SamplingMethod", "SamplingConfig", "SamplingOverrides" };
-        foreach (var expectedKey in expectedKeys)
+        if (expectedKeys.Any(key => siteSetting.ContainsKey(key) == false))
         {
-          if (siteSetting.ContainsKey(expectedKey) == false)
-          {
-            throw new InvalidOperationException(
-              string.Format("Expected all the following properties {0} in the JSON values: {1}", String.Join(", ", expectedKeys), settingsText));
-          }
+          System.Diagnostics.Trace.WriteLine($"Expected all the following properties {string.Join(", ", expectedKeys)} in the JSON values: {settingsText}");
+          continue;
         }
 
         if ((string)siteSetting["Identifier"] != identifier)
@@ -85,15 +85,14 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
               if (overrideSettingConfiguration.ContainsKey("Url") == false || 
                   overrideSettingConfiguration.ContainsKey("SampleOption") == false)
               {
-                throw new InvalidOperationException(
-                  string.Format("Expected properties \"Url\" and \"SampleOption\" in the JSON values: {0}", overrideSettingConfiguration));
+                System.Diagnostics.Trace.WriteLine($"Expected properties \"Url\" and \"SampleOption\" in the JSON values: {overrideSettingConfiguration}");
+                continue;
               }
 
               var overrideUrl = (string)overrideSettingConfiguration["Url"];
               var overridePolicyTypeRaw = (string)overrideSettingConfiguration["SampleOption"];
               var overridePolicyType = (SamplingOption)Enum.Parse(typeof(SamplingOption), overridePolicyTypeRaw);
-              var dataSamplingMethod =
-                overridePolicyType == SamplingOption.Traces ? DataSamplingMethod.Simple : DataSamplingMethod.Thumbprint;
+              var dataSamplingMethod = overridePolicyType == SamplingOption.Traces ? DataSamplingMethod.Simple : DataSamplingMethod.Thumbprint;
 
               var overridePolicy = new SamplingPolicy(dataSamplingMethod, overrideConfigurationData);
               var samplingOverride = new UrlSamplingOverride(overrideUrl, overridePolicy);

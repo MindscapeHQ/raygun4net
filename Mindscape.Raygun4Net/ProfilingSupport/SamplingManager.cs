@@ -26,15 +26,15 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
       SamplingPolicy activePolicy = Policy;
 
       // Check overrides first
-      foreach (var samplingOveride in Overrides)
+      foreach (var samplingOverride in Overrides)
       {
-        // Use a case-insensitive 'contains', because 'samplingOveride.Url' is from user input,
+        // Use a case-insensitive 'contains', because 'samplingOverride.Url' is from user input,
         // i.e. we don't know if it has 'http://', ends with '/', etc, so we do the best we can
         var url = uri.ToString();
-        if (url.Length >= samplingOveride.Url.Length && samplingOveride.Url.Length > 0 &&
-            url.IndexOf(samplingOveride.Url, StringComparison.OrdinalIgnoreCase) >= 0)
+        if (url.Length >= samplingOverride.Url.Length && samplingOverride.Url.Length > 0 &&
+            url.IndexOf(samplingOverride.Url, StringComparison.OrdinalIgnoreCase) >= 0)
         {
-          activePolicy = samplingOveride.Policy;
+          activePolicy = samplingOverride.Policy;
           break;
         }
       }

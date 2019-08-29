@@ -11,7 +11,7 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunHttpModule : IHttpModule
   {
-    private static TimeSpan AgentPollingDelay = new TimeSpan(0, 5, 0);
+    private static readonly TimeSpan AgentPollingDelay = new TimeSpan(0, 5, 0);
     private static ISamplingManager _samplingManager;
 
     private bool ExcludeErrorsBasedOnHttpStatusCode { get; set; }
@@ -42,46 +42,62 @@ namespace Mindscape.Raygun4Net
 
     private void BeginRequest(object sender, EventArgs e)
     {
-      if (_samplingManager != null)
+      try
       {
-        var application = (HttpApplication)sender;
-
-        if (!_samplingManager.TakeSample(application.Request.Url))
+        if (_samplingManager != null)
         {
-          APM.Disable();
+          var application = (HttpApplication) sender;
+
+          if (!_samplingManager.TakeSample(application.Request.Url))
+          {
+            APM.Disable();
+          }
         }
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Trace.WriteLine($"Error during begin request of APM sampling: {ex.Message}");
       }
     }
 
     private void EndRequest(object sender, EventArgs e)
     {
-      if (_samplingManager != null)
+      try
       {
-        APM.Enable();
+        if (_samplingManager != null)
+        {
+          APM.Enable();
+        }
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Trace.WriteLine($"Error during end request of APM sampling: {ex.Message}");
       }
     }
 
     private void InitProfilingSupport()
     {
-      if (APM.ProfilerAttached)
+      try
       {
-        var thread = new Thread(new ThreadStart(RefreshAgentSettings));
-        // ensure that our thread *doesn't* keep the application alive!
-        thread.IsBackground = true;
-        thread.Start();
+        if (APM.ProfilerAttached)
+        {
+          System.Diagnostics.Trace.WriteLine("Detected Raygun APM profiler is attached, initializing profiler support.");
+          
+          var thread = new Thread(RefreshAgentSettings);
+          // ensure that our thread *doesn't* keep the application alive!
+          thread.IsBackground = true;
+          thread.Start();
 
-        _samplingManager = new SamplingManager();
+          _samplingManager = new SamplingManager();
+        }
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Trace.WriteLine($"Error initialising APM profiler support: {ex.Message}");
       }
     }
 
-    private static string settingsFilePath =
-      Path.Combine(
-        Path.Combine(
-          Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-            "Raygun"),
-          "AgentSettings"),
-        "agent-configuration.json");
+    private static readonly string SettingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Raygun", "AgentSettings", "agent-configuration.json");
 
     private void RefreshAgentSettings()
     {
@@ -89,22 +105,25 @@ namespace Mindscape.Raygun4Net
       {
         try
         {
-          if (File.Exists(settingsFilePath))
+          if (File.Exists(SettingsFilePath))
           {
-            var settingsText = File.ReadAllText(settingsFilePath);
+            var settingsText = File.ReadAllText(SettingsFilePath);
             var siteName = System.Web.Hosting.HostingEnvironment.SiteName;
 
             var samplingSetting = SettingsManager.ParseSamplingSettings(settingsText, siteName);
             if (samplingSetting != null)
+            {
               _samplingManager.SetSamplingPolicy(samplingSetting.Policy, samplingSetting.Overrides);
+            }
           }
         }
         catch (ThreadAbortException)
         {
           return;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+          System.Diagnostics.Trace.WriteLine($"Error refreshing agent settings: {ex.Message}");
         }
 
         Thread.Sleep(AgentPollingDelay);
