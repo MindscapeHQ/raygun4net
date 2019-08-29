@@ -7,6 +7,6 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
   {
     void SetSamplingPolicy(SamplingPolicy policy, List<UrlSamplingOverride> overrides = null);
 
-    bool TakeSample(Uri uri);
+    bool TakeSample(string url);
   }
 }

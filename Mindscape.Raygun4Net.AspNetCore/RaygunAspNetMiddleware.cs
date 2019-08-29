@@ -80,13 +80,9 @@ namespace Mindscape.Raygun4Net.AspNetCore
         if (_samplingManager != null)
         {
           var request = httpContext.Request;
-          Uri uri;
-          if (request.QueryString.HasValue)
-            uri = new Uri($"{request.Scheme}://{request.Host}{request.Path}{request.QueryString.Value}");
-          else
-            uri = new Uri($"{request.Scheme}://{request.Host}{request.Path}");
+          string url = $"{request.Scheme}://{request.Host}{request.Path}";
 
-          if (!_samplingManager.TakeSample(uri))
+          if (!_samplingManager.TakeSample(url))
           {
             APM.Disable();
           }

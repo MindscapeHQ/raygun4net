@@ -19,7 +19,7 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
       }
     }
 
-    public bool TakeSample(Uri uri)
+    public bool TakeSample(string url)
     {
       if (Policy == null) return true;
 
@@ -30,7 +30,6 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
       {
         // Use a case-insensitive 'contains', because 'samplingOverride.Url' is from user input,
         // i.e. we don't know if it has 'http://', ends with '/', etc, so we do the best we can
-        var url = uri.ToString();
         if (url.Length >= samplingOverride.Url.Length && samplingOverride.Url.Length > 0 &&
             url.IndexOf(samplingOverride.Url, StringComparison.OrdinalIgnoreCase) >= 0)
         {
@@ -46,7 +45,7 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
         {
           if (activePolicy.Sampler == null) return true;
 
-          return activePolicy.Sampler.TakeSample(uri);
+          return activePolicy.Sampler.TakeSample(url);
         }
       }
 

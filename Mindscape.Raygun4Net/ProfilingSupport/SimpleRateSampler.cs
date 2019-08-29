@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Threading;
 
 namespace Mindscape.Raygun4Net.ProfilingSupport
 {
@@ -35,13 +35,12 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
       Limit = limit;
     }
 
-    public bool TakeSample(Uri uri)
+    public bool TakeSample(string url)
     {
       Reset();
 
       // Increment total seen
-      // TODO does this need to be made thread-safe, i.e. Interlocked or similar?
-      _count++;
+      Interlocked.Increment(ref _count);
 
       return _count <= Take;
     }
@@ -49,10 +48,9 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
     private void Reset()
     {
       // Reset if the count reaches the limit
-      // TODO does this need to be made thread-safe, i.e. Interlocked or similar?
       if (_count >= Limit)
       {
-        _count = 0;
+        Interlocked.Exchange(ref _count, 0);
       }
     }
   }

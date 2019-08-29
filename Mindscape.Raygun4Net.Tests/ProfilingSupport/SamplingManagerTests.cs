@@ -22,7 +22,7 @@ namespace Mindscape.Raygun4Net.Tests.ProfilingSupport
       Assert.AreEqual(2, sampler.Take);
       Assert.AreEqual(4, sampler.Limit);
 
-      var uri = new Uri("http://test-url.com");
+      var uri = "http://test-url.com";
       Assert.IsTrue(samplingManager.TakeSample(uri));
       Assert.IsTrue(samplingManager.TakeSample(uri));
       Assert.IsFalse(samplingManager.TakeSample(uri));
@@ -52,14 +52,14 @@ namespace Mindscape.Raygun4Net.Tests.ProfilingSupport
       Assert.AreEqual(1, overriderSampler.Take);
       Assert.AreEqual(3, overriderSampler.Limit);
 
-      var defaultUri = new Uri("http://test-url.com");
+      var defaultUri = "http://test-url.com";
       Assert.IsTrue(samplingManager.TakeSample(defaultUri));
       Assert.IsTrue(samplingManager.TakeSample(defaultUri));
       Assert.IsFalse(samplingManager.TakeSample(defaultUri));
       Assert.IsFalse(samplingManager.TakeSample(defaultUri));
       Assert.IsTrue(samplingManager.TakeSample(defaultUri));
 
-      var overrideUri = new Uri("http://test-override.com");
+      var overrideUri = "http://test-override.com";
       Assert.IsTrue(samplingManager.TakeSample(overrideUri));
       Assert.IsFalse(samplingManager.TakeSample(overrideUri));
       Assert.IsFalse(samplingManager.TakeSample(overrideUri));
@@ -83,7 +83,7 @@ namespace Mindscape.Raygun4Net.Tests.ProfilingSupport
       Assert.AreEqual(0, perUriRateSampler.Interval.Minutes); 
       Assert.AreEqual(0, perUriRateSampler.Interval.Hours);
 
-      var uri = new Uri("http://test-url.com");
+      var uri = "http://test-url.com";
       Assert.IsTrue(samplingManager.TakeSample(uri));
       Assert.IsFalse(samplingManager.TakeSample(uri));
       Assert.IsFalse(samplingManager.TakeSample(uri));

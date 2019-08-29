@@ -48,7 +48,8 @@ namespace Mindscape.Raygun4Net
         {
           var application = (HttpApplication) sender;
 
-          if (!_samplingManager.TakeSample(application.Request.Url))
+          var urlExcludingQuery = application.Request.Url.GetLeftPart(UriPartial.Path);
+          if (!_samplingManager.TakeSample(urlExcludingQuery))
           {
             APM.Disable();
           }

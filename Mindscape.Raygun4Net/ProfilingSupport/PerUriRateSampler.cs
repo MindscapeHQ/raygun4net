@@ -17,13 +17,13 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
       _tokenBuckets = new ConcurrentDictionary<string, TokenBucket>();
     }
 
-    public bool TakeSample(Uri uri)
+    public bool TakeSample(string url)
     {
-      var sample = _tokenBuckets.GetOrAdd(uri.AbsolutePath, CreateTokenBucket);
+      var sample = _tokenBuckets.GetOrAdd(url, CreateTokenBucket);
       return sample.Consume();
     }
 
-    private TokenBucket CreateTokenBucket(string thumbprint)
+    private TokenBucket CreateTokenBucket(string url)
     {
       return new TokenBucket(MaxPerInterval, MaxPerInterval, Interval);
     }
