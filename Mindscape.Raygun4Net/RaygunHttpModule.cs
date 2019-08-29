@@ -79,16 +79,22 @@ namespace Mindscape.Raygun4Net
     {
       try
       {
-        if (APM.ProfilerAttached)
+        lock (this)
         {
-          System.Diagnostics.Trace.WriteLine("Detected Raygun APM profiler is attached, initializing profiler support.");
-          
-          var thread = new Thread(RefreshAgentSettings);
-          // ensure that our thread *doesn't* keep the application alive!
-          thread.IsBackground = true;
-          thread.Start();
+          if (_samplingManager == null)
+          {
+            if (APM.ProfilerAttached)
+            {
+              System.Diagnostics.Trace.WriteLine("Detected Raygun APM profiler is attached, initializing profiler support.");
 
-          _samplingManager = new SamplingManager();
+              var thread = new Thread(RefreshAgentSettings);
+              // ensure that our thread *doesn't* keep the application alive!
+              thread.IsBackground = true;
+              thread.Start();
+
+              _samplingManager = new SamplingManager();
+            }
+          }
         }
       }
       catch (Exception ex)
@@ -97,7 +103,14 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private static readonly string SettingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Raygun", "AgentSettings", "agent-configuration.json");
+    private static readonly string SettingsFilePath =
+      Path.Combine(
+        Path.Combine(
+          Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            "Raygun"),
+          "AgentSettings"),
+        "agent-configuration.json");
 
     private void RefreshAgentSettings()
     {
@@ -109,12 +122,20 @@ namespace Mindscape.Raygun4Net
           {
             var settingsText = File.ReadAllText(SettingsFilePath);
             var siteName = System.Web.Hosting.HostingEnvironment.SiteName;
-
+            
             var samplingSetting = SettingsManager.ParseSamplingSettings(settingsText, siteName);
             if (samplingSetting != null)
             {
               _samplingManager.SetSamplingPolicy(samplingSetting.Policy, samplingSetting.Overrides);
             }
+            else
+            {
+              System.Diagnostics.Trace.WriteLine($"Could not locate sampling settings for site {siteName}");
+            }
+          }
+          else
+          {
+            System.Diagnostics.Trace.WriteLine($"Could not locate Raygun APM configuration file {SettingsFilePath}");
           }
         }
         catch (ThreadAbortException)
