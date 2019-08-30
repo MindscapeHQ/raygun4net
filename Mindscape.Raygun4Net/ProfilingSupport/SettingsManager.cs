@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Mindscape.Raygun4Net.ProfilingSupport
 {
@@ -49,13 +48,18 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
       foreach (JsonObject siteSetting in siteSettings)
       {
         var expectedKeys = new[] { "Identifier", "SamplingMethod", "SamplingConfig", "SamplingOverrides" };
-        if (expectedKeys.Any(key => siteSetting.ContainsKey(key) == false))
+        var containsAllKeys = true;
+        foreach (var expectedKey in expectedKeys)
         {
-          System.Diagnostics.Debug.WriteLine($"Expected all the following properties {string.Join(", ", expectedKeys)} in the JSON values: {settingsText}");
-          continue;
+          containsAllKeys = siteSetting.ContainsKey(expectedKey);
+          if (!containsAllKeys)
+          {
+            System.Diagnostics.Debug.WriteLine($"Expected property {expectedKey} in the JSON values: {settingsText}");
+            break;
+          }
         }
 
-        if ((string)siteSetting["Identifier"] != identifier)
+        if (!containsAllKeys || (string)siteSetting["Identifier"] != identifier)
         {
           continue;
         }

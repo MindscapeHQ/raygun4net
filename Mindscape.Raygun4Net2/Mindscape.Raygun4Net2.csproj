@@ -105,6 +105,9 @@
     <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\DataSamplingMethod.cs">
       <Link>ProfilingSupport\DataSamplingMethod.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\HttpApplicationInitializer.cs">
+      <Link>ProfilingSupport\HttpApplicationInitializer.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\IDataSampler.cs">
       <Link>ProfilingSupport\IDataSampler.cs</Link>
     </Compile>

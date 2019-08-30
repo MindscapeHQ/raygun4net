@@ -92,5 +92,12 @@ namespace Mindscape.Raygun4Net
       get { return (bool) this["throwOnError"]; }
       set { this["throwOnError"] = value; }
     }
+
+    [ConfigurationProperty("applicationIdentifier", IsRequired = false, DefaultValue = "")]
+    public string ApplicationIdentifier
+    {
+      get { return (string)this["applicationIdentifier"]; }
+      set { this["applicationIdentifier"] = value; }
+    }
   }
 }
