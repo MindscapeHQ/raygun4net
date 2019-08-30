@@ -1,20 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Web;
-using Mindscape.Raygun4Net.ProfilingSupport;
 
 namespace Mindscape.Raygun4Net
 {
   public class RaygunHttpModule : IHttpModule
   {
-    private static readonly TimeSpan AgentPollingDelay = new TimeSpan(0, 5, 0);
-    private static ISamplingManager _samplingManager;
-
     private bool ExcludeErrorsBasedOnHttpStatusCode { get; set; }
+
     private bool ExcludeErrorsFromLocal { get; set; }
 
     private int[] HttpStatusCodesToExclude { get; set; }
@@ -22,8 +17,6 @@ namespace Mindscape.Raygun4Net
     public void Init(HttpApplication context)
     {
       context.Error += SendError;
-      context.BeginRequest += BeginRequest;
-      context.EndRequest += EndRequest;
 
       HttpStatusCodesToExclude = RaygunSettings.Settings.ExcludedStatusCodes;
       ExcludeErrorsBasedOnHttpStatusCode = HttpStatusCodesToExclude.Any();
@@ -37,119 +30,7 @@ namespace Mindscape.Raygun4Net
         method.Invoke(null, new object[] { context, this });
       }
 
-      InitProfilingSupport();
-    }
-
-    private void BeginRequest(object sender, EventArgs e)
-    {
-      try
-      {
-        if (_samplingManager != null)
-        {
-          var application = (HttpApplication) sender;
-
-          var urlExcludingQuery = application.Request.Url.GetLeftPart(UriPartial.Path);
-          if (!_samplingManager.TakeSample(urlExcludingQuery))
-          {
-            APM.Disable();
-          }
-        }
-      }
-      catch (Exception ex)
-      {
-        System.Diagnostics.Trace.WriteLine($"Error during begin request of APM sampling: {ex.Message}");
-      }
-    }
-
-    private void EndRequest(object sender, EventArgs e)
-    {
-      try
-      {
-        if (_samplingManager != null)
-        {
-          APM.Enable();
-        }
-      }
-      catch (Exception ex)
-      {
-        System.Diagnostics.Trace.WriteLine($"Error during end request of APM sampling: {ex.Message}");
-      }
-    }
-
-    private void InitProfilingSupport()
-    {
-      try
-      {
-        lock (this)
-        {
-          if (_samplingManager == null)
-          {
-            if (APM.ProfilerAttached)
-            {
-              System.Diagnostics.Trace.WriteLine("Detected Raygun APM profiler is attached, initializing profiler support.");
-
-              var thread = new Thread(RefreshAgentSettings);
-              // ensure that our thread *doesn't* keep the application alive!
-              thread.IsBackground = true;
-              thread.Start();
-
-              _samplingManager = new SamplingManager();
-            }
-          }
-        }
-      }
-      catch (Exception ex)
-      {
-        System.Diagnostics.Trace.WriteLine($"Error initialising APM profiler support: {ex.Message}");
-      }
-    }
-
-    private static readonly string SettingsFilePath =
-      Path.Combine(
-        Path.Combine(
-          Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-            "Raygun"),
-          "AgentSettings"),
-        "agent-configuration.json");
-
-    private void RefreshAgentSettings()
-    {
-      while (true)
-      {
-        try
-        {
-          if (File.Exists(SettingsFilePath))
-          {
-            var settingsText = File.ReadAllText(SettingsFilePath);
-            var siteName = System.Web.Hosting.HostingEnvironment.SiteName;
-            
-            var samplingSetting = SettingsManager.ParseSamplingSettings(settingsText, siteName);
-            if (samplingSetting != null)
-            {
-              _samplingManager.SetSamplingPolicy(samplingSetting.Policy, samplingSetting.Overrides);
-            }
-            else
-            {
-              System.Diagnostics.Trace.WriteLine($"Could not locate sampling settings for site {siteName}");
-            }
-          }
-          else
-          {
-            System.Diagnostics.Trace.WriteLine($"Could not locate Raygun APM configuration file {SettingsFilePath}");
-          }
-        }
-        catch (ThreadAbortException)
-        {
-          return;
-        }
-        catch (Exception ex)
-        {
-          System.Diagnostics.Trace.WriteLine($"Error refreshing agent settings: {ex.Message}");
-        }
-
-        Thread.Sleep(AgentPollingDelay);
-      }
+      APM.Initialize(context, RaygunSettings.Settings.ApplicationIdentifier);
     }
 
     public void Dispose()

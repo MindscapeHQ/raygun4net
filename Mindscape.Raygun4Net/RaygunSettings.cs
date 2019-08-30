@@ -9,7 +9,7 @@ namespace Mindscape.Raygun4Net
   {
     private static readonly RaygunSettings settings = ConfigurationManager.GetSection("RaygunSettings") as RaygunSettings ?? new RaygunSettings();
 
-    private const string DefaultApiEndPoint = "https://api.raygun.io/entries";
+    private const string DefaultApiEndPoint = "https://api.raygun.com/entries";
 
     public static RaygunSettings Settings
     {
@@ -161,6 +161,13 @@ namespace Mindscape.Raygun4Net
     {
       get { return (bool)this["breadcrumbsLocationRecordingEnabled"]; }
       set { this["breadcrumbsLocationRecordingEnabled"] = value; }
+    }
+
+    [ConfigurationProperty("applicationIdentifier", IsRequired = false, DefaultValue = "")]
+    public string ApplicationIdentifier
+    {
+      get { return (string)this["applicationIdentifier"]; }
+      set { this["applicationIdentifier"] = value; }
     }
 
     /// <summary>

@@ -20,10 +20,8 @@ namespace Mindscape.Raygun4Net.AspNetCore
     private readonly RequestDelegate _next;
     private readonly RaygunMiddlewareSettings _middlewareSettings;
     private readonly RaygunSettings _settings;
-
-    private static TimeSpan AgentPollingDelay = new TimeSpan(0, 5, 0);
-    private static ISamplingManager _samplingManager;
-
+    private readonly AspNetCoreInitializer _aspNetCoreInitializer;
+    
     public RaygunAspNetMiddleware(RequestDelegate next, IOptions<RaygunSettings> settings, RaygunMiddlewareSettings middlewareSettings)
     {
       _next = next;
@@ -31,7 +29,8 @@ namespace Mindscape.Raygun4Net.AspNetCore
 
       _settings = _middlewareSettings.ClientProvider.GetRaygunSettings(settings.Value ?? new RaygunSettings());
 
-      InitProfilingSupport();
+      _aspNetCoreInitializer = new AspNetCoreInitializer();
+      _aspNetCoreInitializer.Initialize(_settings.ApplicationIdentifier);
     }
 
     public async Task Invoke(HttpContext httpContext)
@@ -77,23 +76,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
  
       try
       {
-        if (_samplingManager != null)
-        {
-          var request = httpContext.Request;
-          string url = $"{request.Scheme}://{request.Host}{request.Path}";
-
-          if (!_samplingManager.TakeSample(url))
-          {
-            APM.Disable();
-          }
-        }
-
-        await _next.Invoke(httpContext);
-
-        if (_samplingManager != null)
-        {
-          APM.Enable();
-        }
+        await _aspNetCoreInitializer.WrapAndInvokeRequest(_next, httpContext);
       }
       catch (Exception e)
       {
@@ -113,57 +96,6 @@ namespace Mindscape.Raygun4Net.AspNetCore
         {
           httpContext.Request.Body = originalRequestBody;
         }
-      }
-    }
-
-    private void InitProfilingSupport()
-    {
-      if (APM.ProfilerAttached)
-      {
-        _samplingManager = new SamplingManager();
-
-        // See http://blog.i3arnon.com/2015/07/02/task-run-long-running/ for why TaskCreationOptions.LongRunning is needed
-        _settingsTask = new Task(() => RefreshAgentSettings(), TaskCreationOptions.LongRunning);
-        _settingsTask.Start();
-      }
-    }
-
-    private static string settingsFilePath = Path.Combine(
-#if NETSTANDARD1_6
-        @"C:\ProgramData\Raygun\AgentSettings\", // the best we can do under .NET Std 1.6|
-#else
-        Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-#endif
-        "Raygun", "AgentSettings", "agent-configuration.json");
-
-    private void RefreshAgentSettings()
-    {
-      while (true)
-      {
-        try
-        {
-          if (File.Exists(settingsFilePath))
-          {
-            var settingsText = File.ReadAllText(settingsFilePath);
-            // In .NET Core, siteName needs to be the the name of the main dll, i.e. MyApp.dll
-            var siteName = Path.GetFileName(Assembly.GetEntryAssembly().Location);
-
-            var samplingSetting = SettingsManager.ParseSamplingSettings(settingsText, siteName);
-            if (samplingSetting != null)
-              _samplingManager.SetSamplingPolicy(samplingSetting.Policy, samplingSetting.Overrides);
-          }
-        }
-#if NETSTANDARD2_0
-        catch (ThreadAbortException /*threadEx*/)
-        {
-          return;
-        }
-#endif
-        catch (Exception /*ex*/)
-        {
-        }
-
-        Task.Delay(AgentPollingDelay).Wait();
       }
     }
   }

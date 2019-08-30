@@ -83,6 +83,7 @@
     <Compile Include="Messages\RaygunIdentifierMessage.cs" />
     <Compile Include="Messages\RaygunResponseMessage.cs" />
     <Compile Include="ProfilingSupport\APM.cs" />
+    <Compile Include="ProfilingSupport\HttpApplicationInitializer.cs" />
     <Compile Include="ProfilingSupport\ConcurrentDictionary.cs" />
     <Compile Include="ProfilingSupport\DataSamplingMethod.cs" />
     <Compile Include="ProfilingSupport\IDataSampler.cs" />

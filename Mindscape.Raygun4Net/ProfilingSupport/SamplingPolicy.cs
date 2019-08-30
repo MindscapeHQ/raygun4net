@@ -22,7 +22,7 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
             var json = SimpleJson.DeserializeObject(configuration) as JsonObject;
             if (json.ContainsKey("SampleAmount") == false || json.ContainsKey("SampleBucketSize") == false)
             {
-              System.Diagnostics.Trace.WriteLine("Expected \"SampleAmount\" and \"SampleBucketSize\" properties in the JSON values for the policy: " + configuration);
+              System.Diagnostics.Debug.WriteLine("Expected \"SampleAmount\" and \"SampleBucketSize\" properties in the JSON values for the policy: " + configuration);
               return;
             }
 
@@ -44,7 +44,7 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
             var json = SimpleJson.DeserializeObject(configuration) as JsonObject;
             if (json.ContainsKey("SampleAmount") == false)
             {
-              System.Diagnostics.Trace.WriteLine("Expected \"SampleAmount\" property in the JSON values for the policy: " + configuration);
+              System.Diagnostics.Debug.WriteLine("Expected \"SampleAmount\" property in the JSON values for the policy: " + configuration);
               return;
             }
 
@@ -68,7 +68,7 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
             }
             else
             {
-              System.Diagnostics.Trace.WriteLine("Unexpected JSON values for a policy: " + configuration);
+              System.Diagnostics.Debug.WriteLine("Unexpected JSON values for a policy: " + configuration);
               return;
             }
 

@@ -84,6 +84,9 @@
     <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\APM.cs">
       <Link>ProfilingSupport\APM.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\HttpApplicationInitializer.cs">
+      <Link>ProfilingSupport\HttpApplicationInitializer.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\DataSamplingMethod.cs">
       <Link>ProfilingSupport\DataSamplingMethod.cs</Link>
     </Compile>
@@ -139,6 +142,7 @@
       <Name>Mindscape.Raygun4Net.Core</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

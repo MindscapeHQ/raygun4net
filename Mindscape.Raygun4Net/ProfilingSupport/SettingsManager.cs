@@ -29,19 +29,19 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
       var settings = SimpleJson.DeserializeObject(settingsText) as JsonObject;      
       if (settings == null)
       {
-        System.Diagnostics.Trace.WriteLine("Invalid Json was provided: " + settingsText);
+        System.Diagnostics.Debug.WriteLine("Invalid Json was provided: " + settingsText);
         return null;
       }
 
       if (String.IsNullOrEmpty(identifier))
       {
-        System.Diagnostics.Trace.WriteLine($"A site name must be provided for {nameof(identifier)}");
+        System.Diagnostics.Debug.WriteLine($"A site name must be provided for {nameof(identifier)}");
         return null;
       }
 
       if (settings.ContainsKey("ApiKeyConfiguration") == false)
       {
-        System.Diagnostics.Trace.WriteLine($"Expected property \"ApiKeyConfiguration\" in the JSON values: {settingsText}");
+        System.Diagnostics.Debug.WriteLine($"Expected property \"ApiKeyConfiguration\" in the JSON values: {settingsText}");
         return null;
       }
 
@@ -51,7 +51,7 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
         var expectedKeys = new[] { "Identifier", "SamplingMethod", "SamplingConfig", "SamplingOverrides" };
         if (expectedKeys.Any(key => siteSetting.ContainsKey(key) == false))
         {
-          System.Diagnostics.Trace.WriteLine($"Expected all the following properties {string.Join(", ", expectedKeys)} in the JSON values: {settingsText}");
+          System.Diagnostics.Debug.WriteLine($"Expected all the following properties {string.Join(", ", expectedKeys)} in the JSON values: {settingsText}");
           continue;
         }
 
@@ -85,7 +85,7 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
               if (overrideSettingConfiguration.ContainsKey("Url") == false || 
                   overrideSettingConfiguration.ContainsKey("SampleOption") == false)
               {
-                System.Diagnostics.Trace.WriteLine($"Expected properties \"Url\" and \"SampleOption\" in the JSON values: {overrideSettingConfiguration}");
+                System.Diagnostics.Debug.WriteLine($"Expected properties \"Url\" and \"SampleOption\" in the JSON values: {overrideSettingConfiguration}");
                 continue;
               }
 
