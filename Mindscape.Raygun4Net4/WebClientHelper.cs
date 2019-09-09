@@ -33,7 +33,6 @@ namespace Mindscape.Raygun4Net
             {
                 Client.Proxy = WebProxy;
             }
-
             else if (WebRequest.DefaultWebProxy != null)
             {
                 if (ProxyUri != null && ProxyUri.AbsoluteUri != RaygunSettings.Settings.ApiEndpoint.ToString())
