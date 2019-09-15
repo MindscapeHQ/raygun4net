@@ -1,4 +1,4 @@
-set EnableNuGetPackageRestore=true
-call .\packages\psake.4.3.2\tools\psake.cmd build.ps1 %*
+.\.nuget\NuGet.exe install .nuget\packages.config -o packages
+.\packages\psake.4.8.0\tools\psake\psake.cmd build.ps1 %*
 
 pause

@@ -1,3 +1,6 @@
+# This causes psake to use the VS 2017 build tool:
+Framework "4.6"
+
 properties {
     $root =                       $psake.build_script_dir
     $solution_file_net2 =         "$root/Mindscape.Raygun4Net2.sln"
