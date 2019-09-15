@@ -207,11 +207,18 @@ namespace Mindscape.Raygun4Net.AspNetCore
 
     protected override bool CanSend(RaygunMessage message)
     {
-      if (message != null && message.Details != null && message.Details.Response != null)
+      if (message?.Details?.Response == null)
       {
-        return !GetSettings().ExcludedStatusCodes.Contains(message.Details.Response.StatusCode);
+        return true;
       }
-      return true;
+      
+      RaygunSettings settings = GetSettings();
+      if (settings.ExcludedStatusCodes == null)
+      {
+        return true;
+      }
+      
+      return !settings.ExcludedStatusCodes.Contains(message.Details.Response.StatusCode);
     }
 
     /// <summary>
