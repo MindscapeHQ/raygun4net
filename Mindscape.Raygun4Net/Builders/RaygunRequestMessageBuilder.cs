@@ -369,15 +369,6 @@ namespace Mindscape.Raygun4Net.Builders
       return strIp;
     }
 
-    private static IList GetCookies(HttpCookieCollection cookieCollection, Func<string, bool> ignore)
-    {
-      return Enumerable.Range(0, cookieCollection.Count)
-        .Select(i => cookieCollection[i])
-        .Where(c => !ignore(c.Name))
-        .Select(c => new Mindscape.Raygun4Net.Messages.RaygunRequestMessage.Cookie(c.Name, c.Value))
-        .ToList();
-    }
-
     private static IDictionary ToDictionary(NameValueCollection nameValueCollection, Func<string, bool> ignore, Func<string, bool> isSensitive, bool truncateValues = false)
     {
       IEnumerable<string> keys;
