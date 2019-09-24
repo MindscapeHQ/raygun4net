@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Mindscape.Raygun4Net.Breadcrumbs
 {
-  internal class InMemoryBreadcrumbStorage : IRaygunBreadcrumbStorage
+  public class InMemoryBreadcrumbStorage : IRaygunBreadcrumbStorage
   {
     private readonly List<RaygunBreadcrumb> _breadcrumbs;
 

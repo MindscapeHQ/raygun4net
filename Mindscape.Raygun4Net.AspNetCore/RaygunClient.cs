@@ -1,85 +1,77 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Net.Http;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Mindscape.Raygun4Net.Builders;
-using Mindscape.Raygun4Net.Messages;
+using Mindscape.Raygun4Net.AspNetCore.Builders;
+using Mindscape.Raygun4Net.Filters;
 
-namespace Mindscape.Raygun4Net
+namespace Mindscape.Raygun4Net.AspNetCore
 {
-  public class RaygunClient
+  public class RaygunClient : RaygunClientBase
   {
-    private readonly string _apiKey;
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
-    private readonly List<Type> _wrapperExceptions = new List<Type>();
-
+    
     private readonly ThreadLocal<HttpContext> _currentHttpContext = new ThreadLocal<HttpContext>(() => null);
     private readonly ThreadLocal<RaygunRequestMessage> _currentRequestMessage = new ThreadLocal<RaygunRequestMessage>(() => null);
     private readonly ThreadLocal<RaygunResponseMessage> _currentResponseMessage = new ThreadLocal<RaygunResponseMessage>(() => null);
-    private readonly RaygunSettings _settings;
-
-
-    protected internal const string SentKey = "AlreadySentByRaygun";
-
-    /// <summary>
-    /// Gets or sets the user identity string.
-    /// </summary>
-    public virtual string User { get; set; }
-
-    /// <summary>
-    /// Gets or sets information about the user including the identity string.
-    /// </summary>
-    public virtual RaygunIdentifierMessage UserInfo { get; set; }
-
-    /// <summary>
-    /// Gets or sets a custom application version identifier for all error messages sent to the Raygun endpoint.
-    /// </summary>
-    public string ApplicationVersion { get; set; }
-
+    
     public RaygunClient(string apiKey)
       : this(new RaygunSettings {ApiKey = apiKey})
     {
     }
 
     public RaygunClient(RaygunSettings settings, HttpContext context = null)
+    : base(settings)
     {
-      _settings = settings;
-      _apiKey = settings.ApiKey;
+      if (settings.IgnoreSensitiveFieldNames != null)
+      {
+        var ignoredNames = settings.IgnoreSensitiveFieldNames;
+        IgnoreSensitiveFieldNames(ignoredNames);
+      }
 
-      _wrapperExceptions.Add(typeof(TargetInvocationException));
+      if (settings.IgnoreQueryParameterNames != null)
+      {
+        var ignoredNames = settings.IgnoreQueryParameterNames;
+        IgnoreQueryParameterNames(ignoredNames);
+      }
 
       if (settings.IgnoreFormFieldNames != null)
       {
         var ignoredNames = settings.IgnoreFormFieldNames;
         IgnoreFormFieldNames(ignoredNames);
       }
+
       if (settings.IgnoreHeaderNames != null)
       {
         var ignoredNames = settings.IgnoreHeaderNames;
         IgnoreHeaderNames(ignoredNames);
       }
+
       if (settings.IgnoreCookieNames != null)
       {
         var ignoredNames = settings.IgnoreCookieNames;
         IgnoreCookieNames(ignoredNames);
       }
+
       if (settings.IgnoreServerVariableNames != null)
       {
         var ignoredNames = settings.IgnoreServerVariableNames;
         IgnoreServerVariableNames(ignoredNames);
       }
+
       if (!string.IsNullOrEmpty(settings.ApplicationVersion))
       {
         ApplicationVersion = settings.ApplicationVersion;
       }
+
       IsRawDataIgnored = settings.IsRawDataIgnored;
+      IsRawDataIgnoredWhenFilteringFailed = settings.IsRawDataIgnoredWhenFilteringFailed;
+
+      UseXmlRawDataFilter = settings.UseXmlRawDataFilter;
+      UseKeyValuePairRawDataFilter = settings.UseKeyValuePairRawDataFilter;
 
       if (context != null)
       {
@@ -87,129 +79,32 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    /// <summary>
-    /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
-    /// This can be used when a wrapper exception, e.g. TargetInvocationException or HttpUnhandledException,
-    /// contains the actual exception as the InnerException. The message and stack trace of the inner exception will then
-    /// be used by Raygun for grouping and display. The above two do not need to be added manually,
-    /// but if you have other wrapper exceptions that you want stripped you can pass them in here.
-    /// </summary>
-    /// <param name="wrapperExceptions">Exception types that you want removed and replaced with their inner exception.</param>
-    public void AddWrapperExceptions(params Type[] wrapperExceptions)
+    RaygunSettings GetSettings()
     {
-      foreach (Type wrapper in wrapperExceptions)
-      {
-        if (!_wrapperExceptions.Contains(wrapper))
-        {
-          _wrapperExceptions.Add(wrapper);
-        }
-      }
+      return (RaygunSettings) _settings;
     }
 
     /// <summary>
-    /// Specifies types of wrapper exceptions that Raygun should send rather than stripping out and sending the inner exception.
-    /// This can be used to remove the default wrapper exceptions (TargetInvocationException and HttpUnhandledException).
+    /// Adds a list of keys to remove from the following sections of the <see cref="RaygunRequestMessage" />
+    /// <see cref="RaygunRequestMessage.Headers" />
+    /// <see cref="RaygunRequestMessage.QueryString" />
+    /// <see cref="RaygunRequestMessage.Cookies" />
+    /// <see cref="RaygunRequestMessage.Form" />
+    /// <see cref="RaygunRequestMessage.RawData" />
     /// </summary>
-    /// <param name="wrapperExceptions">Exception types that should no longer be stripped away.</param>
-    public void RemoveWrapperExceptions(params Type[] wrapperExceptions)
+    /// <param name="names">Keys to be stripped from the <see cref="RaygunRequestMessage" />.</param>
+    public void IgnoreSensitiveFieldNames(params string[] names)
     {
-      foreach (Type wrapper in wrapperExceptions)
-      {
-        _wrapperExceptions.Remove(wrapper);
-      }
-    }
-
-    protected virtual bool CanSend(Exception exception)
-    {
-      return exception == null || exception.Data == null || !exception.Data.Contains(SentKey) || false.Equals(exception.Data[SentKey]);
-    }
-
-    protected void FlagAsSent(Exception exception)
-    {
-      if (exception != null && exception.Data != null)
-      {
-        try
-        {
-          Type[] genericTypes = exception.Data.GetType().GetTypeInfo().GenericTypeArguments;
-          if (genericTypes.Length == 0 || genericTypes[0].IsAssignableFrom(typeof(string)))
-          {
-            exception.Data[SentKey] = true;
-          }
-        }
-        catch (Exception ex)
-        {
-          Debug.WriteLine(String.Format("Failed to flag exception as sent: {0}", ex.Message));
-        }
-      }
+      _requestMessageOptions.AddSensitiveFieldNames(names);
     }
 
     /// <summary>
-    /// Raised just before a message is sent. This can be used to make final adjustments to the <see cref="RaygunMessage"/>, or to cancel the send.
+    /// Adds a list of keys to remove from the <see cref="RaygunRequestMessage.QueryString" /> property of the <see cref="RaygunRequestMessage" />
     /// </summary>
-    public event EventHandler<RaygunSendingMessageEventArgs> SendingMessage;
-
-    private bool _handlingRecursiveErrorSending;
-
-    // Returns true if the message can be sent, false if the sending is canceled.
-    protected bool OnSendingMessage(RaygunMessage raygunMessage)
+    /// <param name="names">Keys to be stripped from the <see cref="RaygunRequestMessage.QueryString" /></param>
+    public void IgnoreQueryParameterNames(params string[] names)
     {
-      bool result = true;
-
-      if (!_handlingRecursiveErrorSending)
-      {
-        EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
-        if (handler != null)
-        {
-          RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage);
-          try
-          {
-            handler(this, args);
-          }
-          catch (Exception e)
-          {
-            // Catch and send exceptions that occur in the SendingMessage event handler.
-            // Set the _handlingRecursiveErrorSending flag to prevent infinite errors.
-            _handlingRecursiveErrorSending = true;
-            Send(e);
-            _handlingRecursiveErrorSending = false;
-          }
-          result = !args.Cancel;
-        }
-      }
-
-      return result;
-    }
-
-
-    /// <summary>
-    /// Raised before a message is sent. This can be used to add a custom grouping key to a RaygunMessage before sending it to the Raygun service.
-    /// </summary>
-    public event EventHandler<RaygunCustomGroupingKeyEventArgs> CustomGroupingKey;
-
-    private bool _handlingRecursiveGrouping;
-    protected async Task<string> OnCustomGroupingKey(Exception exception, RaygunMessage message)
-    {
-      string result = null;
-      if (!_handlingRecursiveGrouping)
-      {
-        var handler = CustomGroupingKey;
-        if (handler != null)
-        {
-          var args = new RaygunCustomGroupingKeyEventArgs(exception, message);
-          try
-          {
-            handler(this, args);
-          }
-          catch (Exception e)
-          {
-            _handlingRecursiveGrouping = true;
-            await SendAsync(e, null, null, null);
-            _handlingRecursiveGrouping = false;
-          }
-          result = args.CustomGroupingKey;
-        }
-      }
-      return result;
+      _requestMessageOptions.AddQueryParameterNames(names);
     }
 
     /// <summary>
@@ -268,99 +163,62 @@ namespace Mindscape.Raygun4Net
         _requestMessageOptions.IsRawDataIgnored = value;
       }
     }
-    protected bool ValidateApiKey()
+
+    /// <summary>
+    /// Specifies whether or not RawData from web requests is ignored when sensitive values are seen and unable to be removed due to failing to parse the contents.
+    /// The default is false which means RawData will not be ignored when filtering fails.
+    /// </summary>
+    public bool IsRawDataIgnoredWhenFilteringFailed
     {
-      if (string.IsNullOrEmpty(_apiKey))
+      get { return _requestMessageOptions.IsRawDataIgnoredWhenFilteringFailed; }
+      set { _requestMessageOptions.IsRawDataIgnoredWhenFilteringFailed = value; }
+    }
+
+    /// <summary>
+    /// Specifies whether or not RawData from web requests is filtered of sensitive values using an XML parser.
+    /// </summary>
+    /// <value><c>true</c> if use xml raw data filter; otherwise, <c>false</c>.</value>
+    public bool UseXmlRawDataFilter
+    {
+      get { return _requestMessageOptions.UseXmlRawDataFilter; }
+      set { _requestMessageOptions.UseXmlRawDataFilter = value; }
+    }
+
+    /// <summary>
+    /// Specifies whether or not RawData from web requests is filtered of sensitive values using an KeyValuePair parser.
+    /// </summary>
+    /// <value><c>true</c> if use key pair raw data filter; otherwise, <c>false</c>.</value>
+    public bool UseKeyValuePairRawDataFilter
+    {
+      get { return _requestMessageOptions.UseKeyValuePairRawDataFilter; }
+      set { _requestMessageOptions.UseKeyValuePairRawDataFilter = value; }
+    }
+
+    /// <summary>
+    /// Add an <see cref="IRaygunDataFilter"/> implementation to be used when capturing the raw data
+    /// of a HTTP request. This filter will be passed the request raw data and is expected to remove 
+    /// or replace values whose keys are found in the list supplied to the Filter method.
+    /// </summary>
+    /// <param name="filter">Custom raw data filter implementation.</param>
+    public void AddRawDataFilter(IRaygunDataFilter filter)
+    {
+      _requestMessageOptions.AddRawDataFilter(filter);
+    }
+
+    protected override bool CanSend(RaygunMessage message)
+    {
+      if (message?.Details?.Response == null)
       {
-        Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
-        return false;
+        return true;
       }
-      return true;
-    }
-    protected bool CanSend(RaygunMessage message)
-    {
-      if (message != null && message.Details != null && message.Details.Response != null)
+      
+      RaygunSettings settings = GetSettings();
+      if (settings.ExcludedStatusCodes == null)
       {
-        return !_settings.ExcludedStatusCodes.Contains(message.Details.Response.StatusCode);
+        return true;
       }
-      return true;
-    }
-
-    /// <summary>
-    /// Transmits an exception to Raygun synchronously.
-    /// </summary>
-    /// <param name="exception">The exception to deliver.</param>
-    public void Send(Exception exception)
-    {
-      Send(exception, null, null);
-    }
-
-    /// <summary>
-    /// Transmits an exception to Raygun synchronously specifying a list of string tags associated
-    /// with the message for identification.
-    /// </summary>
-    /// <param name="exception">The exception to deliver.</param>
-    /// <param name="tags">A list of strings associated with the message.</param>
-    public void Send(Exception exception, IList<string> tags)
-    {
-      Send(exception, tags, null);
-    }
-
-    /// <summary>
-    /// Transmits an exception to Raygun synchronously specifying a list of string tags associated
-    /// with the message for identification, as well as sending a key-value collection of custom data.
-    /// </summary>
-    /// <param name="exception">The exception to deliver.</param>
-    /// <param name="tags">A list of strings associated with the message.</param>
-    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
-    {
-      Send(exception, tags, userCustomData, null);
-    }
-
-    /// <summary>
-    /// Transmits an exception to Raygun synchronously specifying a list of string tags associated
-    /// with the message for identification, as well as sending a key-value collection of custom data.
-    /// </summary>
-    /// <param name="exception">The exception to deliver.</param>
-    /// <param name="tags">A list of strings associated with the message.</param>
-    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    /// <param name="context">The current web HttpContext</param>
-    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData, HttpContext context)
-    {
-      SendAsync(exception, tags, userCustomData, context).Wait();
-    }
-
-    private async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData, HttpContext context)
-    {
-      if (CanSend(exception))
-      {
-        _currentHttpContext.Value = context;
-        _currentRequestMessage.Value = await BuildRequestMessage();
-        _currentResponseMessage.Value = BuildResponseMessage();
-
-        await StripAndSend(exception, tags, userCustomData);
-        FlagAsSent(exception);
-      }
-    }
-
-    /// <summary>
-    /// Asynchronously transmits a message to Raygun.
-    /// </summary>
-    /// <param name="exception">The exception to deliver.</param>
-    public Task SendInBackground(Exception exception)
-    {
-      return SendInBackground(exception, null, null);
-    }
-
-    /// <summary>
-    /// Asynchronously transmits an exception to Raygun.
-    /// </summary>
-    /// <param name="exception">The exception to deliver.</param>
-    /// <param name="tags">A list of strings associated with the message.</param>
-    public Task SendInBackground(Exception exception, IList<string> tags)
-    {
-      return SendInBackground(exception, tags, null);
+      
+      return !settings.ExcludedStatusCodes.Contains(message.Details.Response.StatusCode);
     }
 
     /// <summary>
@@ -369,7 +227,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    public async Task SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
+    public override async Task SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       if (CanSend(exception))
       {
@@ -387,21 +245,6 @@ namespace Mindscape.Raygun4Net
         FlagAsSent(exception);
         await task;
       }
-    }
-
-    /// <summary>
-    /// Asynchronously transmits a message to Raygun.
-    /// </summary>
-    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
-    /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public Task SendInBackground(RaygunMessage raygunMessage)
-    {
-      return Task.Run(() => Send(raygunMessage));
-    }
-
-    internal void FlagExceptionAsSent(Exception exception)
-    {
-      FlagAsSent(exception);
     }
 
     private async Task<RaygunRequestMessage> BuildRequestMessage()
@@ -424,9 +267,9 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
-    protected async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    protected override async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      var message = RaygunAspNetCoreMessageBuilder.New(_settings)
+      var message = RaygunMessageBuilder.New(GetSettings())
         .SetResponseDetails(_currentResponseMessage.Value)
         .SetRequestDetails(_currentRequestMessage.Value)
         .SetEnvironmentDetails()
@@ -446,90 +289,6 @@ namespace Mindscape.Raygun4Net
       }
 
       return message;
-    }
-
-    private async Task StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
-    {
-      foreach (Exception e in StripWrapperExceptions(exception))
-      {
-        await Send(await BuildMessage(e, tags, userCustomData));
-      }
-    }
-
-    protected IEnumerable<Exception> StripWrapperExceptions(Exception exception)
-    {
-      if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
-      {
-        AggregateException aggregate = exception as AggregateException;
-        if (aggregate != null)
-        {
-          foreach (Exception e in aggregate.InnerExceptions)
-          {
-            foreach (Exception ex in StripWrapperExceptions(e))
-            {
-              yield return ex;
-            }
-          }
-        }
-        else
-        {
-          foreach (Exception e in StripWrapperExceptions(exception.InnerException))
-          {
-            yield return e;
-          }
-        }
-      }
-      else
-      {
-        yield return exception;
-      }
-    }
-
-    /// <summary>
-    /// Posts a RaygunMessage to the Raygun api endpoint.
-    /// </summary>
-    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
-    /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public async Task Send(RaygunMessage raygunMessage)
-    {
-      if (ValidateApiKey())
-      {
-        bool canSend = OnSendingMessage(raygunMessage) && CanSend(raygunMessage);
-        if (canSend)
-        {
-          using (var client = new HttpClient())
-          {
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
-
-            requestMessage.Headers.Add("X-ApiKey", _apiKey);
-
-            try
-            {
-              var message = SimpleJson.SerializeObject(raygunMessage);
-              requestMessage.Content = new StringContent(message, Encoding.UTF8, "application/json");
-              var result = await client.SendAsync(requestMessage);
-              if(!result.IsSuccessStatusCode)
-              {
-                Debug.WriteLine($"Error Logging Exception to Raygun {result.ReasonPhrase}");
-
-                if (_settings.ThrowOnError)
-                {
-                  throw new Exception("Could not log to Raygun");
-                }
-              }
-            }
-            catch (Exception ex)
-            {
-              Debug.WriteLine(string.Format("Error Logging Exception to Raygun {0}", ex.Message));
-
-              if (_settings.ThrowOnError)
-              {
-                throw;
-              }
-            }
-          }
-        }
-      }
     }
   }
 

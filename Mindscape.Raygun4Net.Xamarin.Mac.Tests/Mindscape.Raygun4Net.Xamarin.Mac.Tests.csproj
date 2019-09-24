@@ -28,9 +28,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="Mindscape.Raygun4Net.Xamarin">
-      <HintPath>..\Mindscape.Raygun4Net.Xamarin.Mac\bin\Release\Mindscape.Raygun4Net.Xamarin.Mac.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
@@ -48,5 +45,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mindscape.Raygun4Net.Xamarin.Mac\Mindscape.Raygun4Net.Xamarin.Mac.csproj">
+      <Project>{B78E58F3-853F-4991-BFF6-5AECE0C04B91}</Project>
+      <Name>Mindscape.Raygun4Net.Xamarin.Mac</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

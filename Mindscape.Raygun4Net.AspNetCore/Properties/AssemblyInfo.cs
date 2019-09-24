@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Raygun4Net.AspNetCore")]
-[assembly: AssemblyDescription("Raygun provider for .NET Core projects")]
+[assembly: AssemblyDescription("Raygun provider for ASP.NET Core projects")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Raygun")]
 [assembly: AssemblyProduct("Raygun4Net")]
-[assembly: AssemblyCopyright("Copyright © Raygun 2016-2017")]
+[assembly: AssemblyCopyright("Copyright © Raygun 2016-2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

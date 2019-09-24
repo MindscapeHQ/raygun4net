@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Raygun")]
 [assembly: AssemblyProduct("Raygun4Net")]
-[assembly: AssemblyCopyright("Copyright © Raygun 2012-2017")]
+[assembly: AssemblyCopyright("Copyright © Raygun 2012-2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -22,4 +22,3 @@ using System.Runtime.InteropServices;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("72856682-3b04-495f-8e1f-bdd4b698b20e")]
 
-[assembly: InternalsVisibleTo("Mindscape.Raygun4Net.Tests")]

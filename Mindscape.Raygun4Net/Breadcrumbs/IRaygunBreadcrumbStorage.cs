@@ -2,7 +2,7 @@
 
 namespace Mindscape.Raygun4Net.Breadcrumbs
 {
-  internal interface IRaygunBreadcrumbStorage : IEnumerable<RaygunBreadcrumb>
+  public interface IRaygunBreadcrumbStorage : IEnumerable<RaygunBreadcrumb>
   {
     void Store(RaygunBreadcrumb breadcrumb);
 

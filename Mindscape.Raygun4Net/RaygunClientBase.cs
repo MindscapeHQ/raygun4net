@@ -19,7 +19,12 @@ namespace Mindscape.Raygun4Net
     public virtual RaygunIdentifierMessage UserInfo { get; set; }
 
     /// <summary>
-    /// Gets or sets a custom application version identifier for all error messages sent to the Raygun.io endpoint.
+    /// Gets or sets the context identifier defining a scope under which errors are related
+    /// </summary>
+    public string ContextId { get; set; }
+
+    /// <summary>
+    /// Gets or sets a custom application version identifier for all error messages sent to the Raygun endpoint.
     /// </summary>
     public string ApplicationVersion { get; set; }
 

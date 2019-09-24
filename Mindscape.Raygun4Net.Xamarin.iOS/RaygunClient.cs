@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
-using System.Runtime.InteropServices;
+using System.Net.Http;
 using Mindscape.Raygun4Net.Messages;
 
 using System.Threading;
 using System.Threading.Tasks;
 using System.Reflection;
-using System.IO.IsolatedStorage;
-using System.IO;
-using System.Text;
-using MonoTouch;
 using System.Diagnostics;
 
 #if __UNIFIED__
@@ -30,16 +25,17 @@ using MonoTouch.Security;
 using MonoTouch.ObjCRuntime;
 #endif
 
-using NativeRaygunClient = Mindscape.Raygun4Net.Xamarin.iOS.Raygun;
-using NativeRaygunUserInfo = Mindscape.Raygun4Net.Xamarin.iOS.RaygunUserInfo;
+using NativeRaygunClient = Mindscape.Raygun4Net.Xamarin.iOS.RaygunClient;
+using NativeRaygunUserInfo = Mindscape.Raygun4Net.Xamarin.iOS.RaygunUserInformation;
 
 namespace Mindscape.Raygun4Net
 {
   public class RaygunClient : RaygunClientBase
   {
-    private const string StackTraceDirectory = "stacktraces";
-
     private static RaygunClient _client;
+
+    private static readonly object _batchLock = new object();
+    private static bool _exceptionHandlersSet;
 
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
@@ -49,7 +45,7 @@ namespace Mindscape.Raygun4Net
     private string _user;
     private RaygunIdentifierMessage _userInfo;
     private PulseEventBatch _activeBatch;
-    private static readonly object _batchLock = new object();
+    private RaygunFileManager _fileManager;
 
     private NativeRaygunClient NativeClient { get; set; }
 
@@ -58,7 +54,7 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     public static RaygunClient Current
     {
-    	get { return _client; }
+      get { return _client; }
     }
 
     /// <summary>
@@ -68,6 +64,11 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <value>The synchronous timeout in milliseconds.</value>
     public int SynchronousTimeout { get; set; }
+
+    public int MaxReportsStoredOnDevice
+    {
+      get; set;
+    }
 
     private string DeviceId
     {
@@ -107,7 +108,7 @@ namespace Mindscape.Raygun4Net
 
           if (code != SecStatusCode.Success && code != SecStatusCode.DuplicateItem)
           {
-            System.Diagnostics.Debug.WriteLine(string.Format("Could not save device ID. Security status code: {0}", code));
+            Debug.WriteLine(string.Format("Could not save device ID. Security status code: {0}", code));
           }
 
           _deviceId = id;
@@ -123,19 +124,19 @@ namespace Mindscape.Raygun4Net
 
     private string MachineName
     {
-    	get
-    	{
-    		string machineName = null;
-    		try
-    		{
-    			machineName = UIDevice.CurrentDevice.Name;
-    		}
-    		catch (Exception e)
-    		{
-    			System.Diagnostics.Debug.WriteLine("Exception getting device name {0}", e.Message);
-    		}
+      get
+      {
+        string machineName = null;
+        try
+        {
+          machineName = UIDevice.CurrentDevice.Name;
+        }
+        catch (Exception e)
+        {
+          Debug.WriteLine("Exception getting device name {0}", e.Message);
+        }
 
-    		return machineName ?? "Unknown";
+        return machineName ?? "Unknown";
       }
     }
 
@@ -153,19 +154,19 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     public override RaygunIdentifierMessage UserInfo
     {
-    	get { return _userInfo; }
-    	set { SetUserInfo(value); }
+      get { return _userInfo; }
+      set { SetUserInfo(value); }
     }
 
     private void SetUserInfo(string identifier)
     {
       if (string.IsNullOrEmpty(identifier) || string.IsNullOrWhiteSpace(identifier))
       {
-		    SetUserInfo(GetAnonymousUserInfo());
+        SetUserInfo(GetAnonymousUserInfo());
       }
       else
       {
-		    SetUserInfo(new RaygunIdentifierMessage(identifier));
+        SetUserInfo(new RaygunIdentifierMessage(identifier));
       }
     }
 
@@ -185,16 +186,16 @@ namespace Mindscape.Raygun4Net
       }
 
       // Has the user changed ?
-      if (_userInfo != null 
+      if (_userInfo != null
        && _userInfo.Identifier != userInfo.Identifier
        && _userInfo.IsAnonymous == false)
       {
         if (!string.IsNullOrEmpty(_sessionId))
         {
-		      SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionEnd);
+          SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionEnd);
           _userInfo = userInfo;
           _user = userInfo.Identifier;
-		      SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionStart);
+          SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionStart);
         }
       }
       else
@@ -207,46 +208,48 @@ namespace Mindscape.Raygun4Net
       if (NativeClient != null)
       {
         var info = new NativeRaygunUserInfo();
-        info.Identifier  = _userInfo.Identifier;
+        info.Identifier = _userInfo.Identifier;
         info.IsAnonymous = _userInfo.IsAnonymous;
-        info.Email       = _userInfo.Email;
-        info.FullName    = _userInfo.FullName;
-        info.FirstName   = _userInfo.FirstName;
-        NativeClient.IdentifyWithUserInfo(info);
+        info.Email = _userInfo.Email;
+        info.FullName = _userInfo.FullName;
+        info.FirstName = _userInfo.FirstName;
+        NativeClient.UserInformation = info;
       }
     }
 
     private RaygunIdentifierMessage GetAnonymousUserInfo()
     {
-      return new RaygunIdentifierMessage(DeviceId) 
+      return new RaygunIdentifierMessage(DeviceId)
       {
-        IsAnonymous = true, FullName = MachineName, UUID = DeviceId
+        IsAnonymous = true,
+        FullName = MachineName,
+        UUID = DeviceId
       };
     }
 
     private string GetVersion()
     {
-    	string version = ApplicationVersion;
-    	if (String.IsNullOrWhiteSpace(version))
-    	{
-    		try
-    		{
-    			string versionNumber = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleShortVersionString").ToString();
-    			string buildNumber = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString();
-    			version = String.Format("{0} ({1})", versionNumber, buildNumber);
-    		}
-    		catch (Exception ex)
-    		{
-    			System.Diagnostics.Trace.WriteLine("Error retieving bundle version {0}", ex.Message);
-    		}
-    	}
+      string version = ApplicationVersion;
+      if (String.IsNullOrWhiteSpace(version))
+      {
+        try
+        {
+          string versionNumber = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleShortVersionString").ToString();
+          string buildNumber = NSBundle.MainBundle.ObjectForInfoDictionary("CFBundleVersion").ToString();
+          version = String.Format("{0} ({1})", versionNumber, buildNumber);
+        }
+        catch (Exception ex)
+        {
+          Trace.WriteLine("Error retieving bundle version {0}", ex.Message);
+        }
+      }
 
-    	if (String.IsNullOrWhiteSpace(version))
-    	{
-    		version = "Not supplied";
-    	}
+      if (String.IsNullOrWhiteSpace(version))
+      {
+        version = "Not supplied";
+      }
 
-    	return version;
+      return version;
     }
 
     /// <summary>
@@ -255,28 +258,217 @@ namespace Mindscape.Raygun4Net
     /// <param name="apiKey">The API key.</param>
     public RaygunClient(string apiKey)
     {
-    	_apiKey = apiKey;
+      _apiKey = apiKey;
+
+      _fileManager = new RaygunFileManager();
+      _fileManager.Intialise();
+
+      MaxReportsStoredOnDevice = RaygunFileManager.MAX_STORED_REPORTS_UPPER_LIMIT;
 
       // Setting default user information.
       var anonUser = GetAnonymousUserInfo();
+
       _userInfo = anonUser;
       _user = anonUser.Identifier;
 
-    	_wrapperExceptions.Add(typeof(TargetInvocationException));
-    	_wrapperExceptions.Add(typeof(AggregateException));
+      _wrapperExceptions.Add(typeof(TargetInvocationException));
+      _wrapperExceptions.Add(typeof(AggregateException));
 
-    	ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(0); });
+      try
+      {
+        var clientVersion = new AssemblyName(GetType().Assembly.FullName).Version.ToString();
+        RaygunLogger.Info(string.Format("Configuring Raygun ({0})", clientVersion));
+      }
+      catch
+      {
+        // Ignore
+      }
     }
 
     private bool ValidateApiKey()
     {
-    	if (string.IsNullOrEmpty(_apiKey))
-    	{
-    		System.Diagnostics.Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
-    		return false;
-    	}
+      if (string.IsNullOrEmpty(_apiKey))
+      {
+        Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
+        return false;
+      }
 
-    	return true;
+      return true;
+    }
+
+    /// <summary>
+    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    /// <param name="apiKey">Your app api key.</param>
+    public static void Attach(string apiKey)
+    {
+      Attach(apiKey, null);
+    }
+
+    /// <summary>
+    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    /// <param name="apiKey">Your app api key.</param>
+    /// <param name="reportNativeErrors">Whether or not to listen to and report native iOS exceptions.</param>
+    public static void Attach(string apiKey, bool reportNativeErrors)
+    {
+      Attach(apiKey, null, reportNativeErrors);
+    }
+
+    /// <summary>
+    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    /// <param name="apiKey">Your app api key.</param>
+    /// <param name="user">An identity string for tracking affected users.</param>
+    public static void Attach(string apiKey, string user)
+    {
+      Attach(apiKey, user, false);
+    }
+
+    /// <summary>
+    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    /// <param name="apiKey">Your app api key.</param>
+    /// <param name="user">An identity string for tracking affected users.</param>
+    /// <param name="reportNativeErrors">Whether or not to listen to and report native exceptions.</param>
+    public static void Attach(string apiKey, string user, bool reportNativeErrors)
+    {
+      Detach();
+
+      if (_client == null)
+      {
+        _client = new RaygunClient(apiKey);
+      }
+
+      _client.AttachCrashReporting(reportNativeErrors);
+
+      _client.SetUserInfo(user);
+    }
+
+    /// <summary>
+    /// Initializes the static RaygunClient with the given Raygun api key.
+    /// </summary>
+    /// <param name="apiKey">Your Raygun api key for this application.</param>
+    /// <returns>The RaygunClient to chain other methods.</returns>
+    public static RaygunClient Initialize(string apiKey)
+    {
+      if (_client == null)
+      {
+        _client = new RaygunClient(apiKey);
+      }
+
+      return _client;
+    }
+
+    /// <summary>
+    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
+    /// Native iOS exception reporting is not enabled with this method, an overload is available to do so.
+    /// </summary>
+    /// <returns>The RaygunClient to chain other methods.</returns>
+    public RaygunClient AttachCrashReporting()
+    {
+      return AttachCrashReporting(false);
+    }
+
+    /// <summary>
+    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    /// <param name="canReportNativeErrors">Whether or not to listen to and report native exceptions.</param>
+    /// <returns>The RaygunClient to chain other methods.</returns>
+    public RaygunClient AttachCrashReporting(bool reportNativeErrors)
+    {
+      Debug.WriteLine("Raygun: Initialising crash reporting");
+      RaygunClient.DetachCrashReporting();
+
+      SetUnhandledExceptionHandlers();
+
+      if (reportNativeErrors)
+      {
+        NativeClient = NativeRaygunClient.SharedInstanceWithApiKey(_apiKey);
+      }
+
+      SendAllStoredCrashReports();
+
+      return this;
+    }
+
+    /// <summary>
+    /// Causes Raygun to automatically send session and view events for Raygun Pulse.
+    /// </summary>
+    /// <returns>The RaygunClient to chain other methods.</returns>
+    public RaygunClient AttachPulse()
+    {
+      Pulse.Attach(this);
+      return this;
+    }
+
+    /// <summary>
+    /// Detaches Raygun from listening to unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    public static void Detach()
+    {
+      RemoveUnhandledExceptionHandlers();
+    }
+
+    /// <summary>
+    /// Detaches Raygun from listening to unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    public static void DetachCrashReporting()
+    {
+      RemoveUnhandledExceptionHandlers();
+    }
+
+    /// <summary>
+    /// Detaches Raygun from automatically sending session and view events to Raygun Pulse.
+    /// </summary>
+    public static void DetachPulse()
+    {
+      Pulse.Detach();
+    }
+
+    private static void SetUnhandledExceptionHandlers()
+    {
+      if (!_exceptionHandlersSet)
+      {
+        _exceptionHandlersSet = true;
+        RaygunLogger.Debug("Adding exception handlers");
+        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+      }
+    }
+
+    private static void RemoveUnhandledExceptionHandlers()
+    {
+      if (_exceptionHandlersSet)
+      {
+        _exceptionHandlersSet = false;
+        RaygunLogger.Debug("Removing exception handlers");
+        AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
+        TaskScheduler.UnobservedTaskException -= TaskScheduler_UnobservedTaskException;
+      }
+    }
+
+    private static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+    {
+      if (e.Exception != null)
+      {
+        _client.Send(e.Exception);
+      }
+
+      if (RaygunSettings.Settings.SetUnobservedTaskExceptionsAsObserved)
+      {
+        e.SetObserved();
+      }
+    }
+
+    private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+      if (e.ExceptionObject is Exception)
+      {
+        _client.Send(e.ExceptionObject as Exception, new List<string>() { "UnhandledException" });
+
+        Pulse.SendRemainingViews();
+      }
     }
 
     #region Crash Reporting
@@ -343,7 +535,15 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      StripAndSend(exception, tags, userCustomData, SynchronousTimeout);
+      if (CanSend(exception))
+      {
+        StripAndSend(exception, tags, userCustomData, SynchronousTimeout);
+        FlagAsSent(exception);
+      }
+      else
+      {
+        RaygunLogger.Debug("Not sending exception");
+      }
     }
 
     /// <summary>
@@ -373,7 +573,15 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      ThreadPool.QueueUserWorkItem(c => StripAndSend(exception, tags, userCustomData, 0));
+      if (CanSend(exception))
+      {
+        ThreadPool.QueueUserWorkItem(c => StripAndSend(exception, tags, userCustomData, 0));
+        FlagAsSent(exception);
+      }
+      else
+      {
+        RaygunLogger.Debug("Not sending exception in background");
+      }
     }
 
     /// <summary>
@@ -386,273 +594,116 @@ namespace Mindscape.Raygun4Net
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage, 0));
     }
 
-    [DllImport("libc")]
-    private static extern int sigaction (Signal sig, IntPtr act, IntPtr oact);
+    private void SendAllStoredCrashReports()
+    {
+      if (!HasInternetConnection)
+      {
+        RaygunLogger.Debug("Not sending stored crash reports due to no internet connection");
+        return;
+      }
 
-    enum Signal {
-      SIGBUS = 10,
-      SIGSEGV = 11
+      // Get all stored crash reports.
+      var reports = _fileManager.GetAllStoredCrashReports();
+
+      RaygunLogger.Info(string.Format("Attempting to send {0} stored crash report(s)", reports.Count));
+
+      // Quick escape if there's no crash reports.
+      if (reports.Count == 0)
+      {
+        return;
+      }
+
+      try
+      {
+        Task.Run(async () =>
+        {
+          // Use a single HttpClient for all requests.
+          using (var client = new HttpClient())
+          {
+            foreach (var report in reports)
+            {
+              await SendStoredReportAsync(client, report);
+            }
+          }
+        }).ContinueWith(t =>
+        {
+          if (t != null && t.IsFaulted)
+          {
+            RaygunLogger.Error("Fault occurred when sending stored reports - clearing stored reports");
+
+            try
+            {
+              // If there was an issue then clear the stored reports.
+              _fileManager.RemoveFiles(reports);
+            }
+            catch (Exception e)
+            {
+              RaygunLogger.Error("Failed to remove stored report due to error: " + e.Message);
+            }
+          }
+
+          if (t != null && t.Exception != null)
+          {
+            // Consume all errors as we dont want them being sent.
+            t.Exception.Handle((e) =>
+            {
+              RaygunLogger.Error("Error occurred while sending stored reports: " + e.Message);
+              return true; // Handled
+            });
+          }
+        });
+      }
+      catch (Exception e)
+      {
+        RaygunLogger.Error("Failed to send stored reports due to error: " + e.Message);
+      }
+    }
+
+    private async Task SendStoredReportAsync(HttpClient client, RaygunFile report)
+    {
+      try
+      {
+        RaygunLogger.Verbose("Sending JSON -------------------------------");
+        RaygunLogger.Verbose(report.Data);
+        RaygunLogger.Verbose("--------------------------------------------");
+
+        // Create the request contnet.
+        HttpContent content = new StringContent(report.Data, System.Text.Encoding.UTF8, "application/json");
+
+        // Add API key to headers.
+        content.Headers.Add("X-ApiKey", _apiKey);
+
+        // Perform the request.
+        var response = await client.PostAsync(RaygunSettings.Settings.ApiEndpoint, content);
+
+        // Check the response.
+        var statusCode = (int)response.StatusCode;
+
+        RaygunLogger.LogResponseStatusCode(statusCode);
+
+        // Remove the stored crash report if it was sent successfully.
+        if (statusCode == (int)RaygunResponseStatusCode.Accepted)
+        {
+          _fileManager.RemoveFile(report.Path); // We can delete the file from disk now.
+        }
+      }
+      catch (Exception e)
+      {
+        RaygunLogger.Error(string.Format("Failed to send stored crash report due to error {0}: {1}", e.GetType().Name, e.Message));
+
+        const string TaskCanceledEx = "TaskCanceledException";
+        if (e.GetType().Name == TaskCanceledEx || e.InnerException.GetType().Name == TaskCanceledEx)
+        {
+          RaygunLogger.LogResponseStatusCode((int)HttpStatusCode.RequestTimeout);
+        }
+        else
+        {
+          RaygunLogger.LogResponseStatusCode((int)HttpStatusCode.BadRequest);
+        }
+      }
     }
 
     #endregion
-
-    /// <summary>
-    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
-    /// </summary>
-    /// <param name="apiKey">Your app api key.</param>
-    public static void Attach(string apiKey)
-    {
-      Attach(apiKey, null);
-    }
-
-    /// <summary>
-    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
-    /// </summary>
-    /// <param name="apiKey">Your app api key.</param>
-    /// <param name="canReportNativeErrors">Whether or not to listen to and report native exceptions.</param>
-    /// <param name="hijackNativeSignals">When true, this solves the issue where null reference exceptions inside try/catch blocks crash the app, but when false, additional native errors can be reported.</param>
-    public static void Attach(string apiKey, bool canReportNativeErrors, bool hijackNativeSignals)
-    {
-      Attach (apiKey, null, canReportNativeErrors, hijackNativeSignals);
-    }
-
-    /// <summary>
-    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
-    /// </summary>
-    /// <param name="apiKey">Your app api key.</param>
-    /// <param name="user">An identity string for tracking affected users.</param>
-    public static void Attach(string apiKey, string user)
-    {
-      Attach (apiKey, user, false, true);
-    }
-
-    /// <summary>
-    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
-    /// </summary>
-    /// <param name="apiKey">Your app api key.</param>
-    /// <param name="user">An identity string for tracking affected users.</param>
-    /// <param name="canReportNativeErrors">Whether or not to listen to and report native exceptions.</param>
-    /// <param name="hijackNativeSignals">When true, this solves the issue where null reference exceptions inside try/catch blocks crash the app, but when false, additional native errors can be reported.</param>
-    public static void Attach(string apiKey, string user, bool canReportNativeErrors, bool hijackNativeSignals)
-    {
-      Detach();
-
-      if (_client == null) 
-      {
-        _client = new RaygunClient(apiKey);
-      }
-
-      AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-      TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-
-      if (canReportNativeErrors)
-      {
-        PopulateCrashReportDirectoryStructure();
-
-        if (hijackNativeSignals)
-        {
-          IntPtr sigbus = Marshal.AllocHGlobal (512);
-          IntPtr sigsegv = Marshal.AllocHGlobal (512);
-
-          // Store Mono SIGSEGV and SIGBUS handlers
-          sigaction (Signal.SIGBUS, IntPtr.Zero, sigbus);
-          sigaction (Signal.SIGSEGV, IntPtr.Zero, sigsegv);
-
-          _client.NativeClient = NativeRaygunClient.SharedReporterWithApiKey(apiKey);
-
-          // Restore Mono SIGSEGV and SIGBUS handlers
-          sigaction (Signal.SIGBUS, sigbus, IntPtr.Zero);
-          sigaction (Signal.SIGSEGV, sigsegv, IntPtr.Zero);
-
-          Marshal.FreeHGlobal (sigbus);
-          Marshal.FreeHGlobal (sigsegv);
-        }
-        else
-        {
-          _client.NativeClient = NativeRaygunClient.SharedReporterWithApiKey(apiKey);
-        }
-      }
-
-      _client.SetUserInfo(user);
-    }
-
-    /// <summary>
-    /// Initializes the static RaygunClient with the given Raygun api key.
-    /// </summary>
-    /// <param name="apiKey">Your Raygun api key for this application.</param>
-    /// <returns>The RaygunClient to chain other methods.</returns>
-    public static RaygunClient Initialize(string apiKey)
-    {
-      if (_client == null) 
-      {
-        _client = new RaygunClient(apiKey);
-      }
-
-      return _client;
-    }
-
-    /// <summary>
-    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
-    /// Native iOS exception reporting is not enabled with this method, an overload is available to do so.
-    /// </summary>
-    /// <returns>The RaygunClient to chain other methods.</returns>
-    public RaygunClient AttachCrashReporting()
-    {
-      return AttachCrashReporting(false, false);
-    }
-
-    /// <summary>
-    /// Causes Raygun to listen to and send all unhandled exceptions and unobserved task exceptions.
-    /// </summary>
-    /// <param name="canReportNativeErrors">Whether or not to listen to and report native exceptions.</param>
-    /// <param name="hijackNativeSignals">When true, this solves the issue where null reference exceptions inside try/catch blocks crash the app, but when false, additional native errors can be reported.</param>
-    /// <returns>The RaygunClient to chain other methods.</returns>
-    public RaygunClient AttachCrashReporting(bool canReportNativeErrors, bool hijackNativeSignals)
-    {
-      RaygunClient.DetachCrashReporting();
-
-      AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-      TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-
-      if (canReportNativeErrors)
-      {
-        PopulateCrashReportDirectoryStructure();
-
-        if (hijackNativeSignals)
-        {
-          IntPtr sigbus = Marshal.AllocHGlobal(512);
-          IntPtr sigsegv = Marshal.AllocHGlobal(512);
-
-          // Store Mono SIGSEGV and SIGBUS handlers
-          sigaction(Signal.SIGBUS, IntPtr.Zero, sigbus);
-          sigaction(Signal.SIGSEGV, IntPtr.Zero, sigsegv);
-
-          NativeClient = NativeRaygunClient.SharedReporterWithApiKey(_apiKey);
-
-          // Restore Mono SIGSEGV and SIGBUS handlers
-          sigaction (Signal.SIGBUS, sigbus, IntPtr.Zero);
-          sigaction (Signal.SIGSEGV, sigsegv, IntPtr.Zero);
-
-          Marshal.FreeHGlobal (sigbus);
-          Marshal.FreeHGlobal (sigsegv);
-        }
-        else
-        {
-          NativeClient = NativeRaygunClient.SharedReporterWithApiKey(_apiKey);
-        }
-      }
-      return this;
-    }
-
-    /// <summary>
-    /// Causes Raygun to automatically send session and view events for Raygun Pulse.
-    /// </summary>
-    /// <returns>The RaygunClient to chain other methods.</returns>
-    public RaygunClient AttachPulse()
-    {
-      Pulse.Attach(this);
-      return this;
-    }
-
-    /// <summary>
-    /// Detaches Raygun from listening to unhandled exceptions and unobserved task exceptions.
-    /// </summary>
-    public static void Detach()
-    {
-      AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
-      TaskScheduler.UnobservedTaskException -= TaskScheduler_UnobservedTaskException;
-    }
-
-    /// <summary>
-    /// Detaches Raygun from listening to unhandled exceptions and unobserved task exceptions.
-    /// </summary>
-    public static void DetachCrashReporting()
-    {
-      AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
-      TaskScheduler.UnobservedTaskException -= TaskScheduler_UnobservedTaskException;
-    }
-
-    /// <summary>
-    /// Detaches Raygun from automatically sending session and view events to Raygun Pulse.
-    /// </summary>
-    public static void DetachPulse()
-    {
-      Pulse.Detach();
-    }
-
-    private static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
-    {
-      if (e.Exception != null)
-      {
-        _client.Send(e.Exception);
-        if (_client.NativeClient != null)
-        {
-          WriteExceptionInformation(_client.NativeClient.NextReportUUID, e.Exception);
-        }
-      }
-    }
-
-    private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-    {
-      if (e.ExceptionObject is Exception)
-      {
-        _client.Send(e.ExceptionObject as Exception, new List<string>(){ "UnhandledException" });
-        if (_client.NativeClient != null)
-        {
-          WriteExceptionInformation(_client.NativeClient.NextReportUUID, e.ExceptionObject as Exception);
-        }
-        Pulse.SendRemainingViews();
-      }
-    }
-
-    private static string StackTracePath
-    {
-      get
-      {
-        string documents = NSFileManager.DefaultManager.GetUrls(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomain.User)[0].Path;
-        return Path.Combine (documents, "..", "Library", "Caches", StackTraceDirectory);
-      }
-    }
-
-    private static void PopulateCrashReportDirectoryStructure()
-    {
-      try
-      {
-        Directory.CreateDirectory(StackTracePath);
-
-        // Write client info to a file to be picked up by the native reporter:
-        var clientInfoPath = Path.GetFullPath(Path.Combine(StackTracePath, "RaygunClientInfo"));
-        var clientMessage = new RaygunClientMessage();
-        string clientInfo = String.Format("{0}\n{1}\n{2}", clientMessage.Version, clientMessage.Name, clientMessage.ClientUrl);
-        File.WriteAllText(clientInfoPath, clientInfo);
-      }
-      catch (Exception ex)
-      {
-        System.Diagnostics.Debug.WriteLine(string.Format("Failed to populate crash report directory structure: {0}", ex.Message));
-      }
-    }
-
-    private static void WriteExceptionInformation(string identifier, Exception exception)
-    {
-      try
-      {
-        if (exception == null)
-        {
-          return;
-        }
-
-        var path = Path.GetFullPath(Path.Combine(StackTracePath, string.Format ("{0}", identifier)));
-
-        var exceptionType = exception.GetType ();
-        string message = exceptionType.Name + ": " + exception.Message;
-
-        File.WriteAllText(path, string.Join(Environment.NewLine, exceptionType.FullName, message, exception.StackTrace));
-      }
-      catch (Exception ex)
-      {
-        System.Diagnostics.Debug.WriteLine(string.Format("Failed to write managed exception information: {0}", ex.Message));
-      }
-    }
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
@@ -668,6 +719,7 @@ namespace Mindscape.Raygun4Net
         .Build();
 
       var customGroupingKey = OnCustomGroupingKey(exception, message);
+
       if (string.IsNullOrEmpty(customGroupingKey) == false)
       {
         message.Details.GroupingKey = customGroupingKey;
@@ -720,50 +772,130 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public override void Send(RaygunMessage raygunMessage)
     {
-      Send (raygunMessage, SynchronousTimeout);
+      Send(raygunMessage, SynchronousTimeout);
     }
 
     private void Send(RaygunMessage raygunMessage, int timeout)
     {
-      if (ValidateApiKey())
+      if (!ValidateApiKey())
       {
-        bool canSend = OnSendingMessage(raygunMessage);
-        if (canSend)
+        RaygunLogger.Error("Failed to send due to invalid API key");
+        return;
+      }
+
+      bool canSend = OnSendingMessage(raygunMessage);
+
+      if (!canSend)
+      {
+        RaygunLogger.Debug("Sending message cancelled");
+        return;
+      }
+
+      // No internet then we store the report.
+      if (!HasInternetConnection)
+      {
+        var path = _fileManager.SaveCrashReport(raygunMessage, MaxReportsStoredOnDevice);
+
+        if (!string.IsNullOrEmpty(path))
         {
-          string message = null;
-          try
-          {
-            message = SimpleJson.SerializeObject(raygunMessage);
-          }
-          catch (Exception ex)
-          {
-            System.Diagnostics.Debug.WriteLine (string.Format ("Error serializing message {0}", ex.Message));
-          }
+          RaygunLogger.Debug("Saved crash report to: " + path);
+        }
 
-          if (message != null)
-          {
-            try
-            {
-              SaveMessage(message);
-            }
-            catch (Exception ex)
-            {
-              System.Diagnostics.Debug.WriteLine (string.Format ("Error saving Exception to device {0}", ex.Message));
-              if (HasInternetConnection)
-              {
-                SendMessage(message, timeout);
-              }
-            }
+        return;
+      }
 
-            // In the case of sending messages during a crash, only send stored messages if there are 2 or less.
-            // This is to prevent keeping the app open for a long time while it crashes.
-            if (HasInternetConnection && GetStoredMessageCount() <= 2)
-            {
-              SendStoredMessages(timeout);
-            }
+      try
+      {
+        // Create the json data.
+        var jsonData = SimpleJson.SerializeObject(raygunMessage);
+
+        var statusCode = SendMessage(jsonData, timeout);
+
+        RaygunLogger.LogResponseStatusCode(statusCode);
+
+        // Save the message if the application is currently being rate limited or there was a timeout.
+        if (statusCode == (int)RaygunResponseStatusCode.RateLimited || 
+            statusCode == (int)RaygunResponseStatusCode.RequestTimeout ||
+            statusCode == (int)RaygunResponseStatusCode.GatewayTimeout)
+        {
+          var path = _fileManager.SaveCrashReport(raygunMessage, MaxReportsStoredOnDevice);
+
+          if (!string.IsNullOrEmpty(path))
+          {
+            RaygunLogger.Debug("Saved crash report to: " + path);
           }
         }
       }
+      catch (Exception e)
+      {
+        RaygunLogger.Error(string.Format("Failed to send message due to error {0}: {1}", e.GetType().Name, e.Message));
+
+        var path = _fileManager.SaveCrashReport(raygunMessage, MaxReportsStoredOnDevice);
+
+        if (!string.IsNullOrEmpty(path))
+        {
+          RaygunLogger.Debug("Saved crash report to: " + path);
+        }
+      }
+    }
+
+    internal int SendMessage(string message, int timeout)
+    {
+      RaygunLogger.Verbose("Sending JSON -------------------------------");
+      RaygunLogger.Verbose(message);
+      RaygunLogger.Verbose("--------------------------------------------");
+
+      int statusCode = 0;
+
+      using (var client = new HttpClient())
+      {
+        try
+        {
+          // Set the timeout
+          if (timeout > 0)
+          {
+            client.Timeout = TimeSpan.FromMilliseconds(timeout);
+          }
+
+          // Create the request contnet.
+          HttpContent content = new StringContent(message, System.Text.Encoding.UTF8, "application/json");
+
+          // Add API key to headers.
+          content.Headers.Add("X-ApiKey", _apiKey);
+
+          // Perform the request.
+          var task = client.PostAsync(RaygunSettings.Settings.ApiEndpoint, content);
+
+          task.Wait();
+
+          var response = task.Result;
+
+          // Check the response.
+          statusCode = (int)response.StatusCode;
+        }
+        catch (Exception e)
+        {
+          RaygunLogger.Error(string.Format("Failed to send message due to error {0}: {1}", e.GetType().Name, e.Message));
+
+          // Was this due to the request timing out?
+          const string TaskCanceledEx = "TaskCanceledException";
+          if (e.GetType().Name == TaskCanceledEx || e.InnerException.GetType().Name == TaskCanceledEx)
+          {
+            statusCode = (int)HttpStatusCode.RequestTimeout;
+          }
+          else
+          {
+            statusCode = (int)HttpStatusCode.BadRequest;
+          }
+        }
+      }
+
+      return statusCode;
+    }
+
+    public void Crash()
+    {
+      NativeClient.Crash();
     }
 
     #region Real User Monitoring
@@ -783,39 +915,39 @@ namespace Mindscape.Raygun4Net
 
     public void EnsurePulseSessionEnded()
     {
-    	if (!string.IsNullOrEmpty(_sessionId))
-    	{
-    		SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionEnd);
+      if (!string.IsNullOrEmpty(_sessionId))
+      {
+        SendPulseSessionEventNow(RaygunPulseSessionEventType.SessionEnd);
       }
     }
 
     private RaygunPulseMessage BuildPulseMessage(RaygunPulseSessionEventType type)
     {
-    	var msg = new RaygunPulseMessage();
-    	var data = new RaygunPulseDataMessage();
+      var msg = new RaygunPulseMessage();
+      var data = new RaygunPulseDataMessage();
 
-    	data.Timestamp = DateTime.UtcNow;
-    	data.Version   = GetVersion();
-    	data.OS        = UIDevice.CurrentDevice.SystemName;
-    	data.OSVersion = UIDevice.CurrentDevice.SystemVersion;
-    	data.Platform  = Mindscape.Raygun4Net.Builders.RaygunEnvironmentMessageBuilder.GetStringSysCtl("hw.machine");
-    	data.User      = UserInfo;
+      data.Timestamp = DateTime.UtcNow;
+      data.Version = GetVersion();
+      data.OS = UIDevice.CurrentDevice.SystemName;
+      data.OSVersion = UIDevice.CurrentDevice.SystemVersion;
+      data.Platform = Mindscape.Raygun4Net.Builders.RaygunEnvironmentMessageBuilder.GetStringSysCtl("hw.machine");
+      data.User = UserInfo;
 
-    	msg.EventData = new[] { data };
+      msg.EventData = new[] { data };
 
-    	switch (type)
-    	{
-    		case RaygunPulseSessionEventType.SessionStart:
-    			data.Type = "session_start";
-    			break;
-    		case RaygunPulseSessionEventType.SessionEnd:
-    			data.Type = "session_end";
-    			break;
-    	}
+      switch (type)
+      {
+        case RaygunPulseSessionEventType.SessionStart:
+          data.Type = "session_start";
+          break;
+        case RaygunPulseSessionEventType.SessionEnd:
+          data.Type = "session_end";
+          break;
+      }
 
-    	data.SessionId = _sessionId;
+      data.SessionId = _sessionId;
 
-    	return msg;
+      return msg;
     }
 
     internal void SendPulseSessionEventNow(RaygunPulseSessionEventType type)
@@ -826,7 +958,7 @@ namespace Mindscape.Raygun4Net
       }
 
       var message = BuildPulseMessage(type);
-	    Send(message);
+      Send(message);
 
       if (type == RaygunPulseSessionEventType.SessionEnd)
       {
@@ -890,7 +1022,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception e)
         {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error sending pulse timing event to Raygun: {0}", e.Message));
+          Debug.WriteLine(string.Format("Error sending pulse timing event to Raygun: {0}", e.Message));
         }
       }
     }
@@ -907,10 +1039,10 @@ namespace Mindscape.Raygun4Net
       {
         EnsurePulseSessionStarted();
 
-        string version   = GetVersion();
-        string os        = UIDevice.CurrentDevice.SystemName;
+        string version = GetVersion();
+        string os = UIDevice.CurrentDevice.SystemName;
         string osVersion = UIDevice.CurrentDevice.SystemVersion;
-        string platform  = Mindscape.Raygun4Net.Builders.RaygunEnvironmentMessageBuilder.GetStringSysCtl("hw.machine");
+        string platform = Mindscape.Raygun4Net.Builders.RaygunEnvironmentMessageBuilder.GetStringSysCtl("hw.machine");
 
         RaygunPulseMessage message = new RaygunPulseMessage();
 
@@ -924,18 +1056,19 @@ namespace Mindscape.Raygun4Net
           RaygunPulseDataMessage dataMessage = new RaygunPulseDataMessage();
           dataMessage.SessionId = pendingEvent.SessionId;
           dataMessage.Timestamp = pendingEvent.Timestamp;
-          dataMessage.Version   = version;
-          dataMessage.OS        = os;
+          dataMessage.Version = version;
+          dataMessage.OS = os;
           dataMessage.OSVersion = osVersion;
-          dataMessage.Platform  = platform;
-          dataMessage.Type      = "mobile_event_timing";
-          dataMessage.User      = batch.UserInfo;
+          dataMessage.Platform = platform;
+          dataMessage.Type = "mobile_event_timing";
+          dataMessage.User = batch.UserInfo;
 
           string type = pendingEvent.EventType == RaygunPulseEventType.ViewLoaded ? "p" : "n";
 
-          RaygunPulseData data = new RaygunPulseData() 
-          { 
-            Name = pendingEvent.Name, Timing = new RaygunPulseTimingMessage() { Type = type, Duration = pendingEvent.Duration } 
+          RaygunPulseData data = new RaygunPulseData()
+          {
+            Name = pendingEvent.Name,
+            Timing = new RaygunPulseTimingMessage() { Type = type, Duration = pendingEvent.Duration }
           };
 
           RaygunPulseData[] dataArray = { data };
@@ -951,7 +1084,7 @@ namespace Mindscape.Raygun4Net
       }
       catch (Exception e)
       {
-        System.Diagnostics.Debug.WriteLine(string.Format("Error sending pulse event batch to Raygun: {0}", e.Message));
+        Debug.WriteLine(string.Format("Error sending pulse event batch to Raygun: {0}", e.Message));
       }
     }
 
@@ -964,25 +1097,26 @@ namespace Mindscape.Raygun4Net
 
       dataMessage.SessionId = _sessionId;
       dataMessage.Timestamp = DateTime.UtcNow - TimeSpan.FromMilliseconds(milliseconds);
-      dataMessage.Version   = GetVersion();
-      dataMessage.OS        = UIDevice.CurrentDevice.SystemName;
+      dataMessage.Version = GetVersion();
+      dataMessage.OS = UIDevice.CurrentDevice.SystemName;
       dataMessage.OSVersion = UIDevice.CurrentDevice.SystemVersion;
-      dataMessage.Platform  = Mindscape.Raygun4Net.Builders.RaygunEnvironmentMessageBuilder.GetStringSysCtl("hw.machine");
-      dataMessage.Type      = "mobile_event_timing";
-      dataMessage.User      = UserInfo;
+      dataMessage.Platform = Mindscape.Raygun4Net.Builders.RaygunEnvironmentMessageBuilder.GetStringSysCtl("hw.machine");
+      dataMessage.Type = "mobile_event_timing";
+      dataMessage.User = UserInfo;
 
       string type = eventType == RaygunPulseEventType.ViewLoaded ? "p" : "n";
 
       RaygunPulseData data = new RaygunPulseData()
-      { 
-        Name = name, Timing = new RaygunPulseTimingMessage() { Type = type, Duration = milliseconds } 
+      {
+        Name = name,
+        Timing = new RaygunPulseTimingMessage() { Type = type, Duration = milliseconds }
       };
 
       RaygunPulseData[] dataArray = { data };
       string dataStr = SimpleJson.SerializeObject(dataArray);
       dataMessage.Data = dataStr;
 
-      message.EventData = new [] { dataMessage };
+      message.EventData = new[] { dataMessage };
 
       Send(message);
     }
@@ -996,9 +1130,9 @@ namespace Mindscape.Raygun4Net
         {
           message = SimpleJson.SerializeObject(raygunPulseMessage);
         }
-        catch (Exception ex) 
+        catch (Exception ex)
         {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error serializing message {0}", ex.Message));
+          Debug.WriteLine(string.Format("Error serializing message {0}", ex.Message));
         }
 
         if (message != null)
@@ -1010,30 +1144,7 @@ namespace Mindscape.Raygun4Net
 
     private bool SendPulseMessage(string message)
     {
-    	using (var client = new WebClient())
-    	{
-    		client.Headers.Add("X-ApiKey", _apiKey);
-    		client.Headers.Add("content-type", "application/json; charset=utf-8");
-    		client.Encoding = System.Text.Encoding.UTF8;
-
-    		try
-    		{
-    			client.UploadStringAsync(RaygunSettings.Settings.PulseEndpoint, message);
-    		}
-    		catch (Exception ex)
-    		{
-    			System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Pulse message to Raygun.io {0}", ex.Message));
-    			return false;
-    		}
-    	}
-    	return true;
-    }
-
-    #endregion
-
-    private bool SendMessage(string message, int timeout)
-    {
-      using (var client = new TimeoutWebClient(timeout))
+      using (var client = new WebClient())
       {
         client.Headers.Add("X-ApiKey", _apiKey);
         client.Headers.Add("content-type", "application/json; charset=utf-8");
@@ -1041,16 +1152,18 @@ namespace Mindscape.Raygun4Net
 
         try
         {
-          client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
+          client.UploadStringAsync(RaygunSettings.Settings.PulseEndpoint, message);
         }
         catch (Exception ex)
         {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+          Debug.WriteLine(string.Format("Error Logging Pulse message to Raygun.io {0}", ex.Message));
           return false;
         }
       }
       return true;
     }
+
+    #endregion
 
     private bool HasInternetConnection
     {
@@ -1071,141 +1184,6 @@ namespace Mindscape.Raygun4Net
           }
         }
         return false;
-      }
-    }
-
-    private void SendStoredMessages(int timeout)
-    {
-      if (HasInternetConnection)
-      {
-        try
-        {
-          using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
-          {
-            if (isolatedStorage.DirectoryExists("RaygunIO"))
-            {
-              string[] fileNames = isolatedStorage.GetFileNames("RaygunIO\\*.txt");
-              foreach (string name in fileNames)
-              {
-                IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile(name, FileMode.Open);
-                using (StreamReader reader = new StreamReader(isoFileStream))
-                {
-                  string text = reader.ReadToEnd();
-                  bool success = SendMessage(text, timeout);
-                  // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
-                  if (!success)
-                  {
-                    return;
-                  }
-                  System.Diagnostics.Debug.WriteLine("Sent " + name);
-                }
-                isolatedStorage.DeleteFile(name);
-              }
-              if (isolatedStorage.GetFileNames("RaygunIO\\*.txt").Length == 0)
-              {
-                System.Diagnostics.Debug.WriteLine("Successfully sent all pending messages");
-              }
-              isolatedStorage.DeleteDirectory("RaygunIO");
-            }
-          }
-        }
-        catch (Exception ex)
-        {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error sending stored messages to Raygun.io {0}", ex.Message));
-        }
-      }
-    }
-
-    private int GetStoredMessageCount()
-    {
-      try
-      {
-        using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
-        {
-          if (isolatedStorage.DirectoryExists("RaygunIO"))
-          {
-            string[] fileNames = isolatedStorage.GetFileNames("RaygunIO\\*.txt");
-            return fileNames.Length;
-          }
-        }
-      }
-      catch (Exception ex)
-      {
-        System.Diagnostics.Debug.WriteLine(string.Format("Error getting stored message count: {0}", ex.Message));
-      }
-      return 0;
-    }
-
-    private void SaveMessage(string message)
-    {
-      try
-      {
-        using (IsolatedStorageFile isolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
-        {
-          if (!isolatedStorage.DirectoryExists("RaygunIO"))
-          {
-            isolatedStorage.CreateDirectory("RaygunIO");
-          }
-          int number = 1;
-          while (true)
-          {
-            bool exists = isolatedStorage.FileExists("RaygunIO\\RaygunErrorMessage" + number + ".txt");
-            if (!exists)
-            {
-              string nextFileName = "RaygunIO\\RaygunErrorMessage" + (number + 1) + ".txt";
-              exists = isolatedStorage.FileExists(nextFileName);
-              if (exists)
-              {
-                isolatedStorage.DeleteFile(nextFileName);
-              }
-              break;
-            }
-            number++;
-          }
-          if (number == 11)
-          {
-            string firstFileName = "RaygunIO\\RaygunErrorMessage1.txt";
-            if (isolatedStorage.FileExists(firstFileName))
-            {
-              isolatedStorage.DeleteFile(firstFileName);
-            }
-          }
-          using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream("RaygunIO\\RaygunErrorMessage" + number + ".txt", FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage))
-          {
-            using (StreamWriter writer = new StreamWriter(isoStream, Encoding.Unicode))
-            {
-              writer.Write(message);
-              writer.Flush();
-              writer.Close();
-            }
-          }
-          System.Diagnostics.Debug.WriteLine("Saved message: " + "RaygunErrorMessage" + number + ".txt");
-          System.Diagnostics.Debug.WriteLine("File Count: " + isolatedStorage.GetFileNames("RaygunIO\\*.txt").Length);
-        }
-      }
-      catch (Exception ex)
-      {
-        System.Diagnostics.Debug.WriteLine(string.Format("Error saving message to isolated storage {0}", ex.Message));
-      }
-    }
-
-    private class TimeoutWebClient : WebClient
-    {
-      private readonly int _timeout;
-
-      public TimeoutWebClient(int timeout)
-      {
-        _timeout = timeout;
-      }
-
-      protected override WebRequest GetWebRequest(Uri address)
-      {
-        WebRequest request = base.GetWebRequest(address);
-        if (_timeout > 0)
-        {
-          request.Timeout = _timeout;
-        }
-        return request;
       }
     }
   }

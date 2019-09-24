@@ -1,27 +1,16 @@
-﻿using System;
-
-namespace Mindscape.Raygun4Net
+﻿namespace Mindscape.Raygun4Net.AspNetCore
 {
-  public class RaygunSettings
+  public class RaygunSettings : RaygunSettingsBase
   {
-    private const string DefaultApiEndPoint = "https://api.raygun.com/entries";
-
-    public RaygunSettings()
-    {
-      ApiEndpoint = new Uri(DefaultApiEndPoint);
-    }
-
-    public string ApiKey { get; set; }
-
-    public Uri ApiEndpoint { get; set; }
-
     public bool MediumTrust { get; set; }
-
-    public bool ThrowOnError { get; set; }
 
     public int[] ExcludedStatusCodes { get; set; }
 
     public bool ExcludeErrorsFromLocal { get; set; }
+
+    public string[] IgnoreSensitiveFieldNames { get; set; }
+
+    public string[] IgnoreQueryParameterNames { get; set; }
 
     public string[] IgnoreFormFieldNames { get; set; }
 
@@ -33,8 +22,12 @@ namespace Mindscape.Raygun4Net
 
     public bool IsRawDataIgnored { get; set; }
 
-    public string ApplicationVersion { get; set; }
-    
+    public bool IsRawDataIgnoredWhenFilteringFailed { get; set; }
+
+    public bool UseXmlRawDataFilter { get; set; }
+
+    public bool UseKeyValuePairRawDataFilter { get; set; }
+
     public bool ReplaceUnseekableRequestStreams { get; set; }
   }
 }

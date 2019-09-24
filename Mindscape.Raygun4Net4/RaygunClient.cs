@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using Mindscape.Raygun4Net.Messages;
@@ -13,19 +14,20 @@ using System.IO;
 using System.IO.IsolatedStorage;
 using System.Text;
 using Mindscape.Raygun4Net.Breadcrumbs;
+using Mindscape.Raygun4Net.Filters;
 
 namespace Mindscape.Raygun4Net
 {
   public class RaygunClient : RaygunClientBase
   {
+    internal const string UnhandledExceptionTag = "UnhandledException";
+
     private readonly string _apiKey;
     private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private readonly List<Type> _wrapperExceptions = new List<Type>();
 
-    [ThreadStatic]
-    private static RaygunRequestMessage _currentRequestMessage;
-    [ThreadStatic]
-    private static List<RaygunBreadcrumb> _currentBreadcrumbs;
+    [ThreadStatic] private static RaygunRequestMessage _currentRequestMessage;
+    [ThreadStatic] private static List<RaygunBreadcrumb> _currentBreadcrumbs;
 
     private static readonly RaygunBreadcrumbs _breadcrumbs = new RaygunBreadcrumbs(new DefaultBreadcrumbStorage());
 
@@ -40,29 +42,48 @@ namespace Mindscape.Raygun4Net
       _wrapperExceptions.Add(typeof(TargetInvocationException));
       _wrapperExceptions.Add(typeof(HttpUnhandledException));
 
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreSensitiveFieldNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreSensitiveFieldNames.Split(',');
+        IgnoreSensitiveFieldNames(ignoredNames);
+      }
+
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreQueryParameterNames))
+      {
+        var ignoredNames = RaygunSettings.Settings.IgnoreQueryParameterNames.Split(',');
+        IgnoreQueryParameterNames(ignoredNames);
+      }
 
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormFieldNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreFormFieldNames.Split(',');
         IgnoreFormFieldNames(ignoredNames);
       }
+
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreHeaderNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreHeaderNames.Split(',');
         IgnoreHeaderNames(ignoredNames);
       }
+
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreCookieNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreCookieNames.Split(',');
         IgnoreCookieNames(ignoredNames);
       }
+
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreServerVariableNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreServerVariableNames.Split(',');
         IgnoreServerVariableNames(ignoredNames);
       }
+
       IsRawDataIgnored = RaygunSettings.Settings.IsRawDataIgnored;
+      IsRawDataIgnoredWhenFilteringFailed = RaygunSettings.Settings.IsRawDataIgnoredWhenFilteringFailed;
       IsRequestIpAddressMasked = RaygunSettings.Settings.IsRequestIpAddressMasked;
+
+      UseXmlRawDataFilter = RaygunSettings.Settings.UseXmlRawDataFilter;
+      UseKeyValuePairRawDataFilter = RaygunSettings.Settings.UseKeyValuePairRawDataFilter;
 
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
@@ -83,6 +104,7 @@ namespace Mindscape.Raygun4Net
         System.Diagnostics.Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
         return false;
       }
+
       return true;
     }
 
@@ -127,6 +149,30 @@ namespace Mindscape.Raygun4Net
       {
         _wrapperExceptions.Remove(wrapper);
       }
+    }
+
+    /// <summary>
+    /// Adds a list of keys to remove from the following sections of the <see cref="RaygunRequestMessage" />
+    /// <see cref="RaygunRequestMessage.Headers" />
+    /// <see cref="RaygunRequestMessage.QueryString" />
+    /// <see cref="RaygunRequestMessage.Cookies" />
+    /// <see cref="RaygunRequestMessage.Data" />
+    /// <see cref="RaygunRequestMessage.Form" />
+    /// <see cref="RaygunRequestMessage.RawData" />
+    /// </summary>
+    /// <param name="names">Keys to be stripped from the <see cref="RaygunRequestMessage" />.</param>
+    public void IgnoreSensitiveFieldNames(params string[] names)
+    {
+      _requestMessageOptions.AddSensitiveFieldNames(names);
+    }
+
+    /// <summary>
+    /// Adds a list of keys to remove from the <see cref="RaygunRequestMessage.QueryString" /> property of the <see cref="RaygunRequestMessage" />
+    /// </summary>
+    /// <param name="names">Keys to be stripped from the <see cref="RaygunRequestMessage.QueryString" /></param>
+    public void IgnoreQueryParameterNames(params string[] names)
+    {
+      _requestMessageOptions.AddQueryParameterNames(names);
     }
 
     /// <summary>
@@ -180,23 +226,48 @@ namespace Mindscape.Raygun4Net
     public bool IsRawDataIgnored
     {
       get { return _requestMessageOptions.IsRawDataIgnored; }
-      set
-      {
-        _requestMessageOptions.IsRawDataIgnored = value;
-      }
+      set { _requestMessageOptions.IsRawDataIgnored = value; }
     }
 
     /// <summary>
-    /// Specifies whether or not the request IpAddress has the last octet zeroed. This may be
-    /// required to comply with the European GDPR laws.
+    /// Specifies whether or not RawData from web requests is ignored when sensitive values are seen and unable to be removed due to failing to parse the contents.
+    /// The default is false which means RawData will not be ignored when filtering fails.
     /// </summary>
-    public bool IsRequestIpAddressMasked
+    public bool IsRawDataIgnoredWhenFilteringFailed
     {
-        get { return _requestMessageOptions.IsRequestIpAddressMasked; }
-        set
-        {
-            _requestMessageOptions.IsRequestIpAddressMasked = value;
-        }
+      get { return _requestMessageOptions.IsRawDataIgnoredWhenFilteringFailed; }
+      set { _requestMessageOptions.IsRawDataIgnoredWhenFilteringFailed = value; }
+    }
+
+    /// <summary>
+    /// Specifies whether or not RawData from web requests is filtered of sensitive values using an XML parser.
+    /// </summary>
+    /// <value><c>true</c> if use xml raw data filter; otherwise, <c>false</c>.</value>
+    public bool UseXmlRawDataFilter
+    {
+      get { return _requestMessageOptions.UseXmlRawDataFilter; }
+      set { _requestMessageOptions.UseXmlRawDataFilter = value; }
+    }
+
+    /// <summary>
+    /// Specifies whether or not RawData from web requests is filtered of sensitive values using an KeyValuePair parser.
+    /// </summary>
+    /// <value><c>true</c> if use key pair raw data filter; otherwise, <c>false</c>.</value>
+    public bool UseKeyValuePairRawDataFilter
+    {
+      get { return _requestMessageOptions.UseKeyValuePairRawDataFilter; }
+      set { _requestMessageOptions.UseKeyValuePairRawDataFilter = value; }
+    }
+
+    /// <summary>
+    /// Add an <see cref="IRaygunDataFilter"/> implementation to be used when capturing the raw data
+    /// of a HTTP request. This filter will be passed the request raw data and is expected to remove 
+    /// or replace values whose keys are found in the list supplied to the Filter method.
+    /// </summary>
+    /// <param name="filter">Custom raw data filter implementation.</param>
+    public void AddRawDataFilter(IRaygunDataFilter filter)
+    {
+      _requestMessageOptions.AddRawDataFilter(filter);
     }
 
     protected override bool CanSend(Exception exception)
@@ -218,12 +289,13 @@ namespace Mindscape.Raygun4Net
           }
         }
       }
+
       return base.CanSend(exception);
     }
 
     public static void RecordBreadcrumb(string message)
     {
-      _breadcrumbs.Record(new RaygunBreadcrumb { Message = message });
+      _breadcrumbs.Record(new RaygunBreadcrumb {Message = message});
     }
 
     public static void RecordBreadcrumb(RaygunBreadcrumb crumb)
@@ -242,7 +314,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     public override void Send(Exception exception)
     {
-      Send(exception, null, (IDictionary)null, null);
+      Send(exception, null, (IDictionary) null, null);
     }
 
     /// <summary>
@@ -253,7 +325,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message.</param>
     public void Send(Exception exception, IList<string> tags)
     {
-      Send(exception, tags, (IDictionary)null, null);
+      Send(exception, tags, (IDictionary) null, null);
     }
 
     /// <summary>
@@ -296,7 +368,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     public void SendInBackground(Exception exception)
     {
-      SendInBackground(exception, null, (IDictionary)null, null);
+      SendInBackground(exception, null, (IDictionary) null, null);
     }
 
     /// <summary>
@@ -306,7 +378,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message.</param>
     public void SendInBackground(Exception exception, IList<string> tags)
     {
-      SendInBackground(exception, tags, (IDictionary)null, null);
+      SendInBackground(exception, tags, (IDictionary) null, null);
     }
 
     /// <summary>
@@ -366,12 +438,12 @@ namespace Mindscape.Raygun4Net
       }
       catch (Exception)
       {
-         // This will swallow any unhandled exceptions unless we explicitly want to throw on error.
-         // Otherwise this can bring the whole process down.
-         if (RaygunSettings.Settings.ThrowOnError)
-         {
-           throw;
-         }
+        // This will swallow any unhandled exceptions unless we explicitly want to throw on error.
+        // Otherwise this can bring the whole process down.
+        if (RaygunSettings.Settings.ThrowOnError)
+        {
+          throw;
+        }
       }
     }
 
@@ -435,6 +507,7 @@ namespace Mindscape.Raygun4Net
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
+        .SetContextId(ContextId)
         .SetUser(userInfoMessage ?? UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
         .Build();
 
@@ -482,11 +555,15 @@ namespace Mindscape.Raygun4Net
               {
                 e.Data["Type"] = rtle.Types[index];
               }
-              catch { }
+              catch
+              {
+              }
+
               foreach (Exception ex in StripWrapperExceptions(e))
               {
                 yield return ex;
               }
+
               index++;
             }
           }
@@ -534,12 +611,24 @@ namespace Mindscape.Raygun4Net
         {
           try
           {
-            Send(message);
+              if (WebProxy != null)
+              {
+                WebClientHelper.WebProxy = WebProxy;
+              }
+              
+              WebClientHelper.Send(message, _apiKey, ProxyCredentials);
           }
           catch (Exception ex)
           {
-            SaveMessage(message);
-            System.Diagnostics.Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+            try
+            {
+              SaveMessage(message);
+              Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
+            }
+            catch
+            {
+              //ignored
+            }
 
             if (RaygunSettings.Settings.ThrowOnError)
             {
@@ -550,51 +639,6 @@ namespace Mindscape.Raygun4Net
           SendStoredMessages();
         }
       }
-    }
-
-    private void Send(string message)
-    {
-      if (ValidateApiKey())
-      {
-        using (var client = CreateWebClient())
-        {
-          client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
-        }
-      }
-    }
-
-    protected WebClient CreateWebClient()
-    {
-      var client = new WebClient();
-      client.Headers.Add("X-ApiKey", _apiKey);
-      client.Headers.Add("content-type", "application/json; charset=utf-8");
-      client.Encoding = System.Text.Encoding.UTF8;
-
-      if (WebProxy != null)
-      {
-        client.Proxy = WebProxy;
-      }
-      else if (WebRequest.DefaultWebProxy != null)
-      {
-        Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(new Uri(RaygunSettings.Settings.ApiEndpoint.ToString()));
-
-        if (proxyUri != null && proxyUri.AbsoluteUri != RaygunSettings.Settings.ApiEndpoint.ToString())
-        {
-          client.Proxy = new WebProxy(proxyUri, false);
-
-          if (ProxyCredentials == null)
-          {
-            client.UseDefaultCredentials = true;
-            client.Proxy.Credentials = CredentialCache.DefaultCredentials;
-          }
-          else
-          {
-            client.UseDefaultCredentials = false;
-            client.Proxy.Credentials = ProxyCredentials;
-          }
-        }
-      }
-      return client;
     }
 
     private void SaveMessage(string message)
@@ -621,8 +665,10 @@ namespace Mindscape.Raygun4Net
               {
                 isolatedStorage.DeleteFile(nextFileName);
               }
+
               break;
             }
+
             number++;
           }
 
@@ -634,6 +680,7 @@ namespace Mindscape.Raygun4Net
               isolatedStorage.DeleteFile(firstFileName);
             }
           }
+
           using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream(directoryName + "\\RaygunErrorMessage" + number + ".txt", FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage))
           {
             using (StreamWriter writer = new StreamWriter(isoStream, Encoding.Unicode))
@@ -643,6 +690,7 @@ namespace Mindscape.Raygun4Net
               writer.Close();
             }
           }
+
           System.Diagnostics.Trace.WriteLine("Saved message: " + "RaygunErrorMessage" + number + ".txt");
         }
       }
@@ -674,17 +722,25 @@ namespace Mindscape.Raygun4Net
                   string text = reader.ReadToEnd();
                   try
                   {
-                    Send(text);
+                    if (WebProxy != null)
+                    {
+                      WebClientHelper.WebProxy = WebProxy;
+                    }
+                    
+                    WebClientHelper.Send(text, _apiKey, ProxyCredentials);
                   }
                   catch
                   {
                     // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
                     return;
                   }
+
                   System.Diagnostics.Debug.WriteLine("Sent " + name);
                 }
+
                 isolatedStorage.DeleteFile(directoryName + "\\" + name);
               }
+
               if (isolatedStorage.GetFileNames(directoryName + "\\*.txt").Length == 0)
               {
                 System.Diagnostics.Debug.WriteLine("Successfully sent all pending messages");

@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <raygunsettings apikey="123456" />
+    <user name="Raygun" password="ABC123" />
+</root>

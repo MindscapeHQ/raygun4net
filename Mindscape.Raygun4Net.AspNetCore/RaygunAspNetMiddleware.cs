@@ -1,16 +1,16 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using System;
+﻿using System;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
 using System.Net;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
-using System.IO;
-using System.Globalization;
-using System.Diagnostics;
+using Microsoft.Extensions.Options;
 
-namespace Mindscape.Raygun4Net
+namespace Mindscape.Raygun4Net.AspNetCore
 {
   public class RaygunAspNetMiddleware
   {
@@ -92,14 +92,14 @@ namespace Mindscape.Raygun4Net
     }
   }
 
-  public static class IApplicationBuilderExtensions
+  public static class ApplicationBuilderExtensions
   {
     public static IApplicationBuilder UseRaygun(this IApplicationBuilder app)
     {
       return app.UseMiddleware<RaygunAspNetMiddleware>();
     }
 
-    public static IServiceCollection AddRaygun(this IServiceCollection services, IConfigurationRoot configuration)
+    public static IServiceCollection AddRaygun(this IServiceCollection services, IConfiguration configuration)
     {
       services.Configure<RaygunSettings>(configuration.GetSection("RaygunSettings"));
 
