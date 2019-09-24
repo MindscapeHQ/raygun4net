@@ -240,6 +240,16 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
+    /// Specifies whether or not the request IpAddress has the last octet zeroed. This may be
+    /// required to comply with the European GDPR laws.
+    /// </summary>
+    public bool IsRequestIpAddressMasked
+    {
+        get { return _requestMessageOptions.IsRequestIpAddressMasked; }
+        set { _requestMessageOptions.IsRequestIpAddressMasked = value; }
+    }
+
+    /// <summary>
     /// Specifies whether or not RawData from web requests is filtered of sensitive values using an XML parser.
     /// </summary>
     /// <value><c>true</c> if use xml raw data filter; otherwise, <c>false</c>.</value>

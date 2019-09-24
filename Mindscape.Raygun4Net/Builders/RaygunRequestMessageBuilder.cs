@@ -49,7 +49,7 @@ namespace Mindscape.Raygun4Net.Builders
       return message;
     }
 
-    private static string GetIpAddress(HttpRequest request, )
+    private static string GetIpAddress(HttpRequest request, RaygunRequestMessageOptions options)
     {
       string strIp = null;
 
@@ -94,12 +94,12 @@ namespace Mindscape.Raygun4Net.Builders
         System.Diagnostics.Trace.WriteLine("Failed to get IP address: {0}", ex.Message);
       }
 
-            if (isMasked)
-            {
-                strIp = MaskIpAddress(strIp);
-            }
+      if (options.IsRequestIpAddressMasked)
+      {
+        strIp = MaskIpAddress(strIp);
+      }
 
-            return strIp;
+      return strIp;
     }
 
     private static bool IsValidIpAddress(string strIp)
@@ -335,7 +335,7 @@ namespace Mindscape.Raygun4Net.Builders
         parsers.Add(new RaygunKeyValuePairDataFilter());
       }
 
-      return strIp;
+      return parsers;
     }
 
     public static bool DataContains(string data, List<string> values)
@@ -350,6 +350,9 @@ namespace Mindscape.Raygun4Net.Builders
           break;
         }
       }
+
+      return exists;
+    }
 
     private static string MaskIpAddress(string strIp)
     {
