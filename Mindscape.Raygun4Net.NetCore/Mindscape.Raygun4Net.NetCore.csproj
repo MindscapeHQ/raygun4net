@@ -6,6 +6,8 @@
     <TargetFrameworks>netstandard1.6;netstandard2.0</TargetFrameworks>
     <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Configurations>Debug;Release;Sign</Configurations>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
   <!-- NuGet Options -->
   <PropertyGroup>

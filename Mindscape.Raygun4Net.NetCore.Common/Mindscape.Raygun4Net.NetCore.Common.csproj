@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard1.6;netstandard2.0</TargetFrameworks>
+    <Configurations>Debug;Release;Sign</Configurations>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
   <PropertyGroup>
     <Authors>Raygun</Authors>
