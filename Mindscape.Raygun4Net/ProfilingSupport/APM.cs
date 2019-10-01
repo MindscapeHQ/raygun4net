@@ -49,10 +49,11 @@ namespace Mindscape.Raygun4Net
 #if !NETSTANDARD1_6 && !NETSTANDARD2_0
     /// <summary>
     /// Initializes enhanced features when using Raygun APM.
-    /// Should be called once on Application init. Subsequent calls will do nothing once initialized.
+    /// Should be called once on Application init.
     /// This will be called automatically by the RaygunHttpModule if configured.
     /// </summary>
-    /// <param name="context"></param>
+    /// <param name="context">The current HttpApplication instance</param>
+    /// <param name="appIdentifier">The identifier for your application, generally the IIS AppPool name</param>
     public static void Initialize(HttpApplication context, string appIdentifier = null)
     {
       var initializer = new HttpApplicationInitializer();
