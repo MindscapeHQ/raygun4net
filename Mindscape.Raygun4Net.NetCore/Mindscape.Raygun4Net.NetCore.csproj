@@ -25,6 +25,11 @@
     <Compile Include="RaygunSettings.cs" />
     <Compile Include="Properties\*.cs" />
   </ItemGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
+    <AssemblyOriginatorKeyFile>Raygun4Net.NetCore.snk</AssemblyOriginatorKeyFile>
+	<SignAssembly>true</SignAssembly>
+	<Optimize>true</Optimize>
+  </PropertyGroup>
   <!-- .NET Standard 2.0 references, compilation flags and build options -->
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
     <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
