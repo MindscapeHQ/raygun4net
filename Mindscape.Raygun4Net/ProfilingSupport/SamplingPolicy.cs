@@ -20,16 +20,11 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
             // "OverrideData": "{ "SampleAmount":5, "SampleBucketSize":10, "SampleOption":"Traces", "Url":"test-traces.com" }"
 
             var json = SimpleJson.DeserializeObject(configuration) as JsonObject;
-            if (json.ContainsKey("SampleAmount") == false || json.ContainsKey("SampleBucketSize") == false)
-            {
-              System.Diagnostics.Debug.WriteLine("Expected \"SampleAmount\" and \"SampleBucketSize\" properties in the JSON values for the policy: " + configuration);
-              return;
-            }
 
-            var amount = GetSamplingSetting<int>(configuration, "SampleAmount");
-            var bucketSize = GetSamplingSetting<int>(configuration, "SampleBucketSize");
+            var amount = GetSamplingSetting<int>(json, "SampleAmount") ?? 1;
+            var bucketSize = GetSamplingSetting<int>(json, "SampleBucketSize") ?? 5;
 
-            Sampler = new SimpleRateSampler(amount ?? 1, bucketSize ?? 1);
+            Sampler = new SimpleRateSampler(amount, bucketSize);
           }
           break;
         
@@ -42,52 +37,44 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
             // "OverrideData": "{ "SampleAmount":1, "SampleBucketSize":5, "SampleOption":"Seconds", "Url":"test-seconds.com" }"
 
             var json = SimpleJson.DeserializeObject(configuration) as JsonObject;
-            if (json.ContainsKey("SampleAmount") == false)
-            {
-              System.Diagnostics.Debug.WriteLine("Expected \"SampleAmount\" property in the JSON values for the policy: " + configuration);
-              return;
-            }
 
             // This is consistent across 'default' and 'override' value
-            var amount = GetSamplingSetting<int>(configuration, "SampleAmount");
+            var amount = GetSamplingSetting<int>(json, "SampleAmount") ?? 1;
 
-            SamplingOption intervalOption = SamplingOption.Traces;
-            int? intervalAmount;
-            if (json.ContainsKey("SampleIntervalOption") && json.ContainsKey("SampleIntervalAmount")) // 'default'
+            // Default to 1 trace per 1 minute
+            int intervalAmount = 1;
+            SamplingOption intervalOption = SamplingOption.Minutes;
+            
+            if (json != null && json.ContainsKey("SampleIntervalOption") && json.ContainsKey("SampleIntervalAmount")) // 'default'
             {
-              var intervalOptionRaw = GetSamplingSetting<int>(configuration, "SampleIntervalOption");
+              var intervalOptionRaw = GetSamplingSetting<int>(json, "SampleIntervalOption") ?? 2;
               intervalOption = (SamplingOption)intervalOptionRaw;
-              intervalAmount = GetSamplingSetting<int>(configuration, "SampleIntervalAmount");
+              intervalAmount = GetSamplingSetting<int>(json, "SampleIntervalAmount") ?? 1;
 
             }
-            else if (json.ContainsKey("SampleOption") && json.ContainsKey("SampleBucketSize")) // an 'override'
+            else if (json != null && json.ContainsKey("SampleOption") && json.ContainsKey("SampleBucketSize")) // an 'override'
             {
               var intervalOptionRaw = (string)json["SampleOption"];
               intervalOption = (SamplingOption)Enum.Parse(typeof(SamplingOption), intervalOptionRaw);
-              intervalAmount = GetSamplingSetting<int>(configuration, "SampleBucketSize");
-            }
-            else
-            {
-              System.Diagnostics.Debug.WriteLine("Unexpected JSON values for a policy: " + configuration);
-              return;
+              intervalAmount = GetSamplingSetting<int>(json, "SampleBucketSize") ?? 1;
             }
 
             TimeSpan interval;
             switch (intervalOption)
             {
               case SamplingOption.Seconds:
-                interval = TimeSpan.FromSeconds(intervalAmount ?? 1);
+                interval = TimeSpan.FromSeconds(intervalAmount);
                 break;
               case SamplingOption.Hours:
-                interval = TimeSpan.FromHours(intervalAmount ?? 1);
+                interval = TimeSpan.FromHours(intervalAmount);
                 break;
               case SamplingOption.Minutes:
               default:
-                interval = TimeSpan.FromMinutes(intervalAmount ?? 1);
+                interval = TimeSpan.FromMinutes(intervalAmount);
                 break;
             }
 
-            Sampler = new PerUriRateSampler(amount ?? 1, interval);
+            Sampler = new PerUriRateSampler(amount, interval);
           }
           break;
       }
@@ -97,10 +84,8 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
     public IDataSampler Sampler { get; private set; }
     public string Configuration { get; private set; }
 
-    private T? GetSamplingSetting<T>(string configuration, string settingName) where T : struct
+    private T? GetSamplingSetting<T>(JsonObject json, string settingName) where T : struct
     {
-      var json = SimpleJson.DeserializeObject(configuration) as JsonObject;
-
       if (json == null)
       {
         return default(T?);
