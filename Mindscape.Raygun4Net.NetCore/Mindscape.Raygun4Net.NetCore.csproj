@@ -6,6 +6,8 @@
     <TargetFrameworks>netstandard1.6;netstandard2.0</TargetFrameworks>
     <TargetFrameworkIdentifier>.NETStandard</TargetFrameworkIdentifier>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Configurations>Debug;Release;Sign</Configurations>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
   <!-- NuGet Options -->
   <PropertyGroup>
@@ -23,6 +25,12 @@
     <Compile Include="RaygunSettings.cs" />
     <Compile Include="Properties\*.cs" />
   </ItemGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
+    <PackageId>Mindscape.Raygun4Net.NetCore.Signed</PackageId>
+    <AssemblyOriginatorKeyFile>Raygun4Net.NetCore.snk</AssemblyOriginatorKeyFile>
+	<SignAssembly>true</SignAssembly>
+	<Optimize>true</Optimize>
+  </PropertyGroup>
   <!-- .NET Standard 2.0 references, compilation flags and build options -->
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
     <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
