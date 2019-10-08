@@ -4,6 +4,16 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
 {
   public class SamplingPolicy
   {
+    private const string SAMPLE_AMOUNT = "SampleAmount";
+    private const string SAMPLE_OPTION = "SampleOption";
+    private const string SAMPLE_BUCKET_SIZE = "SampleBucketSize";
+    private const string SAMPLE_INTERVAL_OPTION = "SampleIntervalOption";
+    private const string SAMPLE_INTERVAL_AMOUNT = "SampleIntervalAmount";
+    private const int DEFAULT_AMOUNT = 1; // 1 trace
+    private const int DEFAULT_BUCKET_SIZE = 5; // 1 in 5 traces
+    private const int DEFAULT_INTERVAL_AMOUNT = 1; // 1 minute
+    private const int DEFAULT_INTERVAL_OPTION = 2; // SamplingOption.Minutes
+    
     public SamplingPolicy(DataSamplingMethod samplingMethod, string configuration)
     {
       SamplingMethod = samplingMethod;
@@ -21,8 +31,8 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
 
             var json = SimpleJson.DeserializeObject(configuration) as JsonObject;
 
-            var amount = GetSamplingSetting<int>(json, "SampleAmount") ?? 1;
-            var bucketSize = GetSamplingSetting<int>(json, "SampleBucketSize") ?? 5;
+            var amount = GetSamplingSetting<int>(json, SAMPLE_AMOUNT) ?? DEFAULT_AMOUNT;
+            var bucketSize = GetSamplingSetting<int>(json, SAMPLE_BUCKET_SIZE) ?? DEFAULT_BUCKET_SIZE;
 
             Sampler = new SimpleRateSampler(amount, bucketSize);
           }
@@ -39,24 +49,24 @@ namespace Mindscape.Raygun4Net.ProfilingSupport
             var json = SimpleJson.DeserializeObject(configuration) as JsonObject;
 
             // This is consistent across 'default' and 'override' value
-            var amount = GetSamplingSetting<int>(json, "SampleAmount") ?? 1;
+            var amount = GetSamplingSetting<int>(json, SAMPLE_AMOUNT) ?? DEFAULT_AMOUNT;
 
             // Default to 1 trace per 1 minute
-            int intervalAmount = 1;
+            int intervalAmount = DEFAULT_INTERVAL_AMOUNT;
             SamplingOption intervalOption = SamplingOption.Minutes;
             
-            if (json != null && json.ContainsKey("SampleIntervalOption") && json.ContainsKey("SampleIntervalAmount")) // 'default'
+            if (json != null && json.ContainsKey(SAMPLE_INTERVAL_OPTION) && json.ContainsKey(SAMPLE_INTERVAL_AMOUNT)) // 'default'
             {
-              var intervalOptionRaw = GetSamplingSetting<int>(json, "SampleIntervalOption") ?? 2;
+              var intervalOptionRaw = GetSamplingSetting<int>(json, SAMPLE_INTERVAL_OPTION) ?? DEFAULT_INTERVAL_OPTION;
               intervalOption = (SamplingOption)intervalOptionRaw;
-              intervalAmount = GetSamplingSetting<int>(json, "SampleIntervalAmount") ?? 1;
+              intervalAmount = GetSamplingSetting<int>(json, SAMPLE_INTERVAL_AMOUNT) ?? DEFAULT_INTERVAL_AMOUNT;
 
             }
-            else if (json != null && json.ContainsKey("SampleOption") && json.ContainsKey("SampleBucketSize")) // an 'override'
+            else if (json != null && json.ContainsKey(SAMPLE_OPTION) && json.ContainsKey(SAMPLE_BUCKET_SIZE)) // an 'override'
             {
-              var intervalOptionRaw = (string)json["SampleOption"];
+              var intervalOptionRaw = (string)json[SAMPLE_OPTION];
               intervalOption = (SamplingOption)Enum.Parse(typeof(SamplingOption), intervalOptionRaw);
-              intervalAmount = GetSamplingSetting<int>(json, "SampleBucketSize") ?? 1;
+              intervalAmount = GetSamplingSetting<int>(json, SAMPLE_BUCKET_SIZE) ?? DEFAULT_INTERVAL_AMOUNT;
             }
 
             TimeSpan interval;
