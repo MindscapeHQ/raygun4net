@@ -29,5 +29,7 @@
     public bool UseKeyValuePairRawDataFilter { get; set; }
 
     public bool ReplaceUnseekableRequestStreams { get; set; }
+    
+    public string ApplicationIdentifier { get; set; }
   }
 }

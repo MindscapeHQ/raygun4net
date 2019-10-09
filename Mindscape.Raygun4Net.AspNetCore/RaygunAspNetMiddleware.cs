@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Mindscape.Raygun4Net.ProfilingSupport;
 
 namespace Mindscape.Raygun4Net.AspNetCore
 {
@@ -17,14 +18,19 @@ namespace Mindscape.Raygun4Net.AspNetCore
     private readonly RequestDelegate _next;
     private readonly RaygunMiddlewareSettings _middlewareSettings;
     private readonly RaygunSettings _settings;
-
+    private readonly AspNetCoreInitializer _aspNetCoreInitializer;
+    
     public RaygunAspNetMiddleware(RequestDelegate next, IOptions<RaygunSettings> settings, RaygunMiddlewareSettings middlewareSettings)
     {
       _next = next;
       _middlewareSettings = middlewareSettings;
 
       _settings = _middlewareSettings.ClientProvider.GetRaygunSettings(settings.Value ?? new RaygunSettings());
+
+      _aspNetCoreInitializer = new AspNetCoreInitializer();
+      _aspNetCoreInitializer.Initialize(_settings.ApplicationIdentifier);
     }
+
     public async Task Invoke(HttpContext httpContext)
     {
       MemoryStream buffer = null;
@@ -68,7 +74,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
  
       try
       {
-        await _next.Invoke(httpContext);
+        await _aspNetCoreInitializer.WrapAndInvokeRequest(_next, httpContext);
       }
       catch (Exception e)
       {

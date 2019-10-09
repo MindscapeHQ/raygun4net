@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -9,6 +9,7 @@ namespace Mindscape.Raygun4Net
   public class RaygunHttpModule : IHttpModule
   {
     private bool ExcludeErrorsBasedOnHttpStatusCode { get; set; }
+
     private bool ExcludeErrorsFromLocal { get; set; }
 
     private int[] HttpStatusCodesToExclude { get; set; }
@@ -28,6 +29,8 @@ namespace Mindscape.Raygun4Net
         var method = type.GetMethod("AttachExceptionFilter", BindingFlags.Static | BindingFlags.Public);
         method.Invoke(null, new object[] { context, this });
       }
+
+      APM.Initialize(context, RaygunSettings.Settings.ApplicationIdentifier);
     }
 
     public void Dispose()

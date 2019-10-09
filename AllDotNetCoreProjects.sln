@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mindscape.Raygun4Net.NetCore", "Mindscape.Raygun4Net.NetCore\Mindscape.Raygun4Net.NetCore.csproj", "{3C195D62-104A-4D11-BB93-B03BE8CFB31C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mindscape.Raygun4Net.NetCore.Common", "Mindscape.Raygun4Net.NetCore.Common\Mindscape.Raygun4Net.NetCore.Common.csproj", "{665ED35A-BA7F-4222-87A5-F612F1C2CBC5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mindscape.Raygun4Net.NetCore.Tests", "Mindscape.Raygun4Net.NetCore.Tests\Mindscape.Raygun4Net.NetCore.Tests.csproj", "{F6CF266A-CB10-4EE0-9E1A-C115BD6B47F3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mindscape.Raygun4Net.AspNetCore", "Mindscape.Raygun4Net.AspNetCore\Mindscape.Raygun4Net.AspNetCore.csproj", "{60FCAC1C-A874-4CCF-B722-508EB62DC798}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mindscape.Raygun4Net.AspNetCore2.Tests", "Mindscape.Raygun4Net.AspNetCore2.Tests\Mindscape.Raygun4Net.AspNetCore2.Tests.csproj", "{8A6000B2-EE9D-4220-8177-53D5F3655377}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mindscape.Raygun4Net.AspNetCore2.Tests.TestLib", "Mindscape.Raygun4Net.AspNetCore2.Tests.TestLib\Mindscape.Raygun4Net.AspNetCore2.Tests.TestLib.csproj", "{8E625850-1EE9-43FE-951C-49229FB584F9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3C195D62-104A-4D11-BB93-B03BE8CFB31C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C195D62-104A-4D11-BB93-B03BE8CFB31C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C195D62-104A-4D11-BB93-B03BE8CFB31C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C195D62-104A-4D11-BB93-B03BE8CFB31C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{665ED35A-BA7F-4222-87A5-F612F1C2CBC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{665ED35A-BA7F-4222-87A5-F612F1C2CBC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{665ED35A-BA7F-4222-87A5-F612F1C2CBC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{665ED35A-BA7F-4222-87A5-F612F1C2CBC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6CF266A-CB10-4EE0-9E1A-C115BD6B47F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6CF266A-CB10-4EE0-9E1A-C115BD6B47F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6CF266A-CB10-4EE0-9E1A-C115BD6B47F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6CF266A-CB10-4EE0-9E1A-C115BD6B47F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60FCAC1C-A874-4CCF-B722-508EB62DC798}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60FCAC1C-A874-4CCF-B722-508EB62DC798}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60FCAC1C-A874-4CCF-B722-508EB62DC798}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60FCAC1C-A874-4CCF-B722-508EB62DC798}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A6000B2-EE9D-4220-8177-53D5F3655377}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A6000B2-EE9D-4220-8177-53D5F3655377}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A6000B2-EE9D-4220-8177-53D5F3655377}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A6000B2-EE9D-4220-8177-53D5F3655377}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E625850-1EE9-43FE-951C-49229FB584F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E625850-1EE9-43FE-951C-49229FB584F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E625850-1EE9-43FE-951C-49229FB584F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E625850-1EE9-43FE-951C-49229FB584F9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3F896B59-DB81-4A43-95B7-359E16A5C928}
+	EndGlobalSection
+EndGlobal

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
+using System.Threading;
 using System.Web;
+using Mindscape.Raygun4Net.ProfilingSupport;
 
 namespace Mindscape.Raygun4Net
 {
@@ -15,6 +17,7 @@ namespace Mindscape.Raygun4Net
     public void Init(HttpApplication context)
     {
       context.Error += SendError;
+
       HttpStatusCodesToExclude = new int[0];
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.ExcludeHttpStatusCodesList))
       {
@@ -32,6 +35,8 @@ namespace Mindscape.Raygun4Net
       }
       ExcludeErrorsBasedOnHttpStatusCode = HttpStatusCodesToExclude.Length > 0;
       ExcludeErrorsFromLocal = RaygunSettings.Settings.ExcludeErrorsFromLocal;
+
+      APM.Initialize(context, RaygunSettings.Settings.ApplicationIdentifier);
     }
 
     public void Dispose()
