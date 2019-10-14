@@ -1,17 +1,9 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using Foundation;
-using ObjCRuntime;
 
 namespace Mindscape.Raygun4Net
 {
   public class RaygunLogger
   {
-    [DllImport(Constants.FoundationLibrary)]
-    extern static void NSLog(IntPtr format, IntPtr s);
-
-    static NSString format = new NSString("%@");
-
     public static void Debug(string message)
     {
       Log(RaygunLogLevel.Debug, message);
@@ -44,10 +36,7 @@ namespace Mindscape.Raygun4Net
       {
         try
         {
-          using (var ns = new NSString(message))
-          {
-            NSLog(format.Handle, ns.Handle);
-          }
+          Console.WriteLine(message);
         }
         catch (Exception)
         {
