@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using Mindscape.Raygun4Net.Messages;
@@ -596,9 +595,9 @@ namespace Mindscape.Raygun4Net
         {
           message = SimpleJson.SerializeObject(raygunMessage);
         }
-        catch (Exception ex)
+        catch (Exception serializeException)
         {
-          System.Diagnostics.Trace.WriteLine(string.Format("Error serializing exception {0}", ex.Message));
+          System.Diagnostics.Trace.WriteLine($"Error serializing Raygun message due to: {serializeException}");
 
           if (RaygunSettings.Settings.ThrowOnError)
           {
@@ -610,23 +609,26 @@ namespace Mindscape.Raygun4Net
         {
           try
           {
-              if (WebProxy != null)
-              {
-                WebClientHelper.WebProxy = WebProxy;
-              }
+            if (WebProxy != null)
+            {
+              WebClientHelper.WebProxy = WebProxy;
+            }
               
-              WebClientHelper.Send(message, _apiKey, ProxyCredentials);
+            WebClientHelper.Send(message, _apiKey, ProxyCredentials);
           }
-          catch (Exception ex)
+          catch (Exception sendMessageException)
           {
             try
             {
+              System.Diagnostics.Trace.WriteLine($"Error sending exception to Raygun.io due to: {sendMessageException}");
+              
+              // Attempt to store the message in isolated storage.
               SaveMessage(message);
-              Trace.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
             }
-            catch
+            catch (Exception saveMessageException)
             {
-              //ignored
+              // Ignored
+              System.Diagnostics.Trace.WriteLine($"Error saving Raygun message due to: {saveMessageException}");
             }
 
             if (RaygunSettings.Settings.ThrowOnError)
@@ -680,7 +682,9 @@ namespace Mindscape.Raygun4Net
             }
           }
 
-          using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream(directoryName + "\\RaygunErrorMessage" + number + ".txt", FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage))
+          string reportFilePath = directoryName + "\\RaygunErrorMessage" + number + ".txt";
+
+          using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream(reportFilePath, FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage))
           {
             using (StreamWriter writer = new StreamWriter(isoStream, Encoding.Unicode))
             {
@@ -690,12 +694,12 @@ namespace Mindscape.Raygun4Net
             }
           }
 
-          System.Diagnostics.Trace.WriteLine("Saved message: " + "RaygunErrorMessage" + number + ".txt");
+          System.Diagnostics.Trace.WriteLine("Saved Raygun message to: " + reportFilePath);
         }
       }
       catch (Exception ex)
       {
-        System.Diagnostics.Trace.WriteLine(string.Format("Error saving message to isolated storage {0}", ex.Message));
+        System.Diagnostics.Trace.WriteLine($"Error saving message to isolated storage {ex}");
       }
     }
 
@@ -705,6 +709,12 @@ namespace Mindscape.Raygun4Net
     {
       lock (_sendLock)
       {
+        if (!ValidateApiKey())
+        {
+          System.Diagnostics.Debug.WriteLine("ApiKey has not been provided, skipping sending stored Raygun messages");
+          return;
+        }
+        
         try
         {
           using (IsolatedStorageFile isolatedStorage = GetIsolatedStorageScope())
@@ -750,7 +760,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception ex)
         {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error sending stored messages to Raygun.io {0}", ex.Message));
+          System.Diagnostics.Debug.WriteLine($"Error sending stored messages to Raygun.io due to: {ex}");
         }
       }
     }

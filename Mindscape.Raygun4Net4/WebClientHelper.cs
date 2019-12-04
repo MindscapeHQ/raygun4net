@@ -14,16 +14,21 @@ namespace Mindscape.Raygun4Net
 
         static WebClientHelper()
         {
-            ProxyUri = WebRequest.DefaultWebProxy.GetProxy(new Uri(RaygunSettings.Settings.ApiEndpoint.ToString()));
+            if (WebRequest.DefaultWebProxy != null)
+            {
+                var uri = new Uri(RaygunSettings.Settings.ApiEndpoint.ToString());
+                ProxyUri = WebRequest.DefaultWebProxy.GetProxy(uri);
+            }
         }
         
         public static void Send(string message, string apiKey, ICredentials proxyCredentials)
         {
             if (string.IsNullOrEmpty(apiKey))
             {
-                System.Diagnostics.Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
+                System.Diagnostics.Trace.WriteLine("ApiKey has not been provided, the Raygun message will not be sent");
                 return;
-            } 
+            }
+            
             Client.Headers.Clear();
             Client.Headers.Add("X-ApiKey", apiKey);
             Client.Headers.Add("content-type", "application/json; charset=utf-8");
@@ -51,7 +56,7 @@ namespace Mindscape.Raygun4Net
                     }
                 }
             }
-
+          
             Client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
         }
     }
