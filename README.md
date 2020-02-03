@@ -191,7 +191,7 @@ Note that you may experience errors if you include the HTTP Module in the `<syst
 The HTTP module is only required if you are using MVC or regular ASP.NET - all WebApi errors are caught using
 `RaygunWebApiClient.Attach`.
 
-To include the HTTP request details, pass in the current request message to the client SetCurrentHTTPRequest when manually sending exceptions.
+To include the HTTP request details, pass in the current request message to the client's SetCurrentHTTPRequest method when manually sending exceptions.
 
 ```csharp
 try
