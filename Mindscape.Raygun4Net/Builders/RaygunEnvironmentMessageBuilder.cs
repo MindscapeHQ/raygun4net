@@ -15,57 +15,88 @@ namespace Mindscape.Raygun4Net.Builders
 {
   public class RaygunEnvironmentMessageBuilder
   {
+    private static RaygunEnvironmentMessage _message;
+    
     public static RaygunEnvironmentMessage Build()
     {
-      RaygunEnvironmentMessage message = new RaygunEnvironmentMessage();
+      bool mediumTrust = RaygunSettings.Settings.MediumTrust || !HasUnrestrictedFeatureSet;
+      
+      //
+      // Gather the environment information that only needs to be collected once
+      //
+      
+      if (_message == null)
+      {
+        _message = new RaygunEnvironmentMessage();
+        
+        // Different environments can fail to load the environment details.
+        // For now if they fail to load for whatever reason then just
+        // swallow the exception. A good addition would be to handle
+        // these cases and load them correctly depending on where its running.
+        // see http://raygun.io/forums/thread/3655
 
-      // Different environments can fail to load the environment details.
-      // For now if they fail to load for whatever reason then just
-      // swallow the exception. A good addition would be to handle
-      // these cases and load them correctly depending on where its running.
-      // see http://raygun.io/forums/thread/3655
+        try
+        {
+          _message.WindowBoundsWidth = SystemInformation.VirtualScreen.Width;
+          _message.WindowBoundsHeight = SystemInformation.VirtualScreen.Height;
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Trace.WriteLine("Error retrieving window dimensions: {0}", ex.Message);
+        }
+        
+        try
+        {
+          DateTime now = DateTime.Now;
+          _message.UtcOffset = TimeZone.CurrentTimeZone.GetUtcOffset(now).TotalHours;
+          _message.Locale = CultureInfo.CurrentCulture.DisplayName;
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Trace.WriteLine("Error retrieving time and locale: {0}", ex.Message);
+        }
+        
+        try
+        {
+          if (!mediumTrust)
+          {
+            // ProcessorCount cannot run in medium trust under net35, once we have
+            // moved to net40 minimum we can move this out of here
+            _message.ProcessorCount = Environment.ProcessorCount;
+            _message.Architecture   = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
+            
+            ComputerInfo info = new ComputerInfo();
+            _message.TotalPhysicalMemory = info.TotalPhysicalMemory / 0x100000; // in MB
+            _message.TotalVirtualMemory  = info.TotalVirtualMemory  / 0x100000; // in MB
+            
+            _message.Cpu       = GetCpu();
+            _message.OSVersion = GetOSVersion();
+          }
+        }
+        catch (SecurityException)
+        {
+          System.Diagnostics.Trace.WriteLine("RaygunClient error: couldn't access environment variables. If you are running in Medium Trust, in web.config in RaygunSettings set mediumtrust=\"true\"");
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Trace.WriteLine("Error retrieving environment info: {0}", ex.Message);
+        }
+      }
 
+      // 
+      // Gather the environment info that must be collected at the time of a report being generated.
+      // 
+      
       try
       {
-        message.WindowBoundsWidth = SystemInformation.VirtualScreen.Width;
-        message.WindowBoundsHeight = SystemInformation.VirtualScreen.Height;
-      }
-      catch (Exception ex)
-      {
-        System.Diagnostics.Trace.WriteLine("Error retrieving window dimensions: {0}", ex.Message);
-      }
-
-      try
-      {
-        DateTime now = DateTime.Now;
-        message.UtcOffset = TimeZone.CurrentTimeZone.GetUtcOffset(now).TotalHours;
-        message.Locale = CultureInfo.CurrentCulture.DisplayName;
-      }
-      catch (Exception ex)
-      {
-        System.Diagnostics.Trace.WriteLine("Error retrieving time and locale: {0}", ex.Message);
-      }
-
-      try
-      {
-        ComputerInfo info = new ComputerInfo();
-        message.OSVersion = info.OSVersion;
-
-        bool mediumTrust = RaygunSettings.Settings.MediumTrust || !HasUnrestrictedFeatureSet;
-
         if (!mediumTrust)
         {
-          // ProcessorCount cannot run in medium trust under net35, once we have
-          // moved to net40 minimum we can move this out of here
-          message.ProcessorCount = Environment.ProcessorCount;
-          message.Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
-          message.TotalPhysicalMemory = (ulong)info.TotalPhysicalMemory / 0x100000; // in MB
-          message.AvailablePhysicalMemory = (ulong)info.AvailablePhysicalMemory / 0x100000;
-          message.TotalVirtualMemory = info.TotalVirtualMemory / 0x100000;
-          message.AvailableVirtualMemory = info.AvailableVirtualMemory / 0x100000;
-          message.DiskSpaceFree = GetDiskSpace();
-          message.Cpu = GetCpu();
-          message.OSVersion = GetOSVersion();
+          ComputerInfo info = new ComputerInfo();
+          
+          _message.AvailablePhysicalMemory = info.AvailablePhysicalMemory / 0x100000; // in MB
+          _message.AvailableVirtualMemory  = info.AvailableVirtualMemory  / 0x100000; // in MB
+          
+          _message.DiskSpaceFree = GetDiskSpace();
         }
       }
       catch (SecurityException)
@@ -76,8 +107,8 @@ namespace Mindscape.Raygun4Net.Builders
       {
         System.Diagnostics.Trace.WriteLine("Error retrieving environment info: {0}", ex.Message);
       }
-
-      return message;
+      
+      return _message;
     }
 
     private static string GetCpu()
