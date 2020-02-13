@@ -12,19 +12,21 @@ namespace Mindscape.Raygun4Net
 {
   public abstract class RaygunClientBase
   {
+    private static readonly HttpClient Client = new HttpClient();
+
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
     protected readonly RaygunSettingsBase _settings;
 
     protected internal const string SentKey = "AlreadySentByRaygun";
-    
+
     public RaygunClientBase(RaygunSettingsBase settings)
     {
       _settings = settings;
       _apiKey = settings.ApiKey;
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
-      
+
       if (!string.IsNullOrEmpty(settings.ApplicationVersion))
       {
         ApplicationVersion = settings.ApplicationVersion;
@@ -90,7 +92,7 @@ namespace Mindscape.Raygun4Net
         try
         {
           Type[] genericTypes = exception.Data.GetType().GetTypeInfo().GenericTypeArguments;
-          
+
           if (genericTypes.Length == 0 || genericTypes[0].GetTypeInfo().IsAssignableFrom(typeof(string)))
           {
             exception.Data[SentKey] = true;
@@ -118,11 +120,11 @@ namespace Mindscape.Raygun4Net
       if (!_handlingRecursiveErrorSending)
       {
         EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
-        
+
         if (handler != null)
         {
           RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage);
-          
+
           try
           {
             handler(this, args);
@@ -132,12 +134,12 @@ namespace Mindscape.Raygun4Net
             // Catch and send exceptions that occur in the SendingMessage event handler.
             // Set the _handlingRecursiveErrorSending flag to prevent infinite errors.
             _handlingRecursiveErrorSending = true;
-            
+
             Send(e);
-            
+
             _handlingRecursiveErrorSending = false;
           }
-          
+
           result = !args.Cancel;
         }
       }
@@ -151,19 +153,19 @@ namespace Mindscape.Raygun4Net
     public event EventHandler<RaygunCustomGroupingKeyEventArgs> CustomGroupingKey;
 
     private bool _handlingRecursiveGrouping;
-    
+
     protected async Task<string> OnCustomGroupingKey(Exception exception, RaygunMessage message)
     {
       string result = null;
-      
+
       if (!_handlingRecursiveGrouping)
       {
         var handler = CustomGroupingKey;
-        
+
         if (handler != null)
         {
           var args = new RaygunCustomGroupingKeyEventArgs(exception, message);
-          
+
           try
           {
             handler(this, args);
@@ -171,19 +173,19 @@ namespace Mindscape.Raygun4Net
           catch (Exception e)
           {
             _handlingRecursiveGrouping = true;
-            
+
             await SendAsync(e, null, null);
-            
+
             _handlingRecursiveGrouping = false;
           }
-          
+
           result = args.CustomGroupingKey;
         }
       }
-      
+
       return result;
     }
-    
+
     protected bool ValidateApiKey()
     {
       if (string.IsNullOrEmpty(_apiKey))
@@ -191,7 +193,7 @@ namespace Mindscape.Raygun4Net
         Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
         return false;
       }
-      
+
       return true;
     }
 
@@ -231,7 +233,7 @@ namespace Mindscape.Raygun4Net
     {
       SendAsync(exception, tags, userCustomData).Wait();
     }
-    
+
     protected virtual async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       if (CanSend(exception))
@@ -274,9 +276,9 @@ namespace Mindscape.Raygun4Net
         {
           await StripAndSend(exception, tags, userCustomData);
         });
-        
+
         FlagAsSent(exception);
-        
+
         await task;
       }
     }
@@ -295,7 +297,7 @@ namespace Mindscape.Raygun4Net
     {
       FlagAsSent(exception);
     }
-    
+
     protected virtual async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       var message = RaygunMessageBuilder.New(_settings)
@@ -310,7 +312,7 @@ namespace Mindscape.Raygun4Net
         .Build();
 
       var customGroupingKey = await OnCustomGroupingKey(exception, message);
-      
+
       if (string.IsNullOrEmpty(customGroupingKey) == false)
       {
         message.Details.GroupingKey = customGroupingKey;
@@ -332,7 +334,7 @@ namespace Mindscape.Raygun4Net
       if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {
         AggregateException aggregate = exception as AggregateException;
-        
+
         if (aggregate != null)
         {
           foreach (Exception e in aggregate.InnerExceptions)
@@ -367,42 +369,40 @@ namespace Mindscape.Raygun4Net
       if (ValidateApiKey())
       {
         bool canSend = OnSendingMessage(raygunMessage) && CanSend(raygunMessage);
-        
+
         if (canSend)
         {
-          using (var client = new HttpClient())
+          var requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
+
+          requestMessage.Headers.Add("X-ApiKey", _apiKey);
+
+          try
           {
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
+            var message = SimpleJson.SerializeObject(raygunMessage);
+            requestMessage.Content = new StringContent(message, Encoding.UTF8, "application/json");
 
-            requestMessage.Headers.Add("X-ApiKey", _apiKey);
+            var result = await Client.SendAsync(requestMessage);
 
-            try
+            if (!result.IsSuccessStatusCode)
             {
-              var message = SimpleJson.SerializeObject(raygunMessage);
-              requestMessage.Content = new StringContent(message, Encoding.UTF8, "application/json");
-              
-              var result = await client.SendAsync(requestMessage);
-              
-              if (!result.IsSuccessStatusCode)
-              {
-                Debug.WriteLine($"Error Logging Exception to Raygun {result.ReasonPhrase}");
-
-                if (_settings.ThrowOnError)
-                {
-                  throw new Exception("Could not log to Raygun");
-                }
-              }
-            }
-            catch (Exception ex)
-            {
-              Debug.WriteLine($"Error Logging Exception to Raygun {ex.Message}");
+              Debug.WriteLine($"Error Logging Exception to Raygun {result.ReasonPhrase}");
 
               if (_settings.ThrowOnError)
               {
-                throw;
+                throw new Exception("Could not log to Raygun");
               }
             }
           }
+          catch (Exception ex)
+          {
+            Debug.WriteLine($"Error Logging Exception to Raygun {ex.Message}");
+
+            if (_settings.ThrowOnError)
+            {
+              throw;
+            }
+          }
+
         }
       }
     }
