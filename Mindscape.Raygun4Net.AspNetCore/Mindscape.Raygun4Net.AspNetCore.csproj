@@ -7,7 +7,7 @@
     <Authors>Raygun</Authors>
     <Description>.NetStandard library for targeting ASP.Net Core applications</Description>
     <PackageId>Mindscape.Raygun4Net.AspNetCore</PackageId>
-    <PackageVersion>6.2.1</PackageVersion>
+    <PackageVersion>6.2.1-beta1</PackageVersion>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseUrl>https://github.com/MindscapeHQ/raygun4net/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/MindscapeHQ/raygun4net</PackageProjectUrl>
