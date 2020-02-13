@@ -13,7 +13,7 @@ The main classes can be found in the Mindscape.Raygun4Net namespace.
 Usage
 ======
 
-In your project.json file, add "Mindscape.Raygun4Net.AspNetCore": "6.2.0" to your dependencies.
+In your project.json file, add "Mindscape.Raygun4Net.AspNetCore": "6.2.1" to your dependencies.
 
 Run dotnet.exe restore or restore packages within Visual Studio to download the package.
 
@@ -39,13 +39,13 @@ try
 catch (Exception e)
 {
   new RaygunClient("YOUR_APP_API_KEY").SendInBackground(e);
-} 
+}
 
 Configure RaygunClient or settings in RaygunAspNetCoreMiddleware
 ================================================================
 
-The AddRaygun method has an overload that takes a RaygunMiddlewareSettings object. 
-These settings control the middleware (not to be confused with RaygunSettings which are the common settings we use across all of our .NET providers). 
+The AddRaygun method has an overload that takes a RaygunMiddlewareSettings object.
+These settings control the middleware (not to be confused with RaygunSettings which are the common settings we use across all of our .NET providers).
 Currently there's just one property on it, ClientProvider. This gives you a hook into the loading of RaygunSettings and the construction of the RaygunAspNetCoreClient used to send errors.
 
 For example, say you want to set user details on your error reports. You'd create a custom client provider like this:
@@ -174,7 +174,7 @@ Placing * before, after or at both ends of a key will perform an ends-with, star
 For example, IgnoreFormFieldNames: ["*password*"] will cause Raygun to ignore all form fields that contain "password" anywhere in the name.
 These options are not case sensitive.
 
-Note: The IgnoreSensitiveFieldNames will be applied to ALL fields in the RaygunRequestMessage. 
+Note: The IgnoreSensitiveFieldNames will be applied to ALL fields in the RaygunRequestMessage.
 
 We provide extra options for removing sensitive data from the request raw data. This comes in the form of filters as implemented by the IRaygunDataFilter interface.
 These filters read the raw data and strip values whose keys match those found in the RaygunSettings IgnoreSensitiveFieldNames property.
