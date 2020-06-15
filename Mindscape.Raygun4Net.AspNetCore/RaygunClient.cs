@@ -241,7 +241,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
             {
                 _currentRequestMessage.Value = currentRequestMessage;
                 _currentResponseMessage.Value = currentResponseMessage;
-                await StripAndSend(exception, tags, userCustomData, null);
+                await StripAndSend(exception, tags, userCustomData, userInfo);
             });
             FlagAsSent(exception);
             await task;
