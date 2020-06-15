@@ -227,17 +227,6 @@ namespace Mindscape.Raygun4Net.AspNetCore
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    public Task SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
-    {
-        return SendInBackground(exception, tags, userCustomData, null);
-    }
-
-    /// <summary>
-    /// Asynchronously transmits an exception to Raygun.
-    /// </summary>
-    /// <param name="exception">The exception to deliver.</param>
-    /// <param name="tags">A list of strings associated with the message.</param>
-    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     /// <param name="userInfo">Information about the user including the identity string.</param>
     public override async Task SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo)
     {
