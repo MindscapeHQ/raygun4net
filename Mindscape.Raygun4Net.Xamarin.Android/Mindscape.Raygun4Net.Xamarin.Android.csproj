@@ -18,7 +18,7 @@
     <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>
     <PackOnBuild>true</PackOnBuild>
     <PackageId>Mindscape.Raygun4Net.Xamarin.Android</PackageId>
-    <PackageVersion>5.7.1</PackageVersion>
+    <PackageVersion>5.7.2</PackageVersion>
     <Authors>Raygun</Authors>
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
     <PackageLicenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</PackageLicenseUrl>
@@ -27,8 +27,7 @@
     <DevelopmentDependency>true</DevelopmentDependency>
     <Summary>Raygun provider for Xamarin Android projects</Summary>
     <Title>Raygun for Xamarin Android</Title>
-    <PackageReleaseNotes>- Additional exception handling when sending stored reports.
-- Added option to mark unobserved task exceptions as observed when caught.</PackageReleaseNotes>
+    <PackageReleaseNotes>- Additional guards against exceptions being thrown when sending stored reports</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
