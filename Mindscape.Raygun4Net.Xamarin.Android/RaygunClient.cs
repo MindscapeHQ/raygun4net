@@ -554,9 +554,9 @@ namespace Mindscape.Raygun4Net
           }
 
           // Consume all errors as we dont want them being sent.
-          t.Exception.Handle((e) => 
+          t.Exception?.Handle((e) => 
           {
-            RaygunLogger.Error("Error occurred while sending stored reports: " + e.Message);
+            RaygunLogger.Error("Error occurred while sending stored reports: " + e?.Message ?? "no message");
             return true; // Handled
           });
 
