@@ -28,11 +28,11 @@ namespace Mindscape.Raygun4Net
         var entryAssembly = GetWebEntryAssembly(context);
         if (entryAssembly != null)
         {
-          RaygunSettings.Settings.ApplicationVersion = entryAssembly.GetName().Version.ToString();
+          RaygunSettings.Settings.ApplicationVersion = entryAssembly.GetName()?.Version?.ToString();
         }
       }
 
-      var mvcAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName.StartsWith("Mindscape.Raygun4Net.Mvc,"));
+      var mvcAssembly = AppDomain.CurrentDomain?.GetAssemblies()?.FirstOrDefault(a => a.FullName.StartsWith("Mindscape.Raygun4Net.Mvc,"));
       if (mvcAssembly != null)
       {
         var type = mvcAssembly.GetType("Mindscape.Raygun4Net.RaygunExceptionFilterAttacher");
@@ -103,7 +103,7 @@ namespace Mindscape.Raygun4Net
 
     private Assembly GetWebEntryAssembly(HttpApplication application)
     {
-      var type = HttpContext.Current?.ApplicationInstance?.GetType();
+      var type = application?.GetType();
       
       while (type != null && "ASP".Equals(type.Namespace))
       {
