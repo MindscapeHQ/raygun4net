@@ -183,8 +183,7 @@ namespace Mindscape.Raygun4Net.WebApi
     {
       if (_exceptionFilter != null)
       {
-        int exceptionLoggerIndex =
-          config.Services.FindIndex(typeof(IExceptionLogger), (o) => o is RaygunWebApiExceptionLogger);
+        int exceptionLoggerIndex = config.Services.FindIndex(typeof(IExceptionLogger), (o) => o is RaygunWebApiExceptionLogger);
         if (exceptionLoggerIndex != -1)
         {
           config.Services.RemoveAt(typeof(IExceptionLogger), exceptionLoggerIndex);
