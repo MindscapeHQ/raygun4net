@@ -103,7 +103,8 @@ namespace Mindscape.Raygun4Net
 
     private Assembly GetWebEntryAssembly(HttpApplication application)
     {
-      var type = HttpContext.Current.ApplicationInstance.GetType();
+      var type = HttpContext.Current?.ApplicationInstance?.GetType();
+      
       while (type != null && "ASP".Equals(type.Namespace))
       {
         type = type.BaseType;
