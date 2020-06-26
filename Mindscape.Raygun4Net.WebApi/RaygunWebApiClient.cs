@@ -199,21 +199,19 @@ namespace Mindscape.Raygun4Net.WebApi
         config.Filters.Remove(_exceptionFilter);
         config.Filters.Remove(_actionFilter);
 
-        RaygunWebApiControllerActivator controllerActivator =
-          config.Services.GetHttpControllerActivator() as RaygunWebApiControllerActivator;
+        var controllerActivator = config.Services.GetHttpControllerActivator() as RaygunWebApiControllerActivator;
         if (controllerActivator != null)
         {
           config.Services.Replace(typeof(IHttpControllerActivator), controllerActivator.ConcreteActivator);
         }
 
-        RaygunWebApiControllerSelector controllerSelector =
-          config.Services.GetHttpControllerSelector() as RaygunWebApiControllerSelector;
+        var controllerSelector = config.Services.GetHttpControllerSelector() as RaygunWebApiControllerSelector;
         if (controllerSelector != null)
         {
           config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector.ConcreteSelector);
         }
 
-        RaygunWebApiActionSelector actionSelector = config.Services.GetActionSelector() as RaygunWebApiActionSelector;
+        var actionSelector = config.Services.GetActionSelector() as RaygunWebApiActionSelector;
         if (actionSelector != null)
         {
           config.Services.Replace(typeof(IHttpActionSelector), actionSelector.ConcreteSelector);
