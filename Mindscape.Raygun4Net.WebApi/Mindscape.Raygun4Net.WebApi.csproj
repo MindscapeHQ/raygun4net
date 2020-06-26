@@ -77,6 +77,7 @@
     </Compile>
     <Compile Include="Filters\RaygunWebApiActionFilter.cs" />
     <Compile Include="Filters\RaygunWebApiExceptionFilter.cs" />
+    <Compile Include="Handlers\RaygunWebApiDelegatingHandler.cs" />
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="Extensions\RaygunHttpContentExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -84,13 +85,12 @@
     <Compile Include="IRaygunWebApiClientProvider.cs" />
     <Compile Include="RaygunWebApiClient.cs" />
     <Compile Include="RaygunWebApiClientProvider.cs" />
-    <Compile Include="RaygunWebApiDelegatingHandler.cs" />
     <Compile Include="RaygunWebApiHttpException.cs" />
-    <Compile Include="RaygunWebApiControllerActivator.cs" />
-    <Compile Include="RaygunWebApiExceptionLogger.cs" />
     <Compile Include="RaygunWebApiMessageBuilder.cs" />
     <Compile Include="Selectors\RaygunWebApiActionSelector.cs" />
     <Compile Include="Selectors\RaygunWebApiControllerSelector.cs" />
+    <Compile Include="Services\RaygunWebApiControllerActivator.cs" />
+    <Compile Include="Services\RaygunWebApiExceptionLogger.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
