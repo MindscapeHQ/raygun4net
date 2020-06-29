@@ -236,7 +236,7 @@ namespace Mindscape.Raygun4Net
     {
       if (CanSend(exception))
       {
-        await StripAndSend(exception, tags, userCustomData);
+        await StripAndSend(exception, tags, userCustomData, null);
         FlagAsSent(exception);
       }
     }
@@ -247,7 +247,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     public Task SendInBackground(Exception exception)
     {
-      return SendInBackground(exception, null, null);
+      return SendInBackground(exception, null, null, null);
     }
 
     /// <summary>
@@ -257,7 +257,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message.</param>
     public Task SendInBackground(Exception exception, IList<string> tags)
     {
-      return SendInBackground(exception, tags, null);
+      return SendInBackground(exception, tags, null, null);
     }
 
     /// <summary>
@@ -266,13 +266,25 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    public virtual async Task SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
+    public Task SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
+    {
+        return SendInBackground(exception, tags, userCustomData, null);
+    }
+
+    /// <summary>
+    /// Asynchronously transmits an exception to Raygun.
+    /// </summary>
+    /// <param name="exception">The exception to deliver.</param>
+    /// <param name="tags">A list of strings associated with the message.</param>
+    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
+    /// <param name="userInfo">Information about the user including the identity string.</param>
+    public virtual async Task SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo)
     {
       if (CanSend(exception))
       {
         var task = Task.Run(async () =>
         {
-          await StripAndSend(exception, tags, userCustomData);
+          await StripAndSend(exception, tags, userCustomData, userInfo);
         });
         
         FlagAsSent(exception);
@@ -296,7 +308,7 @@ namespace Mindscape.Raygun4Net
       FlagAsSent(exception);
     }
     
-    protected virtual async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    protected virtual async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo)
     {
       var message = RaygunMessageBuilder.New(_settings)
         .SetEnvironmentDetails()
@@ -306,7 +318,7 @@ namespace Mindscape.Raygun4Net
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
-        .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
+        .SetUser(userInfo ?? UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
         .Build();
 
       var customGroupingKey = await OnCustomGroupingKey(exception, message);
@@ -319,11 +331,11 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 
-    protected async Task StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData)
+    protected async Task StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo)
     {
       foreach (Exception e in StripWrapperExceptions(exception))
       {
-        await Send(await BuildMessage(e, tags, userCustomData));
+        await Send(await BuildMessage(e, tags, userCustomData, userInfo));
       }
     }
 

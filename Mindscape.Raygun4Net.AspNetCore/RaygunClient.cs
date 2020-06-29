@@ -227,24 +227,25 @@ namespace Mindscape.Raygun4Net.AspNetCore
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    public override async Task SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
+    /// <param name="userInfo">Information about the user including the identity string.</param>
+    public override async Task SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo)
     {
-      if (CanSend(exception))
-      {
-        // We need to process the Request on the current thread,
-        // otherwise it will be disposed while we are using it on the other thread.
-        RaygunRequestMessage currentRequestMessage = await BuildRequestMessage();
-        RaygunResponseMessage currentResponseMessage = BuildResponseMessage();
-
-        var task = Task.Run(async () =>
+        if (CanSend(exception))
         {
-          _currentRequestMessage.Value = currentRequestMessage;
-          _currentResponseMessage.Value = currentResponseMessage;
-          await StripAndSend(exception, tags, userCustomData);
-        });
-        FlagAsSent(exception);
-        await task;
-      }
+            // We need to process the Request on the current thread,
+            // otherwise it will be disposed while we are using it on the other thread.
+            RaygunRequestMessage currentRequestMessage = await BuildRequestMessage();
+            RaygunResponseMessage currentResponseMessage = BuildResponseMessage();
+
+            var task = Task.Run(async () =>
+            {
+                _currentRequestMessage.Value = currentRequestMessage;
+                _currentResponseMessage.Value = currentResponseMessage;
+                await StripAndSend(exception, tags, userCustomData, userInfo);
+            });
+            FlagAsSent(exception);
+            await task;
+        }
     }
 
     private async Task<RaygunRequestMessage> BuildRequestMessage()
@@ -267,7 +268,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
       return this;
     }
 
-    protected override async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    protected override async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfoMessage)
     {
       var message = RaygunMessageBuilder.New(GetSettings())
         .SetResponseDetails(_currentResponseMessage.Value)
@@ -279,7 +280,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
-        .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
+        .SetUser(userInfoMessage ?? UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
         .Build();
 
       var customGroupingKey = await OnCustomGroupingKey(exception, message);
