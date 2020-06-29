@@ -19,17 +19,38 @@ namespace Mindscape.Raygun4Net.WebApi
   public class RaygunWebApiClient : RaygunClientBase
   {
     internal const string UnhandledExceptionTag = "UnhandledException";
-
-    private readonly string _apiKey;
+    
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private readonly List<Type> _wrapperExceptions = new List<Type>();
 
     private readonly ThreadLocal<HttpRequestMessage> _currentWebRequest = new ThreadLocal<HttpRequestMessage>(() => null);
     private readonly ThreadLocal<RaygunRequestMessage> _currentRequestMessage = new ThreadLocal<RaygunRequestMessage>(() => null);
+    
+    private readonly string _apiKey;
 
     private static RaygunWebApiExceptionFilter _exceptionFilter;
     private static RaygunWebApiActionFilter _actionFilter;
     private static RaygunWebApiDelegatingHandler _delegatingHandler;
+    
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RaygunClientBase" /> class.
+    /// Uses the ApiKey specified in the config file.
+    /// </summary>
+    public RaygunWebApiClient()
+    {
+      _apiKey = RaygunSettings.Settings.ApiKey;
+
+      ApplicationVersion = RaygunSettings.Settings.ApplicationVersion;
+      if (string.IsNullOrEmpty(ApplicationVersion))
+      {
+        // Use `GetCallingAssembly` to get access to the library that is using the Raygun4Net library.
+        // We can then lookup and use that library's version. Do not nest this call further
+        // or else we will not be getting the user's library but our own Raygun4Net library.
+        ApplicationVersion = Assembly.GetCallingAssembly()?.GetName()?.Version?.ToString();
+      }
+
+      Init();
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClientBase" /> class.
@@ -38,7 +59,175 @@ namespace Mindscape.Raygun4Net.WebApi
     public RaygunWebApiClient(string apiKey)
     {
       _apiKey = apiKey;
+      
+      ApplicationVersion = RaygunSettings.Settings.ApplicationVersion;
+      if (string.IsNullOrEmpty(ApplicationVersion))
+      {
+        // Use `GetCallingAssembly` to get access to the library that is using the Raygun4Net library.
+        // We can then lookup and use that library's version. Do not nest this call further
+        // or else we will not be getting the user's library but our own Raygun4Net library.
+        ApplicationVersion = Assembly.GetCallingAssembly()?.GetName()?.Version?.ToString();
+      }
+      
+      Init();
+    }
 
+    /// <summary>
+    /// Causes Raygun4Net to listen for exceptions.
+    /// </summary>
+    /// <param name="config">The HttpConfiguration to attach to.</param>
+    public static void Attach(HttpConfiguration config)
+    {
+      var appVersion = RaygunSettings.Settings.ApplicationVersion;
+      if (string.IsNullOrEmpty(appVersion))
+      {
+        // Use `GetCallingAssembly` to get access to the library that is using the Raygun4Net library.
+        // We can then lookup and use that library's version. Do not nest this call further
+        // or else we will not be getting the user's library but our own Raygun4Net library.
+        appVersion = Assembly.GetCallingAssembly()?.GetName()?.Version?.ToString();
+      }
+      
+      AttachInternal(config, null, appVersion);
+    }
+
+    /// <summary>
+    /// Causes Raygun4Net to listen for exceptions.
+    /// </summary>
+    /// <param name="config">The HttpConfiguration to attach to.</param>
+    /// <param name="generateRaygunClient">An optional function to provide a custom RaygunWebApiClient instance to use for reporting exceptions.</param>
+    public static void Attach(HttpConfiguration config, Func<RaygunWebApiClient> generateRaygunClient)
+    {
+      var appVersion = RaygunSettings.Settings.ApplicationVersion;
+      if (string.IsNullOrEmpty(appVersion))
+      {
+        // Use `GetCallingAssembly` to get access to the library that is using the Raygun4Net library.
+        // We can then lookup and use that library's version. Do not nest this call further
+        // or else we will not be getting the user's library but our own Raygun4Net library.
+        appVersion = Assembly.GetCallingAssembly()?.GetName()?.Version?.ToString();
+      }
+      
+      if (generateRaygunClient != null)
+      {
+        AttachInternal(config, message => generateRaygunClient(), appVersion);
+      }
+      else
+      {
+        AttachInternal(config, null, appVersion);
+      }
+    }
+
+    /// <summary>
+    /// Causes Raygun4Net to listen for exceptions.
+    /// </summary>
+    /// <param name="config">The HttpConfiguration to attach to.</param>
+    /// <param name="generateRaygunClient">
+    /// An optional function to provide a custom RaygunWebApiClient instance to use for reporting exceptions.
+    /// The HttpRequestMessage parameter to this function might be null if there is no request in the context of the
+    /// failure we are currently handling.
+    /// </param>
+    public static void Attach(HttpConfiguration config, Func<HttpRequestMessage, RaygunWebApiClient> generateRaygunClient)
+    {
+      var appVersion = RaygunSettings.Settings.ApplicationVersion;
+      if (string.IsNullOrEmpty(appVersion))
+      {
+        // Use `GetCallingAssembly` to get access to the library that is using the Raygun4Net library.
+        // We can then lookup and use that library's version. Do not nest this call further
+        // or else we will not be getting the user's library but our own Raygun4Net library.
+        appVersion = Assembly.GetCallingAssembly()?.GetName()?.Version?.ToString();
+      }
+
+      AttachInternal(config, generateRaygunClient, appVersion);
+    }
+
+    private static void AttachInternal(
+      HttpConfiguration config,
+      Func<HttpRequestMessage, RaygunWebApiClient> generateRaygunClientWithMessage,
+      string appVersion)
+    {
+      Detach(config);
+      
+      if (RaygunSettings.Settings.IsRawDataIgnored == false)
+      {
+        _delegatingHandler = new RaygunWebApiDelegatingHandler();
+        config.MessageHandlers.Add(_delegatingHandler);
+      }
+
+      var clientCreator = new RaygunWebApiClientProvider(generateRaygunClientWithMessage, appVersion);
+
+      // Add Services
+      config.Services.Add(typeof(IExceptionLogger), new RaygunWebApiExceptionLogger(clientCreator));
+
+      // Add Filters
+      _exceptionFilter = new RaygunWebApiExceptionFilter(clientCreator);
+      config.Filters.Add(_exceptionFilter);
+
+      _actionFilter = new RaygunWebApiActionFilter(clientCreator);
+      config.Filters.Add(_actionFilter);
+
+      // Replace Services
+      var concreteActivator = config.Services.GetHttpControllerActivator();
+      config.Services.Replace(typeof(IHttpControllerActivator), new RaygunWebApiControllerActivator(concreteActivator, clientCreator));
+
+      var concreteControllerSelector = config.Services.GetHttpControllerSelector() ?? new DefaultHttpControllerSelector(config);
+      config.Services.Replace(typeof(IHttpControllerSelector), new RaygunWebApiControllerSelector(concreteControllerSelector, clientCreator));
+
+      var concreteActionSelector = config.Services.GetActionSelector() ?? new ApiControllerActionSelector();
+      config.Services.Replace(typeof(IHttpActionSelector), new RaygunWebApiActionSelector(concreteActionSelector, clientCreator));
+    }
+
+    /// <summary>
+    /// Causes Raygun4Net to stop listening for exceptions.
+    /// </summary>
+    /// <param name="config">The HttpConfiguration to detach from.</param>
+    public static void Detach(HttpConfiguration config)
+    {
+      if (_exceptionFilter != null)
+      {
+        int exceptionLoggerIndex = config.Services.FindIndex(typeof(IExceptionLogger), (o) => o is RaygunWebApiExceptionLogger);
+        if (exceptionLoggerIndex != -1)
+        {
+          config.Services.RemoveAt(typeof(IExceptionLogger), exceptionLoggerIndex);
+        }
+
+        if (_delegatingHandler != null)
+        {
+          config.MessageHandlers.Remove(_delegatingHandler);
+          _delegatingHandler = null;
+        }
+
+        config.Filters.Remove(_exceptionFilter);
+        config.Filters.Remove(_actionFilter);
+
+        var controllerActivator = config.Services.GetHttpControllerActivator() as RaygunWebApiControllerActivator;
+        if (controllerActivator != null)
+        {
+          config.Services.Replace(typeof(IHttpControllerActivator), controllerActivator.ConcreteActivator);
+        }
+
+        var controllerSelector = config.Services.GetHttpControllerSelector() as RaygunWebApiControllerSelector;
+        if (controllerSelector != null)
+        {
+          config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector.ConcreteSelector);
+        }
+
+        var actionSelector = config.Services.GetActionSelector() as RaygunWebApiActionSelector;
+        if (actionSelector != null)
+        {
+          config.Services.Replace(typeof(IHttpActionSelector), actionSelector.ConcreteSelector);
+        }
+
+        _exceptionFilter = null;
+        _actionFilter = null;
+      }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="apiKey">The API key.</param>
+    /// <param name="version">The application version.</param>
+    private void Init()
+    {
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreSensitiveFieldNames))
@@ -87,147 +276,6 @@ namespace Mindscape.Raygun4Net.WebApi
 
       UseXmlRawDataFilter = RaygunSettings.Settings.UseXmlRawDataFilter;
       UseKeyValuePairRawDataFilter = RaygunSettings.Settings.UseKeyValuePairRawDataFilter;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RaygunClientBase" /> class.
-    /// Uses the ApiKey specified in the config file.
-    /// </summary>
-    public RaygunWebApiClient()
-      : this(RaygunSettings.Settings.ApiKey)
-    {
-    }
-
-    /// <summary>
-    /// Causes Raygun4Net to listen for exceptions.
-    /// </summary>
-    /// <param name="config">The HttpConfiguration to attach to.</param>
-    public static void Attach(HttpConfiguration config)
-    {
-      var entryAssembly = Assembly.GetCallingAssembly();
-      string version = entryAssembly.GetName().Version.ToString();
-      AttachInternal(config, null, version);
-    }
-
-    /// <summary>
-    /// Causes Raygun4Net to listen for exceptions.
-    /// </summary>
-    /// <param name="config">The HttpConfiguration to attach to.</param>
-    /// <param name="generateRaygunClient">An optional function to provide a custom RaygunWebApiClient instance to use for reporting exceptions.</param>
-    public static void Attach(HttpConfiguration config, Func<RaygunWebApiClient> generateRaygunClient)
-    {
-      var entryAssembly = Assembly.GetCallingAssembly();
-      string version = entryAssembly.GetName().Version.ToString();
-      if (generateRaygunClient != null)
-      {
-        AttachInternal(config, message => generateRaygunClient(), version);
-      }
-      else
-      {
-        AttachInternal(config, null, version);
-      }
-    }
-
-    /// <summary>
-    /// Causes Raygun4Net to listen for exceptions.
-    /// </summary>
-    /// <param name="config">The HttpConfiguration to attach to.</param>
-    /// <param name="generateRaygunClient">
-    /// An optional function to provide a custom RaygunWebApiClient instance to use for reporting exceptions.
-    /// The HttpRequestMessage parameter to this function might be null if there is no request in the context of the
-    /// failure we are currently handling.
-    /// </param>
-    public static void Attach(HttpConfiguration config, Func<HttpRequestMessage, RaygunWebApiClient> generateRaygunClient)
-    {
-      var entryAssembly = Assembly.GetCallingAssembly();
-      string version = entryAssembly.GetName().Version.ToString();
-      AttachInternal(config, generateRaygunClient, version);
-    }
-
-    private static void AttachInternal(HttpConfiguration config, Func<HttpRequestMessage, RaygunWebApiClient> generateRaygunClientWithMessage, string applicationVersionFromAttach)
-    {
-      Detach(config);
-
-      string applicationVersion;
-      if (!string.IsNullOrEmpty(RaygunSettings.Settings.ApplicationVersion))
-      {
-        applicationVersion = RaygunSettings.Settings.ApplicationVersion;
-      }
-      else
-      {
-        applicationVersion = applicationVersionFromAttach;
-      }
-
-      if (RaygunSettings.Settings.IsRawDataIgnored == false)
-      {
-        _delegatingHandler = new RaygunWebApiDelegatingHandler();
-        config.MessageHandlers.Add(_delegatingHandler);
-      }
-
-      var clientCreator = new RaygunWebApiClientProvider(generateRaygunClientWithMessage, applicationVersion);
-
-      config.Services.Add(typeof(IExceptionLogger), new RaygunWebApiExceptionLogger(clientCreator));
-
-      _exceptionFilter = new RaygunWebApiExceptionFilter(clientCreator);
-      config.Filters.Add(_exceptionFilter);
-
-      _actionFilter = new RaygunWebApiActionFilter(clientCreator);
-      config.Filters.Add(_actionFilter);
-
-      var concreteActivator = config.Services.GetHttpControllerActivator();
-      config.Services.Replace(typeof(IHttpControllerActivator), new RaygunWebApiControllerActivator(concreteActivator, clientCreator));
-
-      var concreteControllerSelector = config.Services.GetHttpControllerSelector() ?? new DefaultHttpControllerSelector(config);
-      config.Services.Replace(typeof(IHttpControllerSelector), new RaygunWebApiControllerSelector(concreteControllerSelector, clientCreator));
-
-      var concreteActionSelector = config.Services.GetActionSelector() ?? new ApiControllerActionSelector();
-      config.Services.Replace(typeof(IHttpActionSelector), new RaygunWebApiActionSelector(concreteActionSelector, clientCreator));
-    }
-
-    /// <summary>
-    /// Causes Raygun4Net to stop listening for exceptions.
-    /// </summary>
-    /// <param name="config">The HttpConfiguration to detach from.</param>
-    public static void Detach(HttpConfiguration config)
-    {
-      if (_exceptionFilter != null)
-      {
-        int exceptionLoggerIndex = config.Services.FindIndex(typeof(IExceptionLogger), (o) => o is RaygunWebApiExceptionLogger);
-        if (exceptionLoggerIndex != -1)
-        {
-          config.Services.RemoveAt(typeof(IExceptionLogger), exceptionLoggerIndex);
-        }
-
-        if (_delegatingHandler != null)
-        {
-          config.MessageHandlers.Remove(_delegatingHandler);
-          _delegatingHandler = null;
-        }
-
-        config.Filters.Remove(_exceptionFilter);
-        config.Filters.Remove(_actionFilter);
-
-        RaygunWebApiControllerActivator controllerActivator = config.Services.GetHttpControllerActivator() as RaygunWebApiControllerActivator;
-        if (controllerActivator != null)
-        {
-          config.Services.Replace(typeof(IHttpControllerActivator), controllerActivator.ConcreteActivator);
-        }
-
-        RaygunWebApiControllerSelector controllerSelector = config.Services.GetHttpControllerSelector() as RaygunWebApiControllerSelector;
-        if (controllerSelector != null)
-        {
-          config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector.ConcreteSelector);
-        }
-
-        RaygunWebApiActionSelector actionSelector = config.Services.GetActionSelector() as RaygunWebApiActionSelector;
-        if (actionSelector != null)
-        {
-          config.Services.Replace(typeof(IHttpActionSelector), actionSelector.ConcreteSelector);
-        }
-
-        _exceptionFilter = null;
-        _actionFilter = null;
-      }
     }
 
     /// <summary>

@@ -21,8 +21,18 @@ namespace Mindscape.Raygun4Net
       HttpStatusCodesToExclude = RaygunSettings.Settings.ExcludedStatusCodes;
       ExcludeErrorsBasedOnHttpStatusCode = HttpStatusCodesToExclude.Any();
       ExcludeErrorsFromLocal = RaygunSettings.Settings.ExcludeErrorsFromLocal;
+      
+      // If no version is set, attempt to retrieve the version from the assembly.
+      if (string.IsNullOrEmpty(RaygunSettings.Settings.ApplicationVersion))
+      {
+        var entryAssembly = GetWebEntryAssembly(context);
+        if (entryAssembly != null)
+        {
+          RaygunSettings.Settings.ApplicationVersion = entryAssembly.GetName()?.Version?.ToString();
+        }
+      }
 
-      var mvcAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName.StartsWith("Mindscape.Raygun4Net.Mvc,"));
+      var mvcAssembly = AppDomain.CurrentDomain?.GetAssemblies()?.FirstOrDefault(a => a.FullName.StartsWith("Mindscape.Raygun4Net.Mvc,"));
       if (mvcAssembly != null)
       {
         var type = mvcAssembly.GetType("Mindscape.Raygun4Net.RaygunExceptionFilterAttacher");
@@ -89,6 +99,18 @@ namespace Mindscape.Raygun4Net
       }
 
       return true;
+    }
+
+    private Assembly GetWebEntryAssembly(HttpApplication application)
+    {
+      var type = application?.GetType();
+      
+      while (type != null && "ASP".Equals(type.Namespace))
+      {
+        type = type.BaseType;
+      }
+
+      return type == null ? null : type.Assembly;
     }
   }
 }
