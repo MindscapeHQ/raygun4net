@@ -22,9 +22,9 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         {
         }
 
-        public RaygunMessage ExposeBuildMessage(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData)
+        public RaygunMessage ExposeBuildMessage(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData, [Optional] RaygunIdentifierMessage user)
         {
-            var task = BuildMessage(exception, tags, userCustomData);
+            var task = BuildMessage(exception, tags, userCustomData, user);
             
             task.Wait();
 
