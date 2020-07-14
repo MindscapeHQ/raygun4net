@@ -9,11 +9,13 @@ namespace Mindscape.Raygun4Net
   /// </summary>
   public class RaygunSendingMessageEventArgs : CancelEventArgs
   {
-    public RaygunSendingMessageEventArgs(RaygunMessage message)
+    public RaygunSendingMessageEventArgs(RaygunMessage message, Exception exception)
     {
       Message = message;
+      Exception = exception;
     }
 
-    public RaygunMessage Message { get; private set; }
+    public RaygunMessage Message { get; }
+    public Exception Exception { get; }
   }
 }
