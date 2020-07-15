@@ -540,9 +540,10 @@ namespace Mindscape.Raygun4Net.WebApi
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public void SendInBackground(RaygunMessage raygunMessage)
+    /// <param name="exception">The original exception used to generate the RaygunMessage</param>
+    public void SendInBackground(RaygunMessage raygunMessage, Exception exception)
     {
-      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage, exception));
     }
 
     internal void FlagExceptionAsSent(Exception exception)
@@ -596,7 +597,7 @@ namespace Mindscape.Raygun4Net.WebApi
     {
       foreach (Exception e in StripWrapperExceptions(exception))
       {
-        Send(BuildMessage(e, tags, userCustomData, currentTime));
+        Send(BuildMessage(e, tags, userCustomData, currentTime), exception);
       }
     }
 
@@ -659,11 +660,12 @@ namespace Mindscape.Raygun4Net.WebApi
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public override void Send(RaygunMessage raygunMessage)
+    /// <param name="exception">The original exception used to generate the RaygunMessage</param>
+    public override void Send(RaygunMessage raygunMessage, Exception exception)
     {
       try
       {
-        bool canSend = OnSendingMessage(raygunMessage) && CanSend(raygunMessage);
+        bool canSend = OnSendingMessage(raygunMessage, exception) && CanSend(raygunMessage);
         if (canSend)
         {
           var message = SimpleJson.SerializeObject(raygunMessage);

@@ -25,9 +25,9 @@ namespace Mindscape.Raygun4Net2.Tests
       return ValidateApiKey();
     }
 
-    public bool ExposeOnSendingMessage(RaygunMessage message)
+    public bool ExposeOnSendingMessage(RaygunMessage message, Exception exception)
     {
-      return OnSendingMessage(message);
+      return OnSendingMessage(message, exception);
     }
   }
 }

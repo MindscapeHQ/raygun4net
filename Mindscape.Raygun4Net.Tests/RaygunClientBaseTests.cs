@@ -55,8 +55,8 @@ namespace Mindscape.Raygun4Net.Tests
         throw new Exception("Oops...");
       };
 
-      Assert.That(() => client.ExposeOnSendingMessage(new RaygunMessage()), Throws.Nothing);
-      Assert.IsTrue(client.ExposeOnSendingMessage(new RaygunMessage()));
+      Assert.That(() => client.ExposeOnSendingMessage(new RaygunMessage(), new Exception()), Throws.Nothing);
+      Assert.IsTrue(client.ExposeOnSendingMessage(new RaygunMessage(), new Exception()));
     }
   }
 }

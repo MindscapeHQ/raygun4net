@@ -251,7 +251,7 @@ namespace Mindscape.Raygun4Net
       {
         _currentRequestMessage = BuildRequestMessage();
 
-        Send(BuildMessage(exception, tags, userCustomData, userInfo, null));
+        Send(BuildMessage(exception, tags, userCustomData, userInfo, null), exception);
         FlagAsSent(exception);
       }
     }
@@ -307,7 +307,7 @@ namespace Mindscape.Raygun4Net
           try
           {
             _currentRequestMessage = currentRequestMessage;
-            Send(BuildMessage(exception, tags, userCustomData, userInfo, currentTime));
+            Send(BuildMessage(exception, tags, userCustomData, userInfo, currentTime), exception);
           }
           catch (Exception)
           {
@@ -328,9 +328,10 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public void SendInBackground(RaygunMessage raygunMessage)
+    /// <param name="exception">The original exception that generated the RaygunMessage</param>
+    public void SendInBackground(RaygunMessage raygunMessage, Exception exception)
     {
-      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage, exception));
     }
 
     private RaygunRequestMessage BuildRequestMessage()
@@ -409,9 +410,9 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public override void Send(RaygunMessage raygunMessage)
+    public override void Send(RaygunMessage raygunMessage, Exception exception)
     {
-      bool canSend = OnSendingMessage(raygunMessage);
+      bool canSend = OnSendingMessage(raygunMessage, exception);
       if (canSend)
       {
         string message = null;

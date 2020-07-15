@@ -71,7 +71,7 @@ namespace Mindscape.Raygun4Net
     private bool _handlingRecursiveErrorSending;
 
     // Returns true if the message can be sent, false if the sending is canceled.
-    protected bool OnSendingMessage(RaygunMessage raygunMessage)
+    protected bool OnSendingMessage(RaygunMessage raygunMessage, Exception exception)
     {
       bool result = true;
 
@@ -80,7 +80,7 @@ namespace Mindscape.Raygun4Net
         EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
         if (handler != null)
         {
-          RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage);
+          RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage, exception);
           try
           {
             handler(this, args);
@@ -279,9 +279,9 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public async Task SendAsync(RaygunMessage raygunMessage)
+    public async Task SendAsync(RaygunMessage raygunMessage, Exception exception)
     {
-      await SendOrSave(raygunMessage);
+      await SendOrSave(raygunMessage, exception);
     }
 
     /// <summary>
@@ -329,9 +329,9 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public void Send(RaygunMessage raygunMessage)
+    public void Send(RaygunMessage raygunMessage, Exception exception)
     {
-      SendOrSave(raygunMessage).Wait(3000);
+      SendOrSave(raygunMessage, exception).Wait(3000);
     }
 
     private bool InternetAvailable()
@@ -345,11 +345,11 @@ namespace Mindscape.Raygun4Net
       return internetAvailable;
     }
 
-    private async Task SendOrSave(RaygunMessage raygunMessage)
+    private async Task SendOrSave(RaygunMessage raygunMessage, Exception exception)
     {
       if (ValidateApiKey())
       {
-        bool canSend = OnSendingMessage(raygunMessage);
+        bool canSend = OnSendingMessage(raygunMessage, exception);
         if (canSend)
         {
           try
@@ -551,7 +551,7 @@ namespace Mindscape.Raygun4Net
       var currentTime = DateTime.UtcNow;
       foreach (Exception e in StripWrapperExceptions(exception))
       {
-        Send(BuildMessage(e, tags, userCustomData, currentTime));
+        Send(BuildMessage(e, tags, userCustomData, currentTime), exception);
       }
     }
 
@@ -561,7 +561,7 @@ namespace Mindscape.Raygun4Net
       var currentTime = DateTime.UtcNow;
       foreach (Exception e in StripWrapperExceptions(exception))
       {
-        tasks.Add(SendAsync(BuildMessage(e, tags, userCustomData, currentTime)));
+        tasks.Add(SendAsync(BuildMessage(e, tags, userCustomData, currentTime), exception));
       }
       await Task.WhenAll(tasks);
     }
