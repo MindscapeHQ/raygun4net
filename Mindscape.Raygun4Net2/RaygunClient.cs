@@ -322,7 +322,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     ///<param name="exception">The original exception that generated the RaygunMessage</param>
-    public override void Send(RaygunMessage raygunMessage, Exception exception)
+    public override void Send(RaygunMessage raygunMessage, Exception exception = null)
     {
       if (ValidateApiKey())
       {

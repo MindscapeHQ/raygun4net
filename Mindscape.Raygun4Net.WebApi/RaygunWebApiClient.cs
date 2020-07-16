@@ -19,19 +19,19 @@ namespace Mindscape.Raygun4Net.WebApi
   public class RaygunWebApiClient : RaygunClientBase
   {
     internal const string UnhandledExceptionTag = "UnhandledException";
-    
+
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private readonly List<Type> _wrapperExceptions = new List<Type>();
 
     private readonly ThreadLocal<HttpRequestMessage> _currentWebRequest = new ThreadLocal<HttpRequestMessage>(() => null);
     private readonly ThreadLocal<RaygunRequestMessage> _currentRequestMessage = new ThreadLocal<RaygunRequestMessage>(() => null);
-    
+
     private readonly string _apiKey;
 
     private static RaygunWebApiExceptionFilter _exceptionFilter;
     private static RaygunWebApiActionFilter _actionFilter;
     private static RaygunWebApiDelegatingHandler _delegatingHandler;
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClientBase" /> class.
     /// Uses the ApiKey specified in the config file.
@@ -59,7 +59,7 @@ namespace Mindscape.Raygun4Net.WebApi
     public RaygunWebApiClient(string apiKey)
     {
       _apiKey = apiKey;
-      
+
       ApplicationVersion = RaygunSettings.Settings.ApplicationVersion;
       if (string.IsNullOrEmpty(ApplicationVersion))
       {
@@ -68,7 +68,7 @@ namespace Mindscape.Raygun4Net.WebApi
         // or else we will not be getting the user's library but our own Raygun4Net library.
         ApplicationVersion = Assembly.GetCallingAssembly()?.GetName()?.Version?.ToString();
       }
-      
+
       Init();
     }
 
@@ -86,7 +86,7 @@ namespace Mindscape.Raygun4Net.WebApi
         // or else we will not be getting the user's library but our own Raygun4Net library.
         appVersion = Assembly.GetCallingAssembly()?.GetName()?.Version?.ToString();
       }
-      
+
       AttachInternal(config, null, appVersion);
     }
 
@@ -105,7 +105,7 @@ namespace Mindscape.Raygun4Net.WebApi
         // or else we will not be getting the user's library but our own Raygun4Net library.
         appVersion = Assembly.GetCallingAssembly()?.GetName()?.Version?.ToString();
       }
-      
+
       if (generateRaygunClient != null)
       {
         AttachInternal(config, message => generateRaygunClient(), appVersion);
@@ -145,7 +145,7 @@ namespace Mindscape.Raygun4Net.WebApi
       string appVersion)
     {
       Detach(config);
-      
+
       if (RaygunSettings.Settings.IsRawDataIgnored == false)
       {
         _delegatingHandler = new RaygunWebApiDelegatingHandler();
@@ -220,9 +220,9 @@ namespace Mindscape.Raygun4Net.WebApi
         _actionFilter = null;
       }
     }
-    
+
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="apiKey">The API key.</param>
     /// <param name="version">The application version.</param>
@@ -444,7 +444,7 @@ namespace Mindscape.Raygun4Net.WebApi
 
     /// <summary>
     /// Add an <see cref="IRaygunDataFilter"/> implementation to be used when capturing the raw data
-    /// of a HTTP request. This filter will be passed the request raw data and is expected to remove 
+    /// of a HTTP request. This filter will be passed the request raw data and is expected to remove
     /// or replace values whose keys are found in the list supplied to the Filter method.
     /// </summary>
     /// <param name="filter">Custom raw data filter implementation.</param>
@@ -661,7 +661,7 @@ namespace Mindscape.Raygun4Net.WebApi
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     /// <param name="exception">The original exception used to generate the RaygunMessage</param>
-    public override void Send(RaygunMessage raygunMessage, Exception exception)
+    public override void Send(RaygunMessage raygunMessage, Exception exception = null)
     {
       try
       {

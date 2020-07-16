@@ -301,7 +301,7 @@ namespace Mindscape.Raygun4Net
         // otherwise it will be disposed while we are using it on the other thread.
         RaygunRequestMessage currentRequestMessage = BuildRequestMessage();
         DateTime currentTime = DateTime.UtcNow;
-        
+
         ThreadPool.QueueUserWorkItem(c =>
         {
           try
@@ -410,7 +410,8 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public override void Send(RaygunMessage raygunMessage, Exception exception)
+    /// <param name="exception">The original exception that generated the RaygunMessage</param>
+    public override void Send(RaygunMessage raygunMessage, Exception exception = null)
     {
       bool canSend = OnSendingMessage(raygunMessage, exception);
       if (canSend)
