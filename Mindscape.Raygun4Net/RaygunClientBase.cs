@@ -67,9 +67,11 @@ namespace Mindscape.Raygun4Net
       if (!_handlingRecursiveErrorSending)
       {
         EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
+
         if (handler != null)
         {
           RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage, exception);
+
           try
           {
             handler(this, args);
@@ -82,6 +84,7 @@ namespace Mindscape.Raygun4Net
             Send(e);
             _handlingRecursiveErrorSending = false;
           }
+
           result = !args.Cancel;
         }
       }
