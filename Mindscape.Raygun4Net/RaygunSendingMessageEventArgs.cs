@@ -11,6 +11,11 @@ namespace Mindscape.Raygun4Net
   {
     private RaygunMessage _raygunMessage;
     private Exception _exception;
+
+    public RaygunSendingMessageEventArgs(RaygunMessage message)
+    : this(message, null)
+    {
+    }
     
     public RaygunSendingMessageEventArgs(RaygunMessage message, Exception exception)
     {

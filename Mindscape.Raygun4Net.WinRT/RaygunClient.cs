@@ -53,7 +53,7 @@ namespace Mindscape.Raygun4Net
     private bool _handlingRecursiveErrorSending;
 
     // Returns true if the message can be sent, false if the sending is canceled.
-    protected bool OnSendingMessage(RaygunMessage raygunMessage, Exception exception)
+    protected bool OnSendingMessage(RaygunMessage raygunMessage, Exception exception = null)
     {
       bool result = true;
 

@@ -71,7 +71,7 @@ namespace Mindscape.Raygun4Net
     private bool _handlingRecursiveErrorSending;
 
     // Returns true if the message can be sent, false if the sending is canceled.
-    protected bool OnSendingMessage(RaygunMessage raygunMessage, Exception exception)
+    protected bool OnSendingMessage(RaygunMessage raygunMessage, Exception exception = null)
     {
       bool result = true;
 
@@ -279,7 +279,8 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public async Task SendAsync(RaygunMessage raygunMessage, Exception exception)
+    /// <param name="exception">The original exception object that the <paramref name="raygunMessage"/> is based upon.</param>
+    public async Task SendAsync(RaygunMessage raygunMessage, Exception exception = null)
     {
       await SendOrSave(raygunMessage, exception);
     }
@@ -329,7 +330,8 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public void Send(RaygunMessage raygunMessage, Exception exception)
+    /// <param name="exception">The original exception object that the <paramref name="raygunMessage"/> is based upon.</param>
+    public void Send(RaygunMessage raygunMessage, Exception exception = null)
     {
       SendOrSave(raygunMessage, exception).Wait(3000);
     }

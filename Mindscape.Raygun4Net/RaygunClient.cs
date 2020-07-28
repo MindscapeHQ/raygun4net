@@ -328,8 +328,8 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    /// <param name="exception">The original exception that generated the RaygunMessage</param>
-    public void SendInBackground(RaygunMessage raygunMessage, Exception exception)
+    /// <param name="exception">The original exception object that the <paramref name="raygunMessage"/> is based upon.</param>
+    public void SendInBackground(RaygunMessage raygunMessage, Exception exception = null)
     {
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage, exception));
     }
