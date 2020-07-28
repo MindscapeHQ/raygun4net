@@ -115,6 +115,8 @@
     <Compile Include="Filters\IRaygunDataFilter.cs" />
     <Compile Include="Filters\RaygunKeyValuePairDataFilter.cs" />
     <Compile Include="Filters\RaygunXmlDataFilter.cs" />
+    <Compile Include="Storage\IRaygunFile.cs" />
+    <Compile Include="Storage\IRaygunOfflineStorage.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
