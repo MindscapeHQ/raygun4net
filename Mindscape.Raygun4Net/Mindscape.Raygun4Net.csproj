@@ -77,6 +77,9 @@
     <Compile Include="Builders\RaygunRequestMessageBuilder.cs" />
     <Compile Include="IRaygunApplication.cs" />
     <Compile Include="IRaygunMessageBuilder.cs" />
+    <Compile Include="Logging\IRaygunLogger.cs" />
+    <Compile Include="Logging\RaygunLogger.cs" />
+    <Compile Include="Logging\RaygunLogLevel.cs" />
     <Compile Include="Messages\RaygunClientMessage.cs" />
     <Compile Include="Messages\RaygunEnvironmentMessage.cs" />
     <Compile Include="Messages\RaygunErrorStackTraceLineMessage.cs" />
