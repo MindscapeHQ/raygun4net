@@ -9,50 +9,47 @@ namespace Mindscape.Raygun4Net.Storage
 {
   public class RaygunIsolatedStorage : IRaygunOfflineStorage
   {
-    private const string RaygunBaseDirectory = "RaygunOfflineStorage";
-    public bool Store(string message, string apiKey)
+    private const int MaxStoredReportsHardUpperLimit = 64;
+    private const string RaygunBaseDirectory = "Raygun";
+    private const string RaygunFileFormat = ".json";
+
+    private int _currentFileCounter = 0;
+
+    public bool Store(string message, string apiKey, int maxReportsStored)
     {
-      using (IsolatedStorageFile isolatedStorage = GetIsolatedStorageScope())
+      // Do not store invalid messages.
+      if (string.IsNullOrEmpty(message) || string.IsNullOrEmpty(apiKey))
       {
-        string[] directories = isolatedStorage.GetDirectoryNames("*");
+        return false;
+      }
 
-        if (!FileExists(directories, RaygunBaseDirectory))
+      using (var storage = GetIsolatedStorageScope())
+      {
+        var maxReports = Math.Min(maxReportsStored, MaxStoredReportsHardUpperLimit);
+
+        // We can only save the report if we havn't reached the report count limit.
+        if (IsLocalStorageFull(storage, apiKey, maxReports))
         {
-          isolatedStorage.CreateDirectory(RaygunBaseDirectory);
+          return false;
         }
 
-        int number = 1;
-        string[] files = isolatedStorage.GetFileNames(RaygunBaseDirectory + "\\*.txt");
+        // Get the directory within isolated storage to hold our data.
+        var localDirectory = GetLocalDirectory(apiKey);
 
-        while (true)
+        // Create the destination if it's not there.
+        if (!EnsureDirectoryExists(storage, localDirectory))
         {
-          bool exists = FileExists(files, "RaygunErrorMessage" + number + ".txt");
-
-          if (!exists)
-          {
-            string nextFileName = "RaygunErrorMessage" + (number + 1) + ".txt";
-            exists = FileExists(files, nextFileName);
-            if (exists)
-            {
-              isolatedStorage.DeleteFile(RaygunBaseDirectory + "\\" + nextFileName);
-            }
-            break;
-          }
-          number++;
+          return false;
         }
 
-        if (number == 11)
-        {
-          string firstFileName = "RaygunErrorMessage1.txt";
+        // Build up our file information.
+        var filename = GetUniqueAcendingJsonName();
+        var localFilePath = Path.Combine(localDirectory, filename);
 
-          if (FileExists(files, firstFileName))
-          {
-            isolatedStorage.DeleteFile(RaygunBaseDirectory + "\\" + firstFileName);
-          }
-        }
-        using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream(RaygunBaseDirectory + "\\RaygunErrorMessage" + number + ".txt", FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage))
+        // Write the contents to storage.
+        using (var stream = new IsolatedStorageFileStream(localFilePath, FileMode.OpenOrCreate, FileAccess.Write, storage))
         {
-          using (StreamWriter writer = new StreamWriter(isoStream, Encoding.Unicode))
+          using (var writer = new StreamWriter(stream, Encoding.Unicode))
           {
             writer.Write(message);
             writer.Flush();
@@ -64,31 +61,66 @@ namespace Mindscape.Raygun4Net.Storage
       return true;
     }
 
+    private bool IsLocalStorageFull(IsolatedStorageFile storage, string apiKey, int maxCount)
+    {
+      return NumberOfFilesOnDisk(storage, apiKey) >= maxCount;
+    }
+
+    private int NumberOfFilesOnDisk(IsolatedStorageFile storage, string apiKey)
+    {
+      var files = storage.GetFileNames(Path.Combine(GetLocalDirectory(apiKey), $"*{RaygunFileFormat}"));
+
+      if (files != null)
+      {
+        return files.Length;
+      }
+
+      return MaxStoredReportsHardUpperLimit;
+    }
+
+    private bool EnsureDirectoryExists(IsolatedStorageFile storage, string localDirectory)
+    {
+      bool success = true;
+
+      try
+      {
+        storage.CreateDirectory(localDirectory);
+      }
+      catch (Exception ex)
+      {
+        success = false;
+      }
+
+      return success;
+    }
+
     public IList<IRaygunFile> FetchAll(string apiKey)
     {
       var files = new List<IRaygunFile>();
 
-      using (IsolatedStorageFile isolatedStorage = GetIsolatedStorageScope())
+      using (IsolatedStorageFile storage = GetIsolatedStorageScope())
       {
-        string[] directories = isolatedStorage.GetDirectoryNames("*");
+        // Get the directory within isolated storage to hold our data.
+        var localDirectory = GetLocalDirectory(apiKey);
 
-        if (FileExists(directories, RaygunBaseDirectory))
+        // Look for all the files within our working local directory.
+        var fileNames = storage.GetFileNames(Path.Combine(localDirectory, $"*{RaygunFileFormat}"));
+
+        // Take action on each file.
+        foreach (string name in fileNames)
         {
-          string[] fileNames = isolatedStorage.GetFileNames(RaygunBaseDirectory + "\\*.txt");
+          var stream = new IsolatedStorageFileStream(Path.Combine(localDirectory, name), FileMode.Open, storage);
 
-          foreach (string name in fileNames)
+          // Read the contents and put it into our own structure.
+          using (StreamReader reader = new StreamReader(stream))
           {
-            IsolatedStorageFileStream isoFileStream = new IsolatedStorageFileStream(RaygunBaseDirectory + "\\" + name, FileMode.Open, isolatedStorage);
+            string contents = reader.ReadToEnd();
 
-            using (StreamReader reader = new StreamReader(isoFileStream))
+            files.Add(new RaygunFile()
             {
-              string contents = reader.ReadToEnd();
-              files.Add(new RaygunFile()
-              {
-                Name = name,
-                Contents = contents
-              });
-            }
+              Name = name,
+              Contents = contents
+            });
           }
         }
       }
@@ -98,7 +130,41 @@ namespace Mindscape.Raygun4Net.Storage
 
     public bool Remove(string name, string apiKey)
     {
-      throw new System.NotImplementedException();
+      // We cannot remove based on invalid params.
+      if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(apiKey))
+      {
+        return false;
+      }
+
+      using (IsolatedStorageFile storage = GetIsolatedStorageScope())
+      {
+        // Get a list of the current files in storage.
+        var localDirectory = GetLocalDirectory(apiKey);
+        var localFileNames = storage.GetFileNames(localDirectory);
+
+        // Check for a file with the same name.
+        if (HasMatchingName(localFileNames, name))
+        {
+          // Remove the matching file from storage.
+          storage.DeleteFile(Path.Combine(localDirectory, name));
+
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    private bool HasMatchingName(string[] fileNames, string name)
+    {
+      foreach (var fileName in fileNames)
+      {
+        if (fileName.Equals(name))
+        {
+          return true;
+        }
+      }
+      return false;
     }
 
     private IsolatedStorageFile GetIsolatedStorageScope()
@@ -113,16 +179,15 @@ namespace Mindscape.Raygun4Net.Storage
       }
     }
 
-    private bool FileExists(string[] files, string fileName)
+    private string GetLocalDirectory(string apiKey)
     {
-      foreach (string str in files)
-      {
-        if (fileName.Equals(str))
-        {
-          return true;
-        }
-      }
-      return false;
+      // TODO encode the apikey
+      return Path.Combine(RaygunBaseDirectory, apiKey);
+    }
+
+    private string GetUniqueAcendingJsonName()
+    {
+      return $"{DateTime.UtcNow.Ticks}-{_currentFileCounter++}-{Guid.NewGuid().ToString()}{RaygunFileFormat}";
     }
   }
 }
