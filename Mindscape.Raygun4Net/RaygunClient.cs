@@ -332,7 +332,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception ex)
         {
-          System.Diagnostics.Trace.WriteLine(string.Format("Error serializing exception {0}", ex.Message));
+          _logger.Error($"Failed to serialize report: {ex.Message}");
 
           if (RaygunSettings.Settings.ThrowOnError)
           {
@@ -386,6 +386,7 @@ namespace Mindscape.Raygun4Net
     {
       RaygunRequestMessage requestMessage = null;
       HttpContext context = HttpContext.Current;
+
       if (context != null)
       {
         HttpRequest request = null;
@@ -395,7 +396,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (HttpException ex)
         {
-          System.Diagnostics.Trace.WriteLine("Error retrieving HttpRequest {0}", ex.Message);
+          _logger.Error($"Error retrieving HttpRequest {ex.Message}");
         }
 
         if (request != null)
