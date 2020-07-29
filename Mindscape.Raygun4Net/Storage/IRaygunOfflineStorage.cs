@@ -8,10 +8,10 @@ namespace Mindscape.Raygun4Net.Storage
     /// <summary>
     /// Persist the <paramref name="message"/>> to local storage.
     /// </summary>
-    /// <param name="message">The error report to store locally.</param>
+    /// <param name="message">The serialized error report to store locally.</param>
     /// <param name="apiKey">The key for which these file are associated with.</param>
     /// <returns></returns>
-    bool Store(RaygunMessage message, string apiKey);
+    bool Store(string message, string apiKey);
     
     /// <summary>
     /// Retrieve all files from local storage.
