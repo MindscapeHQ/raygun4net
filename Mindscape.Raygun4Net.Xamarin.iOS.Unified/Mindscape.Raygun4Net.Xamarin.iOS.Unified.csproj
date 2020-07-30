@@ -125,12 +125,6 @@
     <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
       <Link>IRaygunMessageBuilder.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\RaygunClientBase.cs">
-      <Link>RaygunClientBase.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\RaygunSendingMessageEventArgs.cs">
-      <Link>RaygunSendingMessageEventArgs.cs</Link>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunClientMessage.cs">
       <Link>Messages\RaygunClientMessage.cs</Link>
@@ -158,6 +152,9 @@
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net.WindowsStore\Messages\RaygunMessageDetails.cs">
       <Link>Messages\RaygunMessageDetails.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net.Xamarin.iOS\RaygunClientBase.cs">
+      <Link>RaygunClientBase.cs</Link>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net.Xamarin.iOS\RaygunClient.cs">
       <Link>RaygunClient.cs</Link>
@@ -204,6 +201,9 @@
     <Compile Include="RaygunLogLevel.cs" />
     <Compile Include="RaygunFile.cs" />
     <Compile Include="RaygunFileManager.cs" />
+    <Compile Include="..\Mindscape.Raygun4Net.Xamarin.iOS\RaygunSendingMessageEventArgs.cs">
+      <Link>RaygunSendingMessageEventArgs.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <NativeReference Include="native\raygun4apple.framework">

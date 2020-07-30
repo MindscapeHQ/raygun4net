@@ -22,7 +22,7 @@ namespace Mindscape.Raygun4Net.WinRT.Tests
     [Test]
     public void NoHandlerSendsAll()
     {
-      Assert.IsTrue(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)));
+      Assert.IsTrue(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception), _exception));
     }
 
     [Test]
@@ -35,7 +35,7 @@ namespace Mindscape.Raygun4Net.WinRT.Tests
         filterCalled = true;
         e.Cancel = true;
       };
-      Assert.IsFalse(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)));
+      Assert.IsFalse(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception), _exception));
       Assert.IsTrue(filterCalled);
     }
 
@@ -46,7 +46,7 @@ namespace Mindscape.Raygun4Net.WinRT.Tests
       {
         // Allow send by not setting e.Cancel
       };
-      Assert.IsTrue(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)));
+      Assert.IsTrue(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception), _exception));
     }
 
     [Test]
@@ -66,7 +66,7 @@ namespace Mindscape.Raygun4Net.WinRT.Tests
         filter2Called = true;
         e.Cancel = true;
       };
-      Assert.IsFalse(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)));
+      Assert.IsFalse(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception), _exception));
       Assert.IsTrue(filter1Called);
       Assert.IsTrue(filter2Called);
     }
@@ -82,7 +82,7 @@ namespace Mindscape.Raygun4Net.WinRT.Tests
       {
         // Allow send by not setting e.Cancel
       };
-      Assert.IsFalse(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)));
+      Assert.IsFalse(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception), _exception));
     }
 
     [Test]
@@ -96,7 +96,7 @@ namespace Mindscape.Raygun4Net.WinRT.Tests
       {
         e.Cancel = true;
       };
-      Assert.IsFalse(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)));
+      Assert.IsFalse(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception), _exception));
     }
 
     [Test]
@@ -110,7 +110,7 @@ namespace Mindscape.Raygun4Net.WinRT.Tests
       {
         // Allow send by not setting e.Cancel
       };
-      Assert.IsTrue(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)));
+      Assert.IsTrue(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception), _exception));
     }
 
     [Test]
@@ -124,7 +124,7 @@ namespace Mindscape.Raygun4Net.WinRT.Tests
         e.Message.Details.Error.Message = "Custom error message";
       };
 
-      Assert.IsTrue(_client.ExposeOnSendingMessage(message));
+      Assert.IsTrue(_client.ExposeOnSendingMessage(message, _exception));
       Assert.AreEqual("Custom error message", message.Details.Error.Message);
     }
 

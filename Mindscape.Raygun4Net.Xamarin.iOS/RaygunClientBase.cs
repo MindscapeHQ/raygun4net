@@ -60,7 +60,7 @@ namespace Mindscape.Raygun4Net
     private bool _handlingRecursiveErrorSending;
 
     // Returns true if the message can be sent, false if the sending is canceled.
-    protected bool OnSendingMessage(RaygunMessage raygunMessage, Exception exception)
+    protected bool OnSendingMessage(RaygunMessage raygunMessage)
     {
       bool result = true;
 
@@ -70,7 +70,7 @@ namespace Mindscape.Raygun4Net
 
         if (handler != null)
         {
-          RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage, exception);
+          RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage);
 
           try
           {
@@ -135,6 +135,6 @@ namespace Mindscape.Raygun4Net
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     /// <param name="exception">The original exception used to generate the RaygunMessage</param>
-    public abstract void Send(RaygunMessage raygunMessage, Exception exception = null);
+    public abstract void Send(RaygunMessage raygunMessage);
   }
 }

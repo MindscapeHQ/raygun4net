@@ -23,9 +23,9 @@ namespace Mindscape.Raygun4Net.WinRT.Tests
       return BuildMessage(exception, tags, userCustomData);
     }
 
-    public bool ExposeOnSendingMessage(RaygunMessage raygunMessage)
+    public bool ExposeOnSendingMessage(RaygunMessage raygunMessage, Exception exception)
     {
-      return OnSendingMessage(raygunMessage);
+      return OnSendingMessage(raygunMessage, exception);
     }
 
     public IEnumerable<Exception> ExposeStripWrapperExceptions(Exception exception)

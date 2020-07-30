@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata minClientVersion="2.5">
     <id>Mindscape.Raygun4Net.WebApi</id>
-    <version>5.10.3</version>
+    <version>5.11.0</version>
     <title>Raygun for ASP.NET Web API</title>
     <authors>Raygun</authors>
     <owners />
@@ -13,7 +13,7 @@
     <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
     <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
     <dependencies>
-      <dependency id="Mindscape.Raygun4Net.Core" version="5.10.2" />
+      <dependency id="Mindscape.Raygun4Net.Core" version="5.11.0" />
     </dependencies>
   </metadata>
   <files>

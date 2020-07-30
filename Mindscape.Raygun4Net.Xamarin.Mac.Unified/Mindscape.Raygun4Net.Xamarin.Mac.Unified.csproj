@@ -71,12 +71,6 @@
     <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
       <Link>IRaygunMessageBuilder.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\RaygunClientBase.cs">
-      <Link>RaygunClientBase.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\RaygunSendingMessageEventArgs.cs">
-      <Link>RaygunSendingMessageEventArgs.cs</Link>
-    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\SimpleJson.cs">
       <Link>SimpleJson.cs</Link>
     </Compile>
@@ -115,6 +109,12 @@
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\RaygunCustomGroupingKeyEventArgs.cs">
       <Link>RaygunCustomGroupingKeyEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net.Xamarin.Mac\RaygunClientBase.cs">
+      <Link>RaygunClientBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net.Xamarin.Mac\RaygunSendingMessageEventArgs.cs">
+      <Link>RaygunSendingMessageEventArgs.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

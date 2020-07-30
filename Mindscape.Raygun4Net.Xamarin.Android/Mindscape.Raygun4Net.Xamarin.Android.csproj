@@ -78,14 +78,8 @@
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunMessage.cs">
       <Link>Messages\RaygunMessage.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\RaygunClientBase.cs">
-      <Link>RaygunClientBase.cs</Link>
-    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\RaygunCustomGroupingKeyEventArgs.cs">
       <Link>RaygunCustomGroupingKeyEventArgs.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\RaygunSendingMessageEventArgs.cs">
-      <Link>RaygunSendingMessageEventArgs.cs</Link>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\SimpleJson.cs">
       <Link>SimpleJson.cs</Link>
@@ -114,6 +108,8 @@
     <Compile Include="RaygunFileManager.cs" />
     <Compile Include="RaygunFile.cs" />
     <Compile Include="RaygunResponseStatusCode.cs" />
+    <Compile Include="RaygunClientBase.cs" />
+    <Compile Include="RaygunSendingMessageEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />

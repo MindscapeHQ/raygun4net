@@ -212,9 +212,10 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public void SendInBackground(RaygunMessage raygunMessage)
+    /// <param name="exception">The original exception that generated the RaygunMessage</param>
+    public void SendInBackground(RaygunMessage raygunMessage, Exception exception)
     {
-      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage, exception));
     }
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
@@ -247,7 +248,7 @@ namespace Mindscape.Raygun4Net
     {
       foreach (Exception e in StripWrapperExceptions(exception))
       {
-        Send(BuildMessage(e, tags, userCustomData, userInfo, currentTime));
+        Send(BuildMessage(e, tags, userCustomData, userInfo, currentTime), exception);
       }
     }
 
@@ -285,9 +286,10 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public override void Send(RaygunMessage raygunMessage)
+    /// <param name="exception">The original exception that generated the RaygunMessage</param>
+    public override void Send(RaygunMessage raygunMessage, Exception exception = null)
     {
-      bool canSend = OnSendingMessage(raygunMessage);
+      bool canSend = OnSendingMessage(raygunMessage, exception);
       if (canSend)
       {
         string message = null;

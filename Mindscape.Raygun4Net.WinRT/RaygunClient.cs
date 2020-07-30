@@ -53,16 +53,18 @@ namespace Mindscape.Raygun4Net
     private bool _handlingRecursiveErrorSending;
 
     // Returns true if the message can be sent, false if the sending is canceled.
-    protected bool OnSendingMessage(RaygunMessage raygunMessage)
+    protected bool OnSendingMessage(RaygunMessage raygunMessage, Exception exception = null)
     {
       bool result = true;
 
       if (!_handlingRecursiveErrorSending)
       {
         EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
+
         if (handler != null)
         {
-          RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage);
+          RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage, exception);
+
           try
           {
             handler(this, args);
@@ -232,11 +234,11 @@ namespace Mindscape.Raygun4Net
       StripAndSend(exception, tags, userCustomData);
     }
 
-    public async void Send(RaygunMessage raygunMessage)
+    public async void Send(RaygunMessage raygunMessage, Exception exception = null)
     {
       if (ValidateApiKey())
       {
-        bool canSend = OnSendingMessage(raygunMessage);
+        bool canSend = OnSendingMessage(raygunMessage, exception);
         if (canSend)
         {
           HttpClientHandler handler = new HttpClientHandler {UseDefaultCredentials = true};
