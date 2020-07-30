@@ -43,8 +43,10 @@ namespace Mindscape.Raygun4Net.Storage
 
         var maxReports = Math.Min(maxReportsStored, MaxStoredReportsHardUpperLimit);
 
+        var fileSearchPattern = Path.Combine(localDirectory, $"*{RaygunFileFormat}");
+
         // We can only save the report if we havn't reached the report count limit.
-        if (IsLocalStorageFull(storage, localDirectory, maxReports))
+        if (storage.GetFileNames(fileSearchPattern).Length >= maxReports)
         {
           return false;
         }
@@ -66,23 +68,6 @@ namespace Mindscape.Raygun4Net.Storage
       }
 
       return true;
-    }
-
-    private bool IsLocalStorageFull(IsolatedStorageFile storage, string localDirectory, int maxCount)
-    {
-      return NumberOfFilesOnDisk(storage, localDirectory) >= maxCount;
-    }
-
-    private int NumberOfFilesOnDisk(IsolatedStorageFile storage, string localDirectory)
-    {
-      var files = storage.GetFileNames(Path.Combine(localDirectory, $"*{RaygunFileFormat}"));
-
-      if (files != null)
-      {
-        return files.Length;
-      }
-
-      return MaxStoredReportsHardUpperLimit;
     }
 
     private bool EnsureDirectoryExists(IsolatedStorageFile storage, string localDirectory)
@@ -176,18 +161,6 @@ namespace Mindscape.Raygun4Net.Storage
 
         return true;
       }
-    }
-
-    private bool HasMatchingName(string[] fileNames, string name)
-    {
-      foreach (var fileName in fileNames)
-      {
-        if (fileName.Equals(name))
-        {
-          return true;
-        }
-      }
-      return false;
     }
 
     private IsolatedStorageFile GetIsolatedStorageScope()
