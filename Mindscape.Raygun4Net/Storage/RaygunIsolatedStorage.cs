@@ -41,12 +41,11 @@ namespace Mindscape.Raygun4Net.Storage
           return false;
         }
 
+        var searchPattern = Path.Combine(localDirectory, $"*{RaygunFileFormat}");
         var maxReports = Math.Min(maxReportsStored, MaxStoredReportsHardUpperLimit);
 
-        var fileSearchPattern = Path.Combine(localDirectory, $"*{RaygunFileFormat}");
-
         // We can only save the report if we havn't reached the report count limit.
-        if (storage.GetFileNames(fileSearchPattern).Length >= maxReports)
+        if (storage.GetFileNames(searchPattern).Length >= maxReports)
         {
           return false;
         }
@@ -90,7 +89,7 @@ namespace Mindscape.Raygun4Net.Storage
     {
       var files = new List<IRaygunFile>();
 
-      using (IsolatedStorageFile storage = GetIsolatedStorageScope())
+      using (var storage = GetIsolatedStorageScope())
       {
         // Get the directory within isolated storage to hold our data.
         var localDirectory = GetLocalDirectory(apiKey);
@@ -110,12 +109,12 @@ namespace Mindscape.Raygun4Net.Storage
         var fileNames = storage.GetFileNames(Path.Combine(localDirectory, $"*{RaygunFileFormat}"));
 
         // Take action on each file.
-        foreach (string name in fileNames)
+        foreach (var name in fileNames)
         {
           var stream = new IsolatedStorageFileStream(Path.Combine(localDirectory, name), FileMode.Open, storage);
 
           // Read the contents and put it into our own structure.
-          using (StreamReader reader = new StreamReader(stream))
+          using (var reader = new StreamReader(stream))
           {
             string contents = reader.ReadToEnd();
 
@@ -139,7 +138,7 @@ namespace Mindscape.Raygun4Net.Storage
         return false;
       }
 
-      using (IsolatedStorageFile storage = GetIsolatedStorageScope())
+      using (var storage = GetIsolatedStorageScope())
       {
         // Get a list of the current files in storage.
         var localDirectory = GetLocalDirectory(apiKey);
