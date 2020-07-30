@@ -171,6 +171,29 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
+    /// Gets or sets the max crash reports stored on the device.
+    /// There is a hard upper limit of 64 reports.
+    /// </summary>
+    /// <value>The max crash reports stored on device.</value>
+    [ConfigurationProperty("maxCrashReportsStoredOffline", IsRequired = false, DefaultValue = 64)]
+    public int MaxCrashReportsStoredOffline
+    {
+      get { return (int)this["maxCrashReportsStoredOffline"]; }
+      set { this["maxCrashReportsStoredOffline"] = value; }
+    }
+
+    /// <summary>
+    /// Allows for crash reports to be stored to local storage when there is no available network connection.
+    /// </summary>
+    /// <value><c>true</c> if allowing crash reports to be stored offline; otherwise, <c>false</c>.</value>
+    [ConfigurationProperty("crashReportingOfflineStorageEnabled", IsRequired = false, DefaultValue = true)]
+    public bool CrashReportingOfflineStorageEnabled
+    {
+      get { return (bool)this["crashReportingOfflineStorageEnabled"]; }
+      set { this["crashReportingOfflineStorageEnabled"] = value; }
+    }
+
+    /// <summary>
     /// Return false.
     /// </summary>
     /// <returns>False</returns>
