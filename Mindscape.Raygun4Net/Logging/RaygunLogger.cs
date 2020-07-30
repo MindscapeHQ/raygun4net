@@ -1,9 +1,11 @@
+using Mindscape.Raygun4Net.Utils;
+
 namespace Mindscape.Raygun4Net.Logging
 {
-  public class RaygunLogger : IRaygunLogger
+  public class RaygunLogger : Singleton<RaygunLogger>, IRaygunLogger
   {
     public RaygunLogLevel LogLevel { get; set; }
-    
+
     public void Error(string message)
     {
       Log(RaygunLogLevel.Error, message);
@@ -35,7 +37,7 @@ namespace Mindscape.Raygun4Net.Logging
       {
         return;
       }
-      
+
       if (level <= LogLevel)
       {
         System.Diagnostics.Trace.WriteLine(message);

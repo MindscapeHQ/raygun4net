@@ -122,6 +122,7 @@
     <Compile Include="Storage\IRaygunOfflineStorage.cs" />
     <Compile Include="Storage\RaygunFile.cs" />
     <Compile Include="Storage\RaygunIsolatedStorage.cs" />
+    <Compile Include="Utils\Singleton.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
