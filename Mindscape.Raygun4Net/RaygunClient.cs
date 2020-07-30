@@ -460,9 +460,15 @@ namespace Mindscape.Raygun4Net
 
     private void SaveMessage(string message)
     {
+      if (!RaygunSettings.Settings.CrashReportingOfflineStorageEnabled)
+      {
+        _logger.Warning("Skipping saving report to offline storage due to offline storage being disabled");
+        return;
+      }
+
       try
       {
-        if (!_offlineStorage.Store(message, _apiKey))
+        if (!_offlineStorage.Store(message, _apiKey, RaygunSettings.Settings.MaxCrashReportsStoredOffline))
         {
           _logger.Warning($"Failed to save error report");
         }
