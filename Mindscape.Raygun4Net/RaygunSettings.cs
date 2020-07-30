@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.Linq;
 using Mindscape.Raygun4Net.Breadcrumbs;
+using Mindscape.Raygun4Net.Logging;
 
 namespace Mindscape.Raygun4Net
 {
@@ -191,6 +192,19 @@ namespace Mindscape.Raygun4Net
     {
       get { return (bool)this["crashReportingOfflineStorageEnabled"]; }
       set { this["crashReportingOfflineStorageEnabled"] = value; }
+    }
+
+    /// <summary>
+    /// Gets or sets the log level controlling the amount of information printed to system consoles.
+    /// Setting the level to <see cref="RaygunLogLevel.Verbose"/> will print the raw Crash Reporting being
+    /// posted to the API endpoints.
+    /// </summary>
+    /// <value>The log level.</value>
+    [ConfigurationProperty("logLevel", IsRequired = false, DefaultValue = RaygunLogLevel.Warning)]
+    public RaygunLogLevel LogLevel
+    {
+      get { return (RaygunLogLevel)this["logLevel"]; }
+      set { this["logLevel"] = value; }
     }
 
     /// <summary>
