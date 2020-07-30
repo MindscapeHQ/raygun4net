@@ -40,6 +40,15 @@ namespace Mindscape.Raygun4Net
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
+    /// Uses the ApiKey specified in the config file.
+    /// </summary>
+    public RaygunClient()
+      : this(RaygunSettings.Settings.ApiKey)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RaygunClient" /> class.
     /// </summary>
     /// <param name="apiKey">The API key.</param>
     public RaygunClient(string apiKey)
@@ -75,16 +84,9 @@ namespace Mindscape.Raygun4Net
 
       IsRawDataIgnored = RaygunSettings.Settings.IsRawDataIgnored;
 
-      ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
-    }
+      _logger.LogLevel = RaygunSettings.Settings.LogLevel;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RaygunClient" /> class.
-    /// Uses the ApiKey specified in the config file.
-    /// </summary>
-    public RaygunClient()
-      : this(RaygunSettings.Settings.ApiKey)
-    {
+      ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
 
     /// <summary>
@@ -322,44 +324,55 @@ namespace Mindscape.Raygun4Net
     {
       bool canSend = OnSendingMessage(raygunMessage);
 
-      if (canSend)
+      if (!canSend)
       {
-        string message = null;
+        return;
+      }
 
-        try
+      string message = null;
+
+      try
+      {
+        message = SimpleJson.SerializeObject(raygunMessage);
+      }
+      catch (Exception ex)
+      {
+        _logger.Error($"Failed to serialize report due to: {ex.Message}");
+
+        if (RaygunSettings.Settings.ThrowOnError)
         {
-          message = SimpleJson.SerializeObject(raygunMessage);
+          throw;
         }
-        catch (Exception ex)
+      }
+
+      if (string.IsNullOrEmpty(message))
+      {
+        return;
+      }
+
+      bool successfullySentReport = true;
+
+      try
+      {
+        Send(message);
+      }
+      catch (Exception ex)
+      {
+        successfullySentReport = false;
+
+        _logger.Error($"Failed to send report to Raygun due to: {ex.Message}");
+
+        SaveMessage(message);
+
+        if (RaygunSettings.Settings.ThrowOnError)
         {
-          _logger.Error($"Failed to serialize report: {ex.Message}");
-
-          if (RaygunSettings.Settings.ThrowOnError)
-          {
-            throw;
-          }
+          throw;
         }
+      }
 
-        if (message != null)
-        {
-          try
-          {
-            Send(message);
-          }
-          catch (Exception ex)
-          {
-            SaveMessage(message);
-
-            _logger.Error($"Failed to report error to Raygun: {ex.Message}");
-
-            if (RaygunSettings.Settings.ThrowOnError)
-            {
-              throw;
-            }
-          }
-
-          SendStoredMessages();
-        }
+      if (successfullySentReport)
+      {
+        SendStoredMessages();
       }
     }
 
@@ -367,6 +380,8 @@ namespace Mindscape.Raygun4Net
     {
       if (HasValidApiKey())
       {
+        _logger.Verbose(message);
+
         using (var client = CreateWebClient())
         {
           client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
@@ -396,7 +411,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (HttpException ex)
         {
-          _logger.Error($"Error retrieving HttpRequest {ex.Message}");
+          _logger.Error($"Failed to retrieve the HttpRequest due to: {ex.Message}");
         }
 
         if (request != null)
@@ -462,7 +477,7 @@ namespace Mindscape.Raygun4Net
     {
       if (!RaygunSettings.Settings.CrashReportingOfflineStorageEnabled)
       {
-        _logger.Warning("Skipping saving report to offline storage due to offline storage being disabled");
+        _logger.Warning("Offline storage is disabled, skipping saving report.");
         return;
       }
 
@@ -475,7 +490,7 @@ namespace Mindscape.Raygun4Net
       }
       catch (Exception ex)
       {
-        _logger.Error($"Failed to save message to offline storage: {ex.Message}");
+        _logger.Error($"Failed to save report to offline storage due to: {ex.Message}");
       }
     }
 
@@ -487,11 +502,36 @@ namespace Mindscape.Raygun4Net
         {
           var files = _offlineStorage.FetchAll(_apiKey);
 
-          // TODO: Implement the sending of files
+          foreach (var file in files)
+          {
+            try
+            {
+              // Send the stored report.
+              Send(file.Contents);
+
+              // Remove the stored report from local storage.
+              if (_offlineStorage.Remove(file.Name, _apiKey))
+              {
+                _logger.Info("Successfully removed report from offline storage.");
+              }
+              else
+              {
+                _logger.Warning("Failed to remove report from offline storage.");
+              }
+            }
+            catch (Exception ex)
+            {
+              _logger.Error($"Failed to send stored report to Raygun: {ex.Message}");
+
+              // If just one message fails to send, then don't delete the message,
+              // and don't attempt sending anymore until later.
+              return;
+            }
+          }
         }
         catch (Exception ex)
         {
-          _logger.Error($"Failed to report stored messages to Raygun: {ex.Message}");
+          _logger.Error($"Failed to send stored report to Raygun: {ex.Message}");
         }
       }
     }
