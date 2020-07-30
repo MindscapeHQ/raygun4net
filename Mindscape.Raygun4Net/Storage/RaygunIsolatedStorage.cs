@@ -27,14 +27,6 @@ namespace Mindscape.Raygun4Net.Storage
 
       using (var storage = GetIsolatedStorageScope())
       {
-        var maxReports = Math.Min(maxReportsStored, MaxStoredReportsHardUpperLimit);
-
-        // We can only save the report if we havn't reached the report count limit.
-        if (IsLocalStorageFull(storage, apiKey, maxReports))
-        {
-          return false;
-        }
-
         // Get the directory within isolated storage to hold our data.
         var localDirectory = GetLocalDirectory(apiKey);
 
@@ -45,6 +37,14 @@ namespace Mindscape.Raygun4Net.Storage
 
         // Create the destination if it's not there.
         if (!EnsureDirectoryExists(storage, localDirectory))
+        {
+          return false;
+        }
+
+        var maxReports = Math.Min(maxReportsStored, MaxStoredReportsHardUpperLimit);
+
+        // We can only save the report if we havn't reached the report count limit.
+        if (IsLocalStorageFull(storage, localDirectory, maxReports))
         {
           return false;
         }
@@ -68,14 +68,14 @@ namespace Mindscape.Raygun4Net.Storage
       return true;
     }
 
-    private bool IsLocalStorageFull(IsolatedStorageFile storage, string apiKey, int maxCount)
+    private bool IsLocalStorageFull(IsolatedStorageFile storage, string localDirectory, int maxCount)
     {
-      return NumberOfFilesOnDisk(storage, apiKey) >= maxCount;
+      return NumberOfFilesOnDisk(storage, localDirectory) >= maxCount;
     }
 
-    private int NumberOfFilesOnDisk(IsolatedStorageFile storage, string apiKey)
+    private int NumberOfFilesOnDisk(IsolatedStorageFile storage, string localDirectory)
     {
-      var files = storage.GetFileNames(Path.Combine(GetLocalDirectory(apiKey), $"*{RaygunFileFormat}"));
+      var files = storage.GetFileNames(Path.Combine(localDirectory, $"*{RaygunFileFormat}"));
 
       if (files != null)
       {
@@ -111,6 +111,12 @@ namespace Mindscape.Raygun4Net.Storage
         var localDirectory = GetLocalDirectory(apiKey);
 
         if (string.IsNullOrEmpty(localDirectory))
+        {
+          return files;
+        }
+
+        // We must ensure the local directory exists before we look for files.
+        if (storage.GetDirectoryNames(localDirectory)?.Length == 0)
         {
           return files;
         }
@@ -158,19 +164,18 @@ namespace Mindscape.Raygun4Net.Storage
           return false;
         }
 
-        var localFileNames = storage.GetFileNames(localDirectory);
+        var localFilePath = Path.Combine(localDirectory, name);
 
-        // Check for a file with the same name.
-        if (HasMatchingName(localFileNames, name))
+        // We must ensure the local file exists before delete it.
+        if (storage.GetFileNames(localFilePath)?.Length == 0)
         {
-          // Remove the matching file from storage.
-          storage.DeleteFile(Path.Combine(localDirectory, name));
-
-          return true;
+          return false;
         }
-      }
 
-      return false;
+        storage.DeleteFile(localFilePath);
+
+        return true;
+      }
     }
 
     private bool HasMatchingName(string[] fileNames, string name)
