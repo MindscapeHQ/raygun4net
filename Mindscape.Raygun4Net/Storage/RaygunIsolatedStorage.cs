@@ -2,13 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.IsolatedStorage;
+using System.Security.Cryptography;
 using System.Text;
-using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net.Storage
 {
   public class RaygunIsolatedStorage : IRaygunOfflineStorage
   {
+    private static string _folderNameHash = null;
+
     private const int MaxStoredReportsHardUpperLimit = 64;
     private const string RaygunBaseDirectory = "Raygun";
     private const string RaygunFileFormat = ".json";
@@ -35,6 +37,11 @@ namespace Mindscape.Raygun4Net.Storage
 
         // Get the directory within isolated storage to hold our data.
         var localDirectory = GetLocalDirectory(apiKey);
+
+        if (string.IsNullOrEmpty(localDirectory))
+        {
+          return false;
+        }
 
         // Create the destination if it's not there.
         if (!EnsureDirectoryExists(storage, localDirectory))
@@ -86,7 +93,7 @@ namespace Mindscape.Raygun4Net.Storage
       {
         storage.CreateDirectory(localDirectory);
       }
-      catch (Exception ex)
+      catch
       {
         success = false;
       }
@@ -102,6 +109,11 @@ namespace Mindscape.Raygun4Net.Storage
       {
         // Get the directory within isolated storage to hold our data.
         var localDirectory = GetLocalDirectory(apiKey);
+
+        if (string.IsNullOrEmpty(localDirectory))
+        {
+          return files;
+        }
 
         // Look for all the files within our working local directory.
         var fileNames = storage.GetFileNames(Path.Combine(localDirectory, $"*{RaygunFileFormat}"));
@@ -140,6 +152,12 @@ namespace Mindscape.Raygun4Net.Storage
       {
         // Get a list of the current files in storage.
         var localDirectory = GetLocalDirectory(apiKey);
+
+        if (string.IsNullOrEmpty(localDirectory))
+        {
+          return false;
+        }
+
         var localFileNames = storage.GetFileNames(localDirectory);
 
         // Check for a file with the same name.
@@ -181,8 +199,34 @@ namespace Mindscape.Raygun4Net.Storage
 
     private string GetLocalDirectory(string apiKey)
     {
-      // TODO encode the apikey
-      return Path.Combine(RaygunBaseDirectory, apiKey);
+      // Attempt to perform the hash operation once.
+      if (_folderNameHash == null)
+      {
+        _folderNameHash = PerformHash(apiKey);
+      }
+
+      // If successful return the correct path.
+      return (_folderNameHash == null) ? null : Path.Combine(RaygunBaseDirectory, _folderNameHash);
+    }
+
+    private string PerformHash(string input)
+    {
+      // Use input string to calculate MD5 hash
+      using (var hasher = MD5.Create())
+      {
+        var inputBytes = Encoding.ASCII.GetBytes(input);
+        var hashBytes = hasher.ComputeHash(inputBytes);
+
+        // Convert the byte array to hexadecimal string
+        var builder = new StringBuilder();
+
+        foreach (var hashByte in hashBytes)
+        {
+          builder.Append(hashByte.ToString("X2"));
+        }
+
+        return builder.ToString();
+      }
     }
 
     private string GetUniqueAcendingJsonName()
