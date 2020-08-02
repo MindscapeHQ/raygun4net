@@ -30,7 +30,7 @@ namespace Mindscape.Raygun4Net.Tests
 
     public bool ExposeValidateApiKey()
     {
-      return HasValidApiKey();
+      return ValidateApiKey();
     }
 
     public bool ExposeOnSendingMessage(RaygunMessage raygunMessage)
