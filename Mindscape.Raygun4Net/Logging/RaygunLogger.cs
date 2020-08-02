@@ -4,6 +4,8 @@ namespace Mindscape.Raygun4Net.Logging
 {
   public class RaygunLogger : Singleton<RaygunLogger>, IRaygunLogger
   {
+    private const string RaygunPrefix = "Raygun: ";
+
     public RaygunLogLevel LogLevel { get; set; }
 
     public void Error(string message)
@@ -40,7 +42,7 @@ namespace Mindscape.Raygun4Net.Logging
 
       if (level <= LogLevel)
       {
-        System.Diagnostics.Trace.WriteLine(message);
+        System.Diagnostics.Trace.WriteLine($"{RaygunPrefix}{message}");
       }
     }
   }
