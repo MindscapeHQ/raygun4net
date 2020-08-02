@@ -1,4 +1,3 @@
-using System.Windows.Forms;
 
 namespace Mindscape.Raygun4Net.Logging
 {
