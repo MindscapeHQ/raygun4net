@@ -379,7 +379,9 @@ namespace Mindscape.Raygun4Net
     {
       if (HasValidApiKey())
       {
+        RaygunLogger.Instance.Verbose("Sending Payload --------------");
         RaygunLogger.Instance.Verbose(message);
+        RaygunLogger.Instance.Verbose("------------------------------");
 
         using (var client = CreateWebClient())
         {
@@ -480,21 +482,37 @@ namespace Mindscape.Raygun4Net
         return;
       }
 
-      try
+      if (!HasValidApiKey())
       {
-        if (!_offlineStorage.Store(message, _apiKey, RaygunSettings.Settings.MaxCrashReportsStoredOffline))
-        {
-          RaygunLogger.Instance.Warning($"Failed to save error report");
-        }
+        RaygunLogger.Instance.Warning("Failed to save report due to invalid API key.");
+        return;
       }
-      catch (Exception ex)
+
+      // Avoid writing and reading from disk at the same time with `SendStoredMessages`.
+      lock (_sendLock)
       {
-        RaygunLogger.Instance.Error($"Failed to save report to offline storage due to: {ex.Message}");
+        try
+        {
+          if (!_offlineStorage.Store(message, _apiKey, RaygunSettings.Settings.MaxCrashReportsStoredOffline))
+          {
+            RaygunLogger.Instance.Warning($"Failed to save error report");
+          }
+        }
+        catch (Exception ex)
+        {
+          RaygunLogger.Instance.Error($"Failed to save report to offline storage due to: {ex.Message}");
+        }
       }
     }
 
     private void SendStoredMessages()
     {
+      if (!HasValidApiKey())
+      {
+        RaygunLogger.Instance.Warning("Failed to send offline reports due to invalid API key.");
+        return;
+      }
+
       lock (_sendLock)
       {
         try
