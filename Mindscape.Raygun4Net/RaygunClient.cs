@@ -20,11 +20,12 @@ namespace Mindscape.Raygun4Net
     private readonly string _apiKey;
     private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private readonly List<Type> _wrapperExceptions = new List<Type>();
-    private IRaygunOfflineStorage _offlineStorage = new RaygunIsolatedStorage();
 
     [ThreadStatic]
     private static RaygunRequestMessage _currentRequestMessage;
     private static object _sendLock = new object();
+
+    private IRaygunOfflineStorage _offlineStorage = new RaygunIsolatedStorage();
 
     /// <summary>
     /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
@@ -321,6 +322,11 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public override void Send(RaygunMessage raygunMessage)
     {
+      if (!ValidateApiKey())
+      {
+        RaygunLogger.Instance.Warning("Failed to send error report due to invalid API key");
+      }
+
       bool canSend = OnSendingMessage(raygunMessage);
 
       if (!canSend)
@@ -377,20 +383,13 @@ namespace Mindscape.Raygun4Net
 
     private void Send(string message)
     {
-      if (ValidateApiKey())
-      {
-        RaygunLogger.Instance.Verbose("Sending Payload --------------");
-        RaygunLogger.Instance.Verbose(message);
-        RaygunLogger.Instance.Verbose("------------------------------");
+      RaygunLogger.Instance.Verbose("Sending Payload --------------");
+      RaygunLogger.Instance.Verbose(message);
+      RaygunLogger.Instance.Verbose("------------------------------");
 
-        using (var client = CreateWebClient())
-        {
-          client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
-        }
-      }
-      else
+      using (var client = CreateWebClient())
       {
-        RaygunLogger.Instance.Warning("Unable to send error report due to invalid API key");
+        client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
       }
     }
 
