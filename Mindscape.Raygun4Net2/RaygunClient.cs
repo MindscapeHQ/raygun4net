@@ -7,7 +7,9 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using Mindscape.Raygun4Net.Builders;
+using Mindscape.Raygun4Net.Logging;
 using Mindscape.Raygun4Net.Messages;
+using Mindscape.Raygun4Net.Storage;
 
 namespace Mindscape.Raygun4Net
 {
@@ -19,6 +21,18 @@ namespace Mindscape.Raygun4Net
 
     [ThreadStatic]
     private static RaygunRequestMessage _currentRequestMessage;
+    private static object _sendLock = new object();
+
+    private IRaygunOfflineStorage _offlineStorage = new RaygunIsolatedStorage();
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RaygunClient" /> class.
+    /// Uses the ApiKey specified in the config file.
+    /// </summary>
+    public RaygunClient()
+      : this(RaygunSettings.Settings.ApiKey)
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -55,25 +69,6 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RaygunClient" /> class.
-    /// Uses the ApiKey specified in the config file.
-    /// </summary>
-    public RaygunClient()
-      : this(RaygunSettings.Settings.ApiKey)
-    {
-    }
-
-    protected bool ValidateApiKey()
-    {
-      if (string.IsNullOrEmpty(_apiKey))
-      {
-        System.Diagnostics.Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
-        return false;
-      }
-      return true;
-    }
-
-    /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
     /// This can be used when a wrapper exception, e.g. TargetInvocationException or HttpUnhandledException,
     /// contains the actual exception as the InnerException. The message and stack trace of the inner exception will then
@@ -103,6 +98,8 @@ namespace Mindscape.Raygun4Net
         _wrapperExceptions.Remove(wrapper);
       }
     }
+
+    #region Message Scrubbing Properties
 
     /// <summary>
     /// Adds a list of keys to ignore when attaching the Form data of an HTTP POST request. This allows
@@ -161,14 +158,9 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    protected override bool CanSend(Exception exception)
-    {
-      if (RaygunSettings.Settings.ExcludeErrorsFromLocal && HttpContext.Current != null && HttpContext.Current.Request.IsLocal)
-      {
-        return false;
-      }
-      return base.CanSend(exception);
-    }
+    #endregion // Message Scrubbing Properties
+
+    #region Message Send Methods
 
     /// <summary>
     /// Transmits an exception to Raygun.io synchronously.
@@ -252,6 +244,92 @@ namespace Mindscape.Raygun4Net
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
 
+    /// <summary>
+    /// Posts a RaygunMessage to the Raygun.io api endpoint.
+    /// </summary>
+    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
+    /// set to a valid DateTime and as much of the Details property as is available.</param>
+    public override void Send(RaygunMessage raygunMessage)
+    {
+      if (!ValidateApiKey())
+      {
+        RaygunLogger.Instance.Warning("Failed to send error report due to invalid API key");
+      }
+
+      bool canSend = OnSendingMessage(raygunMessage);
+
+      if (!canSend)
+      {
+        return;
+      }
+
+      string message = null;
+
+      try
+      {
+        message = SimpleJson.SerializeObject(raygunMessage);
+      }
+      catch (Exception ex)
+      {
+        RaygunLogger.Instance.Error($"Failed to serialize report due to: {ex.Message}");
+
+        if (RaygunSettings.Settings.ThrowOnError)
+        {
+          throw;
+        }
+      }
+
+      if (string.IsNullOrEmpty(message))
+      {
+        return;
+      }
+
+      bool successfullySentReport = true;
+
+      try
+      {
+        Send(message);
+      }
+      catch (Exception ex)
+      {
+        successfullySentReport = false;
+
+        RaygunLogger.Instance.Error($"Failed to send report to Raygun due to: {ex.Message}");
+
+        SaveMessage(message);
+
+        if (RaygunSettings.Settings.ThrowOnError)
+        {
+          throw;
+        }
+      }
+
+      if (successfullySentReport)
+      {
+        SendStoredMessages();
+      }
+    }
+
+    private void Send(string message)
+    {
+      RaygunLogger.Instance.Verbose("Sending Payload --------------");
+      RaygunLogger.Instance.Verbose(message);
+      RaygunLogger.Instance.Verbose("------------------------------");
+
+      using (var client = new WebClient())
+      {
+        client.Headers.Add("X-ApiKey", _apiKey);
+        client.Headers.Add("content-type", "application/json; charset=utf-8");
+        client.Encoding = System.Text.Encoding.UTF8;
+
+        client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
+      }
+    }
+
+    #endregion // Message Send Methods
+
+    #region Message Building Methods
+
     private RaygunRequestMessage BuildRequestMessage()
     {
       RaygunRequestMessage requestMessage = null;
@@ -315,56 +393,116 @@ namespace Mindscape.Raygun4Net
       return exception;
     }
 
-    /// <summary>
-    /// Posts a RaygunMessage to the Raygun.io api endpoint.
-    /// </summary>
-    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
-    /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public override void Send(RaygunMessage raygunMessage)
+    #endregion // Message Building Methods
+
+    #region Message Offline Storage
+
+    private void SaveMessage(string message)
     {
-      if (ValidateApiKey())
+      if (!RaygunSettings.Settings.CrashReportingOfflineStorageEnabled)
       {
-        bool canSend = OnSendingMessage(raygunMessage);
-        if (canSend)
+        RaygunLogger.Instance.Warning("Offline storage is disabled, skipping saving report.");
+        return;
+      }
+
+      if (!ValidateApiKey())
+      {
+        RaygunLogger.Instance.Warning("Failed to save report due to invalid API key.");
+        return;
+      }
+
+      // Avoid writing and reading from disk at the same time with `SendStoredMessages`.
+      lock (_sendLock)
+      {
+        try
         {
-          string message = null;
-
-          try
+          if (!_offlineStorage.Store(message, _apiKey, RaygunSettings.Settings.MaxCrashReportsStoredOffline))
           {
-            message = SimpleJson.SerializeObject(raygunMessage);
+            RaygunLogger.Instance.Warning($"Failed to save error report");
           }
-          catch (Exception ex)
-          {
-            System.Diagnostics.Debug.WriteLine(string.Format("Error serializing raygun message: {0}", ex.Message));
-          }
-
-          if (message != null)
-          {
-            SendMessage(message);
-          }
+        }
+        catch (Exception ex)
+        {
+          RaygunLogger.Instance.Error($"Failed to save report to offline storage due to: {ex.Message}");
         }
       }
     }
 
-    private bool SendMessage(string message)
+    private void SendStoredMessages()
     {
-      using (var client = new WebClient())
+      if (!ValidateApiKey())
       {
-        client.Headers.Add("X-ApiKey", _apiKey);
-        client.Headers.Add("content-type", "application/json; charset=utf-8");
-        client.Encoding = System.Text.Encoding.UTF8;
+        RaygunLogger.Instance.Warning("Failed to send offline reports due to invalid API key.");
+        return;
+      }
 
+      lock (_sendLock)
+      {
         try
         {
-          client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
+          var files = _offlineStorage.FetchAll(_apiKey);
+
+          foreach (var file in files)
+          {
+            try
+            {
+              // Send the stored report.
+              Send(file.Contents);
+
+              // Remove the stored report from local storage.
+              if (_offlineStorage.Remove(file.Name, _apiKey))
+              {
+                RaygunLogger.Instance.Info("Successfully removed report from offline storage.");
+              }
+              else
+              {
+                RaygunLogger.Instance.Warning("Failed to remove report from offline storage.");
+              }
+            }
+            catch (Exception ex)
+            {
+              RaygunLogger.Instance.Error($"Failed to send stored report to Raygun: {ex.Message}");
+
+              // If just one message fails to send, then don't delete the message,
+              // and don't attempt sending anymore until later.
+              return;
+            }
+          }
         }
         catch (Exception ex)
         {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
-          return false;
+          RaygunLogger.Instance.Error($"Failed to send stored report to Raygun: {ex.Message}");
         }
       }
-      return true;
+    }
+
+    #endregion // Message Offline Storage
+
+    protected override bool CanSend(Exception exception)
+    {
+      if (RaygunSettings.Settings.ExcludeErrorsFromLocal && HttpContext.Current != null)
+      {
+        try
+        {
+          if (HttpContext.Current.Request.IsLocal)
+          {
+            return false;
+          }
+        }
+        catch
+        {
+          if (RaygunSettings.Settings.ThrowOnError)
+          {
+            throw;
+          }
+        }
+      }
+      return base.CanSend(exception);
+    }
+
+    protected bool ValidateApiKey()
+    {
+      return !string.IsNullOrEmpty(_apiKey);
     }
   }
 }
