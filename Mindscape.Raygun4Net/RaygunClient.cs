@@ -377,7 +377,7 @@ namespace Mindscape.Raygun4Net
 
     private void Send(string message)
     {
-      if (HasValidApiKey())
+      if (ValidateApiKey())
       {
         RaygunLogger.Instance.Verbose("Sending Payload --------------");
         RaygunLogger.Instance.Verbose(message);
@@ -482,7 +482,7 @@ namespace Mindscape.Raygun4Net
         return;
       }
 
-      if (!HasValidApiKey())
+      if (!ValidateApiKey())
       {
         RaygunLogger.Instance.Warning("Failed to save report due to invalid API key.");
         return;
@@ -507,7 +507,7 @@ namespace Mindscape.Raygun4Net
 
     private void SendStoredMessages()
     {
-      if (!HasValidApiKey())
+      if (!ValidateApiKey())
       {
         RaygunLogger.Instance.Warning("Failed to send offline reports due to invalid API key.");
         return;
@@ -555,7 +555,7 @@ namespace Mindscape.Raygun4Net
 
     #endregion // Message Offline Storage
 
-    protected bool HasValidApiKey()
+    protected bool ValidateApiKey()
     {
       return !string.IsNullOrEmpty(_apiKey);
     }
