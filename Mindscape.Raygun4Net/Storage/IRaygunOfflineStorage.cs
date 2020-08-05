@@ -6,10 +6,12 @@ namespace Mindscape.Raygun4Net.Storage
   {
     /// <summary>
     /// Persist the <paramref name="message"/>> to local storage.
+    /// Messages must be saved to a location unique per its API key.
+    /// This is to ensure messages are not sent using the wrong API key.
     /// </summary>
     /// <param name="message">The serialized error report to store locally.</param>
     /// <param name="apiKey">The key for which these file are associated with.</param>
-    /// <param name="maxReportsStored">The number of reports allowed to be stored locally.</param>
+    /// <param name="maxReportsStored">The number of messages allowed to be stored locally.</param>
     /// <returns></returns>
     bool Store(string message, string apiKey, int maxReportsStored);
 

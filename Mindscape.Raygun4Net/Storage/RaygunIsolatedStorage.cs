@@ -10,8 +10,6 @@ namespace Mindscape.Raygun4Net.Storage
   public class RaygunIsolatedStorage : IRaygunOfflineStorage
   {
     private static string _folderNameHash = null;
-
-    private const int MaxStoredReportsHardUpperLimit = 64;
     private const string RaygunBaseDirectory = "Raygun";
     private const string RaygunFileFormat = ".json";
 
@@ -42,7 +40,7 @@ namespace Mindscape.Raygun4Net.Storage
         }
 
         var searchPattern = Path.Combine(localDirectory, $"*{RaygunFileFormat}");
-        var maxReports = Math.Min(maxReportsStored, MaxStoredReportsHardUpperLimit);
+        var maxReports = Math.Min(maxReportsStored, RaygunSettings.MaxCrashReportsStoredOfflineHardLimit);
 
         // We can only save the report if we havn't reached the report count limit.
         if (storage.GetFileNames(searchPattern).Length >= maxReports)
@@ -164,14 +162,9 @@ namespace Mindscape.Raygun4Net.Storage
 
     private IsolatedStorageFile GetIsolatedStorageScope()
     {
-      if (AppDomain.CurrentDomain != null && AppDomain.CurrentDomain.ActivationContext != null)
-      {
-        return IsolatedStorageFile.GetUserStoreForApplication();
-      }
-      else
-      {
-        return IsolatedStorageFile.GetUserStoreForAssembly();
-      }
+      return AppDomain.CurrentDomain?.ActivationContext != null ?
+        IsolatedStorageFile.GetUserStoreForApplication() :
+        IsolatedStorageFile.GetUserStoreForAssembly();
     }
 
     private string GetLocalDirectory(string apiKey)

@@ -492,9 +492,11 @@ namespace Mindscape.Raygun4Net
       {
         try
         {
-          if (!_offlineStorage.Store(message, _apiKey, RaygunSettings.Settings.MaxCrashReportsStoredOffline))
+          var stored = _offlineStorage.Store(message, _apiKey, RaygunSettings.Settings.MaxCrashReportsStoredOffline);
+
+          if (!stored)
           {
-            RaygunLogger.Instance.Warning($"Failed to save error report");
+            RaygunLogger.Instance.Warning($"Failed to save report to offline storage");
           }
         }
         catch (Exception ex)
