@@ -8,7 +8,9 @@ namespace Mindscape.Raygun4Net
   {
     private static readonly RaygunSettings settings = ConfigurationManager.GetSection("RaygunSettings") as RaygunSettings ?? new RaygunSettings();
 
-    private const string DefaultApiEndPoint = "https://api.raygun.io/entries";
+    private const string DefaultApiEndPoint = "https://api.raygun.com/entries";
+
+    public const int MaxCrashReportsStoredOfflineHardLimit = 64;
 
     public static RaygunSettings Settings
     {
@@ -106,7 +108,7 @@ namespace Mindscape.Raygun4Net
     /// There is a hard upper limit of 64 reports.
     /// </summary>
     /// <value>The max crash reports stored on device.</value>
-    [ConfigurationProperty("maxCrashReportsStoredOffline", IsRequired = false, DefaultValue = 64)]
+    [ConfigurationProperty("maxCrashReportsStoredOffline", IsRequired = false, DefaultValue = MaxCrashReportsStoredOfflineHardLimit)]
     public int MaxCrashReportsStoredOffline
     {
       get { return (int)this["maxCrashReportsStoredOffline"]; }
