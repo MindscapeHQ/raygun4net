@@ -97,8 +97,8 @@ namespace Mindscape.Raygun4Net.Storage
           return files;
         }
 
-        // We must ensure the local directory exists before we look for files.
-        if (storage.GetDirectoryNames(localDirectory)?.Length == 0)
+        // We must ensure the local directory exists before we look for files..
+        if (!EnsureDirectoryExists(storage, localDirectory))
         {
           return files;
         }
