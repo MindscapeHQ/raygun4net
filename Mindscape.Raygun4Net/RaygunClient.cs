@@ -17,13 +17,13 @@ namespace Mindscape.Raygun4Net
   {
     internal const string UnhandledExceptionTag = "UnhandledException";
 
-    private readonly string _apiKey;
-    private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
-    private readonly List<Type> _wrapperExceptions = new List<Type>();
-
     [ThreadStatic]
     private static RaygunRequestMessage _currentRequestMessage;
     private static object _sendLock = new object();
+
+    private readonly string _apiKey;
+    private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
+    private readonly List<Type> _wrapperExceptions = new List<Type>();
 
     private IRaygunOfflineStorage _offlineStorage = new RaygunIsolatedStorage();
 
