@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using Mindscape.Raygun4Net.Logging;
 
 namespace Mindscape.Raygun4Net
 {
@@ -25,7 +26,7 @@ namespace Mindscape.Raygun4Net
     {
       if (string.IsNullOrEmpty(apiKey))
       {
-        System.Diagnostics.Trace.WriteLine("ApiKey has not been provided, the Raygun message will not be sent");
+        RaygunLogger.Instance.Warning("ApiKey has not been provided, the Raygun message will not be sent");
         return;
       }
 

@@ -492,11 +492,9 @@ namespace Mindscape.Raygun4Net
       {
         try
         {
-          var stored = _offlineStorage.Store(message, _apiKey, RaygunSettings.Settings.MaxCrashReportsStoredOffline);
-
-          if (!stored)
+          if (!_offlineStorage.Store(message, _apiKey, RaygunSettings.Settings.MaxCrashReportsStoredOffline))
           {
-            RaygunLogger.Instance.Warning($"Failed to save report to offline storage");
+            RaygunLogger.Instance.Warning("Failed to save report to offline storage");
           }
         }
         catch (Exception ex)
@@ -539,7 +537,7 @@ namespace Mindscape.Raygun4Net
             }
             catch (Exception ex)
             {
-              RaygunLogger.Instance.Error($"Failed to send stored report to Raygun: {ex.Message}");
+              RaygunLogger.Instance.Error($"Failed to send stored report to Raygun due to: {ex.Message}");
 
               // If just one message fails to send, then don't delete the message,
               // and don't attempt sending anymore until later.
@@ -549,7 +547,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception ex)
         {
-          RaygunLogger.Instance.Error($"Failed to send stored report to Raygun: {ex.Message}");
+          RaygunLogger.Instance.Error($"Failed to send stored report to Raygun due to: {ex.Message}");
         }
       }
     }

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Web;
 using Mindscape.Raygun4Net.Builders;
@@ -15,13 +14,13 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunClient : RaygunClientBase
   {
-    private readonly string _apiKey;
-    private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
-    private readonly List<Type> _wrapperExceptions = new List<Type>();
-
     [ThreadStatic]
     private static RaygunRequestMessage _currentRequestMessage;
     private static object _sendLock = new object();
+
+    private readonly string _apiKey;
+    private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
+    private readonly List<Type> _wrapperExceptions = new List<Type>();
 
     private IRaygunOfflineStorage _offlineStorage = new RaygunIsolatedStorage();
 
@@ -50,22 +49,30 @@ namespace Mindscape.Raygun4Net
         var ignoredNames = RaygunSettings.Settings.IgnoreFormFieldNames.Split(',');
         IgnoreFormFieldNames(ignoredNames);
       }
+
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreHeaderNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreHeaderNames.Split(',');
         IgnoreHeaderNames(ignoredNames);
       }
+
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreCookieNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreCookieNames.Split(',');
         IgnoreCookieNames(ignoredNames);
       }
+
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreServerVariableNames))
       {
         var ignoredNames = RaygunSettings.Settings.IgnoreServerVariableNames.Split(',');
         IgnoreServerVariableNames(ignoredNames);
       }
+
       IsRawDataIgnored = RaygunSettings.Settings.IsRawDataIgnored;
+
+      RaygunLogger.Instance.LogLevel = RaygunSettings.Settings.LogLevel;
+
+      ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
 
     /// <summary>
@@ -418,7 +425,7 @@ namespace Mindscape.Raygun4Net
         {
           if (!_offlineStorage.Store(message, _apiKey, RaygunSettings.Settings.MaxCrashReportsStoredOffline))
           {
-            RaygunLogger.Instance.Warning($"Failed to save error report");
+            RaygunLogger.Instance.Warning("Failed to save report to offline storage");
           }
         }
         catch (Exception ex)
@@ -461,7 +468,7 @@ namespace Mindscape.Raygun4Net
             }
             catch (Exception ex)
             {
-              RaygunLogger.Instance.Error($"Failed to send stored report to Raygun: {ex.Message}");
+              RaygunLogger.Instance.Error($"Failed to send stored report to Raygun due to: {ex.Message}");
 
               // If just one message fails to send, then don't delete the message,
               // and don't attempt sending anymore until later.
@@ -471,7 +478,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception ex)
         {
-          RaygunLogger.Instance.Error($"Failed to send stored report to Raygun: {ex.Message}");
+          RaygunLogger.Instance.Error($"Failed to send stored report to Raygun due to: {ex.Message}");
         }
       }
     }
