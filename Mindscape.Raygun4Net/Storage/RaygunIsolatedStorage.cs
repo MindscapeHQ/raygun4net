@@ -175,7 +175,7 @@ namespace Mindscape.Raygun4Net.Storage
     private string GetLocalDirectory(string apiKey)
     {
       // Attempt to perform the hash operation once.
-      if (_folderNameHash == null)
+      if (string.IsNullOrEmpty(_folderNameHash))
       {
         _folderNameHash = PerformHash(apiKey);
       }
