@@ -28,24 +28,38 @@ namespace Mindscape.Raygun4Net.Tests.Storage
     }
 
     [Test]
-    public void Store_UsingInvalidParamValues_ReturnFalse()
+    public void Store_UsingInvalidMessageValue_ReturnFalse()
     {
       Assert.IsFalse(_storage.Store(null, TestApiKey, 1));
       Assert.IsFalse(_storage.Store("", TestApiKey, 1));
     }
 
     [Test]
-    public void FetchAll_UsingInvalidParamValues_ReturnEmptyResult()
+    public void Store_UsingInvalidApiKeyValue_ReturnFalse()
+    {
+      Assert.IsFalse(_storage.Store("DummyData", null, 1));
+      Assert.IsFalse(_storage.Store("DummyData", "", 1));
+    }
+
+    [Test]
+    public void FetchAll_UsingInvalidApiKeyValue_ReturnEmptyResult()
     {
       Assert.IsEmpty(_storage.FetchAll(null));
       Assert.IsEmpty(_storage.FetchAll(""));
     }
 
     [Test]
-    public void Remove_UsingInvalidParamValues_ReturnFalse()
+    public void Remove_UsingInvalidNameValue_ReturnFalse()
     {
       Assert.IsFalse(_storage.Remove(null, TestApiKey));
       Assert.IsFalse(_storage.Remove("", TestApiKey));
+    }
+
+    [Test]
+    public void Remove_UsingInvalidApiKeyValue_ReturnFalse()
+    {
+      Assert.IsFalse(_storage.Remove("DummyName", null));
+      Assert.IsFalse(_storage.Remove("DummyName", ""));
     }
 
     [Test]
