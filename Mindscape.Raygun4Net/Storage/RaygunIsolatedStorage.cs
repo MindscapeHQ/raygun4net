@@ -87,6 +87,11 @@ namespace Mindscape.Raygun4Net.Storage
     {
       var files = new List<IRaygunFile>();
 
+      if (string.IsNullOrEmpty(apiKey))
+      {
+        return files;
+      }
+
       using (var storage = GetIsolatedStorageScope())
       {
         // Get the directory within isolated storage to hold our data.
