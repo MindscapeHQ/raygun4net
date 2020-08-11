@@ -3,53 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using Mindscape.Raygun4Net.Messages;
-
 using System.Threading;
 using System.Reflection;
-using Mindscape.Raygun4Net.Builders;
-using System.IO;
-using System.IO.IsolatedStorage;
-using System.Text;
+using Mindscape.Raygun4Net.Messages;
+using Mindscape.Raygun4Net.Logging;
+using Mindscape.Raygun4Net.Storage;
 
 namespace Mindscape.Raygun4Net
 {
   public class RaygunClient : RaygunClientBase
   {
+    private static object _sendLock = new object();
+
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RaygunClient" /> class.
-    /// </summary>
-    /// <param name="apiKey">The API key.</param>
-    public RaygunClient(string apiKey)
-    {
-      _apiKey = apiKey;
-
-      _wrapperExceptions.Add(typeof(TargetInvocationException));
-
-      ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RaygunClient" /> class.
-    /// Uses the ApiKey specified in the config file.
-    /// </summary>
-    public RaygunClient()
-      : this(RaygunSettings.Settings.ApiKey)
-    {
-    }
-
-    protected bool ValidateApiKey()
-    {
-      if (string.IsNullOrEmpty(_apiKey))
-      {
-        System.Diagnostics.Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
-        return false;
-      }
-      return true;
-    }
+    private IRaygunOfflineStorage _offlineStorage = new RaygunIsolatedStorage();
 
     /// <summary>
     /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
@@ -61,6 +30,30 @@ namespace Mindscape.Raygun4Net
     /// Gets or sets an IWebProxy instance which can be used to override the default system proxy server settings
     /// </summary>
     public IWebProxy WebProxy { get; set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RaygunClient" /> class.
+    /// Uses the ApiKey specified in the config file.
+    /// </summary>
+    public RaygunClient()
+      : this(RaygunSettings.Settings.ApiKey)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RaygunClient" /> class.
+    /// </summary>
+    /// <param name="apiKey">The API key.</param>
+    public RaygunClient(string apiKey)
+    {
+      _apiKey = apiKey;
+
+      _wrapperExceptions.Add(typeof(TargetInvocationException));
+
+      RaygunLogger.Instance.LogLevel = RaygunSettings.Settings.LogLevel;
+
+      ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
+    }
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
@@ -93,6 +86,8 @@ namespace Mindscape.Raygun4Net
         _wrapperExceptions.Remove(wrapper);
       }
     }
+
+    #region Message Send Methods
 
     /// <summary>
     /// Transmits an exception to Raygun.io synchronously, using the version number of the originating assembly.
@@ -216,33 +211,7 @@ namespace Mindscape.Raygun4Net
     {
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
-
-    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
-    {
-      return BuildMessage(exception, tags, userCustomData, null, null);
-    }
-
-    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfoMessage)
-    {
-      return BuildMessage(exception, tags, userCustomData, userInfoMessage, null);
-    }
-
-    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfoMessage, DateTime? currentTime)
-    {
-      var message = RaygunMessageBuilder.New
-        .SetEnvironmentDetails()
-        .SetTimeStamp(currentTime)
-        .SetMachineName(Environment.MachineName)
-        .SetExceptionDetails(exception)
-        .SetClientDetails()
-        .SetVersion(ApplicationVersion)
-        .SetTags(tags)
-        .SetUserCustomData(userCustomData)
-        .SetUser(userInfoMessage ?? UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
-        .Build();
-      return message;
-    }
-
+    
     private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
     {
       foreach (Exception e in StripWrapperExceptions(exception))
@@ -250,36 +219,7 @@ namespace Mindscape.Raygun4Net
         Send(BuildMessage(e, tags, userCustomData, userInfo, currentTime));
       }
     }
-
-    protected IEnumerable<Exception> StripWrapperExceptions(Exception exception)
-    {
-      if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
-      {
-        AggregateException aggregate = exception as AggregateException;
-        if (aggregate != null)
-        {
-          foreach (Exception e in aggregate.InnerExceptions)
-          {
-            foreach (Exception ex in StripWrapperExceptions(e))
-            {
-              yield return ex;
-            }
-          }
-        }
-        else
-        {
-          foreach (Exception e in StripWrapperExceptions(exception.InnerException))
-          {
-            yield return e;
-          }
-        }
-      }
-      else
-      {
-        yield return exception;
-      }
-    }
-
+    
     /// <summary>
     /// Posts a RaygunMessage to the Raygun.io api endpoint.
     /// </summary>
@@ -338,6 +278,155 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    #endregion // Message Send Methods
+
+    #region Message Building Methods
+
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
+    {
+      return BuildMessage(exception, tags, userCustomData, null, null);
+    }
+
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfoMessage)
+    {
+      return BuildMessage(exception, tags, userCustomData, userInfoMessage, null);
+    }
+
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfoMessage, DateTime? currentTime)
+    {
+      var message = RaygunMessageBuilder.New
+        .SetEnvironmentDetails()
+        .SetTimeStamp(currentTime)
+        .SetMachineName(Environment.MachineName)
+        .SetExceptionDetails(exception)
+        .SetClientDetails()
+        .SetVersion(ApplicationVersion)
+        .SetTags(tags)
+        .SetUserCustomData(userCustomData)
+        .SetUser(userInfoMessage ?? UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
+        .Build();
+      return message;
+    }
+
+    protected IEnumerable<Exception> StripWrapperExceptions(Exception exception)
+    {
+      if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
+      {
+        AggregateException aggregate = exception as AggregateException;
+        if (aggregate != null)
+        {
+          foreach (Exception e in aggregate.InnerExceptions)
+          {
+            foreach (Exception ex in StripWrapperExceptions(e))
+            {
+              yield return ex;
+            }
+          }
+        }
+        else
+        {
+          foreach (Exception e in StripWrapperExceptions(exception.InnerException))
+          {
+            yield return e;
+          }
+        }
+      }
+      else
+      {
+        yield return exception;
+      }
+    }
+
+    #endregion // Message Building Methods
+
+    #region Message Offline Storage
+
+    private void SaveMessage(string message)
+    {
+      if (!RaygunSettings.Settings.CrashReportingOfflineStorageEnabled)
+      {
+        RaygunLogger.Instance.Warning("Offline storage is disabled, skipping saving report.");
+        return;
+      }
+
+      if (!ValidateApiKey())
+      {
+        RaygunLogger.Instance.Warning("Failed to save report due to invalid API key.");
+        return;
+      }
+
+      // Avoid writing and reading from disk at the same time with `SendStoredMessages`.
+      lock (_sendLock)
+      {
+        try
+        {
+          if (!_offlineStorage.Store(message, _apiKey, RaygunSettings.Settings.MaxCrashReportsStoredOffline))
+          {
+            RaygunLogger.Instance.Warning("Failed to save report to offline storage");
+          }
+        }
+        catch (Exception ex)
+        {
+          RaygunLogger.Instance.Error($"Failed to save report to offline storage due to: {ex.Message}");
+        }
+      }
+    }
+
+    private void SendStoredMessages()
+    {
+      if (!ValidateApiKey())
+      {
+        RaygunLogger.Instance.Warning("Failed to send offline reports due to invalid API key.");
+        return;
+      }
+
+      lock (_sendLock)
+      {
+        try
+        {
+          var files = _offlineStorage.FetchAll(_apiKey);
+
+          foreach (var file in files)
+          {
+            try
+            {
+              // Send the stored report.
+              Send(file.Contents);
+
+              // Remove the stored report from local storage.
+              if (_offlineStorage.Remove(file.Name, _apiKey))
+              {
+                RaygunLogger.Instance.Info("Successfully removed report from offline storage.");
+              }
+              else
+              {
+                RaygunLogger.Instance.Warning("Failed to remove report from offline storage.");
+              }
+            }
+            catch (Exception ex)
+            {
+              RaygunLogger.Instance.Error($"Failed to send stored report to Raygun due to: {ex.Message}");
+
+              // If just one message fails to send, then don't delete the message,
+              // and don't attempt sending anymore until later.
+              return;
+            }
+          }
+        }
+        catch (Exception ex)
+        {
+          RaygunLogger.Instance.Error($"Failed to send stored report to Raygun due to: {ex.Message}");
+        }
+      }
+    }
+
+    #endregion // Message Offline Storage
+
+    protected bool ValidateApiKey()
+    {
+      return !string.IsNullOrEmpty(_apiKey);
+    }
+
     protected WebClient CreateWebClient()
     {
       var client = new WebClient();
@@ -370,121 +459,6 @@ namespace Mindscape.Raygun4Net
         }
       }
       return client;
-    }
-
-    private void SaveMessage(string message)
-    {
-      try
-      {
-        using (IsolatedStorageFile isolatedStorage = GetIsolatedStorageScope())
-        {
-          string directoryName = "RaygunOfflineStorage";
-          if (!isolatedStorage.DirectoryExists(directoryName))
-          {
-            isolatedStorage.CreateDirectory(directoryName);
-          }
-
-          int number = 1;
-          while (true)
-          {
-            bool exists = isolatedStorage.FileExists(directoryName + "\\RaygunErrorMessage" + number + ".txt");
-            if (!exists)
-            {
-              string nextFileName = directoryName + "\\RaygunErrorMessage" + (number + 1) + ".txt";
-              exists = isolatedStorage.FileExists(nextFileName);
-              if (exists)
-              {
-                isolatedStorage.DeleteFile(nextFileName);
-              }
-              break;
-            }
-            number++;
-          }
-
-          if (number == 11)
-          {
-            string firstFileName = directoryName + "\\RaygunErrorMessage1.txt";
-            if (isolatedStorage.FileExists(firstFileName))
-            {
-              isolatedStorage.DeleteFile(firstFileName);
-            }
-          }
-          using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream(directoryName + "\\RaygunErrorMessage" + number + ".txt", FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage))
-          {
-            using (StreamWriter writer = new StreamWriter(isoStream, Encoding.Unicode))
-            {
-              writer.Write(message);
-              writer.Flush();
-              writer.Close();
-            }
-          }
-          System.Diagnostics.Trace.WriteLine("Saved message: " + "RaygunErrorMessage" + number + ".txt");
-        }
-      }
-      catch (Exception ex)
-      {
-        System.Diagnostics.Trace.WriteLine(string.Format("Error saving message to isolated storage {0}", ex.Message));
-      }
-    }
-
-    private static object _sendLock = new object();
-
-    private void SendStoredMessages()
-    {
-      lock (_sendLock)
-      {
-        try
-        {
-          using (IsolatedStorageFile isolatedStorage = GetIsolatedStorageScope())
-          {
-            string directoryName = "RaygunOfflineStorage";
-            if (isolatedStorage.DirectoryExists(directoryName))
-            {
-              string[] fileNames = isolatedStorage.GetFileNames(directoryName + "\\*.txt");
-              foreach (string name in fileNames)
-              {
-                IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile(directoryName + "\\" + name, FileMode.Open);
-                using (StreamReader reader = new StreamReader(isoFileStream))
-                {
-                  string text = reader.ReadToEnd();
-                  try
-                  {
-                    Send(text);
-                  }
-                  catch
-                  {
-                    // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
-                    return;
-                  }
-                  System.Diagnostics.Debug.WriteLine("Sent " + name);
-                }
-                isolatedStorage.DeleteFile(directoryName + "\\" + name);
-              }
-              if (isolatedStorage.GetFileNames(directoryName + "\\*.txt").Length == 0)
-              {
-                System.Diagnostics.Debug.WriteLine("Successfully sent all pending messages");
-                isolatedStorage.DeleteDirectory(directoryName);
-              }
-            }
-          }
-        }
-        catch (Exception ex)
-        {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error sending stored messages to Raygun.io {0}", ex.Message));
-        }
-      }
-    }
-
-    private IsolatedStorageFile GetIsolatedStorageScope()
-    {
-      if (AppDomain.CurrentDomain != null && AppDomain.CurrentDomain.ActivationContext != null)
-      {
-        return IsolatedStorageFile.GetUserStoreForApplication();
-      }
-      else
-      {
-        return IsolatedStorageFile.GetUserStoreForAssembly();
-      }
     }
   }
 }
