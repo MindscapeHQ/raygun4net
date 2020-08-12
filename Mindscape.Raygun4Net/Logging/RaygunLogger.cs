@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using Mindscape.Raygun4Net.Utils;
 
 namespace Mindscape.Raygun4Net.Logging
@@ -42,7 +44,14 @@ namespace Mindscape.Raygun4Net.Logging
 
       if (level <= LogLevel)
       {
-        System.Diagnostics.Trace.WriteLine($"{RaygunPrefix}{message}");
+        try
+        {
+          Trace.WriteLine($"{RaygunPrefix}{message}");
+        }
+        catch
+        {
+          // ignored
+        }
       }
     }
   }
