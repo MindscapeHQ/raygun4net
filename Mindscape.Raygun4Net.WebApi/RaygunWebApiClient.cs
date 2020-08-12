@@ -289,6 +289,8 @@ namespace Mindscape.Raygun4Net.WebApi
 
       UseXmlRawDataFilter = RaygunSettings.Settings.UseXmlRawDataFilter;
       UseKeyValuePairRawDataFilter = RaygunSettings.Settings.UseKeyValuePairRawDataFilter;
+
+      RaygunLogger.Instance.LogLevel = RaygunSettings.Settings.LogLevel;
     }
 
     #endregion // Attach/Detach Methods
@@ -744,7 +746,7 @@ namespace Mindscape.Raygun4Net.WebApi
         {
           if (!_offlineStorage.Store(message, _apiKey, RaygunSettings.Settings.MaxCrashReportsStoredOffline))
           {
-            RaygunLogger.Instance.Warning($"Failed to save error report");
+            RaygunLogger.Instance.Warning("Failed to save report to offline storage");
           }
         }
         catch (Exception ex)
@@ -787,7 +789,7 @@ namespace Mindscape.Raygun4Net.WebApi
             }
             catch (Exception ex)
             {
-              RaygunLogger.Instance.Error($"Failed to send stored report to Raygun: {ex.Message}");
+              RaygunLogger.Instance.Error($"Failed to send stored report to Raygun due to: {ex.Message}");
 
               // If just one message fails to send, then don't delete the message,
               // and don't attempt sending anymore until later.
@@ -797,7 +799,7 @@ namespace Mindscape.Raygun4Net.WebApi
         }
         catch (Exception ex)
         {
-          RaygunLogger.Instance.Error($"Failed to send stored report to Raygun: {ex.Message}");
+          RaygunLogger.Instance.Error($"Failed to send stored report to Raygun due to: {ex.Message}");
         }
       }
     }

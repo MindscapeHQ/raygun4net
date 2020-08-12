@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using Mindscape.Raygun4Net.Logging;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
@@ -73,7 +74,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception ex)
         {
-          System.Diagnostics.Debug.WriteLine(String.Format("Failed to flag exception as sent: {0}", ex.Message));
+          RaygunLogger.Instance.Debug($"Failed to flag exception as sent: {ex.Message}");
         }
       }
     }
