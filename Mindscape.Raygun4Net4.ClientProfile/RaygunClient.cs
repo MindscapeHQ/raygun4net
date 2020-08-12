@@ -211,7 +211,7 @@ namespace Mindscape.Raygun4Net
     {
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
-    
+
     private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
     {
       foreach (Exception e in StripWrapperExceptions(exception))
@@ -219,7 +219,7 @@ namespace Mindscape.Raygun4Net
         Send(BuildMessage(e, tags, userCustomData, userInfo, currentTime));
       }
     }
-    
+
     /// <summary>
     /// Posts a RaygunMessage to the Raygun.io api endpoint.
     /// </summary>
@@ -227,54 +227,74 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public override void Send(RaygunMessage raygunMessage)
     {
-      bool canSend = OnSendingMessage(raygunMessage);
-      if (canSend)
+      if (!ValidateApiKey())
       {
-        string message = null;
-        try
+        RaygunLogger.Instance.Warning("Failed to send error report due to invalid API key.");
+      }
+
+      bool canSend = OnSendingMessage(raygunMessage);
+
+      if (!canSend)
+      {
+        return;
+      }
+
+      string message = null;
+
+      try
+      {
+        message = SimpleJson.SerializeObject(raygunMessage);
+      }
+      catch (Exception ex)
+      {
+        RaygunLogger.Instance.Error($"Failed to serialize report due to: {ex.Message}");
+
+        if (RaygunSettings.Settings.ThrowOnError)
         {
-          message = SimpleJson.SerializeObject(raygunMessage);
+          throw;
         }
-        catch (Exception ex)
+      }
+
+      if (string.IsNullOrEmpty(message))
+      {
+        return;
+      }
+
+      bool successfullySentReport = true;
+
+      try
+      {
+        Send(message);
+      }
+      catch (Exception ex)
+      {
+        successfullySentReport = false;
+
+        RaygunLogger.Instance.Error($"Failed to send report to Raygun due to: {ex.Message}");
+
+        SaveMessage(message);
+
+        if (RaygunSettings.Settings.ThrowOnError)
         {
-          System.Diagnostics.Debug.WriteLine(string.Format("Error serializing exception {0}", ex.Message));
-
-          if (RaygunSettings.Settings.ThrowOnError)
-          {
-            throw;
-          }
+          throw;
         }
+      }
 
-        if (message != null)
-        {
-          try
-          {
-            Send(message);
-          }
-          catch (Exception ex)
-          {
-            SaveMessage(message);
-            System.Diagnostics.Debug.WriteLine(string.Format("Error Logging Exception to Raygun.io {0}", ex.Message));
-
-            if (RaygunSettings.Settings.ThrowOnError)
-            {
-              throw;
-            }
-          }
-
-          SendStoredMessages();
-        }
+      if (successfullySentReport)
+      {
+        SendStoredMessages();
       }
     }
 
     private void Send(string message)
     {
-      if (ValidateApiKey())
+      RaygunLogger.Instance.Verbose("Sending Payload --------------");
+      RaygunLogger.Instance.Verbose(message);
+      RaygunLogger.Instance.Verbose("------------------------------");
+
+      using (var client = CreateWebClient())
       {
-        using (var client = CreateWebClient())
-        {
-          client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
-        }
+        client.UploadString(RaygunSettings.Settings.ApiEndpoint, message);
       }
     }
 
@@ -362,7 +382,7 @@ namespace Mindscape.Raygun4Net
         {
           if (!_offlineStorage.Store(message, _apiKey, RaygunSettings.Settings.MaxCrashReportsStoredOffline))
           {
-            RaygunLogger.Instance.Warning("Failed to save report to offline storage");
+            RaygunLogger.Instance.Warning("Failed to save report to offline storage.");
           }
         }
         catch (Exception ex)
