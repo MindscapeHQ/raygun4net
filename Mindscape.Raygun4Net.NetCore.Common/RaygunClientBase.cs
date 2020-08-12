@@ -125,11 +125,11 @@ namespace Mindscape.Raygun4Net
 
       if (!_handlingRecursiveErrorSending)
       {
-        EventHandler<RaygunSendingMessageEventArgs> handler = SendingMessage;
+        var handler = SendingMessage;
 
         if (handler != null)
         {
-          RaygunSendingMessageEventArgs args = new RaygunSendingMessageEventArgs(raygunMessage);
+          var args = new RaygunSendingMessageEventArgs(raygunMessage);
 
           try
           {
