@@ -9,7 +9,7 @@ namespace Mindscape.Raygun4Net
   {
     private static readonly RaygunSettings settings = ConfigurationManager.GetSection("RaygunSettings") as RaygunSettings ?? new RaygunSettings();
 
-    private const string DefaultApiEndPoint = "https://api.raygun.io/entries";
+    private const string DefaultApiEndPoint = "https://api.raygun.com/entries";
 
     public const int MaxCrashReportsStoredOfflineHardLimit = 64;
 
