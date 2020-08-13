@@ -27,7 +27,7 @@ namespace Mindscape.Raygun4Net.Storage
     /// </summary>
     /// <param name="name">The filename of the local file.</param>
     /// <param name="apiKey">The key for which these file are associated with.</param>
-    /// <returns></returns>s
+    /// <returns></returns>
     bool Remove(string name, string apiKey);
   }
 }
