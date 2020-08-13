@@ -15,8 +15,8 @@ namespace Mindscape.Raygun4Net.Tests.Storage
     [SetUp]
     public void SetUp()
     {
-      _storageOne = new RaygunIsolatedStorage();
-      _storageTwo = new RaygunIsolatedStorage();
+      _storageOne = new IsolatedRaygunOfflineStorage();
+      _storageTwo = new IsolatedRaygunOfflineStorage();
     }
 
     [TearDown]

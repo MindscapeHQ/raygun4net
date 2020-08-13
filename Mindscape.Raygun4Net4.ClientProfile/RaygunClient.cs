@@ -18,7 +18,7 @@ namespace Mindscape.Raygun4Net
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
 
-    private IRaygunOfflineStorage _offlineStorage = new RaygunIsolatedStorage();
+    private IRaygunOfflineStorage _offlineStorage = new IsolatedRaygunOfflineStorage();
 
     /// <summary>
     /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
@@ -230,6 +230,7 @@ namespace Mindscape.Raygun4Net
       if (!ValidateApiKey())
       {
         RaygunLogger.Instance.Warning("Failed to send error report due to invalid API key.");
+        return;
       }
 
       bool canSend = OnSendingMessage(raygunMessage);

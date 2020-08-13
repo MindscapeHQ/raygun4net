@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Mindscape.Raygun4Net.Storage
 {
-  public class RaygunIsolatedStorage : IRaygunOfflineStorage
+  public class IsolatedRaygunOfflineStorage : IRaygunOfflineStorage
   {
     private string _folderNameHash = null;
     private const string RaygunBaseDirectory = "Raygun";

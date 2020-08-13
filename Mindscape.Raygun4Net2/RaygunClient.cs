@@ -22,7 +22,7 @@ namespace Mindscape.Raygun4Net
     private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private readonly List<Type> _wrapperExceptions = new List<Type>();
 
-    private IRaygunOfflineStorage _offlineStorage = new RaygunIsolatedStorage();
+    private IRaygunOfflineStorage _offlineStorage = new IsolatedRaygunOfflineStorage();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -261,6 +261,7 @@ namespace Mindscape.Raygun4Net
       if (!ValidateApiKey())
       {
         RaygunLogger.Instance.Warning("Failed to send error report due to invalid API key");
+        return;
       }
 
       bool canSend = OnSendingMessage(raygunMessage);

@@ -33,7 +33,7 @@ namespace Mindscape.Raygun4Net.WebApi
 
     private readonly string _apiKey;
 
-    private IRaygunOfflineStorage _offlineStorage = new RaygunIsolatedStorage();
+    private IRaygunOfflineStorage _offlineStorage = new IsolatedRaygunOfflineStorage();
 
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
 
@@ -554,6 +554,7 @@ namespace Mindscape.Raygun4Net.WebApi
       if (!ValidateApiKey())
       {
         RaygunLogger.Instance.Warning("Failed to send error report due to invalid API key");
+        return;
       }
 
       bool canSend = OnSendingMessage(raygunMessage) && CanSend(raygunMessage);

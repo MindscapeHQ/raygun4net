@@ -141,8 +141,8 @@
     <Compile Include="..\Mindscape.Raygun4Net\Storage\RaygunFile.cs">
       <Link>Storage\RaygunFile.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Storage\RaygunIsolatedStorage.cs">
-      <Link>Storage\RaygunIsolatedStorage.cs</Link>
+    <Compile Include="..\Mindscape.Raygun4Net\Storage\IsolatedRaygunOfflineStorage.cs">
+      <Link>Storage\IsolatedRaygunOfflineStorage.cs</Link>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Utils\Singleton.cs">
       <Link>Utils\Singleton.cs</Link>
