@@ -49,7 +49,7 @@ namespace Mindscape.Raygun4Net.Storage
         }
 
         // Build up our file information.
-        var filename = GetUniqueAcendingJsonName();
+        var filename = GetUniqueAscendingJsonName();
         var localFilePath = Path.Combine(localDirectory, filename);
 
         // Write the contents to storage.
