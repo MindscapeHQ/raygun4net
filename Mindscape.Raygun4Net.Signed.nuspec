@@ -42,6 +42,6 @@
     <file src="build\windowsphone\Mindscape.Raygun4Net.WindowsPhone.dll" target="lib\windowsphone8\Mindscape.Raygun4Net.WindowsPhone.dll" />
     <file src="build\windowsphone\Mindscape.Raygun4Net.WindowsPhone.pdb" target="lib\windowsphone8\Mindscape.Raygun4Net.WindowsPhone.pdb" />
 
-    <file src="readme.txt" />
+    <file src="README.md" />
   </files>
 </package>

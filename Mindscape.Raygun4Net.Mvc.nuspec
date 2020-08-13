@@ -25,6 +25,6 @@
     <file src="build\mvc\Mindscape.Raygun4Net4.dll" target="lib\net40\Mindscape.Raygun4Net4.dll" />
     <file src="build\mvc\Mindscape.Raygun4Net4.pdb" target="lib\net40\Mindscape.Raygun4Net4.pdb" />
     
-    <file src="Mindscape.Raygun4Net.Mvc\readme.txt" />
+    <file src="Mindscape.Raygun4Net.Mvc\README.md" />
   </files>
 </package>
