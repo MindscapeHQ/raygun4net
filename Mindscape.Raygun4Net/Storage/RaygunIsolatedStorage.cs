@@ -42,7 +42,7 @@ namespace Mindscape.Raygun4Net.Storage
         var searchPattern = Path.Combine(localDirectory, $"*{RaygunFileFormat}");
         var maxReports = Math.Min(maxReportsStored, RaygunSettings.MaxCrashReportsStoredOfflineHardLimit);
 
-        // We can only save the report if we havn't reached the report count limit.
+        // We can only save the report if we have not reached the report count limit.
         if (storage.GetFileNames(searchPattern).Length >= maxReports)
         {
           return false;
@@ -204,7 +204,7 @@ namespace Mindscape.Raygun4Net.Storage
       }
     }
 
-    private string GetUniqueAcendingJsonName()
+    private string GetUniqueAscendingJsonName()
     {
       return $"{DateTime.UtcNow.Ticks}-{_currentFileCounter++}-{Guid.NewGuid().ToString()}{RaygunFileFormat}";
     }
