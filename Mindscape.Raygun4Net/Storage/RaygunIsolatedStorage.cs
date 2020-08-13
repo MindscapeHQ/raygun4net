@@ -9,7 +9,7 @@ namespace Mindscape.Raygun4Net.Storage
 {
   public class RaygunIsolatedStorage : IRaygunOfflineStorage
   {
-    private static string _folderNameHash = null;
+    private string _folderNameHash = null;
     private const string RaygunBaseDirectory = "Raygun";
     private const string RaygunFileFormat = ".json";
 
