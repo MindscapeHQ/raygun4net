@@ -43,13 +43,13 @@ namespace Mindscape.Raygun4Net
     public string ApplicationVersion { get; set; }
 
     /// <summary>
-    /// Transmits an exception to Raygun.io synchronously.
+    /// Transmits an exception to Raygun synchronously.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     public abstract void Send(Exception exception);
 
     /// <summary>
-    /// Posts a RaygunMessage to the Raygun.io api endpoint.
+    /// Posts a RaygunMessage to the Raygun API endpoint.
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>

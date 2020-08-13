@@ -90,7 +90,7 @@ namespace Mindscape.Raygun4Net
     #region Message Send Methods
 
     /// <summary>
-    /// Transmits an exception to Raygun.io synchronously, using the version number of the originating assembly.
+    /// Transmits an exception to Raygun synchronously, using the version number of the originating assembly.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     public override void Send(Exception exception)
@@ -99,7 +99,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
+    /// Transmits an exception to Raygun synchronously specifying a list of string tags associated
     /// with the message for identification. This uses the version number of the originating assembly.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
@@ -110,7 +110,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
+    /// Transmits an exception to Raygun synchronously specifying a list of string tags associated
     /// with the message for identification, as well as sending a key-value collection of custom data.
     /// This uses the version number of the originating assembly.
     /// </summary>
@@ -123,7 +123,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
+    /// Transmits an exception to Raygun synchronously specifying a list of string tags associated
     /// with the message for identification, as well as sending a key-value collection of custom data.
     /// This uses the version number of the originating assembly.
     /// </summary>
@@ -141,7 +141,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Asynchronously transmits a message to Raygun.io.
+    /// Asynchronously transmits a message to Raygun.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     public void SendInBackground(Exception exception)
@@ -150,7 +150,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Asynchronously transmits an exception to Raygun.io.
+    /// Asynchronously transmits an exception to Raygun.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
@@ -160,7 +160,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Asynchronously transmits an exception to Raygun.io.
+    /// Asynchronously transmits an exception to Raygun.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
@@ -171,7 +171,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Asynchronously transmits an exception to Raygun.io.
+    /// Asynchronously transmits an exception to Raygun.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
@@ -203,7 +203,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Asynchronously transmits a message to Raygun.io.
+    /// Asynchronously transmits a message to Raygun.
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
@@ -221,7 +221,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Posts a RaygunMessage to the Raygun.io api endpoint.
+    /// Posts a RaygunMessage to the Raygun API endpoint.
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
