@@ -758,6 +758,12 @@ namespace Mindscape.Raygun4Net.WebApi
 
     private void SendStoredMessages()
     {
+      if (!RaygunSettings.Settings.CrashReportingOfflineStorageEnabled)
+      {
+        RaygunLogger.Instance.Warning("Offline storage is disabled, skipping sending stored reports.");
+        return;
+      }
+
       if (!ValidateApiKey())
       {
         RaygunLogger.Instance.Warning("Failed to send offline reports due to invalid API key.");
