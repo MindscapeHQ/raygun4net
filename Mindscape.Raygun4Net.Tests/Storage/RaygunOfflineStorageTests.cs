@@ -39,15 +39,15 @@ namespace Mindscape.Raygun4Net.Tests.Storage
     [Test]
     public void Store_UsingInvalidMessageValue_ReturnFalse()
     {
-      Assert.IsFalse(_storageOne.Store(null, TestApiKey, 1));
-      Assert.IsFalse(_storageOne.Store("", TestApiKey, 1));
+      Assert.IsFalse(_storageOne.Store(null, TestApiKey));
+      Assert.IsFalse(_storageOne.Store("", TestApiKey));
     }
 
     [Test]
     public void Store_UsingInvalidApiKeyValue_ReturnFalse()
     {
-      Assert.IsFalse(_storageOne.Store("DummyData", null, 1));
-      Assert.IsFalse(_storageOne.Store("DummyData", "", 1));
+      Assert.IsFalse(_storageOne.Store("DummyData", null));
+      Assert.IsFalse(_storageOne.Store("DummyData", ""));
     }
 
     [Test]
@@ -78,8 +78,10 @@ namespace Mindscape.Raygun4Net.Tests.Storage
       var files = _storageOne.FetchAll(TestApiKey);
       Assert.That(files.Count, Is.EqualTo(0));
 
+      RaygunSettings.Settings.MaxCrashReportsStoredOffline = 1;
+
       // Save one message to storage.
-      _storageOne.Store("DummyData", TestApiKey, 1);
+      _storageOne.Store("DummyData", TestApiKey);
 
       files = _storageOne.FetchAll(TestApiKey);
 
@@ -95,11 +97,11 @@ namespace Mindscape.Raygun4Net.Tests.Storage
       var files = _storageOne.FetchAll(TestApiKey);
       Assert.That(files.Count, Is.EqualTo(0));
 
-      const int maxReportsStored = 1;
+      RaygunSettings.Settings.MaxCrashReportsStoredOffline = 1;
 
       // Save two messages to storage.
-      _storageOne.Store("DummyData1", TestApiKey, maxReportsStored);
-      _storageOne.Store("DummyData2", TestApiKey, maxReportsStored);
+      _storageOne.Store("DummyData1", TestApiKey);
+      _storageOne.Store("DummyData2", TestApiKey);
 
       files = _storageOne.FetchAll(TestApiKey);
 
@@ -115,11 +117,11 @@ namespace Mindscape.Raygun4Net.Tests.Storage
       var files = _storageOne.FetchAll(TestApiKey);
       Assert.That(files.Count, Is.EqualTo(0));
 
-      const int maxReportsStored = 2;
+      RaygunSettings.Settings.MaxCrashReportsStoredOffline = 2;
 
       // Save two messages to storage.
-      Assert.IsTrue(_storageOne.Store("DummyData1", TestApiKey, maxReportsStored));
-      Assert.IsTrue(_storageOne.Store("DummyData2", TestApiKey, maxReportsStored));
+      Assert.IsTrue(_storageOne.Store("DummyData1", TestApiKey));
+      Assert.IsTrue(_storageOne.Store("DummyData2", TestApiKey));
 
       files = _storageOne.FetchAll(TestApiKey);
 
@@ -146,10 +148,10 @@ namespace Mindscape.Raygun4Net.Tests.Storage
       // Ensure there are no files in storage under the second API key.
       Assert.That(_storageTwo.FetchAll(apiKeyTwo).Count, Is.EqualTo(0));
 
-      const int maxReportsStored = 1;
+      RaygunSettings.Settings.MaxCrashReportsStoredOffline = 1;
 
       // Save one messages to storage under the first API key.
-      _storageOne.Store("DummyData1", apiKeyOne, maxReportsStored);
+      _storageOne.Store("DummyData1", apiKeyOne);
 
       // There should be one file under the first API key.
       Assert.That(_storageOne.FetchAll(apiKeyOne).Count, Is.EqualTo(1));

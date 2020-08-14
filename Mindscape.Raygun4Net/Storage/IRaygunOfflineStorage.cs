@@ -11,9 +11,8 @@ namespace Mindscape.Raygun4Net.Storage
     /// </summary>
     /// <param name="message">The serialized error report to store locally.</param>
     /// <param name="apiKey">The key for which these file are associated with.</param>
-    /// <param name="maxReportsStored">The number of messages allowed to be stored locally.</param>
     /// <returns></returns>
-    bool Store(string message, string apiKey, int maxReportsStored);
+    bool Store(string message, string apiKey);
 
     /// <summary>
     /// Retrieve all files from local storage.

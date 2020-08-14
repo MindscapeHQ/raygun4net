@@ -15,7 +15,7 @@ namespace Mindscape.Raygun4Net.Storage
 
     private int _currentFileCounter = 0;
 
-    public bool Store(string message, string apiKey, int maxReportsStored)
+    public bool Store(string message, string apiKey)
     {
       // Do not store invalid messages.
       if (string.IsNullOrEmpty(message) || string.IsNullOrEmpty(apiKey))
@@ -40,7 +40,7 @@ namespace Mindscape.Raygun4Net.Storage
         }
 
         var searchPattern = Path.Combine(localDirectory, $"*{RaygunFileFormat}");
-        var maxReports = Math.Min(maxReportsStored, RaygunSettings.MaxCrashReportsStoredOfflineHardLimit);
+        var maxReports = Math.Min(RaygunSettings.Settings.MaxCrashReportsStoredOffline, RaygunSettings.MaxCrashReportsStoredOfflineHardLimit);
 
         // We can only save the report if we have not reached the report count limit.
         if (storage.GetFileNames(searchPattern).Length >= maxReports)

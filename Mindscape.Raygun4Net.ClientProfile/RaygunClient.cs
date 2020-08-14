@@ -360,7 +360,7 @@ namespace Mindscape.Raygun4Net
       {
         try
         {
-          if (!_offlineStorage.Store(message, _apiKey, RaygunSettings.Settings.MaxCrashReportsStoredOffline))
+          if (!_offlineStorage.Store(message, _apiKey))
           {
             RaygunLogger.Instance.Warning("Failed to save report to offline storage.");
           }
