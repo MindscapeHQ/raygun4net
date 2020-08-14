@@ -289,8 +289,6 @@ namespace Mindscape.Raygun4Net.WebApi
 
       UseXmlRawDataFilter = RaygunSettings.Settings.UseXmlRawDataFilter;
       UseKeyValuePairRawDataFilter = RaygunSettings.Settings.UseKeyValuePairRawDataFilter;
-
-      RaygunLogger.Instance.LogLevel = RaygunSettings.Settings.LogLevel;
     }
 
     #endregion // Attach/Detach Methods

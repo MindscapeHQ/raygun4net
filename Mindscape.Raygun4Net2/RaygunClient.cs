@@ -70,8 +70,6 @@ namespace Mindscape.Raygun4Net
 
       IsRawDataIgnored = RaygunSettings.Settings.IsRawDataIgnored;
 
-      RaygunLogger.Instance.LogLevel = RaygunSettings.Settings.LogLevel;
-
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
 

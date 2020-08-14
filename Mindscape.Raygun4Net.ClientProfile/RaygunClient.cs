@@ -50,8 +50,6 @@ namespace Mindscape.Raygun4Net
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
-      RaygunLogger.Instance.LogLevel = RaygunSettings.Settings.LogLevel;
-
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
 

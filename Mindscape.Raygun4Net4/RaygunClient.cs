@@ -104,8 +104,6 @@ namespace Mindscape.Raygun4Net
       UseXmlRawDataFilter = RaygunSettings.Settings.UseXmlRawDataFilter;
       UseKeyValuePairRawDataFilter = RaygunSettings.Settings.UseKeyValuePairRawDataFilter;
 
-      RaygunLogger.Instance.LogLevel = RaygunSettings.Settings.LogLevel;
-
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
 

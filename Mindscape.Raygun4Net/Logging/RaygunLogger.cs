@@ -8,8 +8,6 @@ namespace Mindscape.Raygun4Net.Logging
   {
     private const string RaygunPrefix = "Raygun: ";
 
-    public RaygunLogLevel LogLevel { get; set; }
-
     public void Error(string message)
     {
       Log(RaygunLogLevel.Error, message);
@@ -37,12 +35,12 @@ namespace Mindscape.Raygun4Net.Logging
 
     private void Log(RaygunLogLevel level, string message)
     {
-      if (LogLevel == RaygunLogLevel.None)
+      if (RaygunSettings.Settings.LogLevel == RaygunLogLevel.None)
       {
         return;
       }
 
-      if (level <= LogLevel)
+      if (level <= RaygunSettings.Settings.LogLevel)
       {
         try
         {
