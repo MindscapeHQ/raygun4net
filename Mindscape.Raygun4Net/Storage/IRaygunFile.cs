@@ -6,7 +6,7 @@ namespace Mindscape.Raygun4Net.Storage
     /// The filename as seen in local storage.
     /// </summary>
     string Name { get; }
-    
+
     /// <summary>
     /// The raw data stored locally.
     /// </summary>
