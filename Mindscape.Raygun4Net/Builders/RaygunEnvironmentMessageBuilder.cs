@@ -9,6 +9,7 @@ using System.Security.Permissions;
 using System.Text;
 using System.Windows.Forms;
 using Microsoft.VisualBasic.Devices;
+using Mindscape.Raygun4Net.Logging;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net.Builders
@@ -16,24 +17,24 @@ namespace Mindscape.Raygun4Net.Builders
   public class RaygunEnvironmentMessageBuilder
   {
     private static RaygunEnvironmentMessage _message;
-    
+
     public static RaygunEnvironmentMessage Build()
     {
       bool mediumTrust = RaygunSettings.Settings.MediumTrust || !HasUnrestrictedFeatureSet;
-      
+
       //
       // Gather the environment information that only needs to be collected once
       //
-      
+
       if (_message == null)
       {
         _message = new RaygunEnvironmentMessage();
-        
+
         // Different environments can fail to load the environment details.
         // For now if they fail to load for whatever reason then just
         // swallow the exception. A good addition would be to handle
         // these cases and load them correctly depending on where its running.
-        // see http://raygun.io/forums/thread/3655
+        // see http://raygun.com/forums/thread/3655
 
         try
         {
@@ -42,9 +43,9 @@ namespace Mindscape.Raygun4Net.Builders
         }
         catch (Exception ex)
         {
-          System.Diagnostics.Trace.WriteLine("Error retrieving window dimensions: {0}", ex.Message);
+          RaygunLogger.Instance.Error($"Error retrieving window dimensions: {ex.Message}");
         }
-        
+
         try
         {
           DateTime now = DateTime.Now;
@@ -53,9 +54,9 @@ namespace Mindscape.Raygun4Net.Builders
         }
         catch (Exception ex)
         {
-          System.Diagnostics.Trace.WriteLine("Error retrieving time and locale: {0}", ex.Message);
+          RaygunLogger.Instance.Error($"Error retrieving time and locale: {ex.Message}");
         }
-        
+
         try
         {
           if (!mediumTrust)
@@ -64,50 +65,50 @@ namespace Mindscape.Raygun4Net.Builders
             // moved to net40 minimum we can move this out of here
             _message.ProcessorCount = Environment.ProcessorCount;
             _message.Architecture   = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
-            
+
             ComputerInfo info = new ComputerInfo();
             _message.TotalPhysicalMemory = info.TotalPhysicalMemory / 0x100000; // in MB
             _message.TotalVirtualMemory  = info.TotalVirtualMemory  / 0x100000; // in MB
-            
+
             _message.Cpu       = GetCpu();
             _message.OSVersion = GetOSVersion();
           }
         }
         catch (SecurityException)
         {
-          System.Diagnostics.Trace.WriteLine("RaygunClient error: couldn't access environment variables. If you are running in Medium Trust, in web.config in RaygunSettings set mediumtrust=\"true\"");
+          RaygunLogger.Instance.Error("RaygunClient error: couldn't access environment variables. If you are running in Medium Trust, in web.config in RaygunSettings set mediumtrust=\"true\"");
         }
         catch (Exception ex)
         {
-          System.Diagnostics.Trace.WriteLine("Error retrieving environment info: {0}", ex.Message);
+          RaygunLogger.Instance.Error($"Error retrieving environment info: {ex.Message}");
         }
       }
 
       // 
       // Gather the environment info that must be collected at the time of a report being generated.
       // 
-      
+
       try
       {
         if (!mediumTrust)
         {
           ComputerInfo info = new ComputerInfo();
-          
+
           _message.AvailablePhysicalMemory = info.AvailablePhysicalMemory / 0x100000; // in MB
           _message.AvailableVirtualMemory  = info.AvailableVirtualMemory  / 0x100000; // in MB
-          
+
           _message.DiskSpaceFree = GetDiskSpace();
         }
       }
       catch (SecurityException)
       {
-        System.Diagnostics.Trace.WriteLine("RaygunClient error: couldn't access environment variables. If you are running in Medium Trust, in web.config in RaygunSettings set mediumtrust=\"true\"");
+        RaygunLogger.Instance.Error("RaygunClient error: couldn't access environment variables. If you are running in Medium Trust, in web.config in RaygunSettings set mediumtrust=\"true\"");
       }
       catch (Exception ex)
       {
-        System.Diagnostics.Trace.WriteLine("Error retrieving environment info: {0}", ex.Message);
+        RaygunLogger.Instance.Error($"Error retrieving environment info: {ex.Message}");
       }
-      
+
       return _message;
     }
 
@@ -125,7 +126,7 @@ namespace Mindscape.Raygun4Net.Builders
         }
         catch (ManagementException ex)
         {
-          System.Diagnostics.Trace.WriteLine("Error retrieving CPU {0}", ex.Message);
+          RaygunLogger.Instance.Error($"Error retrieving CPU {ex.Message}");
         }
       }
       return Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER");
@@ -145,7 +146,7 @@ namespace Mindscape.Raygun4Net.Builders
         }
         catch (ManagementException ex)
         {
-          System.Diagnostics.Trace.WriteLine("Error retrieving OSVersion {0}", ex.Message);
+          RaygunLogger.Instance.Error($"Error retrieving OSVersion {ex.Message}");
         }
       }
       return Environment.OSVersion.Version.ToString(3);

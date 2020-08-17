@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using Mindscape.Raygun4Net.Messages;
 using Mindscape.Raygun4Net.Filters;
+using Mindscape.Raygun4Net.Logging;
 
 namespace Mindscape.Raygun4Net.Builders
 {
@@ -44,7 +45,7 @@ namespace Mindscape.Raygun4Net.Builders
       }
       catch (Exception e)
       {
-        System.Diagnostics.Trace.WriteLine("Failed to get basic request info: {0}", e.Message);
+        RaygunLogger.Instance.Error($"Failed to get basic request info: { e.Message}");
       }
 
       return message;
@@ -92,7 +93,7 @@ namespace Mindscape.Raygun4Net.Builders
       }
       catch (Exception ex)
       {
-        System.Diagnostics.Trace.WriteLine("Failed to get IP address: {0}", ex.Message);
+        RaygunLogger.Instance.Error($"Failed to get IP address: {ex.Message}");
       }
 
       return strIp;

@@ -1,12 +1,26 @@
 ﻿using System;
 using System.Net;
+using Mindscape.Raygun4Net.Logging;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
 {
   public abstract class RaygunClientBase
   {
+    private bool _handlingRecursiveErrorSending;
+    private bool _handlingRecursiveGrouping;
+
     protected internal const string SentKey = "AlreadySentByRaygun";
+
+    /// <summary>
+    /// Raised just before a message is sent. This can be used to make final adjustments to the <see cref="RaygunMessage"/>, or to cancel the send.
+    /// </summary>
+    public event EventHandler<RaygunSendingMessageEventArgs> SendingMessage;
+
+    /// <summary>
+    /// Raised before a message is sent. This can be used to add a custom grouping key to a RaygunMessage before sending it to the Raygun service.
+    /// </summary>
+    public event EventHandler<RaygunCustomGroupingKeyEventArgs> CustomGroupingKey;
 
     /// <summary>
     /// Gets or sets the user identity string.
@@ -28,6 +42,19 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     public string ApplicationVersion { get; set; }
 
+    /// <summary>
+    /// Transmits an exception to Raygun synchronously.
+    /// </summary>
+    /// <param name="exception">The exception to deliver.</param>
+    public abstract void Send(Exception exception);
+
+    /// <summary>
+    /// Posts a RaygunMessage to the Raygun API endpoint.
+    /// </summary>
+    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
+    /// set to a valid DateTime and as much of the Details property as is available.</param>
+    public abstract void Send(RaygunMessage raygunMessage);
+
     protected virtual bool CanSend(Exception exception)
     {
       return exception == null || exception.Data == null || !exception.Data.Contains(SentKey) || false.Equals(exception.Data[SentKey]);
@@ -47,17 +74,10 @@ namespace Mindscape.Raygun4Net
         }
         catch (Exception ex)
         {
-          System.Diagnostics.Debug.WriteLine(String.Format("Failed to flag exception as sent: {0}", ex.Message));
+          RaygunLogger.Instance.Debug($"Failed to flag exception as sent: {ex.Message}");
         }
       }
     }
-
-    /// <summary>
-    /// Raised just before a message is sent. This can be used to make final adjustments to the <see cref="RaygunMessage"/>, or to cancel the send.
-    /// </summary>
-    public event EventHandler<RaygunSendingMessageEventArgs> SendingMessage;
-
-    private bool _handlingRecursiveErrorSending;
 
     // Returns true if the message can be sent, false if the sending is canceled.
     protected bool OnSendingMessage(RaygunMessage raygunMessage)
@@ -89,12 +109,6 @@ namespace Mindscape.Raygun4Net
       return result;
     }
 
-    /// <summary>
-    /// Raised before a message is sent. This can be used to add a custom grouping key to a RaygunMessage before sending it to the Raygun service.
-    /// </summary>
-    public event EventHandler<RaygunCustomGroupingKeyEventArgs> CustomGroupingKey;
-
-    private bool _handlingRecursiveGrouping;
     protected string OnCustomGroupingKey(Exception exception, RaygunMessage message)
     {
       string result = null;
@@ -119,18 +133,5 @@ namespace Mindscape.Raygun4Net
       }
       return result;
     }
-
-    /// <summary>
-    /// Transmits an exception to Raygun.io synchronously.
-    /// </summary>
-    /// <param name="exception">The exception to deliver.</param>
-    public abstract void Send(Exception exception);
-
-    /// <summary>
-    /// Posts a RaygunMessage to the Raygun.io api endpoint.
-    /// </summary>
-    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
-    /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public abstract void Send(RaygunMessage raygunMessage);
   }
 }

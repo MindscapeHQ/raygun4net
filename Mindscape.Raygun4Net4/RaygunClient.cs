@@ -4,16 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using Mindscape.Raygun4Net.Messages;
-
 using System.Web;
 using System.Threading;
 using System.Reflection;
 using Mindscape.Raygun4Net.Builders;
-using System.IO;
-using System.IO.IsolatedStorage;
-using System.Text;
 using Mindscape.Raygun4Net.Breadcrumbs;
 using Mindscape.Raygun4Net.Filters;
+using Mindscape.Raygun4Net.Logging;
+using Mindscape.Raygun4Net.Storage;
 
 namespace Mindscape.Raygun4Net
 {
@@ -21,14 +19,37 @@ namespace Mindscape.Raygun4Net
   {
     internal const string UnhandledExceptionTag = "UnhandledException";
 
-    private readonly string _apiKey;
-    private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
-    private readonly List<Type> _wrapperExceptions = new List<Type>();
-
     [ThreadStatic] private static RaygunRequestMessage _currentRequestMessage;
     [ThreadStatic] private static List<RaygunBreadcrumb> _currentBreadcrumbs;
 
     private static readonly RaygunBreadcrumbs _breadcrumbs = new RaygunBreadcrumbs(new DefaultBreadcrumbStorage());
+    private static object _sendLock = new object();
+
+    private readonly string _apiKey;
+    private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
+    private readonly List<Type> _wrapperExceptions = new List<Type>();
+
+    private IRaygunOfflineStorage _offlineStorage = new IsolatedRaygunOfflineStorage();
+
+    /// <summary>
+    /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
+    /// and requires credentials.
+    /// </summary>
+    public ICredentials ProxyCredentials { get; set; }
+
+    /// <summary>
+    /// Gets or sets an IWebProxy instance which can be used to override the default system proxy server settings
+    /// </summary>
+    public IWebProxy WebProxy { get; set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RaygunClient" /> class.
+    /// Uses the ApiKey specified in the config file.
+    /// </summary>
+    public RaygunClient()
+      : this(RaygunSettings.Settings.ApiKey)
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -87,37 +108,6 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RaygunClient" /> class.
-    /// Uses the ApiKey specified in the config file.
-    /// </summary>
-    public RaygunClient()
-      : this(RaygunSettings.Settings.ApiKey)
-    {
-    }
-
-    protected bool ValidateApiKey()
-    {
-      if (string.IsNullOrEmpty(_apiKey))
-      {
-        System.Diagnostics.Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
-        return false;
-      }
-
-      return true;
-    }
-
-    /// <summary>
-    /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
-    /// and requires credentials.
-    /// </summary>
-    public ICredentials ProxyCredentials { get; set; }
-
-    /// <summary>
-    /// Gets or sets an IWebProxy instance which can be used to override the default system proxy server settings
-    /// </summary>
-    public IWebProxy WebProxy { get; set; }
-
-    /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
     /// This can be used when a wrapper exception, e.g. TargetInvocationException or HttpUnhandledException,
     /// contains the actual exception as the InnerException. The message and stack trace of the inner exception will then
@@ -148,6 +138,8 @@ namespace Mindscape.Raygun4Net
         _wrapperExceptions.Remove(wrapper);
       }
     }
+
+    #region Message Scrubbing Properties
 
     /// <summary>
     /// Adds a list of keys to remove from the following sections of the <see cref="RaygunRequestMessage" />
@@ -218,8 +210,8 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Specifies whether or not RawData from web requests is ignored when sending reports to Raygun.io.
-    /// The default is false which means RawData will be sent to Raygun.io.
+    /// Specifies whether or not RawData from web requests is ignored when sending reports to Raygun.
+    /// The default is false which means RawData will be sent to Raygun.
     /// </summary>
     public bool IsRawDataIgnored
     {
@@ -259,7 +251,7 @@ namespace Mindscape.Raygun4Net
 
     /// <summary>
     /// Add an <see cref="IRaygunDataFilter"/> implementation to be used when capturing the raw data
-    /// of a HTTP request. This filter will be passed the request raw data and is expected to remove 
+    /// of a HTTP request. This filter will be passed the request raw data and is expected to remove
     /// or replace values whose keys are found in the list supplied to the Filter method.
     /// </summary>
     /// <param name="filter">Custom raw data filter implementation.</param>
@@ -268,28 +260,9 @@ namespace Mindscape.Raygun4Net
       _requestMessageOptions.AddRawDataFilter(filter);
     }
 
-    protected override bool CanSend(Exception exception)
-    {
-      if (RaygunSettings.Settings.ExcludeErrorsFromLocal && HttpContext.Current != null)
-      {
-        try
-        {
-          if (HttpContext.Current.Request.IsLocal)
-          {
-            return false;
-          }
-        }
-        catch
-        {
-          if (RaygunSettings.Settings.ThrowOnError)
-          {
-            throw;
-          }
-        }
-      }
+    #endregion // Message Scrubbing Properties
 
-      return base.CanSend(exception);
-    }
+    #region Breadcrumbs
 
     public static void RecordBreadcrumb(string message)
     {
@@ -306,8 +279,12 @@ namespace Mindscape.Raygun4Net
       _breadcrumbs.Clear();
     }
 
+    #endregion // Breadcrumbs
+
+    #region Message Send Methods
+
     /// <summary>
-    /// Transmits an exception to Raygun.io synchronously, using the version number of the originating assembly.
+    /// Transmits an exception to Raygun synchronously, using the version number of the originating assembly.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     public override void Send(Exception exception)
@@ -316,7 +293,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
+    /// Transmits an exception to Raygun synchronously specifying a list of string tags associated
     /// with the message for identification. This uses the version number of the originating assembly.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
@@ -327,7 +304,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
+    /// Transmits an exception to Raygun synchronously specifying a list of string tags associated
     /// with the message for identification, as well as sending a key-value collection of custom data.
     /// This uses the version number of the originating assembly.
     /// </summary>
@@ -340,7 +317,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Transmits an exception to Raygun.io synchronously specifying a list of string tags associated
+    /// Transmits an exception to Raygun synchronously specifying a list of string tags associated
     /// with the message for identification, as well as sending a key-value collection of custom data.
     /// This uses the version number of the originating assembly.
     /// </summary>
@@ -361,7 +338,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Asynchronously transmits a message to Raygun.io.
+    /// Asynchronously transmits a message to Raygun.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     public void SendInBackground(Exception exception)
@@ -370,7 +347,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Asynchronously transmits an exception to Raygun.io.
+    /// Asynchronously transmits an exception to Raygun.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
@@ -380,7 +357,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Asynchronously transmits an exception to Raygun.io.
+    /// Asynchronously transmits an exception to Raygun.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
@@ -391,7 +368,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Asynchronously transmits an exception to Raygun.io.
+    /// Asynchronously transmits an exception to Raygun.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
@@ -446,7 +423,7 @@ namespace Mindscape.Raygun4Net
     }
 
     /// <summary>
-    /// Asynchronously transmits a message to Raygun.io.
+    /// Asynchronously transmits a message to Raygun.
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
@@ -454,6 +431,99 @@ namespace Mindscape.Raygun4Net
     {
       ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
     }
+
+    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
+    {
+      foreach (Exception e in StripWrapperExceptions(exception))
+      {
+        Send(BuildMessage(e, tags, userCustomData, userInfo, currentTime));
+      }
+    }
+
+    /// <summary>
+    /// Posts a RaygunMessage to the Raygun API endpoint.
+    /// </summary>
+    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
+    /// set to a valid DateTime and as much of the Details property as is available.</param>
+    public override void Send(RaygunMessage raygunMessage)
+    {
+      if (!ValidateApiKey())
+      {
+        RaygunLogger.Instance.Warning("Failed to send error report due to invalid API key");
+        return;
+      }
+
+      bool canSend = OnSendingMessage(raygunMessage);
+
+      if (!canSend)
+      {
+        return;
+      }
+
+      string message = null;
+
+      try
+      {
+        message = SimpleJson.SerializeObject(raygunMessage);
+      }
+      catch (Exception ex)
+      {
+        RaygunLogger.Instance.Error($"Failed to serialize report due to: {ex.Message}");
+
+        if (RaygunSettings.Settings.ThrowOnError)
+        {
+          throw;
+        }
+      }
+
+      if (string.IsNullOrEmpty(message))
+      {
+        return;
+      }
+
+      bool successfullySentReport = true;
+
+      try
+      {
+        Send(message);
+      }
+      catch (Exception ex)
+      {
+        successfullySentReport = false;
+
+        RaygunLogger.Instance.Error($"Failed to send report to Raygun due to: {ex.Message}");
+
+        SaveMessage(message);
+
+        if (RaygunSettings.Settings.ThrowOnError)
+        {
+          throw;
+        }
+      }
+
+      if (successfullySentReport)
+      {
+        SendStoredMessages();
+      }
+    }
+
+    private void Send(string message)
+    {
+      RaygunLogger.Instance.Verbose("Sending Payload --------------");
+      RaygunLogger.Instance.Verbose(message);
+      RaygunLogger.Instance.Verbose("------------------------------");
+
+      if (WebProxy != null)
+      {
+        WebClientHelper.WebProxy = WebProxy;
+      }
+
+      WebClientHelper.Send(message, _apiKey, ProxyCredentials);
+    }
+
+    #endregion // Message Send Methods
+
+    #region Message Building Methods
 
     private RaygunRequestMessage BuildRequestMessage()
     {
@@ -468,7 +538,7 @@ namespace Mindscape.Raygun4Net
         }
         catch (HttpException ex)
         {
-          System.Diagnostics.Trace.WriteLine("Error retrieving HttpRequest {0}", ex.Message);
+          RaygunLogger.Instance.Error($"Error retrieving HttpRequest {ex.Message}");
         }
 
         if (request != null)
@@ -516,14 +586,6 @@ namespace Mindscape.Raygun4Net
       }
 
       return message;
-    }
-
-    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
-    {
-      foreach (Exception e in StripWrapperExceptions(exception))
-      {
-        Send(BuildMessage(e, tags, userCustomData, userInfo, currentTime));
-      }
     }
 
     protected IEnumerable<Exception> StripWrapperExceptions(Exception exception)
@@ -580,201 +642,123 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    /// <summary>
-    /// Posts a RaygunMessage to the Raygun.io api endpoint.
-    /// </summary>
-    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
-    /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public override void Send(RaygunMessage raygunMessage)
-    {
-      bool canSend = OnSendingMessage(raygunMessage);
-      if (canSend)
-      {
-        string message = null;
-        try
-        {
-          message = SimpleJson.SerializeObject(raygunMessage);
-        }
-        catch (Exception serializeException)
-        {
-          System.Diagnostics.Trace.WriteLine($"Error serializing Raygun message due to: {serializeException}");
+    #endregion // Message Building Methods
 
-          if (RaygunSettings.Settings.ThrowOnError)
-          {
-            throw;
-          }
-        }
-
-        if (message != null)
-        {
-          try
-          {
-            if (WebProxy != null)
-            {
-              WebClientHelper.WebProxy = WebProxy;
-            }
-              
-            WebClientHelper.Send(message, _apiKey, ProxyCredentials);
-          }
-          catch (Exception sendMessageException)
-          {
-            try
-            {
-              System.Diagnostics.Trace.WriteLine($"Error sending exception to Raygun.io due to: {sendMessageException}");
-              
-              // Attempt to store the message in isolated storage.
-              SaveMessage(message);
-            }
-            catch (Exception saveMessageException)
-            {
-              // Ignored
-              System.Diagnostics.Trace.WriteLine($"Error saving Raygun message due to: {saveMessageException}");
-            }
-
-            if (RaygunSettings.Settings.ThrowOnError)
-            {
-              throw;
-            }
-          }
-
-          SendStoredMessages();
-        }
-      }
-    }
+    #region Message Offline Storage
 
     private void SaveMessage(string message)
     {
-      try
+      if (!RaygunSettings.Settings.CrashReportingOfflineStorageEnabled)
       {
-        using (IsolatedStorageFile isolatedStorage = GetIsolatedStorageScope())
-        {
-          string directoryName = "RaygunOfflineStorage";
-          if (!isolatedStorage.DirectoryExists(directoryName))
-          {
-            isolatedStorage.CreateDirectory(directoryName);
-          }
-
-          int number = 1;
-          while (true)
-          {
-            bool exists = isolatedStorage.FileExists(directoryName + "\\RaygunErrorMessage" + number + ".txt");
-            if (!exists)
-            {
-              string nextFileName = directoryName + "\\RaygunErrorMessage" + (number + 1) + ".txt";
-              exists = isolatedStorage.FileExists(nextFileName);
-              if (exists)
-              {
-                isolatedStorage.DeleteFile(nextFileName);
-              }
-
-              break;
-            }
-
-            number++;
-          }
-
-          if (number == 11)
-          {
-            string firstFileName = directoryName + "\\RaygunErrorMessage1.txt";
-            if (isolatedStorage.FileExists(firstFileName))
-            {
-              isolatedStorage.DeleteFile(firstFileName);
-            }
-          }
-
-          string reportFilePath = directoryName + "\\RaygunErrorMessage" + number + ".txt";
-
-          using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream(reportFilePath, FileMode.OpenOrCreate, FileAccess.Write, isolatedStorage))
-          {
-            using (StreamWriter writer = new StreamWriter(isoStream, Encoding.Unicode))
-            {
-              writer.Write(message);
-              writer.Flush();
-              writer.Close();
-            }
-          }
-
-          System.Diagnostics.Trace.WriteLine("Saved Raygun message to: " + reportFilePath);
-        }
+        RaygunLogger.Instance.Warning("Offline storage is disabled, skipping saving report.");
+        return;
       }
-      catch (Exception ex)
+
+      if (!ValidateApiKey())
       {
-        System.Diagnostics.Trace.WriteLine($"Error saving message to isolated storage {ex}");
+        RaygunLogger.Instance.Warning("Failed to save report due to invalid API key.");
+        return;
+      }
+
+      // Avoid writing and reading from disk at the same time with `SendStoredMessages`.
+      lock (_sendLock)
+      {
+        try
+        {
+          if (!_offlineStorage.Store(message, _apiKey))
+          {
+            RaygunLogger.Instance.Warning("Failed to save report to offline storage");
+          }
+        }
+        catch (Exception ex)
+        {
+          RaygunLogger.Instance.Error($"Failed to save report to offline storage due to: {ex.Message}");
+        }
       }
     }
 
-    private static object _sendLock = new object();
-
     private void SendStoredMessages()
     {
+      if (!RaygunSettings.Settings.CrashReportingOfflineStorageEnabled)
+      {
+        RaygunLogger.Instance.Warning("Offline storage is disabled, skipping sending stored reports.");
+        return;
+      }
+
+      if (!ValidateApiKey())
+      {
+        RaygunLogger.Instance.Warning("Failed to send offline reports due to invalid API key.");
+        return;
+      }
+
       lock (_sendLock)
       {
-        if (!ValidateApiKey())
-        {
-          System.Diagnostics.Debug.WriteLine("ApiKey has not been provided, skipping sending stored Raygun messages");
-          return;
-        }
-        
         try
         {
-          using (IsolatedStorageFile isolatedStorage = GetIsolatedStorageScope())
+          var files = _offlineStorage.FetchAll(_apiKey);
+
+          foreach (var file in files)
           {
-            string directoryName = "RaygunOfflineStorage";
-            if (isolatedStorage.DirectoryExists(directoryName))
+            try
             {
-              string[] fileNames = isolatedStorage.GetFileNames(directoryName + "\\*.txt");
-              foreach (string name in fileNames)
+              // Send the stored report.
+              Send(file.Contents);
+
+              // Remove the stored report from local storage.
+              if (_offlineStorage.Remove(file.Name, _apiKey))
               {
-                IsolatedStorageFileStream isoFileStream = isolatedStorage.OpenFile(directoryName + "\\" + name, FileMode.Open);
-                using (StreamReader reader = new StreamReader(isoFileStream))
-                {
-                  string text = reader.ReadToEnd();
-                  try
-                  {
-                    if (WebProxy != null)
-                    {
-                      WebClientHelper.WebProxy = WebProxy;
-                    }
-                    
-                    WebClientHelper.Send(text, _apiKey, ProxyCredentials);
-                  }
-                  catch
-                  {
-                    // If just one message fails to send, then don't delete the message, and don't attempt sending anymore until later.
-                    return;
-                  }
-
-                  System.Diagnostics.Debug.WriteLine("Sent " + name);
-                }
-
-                isolatedStorage.DeleteFile(directoryName + "\\" + name);
+                RaygunLogger.Instance.Info("Successfully removed report from offline storage.");
               }
-
-              if (isolatedStorage.GetFileNames(directoryName + "\\*.txt").Length == 0)
+              else
               {
-                System.Diagnostics.Debug.WriteLine("Successfully sent all pending messages");
-                isolatedStorage.DeleteDirectory(directoryName);
+                RaygunLogger.Instance.Warning("Failed to remove report from offline storage.");
               }
+            }
+            catch (Exception ex)
+            {
+              RaygunLogger.Instance.Error($"Failed to send stored report to Raygun due to: {ex.Message}");
+
+              // If just one message fails to send, then don't delete the message,
+              // and don't attempt sending anymore until later.
+              return;
             }
           }
         }
         catch (Exception ex)
         {
-          System.Diagnostics.Debug.WriteLine($"Error sending stored messages to Raygun.io due to: {ex}");
+          RaygunLogger.Instance.Error($"Failed to send stored report to Raygun due to: {ex.Message}");
         }
       }
     }
 
-    private IsolatedStorageFile GetIsolatedStorageScope()
+    #endregion // Message Offline Storage
+
+    protected bool ValidateApiKey()
     {
-      if (AppDomain.CurrentDomain != null && AppDomain.CurrentDomain.ActivationContext != null)
+      return !string.IsNullOrEmpty(_apiKey);
+    }
+
+    protected override bool CanSend(Exception exception)
+    {
+      if (RaygunSettings.Settings.ExcludeErrorsFromLocal && HttpContext.Current != null)
       {
-        return IsolatedStorageFile.GetUserStoreForApplication();
+        try
+        {
+          if (HttpContext.Current.Request.IsLocal)
+          {
+            return false;
+          }
+        }
+        catch
+        {
+          if (RaygunSettings.Settings.ThrowOnError)
+          {
+            throw;
+          }
+        }
       }
-      else
-      {
-        return IsolatedStorageFile.GetUserStoreForAssembly();
-      }
+
+      return base.CanSend(exception);
     }
   }
 }

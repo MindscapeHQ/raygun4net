@@ -23,6 +23,6 @@
     <file src="build\webjob\Mindscape.Raygun4Net4.dll"             target="lib\net40\Mindscape.Raygun4Net4.dll" />
     <file src="build\webjob\Mindscape.Raygun4Net4.pdb"             target="lib\net40\Mindscape.Raygun4Net4.pdb" />
     
-    <file src="Mindscape.Raygun4Net.Azure.WebJob\readme.txt" />
+    <file src="Mindscape.Raygun4Net.Azure.WebJob\README.md" />
   </files>
 </package>

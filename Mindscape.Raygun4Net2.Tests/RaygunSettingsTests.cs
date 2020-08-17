@@ -18,7 +18,7 @@ namespace Mindscape.Raygun4Net2.Tests
     [Test]
     public void ApiEndPoint_DefaultValue()
     {
-      Assert.AreEqual("https://api.raygun.io/entries", RaygunSettings.Settings.ApiEndpoint.AbsoluteUri);
+      Assert.AreEqual("https://api.raygun.com/entries", RaygunSettings.Settings.ApiEndpoint.AbsoluteUri);
     }
 
     [Test]

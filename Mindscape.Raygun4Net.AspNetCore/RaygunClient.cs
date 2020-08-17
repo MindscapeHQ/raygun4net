@@ -13,11 +13,11 @@ namespace Mindscape.Raygun4Net.AspNetCore
   public class RaygunClient : RaygunClientBase
   {
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
-    
+
     private readonly ThreadLocal<HttpContext> _currentHttpContext = new ThreadLocal<HttpContext>(() => null);
     private readonly ThreadLocal<RaygunRequestMessage> _currentRequestMessage = new ThreadLocal<RaygunRequestMessage>(() => null);
     private readonly ThreadLocal<RaygunResponseMessage> _currentResponseMessage = new ThreadLocal<RaygunResponseMessage>(() => null);
-    
+
     public RaygunClient(string apiKey)
       : this(new RaygunSettings {ApiKey = apiKey})
     {
@@ -196,7 +196,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
 
     /// <summary>
     /// Add an <see cref="IRaygunDataFilter"/> implementation to be used when capturing the raw data
-    /// of a HTTP request. This filter will be passed the request raw data and is expected to remove 
+    /// of a HTTP request. This filter will be passed the request raw data and is expected to remove
     /// or replace values whose keys are found in the list supplied to the Filter method.
     /// </summary>
     /// <param name="filter">Custom raw data filter implementation.</param>
@@ -211,13 +211,13 @@ namespace Mindscape.Raygun4Net.AspNetCore
       {
         return true;
       }
-      
+
       RaygunSettings settings = GetSettings();
       if (settings.ExcludedStatusCodes == null)
       {
         return true;
       }
-      
+
       return !settings.ExcludedStatusCodes.Contains(message.Details.Response.StatusCode);
     }
 

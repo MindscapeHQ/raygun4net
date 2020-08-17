@@ -69,6 +69,15 @@
     <Compile Include="..\Mindscape.Raygun4Net\IRaygunMessageBuilder.cs">
       <Link>IRaygunMessageBuilder.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Logging\IRaygunLogger.cs">
+      <Link>Logging\IRaygunLogger.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Logging\RaygunLogger.cs">
+      <Link>Logging\RaygunLogger.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Logging\RaygunLogLevel.cs">
+      <Link>Logging\RaygunLogLevel.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Messages\RaygunClientMessage.cs">
       <Link>Messages\RaygunClientMessage.cs</Link>
     </Compile>
@@ -155,6 +164,21 @@
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\SimpleJson.cs">
       <Link>SimpleJson.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Storage\IRaygunFile.cs">
+      <Link>Storage\IRaygunFile.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Storage\IRaygunOfflineStorage.cs">
+      <Link>Storage\IRaygunOfflineStorage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Storage\RaygunFile.cs">
+      <Link>Storage\RaygunFile.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Storage\IsolatedRaygunOfflineStorage.cs">
+      <Link>Storage\IsolatedRaygunOfflineStorage.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net\Utils\Singleton.cs">
+      <Link>Utils\Singleton.cs</Link>
     </Compile>
     <Compile Include="Builders\RaygunEnvironmentMessageBuilder.cs" />
     <Compile Include="Builders\RaygunErrorMessageBuilder.cs" />

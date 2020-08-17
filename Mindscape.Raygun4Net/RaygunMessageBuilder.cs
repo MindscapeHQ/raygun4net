@@ -7,6 +7,7 @@ using System.Net;
 using System.Reflection;
 using System.Web;
 using Mindscape.Raygun4Net.Builders;
+using Mindscape.Raygun4Net.Logging;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
@@ -92,7 +93,7 @@ namespace Mindscape.Raygun4Net
       }
       catch (Exception ex)
       {
-        System.Diagnostics.Trace.WriteLine("Error retrieving response info {0}", ex.Message);
+        RaygunLogger.Instance.Error($"Error retrieving response info {ex.Message}");
       }
 
       return this;

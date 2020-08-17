@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Web;
+using Mindscape.Raygun4Net.Logging;
 using Mindscape.Raygun4Net.ProfilingSupport;
 
 namespace Mindscape.Raygun4Net
@@ -42,7 +43,7 @@ namespace Mindscape.Raygun4Net
       }
       catch (Exception ex)
       {
-        System.Diagnostics.Trace.WriteLine($"Error during begin request of APM sampling: {ex.Message}");
+        RaygunLogger.Instance.Error($"Error during begin request of APM sampling: {ex.Message}");
       }
     }
 
@@ -57,7 +58,7 @@ namespace Mindscape.Raygun4Net
       }
       catch (Exception ex)
       {
-        System.Diagnostics.Trace.WriteLine($"Error during end request of APM sampling: {ex.Message}");
+        RaygunLogger.Instance.Error($"Error during end request of APM sampling: {ex.Message}");
       }
     }
 
@@ -71,7 +72,7 @@ namespace Mindscape.Raygun4Net
           {
             if (APM.ProfilerAttached)
             {
-              System.Diagnostics.Trace.WriteLine("Detected Raygun APM profiler is attached, initializing profiler support.");
+              RaygunLogger.Instance.Info("Detected Raygun APM profiler is attached, initializing profiler support.");
 
               _samplingManager = new SamplingManager();
               _refreshTimer = new Timer(RefreshAgentSettings, null, TimeSpan.Zero, AgentPollingDelay);
@@ -87,7 +88,7 @@ namespace Mindscape.Raygun4Net
       }
       catch (Exception ex)
       {
-        System.Diagnostics.Trace.WriteLine($"Error initialising APM profiler support: {ex.Message}");
+        RaygunLogger.Instance.Error($"Error initialising APM profiler support: {ex.Message}");
       }
 
       return false;
@@ -116,17 +117,17 @@ namespace Mindscape.Raygun4Net
           }
           else
           {
-            System.Diagnostics.Trace.WriteLine($"Could not locate sampling settings for site {_appIdentifier}");
+            RaygunLogger.Instance.Warning($"Could not locate sampling settings for site {_appIdentifier}");
           }
         }
         else
         {
-          System.Diagnostics.Trace.WriteLine($"Could not locate Raygun APM configuration file {SettingsFilePath}");
+          RaygunLogger.Instance.Warning($"Could not locate Raygun APM configuration file {SettingsFilePath}");
         }
       }
       catch (Exception ex)
       {
-        System.Diagnostics.Trace.WriteLine($"Error refreshing agent settings: {ex.Message}");
+        RaygunLogger.Instance.Error($"Error refreshing agent settings: {ex.Message}");
       }
     }
   }
