@@ -19,9 +19,11 @@ Run dotnet.exe restore or restore packages within Visual Studio to download the 
 
 Add the following code to your appsettings.json (if you're using another type of config, add it there).
 
+```json
 "RaygunSettings": {
   "ApiKey": "YOUR_APP_API_KEY"
 }
+```
 
 To configure the RaygunAspNetCoreMiddleware to handle exceptions that have been triggered and send unhandled exceptions automatically.
 
@@ -33,13 +35,15 @@ In Startup.cs:
 Anywhere in your code, you can also send exception reports manually simply by creating a new instance of the RaygunClient and calling one of the Send or SendInBackground methods.
 This is most commonly used to send exceptions caught in a try/catch block.
 
+```csharp
 try
 {
 }
 catch (Exception e)
 {
   new RaygunClient("YOUR_APP_API_KEY").SendInBackground(e);
-} 
+}
+```
 
 Configure RaygunClient or settings in RaygunAspNetCoreMiddleware
 ================================================================
@@ -50,6 +54,7 @@ Currently there's just one property on it, ClientProvider. This gives you a hook
 
 For example, say you want to set user details on your error reports. You'd create a custom client provider like this:
 
+```csharp
 public class ExampleRaygunAspNetCoreClientProvider : DefaultRaygunAspNetCoreClientProvider
 {
   public override RaygunClient GetClient(RaygunSettings settings, HttpContext context)
@@ -73,13 +78,16 @@ public class ExampleRaygunAspNetCoreClientProvider : DefaultRaygunAspNetCoreClie
     return client;
   }
 }
+```
 
 Then you would change your services.AddRaygun(Configuration) call in ConfigureServices to this:
 
+```csharp
 services.AddRaygun(Configuration, new RaygunMiddlewareSettings()
 {
   ClientProvider = new ExampleRaygunAspNetCoreClientProvider()
 });
+```
 
 Manually sending exceptions with a custom ClientProvider
 ========================================================
@@ -88,6 +96,7 @@ When configuring a custom ClientProvider you will also want to leverage this Cli
 To do this use the Dependency Injection framework to provide an instance of the IRaygunAspNetCoreClientProvider and IOptions<RaygunSettings> to your MVC Controller.
 This will then ensure that the Raygun crash report also contains any HttpContext information and will execute any code defined in your ClientProvider.GetClient() method.
 
+```csharp
 public class RaygunController : Controller
 {
   private readonly IRaygunAspNetCoreClientProvider _clientProvider;
@@ -114,6 +123,7 @@ public class RaygunController : Controller
     return View();
   }
 }
+```
 
 Additional configuration options and features
 =============================================
@@ -124,10 +134,12 @@ Replace unseekable request streams
 Raygun will try to send the raw request payload with each exception report where applicable, but this is only possible with request streams that are seekable.
 If you are not seeing any raw request payloads in your exception reports where you'd expect to see them, then you can set the ReplaceUnseekableRequestStreams setting to true in your appsettings.json. This will attempt to replace any unseekable streams with a seekable copy on the request object so that Raygun can later read the raw request payload.
 
+```json
 "RaygunSettings": {
   "ApiKey": "YOUR_APP_API_KEY",
   "ReplaceUnseekableRequestStreams": true
 }
+```
 
 This setting is false by default to avoid breaking changes or any unforseen issues with its initial deployment.
 
@@ -139,10 +151,12 @@ Exclude errors by HTTP status code
 You can exclude errors by their HTTP status code by providing an array of status codes to ignore in the configuration.
 For example if you wanted to exclude errors that return the "I'm a teapot" response code (http://tools.ietf.org/html/rfc2324), you could use the configuration below.
 
+```json
 "RaygunSettings": {
   "ApiKey": "YOUR_APP_API_KEY",
   "ExcludedStatusCodes": [418]
 }
+```
 
 Exclude errors that originate from a local origin
 -------------------------------------------------
@@ -150,10 +164,12 @@ Exclude errors that originate from a local origin
 Toggle this boolean and Raygun will not send errors if the request originated from a local origin.
 i.e. A way to prevent local debug/development from notifying Raygun without having to resort to Web.config transforms.
 
+```json
 "RaygunSettings": {
   "ApiKey": "YOUR_APP_API_KEY",
   "ExcludeErrorsFromLocal": true
 }
+```
 
 Remove sensitive request data
 -----------------------------
@@ -182,6 +198,7 @@ These filters read the raw data and strip values whose keys match those found in
 We currently provide two implementations with this provider.
 
 RaygunKeyValuePairDataFilter e.g. filtering "user=raygun&password=pewpew"
+
 RaygunXmlDataFilter e.g. filtering "<password>pewpew</password>"
 
 These filters are initially disabled and can be enbled through the RaygunSettings class. You may also provide your own implementation of the IRaygunDataFilter and pass this to the RaygunClient to use when filtering raw data. An example for implementing an JSON filter can be found at the end of this readme.
@@ -198,7 +215,9 @@ Strip wrapper exceptions
 
 If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by using the multi-parameter method:
 
+```csharp
 RaygunClient.AddWrapperExceptions(typeof(TargetInvocationException));
+```
 
 In this case, if a TargetInvocationException occurs, it will be removed and replaced with the actual InnerException that was the cause.
 Note that TargetInvocationException is already added to the wrapper exception list; you do not have to add this manually.
@@ -227,6 +246,7 @@ This can be done using the various Send and SendInBackground method overloads.
 Example JSON Data Filter
 ========================
 
+```csharp
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -302,3 +322,4 @@ public class RaygunJsonDataFilter : IRaygunDataFilter
     return hasValue && !string.IsNullOrEmpty(property.Name) && ignoredKeys.Any(f => f.Equals(property.Name, StringComparison.OrdinalIgnoreCase));
   }
 }
+```
