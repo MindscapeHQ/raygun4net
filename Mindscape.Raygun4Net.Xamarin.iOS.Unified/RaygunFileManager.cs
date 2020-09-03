@@ -9,7 +9,6 @@ namespace Mindscape.Raygun4Net
   public class RaygunFileManager
   {
     public const int MAX_STORED_REPORTS_UPPER_LIMIT = 64;
-    private const string RAYGUN_DIRECTORY = "RaygunIO";
 
     private int currentFileCounter = 0;
 
@@ -174,7 +173,7 @@ namespace Mindscape.Raygun4Net
 
     private string GetCrashReportDirectory()
     {
-      return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), RAYGUN_DIRECTORY);
+      return RaygunSettings.Settings.RaygunDirectory;
     }
 
     private string GetUniqueAcendingJsonName()
