@@ -1,12 +1,12 @@
-﻿using System;
-using Mindscape.Raygun4Net.Messages;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Collections;
+using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net.Xamarin.iOS.Tests
 {
-  public class FakeRaygunClient : RaygunClient
+  public class FakeRaygunClient : Mindscape.Raygun4Net.RaygunClient
   {
     public FakeRaygunClient ()
       : this("tempkey")

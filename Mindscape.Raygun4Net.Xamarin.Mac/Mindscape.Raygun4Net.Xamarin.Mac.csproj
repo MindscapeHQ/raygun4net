@@ -107,15 +107,13 @@
       <Link>Messages\RaygunMessageDetails.cs</Link>
     </Compile>
     <Compile Include="Builders\RaygunEnvironmentMessageBuilder.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\RaygunClientBase.cs">
-      <Link>RaygunClientBase.cs</Link>
-    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net.Core\Messages\RaygunErrorMessage.cs">
       <Link>Messages\RaygunErrorMessage.cs</Link>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\RaygunCustomGroupingKeyEventArgs.cs">
       <Link>RaygunCustomGroupingKeyEventArgs.cs</Link>
     </Compile>
+    <Compile Include="RaygunClientBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
