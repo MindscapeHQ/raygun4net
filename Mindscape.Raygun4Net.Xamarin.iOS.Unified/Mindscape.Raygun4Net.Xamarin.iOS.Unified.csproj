@@ -14,7 +14,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <PackOnBuild>true</PackOnBuild>
     <PackageId>Mindscape.Raygun4Net.Xamarin.iOS.Unified</PackageId>
-    <PackageVersion>6.0.3</PackageVersion>
+    <PackageVersion>6.1.0</PackageVersion>
     <Authors>Raygun</Authors>
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
     <PackageLicenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</PackageLicenseUrl>
