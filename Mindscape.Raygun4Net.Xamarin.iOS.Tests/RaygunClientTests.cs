@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using NUnit.Framework;
-using Mindscape.Raygun4Net.Messages;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 using Mindscape.Raygun4Net.Builders;
+using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net.Xamarin.iOS.Tests
 {
