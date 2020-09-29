@@ -32,16 +32,22 @@ namespace Mindscape.Raygun4Net
     
     protected static RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
     {
+      var stackTrace = new StackTrace(exception, true);
+
+      return BuildStackTrace(stackTrace);
+    }
+
+    public static RaygunErrorStackTraceLineMessage[] BuildStackTrace(StackTrace stackTrace)
+    {
       var lines = new List<RaygunErrorStackTraceLineMessage>();
 
-      var stackTrace = new StackTrace(exception, true);
       var frames = stackTrace.GetFrames();
 
       if (frames == null || frames.Length == 0)
       {
         var line = new RaygunErrorStackTraceLineMessage { FileName = "none", LineNumber = 0 };
         lines.Add(line);
-        
+
         return lines.ToArray();
       }
 
@@ -78,7 +84,7 @@ namespace Mindscape.Raygun4Net
 
       return lines.ToArray();
     }
-    
+
     protected static string GenerateMethodName(MethodBase method)
     {
       var stringBuilder = new StringBuilder();

@@ -32,6 +32,7 @@ namespace Mindscape.Raygun4Net.Builders
             data[key] = exception.Data[key];
           }
         }
+
         message.Data = data;
       }
 
@@ -72,9 +73,13 @@ namespace Mindscape.Raygun4Net.Builders
           {
             e.Data["Type"] = rtle.Types[index];
           }
-          catch { }
+          catch
+          {
+          }
+
           index++;
         }
+
         return rtle.LoaderExceptions.ToList();
       }
 
@@ -83,9 +88,15 @@ namespace Mindscape.Raygun4Net.Builders
 
     private static RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
     {
+      var stackTrace = new StackTrace(exception, true);
+
+      return BuildStackTrace(stackTrace);
+    }
+
+    public static RaygunErrorStackTraceLineMessage[] BuildStackTrace(StackTrace stackTrace)
+    {
       var lines = new List<RaygunErrorStackTraceLineMessage>();
 
-      var stackTrace = new StackTrace(exception, true);
       var frames = stackTrace.GetFrames();
 
       if (frames == null || frames.Length == 0)
