@@ -13,7 +13,7 @@ The main classes can be found in the Mindscape.Raygun4Net namespace.
 Usage
 =====
 
-In your project file, add "Mindscape.Raygun4Net.NetCore": "6.2.0" to your dependencies.
+In your project file, add "Mindscape.Raygun4Net.NetCore": "6.4.0" to your dependencies.
 
 Run dotnet.exe restore or restore packages within Visual Studio to download the package.
 
