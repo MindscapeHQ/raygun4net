@@ -250,16 +250,12 @@ namespace Mindscape.Raygun4Net.AspNetCore
 
     private async Task<RaygunRequestMessage> BuildRequestMessage()
     {
-      var message = _currentHttpContext.Value != null ? await RaygunAspNetCoreRequestMessageBuilder.Build(_currentHttpContext.Value, _requestMessageOptions) : null;
-      _currentHttpContext.Value = null;
-      return message;
+      return _currentHttpContext.Value != null ? await RaygunAspNetCoreRequestMessageBuilder.Build(_currentHttpContext.Value, _requestMessageOptions) : null;
     }
 
     private RaygunResponseMessage BuildResponseMessage()
     {
-      var message = _currentHttpContext.Value != null ? RaygunAspNetCoreResponseMessageBuilder.Build(_currentHttpContext.Value) : null;
-      _currentHttpContext.Value = null;
-      return message;
+      return _currentHttpContext.Value != null ? RaygunAspNetCoreResponseMessageBuilder.Build(_currentHttpContext.Value) : null;
     }
 
     public RaygunClient SetCurrentContext(HttpContext request)
