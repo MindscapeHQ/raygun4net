@@ -227,6 +227,9 @@ namespace Mindscape.Raygun4Net.AspNetCore
       {
         RaygunRequestMessage currentRequestMessage = await BuildRequestMessage();
         RaygunResponseMessage currentResponseMessage = BuildResponseMessage();
+
+        _currentHttpContext.Value = null;
+
         _currentRequestMessage.Value = currentRequestMessage;
         _currentResponseMessage.Value = currentResponseMessage;
 
@@ -251,10 +254,13 @@ namespace Mindscape.Raygun4Net.AspNetCore
         RaygunRequestMessage currentRequestMessage = await BuildRequestMessage();
         RaygunResponseMessage currentResponseMessage = BuildResponseMessage();
 
+        _currentHttpContext.Value = null;
+
         var task = Task.Run(async () =>
         {
           _currentRequestMessage.Value = currentRequestMessage;
           _currentResponseMessage.Value = currentResponseMessage;
+
           await StripAndSend(exception, tags, userCustomData, userInfo);
         });
         FlagAsSent(exception);
@@ -264,16 +270,12 @@ namespace Mindscape.Raygun4Net.AspNetCore
 
     private async Task<RaygunRequestMessage> BuildRequestMessage()
     {
-      var message = _currentHttpContext.Value != null ? await RaygunAspNetCoreRequestMessageBuilder.Build(_currentHttpContext.Value, _requestMessageOptions) : null;
-      _currentHttpContext.Value = null;
-      return message;
+      return _currentHttpContext.Value != null ? await RaygunAspNetCoreRequestMessageBuilder.Build(_currentHttpContext.Value, _requestMessageOptions) : null;
     }
 
     private RaygunResponseMessage BuildResponseMessage()
     {
-      var message = _currentHttpContext.Value != null ? RaygunAspNetCoreResponseMessageBuilder.Build(_currentHttpContext.Value) : null;
-      _currentHttpContext.Value = null;
-      return message;
+      return _currentHttpContext.Value != null ? RaygunAspNetCoreResponseMessageBuilder.Build(_currentHttpContext.Value) : null;
     }
 
     public RaygunClient SetCurrentContext(HttpContext request)
