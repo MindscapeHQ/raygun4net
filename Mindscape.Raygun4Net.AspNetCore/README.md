@@ -125,6 +125,37 @@ public class RaygunController : Controller
 }
 ```
 
+### Using a singleton RaygunClient
+
+If you are using a singleton RaygunClient, you'll need to manually set the HTTP context (if applicable) before manually sending an exception.
+
+```csharp
+public class RaygunController : Controller
+{
+  private readonly RaygunClient _singletonRaygunClient;
+
+  public RaygunController(RaygunClient singletonRaygunClient)
+  {
+    _singletonRaygunClient = singletonRaygunClient;
+  }
+
+  public async Task<IActionResult> TestManualError()
+  {
+    try
+    {
+      throw new Exception("Test from .NET Core MVC app");
+    }
+    catch (Exception ex)
+    {
+      _singletonRaygunClient.SetCurrentContext(HttpContext);
+      await _singletonRaygunClient.Send(ex);
+    }
+
+    return View();
+  }
+}
+```
+
 Additional configuration options and features
 =============================================
 

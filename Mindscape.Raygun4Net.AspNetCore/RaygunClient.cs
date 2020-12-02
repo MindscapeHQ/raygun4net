@@ -221,6 +221,23 @@ namespace Mindscape.Raygun4Net.AspNetCore
       return !settings.ExcludedStatusCodes.Contains(message.Details.Response.StatusCode);
     }
 
+    protected override async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData)
+    {
+      if (CanSend(exception))
+      {
+        RaygunRequestMessage currentRequestMessage = await BuildRequestMessage();
+        RaygunResponseMessage currentResponseMessage = BuildResponseMessage();
+
+        _currentHttpContext.Value = null;
+
+        _currentRequestMessage.Value = currentRequestMessage;
+        _currentResponseMessage.Value = currentResponseMessage;
+
+        await StripAndSend(exception, tags, userCustomData, null);
+        FlagAsSent(exception);
+      }
+    }
+
     /// <summary>
     /// Asynchronously transmits an exception to Raygun.
     /// </summary>
@@ -230,36 +247,35 @@ namespace Mindscape.Raygun4Net.AspNetCore
     /// <param name="userInfo">Information about the user including the identity string.</param>
     public override async Task SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo)
     {
-        if (CanSend(exception))
-        {
-            // We need to process the Request on the current thread,
-            // otherwise it will be disposed while we are using it on the other thread.
-            RaygunRequestMessage currentRequestMessage = await BuildRequestMessage();
-            RaygunResponseMessage currentResponseMessage = BuildResponseMessage();
+      if (CanSend(exception))
+      {
+        // We need to process the Request on the current thread,
+        // otherwise it will be disposed while we are using it on the other thread.
+        RaygunRequestMessage currentRequestMessage = await BuildRequestMessage();
+        RaygunResponseMessage currentResponseMessage = BuildResponseMessage();
 
-            var task = Task.Run(async () =>
-            {
-                _currentRequestMessage.Value = currentRequestMessage;
-                _currentResponseMessage.Value = currentResponseMessage;
-                await StripAndSend(exception, tags, userCustomData, userInfo);
-            });
-            FlagAsSent(exception);
-            await task;
-        }
+        _currentHttpContext.Value = null;
+
+        var task = Task.Run(async () =>
+        {
+          _currentRequestMessage.Value = currentRequestMessage;
+          _currentResponseMessage.Value = currentResponseMessage;
+
+          await StripAndSend(exception, tags, userCustomData, userInfo);
+        });
+        FlagAsSent(exception);
+        await task;
+      }
     }
 
     private async Task<RaygunRequestMessage> BuildRequestMessage()
     {
-      var message = _currentHttpContext.Value != null ? await RaygunAspNetCoreRequestMessageBuilder.Build(_currentHttpContext.Value, _requestMessageOptions) : null;
-      _currentHttpContext.Value = null;
-      return message;
+      return _currentHttpContext.Value != null ? await RaygunAspNetCoreRequestMessageBuilder.Build(_currentHttpContext.Value, _requestMessageOptions) : null;
     }
 
     private RaygunResponseMessage BuildResponseMessage()
     {
-      var message = _currentHttpContext.Value != null ? RaygunAspNetCoreResponseMessageBuilder.Build(_currentHttpContext.Value) : null;
-      _currentHttpContext.Value = null;
-      return message;
+      return _currentHttpContext.Value != null ? RaygunAspNetCoreResponseMessageBuilder.Build(_currentHttpContext.Value) : null;
     }
 
     public RaygunClient SetCurrentContext(HttpContext request)
