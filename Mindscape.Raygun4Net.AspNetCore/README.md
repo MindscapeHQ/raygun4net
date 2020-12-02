@@ -125,6 +125,40 @@ public class RaygunController : Controller
 }
 ```
 
+### Using a singleton RaygunClient
+
+If you are using a singleton RaygunClient, or have implemented an `IRaygunAspNetCoreClientProvider` which returns a singleton RaygunClient, you'll need to manually set the HTTP context before manually sending an exception.
+
+#### Using custom RaygunClient
+
+```csharp
+try
+{
+  data = JsonSerializer.Deserialize<SomeModel>(suspiciousString);
+}
+catch (Exception ex)
+{
+  _singletonRaygunClient.SetCurrentContext(HttpContext);
+  await _singletonRaygunClient.Send(ex);
+}
+```
+
+#### Using custom provider
+
+```csharp
+try
+{
+  data = JsonSerializer.Deserialize<SomeModel>(suspiciousString);
+}
+catch (Exception ex)
+{
+  // Custom provider returns RaygunClient singleton
+  var raygunClient = _clientProvider.GetClient(_settings.Value);
+  raygunClient.SetCurrentContext(HttpContext);
+  await raygunClient.Send(ex);
+}
+```
+
 Additional configuration options and features
 =============================================
 
