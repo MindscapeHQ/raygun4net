@@ -14,9 +14,9 @@ namespace Mindscape.Raygun4Net.AspNetCore
   {
     protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
 
-    private readonly ThreadLocal<HttpContext> _currentHttpContext = new ThreadLocal<HttpContext>(() => null);
-    private readonly ThreadLocal<RaygunRequestMessage> _currentRequestMessage = new ThreadLocal<RaygunRequestMessage>(() => null);
-    private readonly ThreadLocal<RaygunResponseMessage> _currentResponseMessage = new ThreadLocal<RaygunResponseMessage>(() => null);
+    private readonly AsyncLocal<HttpContext> _currentHttpContext = new AsyncLocal<HttpContext>();
+    private readonly AsyncLocal<RaygunRequestMessage> _currentRequestMessage = new AsyncLocal<RaygunRequestMessage>();
+    private readonly AsyncLocal<RaygunResponseMessage> _currentResponseMessage = new AsyncLocal<RaygunResponseMessage>();
 
     public RaygunClient(string apiKey)
       : this(new RaygunSettings {ApiKey = apiKey})

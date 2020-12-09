@@ -9,7 +9,7 @@ namespace Mindscape.Raygun4Net
 {
   public static class APM
   {
-    [ThreadStatic] private static bool _enabled = false;
+    [ThreadStatic] private static bool _enabled;
 
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
     public static void Enable()
