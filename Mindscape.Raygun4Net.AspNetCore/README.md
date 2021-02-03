@@ -52,7 +52,7 @@ The AddRaygun method has an overload that takes a RaygunMiddlewareSettings objec
 These settings control the middleware (not to be confused with RaygunSettings which are the common settings we use across all of our .NET providers). 
 Currently there's just one property on it, ClientProvider. This gives you a hook into the loading of RaygunSettings and the construction of the RaygunAspNetCoreClient used to send errors.
 
-For example, say you want to set user details on your error reports. You'd create a custom client provider like this:
+For example, say you want to set customer details on your error reports. You'd create a custom client provider like this:
 
 ```csharp
 public class ExampleRaygunAspNetCoreClientProvider : DefaultRaygunAspNetCoreClientProvider
@@ -254,12 +254,12 @@ In this case, if a TargetInvocationException occurs, it will be removed and repl
 Note that TargetInvocationException is already added to the wrapper exception list; you do not have to add this manually.
 This method is useful if you have your own custom wrapper exceptions, or a framework is throwing exceptions using its own wrapper.
 
-Unique (affected) user tracking
+Customers
 -------------------------------
 
-There are properties named *User* and *UserInfo* on RaygunClient which you can set to provide user info such as ID and email address
-This allows you to see the count of affected users for each error in the Raygun dashboard.
-If you provide an email address, and the user has an associated Gravatar, you will see their avatar in the error instance page.
+There are properties named *User* and *UserInfo* on RaygunClient which you can set to provide customer info such as ID and email address
+This allows you to see the count of affected customers for each error in the Raygun dashboard.
+If you provide an email address, and the customer has an associated Gravatar, you will see their avatar in the error instance page.
 
 Make sure to abide by any privacy policies that your company follows when using this feature.
 

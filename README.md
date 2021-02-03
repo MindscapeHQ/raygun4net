@@ -311,7 +311,7 @@ At any point after calling the Attach method, you can use RaygunClient.Current t
 ### Xamarin for Android
 
 In the main/entry Activity of your application, use the static RaygunClient.Attach method using your app API key.
-There is also an overload for the Attach method that lets you pass in a user-identity string which is useful for tracking affected users in your Raygun dashboard.
+There is also an overload for the Attach method that lets you pass in a user-identity string which is useful for tracking affected customers in your Raygun dashboard.
 
 ```csharp
 RaygunClient.Attach("YOUR_APP_API_KEY");
@@ -383,34 +383,34 @@ In this case, if a TargetInvocationException occurs, it will be removed and repl
 Note that HttpUnhandledException and TargetInvocationException are already added to the wrapper exception list; you do not have to add these manually.
 This method is useful if you have your own custom wrapper exceptions, or a framework is throwing exceptions using its own wrapper.
 
-## Affected user tracking
+## Customers
 
-There is a property named ```User``` on RaygunClient which you can set to be the current user's ID. This allows you to see the count of affected users for each error in the Raygun dashboard. 
+There is a property named ```User``` on RaygunClient which you can set to be the current cusrtomer's ID. This allows you to see the count of affected customers for each error in the Raygun dashboard. 
 
-If you want more detailed information about users (and the ability to use the new Affected User reporting feature when it is released), you can set the ```UserInfo``` property on the RaygunClient to a new RaygunIdentifierMessage object. [This class](https://github.com/MindscapeHQ/raygun4net/blob/master/Mindscape.Raygun4Net/Messages/RaygunIdentifierMessage.cs) has a number of properties on it to help identifier the user who experienced a crash.
+If you want more detailed information about customers (and the ability to use the new Customers feature when it is released), you can set the ```UserInfo``` property on the RaygunClient to a new RaygunIdentifierMessage object. [This class](https://github.com/MindscapeHQ/raygun4net/blob/master/Mindscape.Raygun4Net/Messages/RaygunIdentifierMessage.cs) has a number of properties on it to help identifier the customer who experienced a crash.
 
 Make sure to abide by any privacy policies that your company follows when using this feature.
 
 ### Properties
 The only required field is Identifier.
 
-```Identifier``` is the unique identifier from your system for this user.
+```Identifier``` is the unique identifier from your system for this customer.
 
-```IsAnonymous``` is a flag indicating whether the user is logged in (or identifiable) or if they are anonymous. An anonymous user can still have a unique identifier.
+```IsAnonymous``` is a flag indicating whether the customer is logged in (or identifiable) or if they are anonymous. An anonymous user can still have a unique identifier.
 
-```Email``` The user's email address. If you use email addresses to identify your users, feel free to set the identifier to their email and leave this blank, as we will use the identifier as the email address if it looks like one, and no email address is not specified.
+```Email``` The customer's email address. If you use email addresses to identify your customer, feel free to set the identifier to their email and leave this blank, as we will use the identifier as the email address if it looks like one, and no email address is not specified.
 
-```FullName``` The user's full name.
+```FullName``` The customer's full name.
 
-```FirstName``` The user's first (or preferred) name.
+```FirstName``` The customer's first (or preferred) name.
 
-```UUID``` A device identifier. Could be used to identify users across devices, or machines that are breaking for many users.
+```UUID``` A device identifier. Could be used to identify customers across devices, or machines that are breaking for many customers.
 
 ### Usage
 ```csharp
-raygunClient.User = "user@email.com";
+raygunClient.User = "customer@email.com";
 // OR
-raygunClient.UserInfo = new RaygunIdentifierMessage("user@email.com")
+raygunClient.UserInfo = new RaygunIdentifierMessage("customer@email.com")
 {
   IsAnonymous = false,
   FullName = "Robbie Raygun",
