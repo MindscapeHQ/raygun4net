@@ -126,12 +126,12 @@ In this case, if a TargetInvocationException occurs, it will be removed and repl
 Note that HttpUnhandledException and TargetInvocationException are already added to the wrapper exception list; you do not have to add these manually.
 This method is useful if you have your own custom wrapper exceptions, or a framework is throwing exceptions using its own wrapper.
 
-Unique (affected) user tracking
+Customers
 -------------------------------
 
-There is a property named *User* on RaygunClient which you can set to be the current user's ID or email address.
-This allows you to see the count of affected users for each error in the Raygun dashboard.
-If you provide an email address, and the user has an associated Gravatar, you will see their avatar in the error instance page.
+There is a property named *User* on RaygunClient which you can set to be the current customer's ID or email address.
+This allows you to see the count of affected customers for each error in the Raygun dashboard.
+If you provide an email address, and the customer has an associated Gravatar, you will see their avatar in the error instance page.
 
 Make sure to abide by any privacy policies that your company follows when using this feature.
 
