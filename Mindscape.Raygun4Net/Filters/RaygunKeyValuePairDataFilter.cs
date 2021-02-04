@@ -36,7 +36,6 @@ namespace Mindscape.Raygun4Net.Filters
           if (pair.Length == 1)
           {
             stringBuilder.Append(pair[0]);
-            continue;
           }
           else
           {
