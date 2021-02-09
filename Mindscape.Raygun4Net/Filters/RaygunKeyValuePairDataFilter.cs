@@ -31,17 +31,17 @@ namespace Mindscape.Raygun4Net.Filters
           {
             stringBuilder.Append("&");
           }
-
-          stringBuilder.Append(pair[0]);
-          stringBuilder.Append("=");
-
-          if (ShouldIgnore(pair, ignoredKeys))
+          
+          // Can occur when we only have a key and no value.
+          if (pair.Length == 1)
           {
-            stringBuilder.Append(FILTERED_VALUE);
+            stringBuilder.Append(pair[0]);
           }
           else
           {
-            stringBuilder.Append(pair[1]);
+            stringBuilder.Append(pair[0]);
+            stringBuilder.Append("=");
+            stringBuilder.Append(ShouldIgnore(pair, ignoredKeys) ? FILTERED_VALUE : pair[1]);
           }
         }
 
