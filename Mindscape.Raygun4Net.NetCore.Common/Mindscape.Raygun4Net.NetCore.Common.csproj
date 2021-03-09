@@ -25,26 +25,7 @@
     <PackageReference Include="System.Diagnostics.StackTrace" Version="4.0.1" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\APM.cs" Link="ProfilingSupport\APM.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\DataSamplingMethod.cs" Link="ProfilingSupport\DataSamplingMethod.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\IDataSampler.cs" Link="ProfilingSupport\IDataSampler.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\ISamplingManager.cs" Link="ProfilingSupport\ISamplingManager.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\ISamplingOverride.cs" Link="ProfilingSupport\ISamplingOverride.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\PerUriRateSampler.cs" Link="ProfilingSupport\PerUriRateSampler.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SamplingManager.cs" Link="ProfilingSupport\SamplingManager.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SamplingOption.cs" Link="ProfilingSupport\SamplingOption.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SamplingOverride.cs" Link="ProfilingSupport\SamplingOverride.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SamplingPolicy.cs" Link="ProfilingSupport\SamplingPolicy.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SamplingSetting.cs" Link="ProfilingSupport\SamplingSetting.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SettingsManager.cs" Link="ProfilingSupport\SettingsManager.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\SimpleRateSampler.cs" Link="ProfilingSupport\SimpleRateSampler.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\ProfilingSupport\TokenBucket.cs" Link="ProfilingSupport\TokenBucket.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ProfilingSupport\" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
     <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
