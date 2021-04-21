@@ -60,9 +60,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\AssemblyVersionInfo.cs">
-      <Link>Properties\AssemblyVersionInfo.cs</Link>
-    </Compile>
     <Compile Include="Attributes\DoNotProfileAttribute.cs" />
     <Compile Include="Breadcrumbs\DefaultBreadcrumbStorage.cs" />
     <Compile Include="Breadcrumbs\Enums.cs" />
@@ -85,27 +82,12 @@
     <Compile Include="Messages\RaygunErrorStackTraceLineMessage.cs" />
     <Compile Include="Messages\RaygunIdentifierMessage.cs" />
     <Compile Include="Messages\RaygunResponseMessage.cs" />
-    <Compile Include="ProfilingSupport\APM.cs" />
-    <Compile Include="ProfilingSupport\HttpApplicationInitializer.cs" />
-    <Compile Include="ProfilingSupport\ConcurrentDictionary.cs" />
-    <Compile Include="ProfilingSupport\DataSamplingMethod.cs" />
-    <Compile Include="ProfilingSupport\IDataSampler.cs" />
-    <Compile Include="ProfilingSupport\ISamplingManager.cs" />
-    <Compile Include="ProfilingSupport\ISamplingOverride.cs" />
-    <Compile Include="ProfilingSupport\PerUriRateSampler.cs" />
-    <Compile Include="ProfilingSupport\SamplingManager.cs" />
-    <Compile Include="ProfilingSupport\SamplingOption.cs" />
-    <Compile Include="ProfilingSupport\SamplingOverride.cs" />
-    <Compile Include="ProfilingSupport\SamplingPolicy.cs" />
-    <Compile Include="ProfilingSupport\SamplingSetting.cs" />
-    <Compile Include="ProfilingSupport\SettingsManager.cs" />
-    <Compile Include="ProfilingSupport\SimpleRateSampler.cs" />
-    <Compile Include="ProfilingSupport\TokenBucket.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Messages\RaygunErrorMessage.cs" />
     <Compile Include="Messages\RaygunMessage.cs" />
     <Compile Include="Messages\RaygunMessageDetails.cs" />
     <Compile Include="Messages\RaygunRequestMessage.cs" />
+    <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="RaygunClient.cs" />
     <Compile Include="RaygunClientBase.cs" />
     <Compile Include="RaygunCustomGroupingKeyEventArgs.cs" />

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Web;
-using Mindscape.Raygun4Net.ProfilingSupport;
 
 namespace Mindscape.Raygun4Net
 {
@@ -35,8 +34,6 @@ namespace Mindscape.Raygun4Net
       }
       ExcludeErrorsBasedOnHttpStatusCode = HttpStatusCodesToExclude.Length > 0;
       ExcludeErrorsFromLocal = RaygunSettings.Settings.ExcludeErrorsFromLocal;
-
-      APM.Initialize(context, RaygunSettings.Settings.ApplicationIdentifier);
     }
 
     public void Dispose()

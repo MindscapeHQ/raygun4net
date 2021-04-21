@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Raygun")]
 [assembly: AssemblyProduct("Raygun4Net")]
-[assembly: AssemblyCopyright("Copyright © Raygun 2017")]
+[assembly: AssemblyCopyright("Copyright © Raygun 2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

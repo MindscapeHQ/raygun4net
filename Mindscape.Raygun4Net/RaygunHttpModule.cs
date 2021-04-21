@@ -39,8 +39,6 @@ namespace Mindscape.Raygun4Net
         var method = type.GetMethod("AttachExceptionFilter", BindingFlags.Static | BindingFlags.Public);
         method.Invoke(null, new object[] { context, this });
       }
-
-      APM.Initialize(context, RaygunSettings.Settings.ApplicationIdentifier);
     }
 
     public void Dispose()
