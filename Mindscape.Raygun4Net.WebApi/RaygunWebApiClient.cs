@@ -632,9 +632,7 @@ namespace Mindscape.Raygun4Net.WebApi
 
     private RaygunRequestMessage BuildRequestMessage()
     {
-      var message = _currentWebRequest.Value != null ? RaygunWebApiRequestMessageBuilder.Build(_currentWebRequest.Value, _requestMessageOptions) : null;
-      _currentWebRequest.Value = null;
-      return message;
+      return _currentWebRequest.Value != null ? RaygunWebApiRequestMessageBuilder.Build(_currentWebRequest.Value, _requestMessageOptions) : null;
     }
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
