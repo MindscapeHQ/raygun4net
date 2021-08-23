@@ -173,7 +173,7 @@ namespace Mindscape.Raygun4Net
           {
             _handlingRecursiveGrouping = true;
 
-            await SendAsync(e, null, null);
+            await SendAsync(e, null, null).ConfigureAwait(false);
 
             _handlingRecursiveGrouping = false;
           }
@@ -237,7 +237,7 @@ namespace Mindscape.Raygun4Net
     {
       if (CanSend(exception))
       {
-        await StripAndSend(exception, tags, userCustomData, null);
+        await StripAndSend(exception, tags, userCustomData, null).ConfigureAwait(false);
         FlagAsSent(exception);
       }
     }
@@ -285,12 +285,12 @@ namespace Mindscape.Raygun4Net
       {
         var task = Task.Run(async () =>
         {
-          await StripAndSend(exception, tags, userCustomData, userInfo);
+          await StripAndSend(exception, tags, userCustomData, userInfo).ConfigureAwait(false);
         });
 
         FlagAsSent(exception);
 
-        await task;
+        await task.ConfigureAwait(false);
       }
     }
 
@@ -322,7 +322,7 @@ namespace Mindscape.Raygun4Net
         .SetUser(userInfo ?? UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
         .Build();
 
-      var customGroupingKey = await OnCustomGroupingKey(exception, message);
+      var customGroupingKey = await OnCustomGroupingKey(exception, message).ConfigureAwait(false);
 
       if (string.IsNullOrEmpty(customGroupingKey) == false)
       {
@@ -336,7 +336,7 @@ namespace Mindscape.Raygun4Net
     {
       foreach (Exception e in StripWrapperExceptions(exception))
       {
-        await Send(await BuildMessage(e, tags, userCustomData, userInfo));
+        await Send(await BuildMessage(e, tags, userCustomData, userInfo).ConfigureAwait(false)).ConfigureAwait(false);
       }
     }
 
@@ -397,7 +397,7 @@ namespace Mindscape.Raygun4Net
         var message = SimpleJson.SerializeObject(raygunMessage);
         requestMessage.Content = new StringContent(message, Encoding.UTF8, "application/json");
 
-        var result = await Client.SendAsync(requestMessage);
+        var result = await Client.SendAsync(requestMessage).ConfigureAwait(false);
 
         if (!result.IsSuccessStatusCode)
         {
