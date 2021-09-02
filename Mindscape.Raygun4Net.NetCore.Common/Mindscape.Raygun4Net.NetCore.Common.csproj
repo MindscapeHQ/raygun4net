@@ -8,7 +8,7 @@
     <Authors>Raygun</Authors>
     <Description>.NetStandard library .NetCore applications</Description>
     <PackageId>Mindscape.Raygun4Net.NetCore.Common</PackageId>
-    <PackageVersion>6.5.0</PackageVersion>
+    <PackageVersion>6.5.1</PackageVersion>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseUrl>https://github.com/MindscapeHQ/raygun4net/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/MindscapeHQ/raygun4net</PackageProjectUrl>
