@@ -53,7 +53,7 @@ Projects built with the following frameworks are supported:
 
 Install the NuGet package to a project which uses one of the above frameworks and the correct assembly will be referenced.
 
-For Xamarin you may need to add either the [Raygun4Xamarin.Forms](https://www.nuget.org/packages/Raygun4Xamarin.Forms/), or the [Mindscape.Raygun4Net.Xamarin.Android](https://www.nuget.org/packages/Mindscape.Raygun4Net.Xamarin.Android/) & [Mindscape.Raygun4Net.Xamarin.iOS.Unified](https://www.nuget.org/packages/Mindscape.Raygun4Net.Xamarin.iOS.Unified/) packages as well.
+For Xamarin we recommended adding either [Raygun4Xamarin.Forms](https://www.nuget.org/packages/Raygun4Xamarin.Forms/), or the [Mindscape.Raygun4Net.Xamarin.Android](https://www.nuget.org/packages/Mindscape.Raygun4Net.Xamarin.Android/) & [Mindscape.Raygun4Net.Xamarin.iOS.Unified](https://www.nuget.org/packages/Mindscape.Raygun4Net.Xamarin.iOS.Unified/) packages.
 
 Where is my app API key?
 ====================
