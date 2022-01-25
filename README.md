@@ -462,7 +462,7 @@ The key has a maximum length of 100.
 ### Raygun4Net does not send crash reports and there are no errors to help troubleshoot why this is happening
 
 - Raygun4net has the throwOnError property set to false by default. The first thing is to allow what ever error occurring in Raygun4Net to bubble up the stack and be reported as an unhandled exception, so add this attribute in the raygun4Net Config section or enable it in the config options of the client.  
-`<RaygunSettings apikey="[Raygun4Net api key goes here]" throwOnError="ture"/>`
+`<RaygunSettings apikey="[Raygun4Net api key goes here]" throwOnError="true"/>`
 - These errors will start going to the event viewer or you could attach a trace listener and have them logged to a text file as well
 - There are many reasons why crash reports may not be sent through. In the Event that the error message mentions “*The underlying connection was closed: An unexpected error occurred on a send*.” This is probably a TLS handshake issue. Confirm this by inspecting the inner exception or the rest of the trace and look for cipher mismatch phrase. This will be a clear indication that there is a TLS issue. - To Resolve this Add the following global config where it is most convenient e.g. Global.asax  ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 Taking care not to include the less secure protocols like SSL3 and to some extent the TLS1.1.
 
