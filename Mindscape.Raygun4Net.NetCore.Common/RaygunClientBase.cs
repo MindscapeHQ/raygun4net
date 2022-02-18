@@ -60,6 +60,17 @@ namespace Mindscape.Raygun4Net
                 ApplicationVersion = settings.ApplicationVersion;
             }
 
+#if NETSTANDARD2_0_OR_GREATER
+            if (settings.CatchUnhandledExceptions)
+            {
+                System.AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            }
+
+        void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
+        {
+            this.Send(e.ExceptionObject as Exception, new[]{"UnhandledException"});
+        }
+#endif
         }
 
 
