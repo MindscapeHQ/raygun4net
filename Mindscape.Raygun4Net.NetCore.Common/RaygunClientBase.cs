@@ -48,6 +48,45 @@ namespace Mindscape.Raygun4Net
         /// </summary>
         public string ApplicationVersion { get; set; }
 
+#if NETSTANDARD2_0_OR_GREATER
+
+        /// <summary>
+        /// If set to true, this will automatically setup handlers to catch Unhandled Exceptions  
+        /// </summary>
+        /// <remarks>
+        /// Currently defaults to false. This may be change in future releases.
+        /// </remarks>
+        public virtual bool CatchUnhandledExceptions
+        {
+            get { return _settings.CatchUnhandledExceptions; }
+
+            set
+            {
+                if (_settings.CatchUnhandledExceptions == value) { return; }
+
+                if (value == true)
+                {
+                    System.AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+                    _settings.CatchUnhandledExceptions = true;
+                    return;
+                }
+
+                if (value == false)
+                {
+                    System.AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
+                    _settings.CatchUnhandledExceptions = false; 
+                    return;
+                }
+
+                void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
+                {
+                    Send(e.ExceptionObject as Exception, new[] { "UnhandledException" });
+                }
+            }
+        }
+
+#endif
+
         public RaygunClientBase(RaygunSettingsBase settings)
         {
             _settings = settings;
@@ -61,15 +100,10 @@ namespace Mindscape.Raygun4Net
             }
 
 #if NETSTANDARD2_0_OR_GREATER
-            if (settings.CatchUnhandledExceptions)
+            if (_settings.CatchUnhandledExceptions)
             {
-                System.AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-            }
-
-        void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
-        {
-            this.Send(e.ExceptionObject as Exception, new[]{"UnhandledException"});
-        }
+               CatchUnhandledExceptions = _settings.CatchUnhandledExceptions;
+            }      
 #endif
         }
 
