@@ -18,6 +18,8 @@ namespace Mindscape.Raygun4Net.AspNetCore
     private readonly RaygunMiddlewareSettings _middlewareSettings;
     private readonly RaygunSettings _settings;
     
+    internal const string UnhandledExceptionTag = "UnhandledException";
+    
     public RaygunAspNetMiddleware(RequestDelegate next, IOptions<RaygunSettings> settings, RaygunMiddlewareSettings middlewareSettings)
     {
       _next = next;
@@ -79,7 +81,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
         }
 
         var client = _middlewareSettings.ClientProvider.GetClient(_settings, httpContext);
-        await client.SendInBackground(e);
+        await client.SendInBackground(e, new []{UnhandledExceptionTag});
         throw;
       }
       finally

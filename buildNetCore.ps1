@@ -32,9 +32,16 @@ task Init -depends Clean {
     new-item $build_dir_signed_net_core -itemType directory | Out-Null
     new-item $build_dir_signed_net_core_common -itemType directory | Out-Null
     new-item $build_dir_signed_aspnet_core -itemType directory | Out-Null
+
+    New-Item -ItemType Directory -Force -Path $root\Mindscape.Raygun4Net.NetCore.Common\build\NetCoreCommon\ | Out-Null
+    New-Item -ItemType Directory -Force -Path $root\Mindscape.Raygun4Net.NetCore\build\NetCore\ | Out-Null
+    New-Item -ItemType Directory -Force -Path $root\Mindscape.Raygun4Net.AspNetCore\build\AspNetCore\ | Out-Null
+    New-Item -ItemType Directory -Force -Path $root\Mindscape.Raygun4Net.NetCore.Common\build\Signed\NetCoreCommon\ | Out-Null
+    New-Item -ItemType Directory -Force -Path $root\Mindscape.Raygun4Net.NetCore\build\Signed\NetCore\ | Out-Null
+    New-Item -ItemType Directory -Force -Path $root\Mindscape.Raygun4Net.AspNetCore\build\Signed\AspNetCore\ | Out-Null
 }
 
-task Compile -depends Init {
+task Compile -depends Init {    
     exec { dotnet pack .\Mindscape.Raygun4Net.NetCore.Common\ --output build\NetCoreCommon --configuration Release }
     move-item -Path $root\Mindscape.Raygun4Net.NetCore.Common\build\NetCoreCommon\* -Destination $build_dir_net_core_common
     

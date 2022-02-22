@@ -13,7 +13,7 @@ The main classes can be found in the Mindscape.Raygun4Net namespace.
 Usage
 ======
 
-In your project.json file, add "Mindscape.Raygun4Net.AspNetCore": "6.6.2" to your dependencies.
+In your project.json file, add "Mindscape.Raygun4Net.AspNetCore": "6.6.3" to your dependencies.
 
 Run dotnet.exe restore or restore packages within Visual Studio to download the package.
 
@@ -28,6 +28,7 @@ Add the following code to your appsettings.json (if you're using another type of
 To configure the RaygunAspNetCoreMiddleware to handle exceptions that have been triggered and send unhandled exceptions automatically.
 
 In Startup.cs:
+
   1. Add using Mindscape.Raygun4Net; to your using statements.
   2. Add app.UseRaygun(); to the Configure method after any other ExceptionHandling methods e.g. app.UseDeveloperExceptionPage() or app.UseExceptionHandler("/Home/Error").
   3. Add services.AddRaygun(Configuration); to the ConfigureServices method.
