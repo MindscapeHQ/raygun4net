@@ -64,14 +64,13 @@ namespace Mindscape.Raygun4Net
       {
         if (_settings.CatchUnhandledExceptions == value) { return; }
 
-        if (value == true)
+        if (value)
         {
           System.AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
           _settings.CatchUnhandledExceptions = true;
           return;
         }
-
-        if (value == false)
+        else
         {
           System.AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
           _settings.CatchUnhandledExceptions = false;
