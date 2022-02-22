@@ -68,13 +68,11 @@ namespace Mindscape.Raygun4Net
         {
           System.AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
           _settings.CatchUnhandledExceptions = true;
-          return;
         }
         else
         {
           System.AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
-          _settings.CatchUnhandledExceptions = false;
-          return;
+          _settings.CatchUnhandledExceptions = false;         
         }
 
         void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
@@ -99,10 +97,10 @@ namespace Mindscape.Raygun4Net
       }
 
 #if NETSTANDARD2_0_OR_GREATER
-            if (_settings.CatchUnhandledExceptions)
-            {
-               CatchUnhandledExceptions = _settings.CatchUnhandledExceptions;
-            }      
+      if (_settings.CatchUnhandledExceptions)
+      {
+         CatchUnhandledExceptions = _settings.CatchUnhandledExceptions;
+      }      
 #endif
     }
 
