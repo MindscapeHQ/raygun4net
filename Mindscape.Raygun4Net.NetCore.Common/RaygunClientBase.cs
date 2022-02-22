@@ -67,14 +67,15 @@ namespace Mindscape.Raygun4Net
         if (value)
         {
           System.AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-          _settings.CatchUnhandledExceptions = true;
         }
         else
         {
-          System.AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
-          _settings.CatchUnhandledExceptions = false;         
+          System.AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;     
         }
 
+        _settings.CatchUnhandledExceptions = value;
+        
+        
         void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
         {
           Send(e.ExceptionObject as Exception, new[] { "UnhandledException" });
