@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard1.6;netstandard2.0;netstandard2.1;net5.0;net6.0</TargetFrameworks>
     <Configurations>Debug;Release;Sign</Configurations>
     <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
@@ -8,11 +8,12 @@
     <Authors>Raygun</Authors>
     <Description>.NetStandard library .NetCore applications</Description>
     <PackageId>Mindscape.Raygun4Net.NetCore.Common</PackageId>
-    <PackageVersion>6.5.2</PackageVersion>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <PackageLicenseUrl>https://github.com/MindscapeHQ/raygun4net/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageVersion>6.5.3</PackageVersion>
     <PackageProjectUrl>https://github.com/MindscapeHQ/raygun4net</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance> 
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
+    <PackageIcon>nuget-icon.png</PackageIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
     <PackageId>Mindscape.Raygun4Net.NetCore.Common.Signed</PackageId>
@@ -20,6 +21,10 @@
     <SignAssembly>true</SignAssembly>
     <Optimize>true</Optimize>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\LICENSE" Pack="true" PackagePath=""/>
+    <None Include="..\nuget-icon.png" Pack="true" PackagePath="\"/>
+  </ItemGroup>  
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
     <PackageReference Include="System.ComponentModel" Version="4.3.0" />
     <PackageReference Include="System.Diagnostics.StackTrace" Version="4.0.1" />
