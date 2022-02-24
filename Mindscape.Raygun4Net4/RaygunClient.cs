@@ -46,10 +46,7 @@ namespace Mindscape.Raygun4Net
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
     /// Uses the ApiKey specified in the config file.
     /// </summary>
-    public RaygunClient()
-      : this(RaygunSettings.Settings.ApiKey)
-    {
-    }
+    public RaygunClient() : this(RaygunSettings.Settings.ApiKey) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -266,7 +263,7 @@ namespace Mindscape.Raygun4Net
 
     public static void RecordBreadcrumb(string message)
     {
-      _breadcrumbs.Record(new RaygunBreadcrumb {Message = message});
+      _breadcrumbs.Record(new RaygunBreadcrumb { Message = message });
     }
 
     public static void RecordBreadcrumb(RaygunBreadcrumb crumb)
@@ -289,7 +286,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     public override void Send(Exception exception)
     {
-      Send(exception, null, (IDictionary) null, null);
+      Send(exception, null, (IDictionary)null, null);
     }
 
     /// <summary>
@@ -300,7 +297,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message.</param>
     public void Send(Exception exception, IList<string> tags)
     {
-      Send(exception, tags, (IDictionary) null, null);
+      Send(exception, tags, (IDictionary)null, null);
     }
 
     /// <summary>
@@ -343,7 +340,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     public void SendInBackground(Exception exception)
     {
-      SendInBackground(exception, null, (IDictionary) null, null);
+      SendInBackground(exception, null, (IDictionary)null, null);
     }
 
     /// <summary>
@@ -353,7 +350,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message.</param>
     public void SendInBackground(Exception exception, IList<string> tags)
     {
-      SendInBackground(exception, tags, (IDictionary) null, null);
+      SendInBackground(exception, tags, (IDictionary)null, null);
     }
 
     /// <summary>
