@@ -13,7 +13,7 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance> 
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
-    <PackageIcon>nuget-icon.png</PackageIcon>
+    <PackageIcon>128x128-transparent.png</PackageIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
     <PackageId>Mindscape.Raygun4Net.NetCore.Common.Signed</PackageId>
@@ -23,7 +23,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\LICENSE" Pack="true" PackagePath=""/>
-    <None Include="..\nuget-icon.png" Pack="true" PackagePath="\"/>
+    <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\"/>
   </ItemGroup>  
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
     <PackageReference Include="System.ComponentModel" Version="4.3.0" />

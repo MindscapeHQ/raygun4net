@@ -18,11 +18,11 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
-    <PackageIcon>nuget-icon.png</PackageIcon>
+    <PackageIcon>128x128-transparent.png</PackageIcon>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\LICENSE" Pack="true" PackagePath=""/>
-    <None Include="..\nuget-icon.png" Pack="true" PackagePath="\"/>
+    <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\"/>
   </ItemGroup>  
   <ItemGroup>
     <Compile Include="RaygunClient.cs" />
