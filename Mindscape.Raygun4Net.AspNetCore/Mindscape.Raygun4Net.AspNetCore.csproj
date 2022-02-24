@@ -34,11 +34,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
-     </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Mindscape.Raygun4Net\Filters\IRaygunDataFilter.cs" Link="Filters\IRaygunDataFilter.cs" />
     <Compile Include="..\Mindscape.Raygun4Net\Filters\RaygunXmlDataFilter.cs" Link="Filters\RaygunXmlDataFilter.cs" />
