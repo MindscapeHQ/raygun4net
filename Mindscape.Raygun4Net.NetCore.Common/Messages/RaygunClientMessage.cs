@@ -5,7 +5,7 @@
     public RaygunClientMessage()
     {
       Name = "Raygun4Net.NetCore";
-      Version = "6.5.2";
+      Version = "6.5.3";
       ClientUrl = @"https://github.com/MindscapeHQ/raygun4net";
     }
 

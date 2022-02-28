@@ -3,7 +3,7 @@
     <RootNamespace>Mindscape.Raygun4Net.NetCore</RootNamespace>
     <AssemblyName>Mindscape.Raygun4Net.NetCore</AssemblyName>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <TargetFrameworks>netstandard1.6;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard1.6;netstandard2.0;netstandard2.1;net5.0;net6.0</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Configurations>Debug;Release;Sign</Configurations>
     <Platforms>AnyCPU</Platforms>
@@ -13,12 +13,17 @@
     <Authors>Raygun</Authors>
     <Description>.NetStandard library for targeting .Net Core applications</Description>
     <PackageId>Mindscape.Raygun4Net.NetCore</PackageId>
-    <PackageVersion>6.4.2</PackageVersion>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <PackageLicenseUrl>https://github.com/MindscapeHQ/raygun4net/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageVersion>6.4.3</PackageVersion>
     <PackageProjectUrl>https://github.com/MindscapeHQ/raygun4net</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
+    <PackageIcon>128x128-transparent.png</PackageIcon>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\LICENSE" Pack="true" PackagePath=""/>
+    <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\"/>
+  </ItemGroup>  
   <ItemGroup>
     <Compile Include="RaygunClient.cs" />
     <Compile Include="RaygunSettings.cs" />
