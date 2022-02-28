@@ -2,6 +2,7 @@ properties {
     $root =                             $psake.build_script_dir
     $configuration =                    "Release"
     $build_dir =                        "$root\build\"
+    $build_dir_upload =                 "$root\to-upload"
     $build_dir_net_core =               "$build_dir\netcore"
     $build_dir_aspnet_core  =           "$build_dir\asp-netcore"
     $build_dir_net_core_common  =       "$build_dir\netcore-common"
@@ -17,6 +18,7 @@ properties {
 task default -depends Compile
 
 task Clean {
+    remove-item -force -recurse $build_dir_upload -ErrorAction SilentlyContinue | Out-Null
     remove-item -force -recurse $build_dir_net_core -ErrorAction SilentlyContinue | Out-Null
     remove-item -force -recurse $build_dir_aspnet_core -ErrorAction SilentlyContinue | Out-Null
     remove-item -force -recurse $build_dir_net_core_common -ErrorAction SilentlyContinue | Out-Null
@@ -26,13 +28,14 @@ task Clean {
 }
 
 task Init -depends Clean {
+    new-item $build_dir_upload -itemType directory | Out-Null
     new-item $build_dir_net_core -itemType directory | Out-Null
     new-item $build_dir_aspnet_core -itemType directory | Out-Null
     new-item $build_dir_net_core_common -itemType directory | Out-Null
     new-item $build_dir_signed_net_core -itemType directory | Out-Null
     new-item $build_dir_signed_net_core_common -itemType directory | Out-Null
     new-item $build_dir_signed_aspnet_core -itemType directory | Out-Null
-
+    
     New-Item -ItemType Directory -Force -Path $root\Mindscape.Raygun4Net.NetCore.Common\build\NetCoreCommon\ | Out-Null
     New-Item -ItemType Directory -Force -Path $root\Mindscape.Raygun4Net.NetCore\build\NetCore\ | Out-Null
     New-Item -ItemType Directory -Force -Path $root\Mindscape.Raygun4Net.AspNetCore\build\AspNetCore\ | Out-Null
@@ -42,13 +45,13 @@ task Init -depends Clean {
 }
 
 task Compile -depends Init {    
-    exec { dotnet pack .\Mindscape.Raygun4Net.NetCore.Common\ --output build\NetCoreCommon --configuration Release }
+    exec { dotnet pack .\Mindscape.Raygun4Net.NetCore.Common\ --output build\NetCoreCommon --configuration $configuration }
     move-item -Path $root\Mindscape.Raygun4Net.NetCore.Common\build\NetCoreCommon\* -Destination $build_dir_net_core_common
     
-    exec { dotnet pack .\Mindscape.Raygun4Net.NetCore\ --output build\NetCore --configuration Release }
+    exec { dotnet pack .\Mindscape.Raygun4Net.NetCore\ --output build\NetCore --configuration Rele$configurationase }
     move-item -Path $root\Mindscape.Raygun4Net.NetCore\build\NetCore\* -Destination $build_dir_net_core
     
-    exec { dotnet pack .\Mindscape.Raygun4Net.AspNetCore\ --output build\AspNetCore --configuration Release }
+    exec { dotnet pack .\Mindscape.Raygun4Net.AspNetCore\ --output build\AspNetCore --configuration $configuration }
     move-item -Path $root\Mindscape.Raygun4Net.AspNetCore\build\AspNetCore\* -Destination $build_dir_aspnet_core
 
     # Signed
@@ -62,4 +65,13 @@ task Compile -depends Init {
     # Signed
     exec { dotnet pack .\Mindscape.Raygun4Net.AspNetCore\ --output build\Signed\AspNetCore --configuration Sign }
     move-item -Path $root\Mindscape.Raygun4Net.AspNetCore\build\Signed\AspNetCore\* -Destination $build_dir_signed_aspnet_core
+
+    # Move all of the packages into one directory
+    Copy-Item -Path $build_dir -Destination $build_dir_upload -Recurse -Container:$false -Force 
+
+    #Tidy up empty directories (artifacts)
+    Get-ChildItem $build_dir_upload -Recurse -Force -Directory | 
+    Sort-Object -Property FullName -Descending |
+    Where-Object { $($_ | Get-ChildItem -Force | Select-Object -First 1).Count -eq 0 } |
+    Remove-Item -Verbose
 }
