@@ -28,7 +28,6 @@ task Clean {
 }
 
 task Init -depends Clean {
-    new-item $build_dir_upload -itemType directory | Out-Null
     new-item $build_dir_net_core -itemType directory | Out-Null
     new-item $build_dir_aspnet_core -itemType directory | Out-Null
     new-item $build_dir_net_core_common -itemType directory | Out-Null
@@ -36,6 +35,7 @@ task Init -depends Clean {
     new-item $build_dir_signed_net_core_common -itemType directory | Out-Null
     new-item $build_dir_signed_aspnet_core -itemType directory | Out-Null
     
+    New-Item -ItemType Directory -Force -Path $build_dir_upload\ | Out-Null
     New-Item -ItemType Directory -Force -Path $root\Mindscape.Raygun4Net.NetCore.Common\build\NetCoreCommon\ | Out-Null
     New-Item -ItemType Directory -Force -Path $root\Mindscape.Raygun4Net.NetCore\build\NetCore\ | Out-Null
     New-Item -ItemType Directory -Force -Path $root\Mindscape.Raygun4Net.AspNetCore\build\AspNetCore\ | Out-Null
