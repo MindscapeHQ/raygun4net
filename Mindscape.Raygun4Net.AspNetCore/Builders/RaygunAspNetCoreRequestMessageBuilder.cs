@@ -76,17 +76,17 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
 
     private static IList GetCookies(HttpRequest request, RaygunRequestMessageOptions options)
     {
-      IList cookies = null;
+      IList cookies;
       try
       {
-        if (request.HasFormContentType)
-        {
-          cookies = request.Cookies.Where(c => !options.IsCookieIgnored(c.Key) && !options.IsSensitiveFieldIgnored(c.Key))
-                                   .Select(c => new RaygunRequestMessage.Cookie(c.Key, c.Value)).ToList();
-        }
+	      cookies = request.Cookies.Where(c => !options.IsCookieIgnored(c.Key) && !options.IsSensitiveFieldIgnored(c.Key))
+		      .Select(c => new RaygunRequestMessage.Cookie(c.Key, c.Value)).ToList();
       }
       // ReSharper disable once EmptyGeneralCatchClause
-      catch { }
+      catch (Exception e)
+      {
+	      cookies = new List<string>() { "Failed to retrieve cookies: " + e.Message };
+      }
 
       return cookies;
     }
