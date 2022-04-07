@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -81,7 +82,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
         }
 
         var client = _middlewareSettings.ClientProvider.GetClient(_settings, httpContext);
-        await client.SendInBackground(e, new []{UnhandledExceptionTag});
+        await client.SendInBackground(e, new List<string>{UnhandledExceptionTag});
         throw;
       }
       finally
