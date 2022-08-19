@@ -167,9 +167,7 @@ namespace Mindscape.Raygun4Net.Storage
 
     private IsolatedStorageFile GetIsolatedStorageScope()
     {
-      return AppDomain.CurrentDomain?.ActivationContext != null ?
-        IsolatedStorageFile.GetUserStoreForApplication() :
-        IsolatedStorageFile.GetUserStoreForAssembly();
+      return IsolatedStorageFile.GetUserStoreForAssembly();
     }
 
     private string GetLocalDirectory(string apiKey)

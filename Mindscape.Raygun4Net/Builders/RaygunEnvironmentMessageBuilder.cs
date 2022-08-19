@@ -48,8 +48,7 @@ namespace Mindscape.Raygun4Net.Builders
 
         try
         {
-          DateTime now = DateTime.Now;
-          _message.UtcOffset = TimeZone.CurrentTimeZone.GetUtcOffset(now).TotalHours;
+          _message.UtcOffset = DateTimeOffset.Now.Offset.TotalHours;
           _message.Locale = CultureInfo.CurrentCulture.DisplayName;
         }
         catch (Exception ex)
@@ -64,13 +63,13 @@ namespace Mindscape.Raygun4Net.Builders
             // ProcessorCount cannot run in medium trust under net35, once we have
             // moved to net40 minimum we can move this out of here
             _message.ProcessorCount = Environment.ProcessorCount;
-            _message.Architecture   = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
+            _message.Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
 
             ComputerInfo info = new ComputerInfo();
             _message.TotalPhysicalMemory = info.TotalPhysicalMemory / 0x100000; // in MB
-            _message.TotalVirtualMemory  = info.TotalVirtualMemory  / 0x100000; // in MB
+            _message.TotalVirtualMemory = info.TotalVirtualMemory / 0x100000; // in MB
 
-            _message.Cpu       = GetCpu();
+            _message.Cpu = GetCpu();
             _message.OSVersion = GetOSVersion();
           }
         }
@@ -95,7 +94,7 @@ namespace Mindscape.Raygun4Net.Builders
           ComputerInfo info = new ComputerInfo();
 
           _message.AvailablePhysicalMemory = info.AvailablePhysicalMemory / 0x100000; // in MB
-          _message.AvailableVirtualMemory  = info.AvailableVirtualMemory  / 0x100000; // in MB
+          _message.AvailableVirtualMemory = info.AvailableVirtualMemory / 0x100000; // in MB
 
           _message.DiskSpaceFree = GetDiskSpace();
         }
@@ -114,41 +113,52 @@ namespace Mindscape.Raygun4Net.Builders
 
     private static string GetCpu()
     {
-      ManagementObjectSearcher wmiProcessorSearcher = new ManagementObjectSearcher("SELECT Name FROM Win32_Processor");
-      ManagementObjectCollection wmiProcessorCollection = wmiProcessorSearcher.Get();
-
-      foreach (ManagementObject wmiProcessorObject in wmiProcessorCollection)
+      if (OperatingSystem.IsWindows())
       {
-        try
+        ManagementObjectSearcher wmiProcessorSearcher =
+          new ManagementObjectSearcher("SELECT Name FROM Win32_Processor");
+        ManagementObjectCollection wmiProcessorCollection = wmiProcessorSearcher.Get();
+
+        foreach (var managementObject in wmiProcessorCollection)
         {
-          var name = wmiProcessorObject["Name"].ToString();
-          return name;
-        }
-        catch (ManagementException ex)
-        {
-          RaygunLogger.Instance.Error($"Error retrieving CPU {ex.Message}");
+          var wmiProcessorObject = (ManagementObject)managementObject;
+          try
+          {
+            var name = wmiProcessorObject["Name"].ToString();
+            return name;
+          }
+          catch (ManagementException ex)
+          {
+            RaygunLogger.Instance.Error($"Error retrieving CPU {ex.Message}");
+          }
         }
       }
+
       return Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER");
     }
 
     private static string GetOSVersion()
     {
-      ManagementObjectSearcher wmiOperatingSystemSearcher = new ManagementObjectSearcher("SELECT Version FROM Win32_OperatingSystem");
-      ManagementObjectCollection wmiOperatingSystemCollection = wmiOperatingSystemSearcher.Get();
-
-      foreach (ManagementObject wmiOperatingSystemObject in wmiOperatingSystemCollection)
+      if (OperatingSystem.IsWindows())
       {
-        try
+        ManagementObjectSearcher wmiOperatingSystemSearcher =
+          new ManagementObjectSearcher("SELECT Version FROM Win32_OperatingSystem");
+        ManagementObjectCollection wmiOperatingSystemCollection = wmiOperatingSystemSearcher.Get();
+
+        foreach (ManagementObject wmiOperatingSystemObject in wmiOperatingSystemCollection)
         {
-          var version = wmiOperatingSystemObject["Version"].ToString();
-          return version;
-        }
-        catch (ManagementException ex)
-        {
-          RaygunLogger.Instance.Error($"Error retrieving OSVersion {ex.Message}");
+          try
+          {
+            var version = wmiOperatingSystemObject["Version"].ToString();
+            return version;
+          }
+          catch (ManagementException ex)
+          {
+            RaygunLogger.Instance.Error($"Error retrieving OSVersion {ex.Message}");
+          }
         }
       }
+
       return Environment.OSVersion.Version.ToString(3);
     }
 
