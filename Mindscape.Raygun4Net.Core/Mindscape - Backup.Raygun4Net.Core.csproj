@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netstandard2.1;net48;netstandard2</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <OutputType>Library</OutputType>
     <RootNamespace>Mindscape.Raygun4Net</RootNamespace>
     <AssemblyName>Mindscape.Raygun4Net</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-   <!--  <UseWindowsForms>true</UseWindowsForms>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets> -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
 
  
@@ -126,8 +126,8 @@
     <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.336902">
-     <PrivateAssets>all</PrivateAssets> 
-    </PackageReference> 
-     <!-- <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.0" Condition="$([MSBuild]::IsOsPlatform('Windows'))" />  -->
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+     <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.0" Condition="$([MSBuild]::IsOsPlatform('Windows'))" /> 
   </ItemGroup>
 </Project>
