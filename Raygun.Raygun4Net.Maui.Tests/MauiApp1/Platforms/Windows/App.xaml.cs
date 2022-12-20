@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Raygun.Raygun4Net.Maui;
+using System.Diagnostics;
 
 //using RGmagic;
 
@@ -49,15 +50,33 @@ namespace MauiApp1.WinUI
     //TODO: Move this into an extension method in the Raygun.Raygun4Net.Maui project
     private void HandleTheUnhandled()
         {
-          AppDomain.CurrentDomain.FirstChanceException += (sender, args) => { _exceptionBuffer.Add(args.Exception); };
+          AppDomain.CurrentDomain.FirstChanceException += (sender, args) =>
+          {
+
+            _exceptionBuffer.Add(args.Exception);
+          };
 
           UnhandledException += (sender, args) =>
           {
+            if (args.Exception.StackTrace is not null)
+            {
+              Services.GetService<ILogger>().LogCritical(args.Exception, "UnhandledException");
+            }
             var ex = _exceptionBuffer.Find(exception => exception.Message == args.Message);
-            _logger.LogCritical(ex ?? args.Exception,
-              args.Exception.StackTrace is null ? "StackTrace is null" : "it went down");
+            _logger.LogCritical(ex ?? args.Exception, "UnhandledException");
+
           };
-        }
+          AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+          {
+            if (args.ExceptionObject is Exception ex)
+            {
+              _logger.LogCritical(ex, "UnhandledException");
+            }
+            //var ex = _exceptionBuffer.Find(exception => exception.Message == args.);
+            //_logger.LogCritical(ex ?? args.Exception, "UnhandledException");
+
+          };
+    }
 
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {

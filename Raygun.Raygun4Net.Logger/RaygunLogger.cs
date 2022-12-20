@@ -24,6 +24,7 @@ public class RaygunLogger : ILogger
     if (exception is not null)
     {
       new RaygunClient(_settings.ApiKey).SendInBackground(exception);
+      return;
     }
 
     //TODO get stack trace
