@@ -28,13 +28,12 @@ namespace MauiApp1
         {
             try
             {
-               
-                throw new Exception("ssssshshshhh");
+              throw new Exception("ssssshshshhh");
             }
             catch (Exception ex)
             {
                 Services.GetService<ILogger<MainPage>>().LogCritical(ex, "death");
-                Thread.Sleep(1);
+                Thread.Sleep(100);
               //  throw;
             }
         }

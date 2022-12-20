@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
+using Raygun.Raygun4Net.Maui;
+
 //using RGmagic;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -13,9 +15,9 @@ namespace MauiApp1.WinUI
     public partial class App : MauiWinUIApplication
     {
 
-        private readonly Lazy<ILogger<MainPage>> _loggerLazy;
-      //  private readonly RingBuffer<Exception> _exceptionBuffer = new();
-        private ILogger<MainPage> _logger => _loggerLazy.Value;
+        private readonly Lazy<ILogger> _loggerLazy;
+        private readonly RingBuffer<Exception> _exceptionBuffer = new();
+        private ILogger _logger => _loggerLazy.Value;
 
 
         /// <summary>
@@ -24,13 +26,12 @@ namespace MauiApp1.WinUI
         /// </summary>
         public App()
         {
-            _loggerLazy = new Lazy<ILogger<MainPage>>(() => Services.GetService<ILogger<MainPage>>());
-
+            _loggerLazy = new Lazy<ILogger>(() => Services.GetService<ILogger>());
 
 
             AppDomain.CurrentDomain.FirstChanceException += (sender, args) =>
             {
-             //   _exceptionBuffer.Add(args.Exception);
+               _exceptionBuffer.Add(args.Exception);
 
             //    this.Services.GetService<ILogger<App>>().LogCritical(args.Exception, "it went up");
             };
@@ -47,8 +48,8 @@ namespace MauiApp1.WinUI
             };
             this.UnhandledException += (sender, args) =>
             {
-               // var ex =   _exceptionBuffer.Find(exception => exception.Message == args.Message);
-             //   _logger.LogCritical(ex ?? args.Exception, args.Exception.StackTrace is null ? "StackTrace is null" : "it went down");
+                var ex =   _exceptionBuffer.Find(exception => exception.Message == args.Message);
+                _logger.LogCritical(ex ?? args.Exception, args.Exception.StackTrace is null ? "StackTrace is null" : "it went down");
             };
             this.InitializeComponent();
         }
