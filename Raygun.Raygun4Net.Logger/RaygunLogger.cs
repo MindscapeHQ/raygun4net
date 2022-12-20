@@ -18,6 +18,8 @@ public class RaygunLogger : ILogger
     if (logLevel == LogLevel.Critical)
     {
       new RaygunClient(_settings.ApiKey).Send(exception);
+
+      Thread.Sleep(100);
       return;
     }
 

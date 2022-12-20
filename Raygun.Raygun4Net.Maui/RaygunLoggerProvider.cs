@@ -19,7 +19,10 @@ public sealed class RaygunLoggerProvider : ILoggerProvider
     _onChangeToken = config.OnChange(updatedConfig => _currentConfig = updatedConfig);
   }
 
-  public ILogger CreateLogger(string categoryName) => _loggers.GetOrAdd(categoryName, name => new RaygunLogger( GetCurrentConfig()));
+  public ILogger CreateLogger(string categoryName) => _loggers.GetOrAdd(categoryName, name =>
+  {
+    return new RaygunLogger(GetCurrentConfig());
+  });
 
   private RaygunSettings GetCurrentConfig() => _currentConfig;
 

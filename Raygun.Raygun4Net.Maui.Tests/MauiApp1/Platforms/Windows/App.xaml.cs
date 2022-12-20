@@ -27,7 +27,7 @@ namespace MauiApp1.WinUI
         /// </summary>
         public App()
         {
-            _loggerLazy = new Lazy<ILogger>(() => Services.GetService<ILogger>());
+            _loggerLazy = new Lazy<ILogger>(() => Services.GetService<ILogger<App>>());
 
 
             HandleTheUnhandled();
@@ -60,7 +60,8 @@ namespace MauiApp1.WinUI
           {
             if (args.Exception.StackTrace is not null)
             {
-              Services.GetService<ILogger>().LogCritical(args.Exception, "UnhandledException");
+              _logger.LogCritical(args.Exception, "UnhandledException");
+              return;
             }
             var ex = _exceptionBuffer.Find(exception => exception.Message == args.Message);
             _logger.LogCritical(ex ?? args.Exception, "UnhandledException");
