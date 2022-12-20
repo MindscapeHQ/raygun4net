@@ -32,8 +32,7 @@ namespace MauiApp1.WinUI
             {
              //   _exceptionBuffer.Add(args.Exception);
 
-                this.Services.GetService<ILogger<App>>()
-                    .LogCritical(args.Exception, "it went up");
+            //    this.Services.GetService<ILogger<App>>().LogCritical(args.Exception, "it went up");
             };
 
             AppDomain.CurrentDomain.ProcessExit += (sender, args) =>
@@ -44,8 +43,7 @@ namespace MauiApp1.WinUI
 
             AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
             {
-                this.Services.GetService<ILogger<App>>()
-                    .LogCritical(args.ExceptionObject as Exception, "it went right");
+             //   this.Services.GetService<ILogger<App>>().LogCritical(args.ExceptionObject as Exception, "it went right");
             };
             this.UnhandledException += (sender, args) =>
             {

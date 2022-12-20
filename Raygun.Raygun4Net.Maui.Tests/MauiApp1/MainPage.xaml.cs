@@ -35,7 +35,7 @@ namespace MauiApp1
                 {
                     _logger.LogError( exception, "oh no");
                     Console.WriteLine(exception);
-                    throw;
+                 //   throw;
                 }
             }
 

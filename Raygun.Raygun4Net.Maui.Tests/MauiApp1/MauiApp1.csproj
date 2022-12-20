@@ -65,6 +65,11 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
 	</ItemGroup>
 
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Raygun.Raygun4Net.Maui\Raygun.Raygun4Net.Maui.csproj" />
+	</ItemGroup>
+
 	<!--<ItemGroup>
 	  <ProjectReference Include="..\RGmagic\RGmagic.csproj" />
 	</ItemGroup>-->
