@@ -29,12 +29,7 @@ namespace MauiApp1.WinUI
             _loggerLazy = new Lazy<ILogger>(() => Services.GetService<ILogger>());
 
 
-            AppDomain.CurrentDomain.FirstChanceException += (sender, args) =>
-            {
-               _exceptionBuffer.Add(args.Exception);
-
-            //    this.Services.GetService<ILogger<App>>().LogCritical(args.Exception, "it went up");
-            };
+            HandleTheUnhandled();
 
             AppDomain.CurrentDomain.ProcessExit += (sender, args) =>
             {
@@ -44,14 +39,24 @@ namespace MauiApp1.WinUI
 
             AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
             {
-             //   this.Services.GetService<ILogger<App>>().LogCritical(args.ExceptionObject as Exception, "it went right");
+                this.Services.GetService<ILogger<App>>().LogCritical(args.ExceptionObject as Exception, "it went right");
             };
-            this.UnhandledException += (sender, args) =>
-            {
-                var ex =   _exceptionBuffer.Find(exception => exception.Message == args.Message);
-                _logger.LogCritical(ex ?? args.Exception, args.Exception.StackTrace is null ? "StackTrace is null" : "it went down");
-            };
+
             this.InitializeComponent();
+        }
+
+
+    //TODO: Move this into an extension method in the Raygun.Raygun4Net.Maui project
+    private void HandleTheUnhandled()
+        {
+          AppDomain.CurrentDomain.FirstChanceException += (sender, args) => { _exceptionBuffer.Add(args.Exception); };
+
+          UnhandledException += (sender, args) =>
+          {
+            var ex = _exceptionBuffer.Find(exception => exception.Message == args.Message);
+            _logger.LogCritical(ex ?? args.Exception,
+              args.Exception.StackTrace is null ? "StackTrace is null" : "it went down");
+          };
         }
 
         protected override void OnLaunched(LaunchActivatedEventArgs args)
