@@ -3,7 +3,7 @@ Raygun4Net.NetCore - Raygun Provider for .NET Core projects
 
 Where is my app API key?
 ========================
-When you create a new application on your Raygun dashboard, your app API key is displayed at the top of the instructions page.
+When you create a new application on your Raygun dashboard, your app API key is displayed within the instructions page.
 You can also find the API key by clicking the "Application Settings" button in the side bar of the Raygun dashboard.
 
 Namespace
@@ -20,13 +20,16 @@ Run dotnet.exe restore or restore packages within Visual Studio to download the 
 Anywhere in your code, you can also send exception reports manually simply by creating a new instance of the RaygunClient and calling one of the Send or SendInBackground methods.
 This is most commonly used to send exceptions caught in a try/catch block.
 
+```
 try
 {
+  ...
 }
 catch (Exception e)
 {
   new RaygunClient("YOUR_APP_API_KEY").SendInBackground(e);
 } 
+```
 
 Additional configuration options and features
 =============================================
@@ -68,3 +71,6 @@ Tags and custom data
 
 When sending exceptions manually, you can also send an arbitrary list of tags (an array of strings), and a collection of custom data (a dictionary of any objects).
 This can be done using the various Send and SendInBackground method overloads.
+
+---
+See the [Raygun docs](https://raygun.com/documentation/language-guides/dotnet/crash-reporting/net-core/) for a more detailed explanation on how to use this provider.
