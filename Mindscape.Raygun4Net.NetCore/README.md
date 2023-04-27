@@ -73,4 +73,4 @@ When sending exceptions manually, you can also send an arbitrary list of tags (a
 This can be done using the various Send and SendInBackground method overloads.
 
 ---
-See the [Raygun docs](https://raygun.com/documentation/language-guides/dotnet/crash-reporting/net-core/) for a more detailed explanation on how to use this provider.
+See the [Raygun docs](https://raygun.com/documentation/language-guides/dotnet/crash-reporting/net-core/) for more detailed instructions on how to use this provider.
