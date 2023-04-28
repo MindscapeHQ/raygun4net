@@ -2,7 +2,7 @@ Raygun4Net
 ==========
 
 [Raygun](http://raygun.com) provider for .NET Framework
-This package is up to date with .NET 7
+This package supports up to .NET 7
 
 Installation
 ====================
