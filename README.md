@@ -26,7 +26,7 @@ Projects built with the following frameworks are supported:
 * .NET 2.0, 3.5, 4.0+
 * .NET 3.5 and 4.0 Client Profile
 * .NET Core 1, 2 (Use the [Mindscape.Raygun4Net.NetCore](https://www.nuget.org/packages/Mindscape.Raygun4Net.NetCore/) package for higher versions)
-* ASP.NET 
+* ASP.NET
 * Mvc
 * WebApi
 * WinForms, WPF, console apps etc
