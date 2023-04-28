@@ -10,14 +10,27 @@ Namespace
 =========
 The main classes can be found in the Mindscape.Raygun4Net namespace.
 
-Usage
+Installation
 =====
 
-In your project file, add "Mindscape.Raygun4Net.NetCore": "6.4.3" to your dependencies.
+Install the **Mindscape.Raygun4Net.NetCore** NuGet package into your project. You can either use the below dotnet CLI command, or the NuGet management GUI in the IDE you use.
 
-Run dotnet.exe restore or restore packages within Visual Studio to download the package.
+```
+dotnet add package Mindscape.Raygun4Net.NetCore
+```
 
-Anywhere in your code, you can also send exception reports manually simply by creating a new instance of the RaygunClient and calling one of the Send or SendInBackground methods.
+Create an instance of RaygunClient by passing your app API key to the constructor, and hook it up to the unhandled exception delegate. This is typically done in Program.cs or the main method.
+
+```
+using Mindscape.Raygun4Net;
+
+private static RaygunClient _raygunClient = new RaygunClient("paste_your_api_key_here");
+
+AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs e) =>
+  _raygunClient.Send(e.ExceptionObject as Exception);
+```
+
+Add some temporary code to throw an exception and manually send it to Raygun by calling one of the Send or SendInBackground methods.
 This is most commonly used to send exceptions caught in a try/catch block.
 
 ```
