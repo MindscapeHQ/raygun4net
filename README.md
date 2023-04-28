@@ -25,7 +25,7 @@ Projects built with the following frameworks are supported:
 
 * .NET 2.0, 3.5, 4.0+
 * .NET 3.5 and 4.0 Client Profile
-* .NET Core 1, 2 (Use the [Mindscape.Raygun4Net.NetCore](https://www.nuget.org/packages/Mindscape.Raygun4Net.NetCore/) package for higher versions)
+* .NET Core 1.0, 2.0, 3.0+
 * ASP.NET
 * Mvc
 * WebApi
@@ -38,6 +38,8 @@ Projects built with the following frameworks are supported:
 Install the NuGet package to a project which uses one of the above frameworks and the correct assembly will be referenced.
 
 For Xamarin we recommended adding either [Raygun4Xamarin.Forms](https://www.nuget.org/packages/Raygun4Xamarin.Forms/), or the [Mindscape.Raygun4Net.Xamarin.Android](https://www.nuget.org/packages/Mindscape.Raygun4Net.Xamarin.Android/) & [Mindscape.Raygun4Net.Xamarin.iOS.Unified](https://www.nuget.org/packages/Mindscape.Raygun4Net.Xamarin.iOS.Unified/) packages.
+
+For .NET Core and .NET versions 5.0 or higher, we recommend using the [Mindscape.Raygun4Net.NetCore](https://www.nuget.org/packages/Mindscape.Raygun4Net.NetCore/) package.
 
 Where is my app API key?
 ====================
