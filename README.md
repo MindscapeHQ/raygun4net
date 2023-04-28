@@ -41,7 +41,7 @@ Where is my app API key?
 
 When sending exceptions to the Raygun service, an app API key is required to map the messages to your application.
 
-When you create a new application in your Raygun dashboard, your app API key is displayed at the top of the instructions page. You can also find the API key by clicking the "Application Settings" button in the side bar of the Raygun dashboard.
+When you create a new application in your Raygun dashboard, your app API key is displayed within the instructions page. You can also find the API key by clicking the "Application Settings" button in the side bar of the Raygun dashboard.
 
 Namespace
 ====================
@@ -233,32 +233,6 @@ private static void Application_ThreadException(object sender, ThreadExceptionEv
 }
 ```
 
-### Windows Store Apps (Windows 8.1 and Windows Phone 8.1)
-
-In the App.xaml.cs constructor (or any central entry point in your application), call the static RaygunClient.Attach method using your API key. This will catch and send all unhandled exception to Raygun for you.
-
-```csharp
-public App()
-{
-  RaygunClient.Attach("YOUR_APP_API_KEY");
-}
-```
-
-At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages (via the Send methods) or changing options such as the User identity string.
-
-You can manually send exceptions with the SendAsync method. When manually sending, currently the compiler does not allow you to use `await` in a catch block. You can however call SendAsync in a blocking way:
-
-```csharp
-try
-{
-  throw new Exception("foo");
-}
-catch (Exception e)
-{
-  RaygunClient.Current.SendAsync(e);
-}
-```
-
 ### WinRT
 
 In the App.xaml.cs constructor (or any main entry point to your application), call the static RaygunClient.Attach method using your API key.
@@ -280,16 +254,6 @@ A workaround for this issue is provided with the Wrap() method. These allow you 
 
 #### Fody
 Another option is to use the [Fody](https://github.com/Fody/Fody) library, and its [AsyncErrorHandler](https://github.com/Fody/AsyncErrorHandler) extension. This will automatically catch async exceptions and pass them to a handler of your choice (which would send to Raygun as above). See the [installation instructions here](https://github.com/Fody/Fody/wiki/SampleUsage), then check out the [sample project](https://github.com/Fody/FodyAddinSamples/tree/master/AsyncErrorHandlerWithRaygun) for how to use.
-
-### Windows Phone 7.1 and 8
-
-In the App.xaml.cs constructor (or any main entry point to your application), call the static RaygunClient.Attach method using your API key.
-
-```csharp
-RaygunClient.Attach("YOUR_APP_API_KEY");
-```
-
-At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages (via the Send methods) or changing options such as the User identity string.
 
 ### Xamarin for Android
 
