@@ -15,6 +15,9 @@ dotnet add package Mindscape.Raygun4Net
 
 * If you have issues trying to install the package into a WinRT project, see the troubleshooting section below.
 
+---
+See the [Raygun docs](https://raygun.com/documentation/language-guides/dotnet/crash-reporting/net-framework/) for more detailed instructions on how to use this provider.
+
 Supported platforms/frameworks
 ====================
 
