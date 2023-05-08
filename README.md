@@ -2,28 +2,13 @@ Raygun4Net
 ==========
 
 [Raygun](http://raygun.com) provider for .NET Framework
-This package supports up to .NET 7
-
-Installation
-====================
-
-* The easiest way to install this provider is by either using the below dotnet CLI command, or in the NuGet management GUI in the IDE you use.
-
-```
-dotnet add package Mindscape.Raygun4Net
-```
-
-* If you have issues trying to install the package into a WinRT project, see the troubleshooting section below.
-
----
-See the [Raygun docs](https://raygun.com/documentation/language-guides/dotnet/crash-reporting/net-framework/) for more detailed instructions on how to use this provider.
 
 Supported platforms/frameworks
 ====================
 
 Projects built with the following frameworks are supported:
 
-* .NET 2.0, 3.5, 4.0+
+* .NET 2.0, 3.5, 4.0+, up to .NET 7.0
 * .NET 3.5 and 4.0 Client Profile
 * .NET Core 1.0, 2.0, 3.0+
 * ASP.NET
@@ -40,6 +25,21 @@ Install the NuGet package to a project which uses one of the above frameworks an
 For Xamarin we recommended adding either [Raygun4Xamarin.Forms](https://www.nuget.org/packages/Raygun4Xamarin.Forms/), or the [Mindscape.Raygun4Net.Xamarin.Android](https://www.nuget.org/packages/Mindscape.Raygun4Net.Xamarin.Android/) & [Mindscape.Raygun4Net.Xamarin.iOS.Unified](https://www.nuget.org/packages/Mindscape.Raygun4Net.Xamarin.iOS.Unified/) packages.
 
 For .NET Core and .NET versions 5.0 or higher, we recommend using the [Mindscape.Raygun4Net.NetCore](https://www.nuget.org/packages/Mindscape.Raygun4Net.NetCore/) package.
+
+
+Installation
+====================
+
+* The easiest way to install this provider is by either using the below dotnet CLI command, or in the NuGet management GUI in the IDE you use.
+
+```
+dotnet add package Mindscape.Raygun4Net
+```
+
+* If you have issues trying to install the package into a WinRT project, see the troubleshooting section below.
+
+---
+See the [Raygun docs](https://raygun.com/documentation/language-guides/dotnet/crash-reporting/) for more detailed instructions on how to use this provider.
 
 Where is my app API key?
 ====================
