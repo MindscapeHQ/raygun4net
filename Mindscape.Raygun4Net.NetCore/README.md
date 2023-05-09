@@ -1,32 +1,54 @@
-Raygun4Net.NetCore - Raygun Provider for .NET Core projects
+Raygun4Net.NetCore - Raygun Provider for .NET 6+ projects
 ===========================================================
 
 Where is my app API key?
 ========================
-When you create a new application on your Raygun dashboard, your app API key is displayed at the top of the instructions page.
+When you create a new application on your Raygun dashboard, your app API key is displayed within the instructions page.
 You can also find the API key by clicking the "Application Settings" button in the side bar of the Raygun dashboard.
 
 Namespace
 =========
 The main classes can be found in the Mindscape.Raygun4Net namespace.
 
-Usage
+Installation
 =====
 
-In your project file, add "Mindscape.Raygun4Net.NetCore": "6.4.3" to your dependencies.
+Install the **Mindscape.Raygun4Net.NetCore** NuGet package into your project. You can either use the below dotnet CLI command, or the NuGet management GUI in the IDE you use.
 
-Run dotnet.exe restore or restore packages within Visual Studio to download the package.
+```
+dotnet add package Mindscape.Raygun4Net.NetCore
+```
 
-Anywhere in your code, you can also send exception reports manually simply by creating a new instance of the RaygunClient and calling one of the Send or SendInBackground methods.
-This is most commonly used to send exceptions caught in a try/catch block.
+Create an instance of RaygunClient by passing your app API key to the constructor, and hook it up to the unhandled exception delegate. This is typically done in Program.cs or the main method.
 
+```
+using Mindscape.Raygun4Net;
+
+private static RaygunClient _raygunClient = new RaygunClient("paste_your_api_key_here");
+
+AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs e) =>
+  _raygunClient.Send(e.ExceptionObject as Exception);
+```
+
+Add some temporary code to throw an exception and manually send it to Raygun.
+
+```
 try
 {
+  ...
 }
 catch (Exception e)
 {
-  new RaygunClient("YOUR_APP_API_KEY").SendInBackground(e);
+  _raygunClient.SendInBackground(e);
 } 
+```
+
+Manually sending exceptions
+------------------------
+
+The above instructions will setup Raygun4Net to automatically detect and send all unhandled exceptions. Sometimes you may want to send exceptions manually, such as handled exceptions from within a try/catch block.
+
+RaygunClient provides Send and SendInBackground methods for manually sending to Raygun. It's important to note that SendInBackground should only be used for handled exceptions, rather than exceptions that will cause the application to crash - otherwise the application will most likely shutdown all threads before Raygun is able to finish sending. 
 
 Additional configuration options and features
 =============================================
@@ -68,3 +90,6 @@ Tags and custom data
 
 When sending exceptions manually, you can also send an arbitrary list of tags (an array of strings), and a collection of custom data (a dictionary of any objects).
 This can be done using the various Send and SendInBackground method overloads.
+
+---
+See the [Raygun docs](https://raygun.com/documentation/language-guides/dotnet/crash-reporting/net-core/) for more detailed instructions on how to use this provider.

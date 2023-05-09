@@ -3,50 +3,19 @@ Raygun4Net
 
 [Raygun](http://raygun.com) provider for .NET Framework
 
-! IMPORTANT CHANGE IN 5.0 !
-====================
-
-If you are manually referencing Raygun4Net dlls in your project rather than installing the NuGet package, then there are some minor dependency changes that you'll need to be aware of:
-
-For Mvc projects, make sure your project references these dlls:
-* Mindscape.Raygun4Net
-* Mindscape.Raygun4Net.Mvc
-* Mindscape Raygun4Net4
-
-For other .Net 4.0+ projects, make sure your project references these dlls:
-* Mindscape.Raygun4Net
-* Mindscape.Raygun4Net4
-
-For both of the above setups, you can find all the correct dlls in the Mvc and Net4 folders respectively within the .zip file hosted on the [latest GitHub release](https://github.com/MindscapeHQ/raygun4net/releases).
-If you build the Raygun4Net projects yourself with the build.bat script, all the correct dlls will be in the raygun4net/build/Mvc and raygun4net/build/Net4 folders.
-Or if you build the Raygun4Net projects in Visual Studio, all the correct dlls will be within the bin folder for each project.
-
-If you are using Raygun4Net in a .Net project type not listed above, or if you are installing via NuGet, then you'll have no problems upgrading to version 5.0. There are no breaking changes in this version.
-
-Installation
-====================
-
-* The easiest way to install this provider is by grabbing the NuGet package. Ensure the NuGet Visual Studio extension is installed, right-click on your project -> Manage NuGet Packages -> Online -> search for **Mindscape.Raygun4Net**, then install the appropriate package. Or, visit https://nuget.org/packages/Mindscape.Raygun4Net/ for instructions on installation using the package manager console.
-
-* For Visual Studio 2008 (without NuGet) you can clone this repository, run build.bat, then add project references to **Mindscape.Raygun4Net.dll**
-
-* If you have issues trying to install the package into a WinRT project, see the troubleshooting section below.
-
 Supported platforms/frameworks
 ====================
 
 Projects built with the following frameworks are supported:
 
-* .NET 2.0, 3.5, 4.0+
+* .NET 2.0, 3.5, 4.0+, up to .NET 7.0
 * .NET 3.5 and 4.0 Client Profile
-* .NET Core 1, 2
+* .NET Core 1.0, 2.0, 3.0+
 * ASP.NET
 * Mvc
 * WebApi
 * WinForms, WPF, console apps etc
-* Windows Store apps (universal) for Windows 8.1 and Windows Phone 8.1
 * Windows 8
-* Windows Phone 7.1 and 8
 * WinRT
 * Xamarin.iOS and Xamarin.Mac (Both unified and classic)
 * Xamarin.Android
@@ -55,12 +24,29 @@ Install the NuGet package to a project which uses one of the above frameworks an
 
 For Xamarin we recommended adding either [Raygun4Xamarin.Forms](https://www.nuget.org/packages/Raygun4Xamarin.Forms/), or the [Mindscape.Raygun4Net.Xamarin.Android](https://www.nuget.org/packages/Mindscape.Raygun4Net.Xamarin.Android/) & [Mindscape.Raygun4Net.Xamarin.iOS.Unified](https://www.nuget.org/packages/Mindscape.Raygun4Net.Xamarin.iOS.Unified/) packages.
 
+For .NET Core and .NET versions 5.0 or higher, we recommend using the [Mindscape.Raygun4Net.NetCore](https://www.nuget.org/packages/Mindscape.Raygun4Net.NetCore/) package.
+
+
+Installation
+====================
+
+* The easiest way to install this provider is by either using the below dotnet CLI command, or in the NuGet management GUI in the IDE you use.
+
+```
+dotnet add package Mindscape.Raygun4Net
+```
+
+* If you have issues trying to install the package into a WinRT project, see the troubleshooting section below.
+
+---
+See the [Raygun docs](https://raygun.com/documentation/language-guides/dotnet/crash-reporting/) for more detailed instructions on how to use this provider.
+
 Where is my app API key?
 ====================
 
 When sending exceptions to the Raygun service, an app API key is required to map the messages to your application.
 
-When you create a new application in your Raygun dashboard, your app API key is displayed at the top of the instructions page. You can also find the API key by clicking the "Application Settings" button in the side bar of the Raygun dashboard.
+When you create a new application in your Raygun dashboard, your app API key is displayed within the instructions page. You can also find the API key by clicking the "Application Settings" button in the side bar of the Raygun dashboard.
 
 Namespace
 ====================
@@ -252,32 +238,6 @@ private static void Application_ThreadException(object sender, ThreadExceptionEv
 }
 ```
 
-### Windows Store Apps (Windows 8.1 and Windows Phone 8.1)
-
-In the App.xaml.cs constructor (or any central entry point in your application), call the static RaygunClient.Attach method using your API key. This will catch and send all unhandled exception to Raygun for you.
-
-```csharp
-public App()
-{
-  RaygunClient.Attach("YOUR_APP_API_KEY");
-}
-```
-
-At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages (via the Send methods) or changing options such as the User identity string.
-
-You can manually send exceptions with the SendAsync method. When manually sending, currently the compiler does not allow you to use `await` in a catch block. You can however call SendAsync in a blocking way:
-
-```csharp
-try
-{
-  throw new Exception("foo");
-}
-catch (Exception e)
-{
-  RaygunClient.Current.SendAsync(e);
-}
-```
-
 ### WinRT
 
 In the App.xaml.cs constructor (or any main entry point to your application), call the static RaygunClient.Attach method using your API key.
@@ -299,16 +259,6 @@ A workaround for this issue is provided with the Wrap() method. These allow you 
 
 #### Fody
 Another option is to use the [Fody](https://github.com/Fody/Fody) library, and its [AsyncErrorHandler](https://github.com/Fody/AsyncErrorHandler) extension. This will automatically catch async exceptions and pass them to a handler of your choice (which would send to Raygun as above). See the [installation instructions here](https://github.com/Fody/Fody/wiki/SampleUsage), then check out the [sample project](https://github.com/Fody/FodyAddinSamples/tree/master/AsyncErrorHandlerWithRaygun) for how to use.
-
-### Windows Phone 7.1 and 8
-
-In the App.xaml.cs constructor (or any main entry point to your application), call the static RaygunClient.Attach method using your API key.
-
-```csharp
-RaygunClient.Attach("YOUR_APP_API_KEY");
-```
-
-At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages (via the Send methods) or changing options such as the User identity string.
 
 ### Xamarin for Android
 
@@ -454,8 +404,6 @@ property on the event arguments. Setting it to null or empty string will leave t
 The key has a maximum length of 100.
 
 ## Troubleshooting
-
-* If the solution fails to build due to missing dependencies, in Visual Studio 2012 ensure you have the NuGet extension installed and that the Tools -> Options -> Package Manager -> 'Allow NuGet to download missing packages during build' box is checked. Then, go to the directory that you cloned this repository into and run build.bat.
 
 * When installing the package via NuGet into a WinRT project you encounter an error due to an invalid dependency, clone this repository into a directory via Git. Then, open a Powershell or command prompt in the directory location, and run `.\build.bat CompileWinRT`. Then, add the resulting Mindscape.Raygun4Net.WinRT.dll (located in the /release folder) to your project.
 
