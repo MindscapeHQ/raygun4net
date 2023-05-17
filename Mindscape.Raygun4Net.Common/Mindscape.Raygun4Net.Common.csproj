@@ -6,6 +6,11 @@
 
   <ItemGroup >
     <Reference Include="System.Net"  Condition=" '$(TargetFramework)' != 'net6' " />
+    <TargetFrameworks>net4;net45;netstandard2.0;net6</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup >
+    <Reference Include="System.Net"  Condition=" '$(TargetFramework)' == 'net4' Or '$(TargetFramework)' == 'net45'  " />
   </ItemGroup>
 
 </Project>

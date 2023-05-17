@@ -9,14 +9,12 @@ Supported platforms/frameworks
 Projects built with the following frameworks are supported:
 
 * .NET 2.0, 3.5, 4.0+, up to .NET 7.0
-* .NET 3.5 and 4.0 Client Profile
+* .NET 4.0 Client Profile
 * .NET Core 1.0, 2.0, 3.0+
 * ASP.NET
 * ASP.NET MVC
 * ASP.NET WebApi
 * WinForms, WPF, console apps etc
-* Windows 8
-* WinRT
 * Xamarin.iOS and Xamarin.Mac (Both unified and classic)
 * Xamarin.Android
 
@@ -35,8 +33,6 @@ Installation
 ```
 dotnet add package Mindscape.Raygun4Net
 ```
-
-* If you have issues trying to install the package into a WinRT project, see the troubleshooting section below.
 
 ---
 See the [Raygun docs](https://raygun.com/documentation/language-guides/dotnet/crash-reporting/) for more detailed instructions on how to use this provider.
@@ -418,7 +414,6 @@ raygunClient.UserInfo = new RaygunIdentifierMessage("user@email.com")
 ## Version numbering
 
 By default, Raygun will send the assembly version of your project with each report.
-If you are using WinRT, the transmitted version number will be that of the Windows Store package, set in Package.appxmanifest (under Packaging).
 
 If you need to provide your own custom version value, you can do so by setting the ApplicationVersion property of the RaygunClient (in the format x.x.x.x where x is a positive integer).
 
@@ -434,7 +429,7 @@ The Raygun4NET provider uses the default Windows proxy settings (as set in Inter
 ```csharp
 var raygunClient = new RaygunClient()
 {
-  ProxyCredentials = new NetworkCredential("user", "pword")
+  ProxyCredentials = new NetworkCredential("user", "password")
 };
 ```
 
@@ -450,7 +445,6 @@ The key has a maximum length of 100.
 
 ## Troubleshooting
 
-* When installing the package via NuGet into a WinRT project you encounter an error due to an invalid dependency, clone this repository into a directory via Git. Then, open a Powershell or command prompt in the directory location, and run `.\build.bat CompileWinRT`. Then, add the resulting Mindscape.Raygun4Net.WinRT.dll (located in the /release folder) to your project.
 
 ### Raygun4Net does not send crash reports and there are no errors to help troubleshoot why this is happening
 

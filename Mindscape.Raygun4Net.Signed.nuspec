@@ -26,17 +26,6 @@
     <file src="build\signed\net40-client\Mindscape.Raygun4Net.Common.dll" target="lib\net40-client\Mindscape.Raygun4Net.Common.dll" />
     <file src="build\signed\net40-client\Mindscape.Raygun4Net.Common.pdb" target="lib\net40-client\Mindscape.Raygun4Net.Common.pdb" />
  
-    <!-- WinRT and Windows 8 -->
-    <!-- <file src="build\signed\winrt\Mindscape.Raygun4Net.WinRT.dll" target="lib\portable-windows8\Mindscape.Raygun4Net.WinRT.dll" />
-    <file src="build\signed\winrt\Mindscape.Raygun4Net.WinRT.pdb" target="lib\portable-windows8\Mindscape.Raygun4Net.WinRT.pdb" /> -->
-    <!-- Windows Store universal apps (Windows 8.1 and Windows Phone 8.1) -->
-    <!-- <file src="build\signed\uwp\Mindscape.Raygun4Net.WindowsStore.dll" target="lib\portable-net45+win81+wpa81+windows81\Mindscape.Raygun4Net.WindowsStore.dll" />  -->
-    <!-- Windows Phone 7.1 -->
-    <!-- <file src="build\windowsphone\Mindscape.Raygun4Net.WindowsPhone.dll" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.dll" />
-    <file src="build\windowsphone\Mindscape.Raygun4Net.WindowsPhone.pdb" target="lib\wp71\Mindscape.Raygun4Net.WindowsPhone.pdb" /> -->
-    <!-- Windows Phone 8 -->
-    <!-- <file src="build\windowsphone\Mindscape.Raygun4Net.WindowsPhone.dll" target="lib\windowsphone8\Mindscape.Raygun4Net.WindowsPhone.dll" />
-    <file src="build\windowsphone\Mindscape.Raygun4Net.WindowsPhone.pdb" target="lib\windowsphone8\Mindscape.Raygun4Net.WindowsPhone.pdb" />  -->
 
     <file src="README.md" />
   </files>
