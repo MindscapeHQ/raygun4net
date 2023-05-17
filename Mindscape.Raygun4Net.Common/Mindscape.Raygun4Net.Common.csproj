@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net4;net45;netstandard2.0;net5;net6</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup >
+    <Reference Include="System.Net" />
+  </ItemGroup>
+
+</Project>
