@@ -57,43 +57,111 @@ Usage
 
 The Raygun4Net provider includes support for many .NET frameworks. Scroll down to find information about using Raygun for your type of application.
 
-### ASP.NET
-Add a section to configSections:
+### ASP.NET 5+
+
+As of version 5.0.0, ASP.NET support has been moved into a new NuGet package.
+If you have a ASP.NET project, please uninstall the Raygun4Net NuGet package and install the Mindscape.Raygun4Net.AspNetCore NuGet package instead.
+
+Once the package is installed, add the following code to your appsettings.json (if you're using another type of config, add it there):
+
+```json
+"RaygunSettings": {
+  "ApiKey":  "YOUR_APP_API_KEY"
+}
+```
+
+Configure the Raygun Middleware to handle exceptions that have been triggered and send unhandled exceptions automatically.
+
+In `Program.cs`:
+
+1. Add `using Mindscape.Raygun4Net.AspNetCore;` to your using statements.
+2. Add `builder.Services.AddRaygun(builder.Configuration);`.
+3. Add `app.UseRaygun();` after any other ExceptionHandling methods e.g. `app.UseDeveloperExceptionPage()` or `app.UseExceptionHandler("/Home/Error")`.
+
+```csharp
+using Mindscape.Raygun4Net.AspNetCore;
+```
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddRaygun(builder.Configuration);
+  
+/*The rest of your builder setup*/
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+app.MapGet("/throw", (Func<string>)(() => throw new Exception("Exception in request pipeline")));
+
+app.UseRaygun();
+
+/*The rest of your app setup*/
+```
+
+The above set up will cause all unhandled exceptions to be sent to your Raygun account, where you can easily view all of your error monitoring and crash report data.
+
+#### TLS configuration
+
+Raygun's ingestion nodes require TLS 1.1 or TLS 1.2. If you are using .NET 4.5 or earlier, you may need to enable these protocols in your application. This is done by updating the protocol property in your application's startup code.
+
+```csharp
+protected void Application_Start()
+  {
+    // Enable TLS 1.1 and TLS 1.2 with future support for TLS 3
+    ServicePointManager.SecurityProtocol |= (SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls3 );
+  }
+```
+
+### ASP.NET Framework
+
+In your Web.config file, find or add a `<configSections>` element, which should be nested under the `<configuration>` element, and add the following entry:
 
 ```
 <section name="RaygunSettings" type="Mindscape.Raygun4Net.RaygunSettings, Mindscape.Raygun4Net"/>
 ```
 
-Add the Raygun settings configuration block from above:
+Then reference it by adding the following line somewhere after the `configSections` tag.
 
-```
+```xml
 <RaygunSettings apikey="YOUR_APP_API_KEY" />
 ```
 
 Now you can either setup Raygun to send unhandled exceptions automatically or/and send exceptions manually.
 
-To send unhandled exceptions automatically, use the RaygunHttpModule in web.config in the appropriate way for your application:
+To send unhandled exceptions automatically, use the Raygun HTTP module within the `<configuration>` element in web.config. This is done slightly differently depending on what version of IIS you're using. If in doubt, just try them both:
 
-For system.web:
-
+```xml
+<system.web>
+  <httpModules>
+    <add name="RaygunErrorModule" type="Mindscape.Raygun4Net.RaygunHttpModule"/>
+  </httpModules>
+</system.web>
 ```
-<httpModules>
-  <add name="RaygunErrorModule" type="Mindscape.Raygun4Net.RaygunHttpModule"/>
-</httpModules>
-```
 
-For system.webServer:
+For IIS 7.0, use `system.webServer`
 
-```
-<modules>
-  <add name="RaygunErrorModule" type="Mindscape.Raygun4Net.RaygunHttpModule"/>
-</modules>
+```xml
+<system.webServer>
+  <modules>
+    <add name="RaygunErrorModule" type="Mindscape.Raygun4Net.RaygunHttpModule"/>
+  </modules>
+</system.webServer>
 ```
 
 Anywhere in you code, you can also send exception reports manually simply by creating a new instance of the RaygunClient and call one of the Send or SendInBackground methods.
 This is most commonly used to send exceptions caught in a try/catch block.
 
-```
+```csharp
 try
 {
   
@@ -106,7 +174,7 @@ catch (Exception e)
 
 Or to send exceptions in your own handlers rather than using the automatic setup above.
 
-```
+```csharp
 protected void Application_Error()
 {
   var exception = Server.GetLastError();
@@ -114,13 +182,13 @@ protected void Application_Error()
 }
 ```
 
-####Additional ASP.NET configuration options
+#### Additional ASP.NET configuration options
 
 **Exclude errors by HTTP status code**
 
 If using the HTTP module then you can exclude errors by their HTTP status code by providing a comma separated list of status codes to ignore in the configuration. For example if you wanted to exclude errors that return the [I'm a teapot](http://tools.ietf.org/html/rfc2324) response code, you could use the configuration below.
 
-```
+```xml
 <RaygunSettings apikey="YOUR_APP_API_KEY" excludeHttpStatusCodes="418" />
 ```
 
@@ -128,7 +196,7 @@ If using the HTTP module then you can exclude errors by their HTTP status code b
 
 Toggle this boolean and the HTTP module will not send errors to Raygun if the request originated from a local origin. i.e. A way to prevent local debug/development from notifying Raygun without having to resort to Web.config transforms.
 
-```
+```xml
 <RaygunSettings apikey="YOUR_APP_API_KEY" excludeErrorsFromLocal="true" />
 ```
 
