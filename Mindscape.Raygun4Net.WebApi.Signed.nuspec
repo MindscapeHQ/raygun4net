@@ -9,10 +9,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>Raygun provider for signed ASP.NET Web API projects</summary>
     <description>Raygun provider for signed ASP.NET Web API projects</description>
-    <iconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</iconUrl>
     <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
-    <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
-    <dependencies>
+    <license type="file">LICENSE</license>
+    <icon>128x128-transparent.png</icon>  <dependencies>
       <dependency id="Mindscape.Raygun4Net.Core.Signed" version="5.12.1" />
     </dependencies>
   </metadata>
@@ -21,5 +20,7 @@
     <file src="build\signed\webapi\Mindscape.Raygun4Net.WebApi.pdb" target="lib\net45\Mindscape.Raygun4Net.WebApi.pdb" />
     
     <file src="Mindscape.Raygun4Net.WebApi\README.md" />
+    <file src="128x128-transparent.png" />
+    <file src="LICENSE" />
   </files>
 </package>
