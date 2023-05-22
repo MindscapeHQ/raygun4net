@@ -1,15 +1,25 @@
-using System;
+﻿using System;
 using System.Net;
+using System.Reflection;
 using Mindscape.Raygun4Net.Common.DataAccess;
 using Mindscape.Raygun4Net.Logging;
 
 namespace Mindscape.Raygun4Net
 {
+
+
   public static class WebClientHelper
   {
+
     [ThreadStatic] private static WebClient _client;
 
-    private static WebClient Client => _client ?? (_client = new WebClient());
+    private static WebClient Client => _client ?? (_client = FreshClient());
+
+    private static WebClient FreshClient()
+    {
+      return new RaygunWebClient();
+    }
+
     private static readonly Uri ProxyUri;
 
     internal static IWebProxy WebProxy { get; set; }
@@ -22,7 +32,6 @@ namespace Mindscape.Raygun4Net
         ProxyUri = WebRequest.DefaultWebProxy.GetProxy(uri);
       }
     }
-
 
     internal static IHttpClient GetClient(string apiKey, ICredentials proxyCredentials)
     {
@@ -56,6 +65,7 @@ namespace Mindscape.Raygun4Net
       }
 
       return new WebClientFacade(Client);
+
     }
 
 

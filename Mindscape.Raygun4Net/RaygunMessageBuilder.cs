@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -14,20 +13,11 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunMessageBuilder : IRaygunMessageBuilder
   {
-    public static RaygunMessageBuilder New
-    {
-      get
-      {
-        return new RaygunMessageBuilder();
-      }
-    }
+    public static RaygunMessageBuilder New => new RaygunMessageBuilder();
 
-    private readonly RaygunMessage _raygunMessage;
+    private readonly RaygunMessage _raygunMessage = new RaygunMessage();
 
-    private RaygunMessageBuilder()
-    {
-      _raygunMessage = new RaygunMessage();
-    }
+    private RaygunMessageBuilder() { }
 
     public RaygunMessage Build()
     {
@@ -58,8 +48,7 @@ namespace Mindscape.Raygun4Net
         }
       }
 
-      HttpException error = exception as HttpException;
-      if (error != null)
+      if (exception is HttpException error)
       {
         int code = error.GetHttpCode();
         string description = null;
@@ -67,13 +56,13 @@ namespace Mindscape.Raygun4Net
         {
           description = ((HttpStatusCode)code).ToString();
         }
+
         _raygunMessage.Details.Response = new RaygunResponseMessage() { StatusCode = code, StatusDescription = description };
       }
 
       try
       {
-        WebException webError = exception as WebException;
-        if (webError != null)
+        if (exception is WebException webError)
         {
           if (webError.Status == WebExceptionStatus.ProtocolError && webError.Response is HttpWebResponse)
           {
@@ -161,6 +150,7 @@ namespace Mindscape.Raygun4Net
         {
           return this;
         }
+
         _raygunMessage.Details.Request = RaygunRequestMessageBuilder.Build(request, options);
       }
 
@@ -178,39 +168,36 @@ namespace Mindscape.Raygun4Net
       if (!String.IsNullOrEmpty(version))
       {
         _raygunMessage.Details.Version = version;
+        return this;
       }
-      else if (!String.IsNullOrEmpty(RaygunSettings.Settings.ApplicationVersion))
+
+      if (!String.IsNullOrEmpty(RaygunSettings.Settings.ApplicationVersion))
       {
         _raygunMessage.Details.Version = RaygunSettings.Settings.ApplicationVersion;
       }
       else
       {
         var entryAssembly = Assembly.GetEntryAssembly() ?? GetWebEntryAssembly();
-        if (entryAssembly != null)
-        {
-          _raygunMessage.Details.Version = entryAssembly.GetName().Version.ToString();
-        }
-        else
-        {
-          _raygunMessage.Details.Version = "Not supplied";
-        }
+        _raygunMessage.Details.Version = entryAssembly != null ? entryAssembly.GetName().Version.ToString() : "Not supplied";
       }
+
       return this;
     }
 
     private static Assembly GetWebEntryAssembly()
     {
-      if (HttpContext.Current != null && HttpContext.Current.ApplicationInstance != null)
+      if (HttpContext.Current == null || HttpContext.Current.ApplicationInstance == null)
       {
-        var type = HttpContext.Current.ApplicationInstance.GetType();
-        while (type != null && "ASP".Equals(type.Namespace))
-        {
-          type = type.BaseType;
-        }
-
-        return type == null ? null : type.Assembly;
+        return null;
       }
-      return null;
+
+      var type = HttpContext.Current.ApplicationInstance.GetType();
+      while (type != null && "ASP".Equals(type.Namespace))
+      {
+        type = type.BaseType;
+      }
+
+      return type?.Assembly;
     }
 
     public IRaygunMessageBuilder SetTimeStamp(DateTime? currentTime)
@@ -219,6 +206,7 @@ namespace Mindscape.Raygun4Net
       {
         _raygunMessage.OccurredOn = currentTime.Value;
       }
+
       return this;
     }
 

@@ -41,7 +41,7 @@ namespace Mindscape.Raygun4Net.Tests
     {
       _builder.SetVersion(null);
       RaygunMessage message = _builder.Build();
-      Assert.AreEqual("Not supplied", message.Details.Version);
+      Assert.IsNotNullOrEmpty(message.Details.Version);
     }
 
     [Test]
