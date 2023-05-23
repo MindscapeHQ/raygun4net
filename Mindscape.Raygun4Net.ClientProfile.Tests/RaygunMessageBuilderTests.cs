@@ -34,7 +34,6 @@ namespace Mindscape.Raygun4Net.Tests
     public void SetVersion_Null()
     {
   #if DEBUG
-      RaygunSettings.Settings = new RaygunSettings();//Mindscape.Raygun4Net.RaygunHttpModule is modifying this global object. So this is resetting it.
   #endif
       _builder.SetVersion(null);
       RaygunMessage message = _builder.Build();
