@@ -115,9 +115,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="readme.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net.Core\Mindscape.Raygun4Net.Core.csproj">
       <Project>{6435c84c-1dac-41fe-aa51-faa8e9a7f090}</Project>
       <Name>Mindscape.Raygun4Net.Core</Name>
