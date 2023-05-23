@@ -10,9 +10,6 @@ properties {
     $nuspec_webapi_signed =          "$root\Mindscape.Raygun4Net.WebApi.Signed.nuspec"
     $nuspec_webjob =                 "$root\Mindscape.Raygun4Net.Azure.WebJob.nuspec"
     $build_dir =                     "$root\build\"
-    $build_dir_net2 =                "$build_dir\net20"
-    $build_dir_net35 =               "$build_dir\net35"
-    $build_dir_net35_client =        "$build_dir\net35-client"
     $build_dir_net4 =                "$build_dir\net40"
     $build_dir_net4_client =         "$build_dir\net40-client"
     $build_dir_mvc =                 "$build_dir\mvc"
@@ -20,11 +17,7 @@ properties {
     $build_dir_webjob =              "$build_dir\webjob"
     $build_dir_winrt =               "$build_dir\winrt"
     $build_dir_uwp =                 "$build_dir\uwp"
-    $build_dir_windowsphone =        "$build_dir\windowsphone"
     $build_dir_signed =              "$build_dir\signed"
-    $build_dir_net2_signed =         "$build_dir_signed\net20"
-    $build_dir_net35_signed =        "$build_dir_signed\net35"
-    $build_dir_net35_client_signed = "$build_dir_signed\net35-client"
     $build_dir_net4_signed =         "$build_dir_signed\net40"
     $build_dir_net4_client_signed =  "$build_dir_signed\net40-client"
     $build_dir_mvc_signed =          "$build_dir_signed\mvc"
@@ -47,8 +40,6 @@ task Init -depends Clean {
 }
 
 task Package -depends Init {
-    exec { nuget pack $nuspec_net35 -OutputDirectory $release_dir }
-    exec { nuget pack $nuspec_net35_signed -OutputDirectory $release_dir }
     exec { nuget pack $nuspec_core -OutputDirectory $release_dir }
     exec { nuget pack $nuspec_core_signed -OutputDirectory $release_dir }
     exec { nuget pack $nuspec_mvc -OutputDirectory $release_dir }
@@ -66,9 +57,6 @@ task Zip -depends Package {
     
     $outerfolder =               $release_dir + $version
     $versionfolder =             $outerfolder + "\" + $version
-    $versionfolder2 =            $versionfolder + "\net20"
-    $versionfolder35 =           $versionfolder + "\net35"
-    $versionfolder35client =     $versionfolder + "\net35-client"
     $versionfolder4 =            $versionfolder + "\net40"
     $versionfolder4client =      $versionfolder + "\net40-client"
     $versionfoldermvc =          $versionfolder + "\mvc"
@@ -79,9 +67,6 @@ task Zip -depends Package {
     $versionfolderwindowsphone = $versionfolder + "\windowsphone"
     
     $signedfolder =         $versionfolder + "\signed"
-    $signedfolder2 =        $signedfolder + "\net20"
-    $signedfolder35 =       $signedfolder + "\net35"
-    $signedfolder35client = $signedfolder + "\net35-client"
     $signedfolder4 =        $signedfolder + "\net40"
     $signedfolder4client =  $signedfolder + "\net40-client"
     $signedfoldermvc =      $signedfolder + "\mvc"
@@ -112,16 +97,7 @@ task Zip -depends Package {
     new-item $signedfolderwebapi -itemType directory | Out-Null
     new-item $signedfolderwinrt -itemType directory | Out-Null
     new-item $signedfolderuwp -itemType directory | Out-Null
-    
-    # .NET 2.0
-    copy-item $build_dir_net2/Mindscape.Raygun4Net.dll $versionfolder2
-    copy-item $build_dir_net2/Mindscape.Raygun4Net.pdb $versionfolder2
-    # .NET 3.5
-    copy-item $build_dir_net35/Mindscape.Raygun4Net.dll $versionfolder35
-    copy-item $build_dir_net35/Mindscape.Raygun4Net.pdb $versionfolder35
-    # .NET 3.5 Client Profile
-    copy-item $build_dir_net35_client/Mindscape.Raygun4Net.dll $versionfolder35client
-    copy-item $build_dir_net35_client/Mindscape.Raygun4Net.pdb $versionfolder35client
+        
     # .NET 4.0
     copy-item $build_dir_net4/Mindscape.Raygun4Net.dll $versionfolder4
     copy-item $build_dir_net4/Mindscape.Raygun4Net.pdb $versionfolder4
@@ -153,18 +129,6 @@ task Zip -depends Package {
     # Windows Store
     copy-item $build_dir_uwp/Mindscape.Raygun4Net.WindowsStore.dll $versionfolderuwp
     copy-item $build_dir_uwp/Mindscape.Raygun4Net.WindowsStore.pdb $versionfolderuwp
-    # Windows Phone
-    copy-item $build_dir_windowsphone/Mindscape.Raygun4Net.WindowsPhone.dll $versionfolderwindowsphone
-    copy-item $build_dir_windowsphone/Mindscape.Raygun4Net.WindowsPhone.pdb $versionfolderwindowsphone
-    # Signed .NET 2
-    copy-item $build_dir_net2_signed/Mindscape.Raygun4Net.dll $signedfolder2
-    copy-item $build_dir_net2_signed/Mindscape.Raygun4Net.pdb $signedfolder2
-    # Signed .NET 3.5
-    copy-item $build_dir_net35_signed/Mindscape.Raygun4Net.dll $signedfolder35
-    copy-item $build_dir_net35_signed/Mindscape.Raygun4Net.pdb $signedfolder35
-    # Signed .NET 3.5 Client Profile
-    copy-item $build_dir_net35_client_signed/Mindscape.Raygun4Net.dll $signedfolder35client
-    copy-item $build_dir_net35_client_signed/Mindscape.Raygun4Net.pdb $signedfolder35client
     # Signed .NET 4
     copy-item $build_dir_net4_signed/Mindscape.Raygun4Net.dll $signedfolder4
     copy-item $build_dir_net4_signed/Mindscape.Raygun4Net.pdb $signedfolder4

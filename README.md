@@ -9,7 +9,7 @@ Supported platforms/frameworks
 Projects built with the following frameworks are supported:
 
 * .NET 4.0+, up to .NET 7.0
-* .NET 3.5 and 4.0 Client Profile
+* .NET 4.0 Client Profile
 * .NET Core 1.0, 2.0, 3.0+
 * ASP.NET
 * Mvc

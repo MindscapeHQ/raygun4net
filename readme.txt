@@ -27,14 +27,14 @@ Supported platforms/frameworks
 
 Projects built with the following frameworks are supported:
 
-* .NET 4.0, 4.5
-* .NET 3.5 and 4.0 Client Profile
-* .NET Core 1, 2
+
+* .NET Core 1, 2, 3
+* .NET Framework 4.0, 4.5 4.6 4.7 4.8
+* .NET 4.0 Client Profile
 * ASP.NET
 * WinForms, WPF, console apps etc.
-* Windows Store apps (universal) for Windows 8.1 and Windows Phone 8.1
+* Windows Store apps (universal) for Windows 8.1 
 * Windows 8
-* Windows Phone 7.1 and 8
 * WinRT
 * Xamarin.iOS and Xamarin.Mac (Both unified and classic)
 * Xamarin.Android
