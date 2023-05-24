@@ -17,7 +17,9 @@ namespace Mindscape.Raygun4Net
     public static RaygunSettings Settings
     {
       get { return settings; }
+#if DEBUG
       internal set => settings = value; //Needed to be able to reset, after some unit tests pollute this global object.
+#endif
     }
 
     [ConfigurationProperty("apikey", IsRequired = true, DefaultValue = "")]

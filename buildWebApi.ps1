@@ -1,3 +1,5 @@
+Framework "4.6"
+
 properties {
     $root =                 $psake.build_script_dir
     $solution_file =        "$root/Mindscape.Raygun4Net.WebApi.sln"
