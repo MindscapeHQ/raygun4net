@@ -13,15 +13,7 @@
     <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
   </metadata>
   <files>
-    <!-- .NET 2.0 -->
-    <file src="build\signed\net20\Mindscape.Raygun4Net.dll" target="lib\net20\Mindscape.Raygun4Net.dll" />
-    <file src="build\signed\net20\Mindscape.Raygun4Net.pdb" target="lib\net20\Mindscape.Raygun4Net.pdb" />
-    <!-- .NET 3.5 -->
-    <file src="build\signed\net35\Mindscape.Raygun4Net.dll" target="lib\net35\Mindscape.Raygun4Net.dll" />
-    <file src="build\signed\net35\Mindscape.Raygun4Net.pdb" target="lib\net35\Mindscape.Raygun4Net.pdb" />
-    <!-- .NET 3.5 Client Profile -->
-    <file src="build\signed\net35-client\Mindscape.Raygun4Net.dll" target="lib\net35-client\Mindscape.Raygun4Net.dll" />
-    <file src="build\signed\net35-client\Mindscape.Raygun4Net.pdb" target="lib\net35-client\Mindscape.Raygun4Net.pdb" />
+    
     <!-- .NET 4.0 -->
     <file src="build\signed\net40\Mindscape.Raygun4Net.dll" target="lib\net40\Mindscape.Raygun4Net.dll" />
     <file src="build\signed\net40\Mindscape.Raygun4Net.pdb" target="lib\net40\Mindscape.Raygun4Net.pdb" />
