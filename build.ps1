@@ -1,5 +1,5 @@
-# This causes psake to use the VS 2017 build tool:
-Framework "4.6"
+# This causes psake to use the VS 2019 build tool:
+Framework "4.8"
 
 properties {
     $root =                       $psake.build_script_dir

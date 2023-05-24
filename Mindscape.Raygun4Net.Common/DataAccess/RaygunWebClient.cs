@@ -11,21 +11,20 @@ namespace Mindscape.Raygun4Net.Common.DataAccess
   {
     private readonly SecurityProtocolType _sslProtocol;
 
-
+#if NET40 || NET45
     private static readonly PropertyInfo SslProtocolsPropertyInfo =
       typeof(HttpWebRequest).GetProperty("SslProtocols", BindingFlags.Instance | BindingFlags.NonPublic);
+#endif
 
     public RaygunWebClient(SecurityProtocolType? sslProtocol = null)
     {
       SecurityProtocolType defaults = ServicePointManager.SecurityProtocol;
 #if NET40
-   // defaults |= (SecurityProtocolType)768;//TLS 1.1
-    defaults |= (SecurityProtocolType)3072; //TLS 1.2
+      defaults |= (SecurityProtocolType)3072; //TLS 1.2
 #elif NET45
-   //   defaults |= SecurityProtocolType.Tls11;
       defaults |= SecurityProtocolType.Tls12;
 #endif
-      _sslProtocol = sslProtocol?? defaults;
+      _sslProtocol = sslProtocol ?? defaults;
     }
 
 #if NET40 || NET45

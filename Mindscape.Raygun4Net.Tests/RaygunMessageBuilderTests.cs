@@ -20,13 +20,7 @@ namespace Mindscape.Raygun4Net.Tests
     {
       _builder = RaygunMessageBuilder.New;
     }
-
-    [TearDown]
-    public void EndTest()
-    {
-      _builder = null;
-    }
-
+    
     [Test]
     public void New()
     {
@@ -46,7 +40,7 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void SetVersion_Null()
     {
-      RaygunSettings.Settings = new RaygunSettings();//Mindscape.Raygun4Net.RaygunHttpModule is modifying this global object. So this is resetting it.
+      RaygunSettings.Settings = new RaygunSettings();//Mindscape.Raygun4Net.RaygunHttpModule is modifying this global object. So this is resetting it here.
       _builder.SetVersion(null);
       RaygunMessage message = _builder.Build();
       Assert.AreEqual("Not supplied", message.Details.Version);

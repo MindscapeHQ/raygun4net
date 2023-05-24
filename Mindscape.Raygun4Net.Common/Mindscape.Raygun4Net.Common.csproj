@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup >
-    <Reference Include="System.Net" />
+    <Reference Include="System.Net"  Condition=" '$(TargetFramework)' != 'net6' " />
   </ItemGroup>
 
 </Project>

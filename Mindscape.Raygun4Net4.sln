@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33626.354
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net4", "Mindscape.Raygun4Net4\Mindscape.Raygun4Net4.csproj", "{6D1C7E96-5E04-421D-8E8A-B3C8C02FD41D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net4.Tests", "Mindscape.Raygun4Net4.Tests\Mindscape.Raygun4Net4.Tests.csproj", "{046F330F-D640-452C-A0CB-C88A8E87C7F1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net4.Tests", "Mindscape.Raygun4Net4.Tests\Mindscape.Raygun4Net4.Tests.csproj", "{BC560F66-B06E-4C85-AC05-B889165AA818}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.Core", "Mindscape.Raygun4Net.Core\Mindscape.Raygun4Net.Core.csproj", "{6435C84C-1DAC-41FE-AA51-FAA8E9A7F090}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mindscape.Raygun4Net.Common", "Mindscape.Raygun4Net.Common\Mindscape.Raygun4Net.Common.csproj", "{E2E96209-EF7A-439C-8EB7-AB5F8150095E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,20 +24,29 @@ Global
 		{6D1C7E96-5E04-421D-8E8A-B3C8C02FD41D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6D1C7E96-5E04-421D-8E8A-B3C8C02FD41D}.Sign|Any CPU.ActiveCfg = Sign|Any CPU
 		{6D1C7E96-5E04-421D-8E8A-B3C8C02FD41D}.Sign|Any CPU.Build.0 = Sign|Any CPU
-		{046F330F-D640-452C-A0CB-C88A8E87C7F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{046F330F-D640-452C-A0CB-C88A8E87C7F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{046F330F-D640-452C-A0CB-C88A8E87C7F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{046F330F-D640-452C-A0CB-C88A8E87C7F1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{046F330F-D640-452C-A0CB-C88A8E87C7F1}.Sign|Any CPU.ActiveCfg = Release|Any CPU
-		{046F330F-D640-452C-A0CB-C88A8E87C7F1}.Sign|Any CPU.Build.0 = Release|Any CPU
+		{BC560F66-B06E-4C85-AC05-B889165AA818}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC560F66-B06E-4C85-AC05-B889165AA818}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC560F66-B06E-4C85-AC05-B889165AA818}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC560F66-B06E-4C85-AC05-B889165AA818}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC560F66-B06E-4C85-AC05-B889165AA818}.Sign|Any CPU.ActiveCfg = Release|Any CPU
+		{BC560F66-B06E-4C85-AC05-B889165AA818}.Sign|Any CPU.Build.0 = Release|Any CPU
 		{6435C84C-1DAC-41FE-AA51-FAA8E9A7F090}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6435C84C-1DAC-41FE-AA51-FAA8E9A7F090}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6435C84C-1DAC-41FE-AA51-FAA8E9A7F090}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6435C84C-1DAC-41FE-AA51-FAA8E9A7F090}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6435C84C-1DAC-41FE-AA51-FAA8E9A7F090}.Sign|Any CPU.ActiveCfg = Sign|Any CPU
 		{6435C84C-1DAC-41FE-AA51-FAA8E9A7F090}.Sign|Any CPU.Build.0 = Sign|Any CPU
+		{E2E96209-EF7A-439C-8EB7-AB5F8150095E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2E96209-EF7A-439C-8EB7-AB5F8150095E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2E96209-EF7A-439C-8EB7-AB5F8150095E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2E96209-EF7A-439C-8EB7-AB5F8150095E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2E96209-EF7A-439C-8EB7-AB5F8150095E}.Sign|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2E96209-EF7A-439C-8EB7-AB5F8150095E}.Sign|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E57F5C29-7F5F-4C18-83FD-4800F5B372ED}
 	EndGlobalSection
 EndGlobal
