@@ -32,7 +32,7 @@ namespace Mindscape.Raygun4Net4.Integration.Tests
     /// <summary>
     /// This checks that a local user secret has been set for this project
     ///
-    /// Make your you set the api ke o a real key, but don't commit it!
+    /// Make your you set the api key to a real key, but don't commit it!
     /// </summary>
     [Test]
     public void CheckApiKeyHasBeenSet()
