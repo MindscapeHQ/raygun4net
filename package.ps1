@@ -18,7 +18,7 @@ properties {
     $build_dir_mvc =                 "$build_dir\mvc"
     $build_dir_webapi =              "$build_dir\webapi"
     $build_dir_webjob =              "$build_dir\webjob"
-    $build_dir_winrt =               "$build_dir\winrt"
+  #  $build_dir_winrt =               "$build_dir\winrt"
     $build_dir_uwp =                 "$build_dir\uwp"
     $build_dir_windowsphone =        "$build_dir\windowsphone"
     $build_dir_signed =              "$build_dir\signed"
@@ -29,8 +29,8 @@ properties {
     $build_dir_net4_client_signed =  "$build_dir_signed\net40-client"
     $build_dir_mvc_signed =          "$build_dir_signed\mvc"
     $build_dir_webapi_signed =       "$build_dir_signed\webapi"
-    $build_dir_winrt_signed =        "$build_dir_signed\winrt"
-    $build_dir_uwp_signed =          "$build_dir_signed\uwp"
+  #  $build_dir_winrt_signed =        "$build_dir_signed\winrt"
+  #  $build_dir_uwp_signed =          "$build_dir_signed\uwp"
     $release_dir =                   "$root\release\"
     $nuget_dir =                     "$root\.nuget"
     $env:Path +=                     ";$nuget_dir"
@@ -74,9 +74,9 @@ task Zip -depends Package {
     $versionfoldermvc =          $versionfolder + "\mvc"
     $versionfolderwebapi =       $versionfolder + "\webapi"
     $versionfolderwebjob =       $versionfolder + "\webjob"
-    $versionfolderwinrt =        $versionfolder + "\winrt"
-    $versionfolderuwp =          $versionfolder + "\uwp"
-    $versionfolderwindowsphone = $versionfolder + "\windowsphone"
+  #  $versionfolderwinrt =        $versionfolder + "\winrt"
+  #  $versionfolderuwp =          $versionfolder + "\uwp"
+  #  $versionfolderwindowsphone = $versionfolder + "\windowsphone"
     
     $signedfolder =         $versionfolder + "\signed"
     $signedfolder2 =        $signedfolder + "\net20"
@@ -86,8 +86,8 @@ task Zip -depends Package {
     $signedfolder4client =  $signedfolder + "\net40-client"
     $signedfoldermvc =      $signedfolder + "\mvc"
     $signedfolderwebapi =   $signedfolder + "\webapi"
-    $signedfolderwinrt =    $signedfolder + "\winrt"
-    $signedfolderuwp =      $signedfolder + "\uwp"
+  #  $signedfolderwinrt =    $signedfolder + "\winrt"
+  #  $signedfolderuwp =      $signedfolder + "\uwp"
     
     new-item $versionfolder -itemType directory | Out-Null
     new-item $versionfolder2 -itemType directory | Out-Null
@@ -98,9 +98,9 @@ task Zip -depends Package {
     new-item $versionfoldermvc -itemType directory | Out-Null
     new-item $versionfolderwebapi -itemType directory | Out-Null
     new-item $versionfolderwebjob -itemType directory | Out-Null
-    new-item $versionfolderwinrt -itemType directory | Out-Null
-    new-item $versionfolderuwp -itemType directory | Out-Null
-    new-item $versionfolderwindowsphone -itemType directory | Out-Null
+  #  new-item $versionfolderwinrt -itemType directory | Out-Null
+  #  new-item $versionfolderuwp -itemType directory | Out-Null
+  #  new-item $versionfolderwindowsphone -itemType directory | Out-Null
     
     new-item $signedfolder -itemType directory | Out-Null
     new-item $signedfolder2 -itemType directory | Out-Null
@@ -110,8 +110,8 @@ task Zip -depends Package {
     new-item $signedfolder4client -itemType directory | Out-Null
     new-item $signedfoldermvc -itemType directory | Out-Null
     new-item $signedfolderwebapi -itemType directory | Out-Null
-    new-item $signedfolderwinrt -itemType directory | Out-Null
-    new-item $signedfolderuwp -itemType directory | Out-Null
+  #  new-item $signedfolderwinrt -itemType directory | Out-Null
+  #  new-item $signedfolderuwp -itemType directory | Out-Null
     
     # .NET 2.0
     copy-item $build_dir_net2/Mindscape.Raygun4Net.dll $versionfolder2
@@ -148,14 +148,14 @@ task Zip -depends Package {
     copy-item $build_dir_webjob/Mindscape.Raygun4Net.Azure.WebJob.dll $versionfolderwebjob
     copy-item $build_dir_webjob/Mindscape.Raygun4Net.Azure.WebJob.pdb $versionfolderwebjob
     # WinRT
-    copy-item $build_dir_winrt/Mindscape.Raygun4Net.WinRT.dll $versionfolderwinrt
-    copy-item $build_dir_winrt/Mindscape.Raygun4Net.WinRT.pdb $versionfolderwinrt
+   # copy-item $build_dir_winrt/Mindscape.Raygun4Net.WinRT.dll $versionfolderwinrt
+   # copy-item $build_dir_winrt/Mindscape.Raygun4Net.WinRT.pdb $versionfolderwinrt
     # Windows Store
-    copy-item $build_dir_uwp/Mindscape.Raygun4Net.WindowsStore.dll $versionfolderuwp
-    copy-item $build_dir_uwp/Mindscape.Raygun4Net.WindowsStore.pdb $versionfolderuwp
+  #  copy-item $build_dir_uwp/Mindscape.Raygun4Net.WindowsStore.dll $versionfolderuwp
+  #  copy-item $build_dir_uwp/Mindscape.Raygun4Net.WindowsStore.pdb $versionfolderuwp
     # Windows Phone
-    copy-item $build_dir_windowsphone/Mindscape.Raygun4Net.WindowsPhone.dll $versionfolderwindowsphone
-    copy-item $build_dir_windowsphone/Mindscape.Raygun4Net.WindowsPhone.pdb $versionfolderwindowsphone
+  #  copy-item $build_dir_windowsphone/Mindscape.Raygun4Net.WindowsPhone.dll $versionfolderwindowsphone
+  #  copy-item $build_dir_windowsphone/Mindscape.Raygun4Net.WindowsPhone.pdb $versionfolderwindowsphone
     # Signed .NET 2
     copy-item $build_dir_net2_signed/Mindscape.Raygun4Net.dll $signedfolder2
     copy-item $build_dir_net2_signed/Mindscape.Raygun4Net.pdb $signedfolder2
@@ -186,10 +186,10 @@ task Zip -depends Package {
     copy-item $build_dir_webapi_signed/Mindscape.Raygun4Net.dll $signedfolderwebapi
     copy-item $build_dir_webapi_signed/Mindscape.Raygun4Net.pdb $signedfolderwebapi
     # Signed WinRT
-    copy-item $build_dir_winrt_signed/Mindscape.Raygun4Net.WinRT.dll $signedfolderwinrt
-    copy-item $build_dir_winrt_signed/Mindscape.Raygun4Net.WinRT.pdb $signedfolderwinrt
+  #  copy-item $build_dir_winrt_signed/Mindscape.Raygun4Net.WinRT.dll $signedfolderwinrt
+  #  copy-item $build_dir_winrt_signed/Mindscape.Raygun4Net.WinRT.pdb $signedfolderwinrt
     # Signed UWP
-    copy-item $build_dir_uwp_signed/Mindscape.Raygun4Net.WindowsStore.dll $signedfolderuwp
+  #  copy-item $build_dir_uwp_signed/Mindscape.Raygun4Net.WindowsStore.dll $signedfolderuwp
     
     $zipFullName = $release_dir + $version + ".zip"
     Get-ChildItem $outerfolder | Add-Zip $zipFullName
