@@ -143,7 +143,12 @@
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="RaygunClient.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Mindscape.Raygun4Net.Common\Mindscape.Raygun4Net.Common.csproj">
+      <Project>{C54AC4FF-E134-4444-823B-066BA915AF62}</Project>
+      <Name>Mindscape.Raygun4Net.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

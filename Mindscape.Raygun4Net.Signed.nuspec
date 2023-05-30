@@ -2,34 +2,29 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata minClientVersion="2.5">
     <id>Mindscape.Raygun4Net.Signed</id>
-    <version>6.0.0-beta001</version>
+    <version>6.0.0-beta004</version>
     <title />
     <authors>Raygun</authors>
     <owners />
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Raygun provider for signed projects built with .NET Framework + Windows Store apps, Windows Phone, Windows 8 and  WinRT.</description>
+    <description>Raygun provider for signed projects built with .NET Framework</description>
     <iconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</iconUrl>
     <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
     <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
   </metadata>
   <files>
-    <!-- .NET 2.0 -->
-    <file src="build\signed\net20\Mindscape.Raygun4Net.dll" target="lib\net20\Mindscape.Raygun4Net.dll" />
-    <file src="build\signed\net20\Mindscape.Raygun4Net.pdb" target="lib\net20\Mindscape.Raygun4Net.pdb" />
-    <!-- .NET 3.5 -->
-    <file src="build\signed\net35\Mindscape.Raygun4Net.dll" target="lib\net35\Mindscape.Raygun4Net.dll" />
-    <file src="build\signed\net35\Mindscape.Raygun4Net.pdb" target="lib\net35\Mindscape.Raygun4Net.pdb" />
-    <!-- .NET 3.5 Client Profile -->
-    <file src="build\signed\net35-client\Mindscape.Raygun4Net.dll" target="lib\net35-client\Mindscape.Raygun4Net.dll" />
-    <file src="build\signed\net35-client\Mindscape.Raygun4Net.pdb" target="lib\net35-client\Mindscape.Raygun4Net.pdb" />
     <!-- .NET 4.0 -->
     <file src="build\signed\net40\Mindscape.Raygun4Net.dll" target="lib\net40\Mindscape.Raygun4Net.dll" />
     <file src="build\signed\net40\Mindscape.Raygun4Net.pdb" target="lib\net40\Mindscape.Raygun4Net.pdb" />
     <file src="build\signed\net40\Mindscape.Raygun4Net4.dll" target="lib\net40\Mindscape.Raygun4Net4.dll" />
     <file src="build\signed\net40\Mindscape.Raygun4Net4.pdb" target="lib\net40\Mindscape.Raygun4Net4.pdb" />
+    <file src="build\signed\net40\Mindscape.Raygun4Net.Common.dll" target="lib\net40\Mindscape.Raygun4Net.Common.dll" />
+    <file src="build\signed\net40\Mindscape.Raygun4Net.Common.pdb" target="lib\net40\Mindscape.Raygun4Net.Common.pdb" />
     <!-- .NET 4.0 Client Profile -->
     <file src="build\signed\net40-client\Mindscape.Raygun4Net.dll" target="lib\net40-client\Mindscape.Raygun4Net.dll" />
     <file src="build\signed\net40-client\Mindscape.Raygun4Net.pdb" target="lib\net40-client\Mindscape.Raygun4Net.pdb" />
+    <file src="build\signed\net40-client\Mindscape.Raygun4Net.Common.dll" target="lib\net40-client\Mindscape.Raygun4Net.Common.dll" />
+    <file src="build\signed\net40-client\Mindscape.Raygun4Net.Common.pdb" target="lib\net40-client\Mindscape.Raygun4Net.Common.pdb" />
  
     <!-- WinRT and Windows 8 -->
     <!-- <file src="build\signed\winrt\Mindscape.Raygun4Net.WinRT.dll" target="lib\portable-windows8\Mindscape.Raygun4Net.WinRT.dll" />

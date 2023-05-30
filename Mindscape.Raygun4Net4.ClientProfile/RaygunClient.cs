@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Reflection;
+using Mindscape.Raygun4Net.Common.DataAccess;
 using Mindscape.Raygun4Net.Messages;
 using Mindscape.Raygun4Net.Logging;
 using Mindscape.Raygun4Net.Storage;
@@ -454,7 +455,7 @@ namespace Mindscape.Raygun4Net
 
     protected WebClient CreateWebClient()
     {
-      var client = new WebClient();
+      var client = new RaygunWebClient();
       client.Headers.Add("X-ApiKey", _apiKey);
       client.Headers.Add("content-type", "application/json; charset=utf-8");
       client.Encoding = System.Text.Encoding.UTF8;
@@ -483,6 +484,7 @@ namespace Mindscape.Raygun4Net
           }
         }
       }
+
       return client;
     }
   }
