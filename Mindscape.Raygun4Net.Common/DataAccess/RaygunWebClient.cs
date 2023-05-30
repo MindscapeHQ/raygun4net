@@ -11,29 +11,22 @@ namespace Mindscape.Raygun4Net.Common.DataAccess
   {
     private readonly SecurityProtocolType _sslProtocol;
 
-#if NET40 || NET45
+
     private static readonly PropertyInfo SslProtocolsPropertyInfo =
       typeof(HttpWebRequest).GetProperty("SslProtocols", BindingFlags.Instance | BindingFlags.NonPublic);
-#endif
+
 
     /// <summary>
-    /// 
+    /// An override of System.Net.WebClient, which uses reflection to patch and enable TLS 1.2 and 1.3 in .net 4.0-4.5
     /// </summary>
-    /// <param name="sslProtocol">The tls protocols to use to make the network connection to Raygun. This should not normally be set, as correct defaults, for the given runtime, should be chosen automatically</param>
+    /// <param name="sslProtocol">The TLS protocols to use to make the network connection to Raygun. This should not normally be set, as correct defaults, for the given runtime, should be chosen automatically</param>
     public RaygunWebClient(SecurityProtocolType? sslProtocol = null)
     {
       SecurityProtocolType defaults = ServicePointManager.SecurityProtocol;
-//#if NET40
-      defaults |= (SecurityProtocolType)3072; //TLS 1.2
-      defaults |= (SecurityProtocolType) 12288; //TLS 1.3
-//#elif NET45
-//      defaults |= SecurityProtocolType.Tls12;
-//      defaults |= (SecurityProtocolType) 12288; //TLS 1.3
-//#endif
+
       _sslProtocol = sslProtocol ?? defaults;
     }
 
-//#if NET40 || NET45
     protected override WebRequest GetWebRequest(Uri address)
     {
       var request = base.GetWebRequest(address);
@@ -45,6 +38,5 @@ namespace Mindscape.Raygun4Net.Common.DataAccess
 
       return request;
     }
-//#endif
   }
 }
