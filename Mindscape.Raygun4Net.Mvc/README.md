@@ -1,4 +1,4 @@
-Raygun4Net.Mvc - Raygun Provider for ASP .NET MVC projects
+Raygun4Net.Mvc - Raygun Provider for ASP .NET Framework MVC projects
 =============================================================
 
 Where is my app API key?
