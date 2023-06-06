@@ -8,7 +8,7 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunSettings : ConfigurationSection
   {
-    private static readonly RaygunSettings settings = ConfigurationManager.GetSection("RaygunSettings") as RaygunSettings ?? new RaygunSettings();
+    private static RaygunSettings settings = ConfigurationManager.GetSection("RaygunSettings") as RaygunSettings ?? new RaygunSettings();
 
     private const string DefaultApiEndPoint = "https://api.raygun.com/entries";
 
@@ -17,6 +17,9 @@ namespace Mindscape.Raygun4Net
     public static RaygunSettings Settings
     {
       get { return settings; }
+#if DEBUG
+      internal set => settings = value; //Needed to be able to reset, after some unit tests pollute this global object.
+#endif
     }
 
     [ConfigurationProperty("apikey", IsRequired = true, DefaultValue = "")]

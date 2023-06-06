@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net4;net45</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup >
+    <Reference Include="System.Net"  Condition=" '$(TargetFramework)' != 'net6' " />
+  </ItemGroup>
+
+</Project>

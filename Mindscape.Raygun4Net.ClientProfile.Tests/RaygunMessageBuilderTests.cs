@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using Mindscape.Raygun4Net.Messages;
+﻿using Mindscape.Raygun4Net.Messages;
 using NUnit.Framework;
 
 namespace Mindscape.Raygun4Net.Tests
@@ -38,6 +33,9 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void SetVersion_Null()
     {
+  #if DEBUG
+      RaygunSettings.Settings = new RaygunSettings();//Mindscape.Raygun4Net.RaygunHttpModule is modifying this global object. So this is resetting it.
+  #endif
       _builder.SetVersion(null);
       RaygunMessage message = _builder.Build();
       Assert.AreEqual("Not supplied", message.Details.Version);

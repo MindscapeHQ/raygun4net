@@ -20,7 +20,7 @@ namespace Mindscape.Raygun4Net
     public string ApplicationVersion { get; set; }
 
     /// <summary>
-    /// If set to true will automatically setup handlers to catch Unhandled Exceptions  
+    /// If set to true will automatically setup handlers to catch Unhandled Exceptions
     /// </summary>
     /// <remarks>
     /// Currently defaults to false. This may be change in future releases.

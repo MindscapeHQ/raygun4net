@@ -19,6 +19,7 @@ namespace Mindscape.Raygun4Net
 
     [ThreadStatic]
     private static RaygunRequestMessage _currentRequestMessage;
+
     private static object _sendLock = new object();
 
     private readonly string _apiKey;
@@ -56,7 +57,9 @@ namespace Mindscape.Raygun4Net
       _apiKey = apiKey;
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
+
       _wrapperExceptions.Add(typeof(HttpUnhandledException));
+
 
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreFormFieldNames))
       {

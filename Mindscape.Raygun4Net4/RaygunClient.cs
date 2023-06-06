@@ -57,7 +57,9 @@ namespace Mindscape.Raygun4Net
       _apiKey = apiKey;
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
+
       _wrapperExceptions.Add(typeof(HttpUnhandledException));
+
 
       if (!string.IsNullOrEmpty(RaygunSettings.Settings.IgnoreSensitiveFieldNames))
       {

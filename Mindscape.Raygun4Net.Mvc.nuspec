@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata minClientVersion="2.5">
     <id>Mindscape.Raygun4Net.Mvc</id>
-    <version>5.13.0</version>
+    <version>6.0.0-beta001</version>
     <title />
     <authors>Raygun</authors>
     <owners />
@@ -16,9 +16,6 @@
     </dependencies>
   </metadata>
   <files>
-    <!-- .NET 3.5 -->
-    <file src="build\net35\Mindscape.Raygun4Net.dll" target="lib\net35\Mindscape.Raygun4Net.dll" />
-    <file src="build\net35\Mindscape.Raygun4Net.pdb" target="lib\net35\Mindscape.Raygun4Net.pdb" />
     <!-- .NET 4.0+ -->
     <file src="build\mvc\Mindscape.Raygun4Net.Mvc.dll" target="lib\net40\Mindscape.Raygun4Net.Mvc.dll" />
     <file src="build\mvc\Mindscape.Raygun4Net.Mvc.pdb" target="lib\net40\Mindscape.Raygun4Net.Mvc.pdb" />

@@ -38,7 +38,6 @@ namespace Mindscape.Raygun4Net
     public RaygunClient(string apiKey)
     {
       _apiKey = apiKey;
-      
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
       BeginSendStoredMessages();
@@ -62,9 +61,10 @@ namespace Mindscape.Raygun4Net
     {
       if (string.IsNullOrEmpty(_apiKey))
       {
-        System.Diagnostics.Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
+        Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
         return false;
       }
+
       return true;
     }
 
@@ -93,6 +93,7 @@ namespace Mindscape.Raygun4Net
             Send(e);
             _handlingRecursiveErrorSending = false;
           }
+
           result = !args.Cancel;
         }
       }
@@ -106,6 +107,7 @@ namespace Mindscape.Raygun4Net
     public event EventHandler<RaygunCustomGroupingKeyEventArgs> CustomGroupingKey;
 
     private bool _handlingRecursiveGrouping;
+
     protected string OnCustomGroupingKey(Exception exception, RaygunMessage message)
     {
       string result = null;
@@ -125,9 +127,11 @@ namespace Mindscape.Raygun4Net
             Send(e);
             _handlingRecursiveGrouping = false;
           }
+
           result = args.CustomGroupingKey;
         }
       }
+
       return result;
     }
 
@@ -169,7 +173,7 @@ namespace Mindscape.Raygun4Net
         }
       }
     }
-    
+
     /// <summary>
     /// Specifies types of wrapper exceptions that Raygun should send rather than stripping out and sending the inner exception.
     /// This can be used to remove the default wrapper exception (TargetInvocationException).
@@ -570,7 +574,7 @@ namespace Mindscape.Raygun4Net
     {
       if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {
-        System.AggregateException aggregate = exception as System.AggregateException;
+        AggregateException aggregate = exception as AggregateException;
         if (aggregate != null)
         {
           foreach (Exception e in aggregate.InnerExceptions)

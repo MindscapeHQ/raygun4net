@@ -97,6 +97,7 @@ namespace Mindscape.Raygun4Net
           _raygunMessage.Details.Version = "Not supplied";
         }
       }
+
       return this;
     }
 
