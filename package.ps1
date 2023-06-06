@@ -1,5 +1,8 @@
 properties {
     $root =                          $psake.build_script_dir
+    
+    $nuspec_framework =              "$root\Mindscape.Raygun4Net.nuspec"
+    $nuspec_framework_signed =       "$root\Mindscape.Raygun4Net.signed.nuspec"
     $nuspec_core =                   "$root\Mindscape.Raygun4Net.Core.nuspec"
     $nuspec_core_signed =            "$root\Mindscape.Raygun4Net.Core.Signed.nuspec"
     $nuspec_mvc =                    "$root\Mindscape.Raygun4Net.Mvc.nuspec"
@@ -39,6 +42,8 @@ task Init -depends Clean {
 }
 
 task Package -depends Init {
+    exec { nuget pack $nuspec_framework -OutputDirectory $release_dir }
+    exec { nuget pack $nuspec_framework_signed -OutputDirectory $release_dir }
     exec { nuget pack $nuspec_core -OutputDirectory $release_dir }
     exec { nuget pack $nuspec_core_signed -OutputDirectory $release_dir }
     exec { nuget pack $nuspec_mvc -OutputDirectory $release_dir }

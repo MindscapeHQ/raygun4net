@@ -24,6 +24,9 @@ namespace Mindscape.Raygun4Net.Common.DataAccess
     {
       SecurityProtocolType defaults = ServicePointManager.SecurityProtocol;
 
+      defaults |= (SecurityProtocolType)3072; //TLS 1.2
+      defaults |= (SecurityProtocolType)12288; //TLS 1.3
+
       _sslProtocol = sslProtocol ?? defaults;
     }
 
