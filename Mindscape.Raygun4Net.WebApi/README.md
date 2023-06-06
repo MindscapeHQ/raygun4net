@@ -13,24 +13,58 @@ The main classes can be found in the Mindscape.Raygun4Net namespace.
 Usage
 ======
 
-Add a section to configSections:
+The following instructions are for ASP.NET *Framework* Web API. For instructions for how to install Raygun for ASP.NET Core Web API, see the `Mindscape.Raygun4Net.AspNetCore` provider [here](../Mindscape.Raygun4Net.AspNetCore/README.md).
 
+---
+
+Install the **Mindscape.Raygun4Net.WebApi** NuGet package into your project. You can either use the below dotnet CLI command, or the NuGet management GUI in the IDE you use.
+
+```bash
+dotnet add package Mindscape.Raygun4Net.WebApi
 ```
+
+In your Web.config file, find or add a `<configSections>` element, which should be nested under the `<configuration>` element, and add the following entry:
+
+```xml
 <section name="RaygunSettings" type="Mindscape.Raygun4Net.RaygunSettings, Mindscape.Raygun4Net"/>
 ```
 
-Add the Raygun settings configuration block from above:
+Then reference it by adding the following line somewhere after the `configSections` tag. Your app API key is displayed when you create a new application in your Raygun account, or can be viewed in the application settings. `RaygunSettings` has many options which can be found [here](https://raygun.com/documentation/language-guides/dotnet/crash-reporting/webapi/#exclude-errors-by-http-status-code).
 
+```xml
+<RaygunSettings apikey="paste_your_api_key_here" />
 ```
-<RaygunSettings apikey="YOUR_APP_API_KEY" />
-```
+
 
 Now you can either setup Raygun to send unhandled exceptions automatically or/and send exceptions manually.
 
-To send unhandled exceptions automatically, go to the WebApiConfig class in your project. In the static Register method, call the static RaygunWebApiClient.Attach method.
+---
+
+To send unhandled exceptions automatically, go to your `WebApiConfig` class (typically in the `App_Start` directory). Call the static `RaygunWebApiClient.Attach(config)` method from within the `Register` method:
 
 ```csharp
-RaygunWebApiClient.Attach(config);
+using Mindscape.Raygun4Net.WebApi;
+```
+
+```csharp
+public static class WebApiConfig
+{
+  public static void Register(HttpConfiguration config)
+  {
+    RaygunWebApiClient.Attach(config);
+
+    // Web API routes here
+  }
+}
+```
+
+If you haven't already, make sure to register the `WebApiConfig` class in the `Application_Start` method in your `Global.asax.cs` file:
+
+```csharp
+protected void Application_Start()
+{
+  GlobalConfiguration.Configure(WebApiConfig.Register);
+}
 ```
 
 Anywhere in you code, you can also send exception reports manually simply by creating a new instance of the RaygunWebApiClient and call one of the Send or SendInBackground methods.
@@ -44,6 +78,21 @@ try
 catch (Exception e)
 {
   new RaygunWebApiClient().SendInBackground(e);
+}
+```
+
+---
+
+TLS Configuration
+-------------------
+
+Raygun's ingestion nodes [require TLS 1.1 or TLS 1.2](https://raygun.com/documentation/privacy-security/transport-layer-security/). If you are using .NET 4.5 or earlier, you may need to enable these protocols in your application. This is done by updating the protocol property in the `Application_Start` method in your `Global.asax.cs` file:
+
+```csharp
+protected void Application_Start()
+{
+  // Enable TLS 1.1 and TLS 1.2 with future support for TLS 3
+  ServicePointManager.SecurityProtocol |= (SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls3 );
 }
 ```
 

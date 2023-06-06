@@ -12,8 +12,8 @@ Projects built with the following frameworks are supported:
 * .NET 3.5 and 4.0 Client Profile
 * .NET Core 1.0, 2.0, 3.0+
 * ASP.NET
-* Mvc
-* WebApi
+* ASP.NET MVC
+* ASP.NET WebApi
 * WinForms, WPF, console apps etc
 * Windows 8
 * WinRT
@@ -223,44 +223,21 @@ To do this, get your Http Application to implement the IRaygunApplication interf
 The http module will use the RaygunClient returned from this method to send the unhandled exceptions.
 In this method you can setup any additional options on the RaygunClient instance that you need - more information about each feature is described at the end of this file.
 
-### MVC
+### ASP.NET MVC
 
 As of version 4.0.0, Mvc support has been moved into a new NuGet package.
-If you have an Mvc project, please uninstall the Raygun4Net NuGet package and install the Mindscape.Raygun4Net.Mvc NuGet package instead.
-The NuGet package will include a readme containing everything you need to know about using it.
+If you have an Mvc project, please uninstall the Raygun4Net NuGet package and install the `Mindscape.Raygun4Net.Mvc` NuGet package instead.
 
-The Mvc and WebApi NuGet packages can be installed in the same project.
+Once the package is installed, see the [package README](/Mindscape.Raygun4Net.Mvc/README.md) for instructions on configuration.
 
-### Web Api
+The Mvc and WebApi NuGet packages can be installed in the same project safely.
+
+### ASP.NET Web API
 
 As of version 4.0.0, WebApi support has been moved into a new NuGet package.
-If you have a WebApi project, please uninstall the Raygun4Net NuGet package and install the Mindscape.Raygun4Net.WebApi NuGet package instead.
+If you have a WebApi project, please uninstall the Raygun4Net NuGet package and install the `Mindscape.Raygun4Net.WebApi` NuGet package instead.
 
-Once the package is installed, go to the `WebApiConfig` class in your project.
-In the static `Register` method, call the static `RaygunWebApiClient.Attach` method.
-
-```csharp
-RaygunWebApiClient.Attach(config);
-```
-
-Note that you may experience errors if you include the HTTP Module in the `<system.web>` section of your `web.config`.
-The HTTP module is only required if you are using MVC or regular ASP.NET - all WebApi errors are caught using
-`RaygunWebApiClient.Attach`.
-
-To include the HTTP request details, pass in the current request message to the client's SetCurrentHTTPRequest method when manually sending exceptions.
-
-```csharp
-try
-{
-  // Do something here that might go wrong
-}
-catch (Exception e)
-{
-  var client = new RaygunWebApiClient();
-  client.SetCurrentHttpRequest(ActionContext.Request);
-  client.SendInBackground(e);
-}
-```
+Once the package is installed, see the [package README](/Mindscape.Raygun4Net.WebApi/README.md) for instructions on configuration.
 
 The Mvc and WebApi NuGet packages can be installed in the same project safely.
 
