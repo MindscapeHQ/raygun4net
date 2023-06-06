@@ -1,4 +1,4 @@
-Raygun4Net.Mvc - Raygun Provider for ASP .NET MVC projects
+Raygun4Net.Mvc - Raygun Provider for ASP .NET Framework MVC projects
 =============================================================
 
 Where is my app API key?
@@ -13,38 +13,48 @@ The main classes can be found in the Mindscape.Raygun4Net namespace.
 Usage
 ======
 
-The following instructions are for ASP.NET *Framework* Web API. For instructions for how to install Raygun for ASP.NET Core Web API, see the `Mindscape.Raygun4Net.AspNetCore` provider [here](../Mindscape.Raygun4Net.AspNetCore/README.md).
+The following instructions are for ASP.NET *Framework* MVC. For instructions for how to install Raygun for ASP.NET Core MVC, see the `Mindscape.Raygun4Net.AspNetCore` provider [here](../Mindscape.Raygun4Net.AspNetCore/README.md).
 
 ---
 
-Add a section to configSections:
+In your Web.config file, find or add a `<configSections>` element, which should be nested under the `<configuration>` element, and add the following entry:
 
+```xml
 <section name="RaygunSettings" type="Mindscape.Raygun4Net.RaygunSettings, Mindscape.Raygun4Net"/>
+```
 
-Add the Raygun settings configuration block from above:
+Then reference it by adding the following line somewhere after the `configSections` tag.
 
+```xml
 <RaygunSettings apikey="YOUR_APP_API_KEY" />
+```
 
 Now you can either setup Raygun to send unhandled exceptions automatically or/and send exceptions manually.
 
-To send unhandled exceptions automatically, use the RaygunHttpModule in web.config in the appropriate way for your application as seen below.
-Note that this will also create and attach a custom MVC error filter attribute for sending exceptions to Raygun, so that you don't need to do this.
+To send unhandled exceptions automatically, use the Raygun HTTP module within the `<configuration>` element in web.config. This is done slightly differently depending on what version of IIS you're using. If in doubt, just try them both:
 
-For system.web:
+```xml
+<system.web>
+  <httpModules>
+    <add name="RaygunErrorModule" type="Mindscape.Raygun4Net.RaygunHttpModule"/>
+  </httpModules>
+</system.web>
+```
 
-<httpModules>
-  <add name="RaygunErrorModule" type="Mindscape.Raygun4Net.RaygunHttpModule"/>
-</httpModules>
+For IIS 7.0, use `system.webServer`
 
-For system.webServer:
-
-<modules>
-  <add name="RaygunErrorModule" type="Mindscape.Raygun4Net.RaygunHttpModule"/>
-</modules>
+```xml
+<system.webServer>
+  <modules>
+    <add name="RaygunErrorModule" type="Mindscape.Raygun4Net.RaygunHttpModule"/>
+  </modules>
+</system.webServer>
+```
 
 Anywhere in you code, you can also send exception reports manually simply by creating a new instance of the RaygunClient and call one of the Send or SendInBackground methods.
 This is most commonly used to send exceptions caught in a try/catch block.
 
+```csharp
 try
 {
   
@@ -53,6 +63,17 @@ catch (Exception e)
 {
   new RaygunClient().SendInBackground(e);
 }
+```
+
+Or to send exceptions in your own handlers rather than using the automatic setup above.
+
+```csharp
+protected void Application_Error()
+{
+  var exception = Server.GetLastError();
+  new RaygunClient().Send(exception);
+}
+```
 
 Providing a custom RaygunClient to the http module
 ==================================================
@@ -169,6 +190,8 @@ The WebApi package is able to send additional exceptions to Raygun that occur in
 Example JSON Data Filter
 ========================
 
+
+```
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -244,3 +267,4 @@ public class RaygunJsonDataFilter : IRaygunDataFilter
     return hasValue && !string.IsNullOrEmpty(property.Name) && ignoredKeys.Any(f => f.Equals(property.Name, StringComparison.OrdinalIgnoreCase));
   }
 }
+```

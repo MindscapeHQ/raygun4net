@@ -1,4 +1,4 @@
-Raygun4Net.WebApi - Raygun Provider for ASP .NET WebApi projects
+Raygun4Net.WebApi - Raygun Provider for ASP .NET WebApi Framework projects
 ===================================================================
 
 Where is my app API key?
