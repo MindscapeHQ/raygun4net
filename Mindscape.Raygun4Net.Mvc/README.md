@@ -13,6 +13,10 @@ The main classes can be found in the Mindscape.Raygun4Net namespace.
 Usage
 ======
 
+The following instructions are for ASP.NET *Framework* Web API. For instructions for how to install Raygun for ASP.NET Core Web API, see the `Mindscape.Raygun4Net.AspNetCore` provider [here](../Mindscape.Raygun4Net.AspNetCore/README.md).
+
+---
+
 Add a section to configSections:
 
 <section name="RaygunSettings" type="Mindscape.Raygun4Net.RaygunSettings, Mindscape.Raygun4Net"/>
