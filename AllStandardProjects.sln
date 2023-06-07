@@ -34,7 +34,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mindscape.Raygun4Net4.Integration.Tests", "Mindscape.Raygun4Net4.Intergration.Tests\Mindscape.Raygun4Net4.Integration.Tests.csproj", "{7C77FC80-08E0-4B41-AEEC-8D27F93E91E2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.Common", "Mindscape.Raygun4Net.Common\Mindscape.Raygun4Net.Common.csproj", "{F6087DF7-625D-45F7-AF91-A0C53DA312F1}"
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mindscape.Raygun4Net.Common", "Mindscape.Raygun4Net.Common\Mindscape.Raygun4Net.Common.csproj", "{F6087DF7-625D-45F7-AF91-A0C53DA312F1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
