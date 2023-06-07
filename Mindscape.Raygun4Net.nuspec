@@ -10,7 +10,8 @@
     <description>Raygun provider for .NET Framework</description>
     <iconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</iconUrl>
     <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
-    <licenseUrl>https://raw.github.com/MindscapeHQ/raygun4net/master/LICENSE</licenseUrl>
+    <license type="file">LICENSE</license>
+    <icon>128x128-transparent.png</icon>
   </metadata>
   <files>
     <!-- .NET 4.0 -->
@@ -27,5 +28,7 @@
     <file src="build\net40-client\Mindscape.Raygun4Net.Common.pdb" target="lib\net40-client\Mindscape.Raygun4Net.Common.pdb" />
    
     <file src="README.md" />
+    <file src="128x128-transparent.png" />
+    <file src="LICENSE" />
   </files>
 </package>
