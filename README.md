@@ -30,7 +30,7 @@ Installation
 
 * The easiest way to install this provider is by either using the below dotnet CLI command, or in the NuGet management GUI in the IDE you use.
 
-```
+``` sh
 dotnet add package Mindscape.Raygun4Net
 ```
 
@@ -106,9 +106,14 @@ app.UseRaygun();
 
 The above set up will cause all unhandled exceptions to be sent to your Raygun account, where you can easily view all of your error monitoring and crash report data.
 
-#### TLS configuration
+#### TLS configuration for .NET 3.5 or earlier
 
-Raygun's ingestion nodes require TLS 1.2 or TLS 1.3 If you are using .NET 3.5 or earlier, you may need to enable these protocols in your application. This is done by updating the protocol property in your application's startup code.
+Raygun's ingestion nodes require TLS 1.2 or TLS 1.3 If you are using **.NET 3.5 or earlier**, you may need to enable these protocols in your application and patch your OS.
+
+
+Check out the [TLS troubleshooting guide from Microsoft](https://techcommunity.microsoft.com/t5/azure-paas-blog/ssl-tls-connection-issue-troubleshooting-guide/ba-p/2108065) for their recommendations.
+
+Updating the protocol property in your application's startup code.
 
 ```csharp
 protected void Application_Start()
