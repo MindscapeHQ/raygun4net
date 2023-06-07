@@ -8,7 +8,7 @@ Supported platforms/frameworks
 
 Projects built with the following frameworks are supported:
 
-* .NET 2.0, 3.5, 4.0+, up to .NET 7.0
+* .NET 4.0+, up to .NET 7.0
 * .NET 4.0 Client Profile
 * .NET Core 1.0, 2.0, 3.0+
 * ASP.NET
@@ -108,13 +108,13 @@ The above set up will cause all unhandled exceptions to be sent to your Raygun a
 
 #### TLS configuration
 
-Raygun's ingestion nodes require TLS 1.1 or TLS 1.2. If you are using .NET 4.5 or earlier, you may need to enable these protocols in your application. This is done by updating the protocol property in your application's startup code.
+Raygun's ingestion nodes require TLS 1.2 or TLS 1.3 If you are using .NET 3.5 or earlier, you may need to enable these protocols in your application. This is done by updating the protocol property in your application's startup code.
 
 ```csharp
 protected void Application_Start()
   {
-    // Enable TLS 1.1 and TLS 1.2 with future support for TLS 3
-    ServicePointManager.SecurityProtocol |= (SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls3 );
+    // Enable TLS 1.2 and TLS 1.3
+    ServicePointManager.SecurityProtocol |=  ( (SecurityProtocolType)3072 /*TLS 1.2*/ | (SecurityProtocolType)12288 /*TLS 1.3*/  );
   }
 ```
 
