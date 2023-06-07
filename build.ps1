@@ -8,7 +8,8 @@ properties {
     $solution_file_mvc =          "$root/Mindscape.Raygun4Net.Mvc.sln"
     $solution_file_webapi =       "$root/Mindscape.Raygun4Net.WebApi.sln"
     $solution_file_webjob =       "$root/Mindscape.Raygun4Net.Azure.WebJob.sln"
-    $configuration =              "Release"
+    $configuration =              "Sign" ## We can sign the regular packages too
+    $configurationOld =           "Release" ## Update some time in the future
     $build_dir =                  "$root\build\"
     $build_dir_net4 =             "$build_dir\net40"
     $build_dir_net4_client =      "$build_dir\net40-client"
@@ -35,9 +36,10 @@ task Compile -depends Init {
     
     exec { msbuild "$solution_file_net4"   /p:OutDir=$build_dir_net4 /p:Configuration=$configuration }
     exec { msbuild "$solution_file_net4_client" /m /p:OutDir=$build_dir_net4_client /p:Configuration=$configuration }
-    exec { msbuild "$solution_file_mvc" /m /p:OutDir=$build_dir_mvc /p:Configuration=$configuration }
-    exec { msbuild "$solution_file_webapi" /m /p:OutDir=$build_dir_webapi /p:Configuration=$configuration }
-    exec { msbuild "$solution_file_webjob" /m /p:OutDir=$build_dir_webjob /p:Configuration=$configuration }
+
+    exec { msbuild "$solution_file_mvc" /m /p:OutDir=$build_dir_mvc /p:Configuration=$configurationOld }
+    exec { msbuild "$solution_file_webapi" /m /p:OutDir=$build_dir_webapi /p:Configuration=$configurationOld }
+    exec { msbuild "$solution_file_webjob" /m /p:OutDir=$build_dir_webjob /p:Configuration=$configurationOld }
 }
 
 
