@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Mindscape.Raygun4Net.AspNetCore2.Tests": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:50407"
+    }
+  }
+}

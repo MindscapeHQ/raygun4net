@@ -27,15 +27,12 @@ Supported platforms/frameworks
 
 Projects built with the following frameworks are supported:
 
-* .NET 2.0, 3.5, 4.0, 4.5
-* .NET 3.5 and 4.0 Client Profile
-* .NET Core 1, 2
+
+* .NET Core 1, 2, 3
+* .NET Framework 4.0, 4.5 4.6 4.7 4.8
+* .NET 4.0 Client Profile
 * ASP.NET
 * WinForms, WPF, console apps etc.
-* Windows Store apps (universal) for Windows 8.1 and Windows Phone 8.1
-* Windows 8
-* Windows Phone 7.1 and 8
-* WinRT
 * Xamarin.iOS and Xamarin.Mac (Both unified and classic)
 * Xamarin.Android
 
@@ -244,13 +241,6 @@ If the method you pass in does result in an exception being thrown this will be 
 the exception will again be thrown. Two overloads are available; one for methods that return void and
 another for methods that return an object.
 
-Windows Phone 7.1 and 8
-=======================
-In the App.xaml.cs constructor (or any main entry point to your application), call the static RaygunClient.Attach method using your API key.
-
-RaygunClient.Attach("YOUR_APP_API_KEY");
-
-At any point after calling the Attach method, you can use RaygunClient.Current to get the static instance. This can be used for manually sending messages (via the Send methods) or changing options such as the User identity string.
 
 Xamarin for Android
 ====================
@@ -337,7 +327,6 @@ Version numbering
 -----------------
 
 By default, Raygun will send the assembly version of your project with each report.
-If you are using WinRT, the transmitted version number will be that of the Windows Store package, set in Package.appxmanifest (under Packaging).
 
 If you need to provide your own custom version value, you can do so by setting the ApplicationVersion property of the RaygunClient (in the format x.x.x.x where x is a positive integer).
 
