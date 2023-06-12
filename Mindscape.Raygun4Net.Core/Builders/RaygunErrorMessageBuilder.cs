@@ -57,11 +57,15 @@ namespace Mindscape.Raygun4Net.Builders
 
     private static IList<Exception> GetInnerExceptions(Exception exception)
     {
+
+#if NET40_OR_GREATER
       AggregateException ae = exception as AggregateException;
       if (ae != null)
       {
         return ae.InnerExceptions;
       }
+
+#endif
 
       ReflectionTypeLoadException rtle = exception as ReflectionTypeLoadException;
       if (rtle != null)

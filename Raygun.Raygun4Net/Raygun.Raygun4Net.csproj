@@ -1,11 +1,24 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net4;net45;netstandard2.0;net5.0;net6.0;net7.0;</TargetFrameworks>
+
+    
+    <TargetFrameworks>net4;net4;net45;netstandard2.0;net5.0;net6.0;net7.0;</TargetFrameworks>
     <!--<ImplicitUsings>enable</ImplicitUsings>-->
     <Nullable>enable</Nullable>
     <LangVersion>8.0</LangVersion>
+    <Configurations>Debug;Release;Client</Configurations>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net4'">
+
+    <TargetFramework>net4</TargetFramework>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    
+  </PropertyGroup>
+  
+  
+
 
   <PropertyGroup>
     <PackageId>Raygun.Raygun4Net</PackageId>
@@ -15,5 +28,10 @@
     <Product>Raygun Crash Reporting</Product>
     <PackageTags>Crash Reporting</PackageTags>
   </PropertyGroup>
+  
+  
+
+
+  <Import Project="..\SharedProject1\SharedProject1.projitems" Label="Shared" />
 
 </Project>

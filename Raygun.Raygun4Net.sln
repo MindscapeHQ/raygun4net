@@ -7,16 +7,23 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raygun.Raygun4Net", "Raygun
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raygun.Raygun4Net.Tests", "Raygun.Raygun4Net.Tests\Raygun.Raygun4Net.Tests.csproj", "{CE6704A0-96D3-4A88-85E2-90716F48DECC}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedProject1", "SharedProject1\SharedProject1.shproj", "{ADD6E05B-F979-4B5D-8C5C-DDF1167A8307}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Client|Any CPU = Client|Any CPU
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E6253936-EEF4-4435-B747-497BF3465D73}.Client|Any CPU.ActiveCfg = Client|Any CPU
+		{E6253936-EEF4-4435-B747-497BF3465D73}.Client|Any CPU.Build.0 = Client|Any CPU
 		{E6253936-EEF4-4435-B747-497BF3465D73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E6253936-EEF4-4435-B747-497BF3465D73}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6253936-EEF4-4435-B747-497BF3465D73}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6253936-EEF4-4435-B747-497BF3465D73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE6704A0-96D3-4A88-85E2-90716F48DECC}.Client|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE6704A0-96D3-4A88-85E2-90716F48DECC}.Client|Any CPU.Build.0 = Debug|Any CPU
 		{CE6704A0-96D3-4A88-85E2-90716F48DECC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CE6704A0-96D3-4A88-85E2-90716F48DECC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE6704A0-96D3-4A88-85E2-90716F48DECC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -27,5 +34,9 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4005A7EF-F684-4699-85E8-76AFE761F533}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		SharedProject1\SharedProject1.projitems*{add6e05b-f979-4b5d-8c5c-ddf1167a8307}*SharedItemsImports = 13
+		SharedProject1\SharedProject1.projitems*{e6253936-eef4-4435-b747-497bf3465d73}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

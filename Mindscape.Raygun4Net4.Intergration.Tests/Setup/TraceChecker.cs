@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Mindscape.Raygun4Net4.Integration.Tests.Setup;
 
-[ExcludeFromCodeCoverage]
+//[ExcludeFromCodeCoverage]
 internal class TraceChecker : TraceListener
 {
   public List<string> Traces { get; } = new();

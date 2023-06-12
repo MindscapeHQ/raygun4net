@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net4;net45</TargetFrameworks>
+    <TargetFrameworks>net35;net4;net45</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup >
