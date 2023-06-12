@@ -70,9 +70,7 @@
       <Name>Mindscape.Raygun4Net.WebApi</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Payloads\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="Payloads\AttributedWithoutValues.xml" />
     <EmbeddedResource Include="Payloads\AttributedWithValues.xml" />

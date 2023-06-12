@@ -14,6 +14,8 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
     <PackageIcon>128x128-transparent.png</PackageIcon>
+    <AssemblyOriginatorKeyFile>Raygun4Net.NetCore.Common.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
     <PackageId>Mindscape.Raygun4Net.NetCore.Common.Signed</PackageId>

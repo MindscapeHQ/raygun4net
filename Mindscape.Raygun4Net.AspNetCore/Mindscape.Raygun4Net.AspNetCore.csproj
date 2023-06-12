@@ -43,6 +43,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore.Common\Mindscape.Raygun4Net.NetCore.Common.csproj" />
   </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <AssemblyOriginatorKeyFile>Raygun4Net.AspNetCore.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
     <AssemblyOriginatorKeyFile>Raygun4Net.AspNetCore.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>

@@ -30,6 +30,8 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <SignAssembly>true</SignAssembly>    
+    <AssemblyOriginatorKeyFile>Raygun4Net.Mvc.snk</AssemblyOriginatorKeyFile> 
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
     <SignAssembly>true</SignAssembly>

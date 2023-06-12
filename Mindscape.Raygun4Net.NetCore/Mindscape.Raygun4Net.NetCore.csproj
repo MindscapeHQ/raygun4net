@@ -29,6 +29,11 @@
     <Compile Include="RaygunSettings.cs" />
     <Compile Include="Properties\*.cs" />
   </ItemGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <AssemblyOriginatorKeyFile>Raygun4Net.NetCore.snk</AssemblyOriginatorKeyFile>
+	  <SignAssembly>true</SignAssembly>
+	  <Optimize>true</Optimize>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
     <PackageId>Mindscape.Raygun4Net.NetCore.Signed</PackageId>
     <AssemblyOriginatorKeyFile>Raygun4Net.NetCore.snk</AssemblyOriginatorKeyFile>
