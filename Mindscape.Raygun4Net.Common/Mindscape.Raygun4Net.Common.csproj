@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>net4;net45</TargetFrameworks>
+    <AssemblyOriginatorKeyFile>Raygun4Net4.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup >
