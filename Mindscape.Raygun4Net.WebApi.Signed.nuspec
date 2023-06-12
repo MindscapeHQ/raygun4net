@@ -11,7 +11,8 @@
     <description>Raygun provider for signed ASP.NET Web API projects</description>
     <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
     <license type="file">LICENSE</license>
-    <icon>128x128-transparent.png</icon>  <dependencies>
+    <icon>128x128-transparent.png</icon>
+    <dependencies>
       <dependency id="Mindscape.Raygun4Net.Core.Signed" version="5.12.1" />
     </dependencies>
   </metadata>
