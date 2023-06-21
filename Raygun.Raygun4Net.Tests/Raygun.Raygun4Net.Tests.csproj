@@ -2,7 +2,7 @@
 
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Client' ">
-    <TargetFrameworks>net4;net45</TargetFrameworks>
+    <TargetFrameworks>net4;net45;</TargetFrameworks>
     <TargetFrameworkProfile Condition="'$(TargetFramework)' == 'net4'">Client</TargetFrameworkProfile>
     <Nullable>enable</Nullable>
     <LangVersion>10.0</LangVersion>
@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' != 'Client' ">
-    <TargetFrameworks>net4;net45;net462;net47;net471;net472;net48;net5.0;net6.0;net7.0;</TargetFrameworks>
+    <TargetFrameworks>net4;net45;net462;net47;net471;net472;net48;net5.0;net6.0;net7.0;net8.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <LangVersion>10.0</LangVersion>
     <IsPackable>false</IsPackable>
@@ -34,10 +34,9 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
     <PackageReference Include="NUnit.Analyzers" Version="3.6.1" />
     <PackageReference Include="coverlet.collector" Version="3.2.0" />
+    <PackageReference Include="Raygun.Raygun4Net" Version="0.0.4" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Raygun.Raygun4net\Raygun.Raygun4Net.csproj" />
-  </ItemGroup>
+
 
 </Project>

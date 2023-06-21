@@ -1,9 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-
-    
-    <TargetFrameworks>net4;net4;net45;netstandard2.0;net5.0;net6.0;net7.0;</TargetFrameworks>
+  <PropertyGroup>    
+    <TargetFrameworks>net4;net45;netstandard2.0;net6.0;</TargetFrameworks>
     <!--<ImplicitUsings>enable</ImplicitUsings>-->
     <Nullable>enable</Nullable>
     <LangVersion>8.0</LangVersion>
@@ -11,26 +9,20 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net4'">
-
     <TargetFramework>net4</TargetFramework>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
-    
   </PropertyGroup>
-  
-  
-
 
   <PropertyGroup>
     <PackageId>Raygun.Raygun4Net</PackageId>
-    <Version>0.0.1</Version>
+    <Version>0.0.4</Version>
     <Authors>Raygun Ltd</Authors>
+    <Owners>Raygun Ltd</Owners>
     <Company>Raygun Ltd</Company>
     <Product>Raygun Crash Reporting</Product>
     <PackageTags>Crash Reporting</PackageTags>
+    <Description>Raygun.com Crash Reporting is an automated error tracking software that gives you visibility and diagnostics into the errors and bugs impacting your customers.</Description>
   </PropertyGroup>
-  
-  
-
 
   <Import Project="..\SharedProject1\SharedProject1.projitems" Label="Shared" />
 
