@@ -35,6 +35,7 @@
     <Description>Raygun.com Crash Reporting is an automated error tracking software that gives you visibility and diagnostics into the errors and bugs impacting your customers.</Description>
   </PropertyGroup>
 
-  <Import Project="..\SharedProject1\SharedProject1.projitems" Label="Shared" />
+
+  <Import Project="..\Raygun.Raygun4Net.Shared\SharedProject1.projitems" Label="Shared" />
 
 </Project>

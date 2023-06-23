@@ -5,7 +5,7 @@ namespace Raygun.Raygun4Net
 {
   public class Class1: Class2
   {
-    
+
 
 
 #if NET8_0
@@ -46,7 +46,7 @@ namespace Raygun.Raygun4Net
 #elif NET35
     public String Framework => "NET35";
 
-#elif NETStandard
+#elif NETSTANDARD
     public String Framework => "NETStandard";
 
 #else
