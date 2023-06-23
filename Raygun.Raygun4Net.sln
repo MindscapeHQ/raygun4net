@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raygun.Raygun4Net", "Raygun
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raygun.Raygun4Net.Tests", "Raygun.Raygun4Net.Tests\Raygun.Raygun4Net.Tests.csproj", "{CE6704A0-96D3-4A88-85E2-90716F48DECC}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedProject1", "SharedProject1\SharedProject1.shproj", "{ADD6E05B-F979-4B5D-8C5C-DDF1167A8307}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Raygun.Raygun4Net.Shared", "SharedProject1\Raygun.Raygun4Net.Shared.shproj", "{ADD6E05B-F979-4B5D-8C5C-DDF1167A8307}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

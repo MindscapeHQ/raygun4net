@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>    
-    <TargetFrameworks>net4;net45;netstandard2.0;net6.0;</TargetFrameworks>
+    <TargetFrameworks>net35;net4;net45;netstandard2.0;net6.0;</TargetFrameworks>
     <!--<ImplicitUsings>enable</ImplicitUsings>-->
     <Nullable>enable</Nullable>
     <LangVersion>8.0</LangVersion>
     <Configurations>Debug;Release;Client</Configurations>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net4'">
@@ -13,9 +14,19 @@
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net35'">
+    <TargetFramework>net35</TargetFramework>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <CurrentDate>$([System.DateTime]::Now.ToString(yyyyMMdd-mm))</CurrentDate>
+  </PropertyGroup>
+
+
   <PropertyGroup>
     <PackageId>Raygun.Raygun4Net</PackageId>
-    <Version>0.0.4</Version>
+    <Version>0.0.6-DEV-$(CurrentDate)</Version>
     <Authors>Raygun Ltd</Authors>
     <Owners>Raygun Ltd</Owners>
     <Company>Raygun Ltd</Company>

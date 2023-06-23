@@ -7,15 +7,21 @@ namespace SharedProject1
 {
   public class Class2
   {
-    public String sdkjfhgaskj => GetImplementation().ToString();
+    public String ImplementationType
+    {
+      get
+      {
+        var q = GetImplementation();
+       return q.ToString(); }
+    }
 
 
-    public enum Implementation { Classic, Core, Native, Xamarin }
+    public enum Implementation { Framework, Net, Core, Native, Xamarin }
 
     public Implementation GetImplementation()
     {
-#if NET40 || NET45
-      return Implementation.Classic;
+#if NET35 || NET40 || NET45
+      return Implementation.Framework;
 #else
 
 
@@ -29,14 +35,16 @@ namespace SharedProject1
         var platf = descr.Substring(0, descr.LastIndexOf(' '));
         switch (platf)
         {
+          case ".NET":
+            return Implementation.Net;
           case ".NET Framework":
-            return Implementation.Classic;
+            return Implementation.Framework;
           case ".NET Core":
             return Implementation.Core;
           case ".NET Native":
             return Implementation.Native;
           default:
-            throw new ArgumentException();
+            throw new ArgumentException($"descr: {descr}");
         }
       }
 #endif
