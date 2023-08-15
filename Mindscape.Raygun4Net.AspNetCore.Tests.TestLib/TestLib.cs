@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Mindscape.Raygun4Net.AspNetCore2.Tests.TestLib
+namespace Mindscape.Raygun4Net.AspNetCore.Tests.TestLib
 {
     public class TestLib
     {
