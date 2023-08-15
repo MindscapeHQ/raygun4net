@@ -18,6 +18,11 @@ namespace Mindscape.Raygun4Net4.Integration.Tests
     [SetUp]
     public void Setup()
     {
+      if (ApiKey == "")
+      {
+        Assert.Fail("You need to set the ApiKey to a valid key in order to run these tests");
+      }
+
       Trace.Listeners.Clear();
       TraceChecker.Clear();
       Trace.Listeners.Add(new ConsoleTraceListener());
