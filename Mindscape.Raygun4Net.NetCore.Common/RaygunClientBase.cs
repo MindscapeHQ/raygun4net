@@ -327,9 +327,10 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public void SendInBackground(RaygunMessage raygunMessage)
+    public Task SendInBackground(RaygunMessage raygunMessage)
     {
       Task.Run(() => Send(raygunMessage));
+      return Task.CompletedTask;
     }
 
     internal void FlagExceptionAsSent(Exception exception)
