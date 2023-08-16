@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Mindscape.Raygun4Net.AspNetCore2.Tests.Pages
+namespace Mindscape.Raygun4Net.AspNetCore.Tests.Pages
 {
     public class IndexModel : PageModel
     {

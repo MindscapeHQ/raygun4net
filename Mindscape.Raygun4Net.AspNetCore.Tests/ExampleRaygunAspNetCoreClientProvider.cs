@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Mindscape.Raygun4Net.AspNetCore;
 using System.Collections.Generic;
 
-namespace Mindscape.Raygun4Net.AspNetCore2.Tests
+namespace Mindscape.Raygun4Net.AspNetCore.Tests
 {
     public class ExampleRaygunAspNetCoreClientProvider : DefaultRaygunAspNetCoreClientProvider
     {
-        public override AspNetCore.RaygunClient GetClient(AspNetCore.RaygunSettings settings, HttpContext context)
+        public override RaygunClient GetClient(RaygunSettings settings, HttpContext context)
         {
             var client = base.GetClient(settings, context);
 

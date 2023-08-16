@@ -2,8 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Mindscape.Raygun4Net.AspNetCore;
-using Mindscape.Raygun4Net.AspNetCore2.Tests;
-using Mindscape.Raygun4Net.AspNetCore2.Tests.TestLib;
+using Mindscape.Raygun4Net.AspNetCore.Tests;
+using Mindscape.Raygun4Net.AspNetCore.Tests.TestLib;
 
 var builder = WebApplication.CreateBuilder(args);
 
