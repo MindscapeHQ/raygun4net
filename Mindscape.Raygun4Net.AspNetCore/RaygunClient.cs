@@ -259,7 +259,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
         _currentHttpContext.Value = null;
 
         // Do not await here as we want this to execute in the background and allow the request to finish.
-        Task.Run(async () =>
+        _ = Task.Run(async () =>
         {
           _currentRequestMessage.Value = currentRequestMessage;
           _currentResponseMessage.Value = currentResponseMessage;
