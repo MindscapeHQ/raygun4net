@@ -280,7 +280,18 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      SendAsync(exception, tags, userCustomData).GetAwaiter().GetResult();
+      try
+      {
+        SendAsync(exception, tags, userCustomData).GetAwaiter().GetResult();
+      }
+      catch
+      {
+        // Swallow the exception if we're not throwing on error
+        if (_settings.ThrowOnError)
+        {
+          throw;
+        }
+      }
     }
 
     /// <summary>
@@ -294,8 +305,19 @@ namespace Mindscape.Raygun4Net
     {
       if (CanSend(exception))
       {
-        await StripAndSend(exception, tags, userCustomData, userInfo).ConfigureAwait(false);
-        FlagAsSent(exception);
+        try
+        {
+          await StripAndSend(exception, tags, userCustomData, userInfo).ConfigureAwait(false);
+          FlagAsSent(exception);
+        }
+        catch
+        {
+          // Swallow the exception if we're not throwing on error
+          if (_settings.ThrowOnError)
+          {
+            throw;
+          }
+        }
       }
     }
 
@@ -311,7 +333,10 @@ namespace Mindscape.Raygun4Net
     {
       if (CanSend(exception))
       {
-        Task.Run(async () =>
+        // For backwards compatibility we need to continue to support the old SendInBackground method signature.
+        // So we just fire and forget and discard the task.
+        // If we await this Task it will cause SendInBackground to be blocking.
+        _ = Task.Run(async () =>
         {
           await StripAndSend(exception, tags, userCustomData, userInfo);
         });
@@ -329,7 +354,10 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public Task SendInBackground(RaygunMessage raygunMessage)
     {
-      Task.Run(() => Send(raygunMessage));
+      // For backwards compatibility we need to continue to support the old SendInBackground method signature.
+      // So we just fire and forget and discard the task.
+      // If we await this Task it will cause SendInBackground to be blocking.
+      _ = Task.Run(() => Send(raygunMessage));
       return Task.CompletedTask;
     }
 
