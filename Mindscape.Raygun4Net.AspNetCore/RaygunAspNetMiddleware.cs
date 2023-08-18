@@ -133,8 +133,6 @@ namespace Mindscape.Raygun4Net.AspNetCore
     /// Credit to Filip W for the initial implementation of this method.
     /// See http://www.strathweb.com/2016/04/request-islocal-in-asp-net-core/
     /// </remarks>
-    /// <param name="req"></param>
-    /// <returns></returns>
     public static bool IsLocal(this HttpRequest req)
     {
       var connection = req.HttpContext.Connection;

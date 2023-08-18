@@ -7,6 +7,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Configurations>Debug;Release;Sign</Configurations>
     <Platforms>AnyCPU</Platforms>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
   <!-- NuGet Options -->
   <PropertyGroup>
@@ -54,5 +55,10 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore.Common\Mindscape.Raygun4Net.NetCore.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Internals visible to for Unit Tests -->
+    <InternalsVisibleTo Include="Mindscape.Raygun4Net.NetCore.Tests" />
   </ItemGroup>
 </Project>

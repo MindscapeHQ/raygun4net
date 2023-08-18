@@ -221,7 +221,8 @@ namespace Mindscape.Raygun4Net.AspNetCore
       return !settings.ExcludedStatusCodes.Contains(message.Details.Response.StatusCode);
     }
 
-    protected override async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData)
+    /// <inheritdoc/>
+    public override async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo = null)
     {
       if (CanSend(exception))
       {
@@ -245,26 +246,28 @@ namespace Mindscape.Raygun4Net.AspNetCore
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     /// <param name="userInfo">Information about the user including the identity string.</param>
-    public override async Task SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo)
+    public override async Task SendInBackground(Exception exception, IList<string> tags = null, IDictionary userCustomData = null, RaygunIdentifierMessage userInfo = null)
     {
       if (CanSend(exception))
       {
         // We need to process the Request on the current thread,
         // otherwise it will be disposed while we are using it on the other thread.
+        // BuildRequestMessage relies on ReadFormAsync so we need to await it to ensure it's processed before continuing.
         RaygunRequestMessage currentRequestMessage = await BuildRequestMessage();
         RaygunResponseMessage currentResponseMessage = BuildResponseMessage();
 
         _currentHttpContext.Value = null;
 
-        var task = Task.Run(async () =>
+        // Do not await here as we want this to execute in the background and allow the request to finish.
+        _ = Task.Run(async () =>
         {
           _currentRequestMessage.Value = currentRequestMessage;
           _currentResponseMessage.Value = currentResponseMessage;
 
           await StripAndSend(exception, tags, userCustomData, userInfo);
         });
+
         FlagAsSent(exception);
-        await task;
       }
     }
 

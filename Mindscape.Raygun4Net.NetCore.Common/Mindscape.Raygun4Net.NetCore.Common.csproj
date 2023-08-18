@@ -3,7 +3,9 @@
     <TargetFrameworks>netstandard1.6;netstandard2.0;netstandard2.1;net5.0;net6.0</TargetFrameworks>
     <Configurations>Debug;Release;Sign</Configurations>
     <Platforms>AnyCPU</Platforms>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
+  
   <PropertyGroup>
     <Authors>Raygun</Authors>
     <Description>.NetStandard library .NetCore applications</Description>
@@ -16,30 +18,44 @@
     <PackageIcon>128x128-transparent.png</PackageIcon>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
+    <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
+    <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD1_6</DefineConstants>
+  </PropertyGroup>
+  
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <AssemblyOriginatorKeyFile>Raygun4Net.NetCore.Common.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+  
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
     <PackageId>Mindscape.Raygun4Net.NetCore.Common.Signed</PackageId>
     <AssemblyOriginatorKeyFile>Raygun4Net.NetCore.Common.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <Optimize>true</Optimize>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+  </ItemGroup>
+  
   <ItemGroup>
     <None Include="..\LICENSE" Pack="true" PackagePath=""/>
     <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\"/>
-  </ItemGroup>  
+  </ItemGroup>
+  
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
     <PackageReference Include="System.ComponentModel" Version="4.3.0" />
     <PackageReference Include="System.Diagnostics.StackTrace" Version="4.0.1" />
   </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+    <!-- Internals visible to for Unit Tests -->
+    <InternalsVisibleTo Include="Mindscape.Raygun4Net.NetCore.Tests" />
+    <InternalsVisibleTo Include="Mindscape.Raygun4Net.NetCore" />
+    <InternalsVisibleTo Include="Mindscape.Raygun4Net.AspNetCore" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
-    <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
-    <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD1_6</DefineConstants>
-  </PropertyGroup>
 </Project>

@@ -11,9 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mindscape.Raygun4Net.NetCor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mindscape.Raygun4Net.AspNetCore", "Mindscape.Raygun4Net.AspNetCore\Mindscape.Raygun4Net.AspNetCore.csproj", "{60FCAC1C-A874-4CCF-B722-508EB62DC798}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mindscape.Raygun4Net.AspNetCore2.Tests", "Mindscape.Raygun4Net.AspNetCore2.Tests\Mindscape.Raygun4Net.AspNetCore2.Tests.csproj", "{8A6000B2-EE9D-4220-8177-53D5F3655377}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mindscape.Raygun4Net.AspNetCore.Tests", "Mindscape.Raygun4Net.AspNetCore.Tests\Mindscape.Raygun4Net.AspNetCore.Tests.csproj", "{8A6000B2-EE9D-4220-8177-53D5F3655377}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mindscape.Raygun4Net.AspNetCore2.Tests.TestLib", "Mindscape.Raygun4Net.AspNetCore2.Tests.TestLib\Mindscape.Raygun4Net.AspNetCore2.Tests.TestLib.csproj", "{8E625850-1EE9-43FE-951C-49229FB584F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mindscape.Raygun4Net.AspNetCore.Tests.TestLib", "Mindscape.Raygun4Net.AspNetCore.Tests.TestLib\Mindscape.Raygun4Net.AspNetCore.Tests.TestLib.csproj", "{8E625850-1EE9-43FE-951C-49229FB584F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

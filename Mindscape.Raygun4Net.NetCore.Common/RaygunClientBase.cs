@@ -12,7 +12,7 @@ namespace Mindscape.Raygun4Net
 {
   public abstract class RaygunClientBase
   {
-    private static readonly HttpClient Client = new HttpClient();
+    private static HttpClient Client = new HttpClient();
 
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
@@ -49,7 +49,6 @@ namespace Mindscape.Raygun4Net
     public string ApplicationVersion { get; set; }
 
 #if NETSTANDARD2_0_OR_GREATER
-
     /// <summary>
     /// If set to true, this will automatically setup handlers to catch Unhandled Exceptions  
     /// </summary>
@@ -85,6 +84,11 @@ namespace Mindscape.Raygun4Net
 
 #endif
 
+    internal RaygunClientBase(RaygunSettingsBase settings, HttpClient client) : this(settings)
+    {
+      Client = client;
+    }
+
     public RaygunClientBase(RaygunSettingsBase settings)
     {
       _settings = settings;
@@ -101,7 +105,7 @@ namespace Mindscape.Raygun4Net
       if (_settings.CatchUnhandledExceptions)
       {
          CatchUnhandledExceptions = _settings.CatchUnhandledExceptions;
-      }      
+      }
 #endif
     }
 
@@ -140,7 +144,8 @@ namespace Mindscape.Raygun4Net
 
     protected virtual bool CanSend(Exception exception)
     {
-      return exception == null || exception.Data == null || !exception.Data.Contains(SentKey) || false.Equals(exception.Data[SentKey]);
+      return exception == null || exception.Data == null || !exception.Data.Contains(SentKey) ||
+             false.Equals(exception.Data[SentKey]);
     }
 
     protected void FlagAsSent(Exception exception)
@@ -275,78 +280,85 @@ namespace Mindscape.Raygun4Net
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
-      SendAsync(exception, tags, userCustomData).Wait();
-    }
-
-    protected virtual async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData)
-    {
-      if (CanSend(exception))
+      try
       {
-        await StripAndSend(exception, tags, userCustomData, null).ConfigureAwait(false);
-        FlagAsSent(exception);
+        SendAsync(exception, tags, userCustomData).GetAwaiter().GetResult();
+      }
+      catch
+      {
+        // Swallow the exception if we're not throwing on error
+        if (_settings.ThrowOnError)
+        {
+          throw;
+        }
       }
     }
 
     /// <summary>
-    /// Asynchronously transmits a message to Raygun.
-    /// </summary>
-    /// <param name="exception">The exception to deliver.</param>
-    public Task SendInBackground(Exception exception)
-    {
-      return SendInBackground(exception, null, null, null);
-    }
-
-    /// <summary>
-    /// Asynchronously transmits an exception to Raygun.
-    /// </summary>
-    /// <param name="exception">The exception to deliver.</param>
-    /// <param name="tags">A list of strings associated with the message.</param>
-    public Task SendInBackground(Exception exception, IList<string> tags)
-    {
-      return SendInBackground(exception, tags, null, null);
-    }
-
-    /// <summary>
-    /// Asynchronously transmits an exception to Raygun.
-    /// </summary>
-    /// <param name="exception">The exception to deliver.</param>
-    /// <param name="tags">A list of strings associated with the message.</param>
-    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    public Task SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
-    {
-      return SendInBackground(exception, tags, userCustomData, null);
-    }
-
-    /// <summary>
-    /// Asynchronously transmits an exception to Raygun.
+    /// Transmits an exception to Raygun asynchronously.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     /// <param name="userInfo">Information about the user including the identity string.</param>
-    public virtual async Task SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo)
+    public virtual async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo = null)
     {
       if (CanSend(exception))
       {
-        var task = Task.Run(async () =>
+        try
         {
           await StripAndSend(exception, tags, userCustomData, userInfo).ConfigureAwait(false);
-        });
-
-        FlagAsSent(exception);
-
-        await task.ConfigureAwait(false);
+          FlagAsSent(exception);
+        }
+        catch
+        {
+          // Swallow the exception if we're not throwing on error
+          if (_settings.ThrowOnError)
+          {
+            throw;
+          }
+        }
       }
     }
 
     /// <summary>
-    /// Asynchronously transmits a message to Raygun.
+    /// Transmits an exception to Raygun in the background without blocking.
+    /// </summary>
+    /// <param name="exception">The exception to deliver.</param>
+    /// <param name="tags">A list of strings associated with the message.</param>
+    /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
+    /// <param name="userInfo">Information about the user including the identity string.</param>
+    public virtual Task SendInBackground(Exception exception, IList<string> tags = null,
+      IDictionary userCustomData = null, RaygunIdentifierMessage userInfo = null)
+    {
+      if (CanSend(exception))
+      {
+        // For backwards compatibility we need to continue to support the old SendInBackground method signature.
+        // So we just fire and forget and discard the task.
+        // If we await this Task it will cause SendInBackground to be blocking.
+        _ = Task.Run(async () =>
+        {
+          await StripAndSend(exception, tags, userCustomData, userInfo);
+        });
+
+        FlagAsSent(exception);
+      }
+
+      return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Transmits an exception to Raygun in the background without blocking.
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public Task SendInBackground(RaygunMessage raygunMessage)
     {
-      return Task.Run(() => Send(raygunMessage));
+      // For backwards compatibility we need to continue to support the old SendInBackground method signature.
+      // So we just fire and forget and discard the task.
+      // If we await this Task it will cause SendInBackground to be blocking.
+      _ = Task.Run(() => Send(raygunMessage));
+      return Task.CompletedTask;
     }
 
     internal void FlagExceptionAsSent(Exception exception)
@@ -354,7 +366,8 @@ namespace Mindscape.Raygun4Net
       FlagAsSent(exception);
     }
 
-    protected virtual async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo)
+    protected virtual async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags,
+      IDictionary userCustomData, RaygunIdentifierMessage userInfo)
     {
       var message = RaygunMessageBuilder.New(_settings)
         .SetEnvironmentDetails()
@@ -377,7 +390,8 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 
-    protected async Task StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo)
+    protected async Task StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData,
+      RaygunIdentifierMessage userInfo)
     {
       foreach (Exception e in StripWrapperExceptions(exception))
       {
@@ -387,7 +401,8 @@ namespace Mindscape.Raygun4Net
 
     protected IEnumerable<Exception> StripWrapperExceptions(Exception exception)
     {
-      if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
+      if (exception != null && _wrapperExceptions.Any(wrapperException =>
+            exception.GetType() == wrapperException && exception.InnerException != null))
       {
         AggregateException aggregate = exception as AggregateException;
 
