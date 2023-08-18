@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup>
+    <Platforms>AnyCPU</Platforms>
+    <LangVersion>8</LangVersion>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>Raygun</Authors>
+    <Company>Raygun</Company>
+    <Product>Raygun4Net</Product>
+    <Copyright>Copyright © Raygun 2021</Copyright>
+    <RepositoryUrl>https://github.com/MindscapeHQ/raygun4net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://raygun.com/platform/crash-reporting</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+</Project>

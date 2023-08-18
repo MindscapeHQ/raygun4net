@@ -14,6 +14,13 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     private HttpClient httpClient = null!;
     private MockHttpHandler mockHttp = null!;
 
+    public class BananaClient : RaygunClient
+    {
+      public BananaClient(RaygunSettings settings, HttpClient httpClient) : base(settings, httpClient)
+      {
+      }
+    }
+
     [SetUp]
     public void Init()
     {
@@ -37,7 +44,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       // This test runs using a mocked http client so we don't need a real API key, if you want to run this
       // and have the data sent to Raygun, remove the `httpClient` parameter from the RaygunClient constructor
       // and set a real API key. This will then send the data to Raygun and you can verify that it is being sent.
-      var client = new RaygunClient(new RaygunSettings
+      var client = new BananaClient(new RaygunSettings
       {
         ApiKey = "banana"
       }, httpClient);

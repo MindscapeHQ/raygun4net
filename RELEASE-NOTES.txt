@@ -1,0 +1,4 @@
+﻿# Release Notes
+
+Release v6.7.0
+- SendInBackground is now fire-and-forget
