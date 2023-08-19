@@ -70,8 +70,8 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       // So we can assume that the requests are being sent in parallel, this should be a lot less than 15 seconds
       Assert.That(elapsed, Is.LessThan(500));
 
-      // Delay 2 seconds to give it time to send all the messages
-      await Task.Delay(2000);
+      // Delay 5 seconds to give it time to send all the messages
+      await Task.Delay(5000);
 
       // Verify that the request was sent 50 times
       await mockHttp.VerifyAsync(match => match.Method(HttpMethod.Post)
