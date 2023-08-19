@@ -34,7 +34,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         .RequestUri("https://api.raygun.com/entries"))
         .Respond(x => 
         {
-          x.Latency(NetworkLatency.Between(300, 1000));
+          x.Latency(NetworkLatency.Between(5, 15));
           x.Body("OK");
           x.StatusCode(HttpStatusCode.Accepted);
         }).Verifiable();
@@ -68,10 +68,12 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       // 50 * 300 = 15000ms
       // If the requests were blocking it would take minimum 15 seconds at minimum 300ms per request to send each one
       // So we can assume that the requests are being sent in parallel, this should be a lot less than 15 seconds
-      Assert.That(elapsed, Is.LessThan(500));
+      Assert.That(elapsed, Is.LessThan(100));
+      
+      Console.WriteLine("Elapsed: " + elapsed + "ms");
 
-      // Delay 5 seconds to give it time to send all the messages
-      await Task.Delay(5000);
+      // Delay 1 second to give it time to send all the messages
+      await Task.Delay(1000);
 
       // Verify that the request was sent 50 times
       await mockHttp.VerifyAsync(match => match.Method(HttpMethod.Post)
