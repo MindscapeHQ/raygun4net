@@ -3,3 +3,4 @@ v6.7.0
 - Changed `SendInBackground` to no longer blocking
 
 See full change log here: https://github.com/MindscapeHQ/raygun4net/blob/master/CHANGE-LOG.md
+
