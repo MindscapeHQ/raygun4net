@@ -1,4 +1,5 @@
-﻿# Release Notes
+﻿
+v6.7.0
+- Changed `SendInBackground` to no longer blocking
 
-Release v6.7.0
-- SendInBackground is now fire-and-forget
+See full change log here: https://github.com/MindscapeHQ/raygun4net/blob/master/CHANGE-LOG.md

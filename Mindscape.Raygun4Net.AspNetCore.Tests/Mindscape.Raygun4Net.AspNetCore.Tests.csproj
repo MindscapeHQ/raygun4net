@@ -5,17 +5,14 @@
     <Platforms>AnyCPU</Platforms>
     <LangVersion>10</LangVersion>
   </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
+    <AssemblyOriginatorKeyFile>../Raygun4Net.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net.AspNetCore.Tests.TestLib\Mindscape.Raygun4Net.AspNetCore.Tests.TestLib.csproj" />
     <ProjectReference Include="..\Mindscape.Raygun4Net.AspNetCore\Mindscape.Raygun4Net.AspNetCore.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Pages\Boom.cshtml" />
-    <_ContentIncludedByDefault Remove="Pages\Error.cshtml" />
-    <_ContentIncludedByDefault Remove="Pages\Index.cshtml" />
-    <_ContentIncludedByDefault Remove="Pages\LibBoom.cshtml" />
-    <_ContentIncludedByDefault Remove="Pages\_Layout.cshtml" />
-    <_ContentIncludedByDefault Remove="Pages\_ViewImports.cshtml" />
-    <_ContentIncludedByDefault Remove="Pages\_ViewStart.cshtml" />
   </ItemGroup>
 </Project>

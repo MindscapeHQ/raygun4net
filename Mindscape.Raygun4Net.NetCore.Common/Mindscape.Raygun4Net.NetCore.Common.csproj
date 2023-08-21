@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Description>.NETStandard library for targeting .NET Core applications</Description>
+    <Description>.NETStandard library for targeting .NET applications</Description>
     <PackageId>Mindscape.Raygun4Net.NetCore.Common</PackageId>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
@@ -17,7 +17,7 @@
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
     <PackageId>Mindscape.Raygun4Net.NetCore.Common.Signed</PackageId>
-    <AssemblyOriginatorKeyFile>../Raygun4Net.NetCore.Common.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>../Raygun4Net.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
 

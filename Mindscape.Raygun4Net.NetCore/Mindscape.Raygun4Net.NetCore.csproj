@@ -17,7 +17,7 @@
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
     <PackageId>Mindscape.Raygun4Net.NetCore.Signed</PackageId>
-    <AssemblyOriginatorKeyFile>../Raygun4Net.NetCore.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>../Raygun4Net.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
 
