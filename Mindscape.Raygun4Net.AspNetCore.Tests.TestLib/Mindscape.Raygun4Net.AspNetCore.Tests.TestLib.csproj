@@ -5,7 +5,13 @@
     <Platforms>AnyCPU</Platforms>
     <LangVersion>8</LangVersion>
   </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
+    <AssemblyOriginatorKeyFile>../Raygun4Net.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore\Mindscape.Raygun4Net.NetCore.csproj" />
+    <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore\Mindscape.Raygun4Net.NetCore.csproj"/>
   </ItemGroup>
 </Project>

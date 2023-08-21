@@ -84,7 +84,7 @@ namespace Mindscape.Raygun4Net
 
 #endif
 
-    internal RaygunClientBase(RaygunSettingsBase settings, HttpClient client) : this(settings)
+    protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client) : this(settings)
     {
       Client = client;
     }

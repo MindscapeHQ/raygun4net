@@ -1,62 +1,66 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard1.6;netstandard2.0;netstandard2.1;net5.0;net6.0</TargetFrameworks>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Configurations>Debug;Release;Sign</Configurations>
-    <Platforms>AnyCPU</Platforms>
-    <LangVersion>8</LangVersion>
   </PropertyGroup>
+
   <PropertyGroup>
-    <Authors>Raygun</Authors>
-    <Description>.NetStandard library for targeting ASP.Net Core applications</Description>
+    <Description>.NETStandard library for targeting ASP.NET applications</Description>
     <PackageId>Mindscape.Raygun4Net.AspNetCore</PackageId>
-    <PackageVersion>6.6.6</PackageVersion>
-    <PackageProjectUrl>https://github.com/MindscapeHQ/raygun4net</PackageProjectUrl>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance> 
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
     <PackageIcon>128x128-transparent.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)\..\RELEASE-NOTES.txt"))</PackageReleaseNotes>
+    <PackageTags>crash;exception-handling;exception-reporting;exception-handler;unhandled-exceptions;debugging;debug;bug;bugs;exceptions;error;errors;crash-reporting;aspnet-core</PackageTags>
   </PropertyGroup>
-  <ItemGroup>
-    <None Include="..\LICENSE" Pack="true" PackagePath=""/>
-    <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\"/>
-  </ItemGroup>  
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6'">
-    <PackageReference Include="Microsoft.AspNetCore.Http" Version="1.1.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="1.1.2" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.2" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.2" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.2" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\Mindscape.Raygun4Net\Filters\IRaygunDataFilter.cs" Link="Filters\IRaygunDataFilter.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\Filters\RaygunXmlDataFilter.cs" Link="Filters\RaygunXmlDataFilter.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\Filters\RaygunKeyValuePairDataFilter.cs" Link="Filters\RaygunKeyValuePairDataFilter.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore.Common\Mindscape.Raygun4Net.NetCore.Common.csproj" />
-  </ItemGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <AssemblyOriginatorKeyFile>Raygun4Net.AspNetCore.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
-    <AssemblyOriginatorKeyFile>Raygun4Net.AspNetCore.snk</AssemblyOriginatorKeyFile>
+    <PackageId>Mindscape.Raygun4Net.AspNetCore.Signed</PackageId>
+    <AssemblyOriginatorKeyFile>../Raygun4Net.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\"/>
+    <None Include="..\RELEASE-NOTES.txt" Pack="true" PackagePath="\"/>
+    <None Include="..\LICENSE" Pack="true" PackagePath="\"/>
+    <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">   
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6'">
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="1.1.2"/>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="1.1.2"/>
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.2"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2"/>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0"/>
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.2"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2"/>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0"/>
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.2"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Mindscape.Raygun4Net\Filters\IRaygunDataFilter.cs" Link="Filters\IRaygunDataFilter.cs"/>
+    <Compile Include="..\Mindscape.Raygun4Net\Filters\RaygunXmlDataFilter.cs" Link="Filters\RaygunXmlDataFilter.cs"/>
+    <Compile Include="..\Mindscape.Raygun4Net\Filters\RaygunKeyValuePairDataFilter.cs" Link="Filters\RaygunKeyValuePairDataFilter.cs"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore.Common\Mindscape.Raygun4Net.NetCore.Common.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+    <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <FrameworkReference Include="Microsoft.AspNetCore.App"/>
   </ItemGroup>
 </Project>

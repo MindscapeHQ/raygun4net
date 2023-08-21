@@ -2,22 +2,31 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard1.6;netstandard2.0;netstandard2.1;net5.0;net6.0</TargetFrameworks>
     <Configurations>Debug;Release;Sign</Configurations>
-    <Platforms>AnyCPU</Platforms>
-    <LangVersion>8</LangVersion>
   </PropertyGroup>
-  
+
   <PropertyGroup>
-    <Authors>Raygun</Authors>
-    <Description>.NetStandard library .NetCore applications</Description>
+    <Description>.NETStandard library for targeting .NET applications</Description>
     <PackageId>Mindscape.Raygun4Net.NetCore.Common</PackageId>
-    <PackageVersion>6.5.3</PackageVersion>
-    <PackageProjectUrl>https://github.com/MindscapeHQ/raygun4net</PackageProjectUrl>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance> 
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
     <PackageIcon>128x128-transparent.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)\..\RELEASE-NOTES.txt"))</PackageReleaseNotes>
+    <PackageTags>crash;exception-handling;exception-reporting;exception-handler;unhandled-exceptions;debugging;debug;bug;bugs;exceptions;error;errors;crash-reporting</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
+    <PackageId>Mindscape.Raygun4Net.NetCore.Common.Signed</PackageId>
+    <AssemblyOriginatorKeyFile>../Raygun4Net.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\"/>
+    <None Include="..\RELEASE-NOTES.txt" Pack="true" PackagePath="\"/>
+    <None Include="..\LICENSE" Pack="true" PackagePath=""/>
+    <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
     <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
@@ -26,36 +35,13 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
     <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD1_6</DefineConstants>
   </PropertyGroup>
-  
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <AssemblyOriginatorKeyFile>Raygun4Net.NetCore.Common.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
-    <PackageId>Mindscape.Raygun4Net.NetCore.Common.Signed</PackageId>
-    <AssemblyOriginatorKeyFile>Raygun4Net.NetCore.Common.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <Optimize>true</Optimize>
-  </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0"/>
   </ItemGroup>
-  
-  <ItemGroup>
-    <None Include="..\LICENSE" Pack="true" PackagePath=""/>
-    <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\"/>
-  </ItemGroup>
-  
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
-    <PackageReference Include="System.ComponentModel" Version="4.3.0" />
-    <PackageReference Include="System.Diagnostics.StackTrace" Version="4.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- Internals visible to for Unit Tests -->
-    <InternalsVisibleTo Include="Mindscape.Raygun4Net.NetCore.Tests" />
-    <InternalsVisibleTo Include="Mindscape.Raygun4Net.NetCore" />
-    <InternalsVisibleTo Include="Mindscape.Raygun4Net.AspNetCore" />
+    <PackageReference Include="System.ComponentModel" Version="4.3.0"/>
+    <PackageReference Include="System.Diagnostics.StackTrace" Version="4.0.1"/>
   </ItemGroup>
 </Project>
