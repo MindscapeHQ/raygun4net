@@ -31,13 +31,13 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <SignAssembly>true</SignAssembly>    
-    <AssemblyOriginatorKeyFile>Raygun4Net.Mvc.snk</AssemblyOriginatorKeyFile> 
+    <AssemblyOriginatorKeyFile>../Raygun.snk</AssemblyOriginatorKeyFile> 
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
-    <AssemblyOriginatorKeyFile>Raygun4Net.Mvc.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>../Raygun.snk</AssemblyOriginatorKeyFile>
     <OutputPath>bin\Sign\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Sign|AnyCPU'">
