@@ -6,7 +6,6 @@
    
     <!-- Versions which are supported by Microsoft @ May 2022-->
     <TargetFrameworks>net6.0;net48;net472;net471;net47;net462</TargetFrameworks>
-    <IsPackable>false</IsPackable>
     <AssemblyVersion>1.0.0</AssemblyVersion>
   </PropertyGroup>
   
