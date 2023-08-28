@@ -8,6 +8,12 @@
     <TargetFrameworks>net6.0;net48;net472;net471;net47;net462</TargetFrameworks>
     <AssemblyVersion>1.0.0</AssemblyVersion>
   </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <AssemblyOriginatorKeyFile>../Raygun.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
   
   <ItemGroup>
     <PackageReference Include="NUnit" Version="3.10.1" />
