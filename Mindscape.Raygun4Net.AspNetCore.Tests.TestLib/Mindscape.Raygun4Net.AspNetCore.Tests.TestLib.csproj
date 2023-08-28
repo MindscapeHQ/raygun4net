@@ -1,14 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Configurations>Debug;Release;Sign</Configurations>
-    <Platforms>AnyCPU</Platforms>
-    <LangVersion>8</LangVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
-    <AssemblyOriginatorKeyFile>../Raygun.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

@@ -3,7 +3,7 @@
     <Platforms>AnyCPU</Platforms>
     <LangVersion>8</LangVersion>
     <Optimize>true</Optimize>
-    <Configurations>Debug;Release;Sign</Configurations>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
   <PropertyGroup>

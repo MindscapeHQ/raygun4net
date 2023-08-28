@@ -24,10 +24,11 @@ task Compile -depends Clean {
     build-package .\Mindscape.Raygun4Net.AspNetCore\
 
     # Signed
-    Write-Output "Building signed packages"
-    build-package .\Mindscape.Raygun4Net.NetCore.Common\ Sign
-    build-package .\Mindscape.Raygun4Net.NetCore\ Sign
-    build-package .\Mindscape.Raygun4Net.AspNetCore\ Sign
+    #TODO: Add nugets for signing
+    #Write-Output "Building signed packages"
+    #build-package .\Mindscape.Raygun4Net.NetCore.Common\ Sign
+    #build-package .\Mindscape.Raygun4Net.NetCore\ Sign
+    #build-package .\Mindscape.Raygun4Net.AspNetCore\ Sign
 }
 
 function build-package {
