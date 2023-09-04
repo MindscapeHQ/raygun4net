@@ -13,6 +13,11 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     private CyclicObject _cyclicGenericDictionary;
     private CyclicObject _deepCyclicObject;
     private CyclicObject _siblingObject;
+#if  DEBUG
+    private string token = "null";
+#else
+    private string token = "d595e487e4f9f950";
+#endif
 
     [SetUp]
     public void SetUp()
@@ -90,7 +95,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     public void SerializeTypeObject()
     {
       string json = SimpleJson.SerializeObject(typeof(FakeRaygunClient));
-      Assert.AreEqual("\"Mindscape.Raygun4Net.NetCore.Tests.FakeRaygunClient, Mindscape.Raygun4Net.NetCore.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"", json);
+      Assert.AreEqual(@$"""Mindscape.Raygun4Net.NetCore.Tests.FakeRaygunClient, Mindscape.Raygun4Net.NetCore.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken={token}""", json);
     }
 
     [Test]
@@ -98,7 +103,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     {
       var o = new { Type = typeof(FakeRaygunClient) };
       string json = SimpleJson.SerializeObject(o);
-      Assert.AreEqual("{\"Type\":\"Mindscape.Raygun4Net.NetCore.Tests.FakeRaygunClient, Mindscape.Raygun4Net.NetCore.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"}", json);
+      Assert.AreEqual(@$"{{""Type"":""Mindscape.Raygun4Net.NetCore.Tests.FakeRaygunClient, Mindscape.Raygun4Net.NetCore.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken={token}""}}", json);
     }
 
     // Cyclic object structure tests

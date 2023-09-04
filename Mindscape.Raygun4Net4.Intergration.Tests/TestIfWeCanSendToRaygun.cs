@@ -9,7 +9,7 @@ namespace Mindscape.Raygun4Net4.Integration.Tests
 {
   public class TestIfWeCanSendToRaygun
   {
-    private string ApiKey = "";//"PUT_YOUR_KEY_HERE"
+    private string ApiKey = "0DuXAzfTpTxCJf3PiZqJzA";//"PUT_YOUR_KEY_HERE"
     private const string InvalidApiKey = "BADKEY";
     private TraceChecker TraceChecker { get; } = new();
 
