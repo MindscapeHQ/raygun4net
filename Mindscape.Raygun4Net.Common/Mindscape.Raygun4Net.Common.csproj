@@ -5,12 +5,7 @@
   </PropertyGroup>
   
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <AssemblyOriginatorKeyFile>../Raygun.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition=" '$(Configuration)' == 'Sign' ">
-    <AssemblyOriginatorKeyFile>../Raygun.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\Raygun.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
 

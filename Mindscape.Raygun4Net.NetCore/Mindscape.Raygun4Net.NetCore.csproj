@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <AssemblyOriginatorKeyFile>../Raygun.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\Raygun.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <IsPackable>true</IsPackable>
   </PropertyGroup>

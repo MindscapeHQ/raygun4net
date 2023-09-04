@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>Mindscape.Raygun4Net.AspNetCore.Signed</id>
+    <version>7.0.0</version>
+    <authors>Raygun</authors>
+    <license type="file">LICENSE</license>
+    <icon>128x128-transparent.png</icon>
+    <projectUrl>https://raygun.com/platform/crash-reporting</projectUrl>
+    <iconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</iconUrl>
+    <description>Package is deprecated, please use `Mindscape.Raygun4Net.AspNetCore` which is signed.</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright © Raygun 2021</copyright>
+    <tags>crash exception-handling exception-reporting exception-handler unhandled-exceptions debugging debug bug bugs exceptions error errors crash-reporting aspnet aspnet-core</tags>
+    <repository type="git" url="https://github.com/MindscapeHQ/raygun4net" />
+    <dependencies>
+      <group targetFramework=".NETStandard1.6">
+        <dependency id="Mindscape.Raygun4Net.AspNetCore" version="7.0.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework="net5.0">
+        <dependency id="Mindscape.Raygun4Net.AspNetCore" version="7.0.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework="net6.0">
+        <dependency id="Mindscape.Raygun4Net.AspNetCore" version="7.0.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="Mindscape.Raygun4Net.AspNetCore" version="7.0.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETStandard2.1">
+        <dependency id="Mindscape.Raygun4Net.AspNetCore" version="7.0.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="../LICENSE" />
+    <file src="../128x128-transparent.png" />
+  </files>
+</package>
