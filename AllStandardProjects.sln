@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net4.Tests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.Common", "Mindscape.Raygun4Net.Common\Mindscape.Raygun4Net.Common.csproj", "{F6087DF7-625D-45F7-AF91-A0C53DA312F1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net4.Integration.Tests", "Mindscape.Raygun4Net4.Intergration.Tests\Mindscape.Raygun4Net4.Integration.Tests.csproj", "{CDA9F30E-69B8-44D1-8C8B-C83A8E29842F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -159,6 +161,18 @@ Global
 		{F6087DF7-625D-45F7-AF91-A0C53DA312F1}.Release|ARM.Build.0 = Release|Any CPU
 		{F6087DF7-625D-45F7-AF91-A0C53DA312F1}.Release|x86.ActiveCfg = Release|Any CPU
 		{F6087DF7-625D-45F7-AF91-A0C53DA312F1}.Release|x86.Build.0 = Release|Any CPU
+		{CDA9F30E-69B8-44D1-8C8B-C83A8E29842F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDA9F30E-69B8-44D1-8C8B-C83A8E29842F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDA9F30E-69B8-44D1-8C8B-C83A8E29842F}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{CDA9F30E-69B8-44D1-8C8B-C83A8E29842F}.Debug|ARM.Build.0 = Debug|Any CPU
+		{CDA9F30E-69B8-44D1-8C8B-C83A8E29842F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CDA9F30E-69B8-44D1-8C8B-C83A8E29842F}.Debug|x86.Build.0 = Debug|Any CPU
+		{CDA9F30E-69B8-44D1-8C8B-C83A8E29842F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDA9F30E-69B8-44D1-8C8B-C83A8E29842F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDA9F30E-69B8-44D1-8C8B-C83A8E29842F}.Release|ARM.ActiveCfg = Release|Any CPU
+		{CDA9F30E-69B8-44D1-8C8B-C83A8E29842F}.Release|ARM.Build.0 = Release|Any CPU
+		{CDA9F30E-69B8-44D1-8C8B-C83A8E29842F}.Release|x86.ActiveCfg = Release|Any CPU
+		{CDA9F30E-69B8-44D1-8C8B-C83A8E29842F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -170,6 +184,7 @@ Global
 		{80C7BB59-C753-4E64-9C8D-79B8D57C8215} = {056869D3-A722-4532-89DA-0FDCB2367437}
 		{046F330F-D640-452C-A0CB-C88A8E87C7F1} = {056869D3-A722-4532-89DA-0FDCB2367437}
 		{BC560F66-B06E-4C85-AC05-B889165AA818} = {056869D3-A722-4532-89DA-0FDCB2367437}
+		{CDA9F30E-69B8-44D1-8C8B-C83A8E29842F} = {056869D3-A722-4532-89DA-0FDCB2367437}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {825C31A5-7D53-44CB-9D1B-49408D2CE7FB}
