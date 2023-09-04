@@ -13,10 +13,9 @@
     <icon>128x128-transparent.png</icon>
   </metadata>
   <files>
-    <file src="build\net40\Mindscape.Raygun4Net.dll" target="lib\net40\Mindscape.Raygun4Net.dll" />
-    <file src="build\net40\Mindscape.Raygun4Net.pdb" target="lib\net40\Mindscape.Raygun4Net.pdb" />
+    <file src="..\Mindscape.Raygun4Net\bin\Release\Mindscape.Raygun4Net.dll" target="lib\net40\Mindscape.Raygun4Net.dll" />
   
-    <file src="128x128-transparent.png" />
-    <file src="LICENSE" />
+    <file src="..\128x128-transparent.png" target="128x128-transparent.png" />
+    <file src="..\LICENSE" target="LICENSE" />
   </files>
 </package>
