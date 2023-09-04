@@ -9,7 +9,7 @@ namespace Mindscape.Raygun4Net4.Integration.Tests
 {
   public class TestIfWeCanSendToRaygun
   {
-    private const string ApiKey = "";//"PUT_YOUR_KEY_HERE"
+    private string ApiKey = "";//"PUT_YOUR_KEY_HERE"
     private const string InvalidApiKey = "BADKEY";
     private TraceChecker TraceChecker { get; } = new();
 
@@ -19,7 +19,14 @@ namespace Mindscape.Raygun4Net4.Integration.Tests
     {
       if (ApiKey == "")
       {
-        Assert.Fail("You need to set the ApiKey to a valid key in order to run these tests");
+        if (Environment.GetEnvironmentVariables().Contains("RaygunApiKey"))
+        {
+          ApiKey = Environment.GetEnvironmentVariable("RaygunApiKey")!;
+        }
+        else
+        {
+          Assert.Fail("You need to set the ApiKey to a valid key in order to run these tests");
+        }
       }
 
       Trace.Listeners.Clear();
@@ -70,11 +77,20 @@ namespace Mindscape.Raygun4Net4.Integration.Tests
       Assert.Contains("Raygun: Failed to send report to Raygun due to: The remote server returned an error: (403) Forbidden.", TraceChecker.Traces);
     }
 
-    [TestCase(ApiKey)]
-    [TestCase(InvalidApiKey)]
-    public void CanTrySendAndHasNoSecureChannelErrors(string apiKey)
+    [Test]
+    public void CanTrySendAndHasNoSecureChannelErrors_ValidKey()
     {
-      var sut = new RaygunClient(apiKey);
+      var sut = new RaygunClient(ApiKey);
+
+      sut.Send(new NotImplementedException(nameof(CanSendWithInvalidKeyButGetsA403)));
+
+      Assert.IsFalse(TraceChecker.Traces.Contains("Raygun: Failed to send report to Raygun due to: The request was aborted: Could not create SSL/TLS secure channel."));
+    }
+
+    [Test]
+    public void CanTrySendAndHasNoSecureChannelErrors_InvalidKey()
+    {
+      var sut = new RaygunClient(InvalidApiKey);
 
       sut.Send(new NotImplementedException(nameof(CanSendWithInvalidKeyButGetsA403)));
 
