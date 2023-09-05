@@ -7,6 +7,8 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <AssemblyOriginatorKeyFile>..\Raygun.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
