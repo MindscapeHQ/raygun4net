@@ -19,7 +19,7 @@
     <!-- .NET 4.0+ -->
     <file src="..\Mindscape.Raygun4Net.Mvc\bin\Release\Mindscape.Raygun4Net.Mvc.dll" target="lib\net40\Mindscape.Raygun4Net.Mvc.dll" />
     <file src="..\Mindscape.Raygun4Net4\bin\Release\Mindscape.Raygun4Net4.dll" target="lib\net40\Mindscape.Raygun4Net4.dll" />
-    <file src="..\Mindscape.Raygun4Net\bin\Release\Mindscape.Raygun4Net.Common.dll" target="lib\net40\Mindscape.Raygun4Net.Common.dll" />
+    <file src="..\Mindscape.Raygun4Net.Common\bin\Release\Mindscape.Raygun4Net.Common.dll" target="lib\net40\Mindscape.Raygun4Net.Common.dll" />
     
     <file src="..\Mindscape.Raygun4Net.Mvc\README.md" target="README.md" />
     <file src="..\128x128-transparent.png" target="128x128-transparent.png" />
