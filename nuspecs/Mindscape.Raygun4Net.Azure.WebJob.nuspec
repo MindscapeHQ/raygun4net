@@ -11,8 +11,12 @@
     <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
     <license type="file">LICENSE</license>
     <icon>128x128-transparent.png</icon>
+    
+    <copyright>Copyright © Raygun 2021</copyright>
+    <tags>crash exception-handling exception-reporting exception-handler unhandled-exceptions debugging debug bug bugs exceptions error errors crash-reporting aspnet aspnet-core</tags>
+    <repository type="git" url="https://github.com/MindscapeHQ/raygun4net" />
     <dependencies>
-      <dependency id="Mindscape.Raygun4Net.Core" version="6.0.3" />
+      <dependency id="Mindscape.Raygun4Net.Core" version="7.0.0" />
       <dependency id="Microsoft.Azure.WebJobs.Extensions" version="2.0.0" />
     </dependencies>
   </metadata>

@@ -10,6 +10,10 @@
     <license type="file">LICENSE</license>
     <icon>128x128-transparent.png</icon>
     <tags>Raygun debugging error monitoring bug tracking</tags>
+    
+    <copyright>Copyright © Raygun 2021</copyright>
+    <tags>crash exception-handling exception-reporting exception-handler unhandled-exceptions debugging debug bug bugs exceptions error errors crash-reporting aspnet aspnet-core</tags>
+    <repository type="git" url="https://github.com/MindscapeHQ/raygun4net" />
   </metadata>
   <files>
     <!-- .NET 4.0 -->
