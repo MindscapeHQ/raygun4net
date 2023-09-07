@@ -1,21 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
-  <metadata minClientVersion="2.5">
+  <metadata>
     <id>Mindscape.Raygun4Net.WebApi</id>
     <version>6.0.3</version>
-    <title>Raygun for ASP.NET Web API</title>
     <authors>Raygun</authors>
-    <owners />
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <summary>Raygun provider for ASP.NET Web API projects</summary>
-    <description>Raygun provider for ASP.NET Web API projects</description>
+    <description>.NET Framework - Raygun Provider for ASP.NET Web API projects</description>
     <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
     <license type="file">LICENSE</license>
-    <icon>128x128-transparent.png</icon> 
-    
+    <icon>128x128-transparent.png</icon>     
     <copyright>Copyright © Raygun 2021</copyright>
-    <tags>crash exception-handling exception-reporting exception-handler unhandled-exceptions debugging debug bug bugs exceptions error errors crash-reporting aspnet aspnet-core</tags>
+    <tags>crash exception-handling exception-reporting exception-handler unhandled-exceptions debugging debug bug bugs exceptions error errors crash-reporting aspnet web-api web api</tags>
     <repository type="git" url="https://github.com/MindscapeHQ/raygun4net" />
+    <releaseNotes>https://github.com/MindscapeHQ/raygun4net/blob/master/CHANGE-LOG.md</releaseNotes>
+
     <dependencies>
       <dependency id="Mindscape.Raygun4Net.Core" version="7.0.0" />
     </dependencies>

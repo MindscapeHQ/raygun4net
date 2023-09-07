@@ -1,22 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>Mindscape.Raygun4Net.Core.Signed</id>
+    <id>Mindscape.Raygun4Net.Mvc.Signed</id>
     <version>6.0.3</version>
     <title />
     <authors>Raygun</authors>
     <owners />
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Core library for signed MVC and WebApi Raygun providers</description>
+    <description>Raygun provider for signed ASP.NET MVC projects</description>
     <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
     <license type="file">LICENSE</license>
     <icon>128x128-transparent.png</icon>
     <dependencies>
-      <dependency id="Mindscape.Raygun4Net.Core" version="7.0.0" />
+      <dependency id="Mindscape.Raygun4Net.Mvc" version="7.0.0" />
     </dependencies>
   </metadata>
   <files>
-    <file src="..\..\LICENSE" />
-    <file src="..\..\128x128-transparent.png" />
+    <file src="..\..\Mindscape.Raygun4Net.Mvc\README.md" target="README.md" />
+    <file src="..\..\128x128-transparent.png" target="128x128-transparent.png" />
+    <file src="..\..\LICENSE" target="LICENSE" />
   </files>
 </package>

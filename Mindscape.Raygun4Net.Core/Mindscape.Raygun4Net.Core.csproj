@@ -142,7 +142,6 @@
     <Compile Include="..\Mindscape.Raygun4Net\Filters\RaygunKeyValuePairDataFilter.cs">
       <Link>Filters\RaygunKeyValuePairDataFilter.cs</Link>
     </Compile>
-    <Compile Include="Properties\AssemblyVersionInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

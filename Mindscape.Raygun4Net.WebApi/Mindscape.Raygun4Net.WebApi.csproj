@@ -64,7 +64,6 @@
     <Compile Include="Filters\RaygunWebApiActionFilter.cs" />
     <Compile Include="Filters\RaygunWebApiExceptionFilter.cs" />
     <Compile Include="Handlers\RaygunWebApiDelegatingHandler.cs" />
-    <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="Extensions\RaygunHttpContentExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Builders\RaygunWebApiRequestMessageBuilder.cs" />

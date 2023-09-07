@@ -9,6 +9,7 @@
     <SignAssembly>true</SignAssembly>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>embedded</DebugType>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

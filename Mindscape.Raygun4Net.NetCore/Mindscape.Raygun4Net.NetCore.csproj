@@ -4,13 +4,13 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Description>.NETStandard library for targeting .NET applications</Description>
+    <Description>.NET / .NETStandard - library for targeting .NET applications</Description>
     <PackageId>Mindscape.Raygun4Net.NetCore</PackageId>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
     <PackageIcon>128x128-transparent.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)\..\RELEASE-NOTES.txt"))</PackageReleaseNotes>
+    <PackageReleaseNotes>https://github.com/MindscapeHQ/raygun4net/blob/master/CHANGE-LOG.md</PackageReleaseNotes>
     <PackageTags>crash;exception-handling;exception-reporting;exception-handler;unhandled-exceptions;debugging;debug;bug;bugs;exceptions;error;errors;crash-reporting;aspnet;aspnet-core</PackageTags>
   </PropertyGroup>
 
