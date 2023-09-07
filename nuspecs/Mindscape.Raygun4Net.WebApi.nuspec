@@ -2,12 +2,13 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Mindscape.Raygun4Net.WebApi</id>
-    <version>6.0.3</version>
+    <version>7.0.0</version>
     <authors>Raygun</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>.NET Framework - Raygun Provider for ASP.NET Web API projects</description>
-    <projectUrl>https://github.com/MindscapeHQ/raygun4net</projectUrl>
+    <projectUrl>https://raygun.com/platform/crash-reporting</projectUrl>
     <license type="file">LICENSE</license>
+    <iconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</iconUrl>
     <icon>128x128-transparent.png</icon>     
     <copyright>Copyright © Raygun 2021</copyright>
     <tags>crash exception-handling exception-reporting exception-handler unhandled-exceptions debugging debug bug bugs exceptions error errors crash-reporting aspnet web-api web api</tags>

@@ -7,7 +7,7 @@ properties {
     $nuget_dir = "$root\.nuget"
     $nuspec_folder = "$root\nuspecs"
     $version = "7.0.0"
-    $include_signed = $false
+    $include_signed = $true
 }
 
 task default -depends Pack
