@@ -18,11 +18,11 @@
     <AssemblyOriginatorKeyFile>..\Raygun.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <IsPackable>true</IsPackable>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\"/>
-    <None Include="..\RELEASE-NOTES.txt" Pack="true" PackagePath="\"/>
     <None Include="..\LICENSE" Pack="true" PackagePath="\"/>
     <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
