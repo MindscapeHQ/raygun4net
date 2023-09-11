@@ -39,8 +39,6 @@ namespace Mindscape.Raygun4Net
       }
       catch (Exception ex)
       {
-        Console.WriteLine("TEST FAILED");
-        Console.WriteLine(ex.Message);
         Debug.WriteLine($"Failed to capture env details {ex.Message}");
       }
 
