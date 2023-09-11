@@ -51,6 +51,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Attributes\DoNotProfileAttribute.cs" />
     <Compile Include="Breadcrumbs\DefaultBreadcrumbStorage.cs" />
     <Compile Include="Breadcrumbs\Enums.cs" />

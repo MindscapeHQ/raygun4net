@@ -46,6 +46,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Attributes\DoNotProfileAttribute.cs">
       <Link>Attributes\DoNotProfileAttribute.cs</Link>
     </Compile>
