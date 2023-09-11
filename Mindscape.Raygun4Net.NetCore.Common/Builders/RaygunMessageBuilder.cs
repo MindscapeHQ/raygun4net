@@ -31,6 +31,7 @@ namespace Mindscape.Raygun4Net
       {
         _raygunMessage.OccurredOn = currentTime.Value;
       }
+
       return this;
     }
 

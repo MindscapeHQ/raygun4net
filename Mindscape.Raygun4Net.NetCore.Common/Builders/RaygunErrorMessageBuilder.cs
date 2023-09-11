@@ -29,7 +29,7 @@ namespace Mindscape.Raygun4Net
 
       return stringBuilder.ToString();
     }
-    
+
     protected static RaygunErrorStackTraceLineMessage[] BuildStackTrace(Exception exception)
     {
       var stackTrace = new StackTrace(exception, true);
@@ -92,12 +92,12 @@ namespace Mindscape.Raygun4Net
       stringBuilder.Append(method.Name);
 
       bool first = true;
-      
+
       if (method is MethodInfo && method.IsGenericMethod)
       {
         Type[] genericArguments = method.GetGenericArguments();
         stringBuilder.Append("[");
-        
+
         for (int i = 0; i < genericArguments.Length; i++)
         {
           if (!first)
@@ -108,19 +108,19 @@ namespace Mindscape.Raygun4Net
           {
             first = false;
           }
-          
+
           stringBuilder.Append(genericArguments[i].Name);
         }
-        
+
         stringBuilder.Append("]");
       }
-      
+
       stringBuilder.Append("(");
-      
+
       ParameterInfo[] parameters = method.GetParameters();
-      
+
       first = true;
-      
+
       for (int i = 0; i < parameters.Length; ++i)
       {
         if (!first)
@@ -131,22 +131,22 @@ namespace Mindscape.Raygun4Net
         {
           first = false;
         }
-        
+
         string type = "<UnknownType>";
-        
+
         if (parameters[i].ParameterType != null)
         {
           type = parameters[i].ParameterType.Name;
         }
-        
+
         stringBuilder.Append(type + " " + parameters[i].Name);
       }
-      
+
       stringBuilder.Append(")");
 
       return stringBuilder.ToString();
     }
-    
+
     public static RaygunErrorMessage Build(Exception exception)
     {
       RaygunErrorMessage message = new RaygunErrorMessage();
@@ -161,7 +161,7 @@ namespace Mindscape.Raygun4Net
       if (exception.Data != null)
       {
         IDictionary data = new Dictionary<object, object>();
-        
+
         foreach (object key in exception.Data.Keys)
         {
           if (!RaygunClientBase.SentKey.Equals(key))
@@ -169,17 +169,17 @@ namespace Mindscape.Raygun4Net
             data[key] = exception.Data[key];
           }
         }
-        
+
         message.Data = data;
       }
 
       AggregateException ae = exception as AggregateException;
-      
+
       if (ae != null && ae.InnerExceptions != null)
       {
         message.InnerErrors = new RaygunErrorMessage[ae.InnerExceptions.Count];
         int index = 0;
-        
+
         foreach (Exception e in ae.InnerExceptions)
         {
           message.InnerErrors[index] = Build(e);

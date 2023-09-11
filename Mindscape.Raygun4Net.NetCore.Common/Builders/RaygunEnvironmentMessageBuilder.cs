@@ -13,17 +13,16 @@ namespace Mindscape.Raygun4Net
     public static RaygunEnvironmentMessage Build(RaygunSettingsBase settings)
     {
       RaygunEnvironmentMessage message = new RaygunEnvironmentMessage();
-      
+
       try
       {
 
         message.Architecture = RuntimeInformation.ProcessArchitecture.ToString();
         message.OSVersion = RuntimeInformation.OSDescription;
         message.ProcessorCount = Environment.ProcessorCount;
-        message.WindowBoundsWidth = Console.WindowWidth;
-        message.WindowBoundsHeight = Console.WindowHeight;
         message.Cpu = Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER");
 
+        message = AddWindowSize(message);
 
 # if NETSTANDARD2_0_OR_GREATER || NET
         var process = Process.GetCurrentProcess();
@@ -31,15 +30,15 @@ namespace Mindscape.Raygun4Net
         message.TotalVirtualMemory = (ulong)process.VirtualMemorySize64;
         message.AvailableVirtualMemory = (ulong)process.PagedSystemMemorySize64;
         message.TotalPhysicalMemory = (ulong)process.NonpagedSystemMemorySize64;
-       //  message.AvailablePhysicalMemory = (ulong)process.PagedSystemMemorySize64?? // Need to check these are the correct properties to map
+        message.AvailablePhysicalMemory = (ulong)process.NonpagedSystemMemorySize64;
 
         message.DiskSpaceFree = DriveInfo.GetDrives().Select(d => (double)d.AvailableFreeSpace ).ToList();
 #endif
-        
+
       }
       catch (Exception ex)
       {
-        Debug.WriteLine($"Failed to capture env details locale {ex.Message}");
+        Debug.WriteLine($"Failed to capture env details {ex.Message}");
       }
 
       try
@@ -51,6 +50,25 @@ namespace Mindscape.Raygun4Net
       catch (Exception ex)
       {
         Debug.WriteLine($"Failed to capture time locale {ex.Message}");
+      }
+
+      return message;
+    }
+
+    private static RaygunEnvironmentMessage AddWindowSize(RaygunEnvironmentMessage message)
+    {
+      try
+      {
+        //If redirected then we may not be able to get a handle for the console. Which leads to IOException
+        if (!Console.IsOutputRedirected)
+        {
+             message.WindowBoundsWidth = Console.WindowWidth;
+             message.WindowBoundsHeight = Console.WindowHeight;
+        }
+      }
+      catch (Exception e)
+      {
+        Debug.WriteLine($"Unable to get window size {e.Message}");
       }
 
       return message;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using NUnit.Framework;
 
 namespace Mindscape.Raygun4Net.NetCore.Tests
@@ -45,6 +46,51 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     {
       RaygunMessage message = _builder.SetTimeStamp(null).Build();
       Assert.IsTrue((DateTime.UtcNow - message.OccurredOn).TotalSeconds < 1);
+    }
+
+
+
+    [Test]
+    public void HasMachineName()
+    {
+      RaygunMessage message = _builder.SetMachineName(Environment.MachineName).Build();
+
+      Assert.IsNotNull(message.Details);
+      Assert.IsNotNull(message.Details.MachineName);
+
+    }
+
+    [Test]
+    public void HasEnvironmentInformation()
+    {
+      RaygunMessage message = _builder.SetEnvironmentDetails().Build();
+
+      Assert.IsNotNull(message.Details);
+      Assert.IsNotNull(message.Details.Environment);
+      Assert.IsNotEmpty(message.Details.Environment.Architecture);
+      Assert.GreaterOrEqual(message.Details.Environment.WindowBoundsHeight, 0);
+      Assert.GreaterOrEqual(message.Details.Environment.WindowBoundsWidth, 0);
+
+      Assert.IsNotEmpty(message.Details.Environment.Cpu);
+
+      Assert.GreaterOrEqual(message.Details.Environment.ProcessorCount, 1);
+      Assert.IsNotEmpty(message.Details.Environment.OSVersion);
+      Assert.IsNotEmpty(message.Details.Environment.Locale);
+
+      Assert.IsNotNull(message.Details.Environment.DiskSpaceFree);
+      Assert.True(message.Details.Environment.DiskSpaceFree.Any());
+      Assert.True(message.Details.Environment.DiskSpaceFree.All(a => a > 0));
+    }
+
+    [Test]
+    public void HasEnvironmentMemoryInformation()
+    {
+      RaygunMessage message = _builder.SetEnvironmentDetails().Build();
+
+      Assert.NotZero(message.Details.Environment.AvailablePhysicalMemory);
+      Assert.NotZero(message.Details.Environment.TotalPhysicalMemory);
+      Assert.NotZero(message.Details.Environment.AvailableVirtualMemory);
+      Assert.NotZero(message.Details.Environment.TotalVirtualMemory);
     }
 
     // Response tests
