@@ -16,7 +16,6 @@ namespace Mindscape.Raygun4Net
 
       try
       {
-
         message.Architecture = RuntimeInformation.ProcessArchitecture.ToString();
         message.OSVersion = RuntimeInformation.OSDescription;
         message.ProcessorCount = Environment.ProcessorCount;
@@ -34,10 +33,11 @@ namespace Mindscape.Raygun4Net
 
         message.DiskSpaceFree = DriveInfo.GetDrives().Select(d => (double)d.AvailableFreeSpace ).ToList();
 #endif
-
       }
       catch (Exception ex)
       {
+        Console.WriteLine("TEST FAILED");
+        Console.WriteLine(ex.Message);
         Debug.WriteLine($"Failed to capture env details {ex.Message}");
       }
 
