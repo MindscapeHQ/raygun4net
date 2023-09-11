@@ -24,9 +24,9 @@ namespace Mindscape.Raygun4Net
         message.WindowBoundsHeight = Console.WindowHeight;
         message.Cpu = Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER");
 
-        var process = Process.GetCurrentProcess();
 
 # if NETSTANDARD2_0_OR_GREATER || NET
+        var process = Process.GetCurrentProcess();
 
         message.TotalVirtualMemory = (ulong)process.VirtualMemorySize64;
         message.AvailableVirtualMemory = (ulong)process.PagedSystemMemorySize64;
