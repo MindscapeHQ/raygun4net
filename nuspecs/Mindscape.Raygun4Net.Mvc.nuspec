@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Mindscape.Raygun4Net.Mvc</id>
+    <version>7.0.0</version>
+    <authors>Raygun</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>.NET Framework - Raygun Provider for ASP.NET MVC projects</description>
+    <projectUrl>https://raygun.com/platform/crash-reporting</projectUrl>
+    <license type="file">LICENSE</license>
+    <iconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</iconUrl>
+    <icon>128x128-transparent.png</icon>   
+    <copyright>Copyright © Raygun 2021</copyright>
+    <tags>crash exception-handling exception-reporting exception-handler unhandled-exceptions debugging debug bug bugs exceptions error errors crash-reporting aspnet mvc aspnet-mvc</tags>
+    <repository type="git" url="https://github.com/MindscapeHQ/raygun4net" />
+    <releaseNotes>https://github.com/MindscapeHQ/raygun4net/blob/master/CHANGE-LOG.md</releaseNotes>
+
+    <dependencies>
+      <dependency id="Mindscape.Raygun4Net.Core" version="7.0.0" />
+    </dependencies>
+  </metadata>
+  <files>
+    <!-- .NET 4.0+ -->
+    <file src="..\Mindscape.Raygun4Net.Mvc\bin\Release\Mindscape.Raygun4Net.Mvc.dll" target="lib\net40\Mindscape.Raygun4Net.Mvc.dll" />
+    <file src="..\Mindscape.Raygun4Net4\bin\Release\Mindscape.Raygun4Net4.dll" target="lib\net40\Mindscape.Raygun4Net4.dll" />
+    <file src="..\Mindscape.Raygun4Net.Common\bin\Release\net4\Mindscape.Raygun4Net.Common.dll" target="lib\net40\Mindscape.Raygun4Net.Common.dll" />
+    
+    <file src="..\Mindscape.Raygun4Net.Mvc\README.md" target="README.md" />
+    <file src="..\128x128-transparent.png" target="128x128-transparent.png" />
+    <file src="..\LICENSE" target="LICENSE" />
+  </files>
+</package>

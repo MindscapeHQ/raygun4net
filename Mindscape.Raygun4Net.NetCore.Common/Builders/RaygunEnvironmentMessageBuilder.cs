@@ -16,7 +16,6 @@ namespace Mindscape.Raygun4Net
 
       try
       {
-
         message.Architecture = RuntimeInformation.ProcessArchitecture.ToString();
         message.OSVersion = RuntimeInformation.OSDescription;
         message.ProcessorCount = Environment.ProcessorCount;
@@ -32,9 +31,11 @@ namespace Mindscape.Raygun4Net
         message.TotalPhysicalMemory = (ulong)process.NonpagedSystemMemorySize64;
         message.AvailablePhysicalMemory = (ulong)process.NonpagedSystemMemorySize64;
 
-        message.DiskSpaceFree = DriveInfo.GetDrives().Select(d => (double)d.AvailableFreeSpace ).ToList();
+        message.DiskSpaceFree = DriveInfo.GetDrives()
+          .Where(x => x.IsReady)
+          .Select(d => (double)d.AvailableFreeSpace )
+          .ToList();
 #endif
-
       }
       catch (Exception ex)
       {

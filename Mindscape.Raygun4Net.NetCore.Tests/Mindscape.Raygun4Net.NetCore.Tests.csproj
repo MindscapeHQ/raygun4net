@@ -6,27 +6,21 @@
    
     <!-- Versions which are supported by Microsoft @ May 2022-->
     <TargetFrameworks>net6.0;net48;net472;net471;net47;net462</TargetFrameworks>
-    <IsPackable>false</IsPackable>
-    <Configurations>Debug;Release;Sign</Configurations>
-    <Platforms>AnyCPU</Platforms>
-    <LangVersion>8</LangVersion>
     <AssemblyVersion>1.0.0</AssemblyVersion>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
-    <AssemblyOriginatorKeyFile>../Raygun4Net.snk</AssemblyOriginatorKeyFile>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <AssemblyOriginatorKeyFile>..\Raygun.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.10.1" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.6.1" />
-    <PackageReference Include="skwas.MockHttp" Version="4.0.1" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Compile Remove="Model\FakeRaygunRequestMessageBuilder.cs" />
+    <PackageReference Include="StrongNamer" Version="0.2.5" />
+    <PackageReference Include="NUnit" Version="3.13.3" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
+    <PackageReference Include="skwas.MockHttp" Version="4.1.1" />
   </ItemGroup>
   
   <ItemGroup>

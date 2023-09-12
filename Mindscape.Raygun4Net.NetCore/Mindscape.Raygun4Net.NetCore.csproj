@@ -1,29 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard1.6;netstandard2.0;netstandard2.1;net5.0;net6.0</TargetFrameworks>
-    <Configurations>Debug;Release;Sign</Configurations>
   </PropertyGroup>
 
   <PropertyGroup>
-    <Description>.NETStandard library for targeting .NET applications</Description>
+    <Description>.NET / .NETStandard - library for targeting .NET applications</Description>
     <PackageId>Mindscape.Raygun4Net.NetCore</PackageId>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
     <PackageIcon>128x128-transparent.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)\..\RELEASE-NOTES.txt"))</PackageReleaseNotes>
+    <PackageReleaseNotes>https://github.com/MindscapeHQ/raygun4net/blob/master/CHANGE-LOG.md</PackageReleaseNotes>
     <PackageTags>crash;exception-handling;exception-reporting;exception-handler;unhandled-exceptions;debugging;debug;bug;bugs;exceptions;error;errors;crash-reporting;aspnet;aspnet-core</PackageTags>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Sign|AnyCPU' ">
-    <PackageId>Mindscape.Raygun4Net.NetCore.Signed</PackageId>
-    <AssemblyOriginatorKeyFile>../Raygun4Net.snk</AssemblyOriginatorKeyFile>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <AssemblyOriginatorKeyFile>..\Raygun.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
+    <IsPackable>true</IsPackable>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\"/>
-    <None Include="..\RELEASE-NOTES.txt" Pack="true" PackagePath="\"/>
     <None Include="..\LICENSE" Pack="true" PackagePath=""/>
     <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
