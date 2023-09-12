@@ -19,8 +19,8 @@
   <files>
     <!-- .NET 4.0 -->
     <file src="..\Mindscape.Raygun4Net4\bin\Release\Mindscape.Raygun4Net4.dll" target="lib\net40\Mindscape.Raygun4Net4.dll" />
-    <file src="..\Mindscape.Raygun4Net4\bin\Release\Mindscape.Raygun4Net.dll" target="lib\net40\Mindscape.Raygun4Net.dll" />
-    <file src="..\Mindscape.Raygun4Net4\bin\Release\Mindscape.Raygun4Net.Common.dll" target="lib\net40\Mindscape.Raygun4Net.Common.dll" />
+    <file src="..\Mindscape.Raygun4Net.Core\bin\Release\Mindscape.Raygun4Net.dll" target="lib\net40\Mindscape.Raygun4Net.dll" />
+    <file src="..\Mindscape.Raygun4Net.Common\bin\Release\net4\Mindscape.Raygun4Net.Common.dll" target="lib\net40\Mindscape.Raygun4Net.Common.dll" />
     <!-- .NET 4.0 Client Profile -->
     <file src="..\Mindscape.Raygun4Net\bin\Release\Mindscape.Raygun4Net.dll" target="lib\net40-client\Mindscape.Raygun4Net.dll" />
     <file src="..\Mindscape.Raygun4Net.Common\bin\Release\net4\Mindscape.Raygun4Net.Common.dll" target="lib\net40-client\Mindscape.Raygun4Net.Common.dll" />

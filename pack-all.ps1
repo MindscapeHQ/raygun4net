@@ -14,7 +14,7 @@ properties {
 task default -depends Pack
 
 task Clean {
-    remove-item -force -recurse $build_dir -ErrorAction SilentlyContinue | Out-Null
+    #remove-item -force -recurse $build_dir -ErrorAction SilentlyContinue | Out-Null
 }
 
 task Build -depends Clean {
