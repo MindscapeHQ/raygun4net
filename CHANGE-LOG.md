@@ -1,5 +1,8 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v7.0.1
+- Fixed nuspec packaging wrong files
+
 ### v7.0.0
 - Correctly populate missing Environment Information
 - Deprecated .Signed suffix packages

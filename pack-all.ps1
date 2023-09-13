@@ -6,7 +6,7 @@ properties {
     $build_dir = "$root\build"
     $nuget_dir = "$root\.nuget"
     $nuspec_folder = "$root\nuspecs"
-    $version = "7.0.0"
+    $version = "7.0.1"
     $include_signed = $true
     $global_assembly_info = ".\GlobalAssemblyInfo.cs" 
 }
