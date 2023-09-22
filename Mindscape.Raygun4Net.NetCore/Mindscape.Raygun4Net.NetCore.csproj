@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6;netstandard2.0;netstandard2.1;net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net5.0;netstandard2.0;netstandard2.1</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -34,11 +34,6 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
     <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD1_6</DefineConstants>
   </PropertyGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
-    <PackageReference Include="System.ComponentModel" Version="4.3.0"/>
-    <PackageReference Include="System.Diagnostics.StackTrace" Version="4.0.1"/>
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore.Common\Mindscape.Raygun4Net.NetCore.Common.csproj"/>
