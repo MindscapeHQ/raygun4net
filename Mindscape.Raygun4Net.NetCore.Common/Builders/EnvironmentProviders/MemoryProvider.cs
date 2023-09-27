@@ -37,13 +37,12 @@ namespace Mindscape.Raygun4Net.EnvironmentProviders
       return null;
     }
 
-    private static (ulong AvailableMemory, ulong TotalMemory, ulong AvailableVirtualMemory, ulong TotalVirtualMemory)?
-      GetOnWindows()
+    private static (ulong AvailableMemory, ulong TotalMemory, ulong AvailableVirtualMemory, ulong TotalVirtualMemory)? GetOnWindows()
     {
         var memStatus = new MEMORYSTATUSEX();
         if (GlobalMemoryStatusEx(memStatus))
         {
-          return (memStatus.ullAvailPhys, memStatus.ullTotalPhys, memStatus.ullAvailVirtual, memStatus.ullTotalVirtual);
+          return (memStatus.ullAvailPhys, memStatus.ullTotalPhys, memStatus.ullAvailPageFile, memStatus.ullTotalPageFile);
         }
 
         return null;

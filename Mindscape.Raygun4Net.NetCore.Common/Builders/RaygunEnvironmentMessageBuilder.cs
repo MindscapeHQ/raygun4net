@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
@@ -21,11 +20,15 @@ namespace Mindscape.Raygun4Net
         if (_lastUpdate < DateTime.UtcNow.AddMinutes(-2))
         {
           Semaphore.Wait();
+          
           try
           {
             if (_lastUpdate == DateTime.MinValue)
             {
+              // Build adds all the static data that doesn't change
               Build();
+              
+              // Update includes Memory / Disk which is prone to change
               Update();
               _lastUpdate = DateTime.UtcNow;
             }
@@ -48,7 +51,7 @@ namespace Mindscape.Raygun4Net
       }
       catch
       {
-        // Ignore
+        // Ignore - if an error occurs lets just return what we have and carry on, this is less important than not logging the error
       }
 
       return CachedMessage;

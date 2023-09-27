@@ -47,34 +47,10 @@ namespace Mindscape.Raygun4Net.EnvironmentProviders
 
     private static List<double> GetOnLinux()
     {
-      var diskSpace = new Dictionary<string, double>();
-
-      var procStartInfo = new ProcessStartInfo("df", "-x tmpfs -x devtmpfs -x squashfs --output=source,size")
-      {
-        RedirectStandardOutput = true,
-        UseShellExecute = false,
-        CreateNoWindow = true
-      };
-
-      var proc = new Process { StartInfo = procStartInfo };
-      proc.Start();
-
-      // Skip the header line
-      proc.StandardOutput.ReadLine();
-
-      while (!proc.StandardOutput.EndOfStream)
-      {
-        var line = proc.StandardOutput.ReadLine();
-        if (line != null)
-        {
-          var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-          var mountPoint = parts[0];
-          var size = ulong.Parse(parts[1]) * 1024ul; // df outputs size in KB, so convert to bytes
-          diskSpace[mountPoint] = size;
-        }
-      }
-
-      return diskSpace.Select(x => x.Value).ToList();
+      return DriveInfo.GetDrives()
+        .Where(x => x is { IsReady: true, DriveType: DriveType.Fixed, Name: "/" })
+        .Select(d => (double)d.AvailableFreeSpace)
+        .ToList();
     }
 
     private static List<double> GetOnMacOS()

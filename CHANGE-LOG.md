@@ -1,5 +1,11 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v7.1.0
+- Fixed Environment Information Memory
+- Added cache for Environment Information to reduce overhead
+- Added support for Environment Information on Windows/Linux/MacOS
+- Changed CPU / OS information to be more accurate / understandable
+
 ### v7.0.1
 - Fixed nuspec packaging wrong files
 
