@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Mindscape.Raygun4Net.EnvironmentProviders;
@@ -54,7 +55,23 @@ namespace Mindscape.Raygun4Net
         // Ignore - if an error occurs lets just return what we have and carry on, this is less important than not logging the error
       }
 
-      return CachedMessage;
+      // Return a copy of the cached message to avoid outside changes
+      return new RaygunEnvironmentMessage
+      {
+        OSVersion = CachedMessage.OSVersion,
+        Architecture = CachedMessage.Architecture,
+        Cpu = CachedMessage.Cpu,
+        ProcessorCount = CachedMessage.ProcessorCount,
+        AvailablePhysicalMemory = CachedMessage.AvailablePhysicalMemory,
+        AvailableVirtualMemory = CachedMessage.AvailableVirtualMemory,
+        TotalPhysicalMemory = CachedMessage.TotalPhysicalMemory,
+        TotalVirtualMemory = CachedMessage.TotalVirtualMemory,
+        DiskSpaceFree = CachedMessage.DiskSpaceFree.ToList(),
+        WindowBoundsHeight = CachedMessage.WindowBoundsHeight,
+        WindowBoundsWidth = CachedMessage.WindowBoundsWidth,
+        Locale = CachedMessage.Locale,
+        UtcOffset = CachedMessage.UtcOffset
+      };
     }
 
     private static void Build()
