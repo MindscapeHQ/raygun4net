@@ -68,6 +68,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       Assert.IsNotNull(message.Details);
       Assert.IsNotNull(message.Details.Environment);
       Assert.IsNotEmpty(message.Details.Environment.Architecture);
+      
       Assert.GreaterOrEqual(message.Details.Environment.WindowBoundsHeight, 0);
       Assert.GreaterOrEqual(message.Details.Environment.WindowBoundsWidth, 0);
 
