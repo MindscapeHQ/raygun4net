@@ -1,5 +1,8 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v7.1.1 (Mindscape.Raygun4Net.WebApi)
+- Fixed issue with missing dependency on `Mindscape.Raygun4Net.Common`
+
 ### v7.1.0
 - Fixed Environment Information Memory
 - Added cache for Environment Information to reduce overhead
