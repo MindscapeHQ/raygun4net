@@ -61,6 +61,15 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net.Common\DataAccess\IHttpClient.cs">
+      <Link>IHttpClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net.Common\DataAccess\RaygunWebClient.cs">
+      <Link>RaygunWebClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net.Common\DataAccess\WebClientFacade.cs">
+      <Link>WebClientFacade.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net4\WebClientHelper.cs">
       <Link>WebClientHelper.cs</Link>
     </Compile>
@@ -84,10 +93,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mindscape.Raygun4Net.Common\Mindscape.Raygun4Net.Common.csproj">
-      <Project>{f6087df7-625d-45f7-af91-a0c53da312f1}</Project>
-      <Name>Mindscape.Raygun4Net.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Mindscape.Raygun4Net.Core\Mindscape.Raygun4Net.Core.csproj">
       <Project>{6435c84c-1dac-41fe-aa51-faa8e9a7f090}</Project>
       <Name>Mindscape.Raygun4Net.Core</Name>
