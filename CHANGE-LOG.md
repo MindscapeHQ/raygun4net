@@ -1,5 +1,8 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v8.0.0
+- This release fixes the strong naming and ensures the Assembly version is fixed to the Major version
+
 ### v7.1.1 (Mindscape.Raygun4Net.WebApi)
 - Fixed issue with missing dependency on `Mindscape.Raygun4Net.Common`
 
