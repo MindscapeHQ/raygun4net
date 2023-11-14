@@ -6,7 +6,9 @@ properties {
     $build_dir = "$root\build"
     $nuget_dir = "$root\.nuget"
     $nuspec_folder = "$root\nuspecs"
-    $version = "7.1.0"
+    # Assembly Info should stay the same until there's an API change and we increment it
+    $assemblyVersion = "8.0.0"
+    $version = "8.0.0"
     $include_signed = $false
     $global_assembly_info = ".\GlobalAssemblyInfo.cs"
     $is_pre_release = $true
@@ -21,10 +23,11 @@ task Clean {
 
 task Build -depends Clean {
     # Replace AssemblyVersion and AssemblyFileVersion
-    (Get-Content $global_assembly_info) -replace 'Version\("[^"]*"\)\]', "Version(`"$version`")]" | Set-Content $global_assembly_info
+    (Get-Content $global_assembly_info) -replace 'Version\("[^"]*"\)\]', "Version(`"$assemblyVersion`")]" | Set-Content $global_assembly_info
+    (Get-Content $global_assembly_info) -replace 'AssemblyInformationalVersion\("[^"]*"\)\]', "AssemblyInformationalVersion(`"$version`")]" | Set-Content $global_assembly_info
 
     & dotnet clean $root\Raygun.CrashReporting.sln -c Release
-    & dotnet build $root\Raygun.CrashReporting.sln -c Release -p:FileVersion=$version -p:Version=$version
+    & dotnet build $root\Raygun.CrashReporting.sln -c Release -p:FileVersion=$version -p:Version=$version -p:AssemblyVersion=$assemblyVersion
 }
 
 task Pack -depends Build {
@@ -36,9 +39,9 @@ task Pack -depends Build {
 
     # Pack .NET SDK Projects (these use the project files and not nuspecs)
     # Because of old style projects we need to pack the specific projects directly
-    & dotnet pack $root\Mindscape.Raygun4Net.AspNetCore\Mindscape.Raygun4Net.AspNetCore.csproj -c Release -o $build_dir -p:PackageVersion=$package_version -p:FileVersion=$version -p:Version=$version
-    & dotnet pack $root\Mindscape.Raygun4Net.NetCore\Mindscape.Raygun4Net.NetCore.csproj -c Release -o $build_dir -p:PackageVersion=$package_version -p:FileVersion=$version -p:Version=$version
-    & dotnet pack $root\Mindscape.Raygun4Net.NetCore.Common\Mindscape.Raygun4Net.NetCore.Common.csproj -c Release -o $build_dir -p:PackageVersion=$package_version -p:FileVersion=$version -p:Version=$version
+    & dotnet pack $root\Mindscape.Raygun4Net.AspNetCore\Mindscape.Raygun4Net.AspNetCore.csproj -c Release -o $build_dir -p:PackageVersion=$package_version -p:FileVersion=$version -p:Version=$version -p:AssemblyVersion=$assemblyVersion
+    & dotnet pack $root\Mindscape.Raygun4Net.NetCore\Mindscape.Raygun4Net.NetCore.csproj -c Release -o $build_dir -p:PackageVersion=$package_version -p:FileVersion=$version -p:Version=$version -p:AssemblyVersion=$assemblyVersion
+    & dotnet pack $root\Mindscape.Raygun4Net.NetCore.Common\Mindscape.Raygun4Net.NetCore.Common.csproj -c Release -o $build_dir -p:PackageVersion=$package_version -p:FileVersion=$version -p:Version=$version -p:AssemblyVersion=$assemblyVersion
 
     # Pack nuspecs
     $nuspecs;
