@@ -99,6 +99,7 @@ namespace Mindscape.Raygun4Net
 
       IsRawDataIgnored = RaygunSettings.Settings.IsRawDataIgnored;
       IsRawDataIgnoredWhenFilteringFailed = RaygunSettings.Settings.IsRawDataIgnoredWhenFilteringFailed;
+      IsRequestIpAddressMasked = RaygunSettings.Settings.IsRequestIpAddressMasked;
 
       UseXmlRawDataFilter = RaygunSettings.Settings.UseXmlRawDataFilter;
       UseKeyValuePairRawDataFilter = RaygunSettings.Settings.UseKeyValuePairRawDataFilter;
@@ -226,6 +227,16 @@ namespace Mindscape.Raygun4Net
     {
       get { return _requestMessageOptions.IsRawDataIgnoredWhenFilteringFailed; }
       set { _requestMessageOptions.IsRawDataIgnoredWhenFilteringFailed = value; }
+    }
+
+    /// <summary>
+    /// Specifies whether or not the request IpAddress has the last octet zeroed. This may be
+    /// required to comply with the European GDPR laws.
+    /// </summary>
+    public bool IsRequestIpAddressMasked
+    {
+        get { return _requestMessageOptions.IsRequestIpAddressMasked; }
+        set { _requestMessageOptions.IsRequestIpAddressMasked = value; }
     }
 
     /// <summary>

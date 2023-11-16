@@ -148,6 +148,13 @@ namespace Mindscape.Raygun4Net
       set { this["isResponseContentIgnored"] = value; }
     }
 
+    [ConfigurationProperty("isRequestIpAddressMasked", IsRequired = false, DefaultValue = false)]
+    public bool IsRequestIpAddressMasked
+        {
+        get { return (bool)this["isRequestIpAddressMasked"]; }
+        set { this["isRequestIpAddressMasked"] = value; }
+    }
+
     [ConfigurationProperty("applicationVersion", IsRequired = false, DefaultValue = "")]
     public string ApplicationVersion
     {

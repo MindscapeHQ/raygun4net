@@ -5,7 +5,6 @@ using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using Mindscape.Raygun4Net.Messages;
@@ -16,7 +15,7 @@ namespace Mindscape.Raygun4Net.Builders
 {
   public class RaygunRequestMessageBuilder
   {
-    private static readonly Regex IpAddressRegex = new Regex(@"\A(?:\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b)(:[1-9][0-9]{0,4})?\z", RegexOptions.Compiled);
+    private static readonly Regex IpAddressRegex = new Regex(@"\A(?:\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b)(:[1-9][0-9]{0,4})?\z", RegexOptions.Compiled);
 
     private const int MAX_RAW_DATA_LENGTH = 4096; // bytes
     private const int MAX_KEY_LENGTH = 256; // Characters
@@ -28,7 +27,7 @@ namespace Mindscape.Raygun4Net.Builders
 
       RaygunRequestMessage message = new RaygunRequestMessage()
       {
-        IPAddress   = GetIpAddress(request),
+        IPAddress   = GetIpAddress(request, options),
         QueryString = GetQueryString(request, options),
         Cookies     = GetCookies(request, options),
         Data        = GetServerVariables(request, options),
@@ -51,7 +50,7 @@ namespace Mindscape.Raygun4Net.Builders
       return message;
     }
 
-    private static string GetIpAddress(HttpRequest request)
+    private static string GetIpAddress(HttpRequest request, RaygunRequestMessageOptions options)
     {
       string strIp = null;
 
@@ -94,6 +93,11 @@ namespace Mindscape.Raygun4Net.Builders
       catch (Exception ex)
       {
         RaygunLogger.Instance.Error($"Failed to get IP address: {ex.Message}");
+      }
+
+      if (options.IsRequestIpAddressMasked)
+      {
+        strIp = MaskIpAddress(strIp);
       }
 
       return strIp;
@@ -349,6 +353,21 @@ namespace Mindscape.Raygun4Net.Builders
       }
 
       return exists;
+    }
+
+    private static string MaskIpAddress(string strIp)
+    {
+      if (strIp != null)
+      {
+        var match = IpAddressRegex.Match(strIp);
+        if (match.Success && match.Groups.Count > 1)
+        {
+            var group = match.Groups[1];
+            strIp = strIp.Substring(0, group.Index) + "0" + strIp.Substring(group.Index + group.Length);
+        }
+      }
+
+      return strIp;
     }
 
     private static IDictionary ToDictionary(NameValueCollection nameValueCollection, Func<string, bool> ignore, Func<string, bool> isSensitive, bool truncateValues = false)

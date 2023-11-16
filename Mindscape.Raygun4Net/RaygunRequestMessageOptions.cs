@@ -13,6 +13,7 @@ namespace Mindscape.Raygun4Net
     private readonly List<string> _ignoreServerVariableNames = new List<string>();
     private bool _isRawDataIgnored;
     private bool _isRawDataIgnoredWhenFilteringFailed;
+    private bool _isRequestIpAddressMasked;
     private bool _useXmlRawDataFilter;
     private bool _useKeyValuePairRawDataFilter;
 
@@ -101,6 +102,17 @@ namespace Mindscape.Raygun4Net
     public bool IsQueryParameterIgnored(string name)
     {
       return IsIgnored(name, _ignoredQueryParameterNames);
+    }
+    
+    // Masking
+
+    public bool IsRequestIpAddressMasked
+    {
+        get { return _isRequestIpAddressMasked; }
+        set
+        {
+            _isRequestIpAddressMasked = value;
+        }
     }
 
     // Form fields
