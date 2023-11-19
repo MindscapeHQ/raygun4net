@@ -10,18 +10,19 @@ using System.Threading.Tasks;
 
 namespace Mindscape.Raygun4Net
 {
+
   public abstract class RaygunClientBase
   {
+    protected internal const string SentKey = "AlreadySentByRaygun";
+
     private static HttpClient Client = new HttpClient();
-
-    private readonly string _apiKey;
-    private readonly List<Type> _wrapperExceptions = new List<Type>();
-
     private bool _handlingRecursiveErrorSending;
     private bool _handlingRecursiveGrouping;
 
-    protected readonly RaygunSettingsBase _settings;
-    protected internal const string SentKey = "AlreadySentByRaygun";
+    private readonly string _apiKey;
+    private readonly List<Type> _wrapperExceptions = new List<Type>();
+    protected readonly RaygunSettingsBase Settings;
+
 
     /// <summary>
     /// Raised just before a message is sent. This can be used to make final adjustments to the <see cref="RaygunMessage"/>, or to cancel the send.
@@ -50,18 +51,18 @@ namespace Mindscape.Raygun4Net
 
 #if NETSTANDARD2_0_OR_GREATER
     /// <summary>
-    /// If set to true, this will automatically setup handlers to catch Unhandled Exceptions  
+    /// If set to true, this will automatically setup handlers to catch Unhandled Exceptions
     /// </summary>
     /// <remarks>
     /// Currently defaults to false. This may be change in future releases.
     /// </remarks>
     public virtual bool CatchUnhandledExceptions
     {
-      get { return _settings.CatchUnhandledExceptions; }
+      get { return Settings.CatchUnhandledExceptions; }
 
       set
       {
-        if (_settings.CatchUnhandledExceptions == value) { return; }
+        if (Settings.CatchUnhandledExceptions == value) { return; }
 
         if (value)
         {
@@ -69,12 +70,12 @@ namespace Mindscape.Raygun4Net
         }
         else
         {
-          System.AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;     
+          System.AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
         }
 
-        _settings.CatchUnhandledExceptions = value;
-        
-        
+        Settings.CatchUnhandledExceptions = value;
+
+
         void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
         {
           Send(e.ExceptionObject as Exception, new[] { "UnhandledException" });
@@ -91,7 +92,7 @@ namespace Mindscape.Raygun4Net
 
     public RaygunClientBase(RaygunSettingsBase settings)
     {
-      _settings = settings;
+      Settings = settings;
       _apiKey = settings.ApiKey;
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
@@ -102,9 +103,9 @@ namespace Mindscape.Raygun4Net
       }
 
 #if NETSTANDARD2_0_OR_GREATER
-      if (_settings.CatchUnhandledExceptions)
+      if (Settings.CatchUnhandledExceptions)
       {
-         CatchUnhandledExceptions = _settings.CatchUnhandledExceptions;
+         CatchUnhandledExceptions = Settings.CatchUnhandledExceptions;
       }
 #endif
     }
@@ -287,7 +288,7 @@ namespace Mindscape.Raygun4Net
       catch
       {
         // Swallow the exception if we're not throwing on error
-        if (_settings.ThrowOnError)
+        if (Settings.ThrowOnError)
         {
           throw;
         }
@@ -313,7 +314,7 @@ namespace Mindscape.Raygun4Net
         catch
         {
           // Swallow the exception if we're not throwing on error
-          if (_settings.ThrowOnError)
+          if (Settings.ThrowOnError)
           {
             throw;
           }
@@ -369,7 +370,7 @@ namespace Mindscape.Raygun4Net
     protected virtual async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags,
       IDictionary userCustomData, RaygunIdentifierMessage userInfo)
     {
-      var message = RaygunMessageBuilder.New(_settings)
+      var message = RaygunMessageBuilder.New(Settings)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)
@@ -437,6 +438,7 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public async Task Send(RaygunMessage raygunMessage)
     {
+
       if (!ValidateApiKey())
       {
         return;
@@ -449,7 +451,7 @@ namespace Mindscape.Raygun4Net
         return;
       }
 
-      var requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
+      var requestMessage = new HttpRequestMessage(HttpMethod.Post, Settings.ApiEndpoint);
       requestMessage.Headers.Add("X-ApiKey", _apiKey);
 
       try
@@ -463,7 +465,7 @@ namespace Mindscape.Raygun4Net
         {
           Debug.WriteLine($"Error Logging Exception to Raygun {result.ReasonPhrase}");
 
-          if (_settings.ThrowOnError)
+          if (Settings.ThrowOnError)
           {
             throw new Exception("Could not log to Raygun");
           }
@@ -473,11 +475,13 @@ namespace Mindscape.Raygun4Net
       {
         Debug.WriteLine($"Error Logging Exception to Raygun {ex.Message}");
 
-        if (_settings.ThrowOnError)
+        if (Settings.ThrowOnError)
         {
           throw;
         }
       }
     }
+
+
   }
 }

@@ -81,7 +81,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
 
     RaygunSettings GetSettings()
     {
-      return (RaygunSettings) _settings;
+      return (RaygunSettings) Settings;
     }
 
     /// <summary>
