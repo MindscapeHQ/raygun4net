@@ -438,7 +438,24 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public async Task Send(RaygunMessage raygunMessage)
     {
+      //ONLY when debugging do we want to let an error bubble up!
+      if (Settings.ThrowOnError)
+      {
+        await SendInternal(raygunMessage);
+        return;
+      }
 
+      //Other wise, it is better to not disrupt or slow down the parent app; when trying to send a message to RG.
+      Fire.AndForget(SendInternal(raygunMessage));
+    }
+
+    /// <summary>
+    /// Do the Actual sending!
+    /// </summary>
+    /// <param name="raygunMessage"></param>
+    /// <returns></returns>
+    private async Task SendInternal(RaygunMessage raygunMessage)
+    {
       if (!ValidateApiKey())
       {
         return;
@@ -481,7 +498,5 @@ namespace Mindscape.Raygun4Net
         }
       }
     }
-
-
   }
 }
