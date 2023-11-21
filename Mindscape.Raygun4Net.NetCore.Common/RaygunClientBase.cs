@@ -21,7 +21,7 @@ namespace Mindscape.Raygun4Net
 
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
-    protected readonly RaygunSettingsBase Settings;
+    protected readonly RaygunSettingsBase _settings;
 
 
     /// <summary>
@@ -58,11 +58,11 @@ namespace Mindscape.Raygun4Net
     /// </remarks>
     public virtual bool CatchUnhandledExceptions
     {
-      get { return Settings.CatchUnhandledExceptions; }
+      get { return _settings.CatchUnhandledExceptions; }
 
       set
       {
-        if (Settings.CatchUnhandledExceptions == value) { return; }
+        if (_settings.CatchUnhandledExceptions == value) { return; }
 
         if (value)
         {
@@ -73,7 +73,7 @@ namespace Mindscape.Raygun4Net
           System.AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
         }
 
-        Settings.CatchUnhandledExceptions = value;
+        _settings.CatchUnhandledExceptions = value;
 
 
         void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
@@ -92,7 +92,7 @@ namespace Mindscape.Raygun4Net
 
     public RaygunClientBase(RaygunSettingsBase settings)
     {
-      Settings = settings;
+      _settings = settings;
       _apiKey = settings.ApiKey;
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
@@ -103,9 +103,9 @@ namespace Mindscape.Raygun4Net
       }
 
 #if NETSTANDARD2_0_OR_GREATER
-      if (Settings.CatchUnhandledExceptions)
+      if (_settings.CatchUnhandledExceptions)
       {
-         CatchUnhandledExceptions = Settings.CatchUnhandledExceptions;
+         CatchUnhandledExceptions = _settings.CatchUnhandledExceptions;
       }
 #endif
     }
@@ -288,7 +288,7 @@ namespace Mindscape.Raygun4Net
       catch
       {
         // Swallow the exception if we're not throwing on error
-        if (Settings.ThrowOnError)
+        if (_settings.ThrowOnError)
         {
           throw;
         }
@@ -314,7 +314,7 @@ namespace Mindscape.Raygun4Net
         catch
         {
           // Swallow the exception if we're not throwing on error
-          if (Settings.ThrowOnError)
+          if (_settings.ThrowOnError)
           {
             throw;
           }
@@ -370,7 +370,7 @@ namespace Mindscape.Raygun4Net
     protected virtual async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags,
       IDictionary userCustomData, RaygunIdentifierMessage userInfo)
     {
-      var message = RaygunMessageBuilder.New(Settings)
+      var message = RaygunMessageBuilder.New(_settings)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
         .SetExceptionDetails(exception)
@@ -439,9 +439,9 @@ namespace Mindscape.Raygun4Net
     public async Task Send(RaygunMessage raygunMessage)
     {
       //ONLY when debugging do we want to let an error bubble up!
-      if (Settings.ThrowOnError)
+      if (_settings.ThrowOnError)
       {
-        await SendInternal(raygunMessage);
+        await SendInternal(raygunMessage).ConfigureAwait(false);
         return;
       }
 
@@ -468,7 +468,7 @@ namespace Mindscape.Raygun4Net
         return;
       }
 
-      var requestMessage = new HttpRequestMessage(HttpMethod.Post, Settings.ApiEndpoint);
+      var requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
       requestMessage.Headers.Add("X-ApiKey", _apiKey);
 
       try
@@ -482,7 +482,7 @@ namespace Mindscape.Raygun4Net
         {
           Debug.WriteLine($"Error Logging Exception to Raygun {result.ReasonPhrase}");
 
-          if (Settings.ThrowOnError)
+          if (_settings.ThrowOnError)
           {
             throw new Exception("Could not log to Raygun");
           }
@@ -492,7 +492,7 @@ namespace Mindscape.Raygun4Net
       {
         Debug.WriteLine($"Error Logging Exception to Raygun {ex.Message}");
 
-        if (Settings.ThrowOnError)
+        if (_settings.ThrowOnError)
         {
           throw;
         }

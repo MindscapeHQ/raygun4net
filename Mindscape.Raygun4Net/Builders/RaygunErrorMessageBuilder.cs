@@ -2,9 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net.Builders
@@ -32,6 +30,7 @@ namespace Mindscape.Raygun4Net.Builders
             data[key] = exception.Data[key];
           }
         }
+
         message.Data = data;
       }
 
