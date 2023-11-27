@@ -1,8 +1,8 @@
 ﻿#nullable enable
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using Microsoft.Win32;
 
 namespace Mindscape.Raygun4Net.EnvironmentProviders
 {
@@ -37,18 +37,7 @@ namespace Mindscape.Raygun4Net.EnvironmentProviders
 
     private static string? GetOnWindows()
     {
-      string? cpuName = null;
-
-      var processorNameKey = Registry.LocalMachine.OpenSubKey(@"HARDWARE\DESCRIPTION\System\CentralProcessor\0",
-        RegistryKeyPermissionCheck.ReadSubTree);
-
-      if (processorNameKey != null)
-      {
-        cpuName = (string)processorNameKey.GetValue("ProcessorNameString");
-        processorNameKey.Close();
-      }
-
-      return cpuName;
+      return Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER");
     }
 
     private static string? GetOnLinux()
