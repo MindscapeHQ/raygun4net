@@ -1,5 +1,8 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v8.0.1
+- Removed dependency on Microsoft.Win32.Registry for `Mindscape.Raygun4Net.NetCore.Common` package
+
 ### v8.0.0
 - This release fixes the strong naming and ensures the Assembly version is fixed to the Major version
 
