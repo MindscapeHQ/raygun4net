@@ -1,9 +1,7 @@
 ﻿#nullable enable
-using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Microsoft.Win32;
 
 namespace Mindscape.Raygun4Net.EnvironmentProviders
 {
@@ -38,19 +36,7 @@ namespace Mindscape.Raygun4Net.EnvironmentProviders
 
     private static string? GetForWindows()
     {
-      string? productName = null;
-
-      var registryKey =
-        Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Windows NT\\CurrentVersion");
-      var result = registryKey?.GetValue("productName") as string;
-
-      if (result != null)
-      {
-        var osVersion = Environment.OSVersion.VersionString;
-        productName = $"{result} ({osVersion})";
-      }
-
-      return productName;
+      return RuntimeInformation.OSDescription;
     }
 
     private static string? GetForLinux()
