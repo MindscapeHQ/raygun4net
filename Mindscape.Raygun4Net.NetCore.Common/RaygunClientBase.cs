@@ -1,4 +1,8 @@
-﻿using System;
+﻿#if NETSTANDARD2_0_OR_GREATER || NET
+#define UNHANDLED_EXCEPTIONS_SUPPORT
+#endif
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,6 +16,7 @@ namespace Mindscape.Raygun4Net
 {
   public abstract class RaygunClientBase
   {
+    private static readonly string[] UnhandledExceptionTags = new[] { "UnhandledException" };
     private static HttpClient Client = new HttpClient();
 
     private readonly string _apiKey;
@@ -21,6 +26,7 @@ namespace Mindscape.Raygun4Net
     private bool _handlingRecursiveGrouping;
 
     protected readonly RaygunSettingsBase _settings;
+    private bool _exceptionHandlersAttached;
     protected internal const string SentKey = "AlreadySentByRaygun";
 
     /// <summary>
@@ -48,7 +54,7 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     public string ApplicationVersion { get; set; }
 
-#if NETSTANDARD2_0_OR_GREATER
+#if UNHANDLED_EXCEPTIONS_SUPPORT
     /// <summary>
     /// If set to true, this will automatically setup handlers to catch Unhandled Exceptions  
     /// </summary>
@@ -57,29 +63,43 @@ namespace Mindscape.Raygun4Net
     /// </remarks>
     public virtual bool CatchUnhandledExceptions
     {
-      get { return _settings.CatchUnhandledExceptions; }
-
+      get
+      {
+        return _settings.CatchUnhandledExceptions;
+      }
       set
       {
-        if (_settings.CatchUnhandledExceptions == value) { return; }
+        if (_settings.CatchUnhandledExceptions == value)
+        {
+          return;
+        }
 
-        if (value)
-        {
-          System.AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-        }
-        else
-        {
-          System.AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;     
-        }
+        AttachGlobalExceptionHandlers(value);
 
         _settings.CatchUnhandledExceptions = value;
-        
-        
-        void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
-        {
-          Send(e.ExceptionObject as Exception, new[] { "UnhandledException" });
-        }
       }
+    }
+
+    protected void AttachGlobalExceptionHandlers(bool attachHandlers)
+    {
+      if (_exceptionHandlersAttached == attachHandlers)
+        return;
+
+      if (attachHandlers)
+      {
+        GlobalExceptionHandler.UnhandledException += OnApplicationUnhandledException;
+        _exceptionHandlersAttached = true;
+      }
+      else
+      {
+        GlobalExceptionHandler.UnhandledException -= OnApplicationUnhandledException;
+        _exceptionHandlersAttached = false;
+      }
+    }
+
+    private void OnApplicationUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+      Send(e.ExceptionObject as Exception, UnhandledExceptionTags);
     }
 
 #endif
@@ -101,10 +121,10 @@ namespace Mindscape.Raygun4Net
         ApplicationVersion = settings.ApplicationVersion;
       }
 
-#if NETSTANDARD2_0_OR_GREATER
+#if UNHANDLED_EXCEPTIONS_SUPPORT
       if (_settings.CatchUnhandledExceptions)
       {
-         CatchUnhandledExceptions = _settings.CatchUnhandledExceptions;
+        AttachGlobalExceptionHandlers(true);
       }
 #endif
     }
@@ -301,7 +321,8 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     /// <param name="userInfo">Information about the user including the identity string.</param>
-    public virtual async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo = null)
+    public virtual async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData,
+      RaygunIdentifierMessage userInfo = null)
     {
       if (CanSend(exception))
       {
@@ -336,10 +357,7 @@ namespace Mindscape.Raygun4Net
         // For backwards compatibility we need to continue to support the old SendInBackground method signature.
         // So we just fire and forget and discard the task.
         // If we await this Task it will cause SendInBackground to be blocking.
-        _ = Task.Run(async () =>
-        {
-          await StripAndSend(exception, tags, userCustomData, userInfo);
-        });
+        _ = Task.Run(async () => { await StripAndSend(exception, tags, userCustomData, userInfo); });
 
         FlagAsSent(exception);
       }
