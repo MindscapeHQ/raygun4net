@@ -1,5 +1,9 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v8.0.2
+- Removed dependency on System.Runtime.Serialization.Primitives for `Mindscape.Raygun4Net.NetCore.Common` package
+- Removed dependency on System.Management for `Mindscape.Raygun4Net.NetCore.Common` package
+
 ### v8.0.1
 - Removed dependency on Microsoft.Win32.Registry for `Mindscape.Raygun4Net.NetCore.Common` package
 

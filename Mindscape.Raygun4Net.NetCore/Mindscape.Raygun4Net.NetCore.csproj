@@ -27,14 +27,6 @@
     <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
-    <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6'">
-    <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD1_6</DefineConstants>
-  </PropertyGroup> 
-
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore.Common\Mindscape.Raygun4Net.NetCore.Common.csproj"/>
   </ItemGroup>
