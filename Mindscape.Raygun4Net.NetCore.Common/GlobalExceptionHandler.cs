@@ -17,7 +17,7 @@ namespace Mindscape.Raygun4Net
         UnhandledException?.Invoke(sender, new UnhandledExceptionEventArgs(args.Exception, false));
       };
 
-#if IOS
+#if IOS || MACCATALYST
       // This could also be extended to add support for MacOS and Mac Catalyst
       ObjCRuntime.Runtime.MarshalManagedException += (_, args) =>
       {
