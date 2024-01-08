@@ -27,13 +27,4 @@
     <None Include="..\LICENSE" Pack="true" PackagePath=""/>
     <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
-    <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0"/>
-    <PackageReference Include="System.Management" Version="4.7.0" />
-  </ItemGroup>
 </Project>
