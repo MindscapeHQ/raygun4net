@@ -46,7 +46,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Mindscape.Raygun4Net.Common\Mindscape.Raygun4Net.Common.csproj" />
     <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore.Common\Mindscape.Raygun4Net.NetCore.Common.csproj" />
   </ItemGroup>
 
