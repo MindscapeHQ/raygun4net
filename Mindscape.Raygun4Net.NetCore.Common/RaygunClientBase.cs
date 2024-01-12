@@ -16,7 +16,7 @@ namespace Mindscape.Raygun4Net
 {
   public abstract class RaygunClientBase
   {
-    private static readonly string[] UnhandledExceptionTags = new[] { "UnhandledException" };
+    private static readonly string[] UnhandledExceptionTags = { "UnhandledException" };
     private static HttpClient Client = new HttpClient();
 
     private readonly string _apiKey;
@@ -26,7 +26,6 @@ namespace Mindscape.Raygun4Net
     private bool _handlingRecursiveGrouping;
 
     protected readonly RaygunSettingsBase _settings;
-    private bool _exceptionHandlersAttached;
     protected internal const string SentKey = "AlreadySentByRaygun";
 
     /// <summary>
@@ -74,32 +73,16 @@ namespace Mindscape.Raygun4Net
           return;
         }
 
-        AttachGlobalExceptionHandlers(value);
-
         _settings.CatchUnhandledExceptions = value;
       }
     }
 
-    protected void AttachGlobalExceptionHandlers(bool attachHandlers)
+    private void OnApplicationUnhandledException(Exception exception, bool isTerminating)
     {
-      if (_exceptionHandlersAttached == attachHandlers)
+      if (!CatchUnhandledExceptions)
         return;
-
-      if (attachHandlers)
-      {
-        GlobalExceptionHandler.UnhandledException += OnApplicationUnhandledException;
-        _exceptionHandlersAttached = true;
-      }
-      else
-      {
-        GlobalExceptionHandler.UnhandledException -= OnApplicationUnhandledException;
-        _exceptionHandlersAttached = false;
-      }
-    }
-
-    private void OnApplicationUnhandledException(object sender, UnhandledExceptionEventArgs e)
-    {
-      Send(e.ExceptionObject as Exception, UnhandledExceptionTags);
+      
+      Send(exception, UnhandledExceptionTags);
     }
 
 #endif
@@ -122,10 +105,7 @@ namespace Mindscape.Raygun4Net
       }
 
 #if UNHANDLED_EXCEPTIONS_SUPPORT
-      if (_settings.CatchUnhandledExceptions)
-      {
-        AttachGlobalExceptionHandlers(true);
-      }
+      UnhandledExceptionBridge.OnUnhandledException += OnApplicationUnhandledException;
 #endif
     }
 
