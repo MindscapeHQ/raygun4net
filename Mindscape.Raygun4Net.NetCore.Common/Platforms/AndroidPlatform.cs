@@ -6,13 +6,14 @@ namespace Mindscape.Raygun4Net.Platforms
 {
   internal static class AndroidPlatform
   {
-    private static readonly Assembly AndroidAssembly =
-      AssemblyHelpers.FindAssembly("Mono.Android", AssemblyHelpers.HexStringToByteArray("84e04ff9cfb79065"));
+    private static Assembly AndroidAssembly;
 
     public static bool TryAttachExceptionHandlers()
     {
       try
       {
+        AndroidAssembly ??= AssemblyHelpers.FindAssembly("Mono.Android", AssemblyHelpers.HexStringToByteArray("84e04ff9cfb79065"));
+        
         if (AndroidAssembly is null)
         {
           return false;
@@ -34,7 +35,7 @@ namespace Mindscape.Raygun4Net.Platforms
       }
       catch (Exception ex)
       {
-        Debug.WriteLine($"Error attaching to AndroidEnvironment.UnhandledExceptionRaiser: {0}", ex);
+        Debug.WriteLine("Error attaching to AndroidEnvironment.UnhandledExceptionRaiser: {0}", ex);
         return false;
       }
 

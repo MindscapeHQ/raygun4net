@@ -6,8 +6,7 @@ namespace Mindscape.Raygun4Net.Platforms
 {
   internal static class WindowsPlatform
   {
-    private static readonly Assembly WinUIAssembly =
-      AssemblyHelpers.FindAssembly("Microsoft.WinUI", AssemblyHelpers.HexStringToByteArray("de31ebe4ad15742b"));
+    private static Assembly WinUIAssembly;
 
     private static Exception _lastFirstChanceException;
 
@@ -15,6 +14,8 @@ namespace Mindscape.Raygun4Net.Platforms
     {
       try
       {
+        WinUIAssembly ??= AssemblyHelpers.FindAssembly("Microsoft.WinUI", AssemblyHelpers.HexStringToByteArray("de31ebe4ad15742b"));
+        
         if (WinUIAssembly is null)
         {
           return false;
@@ -43,7 +44,7 @@ namespace Mindscape.Raygun4Net.Platforms
       }
       catch (Exception ex)
       {
-        Debug.WriteLine($"Error attaching to Microsoft.UI.Xaml.Application.Current.UnhandledException: {0}", ex);
+        Debug.WriteLine("Error attaching to Microsoft.UI.Xaml.Application.Current.UnhandledException: {0}", ex);
         return false;
       }
 

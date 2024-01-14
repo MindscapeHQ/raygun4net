@@ -6,11 +6,9 @@ namespace Mindscape.Raygun4Net.Platforms
 {
   internal static class ApplePlatform
   {
-    private static readonly Assembly IOSAssembly =
-      AssemblyHelpers.FindAssembly("Microsoft.iOS", AssemblyHelpers.HexStringToByteArray("84e04ff9cfb79065"));
+    private static Assembly IOSAssembly;
 
-    private static readonly Assembly MacCatalystAssembly =
-      AssemblyHelpers.FindAssembly("Microsoft.MacCatalyst", AssemblyHelpers.HexStringToByteArray("84e04ff9cfb79065"));
+    private static Assembly MacCatalystAssembly;
 
     private static object MarshalManagedExceptionMode_UnwindNativeCode;
 
@@ -18,6 +16,10 @@ namespace Mindscape.Raygun4Net.Platforms
     {
       try
       {
+        IOSAssembly ??= AssemblyHelpers.FindAssembly("Microsoft.iOS", AssemblyHelpers.HexStringToByteArray("84e04ff9cfb79065"));
+
+        MacCatalystAssembly ??= AssemblyHelpers.FindAssembly("Microsoft.MacCatalyst", AssemblyHelpers.HexStringToByteArray("84e04ff9cfb79065"));
+
         // One or the other, the types and names are the same across both
         var activeAssembly = IOSAssembly ?? MacCatalystAssembly;
 
@@ -34,11 +36,11 @@ namespace Mindscape.Raygun4Net.Platforms
          *   args.ExceptionMode = ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode;
          * }
          */
-        
+
         var applicationType = activeAssembly.GetType("ObjCRuntime.Runtime");
         var eventInfo = applicationType.GetEvent("MarshalManagedException");
         var enumType = activeAssembly.GetType("ObjCRuntime.MarshalManagedExceptionMode");
-        
+
         MarshalManagedExceptionMode_UnwindNativeCode = Enum.Parse(enumType, "UnwindNativeCode");
 
         // We need to create a wrapper around the target because the handler is fired with
@@ -51,7 +53,7 @@ namespace Mindscape.Raygun4Net.Platforms
       }
       catch (Exception ex)
       {
-        Debug.WriteLine($"Error attaching to ObjCRuntime.Runtime.MarshalManagedException: {0}", ex);
+        Debug.WriteLine("Error attaching to ObjCRuntime.Runtime.MarshalManagedException: {0}", ex);
         return false;
       }
 
@@ -69,7 +71,7 @@ namespace Mindscape.Raygun4Net.Platforms
         // Assuming 'MarshalManagedExceptionMode' is an enum and 'UnwindNativeCode' is a value within that enum
         exceptionModeProperty.SetValue(e, MarshalManagedExceptionMode_UnwindNativeCode);
       }
-      catch(Exception ex)
+      catch (Exception ex)
       {
         Debug.WriteLine("Could not set ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode: {0}", ex);
       }
