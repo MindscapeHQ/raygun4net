@@ -16,8 +16,10 @@ namespace Mindscape.Raygun4Net.Platforms
       try
       {
         if (WinUIAssembly is null)
+        {
           return false;
-        
+        }
+
         // Reflection equivalent of: 
         // Microsoft.UI.Xaml.Application.Current.UnhandledException += Current_UnhandledException;
 

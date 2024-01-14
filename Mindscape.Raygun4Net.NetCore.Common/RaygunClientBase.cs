@@ -1,8 +1,4 @@
-﻿#if NETSTANDARD2_0_OR_GREATER || NET
-#define UNHANDLED_EXCEPTIONS_SUPPORT
-#endif
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -53,9 +49,8 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     public string ApplicationVersion { get; set; }
 
-#if UNHANDLED_EXCEPTIONS_SUPPORT
     /// <summary>
-    /// If set to true, this will automatically setup handlers to catch Unhandled Exceptions  
+    /// If set to true, this will automatically setup handlers to send Unhandled Exceptions to Raygun  
     /// </summary>
     /// <remarks>
     /// Currently defaults to false. This may be change in future releases.
@@ -80,12 +75,12 @@ namespace Mindscape.Raygun4Net
     private void OnApplicationUnhandledException(Exception exception, bool isTerminating)
     {
       if (!CatchUnhandledExceptions)
+      {
         return;
-      
+      }
+
       Send(exception, UnhandledExceptionTags);
     }
-
-#endif
 
     protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client) : this(settings)
     {
@@ -104,9 +99,7 @@ namespace Mindscape.Raygun4Net
         ApplicationVersion = settings.ApplicationVersion;
       }
 
-#if UNHANDLED_EXCEPTIONS_SUPPORT
       UnhandledExceptionBridge.OnUnhandledException += OnApplicationUnhandledException;
-#endif
     }
 
 

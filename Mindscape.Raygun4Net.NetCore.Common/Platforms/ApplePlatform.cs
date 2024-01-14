@@ -22,7 +22,9 @@ namespace Mindscape.Raygun4Net.Platforms
         var activeAssembly = IOSAssembly ?? MacCatalystAssembly;
 
         if (activeAssembly is null)
+        {
           return false;
+        }
 
         /*
          * Reflection equivalent of

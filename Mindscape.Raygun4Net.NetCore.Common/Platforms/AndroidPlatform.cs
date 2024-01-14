@@ -14,7 +14,9 @@ namespace Mindscape.Raygun4Net.Platforms
       try
       {
         if (AndroidAssembly is null)
+        {
           return false;
+        }
 
         // Reflection equivalent of: 
         // Android.Runtime.AndroidEnvironment.UnhandledExceptionRaiser += Handler
