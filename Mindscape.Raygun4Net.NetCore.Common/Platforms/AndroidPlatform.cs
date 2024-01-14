@@ -18,8 +18,6 @@ namespace Mindscape.Raygun4Net.Platforms
 
         // Reflection equivalent of: 
         // Android.Runtime.AndroidEnvironment.UnhandledExceptionRaiser += Handler
-
-        // Get the Type of Microsoft.UI.Xaml.Application
         var androidRuntimeType = AndroidAssembly.GetType("Android.Runtime.AndroidEnvironment");
         var eventInfo = androidRuntimeType.GetEvent("UnhandledExceptionRaiser");
 

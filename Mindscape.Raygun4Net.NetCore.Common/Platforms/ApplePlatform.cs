@@ -32,8 +32,7 @@ namespace Mindscape.Raygun4Net.Platforms
          *   args.ExceptionMode = ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode;
          * }
          */
-
-        // Get the Type of Microsoft.UI.Xaml.Application
+        
         var applicationType = activeAssembly.GetType("ObjCRuntime.Runtime");
         var eventInfo = applicationType.GetEvent("MarshalManagedException");
         var enumType = activeAssembly.GetType("ObjCRuntime.MarshalManagedExceptionMode");
