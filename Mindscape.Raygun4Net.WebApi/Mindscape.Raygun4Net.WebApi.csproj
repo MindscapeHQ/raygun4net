@@ -66,7 +66,6 @@
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net.Common\DataAccess\RaygunWebClient.cs">
       <Link>RaygunWebClient.cs</Link>
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="..\Mindscape.Raygun4Net.Common\DataAccess\WebClientFacade.cs">
       <Link>WebClientFacade.cs</Link>
