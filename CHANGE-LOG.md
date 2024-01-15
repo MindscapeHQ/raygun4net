@@ -1,5 +1,10 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v8.1.0
+- Fully support catching unhandled exceptions in NetCore
+- Use reflection to discover and attach to exception handlers in Android, iOS, MacCatalyst targets
+- Add `UnhandledExceptionBridge.RaiseUnhandledException`. This can be called from unsupported platforms to raise and log exceptions via Raygun
+
 ### v8.0.1
 - Removed dependency on Microsoft.Win32.Registry for `Mindscape.Raygun4Net.NetCore.Common` package
 
