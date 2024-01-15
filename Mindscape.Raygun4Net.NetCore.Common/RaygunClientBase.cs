@@ -12,6 +12,7 @@ namespace Mindscape.Raygun4Net
 {
   public abstract class RaygunClientBase
   {
+    private static readonly string[] UnhandledExceptionTags = { "UnhandledException" };
     private static HttpClient Client = new HttpClient();
 
     private readonly string _apiKey;
@@ -48,41 +49,38 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     public string ApplicationVersion { get; set; }
 
-#if NETSTANDARD2_0_OR_GREATER
     /// <summary>
-    /// If set to true, this will automatically setup handlers to catch Unhandled Exceptions  
+    /// If set to true, this will automatically setup handlers to send Unhandled Exceptions to Raygun  
     /// </summary>
     /// <remarks>
     /// Currently defaults to false. This may be change in future releases.
     /// </remarks>
     public virtual bool CatchUnhandledExceptions
     {
-      get { return _settings.CatchUnhandledExceptions; }
-
+      get
+      {
+        return _settings.CatchUnhandledExceptions;
+      }
       set
       {
-        if (_settings.CatchUnhandledExceptions == value) { return; }
-
-        if (value)
+        if (_settings.CatchUnhandledExceptions == value)
         {
-          System.AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-        }
-        else
-        {
-          System.AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;     
+          return;
         }
 
         _settings.CatchUnhandledExceptions = value;
-        
-        
-        void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
-        {
-          Send(e.ExceptionObject as Exception, new[] { "UnhandledException" });
-        }
       }
     }
 
-#endif
+    private void OnApplicationUnhandledException(Exception exception, bool isTerminating)
+    {
+      if (!CatchUnhandledExceptions)
+      {
+        return;
+      }
+
+      Send(exception, UnhandledExceptionTags);
+    }
 
     protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client) : this(settings)
     {
@@ -101,12 +99,7 @@ namespace Mindscape.Raygun4Net
         ApplicationVersion = settings.ApplicationVersion;
       }
 
-#if NETSTANDARD2_0_OR_GREATER
-      if (_settings.CatchUnhandledExceptions)
-      {
-         CatchUnhandledExceptions = _settings.CatchUnhandledExceptions;
-      }
-#endif
+      UnhandledExceptionBridge.OnUnhandledException += OnApplicationUnhandledException;
     }
 
 
@@ -301,7 +294,8 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     /// <param name="userInfo">Information about the user including the identity string.</param>
-    public virtual async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo = null)
+    public virtual async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData,
+      RaygunIdentifierMessage userInfo = null)
     {
       if (CanSend(exception))
       {
@@ -336,10 +330,7 @@ namespace Mindscape.Raygun4Net
         // For backwards compatibility we need to continue to support the old SendInBackground method signature.
         // So we just fire and forget and discard the task.
         // If we await this Task it will cause SendInBackground to be blocking.
-        _ = Task.Run(async () =>
-        {
-          await StripAndSend(exception, tags, userCustomData, userInfo);
-        });
+        _ = Task.Run(async () => { await StripAndSend(exception, tags, userCustomData, userInfo); });
 
         FlagAsSent(exception);
       }
