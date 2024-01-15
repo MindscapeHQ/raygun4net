@@ -13,12 +13,12 @@ namespace Mindscape.Raygun4Net
         {
         }
         
-        protected RaygunClient(string apiKey, HttpClient httpClient)
+        public RaygunClient(string apiKey, HttpClient httpClient)
             : this(new RaygunSettings { ApiKey = apiKey }, httpClient)
         {
         }
         
-        protected RaygunClient(RaygunSettings settings, HttpClient httpClient) : base(settings, httpClient)
+        public RaygunClient(RaygunSettings settings, HttpClient httpClient) : base(settings, httpClient)
         {
         }
     }
