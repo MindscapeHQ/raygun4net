@@ -13,7 +13,20 @@ namespace Mindscape.Raygun4Net
   public abstract class RaygunClientBase
   {
     private static readonly string[] UnhandledExceptionTags = { "UnhandledException" };
-    private static HttpClient Client = new HttpClient();
+
+    /// <summary>
+    /// If no HttpClient is provided to the constructor, this will be used.
+    /// </summary>
+    private static readonly HttpClient DefaultClient = new HttpClient
+    {
+      // The default timeout is 100 seconds for the HttpClient, 
+      Timeout = TimeSpan.FromSeconds(30)
+    };
+    
+    /// <summary>
+    /// This is the HttpClient that will be used to send messages to the Raygun endpoint.
+    /// </summary>
+    private readonly HttpClient _client;
 
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
@@ -82,13 +95,10 @@ namespace Mindscape.Raygun4Net
       Send(exception, UnhandledExceptionTags);
     }
 
-    protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client) : this(settings)
+    public RaygunClientBase(RaygunSettingsBase settings, HttpClient client)
     {
-      Client = client;
-    }
-
-    public RaygunClientBase(RaygunSettingsBase settings)
-    {
+      _client = client;
+      
       _settings = settings;
       _apiKey = settings.ApiKey;
 
@@ -102,6 +112,10 @@ namespace Mindscape.Raygun4Net
       UnhandledExceptionBridge.OnUnhandledException += OnApplicationUnhandledException;
     }
 
+    public RaygunClientBase(RaygunSettingsBase settings) : this(settings, DefaultClient)
+    {
+    }
+
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
@@ -113,7 +127,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="wrapperExceptions">Exception types that you want removed and replaced with their inner exception.</param>
     public void AddWrapperExceptions(params Type[] wrapperExceptions)
     {
-      foreach (Type wrapper in wrapperExceptions)
+      foreach (var wrapper in wrapperExceptions)
       {
         if (!_wrapperExceptions.Contains(wrapper))
         {
@@ -129,7 +143,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="wrapperExceptions">Exception types that should no longer be stripped away.</param>
     public void RemoveWrapperExceptions(params Type[] wrapperExceptions)
     {
-      foreach (Type wrapper in wrapperExceptions)
+      foreach (var wrapper in wrapperExceptions)
       {
         _wrapperExceptions.Remove(wrapper);
       }
@@ -137,13 +151,13 @@ namespace Mindscape.Raygun4Net
 
     protected virtual bool CanSend(Exception exception)
     {
-      return exception == null || exception.Data == null || !exception.Data.Contains(SentKey) ||
+      return exception?.Data == null || !exception.Data.Contains(SentKey) ||
              false.Equals(exception.Data[SentKey]);
     }
 
     protected void FlagAsSent(Exception exception)
     {
-      if (exception != null && exception.Data != null)
+      if (exception?.Data != null)
       {
         try
         {
@@ -294,8 +308,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     /// <param name="userInfo">Information about the user including the identity string.</param>
-    public virtual async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData,
-      RaygunIdentifierMessage userInfo = null)
+    public virtual async Task SendAsync(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo = null)
     {
       if (CanSend(exception))
       {
@@ -330,7 +343,10 @@ namespace Mindscape.Raygun4Net
         // For backwards compatibility we need to continue to support the old SendInBackground method signature.
         // So we just fire and forget and discard the task.
         // If we await this Task it will cause SendInBackground to be blocking.
-        _ = Task.Run(async () => { await StripAndSend(exception, tags, userCustomData, userInfo); });
+        _ = Task.Run(async () =>
+        {
+          await StripAndSend(exception, tags, userCustomData, userInfo);
+        });
 
         FlagAsSent(exception);
       }
@@ -448,7 +464,7 @@ namespace Mindscape.Raygun4Net
         var message = SimpleJson.SerializeObject(raygunMessage);
         requestMessage.Content = new StringContent(message, Encoding.UTF8, "application/json");
 
-        var result = await Client.SendAsync(requestMessage).ConfigureAwait(false);
+        var result = await _client.SendAsync(requestMessage).ConfigureAwait(false);
 
         if (!result.IsSuccessStatusCode)
         {

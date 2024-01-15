@@ -1,5 +1,9 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v8.2.0
+- Added public ctor to allow RaygunClient to accept a custom HttpClient
+- Changed the default timeout of HttpClient from 100 seconds to 30 seconds
+
 ### v8.1.0
 - Fully support catching unhandled exceptions in NetCore
 - Use reflection to discover and attach to exception handlers in Android, iOS, MacCatalyst targets
