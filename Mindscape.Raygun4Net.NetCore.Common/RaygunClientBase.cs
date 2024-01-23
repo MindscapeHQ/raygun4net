@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Mindscape.Raygun4Net
@@ -442,7 +443,18 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public async Task Send(RaygunMessage raygunMessage)
+    public Task Send(RaygunMessage raygunMessage)
+    {
+      return Send(raygunMessage, CancellationToken.None);
+    }
+
+    /// <summary>
+    /// Posts a RaygunMessage to the Raygun api endpoint.
+    /// </summary>
+    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
+    /// set to a valid DateTime and as much of the Details property as is available.</param>
+    /// <param name="cancellationToken"></param>
+    public async Task Send(RaygunMessage raygunMessage, CancellationToken cancellationToken)
     {
       if (!ValidateApiKey())
       {
@@ -464,7 +476,7 @@ namespace Mindscape.Raygun4Net
         var message = SimpleJson.SerializeObject(raygunMessage);
         requestMessage.Content = new StringContent(message, Encoding.UTF8, "application/json");
 
-        var result = await _client.SendAsync(requestMessage).ConfigureAwait(false);
+        var result = await _client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
 
         if (!result.IsSuccessStatusCode)
         {

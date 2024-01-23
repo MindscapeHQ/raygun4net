@@ -7,6 +7,7 @@ using Mindscape.Raygun4Net.Messages;
 using System.Web;
 using System.Threading;
 using System.Reflection;
+using System.Threading.Tasks;
 using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Breadcrumbs;
 using Mindscape.Raygun4Net.Filters;
@@ -386,7 +387,7 @@ namespace Mindscape.Raygun4Net
           // will be null on the other thread
           var currentBreadcrumbs = _breadcrumbs.ToList();
           var currentTime = DateTime.UtcNow;
-
+          
           ThreadPool.QueueUserWorkItem(
             c =>
             {
