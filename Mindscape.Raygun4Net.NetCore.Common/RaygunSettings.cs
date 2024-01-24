@@ -41,8 +41,8 @@ namespace Mindscape.Raygun4Net
     /// Controls the number of background threads used to process the raygun message queue
     /// </summary>
     /// <remarks>
-    /// Defaults to Environment.ProcessorCount * 2
+    /// Defaults to Environment.ProcessorCount * 2 &gt;= 8 ? 8 : Environment.ProcessorCount * 2
     /// </remarks>
-    public int BackgroundMessageQueueConcurrency { get; set; } = Environment.ProcessorCount * 2;
+    public int BackgroundMessageWorkerCount { get; set; } = Environment.ProcessorCount * 2 >= 8 ? 8 : Environment.ProcessorCount * 2;
   }
 }

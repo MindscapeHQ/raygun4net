@@ -1,43 +1,62 @@
+#nullable enable
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Mindscape.Raygun4Net
 {
-  public sealed class ThrottledBackgroundMessageProcessor : IBackgroundMessageProcessor, IDisposable
+  internal sealed class ThrottledBackgroundMessageProcessor : IDisposable
   {
-    private readonly Func<RaygunMessage, CancellationToken, Task> _callbackFunc;
     private readonly BlockingCollection<RaygunMessage> _messageQueue;
     private readonly List<Task> _workerTasks;
     private readonly CancellationTokenSource _cancelProcessingSource;
-    private readonly Timer _workerHealthTimer;
-    private bool _isDisposing = false;
+    private readonly Func<RaygunMessage, CancellationToken, Task> _processCallback;
+    private readonly int _maxWorkerTasks;
+    private readonly object _workerTaskMutex = new object();
 
-    public int MaxConcurrency { get; set; }
+    private volatile int _activeWorkers;
+    private volatile bool _isDisposing;
 
-    public ThrottledBackgroundMessageProcessor(Func<RaygunMessage, CancellationToken, Task> callbackFunc, short maxQueueSize, short? maxConcurrency = null)
+    public ThrottledBackgroundMessageProcessor(ushort maxQueueSize, int maxWorkerTasks, Func<RaygunMessage, CancellationToken, Task> onProcessFunc)
     {
-      _callbackFunc = callbackFunc;
-      MaxConcurrency = maxConcurrency ?? Environment.ProcessorCount * 4;
+      _processCallback = onProcessFunc ?? throw new ArgumentNullException(nameof(onProcessFunc));
+      _maxWorkerTasks = maxWorkerTasks;
       _messageQueue = new BlockingCollection<RaygunMessage>(maxQueueSize);
       _cancelProcessingSource = new CancellationTokenSource();
       _workerTasks = new List<Task>();
-      _workerHealthTimer = new Timer(CheckWorkerHealth, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
-
-      for (var i = 0; i < MaxConcurrency; i++)
-      {
-        var workerTask = CreateAndStartWorker();
-        _workerTasks.Add(workerTask);
-      }
     }
 
-    public Task<bool> Enqueue(RaygunMessage message)
+    public bool Enqueue(RaygunMessage message)
     {
       var itemAdded = _messageQueue.TryAdd(message);
-      return Task.FromResult(itemAdded);
+
+      EnsureWorkers();
+
+      return itemAdded;
+    }
+
+    private void EnsureWorkers()
+    {
+      lock (_workerTaskMutex)
+      {
+        var differenceInExpectedWorkers = _maxWorkerTasks - _activeWorkers;
+
+        if (differenceInExpectedWorkers <= 0)
+        {
+          return;
+        }
+
+        for (var i = 0; i < differenceInExpectedWorkers; i++)
+        {
+          _workerTasks.Add(CreateWorkerTask());
+        }
+
+        _workerTasks.RemoveAll(x => x.IsCompleted);
+      }
     }
 
     public void Dispose()
@@ -49,53 +68,46 @@ namespace Mindscape.Raygun4Net
 
       _isDisposing = true;
 
-      _workerHealthTimer.Dispose();
       _messageQueue.CompleteAdding();
       _cancelProcessingSource.Cancel();
       _messageQueue.Dispose();
     }
 
-    private Task CreateAndStartWorker()
+    private Task CreateWorkerTask()
     {
-      return Task.Factory.StartNew(async () => await WorkerLoop(_cancelProcessingSource.Token)).Unwrap();
+      var workerTask = Task.Run(async () =>
+        {
+          // Run the message processor loop
+          await RaygunMessageWorker(_messageQueue, _processCallback, _cancelProcessingSource.Token);
+        })
+        .ContinueWith(x =>
+        {
+          // Minus one from the active worker count
+          Interlocked.Decrement(ref _activeWorkers);
+        });
+
+      Interlocked.Increment(ref _activeWorkers);
+      return workerTask;
     }
 
-    private async Task WorkerLoop(CancellationToken cancellationToken)
+    private static async Task RaygunMessageWorker(BlockingCollection<RaygunMessage> messageQueue, Func<RaygunMessage, CancellationToken, Task> callback,
+      CancellationToken cancellationToken)
     {
-      foreach (var message in _messageQueue.GetConsumingEnumerable(cancellationToken))
+      try
       {
-        await _callbackFunc(message, cancellationToken);
+        foreach (var message in messageQueue.GetConsumingEnumerable(cancellationToken))
+        {
+          await callback(message, cancellationToken);
+        }
+      }
+      catch (Exception cancelledEx) when (cancelledEx is OperationCanceledException || cancelledEx is TaskCanceledException)
+      {
+        // Cancellation was requested, so it's fine
+      }
+      catch (Exception ex)
+      {
+        Debug.WriteLine("Exception in queue worker {0}: {1}", Task.CurrentId, ex);
       }
     }
-
-    private void CheckWorkerHealth(object state)
-    {
-      if (_isDisposing)
-      {
-        return;
-      }
-
-      // Find all dead / "completed" workers
-      var deadWorkers = _workerTasks.Where(t => t.IsCompleted).ToList();
-
-      foreach (var deadWorker in deadWorkers)
-      {
-        // Remove the dead worker
-        _workerTasks.Remove(deadWorker);
-      }
-
-      var workersToSpawn = MaxConcurrency - _workerTasks.Count;
-
-      // While we expect another worker to be alive, add one to the list
-      for (var i = 0; i < workersToSpawn; i++)
-      {
-        _workerTasks.Add(CreateAndStartWorker());
-      }
-    }
-  }
-
-  public interface IBackgroundMessageProcessor
-  {
-    public Task<bool> Enqueue(RaygunMessage message);
   }
 }
