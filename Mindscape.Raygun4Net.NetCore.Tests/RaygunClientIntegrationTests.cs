@@ -135,9 +135,10 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
     
     [Test]
-    public async Task SendInBackground_ShouldFail_WhenMaxTasksIsZero_ENV()
+    [NonParallelizable]
+    public async Task SendInBackground_WithLowQueueMax_DoesNotSendAllRequests()
     {
-      Environment.SetEnvironmentVariable("RAYGUN_MESSAGE_QUEUE_MAX", "10", EnvironmentVariableTarget.Process);
+      Environment.SetEnvironmentVariable("RAYGUN_MESSAGE_QUEUE_MAX", "10");
       
       mockHttp.When(match => match.Method(HttpMethod.Post)
           .RequestUri("https://api.raygun.com/entries"))
@@ -186,9 +187,9 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
 
       // Verify that the request was sent 50 times
       await mockHttp.VerifyAsync(match => match.Method(HttpMethod.Post)
-        .RequestUri("https://api.raygun.com/entries"), IsSent.AtLeast(50));
+        .RequestUri("https://api.raygun.com/entries"), IsSent.AtMost(49));
       
-      Environment.SetEnvironmentVariable("RAYGUN_MESSAGE_QUEUE_MAX", "", EnvironmentVariableTarget.Process);
+      Environment.SetEnvironmentVariable("RAYGUN_MESSAGE_QUEUE_MAX", null);
     }
   }
 }
