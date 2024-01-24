@@ -18,12 +18,11 @@ namespace Mindscape.Raygun4Net
     private readonly int _maxWorkerTasks;
     private readonly object _workerTaskMutex = new object();
 
-    private volatile int _activeWorkers;
     private volatile bool _isDisposing;
 
-    public ThrottledBackgroundMessageProcessor(ushort maxQueueSize, int maxWorkerTasks, Func<RaygunMessage, CancellationToken, Task> onProcessFunc)
+    public ThrottledBackgroundMessageProcessor(ushort maxQueueSize, int maxWorkerTasks, Func<RaygunMessage, CancellationToken, Task> onProcessMessageFunc)
     {
-      _processCallback = onProcessFunc ?? throw new ArgumentNullException(nameof(onProcessFunc));
+      _processCallback = onProcessMessageFunc ?? throw new ArgumentNullException(nameof(onProcessMessageFunc));
       _maxWorkerTasks = maxWorkerTasks;
       _messageQueue = new BlockingCollection<RaygunMessage>(maxQueueSize);
       _cancelProcessingSource = new CancellationTokenSource();
@@ -41,21 +40,28 @@ namespace Mindscape.Raygun4Net
 
     private void EnsureWorkers()
     {
-      lock (_workerTaskMutex)
+      // If something else has the lock, then it's going to update the workers
+      // so we can just early return, and not perform any work
+      if (!Monitor.TryEnter(_workerTaskMutex))
       {
-        var differenceInExpectedWorkers = _maxWorkerTasks - _activeWorkers;
+        return;
+      }
 
-        if (differenceInExpectedWorkers <= 0)
-        {
-          return;
-        }
+      try
+      {
+        // Remove dead/faulted/finished tasks
+        _workerTasks.RemoveAll(x => x.IsCompleted);
 
-        for (var i = 0; i < differenceInExpectedWorkers; i++)
+        var numberOfWorkersToStart = _maxWorkerTasks - _workerTasks.Count;
+
+        for (var i = 0; i < numberOfWorkersToStart; i++)
         {
           _workerTasks.Add(CreateWorkerTask());
         }
-
-        _workerTasks.RemoveAll(x => x.IsCompleted);
+      }
+      finally
+      {
+        Monitor.Exit(_workerTaskMutex);
       }
     }
 
@@ -71,22 +77,19 @@ namespace Mindscape.Raygun4Net
       _messageQueue.CompleteAdding();
       _cancelProcessingSource.Cancel();
       _messageQueue.Dispose();
+
+      // Wait a few seconds for the workers to finish gracefully
+      Task.WhenAll(_workerTasks).Wait(TimeSpan.FromSeconds(2));
     }
 
     private Task CreateWorkerTask()
     {
       var workerTask = Task.Run(async () =>
-        {
-          // Run the message processor loop
-          await RaygunMessageWorker(_messageQueue, _processCallback, _cancelProcessingSource.Token);
-        })
-        .ContinueWith(x =>
-        {
-          // Minus one from the active worker count
-          Interlocked.Decrement(ref _activeWorkers);
-        });
+      {
+        // Run the message processor loop
+        await RaygunMessageWorker(_messageQueue, _processCallback, _cancelProcessingSource.Token);
+      });
 
-      Interlocked.Increment(ref _activeWorkers);
       return workerTask;
     }
 
