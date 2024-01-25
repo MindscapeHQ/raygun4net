@@ -13,7 +13,7 @@ namespace Mindscape.Raygun4Net
       
       // See if there's an overload defined in an environment variable, and set it accordingly
       var messageQueueMaxValue = Environment.GetEnvironmentVariable(RaygunMessageQueueMaxVariable);
-      if (!string.IsNullOrEmpty(messageQueueMaxValue) && ushort.TryParse(messageQueueMaxValue, out var maxQueueSize))
+      if (!string.IsNullOrEmpty(messageQueueMaxValue) && int.TryParse(messageQueueMaxValue, out var maxQueueSize))
       {
         BackgroundMessageQueueMax = maxQueueSize;
       }
@@ -35,7 +35,10 @@ namespace Mindscape.Raygun4Net
     /// </remarks>
     public bool CatchUnhandledExceptions { get; set; } = false;
 
-    public ushort BackgroundMessageQueueMax { get; } = 10_000;
+    /// <summary>
+    /// The maximum queue size for background exceptions
+    /// </summary>
+    public int BackgroundMessageQueueMax { get; } = ushort.MaxValue;
 
     /// <summary>
     /// Controls the number of background threads used to process the raygun message queue

@@ -20,7 +20,7 @@ namespace Mindscape.Raygun4Net
 
     private volatile bool _isDisposing;
 
-    public ThrottledBackgroundMessageProcessor(ushort maxQueueSize, int maxWorkerTasks, Func<RaygunMessage, CancellationToken, Task> onProcessMessageFunc)
+    public ThrottledBackgroundMessageProcessor(int maxQueueSize, int maxWorkerTasks, Func<RaygunMessage, CancellationToken, Task> onProcessMessageFunc)
     {
       _processCallback = onProcessMessageFunc ?? throw new ArgumentNullException(nameof(onProcessMessageFunc));
       _maxWorkerTasks = maxWorkerTasks;
