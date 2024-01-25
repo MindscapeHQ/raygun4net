@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Configuration;
+using System.Linq;
+using Mindscape.Raygun4Net.Breadcrumbs;
 using Mindscape.Raygun4Net.Logging;
 
 namespace Mindscape.Raygun4Net
@@ -16,7 +18,9 @@ namespace Mindscape.Raygun4Net
     public static RaygunSettings Settings
     {
       get { return settings; }
-      internal  set => settings = value; //Needed to be able to reset, after some unit tests pollute this global object.
+#if DEBUG
+      internal set => settings = value; //Needed to be able to reset, after some unit tests pollute this global object.
+#endif
     }
 
     public RaygunSettings()
@@ -48,7 +52,6 @@ namespace Mindscape.Raygun4Net
       get { return (int)this["backgroundMessageWorkerCount"]; }
       set { this["backgroundMessageWorkerCount"] = value; }
     }
-    
 
     [ConfigurationProperty("apikey", IsRequired = true, DefaultValue = "")]
     [StringValidator]
@@ -79,11 +82,129 @@ namespace Mindscape.Raygun4Net
       set { this["throwOnError"] = value; }
     }
 
+    [ConfigurationProperty("excludeHttpStatusCodes", IsRequired = false, DefaultValue = "")]
+    [RegexStringValidator(@"^(\d+(,\s?\d+)*)?$")]
+    public string ExcludeHttpStatusCodesList
+    {
+      get { return (string)this["excludeHttpStatusCodes"]; }
+      set { this["excludeHttpStatusCodes"] = value; }
+    }
+
+    public int[] ExcludedStatusCodes
+    {
+      get { return string.IsNullOrEmpty(ExcludeHttpStatusCodesList) ? new int[0] : ExcludeHttpStatusCodesList.Split(',').Select(int.Parse).ToArray(); }
+    }
+
+    [ConfigurationProperty("excludeErrorsFromLocal", IsRequired = false, DefaultValue = false)]
+    public bool ExcludeErrorsFromLocal
+    {
+      get { return (bool)this["excludeErrorsFromLocal"]; }
+      set { this["excludeErrorsFromLocal"] = value; }
+    }
+
+    [ConfigurationProperty("ignoreSensitiveFieldNames", IsRequired = false, DefaultValue = "")]
+    public string IgnoreSensitiveFieldNames
+    {
+      get { return (string)this["ignoreSensitiveFieldNames"]; }
+      set { this["ignoreSensitiveFieldNames"] = value; }
+    }
+
+    [ConfigurationProperty("ignoreQueryParameterNames", IsRequired = false, DefaultValue = "")]
+    public string IgnoreQueryParameterNames
+    {
+      get { return (string)this["ignoreQueryParameterNames"]; }
+      set { this["ignoreQueryParameterNames"] = value; }
+    }
+
+    [ConfigurationProperty("ignoreFormFieldNames", IsRequired = false, DefaultValue = "")]
+    public string IgnoreFormFieldNames
+    {
+      get { return (string)this["ignoreFormFieldNames"]; }
+      set { this["ignoreFormFieldNames"] = value; }
+    }
+
+    [ConfigurationProperty("ignoreHeaderNames", IsRequired = false, DefaultValue = "")]
+    public string IgnoreHeaderNames
+    {
+      get { return (string)this["ignoreHeaderNames"]; }
+      set { this["ignoreHeaderNames"] = value; }
+    }
+
+    [ConfigurationProperty("ignoreCookieNames", IsRequired = false, DefaultValue = "")]
+    public string IgnoreCookieNames
+    {
+      get { return (string)this["ignoreCookieNames"]; }
+      set { this["ignoreCookieNames"] = value; }
+    }
+
+    [ConfigurationProperty("ignoreServerVariableNames", IsRequired = false, DefaultValue = "")]
+    public string IgnoreServerVariableNames
+    {
+      get { return (string)this["ignoreServerVariableNames"]; }
+      set { this["ignoreServerVariableNames"] = value; }
+    }
+
+    [ConfigurationProperty("isRawDataIgnored", IsRequired = false, DefaultValue = false)]
+    public bool IsRawDataIgnored
+    {
+      get { return (bool)this["isRawDataIgnored"]; }
+      set { this["isRawDataIgnored"] = value; }
+    }
+
+    [ConfigurationProperty("useXmlRawDataFilter", IsRequired = false, DefaultValue = false)]
+    public bool UseXmlRawDataFilter
+    {
+      get { return (bool)this["useXmlRawDataFilter"]; }
+      set { this["useXmlRawDataFilter"] = value; }
+    }
+
+    [ConfigurationProperty("useKeyValuePairRawDataFilter", IsRequired = false, DefaultValue = false)]
+    public bool UseKeyValuePairRawDataFilter
+    {
+      get { return (bool)this["useKeyValuePairRawDataFilter"]; }
+      set { this["useKeyValuePairRawDataFilter"] = value; }
+    }
+
+    [ConfigurationProperty("isRawDataIgnoredWhenFilteringFailed", IsRequired = false, DefaultValue = false)]
+    public bool IsRawDataIgnoredWhenFilteringFailed
+    {
+      get { return (bool)this["isRawDataIgnoredWhenFilteringFailed"]; }
+      set { this["isRawDataIgnoredWhenFilteringFailed"] = value; }
+    }
+
+    [ConfigurationProperty("isResponseContentIgnored", IsRequired = false, DefaultValue = true)]
+    public bool IsResponseContentIgnored
+    {
+      get { return (bool)this["isResponseContentIgnored"]; }
+      set { this["isResponseContentIgnored"] = value; }
+    }
+
     [ConfigurationProperty("applicationVersion", IsRequired = false, DefaultValue = "")]
     public string ApplicationVersion
     {
         get { return (string)this["applicationVersion"]; }
         set { this["applicationVersion"] = value; }
+    }
+
+    [ConfigurationProperty("breadcrumbsLevel", IsRequired = false, DefaultValue = "Info")]
+    public RaygunBreadcrumbLevel BreadcrumbsLevel
+    {
+      get { return (RaygunBreadcrumbLevel) this["breadcrumbsLevel"]; }
+      set { this["breadcrumbsLevel"] = value; }
+    }
+
+    [ConfigurationProperty("breadcrumbsLocationRecordingEnabled", IsRequired = false, DefaultValue = false)]
+    public bool BreadcrumbsLocationRecordingEnabled
+    {
+      get { return (bool)this["breadcrumbsLocationRecordingEnabled"]; }
+      set { this["breadcrumbsLocationRecordingEnabled"] = value; }
+    }
+
+    [ConfigurationProperty("applicationIdentifier", IsRequired = false, DefaultValue = "")]
+    public string ApplicationIdentifier
+    {
+      get { return (string)this["applicationIdentifier"]; }
+      set { this["applicationIdentifier"] = value; }
     }
 
     /// <summary>

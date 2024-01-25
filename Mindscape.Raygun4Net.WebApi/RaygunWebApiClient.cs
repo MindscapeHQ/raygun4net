@@ -30,6 +30,7 @@ namespace Mindscape.Raygun4Net.WebApi
     private readonly List<Type> _wrapperExceptions = new List<Type>();
     private readonly ThreadLocal<HttpRequestMessage> _currentWebRequest = new ThreadLocal<HttpRequestMessage>(() => null);
     private readonly ThreadLocal<RaygunRequestMessage> _currentRequestMessage = new ThreadLocal<RaygunRequestMessage>(() => null);
+    private readonly ThrottledBackgroundMessageProcessor _backgroundMessageProcessor;
 
     private readonly string _apiKey;
 
@@ -79,6 +80,12 @@ namespace Mindscape.Raygun4Net.WebApi
         // or else we will not be getting the user's library but our own Raygun4Net library.
         ApplicationVersion = Assembly.GetCallingAssembly()?.GetName()?.Version?.ToString();
       }
+      
+      
+      _backgroundMessageProcessor = new ThrottledBackgroundMessageProcessor(
+                                          RaygunSettings.Settings.BackgroundMessageQueueMax,
+                                          RaygunSettings.Settings.BackgroundMessageWorkerCount,
+                                          Send);
 
       Init();
     }
@@ -517,16 +524,23 @@ namespace Mindscape.Raygun4Net.WebApi
     {
       if (CanSend(exception))
       {
-        // We need to process the HttpRequestMessage on the current thread,
-        // otherwise it will be disposed while we are using it on the other thread.
-        RaygunRequestMessage currentRequestMessage = BuildRequestMessage();
-        DateTime currentTime = DateTime.UtcNow;
-
-        ThreadPool.QueueUserWorkItem(c =>
+        try
         {
-          _currentRequestMessage.Value = currentRequestMessage;
-          StripAndSend(exception, tags, userCustomData, currentTime);
-        });
+          // We need to process the HttpRequestMessage on the current thread,
+          // otherwise it will be disposed while we are using it on the other thread.
+          _currentRequestMessage.Value = BuildRequestMessage();
+          var currentTime = DateTime.UtcNow;
+          StripAndSendInBackground(exception, tags, userCustomData, currentTime);
+        }
+        catch (Exception)
+        {
+          // This will swallow any unhandled exceptions unless we explicitly want to throw on error.
+          // Otherwise this can bring the whole process down.
+          if (RaygunSettings.Settings.ThrowOnError)
+          {
+            throw;
+          }
+        }
 
         FlagAsSent(exception);
       }
@@ -539,7 +553,10 @@ namespace Mindscape.Raygun4Net.WebApi
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void SendInBackground(RaygunMessage raygunMessage)
     {
-      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+      if (!_backgroundMessageProcessor.Enqueue(raygunMessage))
+      {
+        RaygunLogger.Instance.Debug($"Could not add message to background queue. Dropping message: {raygunMessage}");
+      }
     }
 
     /// <summary>
@@ -620,9 +637,17 @@ namespace Mindscape.Raygun4Net.WebApi
 
     private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime = null)
     {
-      foreach (Exception e in StripWrapperExceptions(exception))
+      foreach (var e in StripWrapperExceptions(exception))
       {
         Send(BuildMessage(e, tags, userCustomData, currentTime));
+      }
+    }
+    
+    private void StripAndSendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime)
+    {
+      foreach (var e in StripWrapperExceptions(exception))
+      {
+        SendInBackground(BuildMessage(e, tags, userCustomData, currentTime));
       }
     }
 

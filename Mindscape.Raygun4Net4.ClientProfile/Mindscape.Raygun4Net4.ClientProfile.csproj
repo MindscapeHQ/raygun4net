@@ -65,6 +65,9 @@
     <Compile Include="..\Mindscape.Raygun4Net.WindowsStore\Messages\RaygunMessageDetails.cs">
       <Link>Messages\RaygunMessageDetails.cs</Link>
     </Compile>
+    <Compile Include="..\Mindscape.Raygun4Net4\ThrottledBackgroundMessageProcessor.cs">
+      <Link>ThrottledBackgroundMessageProcessor.cs</Link>
+    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\Builders\RaygunEnvironmentMessageBuilder.cs">
       <Link>Builders\RaygunEnvironmentMessageBuilder.cs</Link>
     </Compile>

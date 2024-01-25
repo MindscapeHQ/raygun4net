@@ -76,6 +76,7 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaygunClient.cs" />
+    <Compile Include="ThrottledBackgroundMessageProcessor.cs" />
     <Compile Include="WebClientHelper.cs" />
   </ItemGroup>
   <ItemGroup>

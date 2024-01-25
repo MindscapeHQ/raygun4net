@@ -18,6 +18,7 @@ namespace Mindscape.Raygun4Net
 
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
+    private readonly ThrottledBackgroundMessageProcessor _backgroundMessageProcessor;
 
     private IRaygunOfflineStorage _offlineStorage = new IsolatedRaygunOfflineStorage();
 
@@ -50,6 +51,10 @@ namespace Mindscape.Raygun4Net
       _apiKey = apiKey;
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
+      _backgroundMessageProcessor = new ThrottledBackgroundMessageProcessor(
+                                            RaygunSettings.Settings.BackgroundMessageQueueMax,
+                                            RaygunSettings.Settings.BackgroundMessageWorkerCount,
+                                            Send);
 
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
@@ -181,22 +186,20 @@ namespace Mindscape.Raygun4Net
       DateTime? currentTime = DateTime.UtcNow;
       if (CanSend(exception))
       {
-        ThreadPool.QueueUserWorkItem(c =>
+        try
         {
-          try
+          StripAndSendInBackground(exception, tags, userCustomData, userInfo, currentTime);
+        }
+        catch (Exception)
+        {
+          // This will swallow any unhandled exceptions unless we explicitly want to throw on error.
+          // Otherwise this can bring the whole process down.
+          if (RaygunSettings.Settings.ThrowOnError)
           {
-            StripAndSend(exception, tags, userCustomData, userInfo, currentTime);
+            throw;
           }
-          catch (Exception)
-          {
-            // This will swallow any unhandled exceptions unless we explicitly want to throw on error.
-            // Otherwise this can bring the whole process down.
-            if (RaygunSettings.Settings.ThrowOnError)
-            {
-              throw;
-            }
-          }
-        });
+        }
+
         FlagAsSent(exception);
       }
     }
@@ -208,7 +211,10 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void SendInBackground(RaygunMessage raygunMessage)
     {
-      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+      if (!_backgroundMessageProcessor.Enqueue(raygunMessage))
+      {
+        RaygunLogger.Instance.Debug($"Could not add message to background queue. Dropping message: {raygunMessage}");
+      }
     }
 
     private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
@@ -216,6 +222,14 @@ namespace Mindscape.Raygun4Net
       foreach (Exception e in StripWrapperExceptions(exception))
       {
         Send(BuildMessage(e, tags, userCustomData, userInfo, currentTime));
+      }
+    }
+    
+    private void StripAndSendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
+    {
+      foreach (var e in StripWrapperExceptions(exception))
+      {
+        SendInBackground(BuildMessage(e, tags, userCustomData, userInfo, currentTime));
       }
     }
 

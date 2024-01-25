@@ -112,9 +112,6 @@
     <Compile Include="..\Mindscape.Raygun4Net\RaygunSendingMessageEventArgs.cs">
       <Link>RaygunSendingMessageEventArgs.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\RaygunSettings.cs">
-      <Link>RaygunSettings.cs</Link>
-    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net\SimpleJson.cs">
       <Link>SimpleJson.cs</Link>
     </Compile>
@@ -145,6 +142,7 @@
     <Compile Include="..\Mindscape.Raygun4Net\Filters\RaygunKeyValuePairDataFilter.cs">
       <Link>Filters\RaygunKeyValuePairDataFilter.cs</Link>
     </Compile>
+    <Compile Include="RaygunSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
