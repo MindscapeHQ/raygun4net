@@ -21,7 +21,10 @@ namespace Mindscape.Raygun4Net
 
     private volatile bool _isDisposing;
 
-    public ThrottledBackgroundMessageProcessor(int maxQueueSize, int maxWorkerTasks, Action<RaygunMessage> onProcessMessageFunc)
+    public ThrottledBackgroundMessageProcessor(
+      int maxQueueSize, 
+      int maxWorkerTasks,
+      Action<RaygunMessage> onProcessMessageFunc)
     {
       _processCallback = onProcessMessageFunc ?? throw new ArgumentNullException(nameof(onProcessMessageFunc));
       _maxWorkerTasks = maxWorkerTasks;
@@ -41,9 +44,10 @@ namespace Mindscape.Raygun4Net
 
     private void EnsureWorkers()
     {
-      // If something else has the lock, then it's going to update the workers
+      // If we are in the process of disposing or  something else has the lock,
+      // then it's going to update the workers
       // so we can just early return, and not perform any work
-      if (!Monitor.TryEnter(_workerTaskMutex))
+      if (_isDisposing || !Monitor.TryEnter(_workerTaskMutex))
       {
         return;
       }
@@ -85,10 +89,17 @@ namespace Mindscape.Raygun4Net
 
     private Task CreateWorkerTask()
     {
-      return Task.Factory.StartNew(() => RaygunMessageWorker(_messageQueue, _processCallback, _cancelProcessingSource.Token), TaskCreationOptions.LongRunning);
+      var workerTask = Task.Factory
+        .StartNew(() => { RaygunMessageWorker(_messageQueue, _processCallback, _cancelProcessingSource.Token); }, TaskCreationOptions.LongRunning);
+
+      // When a worker finishes ensure that a new one is is created if required
+      workerTask.ContinueWith(x => { EnsureWorkers(); });
+
+      return workerTask;
     }
 
-    private static void RaygunMessageWorker(BlockingCollection<RaygunMessage> messageQueue, Action<RaygunMessage> callback, CancellationToken cancellationToken)
+    private static void RaygunMessageWorker(BlockingCollection<RaygunMessage> messageQueue,
+      Action<RaygunMessage> callback, CancellationToken cancellationToken)
     {
       try
       {
@@ -97,7 +108,9 @@ namespace Mindscape.Raygun4Net
           callback(message);
         }
       }
-      catch (Exception cancelledEx) when (cancelledEx is OperationCanceledException || cancelledEx is TaskCanceledException)
+      catch (Exception cancelledEx) when (cancelledEx is ThreadAbortException ||
+                                          cancelledEx is OperationCanceledException ||
+                                          cancelledEx is TaskCanceledException)
       {
         // Cancellation was requested, so it's fine
       }

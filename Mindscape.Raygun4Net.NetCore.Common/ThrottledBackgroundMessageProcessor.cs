@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Mindscape.Raygun4Net
 {
-  internal sealed class ThrottledBackgroundMessageProcessor : IDisposable
+  public sealed class ThrottledBackgroundMessageProcessor : IDisposable
   {
     private readonly BlockingCollection<RaygunMessage> _messageQueue;
     private readonly List<Task> _workerTasks;
@@ -20,7 +20,10 @@ namespace Mindscape.Raygun4Net
 
     private volatile bool _isDisposing;
 
-    public ThrottledBackgroundMessageProcessor(int maxQueueSize, int maxWorkerTasks, Func<RaygunMessage, CancellationToken, Task> onProcessMessageFunc)
+    public ThrottledBackgroundMessageProcessor(
+      int maxQueueSize, 
+      int maxWorkerTasks,
+      Func<RaygunMessage, CancellationToken, Task> onProcessMessageFunc)
     {
       _processCallback = onProcessMessageFunc ?? throw new ArgumentNullException(nameof(onProcessMessageFunc));
       _maxWorkerTasks = maxWorkerTasks;
@@ -40,9 +43,10 @@ namespace Mindscape.Raygun4Net
 
     private void EnsureWorkers()
     {
-      // If something else has the lock, then it's going to update the workers
+      // If we are in the process of disposing or  something else has the lock,
+      // then it's going to update the workers
       // so we can just early return, and not perform any work
-      if (!Monitor.TryEnter(_workerTaskMutex))
+      if (_isDisposing || !Monitor.TryEnter(_workerTaskMutex))
       {
         return;
       }
@@ -90,10 +94,14 @@ namespace Mindscape.Raygun4Net
         await RaygunMessageWorker(_messageQueue, _processCallback, _cancelProcessingSource.Token);
       });
 
+      // When a worker finishes ensure that a new one is is created if required
+      workerTask.ContinueWith(x => { EnsureWorkers(); });
+
       return workerTask;
     }
 
-    private static async Task RaygunMessageWorker(BlockingCollection<RaygunMessage> messageQueue, Func<RaygunMessage, CancellationToken, Task> callback,
+    private static async Task RaygunMessageWorker(BlockingCollection<RaygunMessage> messageQueue,
+      Func<RaygunMessage, CancellationToken, Task> callback,
       CancellationToken cancellationToken)
     {
       try
@@ -103,7 +111,9 @@ namespace Mindscape.Raygun4Net
           await callback(message, cancellationToken);
         }
       }
-      catch (Exception cancelledEx) when (cancelledEx is OperationCanceledException || cancelledEx is TaskCanceledException)
+      catch (Exception cancelledEx) when (cancelledEx is ThreadAbortException ||
+                                          cancelledEx is OperationCanceledException ||
+                                          cancelledEx is TaskCanceledException)
       {
         // Cancellation was requested, so it's fine
       }
