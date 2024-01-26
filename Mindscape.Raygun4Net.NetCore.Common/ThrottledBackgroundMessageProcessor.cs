@@ -100,7 +100,8 @@ namespace Mindscape.Raygun4Net
       return workerTask;
     }
 
-    private static async Task RaygunMessageWorker(BlockingCollection<RaygunMessage> messageQueue,
+    private static async Task RaygunMessageWorker(
+      BlockingCollection<RaygunMessage> messageQueue,
       Func<RaygunMessage, CancellationToken, Task> callback,
       CancellationToken cancellationToken)
     {

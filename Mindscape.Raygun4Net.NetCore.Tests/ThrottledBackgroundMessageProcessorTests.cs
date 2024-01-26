@@ -91,8 +91,8 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
           throw new Exception("Bad");
         }
 
-        resetEventSlim.Set();
         secondMessageWasProcessed = true;
+        resetEventSlim.Set();
       });
 
       cut.Enqueue(new RaygunMessage());

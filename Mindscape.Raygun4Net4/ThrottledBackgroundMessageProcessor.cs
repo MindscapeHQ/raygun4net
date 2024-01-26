@@ -98,8 +98,10 @@ namespace Mindscape.Raygun4Net
       return workerTask;
     }
 
-    private static void RaygunMessageWorker(BlockingCollection<RaygunMessage> messageQueue,
-      Action<RaygunMessage> callback, CancellationToken cancellationToken)
+    private static void RaygunMessageWorker(
+      BlockingCollection<RaygunMessage> messageQueue,
+      Action<RaygunMessage> callback, 
+      CancellationToken cancellationToken)
     {
       try
       {
