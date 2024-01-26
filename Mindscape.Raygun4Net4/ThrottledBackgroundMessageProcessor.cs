@@ -10,7 +10,7 @@ using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
 {
-  internal sealed class ThrottledBackgroundMessageProcessor : IDisposable
+  public sealed class ThrottledBackgroundMessageProcessor : IDisposable
   {
     private readonly BlockingCollection<RaygunMessage> _messageQueue;
     private readonly List<Task> _workerTasks;
