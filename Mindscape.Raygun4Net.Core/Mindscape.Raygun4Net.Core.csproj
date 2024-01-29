@@ -1,49 +1,22 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6435C84C-1DAC-41FE-AA51-FAA8E9A7F090}</ProjectGuid>
+    <TargetFramework>net462</TargetFramework>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Mindscape.Raygun4Net</RootNamespace>
     <AssemblyName>Mindscape.Raygun4Net</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>embedded</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <SignAssembly>true</SignAssembly>  
-    <AssemblyOriginatorKeyFile>..\Raygun.snk</AssemblyOriginatorKeyFile>  
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\Raygun.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="System" />
     <Reference Include="System.configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\GlobalAssemblyInfo.cs">
@@ -130,9 +103,6 @@
     <Compile Include="..\Mindscape.Raygun4Net\Utils\Singleton.cs">
       <Link>Utils\Singleton.cs</Link>
     </Compile>
-    <Compile Include="Builders\RaygunErrorMessageBuilder.cs" />
-    <Compile Include="Messages\RaygunErrorMessage.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\Mindscape.Raygun4Net\Filters\IRaygunDataFilter.cs">
       <Link>Filters\IRaygunDataFilter.cs</Link>
     </Compile>
@@ -142,24 +112,5 @@
     <Compile Include="..\Mindscape.Raygun4Net\Filters\RaygunKeyValuePairDataFilter.cs">
       <Link>Filters\RaygunKeyValuePairDataFilter.cs</Link>
     </Compile>
-    <Compile Include="RaygunSettings.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\Microsoft.NETFramework.ReferenceAssemblies.net40.1.0.3\build\Microsoft.NETFramework.ReferenceAssemblies.net40.targets" Condition="Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net40.1.0.3\build\Microsoft.NETFramework.ReferenceAssemblies.net40.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net40.1.0.3\build\Microsoft.NETFramework.ReferenceAssemblies.net40.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NETFramework.ReferenceAssemblies.net40.1.0.3\build\Microsoft.NETFramework.ReferenceAssemblies.net40.targets'))" />
-  </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
