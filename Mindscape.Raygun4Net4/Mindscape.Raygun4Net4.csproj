@@ -17,41 +17,14 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Management" />
     <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\DefaultBreadcrumbStorage.cs">
-      <Link>Breadcrumbs\DefaultBreadcrumbStorage.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\HttpBreadcrumbStorage.cs">
-      <Link>Breadcrumbs\HttpBreadcrumbStorage.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\InMemoryBreadcrumbStorage.cs">
-      <Link>Breadcrumbs\InMemoryBreadcrumbStorage.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\IRaygunBreadcrumbStorage.cs">
-      <Link>Breadcrumbs\IRaygunBreadcrumbStorage.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\RaygunBreadcrumbs.cs">
-      <Link>Breadcrumbs\RaygunBreadcrumbs.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Builders\RaygunRequestMessageBuilder.cs">
-      <Link>Builders\RaygunRequestMessageBuilder.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\IRaygunApplication.cs">
-      <Link>IRaygunApplication.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\RaygunHttpModule.cs">
-      <Link>RaygunHttpModule.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\RaygunMessageBuilder.cs">
-      <Link>RaygunMessageBuilder.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mindscape.Raygun4Net.Common\Mindscape.Raygun4Net.Common.csproj" />
     <ProjectReference Include="..\Mindscape.Raygun4Net.Core\Mindscape.Raygun4Net.Core.csproj" />
   </ItemGroup>
 </Project>

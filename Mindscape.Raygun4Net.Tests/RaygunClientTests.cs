@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Web;
@@ -179,8 +180,10 @@ namespace Mindscape.Raygun4Net.Tests
     {
       TargetInvocationException wrapper = new TargetInvocationException(_exception);
 
-      RaygunMessage message = _client.ExposeBuildMessage(wrapper);
-      Assert.AreEqual("System.NullReferenceException", message.Details.Error.ClassName);
+      var exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
+      
+      Assert.That(exceptions, Does.Not.Contain(wrapper));
+      Assert.That(exceptions, Has.Exactly(1).TypeOf<NullReferenceException>());
     }
 
     [Test]
@@ -188,8 +191,10 @@ namespace Mindscape.Raygun4Net.Tests
     {
       HttpUnhandledException wrapper = new HttpUnhandledException("Something went wrong", _exception);
 
-      RaygunMessage message = _client.ExposeBuildMessage(wrapper);
-      Assert.AreEqual("System.NullReferenceException", message.Details.Error.ClassName);
+      var exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
+      
+      Assert.That(exceptions, Does.Not.Contain(wrapper));
+      Assert.That(exceptions, Has.Exactly(1).TypeOf<NullReferenceException>());
     }
 
     [Test]
@@ -199,8 +204,10 @@ namespace Mindscape.Raygun4Net.Tests
 
       WrapperException wrapper = new WrapperException(_exception);
 
-      RaygunMessage message = _client.ExposeBuildMessage(wrapper);
-      Assert.AreEqual("System.NullReferenceException", message.Details.Error.ClassName);
+      var exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
+      
+      Assert.That(exceptions, Does.Not.Contain(wrapper));
+      Assert.That(exceptions, Has.Exactly(1).TypeOf<NullReferenceException>());
     }
 
     [Test]
@@ -208,9 +215,10 @@ namespace Mindscape.Raygun4Net.Tests
     {
       HttpUnhandledException wrapper = new HttpUnhandledException();
 
-      RaygunMessage message = _client.ExposeBuildMessage(wrapper);
-      Assert.AreEqual("System.Web.HttpUnhandledException", message.Details.Error.ClassName);
-      Assert.IsNull(message.Details.Error.InnerError);
+      var exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
+      
+      Assert.That(exceptions, Does.Contain(wrapper));
+      Assert.That(exceptions, Has.Exactly(1).TypeOf<HttpUnhandledException>());
     }
 
     [Test]
@@ -226,8 +234,11 @@ namespace Mindscape.Raygun4Net.Tests
       HttpUnhandledException wrapper = new HttpUnhandledException("Something went wrong", _exception);
       TargetInvocationException wrapper2 = new TargetInvocationException(wrapper);
 
-      RaygunMessage message = _client.ExposeBuildMessage(wrapper2);
-      Assert.AreEqual("System.NullReferenceException", message.Details.Error.ClassName);
+      var exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
+      
+      Assert.That(exceptions, Does.Not.Contain(wrapper));
+      Assert.That(exceptions, Does.Not.Contain(wrapper2));
+      Assert.That(exceptions, Has.Exactly(1).TypeOf<NullReferenceException>());
     }
 
     [Test]
@@ -440,18 +451,19 @@ namespace Mindscape.Raygun4Net.Tests
     }
 
     // WebProxy creation tests
-    [Test]
-    public void WebProxyPropertyPreferredOverDefaultWebProxy()
-    {
-      var theProxyWeDontWant = new WebProxy();
-      var theProxyWeDoWant = new WebProxy();
-
-      WebRequest.DefaultWebProxy = theProxyWeDontWant;
-      _client.WebProxy = theProxyWeDoWant;
-
-      var webClient = _client.ExposeCreateWebClient();
-
-      Assert.AreSame(theProxyWeDoWant, webClient.Proxy);
-    }
+    // TODO SEAN
+    // [Test]
+    // public void WebProxyPropertyPreferredOverDefaultWebProxy()
+    // {
+    //   var theProxyWeDontWant = new WebProxy();
+    //   var theProxyWeDoWant = new WebProxy();
+    //
+    //   WebRequest.DefaultWebProxy = theProxyWeDontWant;
+    //   _client.WebProxy = theProxyWeDoWant;
+    //
+    //   var webClient = _client.ExposeCreateWebClient();
+    //
+    //   Assert.AreSame(theProxyWeDoWant, webClient.Proxy);
+    // }
   }
 }

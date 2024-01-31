@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following
@@ -20,3 +21,5 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("43c33dca-1397-4d4c-9539-8eff69bfd798")]
+
+[assembly: InternalsVisibleTo("Mindscape.Raygun4Net.Tests")]

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Mindscape.Raygun4Net.Breadcrumbs;
 using NUnit.Framework;
@@ -25,9 +26,22 @@ namespace Mindscape.Raygun4Net.Tests
       RaygunSettings.Settings.BreadcrumbsLocationRecordingEnabled = false;
     }
 
+
+    [OneTimeSetUp]
+    public void StartTest()
+    {
+      Trace.Listeners.Add(new ConsoleTraceListener());
+    }
+
+    [OneTimeTearDown]
+    public void EndTest()
+    {
+      Trace.Flush();
+    }
+
     [Test]
     public void Set_ClassName_MethodName_And_LineNumber_Automatically_If_Configured()
-    {
+    {      
       RaygunSettings.Settings.BreadcrumbsLocationRecordingEnabled = true;
       var test = new BreadcrumbTestRecorder(_breadcrumbs);
 

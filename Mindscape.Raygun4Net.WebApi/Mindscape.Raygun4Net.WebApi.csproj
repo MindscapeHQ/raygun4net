@@ -17,16 +17,6 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net.Common\DataAccess\IHttpClient.cs">
-      <Link>IHttpClient.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net.Common\DataAccess\RaygunWebClient.cs">
-      <Link>RaygunWebClient.cs</Link>
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net.Common\DataAccess\WebClientFacade.cs">
-      <Link>WebClientFacade.cs</Link>
-    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net4\ThrottledBackgroundMessageProcessor.cs">
       <Link>ThrottledBackgroundMessageProcessor.cs</Link>
     </Compile>
@@ -36,10 +26,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net.Core\Mindscape.Raygun4Net.Core.csproj" />
+    <ProjectReference Include="..\Mindscape.Raygun4Net4\Mindscape.Raygun4Net4.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.1.1" />

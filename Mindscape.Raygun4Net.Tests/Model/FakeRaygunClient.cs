@@ -23,11 +23,16 @@ namespace Mindscape.Raygun4Net.Tests
       return BuildMessage(exception, tags, userCustomData, userIdentifierMessage);
     }
 
-    public WebClient ExposeCreateWebClient()
-    {
-      return CreateWebClient();
-    }
+    // public WebClient ExposeCreateWebClient()
+    // {
+    //   return WebClientHelper();
+    // }
 
+    public IEnumerable<Exception> ExposeStripWrapperExceptions(Exception exception)
+    {
+      return StripWrapperExceptions(exception);
+    }
+    
     public bool ExposeValidateApiKey()
     {
       return ValidateApiKey();
