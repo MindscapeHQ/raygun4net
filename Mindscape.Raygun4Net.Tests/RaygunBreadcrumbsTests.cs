@@ -26,19 +26,6 @@ namespace Mindscape.Raygun4Net.Tests
       RaygunSettings.Settings.BreadcrumbsLocationRecordingEnabled = false;
     }
 
-
-    [OneTimeSetUp]
-    public void StartTest()
-    {
-      Trace.Listeners.Add(new ConsoleTraceListener());
-    }
-
-    [OneTimeTearDown]
-    public void EndTest()
-    {
-      Trace.Flush();
-    }
-
     [Test]
     public void Set_ClassName_MethodName_And_LineNumber_Automatically_If_Configured()
     {      

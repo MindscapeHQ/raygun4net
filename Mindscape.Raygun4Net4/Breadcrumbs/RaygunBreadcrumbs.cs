@@ -64,7 +64,6 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
       crumb.ClassName = method.ReflectedType == null ? null : method.ReflectedType.FullName;
       crumb.MethodName = method.Name;
       crumb.LineNumber = frame.GetFileLineNumber();
-      File.WriteAllText($"C:\\temp\\stack-{stackTraceFrame}.json", SimpleJson.SerializeObject(crumb));
       if (crumb.MethodName.Contains("<"))
       {
         var unmangledName = new Regex(@"<(\w+)>").Match(crumb.MethodName).Groups[1].Value;
