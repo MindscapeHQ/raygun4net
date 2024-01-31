@@ -451,19 +451,16 @@ namespace Mindscape.Raygun4Net.Tests
     }
 
     // WebProxy creation tests
-    // TODO SEAN
-    // [Test]
-    // public void WebProxyPropertyPreferredOverDefaultWebProxy()
-    // {
-    //   var theProxyWeDontWant = new WebProxy();
-    //   var theProxyWeDoWant = new WebProxy();
-    //
-    //   WebRequest.DefaultWebProxy = theProxyWeDontWant;
-    //   _client.WebProxy = theProxyWeDoWant;
-    //
-    //   var webClient = _client.ExposeCreateWebClient();
-    //
-    //   Assert.AreSame(theProxyWeDoWant, webClient.Proxy);
-    // }
+    [Test]
+    public void WebProxyPropertyPreferredOverDefaultWebProxy()
+    {
+      var theProxyWeDontWant = new WebProxy();
+      var theProxyWeDoWant = new WebProxy();
+    
+      WebRequest.DefaultWebProxy = theProxyWeDontWant;
+      _client.WebProxy = theProxyWeDoWant;
+      
+      Assert.AreSame(theProxyWeDoWant, WebClientHelper.WebProxy);
+    }
   }
 }

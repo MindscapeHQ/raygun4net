@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Text;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net.Tests
@@ -22,12 +19,7 @@ namespace Mindscape.Raygun4Net.Tests
     {
       return BuildMessage(exception, tags, userCustomData, userIdentifierMessage);
     }
-
-    // public WebClient ExposeCreateWebClient()
-    // {
-    //   return WebClientHelper();
-    // }
-
+    
     public IEnumerable<Exception> ExposeStripWrapperExceptions(Exception exception)
     {
       return StripWrapperExceptions(exception);

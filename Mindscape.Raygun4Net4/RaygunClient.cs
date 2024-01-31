@@ -31,6 +31,7 @@ namespace Mindscape.Raygun4Net
 
     private IRaygunOfflineStorage _offlineStorage = new IsolatedRaygunOfflineStorage();
     private readonly ThrottledBackgroundMessageProcessor _backgroundMessageProcessor;
+    private IWebProxy _webProxy;
 
     /// <summary>
     /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
@@ -41,7 +42,15 @@ namespace Mindscape.Raygun4Net
     /// <summary>
     /// Gets or sets an IWebProxy instance which can be used to override the default system proxy server settings
     /// </summary>
-    public IWebProxy WebProxy { get; set; }
+    public IWebProxy WebProxy
+    {
+      get => _webProxy;
+      set
+      {
+        _webProxy = value;
+        WebClientHelper.WebProxy = _webProxy;
+      }
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
