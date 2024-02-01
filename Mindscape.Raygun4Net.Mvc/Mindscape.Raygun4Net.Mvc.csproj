@@ -4,6 +4,16 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <Company>Raygun</Company>
+    <AssemblyName>Raygun4Net.Mvc</AssemblyName>
+    <AssemblyTitle>Raygun4Net.Mvc</AssemblyTitle>
+    <Product>Raygun4Net</Product>
+    <Copyright>Copyright © Raygun 2024</Copyright>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+  </PropertyGroup>
+  
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>embedded</DebugType>
     <SignAssembly>true</SignAssembly>
@@ -16,11 +26,6 @@
   <ItemGroup>
     <Reference Include="System.configuration" />
     <Reference Include="System.Web" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\GlobalAssemblyInfo.cs">
-      <Link>GlobalAssemblyInfo.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />

@@ -5,6 +5,16 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <Company>Raygun</Company>
+    <AssemblyName>Raygun4Net.WebApi</AssemblyName>
+    <AssemblyTitle>Raygun4Net.WebApi</AssemblyTitle>
+    <Product>Raygun4Net</Product>
+    <Copyright>Copyright © Raygun 2024</Copyright>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+  </PropertyGroup>
+  
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>embedded</DebugType>
     <SignAssembly>true</SignAssembly>
@@ -14,9 +24,6 @@
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\GlobalAssemblyInfo.cs">
-      <Link>GlobalAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="..\Mindscape.Raygun4Net4\ThrottledBackgroundMessageProcessor.cs">
       <Link>ThrottledBackgroundMessageProcessor.cs</Link>
     </Compile>

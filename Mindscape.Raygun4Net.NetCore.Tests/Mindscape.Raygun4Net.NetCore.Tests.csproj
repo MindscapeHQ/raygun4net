@@ -2,12 +2,18 @@
   <PropertyGroup>
     <!--Out of support versions which still compiles/works @ May 2022-->
     <!--You may need to install extra SDK/Targeting packs to run these tests -->
-    <TargetFrameworks>net5.0;netcoreapp3.1;netcoreapp3.0;netcoreapp2.2;netcoreapp2.1;netcoreapp2.0;netcoreapp1.1;netcoreapp1.0;net461;</TargetFrameworks>
+<!--    <TargetFrameworks>net5.0;netcoreapp3.1;netcoreapp3.0;netcoreapp2.2;netcoreapp2.1;netcoreapp2.0;netcoreapp1.1;netcoreapp1.0;net461;</TargetFrameworks>-->
    
     <!-- Versions which are supported by Microsoft @ May 2022-->
     <TargetFrameworks>net6.0;net48;net472;net471;net47;net462</TargetFrameworks>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>embedded</DebugType>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\Raygun.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   
   <ItemGroup>
