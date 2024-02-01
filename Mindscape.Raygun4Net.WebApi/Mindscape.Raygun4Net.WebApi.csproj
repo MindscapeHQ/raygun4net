@@ -8,7 +8,7 @@
 
   <PropertyGroup>
     <Company>Raygun</Company>
-    <AssemblyName>Raygun4Net.WebApi</AssemblyName>
+    <AssemblyName>Mindscape.Raygun4Net.WebApi</AssemblyName>
     <AssemblyTitle>Raygun4Net.WebApi</AssemblyTitle>
     <Product>Raygun4Net</Product>
     <Copyright>Copyright © Raygun 2024</Copyright>
