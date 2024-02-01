@@ -10,9 +10,9 @@ using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net
 {
-  public sealed class ThrottledBackgroundMessageProcessor : IDisposable
+  internal sealed class ThrottledBackgroundMessageProcessor : IDisposable
   {
-    private readonly BlockingCollection<RaygunMessage> _messageQueue;
+    private readonly BlockingCollection<Func<RaygunMessage>> _messageQueue;
     private readonly List<Task> _workerTasks;
     private readonly CancellationTokenSource _cancelProcessingSource;
     private readonly Action<RaygunMessage> _processCallback;
@@ -28,14 +28,19 @@ namespace Mindscape.Raygun4Net
     {
       _processCallback = onProcessMessageFunc ?? throw new ArgumentNullException(nameof(onProcessMessageFunc));
       _maxWorkerTasks = maxWorkerTasks;
-      _messageQueue = new BlockingCollection<RaygunMessage>(maxQueueSize);
+      _messageQueue = new BlockingCollection<Func<RaygunMessage>>(maxQueueSize);
       _cancelProcessingSource = new CancellationTokenSource();
       _workerTasks = new List<Task>();
     }
 
     public bool Enqueue(RaygunMessage message)
     {
-      var itemAdded = _messageQueue.TryAdd(message);
+      return Enqueue(() => message);
+    } 
+    
+    public bool Enqueue(Func<RaygunMessage> messageFunc)
+    {
+      var itemAdded = _messageQueue.TryAdd(messageFunc);
 
       EnsureWorkers();
 
@@ -99,15 +104,15 @@ namespace Mindscape.Raygun4Net
     }
 
     private static void RaygunMessageWorker(
-      BlockingCollection<RaygunMessage> messageQueue,
+      BlockingCollection<Func<RaygunMessage>> messageQueue,
       Action<RaygunMessage> callback, 
       CancellationToken cancellationToken)
     {
       try
       {
-        foreach (var message in messageQueue.GetConsumingEnumerable(cancellationToken))
+        foreach (var messageFunc in messageQueue.GetConsumingEnumerable(cancellationToken))
         {
-          callback(message);
+          callback(messageFunc());
         }
       }
       catch (Exception cancelledEx) when (cancelledEx is ThreadAbortException ||

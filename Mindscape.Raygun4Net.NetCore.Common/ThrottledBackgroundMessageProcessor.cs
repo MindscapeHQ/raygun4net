@@ -11,7 +11,7 @@ namespace Mindscape.Raygun4Net
 {
   public sealed class ThrottledBackgroundMessageProcessor : IDisposable
   {
-    private readonly BlockingCollection<RaygunMessage> _messageQueue;
+    private readonly BlockingCollection<Func<Task<RaygunMessage>>> _messageQueue;
     private readonly List<Task> _workerTasks;
     private readonly CancellationTokenSource _cancelProcessingSource;
     private readonly Func<RaygunMessage, CancellationToken, Task> _processCallback;
@@ -21,20 +21,30 @@ namespace Mindscape.Raygun4Net
     private volatile bool _isDisposing;
 
     public ThrottledBackgroundMessageProcessor(
-      int maxQueueSize, 
+      int maxQueueSize,
       int maxWorkerTasks,
       Func<RaygunMessage, CancellationToken, Task> onProcessMessageFunc)
     {
       _processCallback = onProcessMessageFunc ?? throw new ArgumentNullException(nameof(onProcessMessageFunc));
       _maxWorkerTasks = maxWorkerTasks;
-      _messageQueue = new BlockingCollection<RaygunMessage>(maxQueueSize);
+      _messageQueue = new BlockingCollection<Func<Task<RaygunMessage>>>(maxQueueSize);
       _cancelProcessingSource = new CancellationTokenSource();
       _workerTasks = new List<Task>();
     }
 
     public bool Enqueue(RaygunMessage message)
     {
-      var itemAdded = _messageQueue.TryAdd(message);
+      return Enqueue(() => Task.FromResult(message));
+    }
+
+    public bool Enqueue(Func<RaygunMessage> messageFunc)
+    {
+      return Enqueue(() => Task.FromResult(messageFunc()));
+    }
+
+    public bool Enqueue(Func<Task<RaygunMessage>> messageFunc)
+    {
+      var itemAdded = _messageQueue.TryAdd(messageFunc);
 
       EnsureWorkers();
 
@@ -101,14 +111,15 @@ namespace Mindscape.Raygun4Net
     }
 
     private static async Task RaygunMessageWorker(
-      BlockingCollection<RaygunMessage> messageQueue,
+      BlockingCollection<Func<Task<RaygunMessage>>> messageQueue,
       Func<RaygunMessage, CancellationToken, Task> callback,
       CancellationToken cancellationToken)
     {
       try
       {
-        foreach (var message in messageQueue.GetConsumingEnumerable(cancellationToken))
+        foreach (var messageFunc in messageQueue.GetConsumingEnumerable(cancellationToken))
         {
+          var message = await messageFunc();
           await callback(message, cancellationToken);
         }
       }

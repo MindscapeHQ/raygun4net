@@ -343,8 +343,7 @@ namespace Mindscape.Raygun4Net
         var exceptions = StripWrapperExceptions(exception);
         foreach (var ex in exceptions)
         {
-          var message = await BuildMessage(ex, tags, userCustomData, userInfo).ConfigureAwait(false);
-          if (!_backgroundMessageProcessor.Enqueue(message))
+          if (!_backgroundMessageProcessor.Enqueue(async () => await BuildMessage(ex, tags, userCustomData, userInfo)))
           {
             Debug.WriteLine("Could not add message to background queue. Dropping exception: {0}", ex);
           }

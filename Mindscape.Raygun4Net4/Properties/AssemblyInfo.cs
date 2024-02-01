@@ -23,3 +23,4 @@ using System.Runtime.InteropServices;
 [assembly: Guid("3ef21258-8500-4b62-a721-7b94f2faf40c")]
 
 [assembly: InternalsVisibleTo("Mindscape.Raygun4Net.Tests")]
+[assembly: InternalsVisibleTo("Mindscape.Raygun4Net4.Tests")]

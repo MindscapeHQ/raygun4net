@@ -553,6 +553,11 @@ namespace Mindscape.Raygun4Net.WebApi
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void SendInBackground(RaygunMessage raygunMessage)
     {
+      SendInBackground(() => raygunMessage);
+    }
+    
+    public void SendInBackground(Func<RaygunMessage> raygunMessage)
+    {
       if (!_backgroundMessageProcessor.Enqueue(raygunMessage))
       {
         RaygunLogger.Instance.Debug($"Could not add message to background queue. Dropping message: {raygunMessage}");
@@ -647,7 +652,7 @@ namespace Mindscape.Raygun4Net.WebApi
     {
       foreach (var e in StripWrapperExceptions(exception))
       {
-        SendInBackground(BuildMessage(e, tags, userCustomData, currentTime));
+        SendInBackground(() => BuildMessage(e, tags, userCustomData, currentTime));
       }
     }
 
