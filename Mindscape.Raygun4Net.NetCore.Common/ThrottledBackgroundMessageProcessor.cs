@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Mindscape.Raygun4Net
 {
-  public sealed class ThrottledBackgroundMessageProcessor : IDisposable
+  internal sealed class ThrottledBackgroundMessageProcessor : IDisposable
   {
     private readonly BlockingCollection<Func<Task<RaygunMessage>>> _messageQueue;
     private readonly List<Task> _workerTasks;
