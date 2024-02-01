@@ -9,6 +9,7 @@
   </PropertyGroup>
   
   <PropertyGroup>
+    <PackageId>Mindscape.Raygun4Net.Core</PackageId>
     <Company>Raygun</Company>
     <AssemblyName>Mindscape.Raygun4Net</AssemblyName>
     <AssemblyTitle>Raygun4Net.Core</AssemblyTitle>

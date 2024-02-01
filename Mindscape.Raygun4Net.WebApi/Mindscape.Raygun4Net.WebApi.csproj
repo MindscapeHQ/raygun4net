@@ -2,27 +2,36 @@
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
     <OutputType>Library</OutputType>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <PropertyGroup>
-    <Company>Raygun</Company>
-    <AssemblyName>Mindscape.Raygun4Net.WebApi</AssemblyName>
-    <AssemblyTitle>Raygun4Net.WebApi</AssemblyTitle>
-    <Product>Raygun4Net</Product>
-    <Copyright>Copyright © Raygun 2024</Copyright>
-    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Description>.NET Framework - Raygun Provider for ASP.NET Web API projects</Description>
+    <PackageId>Mindscape.Raygun4Net.WebApi</PackageId>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
+    <PackageIcon>128x128-transparent.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/MindscapeHQ/raygun4net/blob/master/CHANGE-LOG.md</PackageReleaseNotes>
+    <PackageTags>crash exception-handling exception-reporting exception-handler unhandled-exceptions debugging debug bug bugs exceptions error errors crash-reporting aspnet web-api web api</PackageTags>
   </PropertyGroup>
   
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>embedded</DebugType>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\Raygun.snk</AssemblyOriginatorKeyFile>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="" />
+    <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  
   <ItemGroup>
     <Reference Include="System.Configuration" />
   </ItemGroup>
+  
   <ItemGroup>
     <Compile Include="..\Mindscape.Raygun4Net4\ThrottledBackgroundMessageProcessor.cs">
       <Link>ThrottledBackgroundMessageProcessor.cs</Link>
@@ -31,16 +40,13 @@
       <Link>WebClientHelper.cs</Link>
     </Compile>
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.1.1" />
   </ItemGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net.Core\Mindscape.Raygun4Net.Core.csproj" />
-    <ProjectReference Include="..\Mindscape.Raygun4Net4\Mindscape.Raygun4Net4.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.1.1" />
-    <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.1.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="4.5.11" />
   </ItemGroup>
 </Project>
