@@ -8,7 +8,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "..nuspecs", "..nuspecs", "{E6E33F9C-2BAD-466D-A571-D9D5C8BEE7FA}"
 	ProjectSection(SolutionItems) = preProject
 		nuspecs\Mindscape.Raygun4Net.Azure.WebJob.nuspec = nuspecs\Mindscape.Raygun4Net.Azure.WebJob.nuspec
-		nuspecs\Mindscape.Raygun4Net.nuspec = nuspecs\Mindscape.Raygun4Net.nuspec
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.AspNetCore", "Mindscape.Raygun4Net.AspNetCore\Mindscape.Raygun4Net.AspNetCore.csproj", "{BA3C3D49-0104-4958-9326-E964B7867200}"

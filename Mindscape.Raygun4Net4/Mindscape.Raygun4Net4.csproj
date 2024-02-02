@@ -4,15 +4,18 @@
     <OutputType>Library</OutputType>
     <!-- This is required as the project is named Raygun4Net4 -->
     <RootNamespace>Mindscape.Raygun4Net</RootNamespace>
-  </PropertyGroup>
-  
-  <PropertyGroup>
-    <Company>Raygun</Company>
     <AssemblyName>Mindscape.Raygun4Net4</AssemblyName>
-    <AssemblyTitle>Raygun4Net4.0</AssemblyTitle>
-    <Product>Raygun4Net</Product>
-    <Copyright>Copyright © Raygun 2024</Copyright>
-    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Description>.NET Framework - Raygun provider</Description>
+    <PackageId>Mindscape.Raygun4Net</PackageId>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
+    <PackageIcon>128x128-transparent.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/MindscapeHQ/raygun4net/blob/master/CHANGE-LOG.md</PackageReleaseNotes>
+    <PackageTags>crash exception-handling exception-reporting exception-handler unhandled-exceptions debugging debug bug bugs exceptions error errors crash-reporting aspnet aspnet-core</PackageTags>
   </PropertyGroup>
   
   <ItemGroup>
@@ -23,6 +26,7 @@
     <DebugType>embedded</DebugType>
     <AssemblyOriginatorKeyFile>..\Raygun.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -38,4 +42,11 @@
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net.Core\Mindscape.Raygun4Net.Core.csproj"/>
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="" />
+    <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  
 </Project>
