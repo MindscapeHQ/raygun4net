@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Management;
 using System.Security;
 using System.Security.Permissions;
-using System.Text;
-using System.Windows.Forms;
 using Microsoft.VisualBasic.Devices;
 using Mindscape.Raygun4Net.Logging;
 using Mindscape.Raygun4Net.Messages;
@@ -38,8 +35,9 @@ namespace Mindscape.Raygun4Net.Builders
 
         try
         {
-          _message.WindowBoundsWidth = SystemInformation.VirtualScreen.Width;
-          _message.WindowBoundsHeight = SystemInformation.VirtualScreen.Height;
+          // TODO: This requires a reference to System.Windows.Forms, we should find a better solution.
+          // _message.WindowBoundsWidth = SystemInformation.VirtualScreen.Width;
+          // _message.WindowBoundsHeight = SystemInformation.VirtualScreen.Height;
         }
         catch (Exception ex)
         {
