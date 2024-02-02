@@ -1,8 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
     <OutputType>Library</OutputType>
+    <!-- This is required as the project is named Raygun4Net4 -->
     <RootNamespace>Mindscape.Raygun4Net</RootNamespace>
   </PropertyGroup>
+  
   <PropertyGroup>
     <Company>Raygun</Company>
     <AssemblyName>Mindscape.Raygun4Net4</AssemblyName>
@@ -11,20 +14,9 @@
     <Copyright>Copyright © Raygun 2024</Copyright>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>
-  <PropertyGroup>
-    <TargetFramework>net462</TargetFramework>
-  </PropertyGroup>
+  
   <ItemGroup>
-    <Reference Include="Microsoft.VisualBasic"/>
-    <Reference Include="System.Configuration"/>
-    <Reference Include="System.Management"/>
     <Reference Include="System.Web"/>
-    <Reference Include="System.Windows.Forms"/>
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <InternalsVisibleTo Include="Mindscape.Raygun4Net.Tests"/>
-    <InternalsVisibleTo Include="Mindscape.Raygun4Net4.Tests"/>
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -32,6 +24,11 @@
     <AssemblyOriginatorKeyFile>..\Raygun.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
+
+  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <InternalsVisibleTo Include="Mindscape.Raygun4Net.Tests"/>
+    <InternalsVisibleTo Include="Mindscape.Raygun4Net4.Tests"/>
+  </ItemGroup>
   
   <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <InternalsVisibleTo Include="Mindscape.Raygun4Net.Tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100499b604a09b4538bcd0e626ae13f86083c9ab5950e3d7f8465d18fb93fd5e445b8fa2a46c42187b02aaeea0b8f738f238b9e1975384adf036cca1545619980c3fbfaf0fe47b9b9e88986f02cdbdeea9d69876e4fbba06b1a9dfc79eb829e258a12d1e751042384655719e3dd58552c18a978f953d110ea0209535682d64ec5bf"/>

@@ -1,43 +1,42 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
     <OutputType>Library</OutputType>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
 
   <PropertyGroup>
-    <Company>Raygun</Company>
-    <AssemblyName>Mindscape.Raygun4Net.Mvc</AssemblyName>
-    <AssemblyTitle>Raygun4Net.Mvc</AssemblyTitle>
-    <Product>Raygun4Net</Product>
-    <Copyright>Copyright © Raygun 2024</Copyright>
-    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Description>.NET Framework - Raygun Provider for ASP.NET MVC projects</Description>
+    <PackageId>Mindscape.Raygun4Net.Mvc</PackageId>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
+    <PackageIcon>128x128-transparent.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/MindscapeHQ/raygun4net/blob/master/CHANGE-LOG.md</PackageReleaseNotes>
+    <PackageTags>crash exception-handling exception-reporting exception-handler unhandled-exceptions debugging debug bug bugs exceptions error errors crash-reporting aspnet mvc aspnet-mvc</PackageTags>
   </PropertyGroup>
   
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>embedded</DebugType>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\Raygun.snk</AssemblyOriginatorKeyFile>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
-  <PropertyGroup>
-    <TargetFramework>net462</TargetFramework>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System.configuration" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="" />
+    <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <Reference Include="System.Web" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-  </ItemGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net4\Mindscape.Raygun4Net4.csproj" />
   </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.Mvc" Version="3.0.20105.1" />
-    <PackageReference Include="Microsoft.AspNet.Razor" Version="1.0.20105.408" />
-    <PackageReference Include="Microsoft.AspNet.WebPages" Version="1.0.20105.408" />
-    <PackageReference Include="Microsoft.Web.Infrastructure" Version="1.0.0.0" />
   </ItemGroup>
 </Project>
