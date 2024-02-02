@@ -2,34 +2,38 @@
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
     <OutputType>Library</OutputType>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <Description>Raygun provider for Azure Web Job SDK enabled projects</Description>
+    <PackageId>Mindscape.Raygun4Net.Azure.WebJob</PackageId>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
+    <PackageIcon>128x128-transparent.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/MindscapeHQ/raygun4net/blob/master/CHANGE-LOG.md</PackageReleaseNotes>
+    <PackageTags>crash exception-handling exception-reporting exception-handler unhandled-exceptions debugging debug bug bugs exceptions error errors crash-reporting aspnet aspnet-core</PackageTags>
+  </PropertyGroup>
+  
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>embedded</DebugType>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\Raygun.snk</AssemblyOriginatorKeyFile>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
+  
   <ItemGroup>
-    <Reference Include="System.Configuration" />
+    <ProjectReference Include="..\Mindscape.Raygun4Net.Core\Mindscape.Raygun4Net.Core.csproj" ReferenceOutputAssembly="true" />
+    <ProjectReference Include="..\Mindscape.Raygun4Net4\Mindscape.Raygun4Net4.csproj" ReferenceOutputAssembly="true" />
   </ItemGroup>
+  
   <ItemGroup>
-    <ProjectReference Include="..\Mindscape.Raygun4Net.Core\Mindscape.Raygun4Net.Core.csproj" />
-    <ProjectReference Include="..\Mindscape.Raygun4Net4\Mindscape.Raygun4Net4.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.KeyVault.Core" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Azure.WebJobs" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Core" Version="2.0.0" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions" Version="2.0.0" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.Data.Edm" Version="5.6.4" />
-    <PackageReference Include="Microsoft.Data.OData" Version="5.6.4" />
-    <PackageReference Include="Microsoft.Data.Services.Client" Version="5.6.4" />
-    <PackageReference Include="Microsoft.Tpl.Dataflow" Version="4.5.24" />
-    <PackageReference Include="ncrontab" Version="3.3.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-    <PackageReference Include="System.Spatial" Version="5.6.4" />
-    <PackageReference Include="WindowsAzure.Storage" Version="7.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="" />
+    <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>
