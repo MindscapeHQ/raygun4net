@@ -9,7 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "..nuspecs", "..nuspecs", "{
 	ProjectSection(SolutionItems) = preProject
 		nuspecs\Mindscape.Raygun4Net.Azure.WebJob.nuspec = nuspecs\Mindscape.Raygun4Net.Azure.WebJob.nuspec
 		nuspecs\Mindscape.Raygun4Net.Core.nuspec = nuspecs\Mindscape.Raygun4Net.Core.nuspec
-		nuspecs\Mindscape.Raygun4Net.Mvc.nuspec = nuspecs\Mindscape.Raygun4Net.Mvc.nuspec
 		nuspecs\Mindscape.Raygun4Net.nuspec = nuspecs\Mindscape.Raygun4Net.nuspec
 	EndProjectSection
 EndProject
