@@ -10,7 +10,7 @@ namespace Mindscape.Raygun4Net
     
     // We'll route all unhandled exceptions through this one event, from there the RaygunClient
     // can determine whether to send them or not
-    internal static event UnhandledExceptionHandler OnUnhandledException;
+    private static event UnhandledExceptionHandler UnhandledExceptionEvent;
 
     static UnhandledExceptionBridge()
     {
@@ -34,7 +34,41 @@ namespace Mindscape.Raygun4Net
     
     public static void RaiseUnhandledException(Exception exception, bool isTerminating)
     {
-      OnUnhandledException?.Invoke(exception, isTerminating);
+      UnhandledExceptionEvent?.Invoke(exception, isTerminating);
+    }
+
+    internal static void OnUnhandledException(UnhandledExceptionHandler callback)
+    {
+      // Wrap the callback in a weak reference container
+      // Then subscribe to the event using the weak reference
+      // The onDestroyed function is called - and unregisters it from the multicast delegate
+      var weakHandler = new WeakExceptionHandler(callback, w => UnhandledExceptionEvent -= w.Handle);
+      UnhandledExceptionEvent += weakHandler.Handle;
+    }
+
+    private class WeakExceptionHandler
+    {
+      private readonly Action<WeakExceptionHandler> _onReferenceDestroyed;
+      private readonly WeakReference<UnhandledExceptionHandler> _reference;
+
+      public WeakExceptionHandler(UnhandledExceptionHandler handler, Action<WeakExceptionHandler> onReferenceDestroyed)
+      {
+        _onReferenceDestroyed = onReferenceDestroyed;
+        _reference = new WeakReference<UnhandledExceptionHandler>(handler);
+      }
+
+      public void Handle(Exception exception, bool isTerminating)
+      {
+        // If the target is still alive then forward the invocation
+        if (_reference.TryGetTarget(out var handle))
+        {
+          handle.Invoke(exception, isTerminating);
+          return;
+        }
+
+        // the reference is dead, so call the clean up function
+        _onReferenceDestroyed(this);
+      }
     }
   }
 }
