@@ -21,6 +21,11 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
             : base(apiKey)
         {
         }
+        
+        public FakeRaygunClient(RaygunSettings settings)
+          : base(settings)
+        {
+        }
 
         public RaygunMessage ExposeBuildMessage(Exception exception, [Optional] IList<string> tags, [Optional] IDictionary userCustomData, [Optional] RaygunIdentifierMessage user)
         {

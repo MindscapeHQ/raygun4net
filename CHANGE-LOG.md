@@ -1,5 +1,8 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v8.2.1
+- Fixed memory leak when multiple RaygunClient instances are created
+
 ### v8.2.0
 - Added public ctor to allow RaygunClient to accept a custom HttpClient
 - Changed the default timeout of HttpClient from 100 seconds to 30 seconds

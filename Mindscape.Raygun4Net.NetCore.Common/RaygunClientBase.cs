@@ -109,7 +109,7 @@ namespace Mindscape.Raygun4Net
         ApplicationVersion = settings.ApplicationVersion;
       }
 
-      UnhandledExceptionBridge.OnUnhandledException += OnApplicationUnhandledException;
+      UnhandledExceptionBridge.OnUnhandledException(OnApplicationUnhandledException);
     }
 
     public RaygunClientBase(RaygunSettingsBase settings) : this(settings, DefaultClient)
