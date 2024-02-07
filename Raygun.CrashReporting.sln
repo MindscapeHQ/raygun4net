@@ -5,15 +5,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".NET", ".NET", "{5AAAF1EB-95FD-47E9-A3E1-A8B77CF49E56}"
 
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "..nuspecs", "..nuspecs", "{E6E33F9C-2BAD-466D-A571-D9D5C8BEE7FA}"
-	ProjectSection(SolutionItems) = preProject
-		nuspecs\Mindscape.Raygun4Net.Azure.WebJob.nuspec = nuspecs\Mindscape.Raygun4Net.Azure.WebJob.nuspec
-		nuspecs\Mindscape.Raygun4Net.Core.nuspec = nuspecs\Mindscape.Raygun4Net.Core.nuspec
-		nuspecs\Mindscape.Raygun4Net.Mvc.nuspec = nuspecs\Mindscape.Raygun4Net.Mvc.nuspec
-		nuspecs\Mindscape.Raygun4Net.nuspec = nuspecs\Mindscape.Raygun4Net.nuspec
-		nuspecs\Mindscape.Raygun4Net.WebApi.nuspec = nuspecs\Mindscape.Raygun4Net.WebApi.nuspec
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.AspNetCore", "Mindscape.Raygun4Net.AspNetCore\Mindscape.Raygun4Net.AspNetCore.csproj", "{BA3C3D49-0104-4958-9326-E964B7867200}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.AspNetCore.Tests", "Mindscape.Raygun4Net.AspNetCore.Tests\Mindscape.Raygun4Net.AspNetCore.Tests.csproj", "{817E16E5-B80D-4D8C-B5D5-98CB7D4FAC83}"
@@ -32,12 +23,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.NetCor
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{3A2DEED0-6A19-4D8B-BA49-2FC229533C8B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net", "Mindscape.Raygun4Net\Mindscape.Raygun4Net.csproj", "{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.ClientProfile", "Mindscape.Raygun4Net.ClientProfile\Mindscape.Raygun4Net.ClientProfile.csproj", "{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.Common", "Mindscape.Raygun4Net.Common\Mindscape.Raygun4Net.Common.csproj", "{8EF76F3B-4C8D-4C10-ADBA-5565F68344D2}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.Core", "Mindscape.Raygun4Net.Core\Mindscape.Raygun4Net.Core.csproj", "{6435C84C-1DAC-41FE-AA51-FAA8E9A7F090}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.Mvc", "Mindscape.Raygun4Net.Mvc\Mindscape.Raygun4Net.Mvc.csproj", "{2CF1FE1F-AD2D-40BD-9F99-57FF00445A9D}"
@@ -46,19 +31,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.WebApi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net4", "Mindscape.Raygun4Net4\Mindscape.Raygun4Net4.csproj", "{6D1C7E96-5E04-421D-8E8A-B3C8C02FD41D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net4.ClientProfile", "Mindscape.Raygun4Net4.ClientProfile\Mindscape.Raygun4Net4.ClientProfile.csproj", "{A658C5BB-B1CE-408D-A4BF-5E17EC0C74A0}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{CA6237D9-BFC9-41DA-B2B7-EDC3681B8E7C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.ClientProfile.Tests", "Mindscape.Raygun4Net.ClientProfile.Tests\Mindscape.Raygun4Net.ClientProfile.Tests.csproj", "{30696896-9463-441E-9789-C79F6BF7B793}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.Mvc.Tests", "Mindscape.Raygun4Net.Mvc.Tests\Mindscape.Raygun4Net.Mvc.Tests.csproj", "{69BFF5D8-7B18-4685-B828-8DF2AADEA20D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.Tests", "Mindscape.Raygun4Net.Tests\Mindscape.Raygun4Net.Tests.csproj", "{C6935911-2385-4788-B249-DB5CE1E3C1FE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.WebApi.Tests", "Mindscape.Raygun4Net.WebApi.Tests\Mindscape.Raygun4Net.WebApi.Tests.csproj", "{80C7BB59-C753-4E64-9C8D-79B8D57C8215}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net4.ClientProfile.Tests", "Mindscape.Raygun4Net4.ClientProfile.Tests\Mindscape.Raygun4Net4.ClientProfile.Tests.csproj", "{046F330F-D640-452C-A0CB-C88A8E87C7F1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net4.Integration.Tests", "Mindscape.Raygun4Net4.Intergration.Tests\Mindscape.Raygun4Net4.Integration.Tests.csproj", "{392DE005-7FFA-429B-A196-C2DED6A1AF2D}"
 EndProject
@@ -69,15 +48,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "..Items", "..Items", "{1F1C
 		CHANGE-LOG.md = CHANGE-LOG.md
 		Directory.Build.props = Directory.Build.props
 		LICENSE = LICENSE
-		GlobalAssemblyInfo.cs = GlobalAssemblyInfo.cs
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "..nuget", "..nuget", "{615783C8-AEC5-4FE4-AADC-46B2849E337B}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
 EndProject
 Global
@@ -94,20 +64,14 @@ Global
 		{817E16E5-B80D-4D8C-B5D5-98CB7D4FAC83} = {3A2DEED0-6A19-4D8B-BA49-2FC229533C8B}
 		{C5D97D23-CBD0-42E6-AE5D-940D81F47FDD} = {3A2DEED0-6A19-4D8B-BA49-2FC229533C8B}
 		{216A000F-04CC-475A-9769-843C31D0424C} = {3A2DEED0-6A19-4D8B-BA49-2FC229533C8B}
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9} = {A07C8060-78D8-4B10-88CC-F399257E8BED}
-		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA} = {A07C8060-78D8-4B10-88CC-F399257E8BED}
-		{8EF76F3B-4C8D-4C10-ADBA-5565F68344D2} = {A07C8060-78D8-4B10-88CC-F399257E8BED}
 		{6435C84C-1DAC-41FE-AA51-FAA8E9A7F090} = {A07C8060-78D8-4B10-88CC-F399257E8BED}
 		{2CF1FE1F-AD2D-40BD-9F99-57FF00445A9D} = {A07C8060-78D8-4B10-88CC-F399257E8BED}
 		{5F72C401-B09D-46C4-873B-65F1B4B1AE09} = {A07C8060-78D8-4B10-88CC-F399257E8BED}
 		{6D1C7E96-5E04-421D-8E8A-B3C8C02FD41D} = {A07C8060-78D8-4B10-88CC-F399257E8BED}
-		{A658C5BB-B1CE-408D-A4BF-5E17EC0C74A0} = {A07C8060-78D8-4B10-88CC-F399257E8BED}
 		{CA6237D9-BFC9-41DA-B2B7-EDC3681B8E7C} = {A07C8060-78D8-4B10-88CC-F399257E8BED}
-		{30696896-9463-441E-9789-C79F6BF7B793} = {CA6237D9-BFC9-41DA-B2B7-EDC3681B8E7C}
 		{69BFF5D8-7B18-4685-B828-8DF2AADEA20D} = {CA6237D9-BFC9-41DA-B2B7-EDC3681B8E7C}
 		{C6935911-2385-4788-B249-DB5CE1E3C1FE} = {CA6237D9-BFC9-41DA-B2B7-EDC3681B8E7C}
 		{80C7BB59-C753-4E64-9C8D-79B8D57C8215} = {CA6237D9-BFC9-41DA-B2B7-EDC3681B8E7C}
-		{046F330F-D640-452C-A0CB-C88A8E87C7F1} = {CA6237D9-BFC9-41DA-B2B7-EDC3681B8E7C}
 		{392DE005-7FFA-429B-A196-C2DED6A1AF2D} = {CA6237D9-BFC9-41DA-B2B7-EDC3681B8E7C}
 		{BC560F66-B06E-4C85-AC05-B889165AA818} = {CA6237D9-BFC9-41DA-B2B7-EDC3681B8E7C}
 	EndGlobalSection
@@ -140,18 +104,6 @@ Global
 		{216A000F-04CC-475A-9769-843C31D0424C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{216A000F-04CC-475A-9769-843C31D0424C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{216A000F-04CC-475A-9769-843C31D0424C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{495E53B3-F3AF-4C4F-BAAF-865EFAA2F4A9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{02E54566-EFB9-424E-8AE7-DC5E9D04E1CA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8EF76F3B-4C8D-4C10-ADBA-5565F68344D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8EF76F3B-4C8D-4C10-ADBA-5565F68344D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8EF76F3B-4C8D-4C10-ADBA-5565F68344D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8EF76F3B-4C8D-4C10-ADBA-5565F68344D2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6435C84C-1DAC-41FE-AA51-FAA8E9A7F090}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6435C84C-1DAC-41FE-AA51-FAA8E9A7F090}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6435C84C-1DAC-41FE-AA51-FAA8E9A7F090}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -168,14 +120,6 @@ Global
 		{6D1C7E96-5E04-421D-8E8A-B3C8C02FD41D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D1C7E96-5E04-421D-8E8A-B3C8C02FD41D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D1C7E96-5E04-421D-8E8A-B3C8C02FD41D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A658C5BB-B1CE-408D-A4BF-5E17EC0C74A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A658C5BB-B1CE-408D-A4BF-5E17EC0C74A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A658C5BB-B1CE-408D-A4BF-5E17EC0C74A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A658C5BB-B1CE-408D-A4BF-5E17EC0C74A0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{30696896-9463-441E-9789-C79F6BF7B793}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{30696896-9463-441E-9789-C79F6BF7B793}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{30696896-9463-441E-9789-C79F6BF7B793}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{30696896-9463-441E-9789-C79F6BF7B793}.Release|Any CPU.Build.0 = Release|Any CPU
 		{69BFF5D8-7B18-4685-B828-8DF2AADEA20D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{69BFF5D8-7B18-4685-B828-8DF2AADEA20D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69BFF5D8-7B18-4685-B828-8DF2AADEA20D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -188,10 +132,6 @@ Global
 		{80C7BB59-C753-4E64-9C8D-79B8D57C8215}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80C7BB59-C753-4E64-9C8D-79B8D57C8215}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80C7BB59-C753-4E64-9C8D-79B8D57C8215}.Release|Any CPU.Build.0 = Release|Any CPU
-		{046F330F-D640-452C-A0CB-C88A8E87C7F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{046F330F-D640-452C-A0CB-C88A8E87C7F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{046F330F-D640-452C-A0CB-C88A8E87C7F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{046F330F-D640-452C-A0CB-C88A8E87C7F1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{392DE005-7FFA-429B-A196-C2DED6A1AF2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{392DE005-7FFA-429B-A196-C2DED6A1AF2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{392DE005-7FFA-429B-A196-C2DED6A1AF2D}.Release|Any CPU.ActiveCfg = Release|Any CPU

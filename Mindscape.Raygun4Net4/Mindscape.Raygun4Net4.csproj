@@ -1,114 +1,52 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6D1C7E96-5E04-421D-8E8A-B3C8C02FD41D}</ProjectGuid>
+    <TargetFramework>net462</TargetFramework>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <!-- This is required as the project is named Raygun4Net4 -->
     <RootNamespace>Mindscape.Raygun4Net</RootNamespace>
     <AssemblyName>Mindscape.Raygun4Net4</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+
+  <PropertyGroup>
+    <Description>.NET Framework - Raygun provider</Description>
+    <PackageId>Mindscape.Raygun4Net</PackageId>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageIconUrl>https://app.raygun.com/Content/Images/nuget-icon.png</PackageIconUrl>
+    <PackageIcon>128x128-transparent.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/MindscapeHQ/raygun4net/blob/master/CHANGE-LOG.md</PackageReleaseNotes>
+    <PackageTags>crash exception-handling exception-reporting exception-handler unhandled-exceptions debugging debug bug bugs exceptions error errors crash-reporting aspnet aspnet-core</PackageTags>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <Reference Include="System.Web"/>
+  </ItemGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>embedded</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
     <AssemblyOriginatorKeyFile>..\Raygun.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Management" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+
+  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <InternalsVisibleTo Include="Mindscape.Raygun4Net.Tests"/>
+    <InternalsVisibleTo Include="Mindscape.Raygun4Net4.Tests"/>
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\GlobalAssemblyInfo.cs">
-      <Link>GlobalAssemblyInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\DefaultBreadcrumbStorage.cs">
-      <Link>Breadcrumbs\DefaultBreadcrumbStorage.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\HttpBreadcrumbStorage.cs">
-      <Link>Breadcrumbs\HttpBreadcrumbStorage.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\InMemoryBreadcrumbStorage.cs">
-      <Link>Breadcrumbs\InMemoryBreadcrumbStorage.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\IRaygunBreadcrumbStorage.cs">
-      <Link>Breadcrumbs\IRaygunBreadcrumbStorage.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Breadcrumbs\RaygunBreadcrumbs.cs">
-      <Link>Breadcrumbs\RaygunBreadcrumbs.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\Builders\RaygunRequestMessageBuilder.cs">
-      <Link>Builders\RaygunRequestMessageBuilder.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\IRaygunApplication.cs">
-      <Link>IRaygunApplication.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\RaygunHttpModule.cs">
-      <Link>RaygunHttpModule.cs</Link>
-    </Compile>
-    <Compile Include="..\Mindscape.Raygun4Net\RaygunMessageBuilder.cs">
-      <Link>RaygunMessageBuilder.cs</Link>
-    </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RaygunClient.cs" />
-    <Compile Include="WebClientHelper.cs" />
+  
+  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <InternalsVisibleTo Include="Mindscape.Raygun4Net.Tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100499b604a09b4538bcd0e626ae13f86083c9ab5950e3d7f8465d18fb93fd5e445b8fa2a46c42187b02aaeea0b8f738f238b9e1975384adf036cca1545619980c3fbfaf0fe47b9b9e88986f02cdbdeea9d69876e4fbba06b1a9dfc79eb829e258a12d1e751042384655719e3dd58552c18a978f953d110ea0209535682d64ec5bf"/>
+    <InternalsVisibleTo Include="Mindscape.Raygun4Net4.Tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100499b604a09b4538bcd0e626ae13f86083c9ab5950e3d7f8465d18fb93fd5e445b8fa2a46c42187b02aaeea0b8f738f238b9e1975384adf036cca1545619980c3fbfaf0fe47b9b9e88986f02cdbdeea9d69876e4fbba06b1a9dfc79eb829e258a12d1e751042384655719e3dd58552c18a978f953d110ea0209535682d64ec5bf"/>
   </ItemGroup>
+  
   <ItemGroup>
-    <ProjectReference Include="..\Mindscape.Raygun4Net.Common\Mindscape.Raygun4Net.Common.csproj">
-      <Project>{F6087DF7-625D-45F7-AF91-A0C53DA312F1}</Project>
-      <Name>Mindscape.Raygun4Net.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Mindscape.Raygun4Net.Core\Mindscape.Raygun4Net.Core.csproj">
-      <Project>{6435c84c-1dac-41fe-aa51-faa8e9a7f090}</Project>
-      <Name>Mindscape.Raygun4Net.Core</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Mindscape.Raygun4Net.Core\Mindscape.Raygun4Net.Core.csproj"/>
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="" />
+    <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\" />
   </ItemGroup>
-  <!-- <ItemGroup> -->
-  <!-- <PackageReference Include="System.Net.Http"> -->
-  <!-- <Version>2.0.20710</Version> -->
-  <!-- </PackageReference> -->
-  <!-- </ItemGroup> -->
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\Microsoft.NETFramework.ReferenceAssemblies.net40.1.0.3\build\Microsoft.NETFramework.ReferenceAssemblies.net40.targets" Condition="Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net40.1.0.3\build\Microsoft.NETFramework.ReferenceAssemblies.net40.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net40.1.0.3\build\Microsoft.NETFramework.ReferenceAssemblies.net40.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NETFramework.ReferenceAssemblies.net40.1.0.3\build\Microsoft.NETFramework.ReferenceAssemblies.net40.targets'))" />
-  </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  
 </Project>

@@ -1,6 +1,5 @@
 ﻿using System;
 using Mindscape.Raygun4Net.Builders;
-using Mindscape.Raygun4Net.Messages;
 using NUnit.Framework;
 
 namespace Mindscape.Raygun4Net.Tests

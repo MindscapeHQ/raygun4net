@@ -2,21 +2,21 @@
   <PropertyGroup>
     <!--Out of support versions which still compiles/works @ May 2022-->
     <!--You may need to install extra SDK/Targeting packs to run these tests -->
-    <TargetFrameworks>net5.0;netcoreapp3.1;netcoreapp3.0;netcoreapp2.2;netcoreapp2.1;netcoreapp2.0;netcoreapp1.1;netcoreapp1.0;net461;</TargetFrameworks>
+<!--    <TargetFrameworks>net5.0;netcoreapp3.1;netcoreapp3.0;netcoreapp2.2;netcoreapp2.1;netcoreapp2.0;netcoreapp1.1;netcoreapp1.0;net461;</TargetFrameworks>-->
    
     <!-- Versions which are supported by Microsoft @ May 2022-->
     <TargetFrameworks>net6.0;net48;net472;net471;net47;net462</TargetFrameworks>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-
+  
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <AssemblyOriginatorKeyFile>..\Raygun.snk</AssemblyOriginatorKeyFile>
+    <DebugType>embedded</DebugType>
     <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\Raygun.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="StrongNamer" Version="0.2.5" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
@@ -24,7 +24,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore.Common\Mindscape.Raygun4Net.NetCore.Common.csproj" />
     <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore\Mindscape.Raygun4Net.NetCore.csproj" />
+    <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore.Common\Mindscape.Raygun4Net.NetCore.Common.csproj" />
   </ItemGroup>
 </Project>
