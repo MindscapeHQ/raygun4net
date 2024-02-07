@@ -8,9 +8,7 @@ Supported platforms/frameworks
 
 Projects built with the following frameworks are supported:
 
-* .NET 4.0+, up to .NET 7.0
-* .NET 4.0 Client Profile
-* .NET Core 1.0, 2.0, 3.0+
+* .NET 4.6.2+, up to .NET 8.0
 * ASP.NET
 * ASP.NET MVC
 * ASP.NET WebApi

@@ -21,18 +21,32 @@ dotnet add package Mindscape.Raygun4Net.NetCore
 
 Create an instance of RaygunClient by passing your app API key to the constructor, and hook it up to the unhandled exception delegate. This is typically done in Program.cs or the main method.
 
-```
+```csharp
 using Mindscape.Raygun4Net;
 
 private static RaygunClient _raygunClient = new RaygunClient("paste_your_api_key_here");
 
 AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs e) =>
   _raygunClient.Send(e.ExceptionObject as Exception);
+  
+```
+
+Alternatively you can configure RaygunClient to automatically report any Unhandled Exceptions directly to Raygun
+
+```csharp
+using Mindscape.Raygun4Net;
+
+private static RaygunSettings _raygunSettings = new RaygunSettings
+{
+  ApiKey = "paste_your_api_key_here",
+  CatchUnhandledExceptions = true // automatically reports any unhandled exceptions to Raygun
+};
+private static RaygunClient _raygunClient = new RaygunClient(_raygunSettings);
 ```
 
 Add some temporary code to throw an exception and manually send it to Raygun.
 
-```
+```csharp
 try
 {
   ...
