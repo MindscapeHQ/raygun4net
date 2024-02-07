@@ -8,6 +8,8 @@
   - Packages are now built using the new SDK style and nuspecs removed
 - Drop support for non-supported Frameworks (.NET Framework 4.6.2 onwards support only)
   - This drops support for Client Profile
+- Include HttpClient on RaygunClient in AspNetCore project as its a parameter defined in RaygunClientBase
+
 
 ### v8.2.1
 - Fixed memory leak when multiple RaygunClient instances are created
