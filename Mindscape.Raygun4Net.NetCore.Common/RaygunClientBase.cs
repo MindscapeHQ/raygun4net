@@ -101,8 +101,7 @@ namespace Mindscape.Raygun4Net
 
     public RaygunClientBase(RaygunSettingsBase settings, HttpClient client)
     {
-      _client = client;
-
+      _client = client ?? DefaultClient;
       _settings = settings;
       _apiKey = settings.ApiKey;
       _backgroundMessageProcessor = new ThrottledBackgroundMessageProcessor(settings.BackgroundMessageQueueMax, _settings.BackgroundMessageWorkerCount, Send);

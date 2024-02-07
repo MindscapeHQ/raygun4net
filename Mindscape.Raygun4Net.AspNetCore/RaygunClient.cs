@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -23,8 +24,8 @@ namespace Mindscape.Raygun4Net.AspNetCore
     {
     }
 
-    public RaygunClient(RaygunSettings settings, HttpContext context = null)
-    : base(settings)
+    public RaygunClient(RaygunSettings settings, HttpContext context = null, HttpClient httpClient = null)
+    : base(settings, httpClient)
     {
       if (settings.IgnoreSensitiveFieldNames != null)
       {
