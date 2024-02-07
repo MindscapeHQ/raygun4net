@@ -40,9 +40,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Mindscape.Raygun4Net\Filters\IRaygunDataFilter.cs" Link="Filters\IRaygunDataFilter.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\Filters\RaygunXmlDataFilter.cs" Link="Filters\RaygunXmlDataFilter.cs" />
-    <Compile Include="..\Mindscape.Raygun4Net\Filters\RaygunKeyValuePairDataFilter.cs" Link="Filters\RaygunKeyValuePairDataFilter.cs" />
+    <Compile Include="..\Mindscape.Raygun4Net.Core\Filters\IRaygunDataFilter.cs" Link="Filters\IRaygunDataFilter.cs" />
+    <Compile Include="..\Mindscape.Raygun4Net.Core\Filters\RaygunXmlDataFilter.cs" Link="Filters\RaygunXmlDataFilter.cs" />
+    <Compile Include="..\Mindscape.Raygun4Net.Core\Filters\RaygunKeyValuePairDataFilter.cs" Link="Filters\RaygunKeyValuePairDataFilter.cs" />
   </ItemGroup>
 
   <ItemGroup>

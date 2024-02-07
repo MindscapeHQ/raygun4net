@@ -30,6 +30,8 @@ namespace Mindscape.Raygun4Net
     private readonly List<Type> _wrapperExceptions = new List<Type>();
 
     private IRaygunOfflineStorage _offlineStorage = new IsolatedRaygunOfflineStorage();
+    private readonly ThrottledBackgroundMessageProcessor _backgroundMessageProcessor;
+    private IWebProxy _webProxy;
 
     /// <summary>
     /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
@@ -40,7 +42,15 @@ namespace Mindscape.Raygun4Net
     /// <summary>
     /// Gets or sets an IWebProxy instance which can be used to override the default system proxy server settings
     /// </summary>
-    public IWebProxy WebProxy { get; set; }
+    public IWebProxy WebProxy
+    {
+      get => _webProxy;
+      set
+      {
+        _webProxy = value;
+        WebClientHelper.WebProxy = _webProxy;
+      }
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RaygunClient" /> class.
@@ -102,6 +112,11 @@ namespace Mindscape.Raygun4Net
 
       UseXmlRawDataFilter = RaygunSettings.Settings.UseXmlRawDataFilter;
       UseKeyValuePairRawDataFilter = RaygunSettings.Settings.UseKeyValuePairRawDataFilter;
+      
+      _backgroundMessageProcessor = new ThrottledBackgroundMessageProcessor(
+                                          RaygunSettings.Settings.BackgroundMessageQueueMax,
+                                          RaygunSettings.Settings.BackgroundMessageWorkerCount,
+                                          Send);
 
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
     }
@@ -379,34 +394,33 @@ namespace Mindscape.Raygun4Net
       {
         if (CanSend(exception))
         {
-          // We need to process the HttpRequestMessage on the current thread,
-          // otherwise it will be disposed while we are using it on the other thread.
-          RaygunRequestMessage currentRequestMessage = BuildRequestMessage();
-          // We need to retrieve the breadcrumbs on the current thread as the HttpContext.Current
-          // will be null on the other thread
-          var currentBreadcrumbs = _breadcrumbs.ToList();
-          var currentTime = DateTime.UtcNow;
-
-          ThreadPool.QueueUserWorkItem(
-            c =>
+          try
+          {
+            // NOTE: Sean 26/01/2024
+            // Thread statics are not required here, as this is processed synchronously
+            // before offloading the sending to a background queue. However the message builder
+            // assumes they exist, so I've left them like this for now
+            
+            // We need to process the HttpRequestMessage on the current thread,
+            // otherwise it will be disposed while we are using it on the other thread.
+            _currentRequestMessage = BuildRequestMessage();
+            // We need to retrieve the breadcrumbs on the current thread as the HttpContext.Current
+            // will be null on the other thread
+            _currentBreadcrumbs = _breadcrumbs.ToList();
+            var currentTime = DateTime.UtcNow;
+            
+            StripAndSendInBackground(exception, tags, userCustomData, userInfo, currentTime);
+          }
+          catch (Exception)
+          {
+            // This will swallow any unhandled exceptions unless we explicitly want to throw on error.
+            // Otherwise this can bring the whole process down.
+            if (RaygunSettings.Settings.ThrowOnError)
             {
-              try
-              {
-                _currentRequestMessage = currentRequestMessage;
-                _currentBreadcrumbs = currentBreadcrumbs;
-
-                StripAndSend(exception, tags, userCustomData, userInfo, currentTime);
-              }
-              catch (Exception)
-              {
-                // This will swallow any unhandled exceptions unless we explicitly want to throw on error.
-                // Otherwise this can bring the whole process down.
-                if (RaygunSettings.Settings.ThrowOnError)
-                {
-                  throw;
-                }
-              }
-            });
+              throw;
+            }
+          }
+          
           FlagAsSent(exception);
         }
       }
@@ -428,14 +442,30 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public void SendInBackground(RaygunMessage raygunMessage)
     {
-      ThreadPool.QueueUserWorkItem(c => Send(raygunMessage));
+      SendInBackground(() => raygunMessage);
+    }
+    
+    public void SendInBackground(Func<RaygunMessage> raygunMessage)
+    {
+      if (!_backgroundMessageProcessor.Enqueue(raygunMessage))
+      {
+        RaygunLogger.Instance.Debug($"Could not add message to background queue. Dropping message: {raygunMessage}");
+      }
     }
 
     private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
     {
-      foreach (Exception e in StripWrapperExceptions(exception))
+      foreach (var e in StripWrapperExceptions(exception))
       {
         Send(BuildMessage(e, tags, userCustomData, userInfo, currentTime));
+      }
+    }
+    
+    private void StripAndSendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
+    {
+      foreach (var e in StripWrapperExceptions(exception))
+      {
+        SendInBackground(() => BuildMessage(e, tags, userCustomData, userInfo, currentTime));
       }
     }
 

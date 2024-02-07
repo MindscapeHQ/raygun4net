@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Mindscape.Raygun4Net
@@ -22,7 +23,7 @@ namespace Mindscape.Raygun4Net
       // The default timeout is 100 seconds for the HttpClient, 
       Timeout = TimeSpan.FromSeconds(30)
     };
-    
+
     /// <summary>
     /// This is the HttpClient that will be used to send messages to the Raygun endpoint.
     /// </summary>
@@ -35,6 +36,7 @@ namespace Mindscape.Raygun4Net
     private bool _handlingRecursiveGrouping;
 
     protected readonly RaygunSettingsBase _settings;
+    private readonly ThrottledBackgroundMessageProcessor _backgroundMessageProcessor;
     protected internal const string SentKey = "AlreadySentByRaygun";
 
     /// <summary>
@@ -70,10 +72,7 @@ namespace Mindscape.Raygun4Net
     /// </remarks>
     public virtual bool CatchUnhandledExceptions
     {
-      get
-      {
-        return _settings.CatchUnhandledExceptions;
-      }
+      get { return _settings.CatchUnhandledExceptions; }
       set
       {
         if (_settings.CatchUnhandledExceptions == value)
@@ -95,12 +94,17 @@ namespace Mindscape.Raygun4Net
       Send(exception, UnhandledExceptionTags);
     }
 
+    public RaygunClientBase(RaygunSettingsBase settings)
+      : this(settings, DefaultClient)
+    {
+    }
+
     public RaygunClientBase(RaygunSettingsBase settings, HttpClient client)
     {
       _client = client ?? DefaultClient;
-      
       _settings = settings;
       _apiKey = settings.ApiKey;
+      _backgroundMessageProcessor = new ThrottledBackgroundMessageProcessor(settings.BackgroundMessageQueueMax, _settings.BackgroundMessageWorkerCount, Send);
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
@@ -109,11 +113,7 @@ namespace Mindscape.Raygun4Net
         ApplicationVersion = settings.ApplicationVersion;
       }
 
-      UnhandledExceptionBridge.OnUnhandledException += OnApplicationUnhandledException;
-    }
-
-    public RaygunClientBase(RaygunSettingsBase settings) : this(settings, DefaultClient)
-    {
+      UnhandledExceptionBridge.OnUnhandledException(OnApplicationUnhandledException);
     }
 
 
@@ -335,23 +335,21 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     /// <param name="userInfo">Information about the user including the identity string.</param>
-    public virtual Task SendInBackground(Exception exception, IList<string> tags = null,
-      IDictionary userCustomData = null, RaygunIdentifierMessage userInfo = null)
+    public virtual async Task SendInBackground(Exception exception, IList<string> tags = null, IDictionary userCustomData = null, RaygunIdentifierMessage userInfo = null)
     {
       if (CanSend(exception))
       {
-        // For backwards compatibility we need to continue to support the old SendInBackground method signature.
-        // So we just fire and forget and discard the task.
-        // If we await this Task it will cause SendInBackground to be blocking.
-        _ = Task.Run(async () =>
+        var exceptions = StripWrapperExceptions(exception);
+        foreach (var ex in exceptions)
         {
-          await StripAndSend(exception, tags, userCustomData, userInfo);
-        });
-
+          if (!_backgroundMessageProcessor.Enqueue(async () => await BuildMessage(ex, tags, userCustomData, userInfo)))
+          {
+            Debug.WriteLine("Could not add message to background queue. Dropping exception: {0}", ex);
+          }
+        }
+        
         FlagAsSent(exception);
       }
-
-      return Task.CompletedTask;
     }
 
     /// <summary>
@@ -361,10 +359,11 @@ namespace Mindscape.Raygun4Net
     /// set to a valid DateTime and as much of the Details property as is available.</param>
     public Task SendInBackground(RaygunMessage raygunMessage)
     {
-      // For backwards compatibility we need to continue to support the old SendInBackground method signature.
-      // So we just fire and forget and discard the task.
-      // If we await this Task it will cause SendInBackground to be blocking.
-      _ = Task.Run(() => Send(raygunMessage));
+      if (!_backgroundMessageProcessor.Enqueue(raygunMessage))
+      {
+        Debug.WriteLine("Could not add message to background queue. Dropping message: {0}", raygunMessage);
+      }
+      
       return Task.CompletedTask;
     }
 
@@ -442,7 +441,18 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
     /// set to a valid DateTime and as much of the Details property as is available.</param>
-    public async Task Send(RaygunMessage raygunMessage)
+    public Task Send(RaygunMessage raygunMessage)
+    {
+      return Send(raygunMessage, CancellationToken.None);
+    }
+
+    /// <summary>
+    /// Posts a RaygunMessage to the Raygun api endpoint.
+    /// </summary>
+    /// <param name="raygunMessage">The RaygunMessage to send. This needs its OccurredOn property
+    /// set to a valid DateTime and as much of the Details property as is available.</param>
+    /// <param name="cancellationToken"></param>
+    public async Task Send(RaygunMessage raygunMessage, CancellationToken cancellationToken)
     {
       if (!ValidateApiKey())
       {
@@ -464,7 +474,7 @@ namespace Mindscape.Raygun4Net
         var message = SimpleJson.SerializeObject(raygunMessage);
         requestMessage.Content = new StringContent(message, Encoding.UTF8, "application/json");
 
-        var result = await _client.SendAsync(requestMessage).ConfigureAwait(false);
+        var result = await _client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
 
         if (!result.IsSuccessStatusCode)
         {

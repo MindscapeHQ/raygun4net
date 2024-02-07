@@ -7,7 +7,6 @@ namespace Mindscape.Raygun4Net
 {
   public static class WebClientHelper
   {
-
     [ThreadStatic] private static WebClient _client;
 
     private static WebClient Client => _client ?? (_client = FreshClient());
@@ -32,7 +31,6 @@ namespace Mindscape.Raygun4Net
 
     internal static IHttpClient GetClient(string apiKey, ICredentials proxyCredentials)
     {
-
       Client.Headers.Clear();
       Client.Headers.Add("X-ApiKey", apiKey);
       Client.Headers.Add("content-type", "application/json; charset=utf-8");

@@ -1,5 +1,17 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v9.0.0
+- SendInBackground will now queue the message to be sent
+  - Fixes issue in .NET Core for Azure where sending many messages Async can cause SNAT exhaustion
+  - Fixes issue in .NET Framework for Azure where sending many messages causes many Threads to be used
+- Moved .NET Framework projects to new SDK style
+  - Packages are now built using the new SDK style and nuspecs removed
+- Drop support for non-supported Frameworks (.NET Framework 4.6.2 onwards support only)
+  - This drops support for Client Profile
+
+### v8.2.1
+- Fixed memory leak when multiple RaygunClient instances are created
+
 ### v8.2.0
 - Added public ctor to allow RaygunClient to accept a custom HttpClient
 - Changed the default timeout of HttpClient from 100 seconds to 30 seconds
