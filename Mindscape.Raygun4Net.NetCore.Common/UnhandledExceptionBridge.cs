@@ -13,8 +13,7 @@ namespace Mindscape.Raygun4Net
 
     private static readonly List<WeakExceptionHandler> Handlers = new List<WeakExceptionHandler>();
 
-    private static readonly ReaderWriterLockSlim HandlersLock =
-      new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
+    private static readonly ReaderWriterLockSlim HandlersLock = new ReaderWriterLockSlim();
 
     static UnhandledExceptionBridge()
     {
@@ -52,43 +51,18 @@ namespace Mindscape.Raygun4Net
     {
       // Wrap the callback in a weak reference container
       // Then subscribe to the event using the weak reference
-      // The onDestroyed function is called - and unregisters it from the multicast delegate
-      var weakHandler = new WeakExceptionHandler(callback, RemoveDeadHandler);
+      var weakHandler = new WeakExceptionHandler(callback);
 
       HandlersLock.EnterWriteLock();
       try
       {
         Handlers.Add(weakHandler);
-        RemoveDeadHandlers();
-      }
-      finally
-      {
-        HandlersLock.ExitWriteLock();
-      }
-    }
-
-    private static void RemoveDeadHandler(WeakExceptionHandler handler)
-    {
-      HandlersLock.EnterWriteLock();
-      try
-      {
-        Handlers.Remove(handler);
-      }
-      finally
-      {
-        HandlersLock.ExitWriteLock();
-      }
-    }
-
-    private static void RemoveDeadHandlers()
-    {
-      HandlersLock.EnterWriteLock();
-      try
-      {
+        
+        // Remove any handlers where their references are no longer alive
         var handlersToRemove = Handlers.Where(x => !x.IsAlive).ToList();
         foreach (var handler in handlersToRemove)
         {
-          RemoveDeadHandler(handler);
+          Handlers.Remove(handler);
         }
       }
       finally
@@ -99,28 +73,24 @@ namespace Mindscape.Raygun4Net
 
     private class WeakExceptionHandler
     {
-      private readonly Action<WeakExceptionHandler> _onReferenceDestroyed;
       private readonly WeakReference<UnhandledExceptionHandler> _reference;
 
       public bool IsAlive => _reference.TryGetTarget(out _);
 
-      public WeakExceptionHandler(UnhandledExceptionHandler handler, Action<WeakExceptionHandler> onReferenceDestroyed)
+      public WeakExceptionHandler(UnhandledExceptionHandler handler)
       {
-        _onReferenceDestroyed = onReferenceDestroyed;
         _reference = new WeakReference<UnhandledExceptionHandler>(handler);
       }
 
       public void Invoke(Exception exception, bool isTerminating)
       {
-        // If the target is still alive then forward the invocation
-        if (_reference.TryGetTarget(out var handle))
+        // If the target is dead then do nothing
+        if (!_reference.TryGetTarget(out var handle))
         {
-          handle.Invoke(exception, isTerminating);
           return;
         }
-
-        // the reference is dead, so call the clean up function
-        _onReferenceDestroyed(this);
+        
+        handle.Invoke(exception, isTerminating);
       }
     }
   }
