@@ -1,5 +1,9 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v9.0.1
+- Fixed issue for lock upgrade/recursion exception raised
+  - https://github.com/MindscapeHQ/raygun4net/issues/513
+
 ### v9.0.0
 - SendInBackground will now queue the message to be sent
   - Fixes issue in .NET Core for Azure where sending many messages Async can cause SNAT exhaustion
@@ -9,7 +13,6 @@
 - Drop support for non-supported Frameworks (.NET Framework 4.6.2 onwards support only)
   - This drops support for Client Profile
 - Include HttpClient on RaygunClient in AspNetCore project as its a parameter defined in RaygunClientBase
-
 
 ### v8.2.1
 - Fixed memory leak when multiple RaygunClient instances are created
