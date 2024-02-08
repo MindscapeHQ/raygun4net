@@ -1,6 +1,4 @@
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace Mindscape.Raygun4Net.NetCore.Tests
@@ -20,6 +18,8 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         UnhandledExceptionBridge.OnUnhandledException(Callback);
         UnhandledExceptionBridge.OnUnhandledException(Callback);
 
+        return;
+        
         void Callback(Exception e, bool b)
         {
         }
@@ -32,7 +32,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       
       try
       {
-        // Manually for an unhandled exception, to handlers that are not alive
+        // Manually raise an unhandled exception, to handlers that are not alive
         // Which should cause the lock upgrade exception
         UnhandledExceptionBridge.RaiseUnhandledException(new Exception("Dead"), false);
       }
