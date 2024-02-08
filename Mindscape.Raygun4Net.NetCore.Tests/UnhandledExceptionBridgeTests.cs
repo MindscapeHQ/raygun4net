@@ -6,6 +6,10 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
   [TestFixture]
   public class UnhandledExceptionBridgeTests
   {
+    /// <summary>
+    /// GitHub Issue: 513
+    /// See https://github.com/MindscapeHQ/raygun4net/issues/513 for the issue report
+    /// </summary>
     [Test]
     public void UnhandledExceptionBridge_WhenHandlersAreNoLongerAlive_LockExceptionsAreNotThrown()
     {
@@ -32,8 +36,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       
       try
       {
-        // Manually raise an unhandled exception, to handlers that are not alive
-        // Which should cause the lock upgrade exception
+        // Manually raise an exception, to handlers references that are no longer alive.
         UnhandledExceptionBridge.RaiseUnhandledException(new Exception("Dead"), false);
       }
       catch (Exception ex)

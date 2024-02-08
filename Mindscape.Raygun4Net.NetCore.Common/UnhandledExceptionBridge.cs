@@ -51,7 +51,6 @@ namespace Mindscape.Raygun4Net
     {
       // Wrap the callback in a weak reference container
       // Then subscribe to the event using the weak reference
-      // The onDestroyed function is called - and unregisters it from the multicast delegate
       var weakHandler = new WeakExceptionHandler(callback);
 
       HandlersLock.EnterWriteLock();
@@ -59,7 +58,7 @@ namespace Mindscape.Raygun4Net
       {
         Handlers.Add(weakHandler);
         
-        // Remove any dead handlers
+        // Remove any handlers where their references are no longer alive
         var handlersToRemove = Handlers.Where(x => !x.IsAlive).ToList();
         foreach (var handler in handlersToRemove)
         {
