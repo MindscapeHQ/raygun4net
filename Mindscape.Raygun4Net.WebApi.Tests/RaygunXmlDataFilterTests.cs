@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 using Mindscape.Raygun4Net.Filters;
-using System.Linq;
 using System.Xml.Linq;
 
 namespace Mindscape.Raygun4Net.WebApi.Tests

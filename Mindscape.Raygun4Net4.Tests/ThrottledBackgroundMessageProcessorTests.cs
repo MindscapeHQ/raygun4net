@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 using Mindscape.Raygun4Net;
 using Mindscape.Raygun4Net.Messages;
 using NUnit.Framework;

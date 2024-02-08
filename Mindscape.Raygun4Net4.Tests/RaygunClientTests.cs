@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Web;
-using Mindscape.Raygun4Net4.Tests;
 using NUnit.Framework;
 
 namespace Mindscape.Raygun4Net4.Tests

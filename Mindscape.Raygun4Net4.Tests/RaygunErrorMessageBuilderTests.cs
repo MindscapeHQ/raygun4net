@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
 using NUnit.Framework;

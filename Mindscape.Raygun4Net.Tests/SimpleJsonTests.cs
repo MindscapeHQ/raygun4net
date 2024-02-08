@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Mindscape.Raygun4Net.Messages;
 using Mindscape.Raygun4Net.Tests.Model;
 using NUnit.Framework;

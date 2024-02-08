@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Web;
 using System.Web.Mvc;
-using Mindscape.Raygun4Net;
 using NUnit.Framework;
 
 namespace Mindscape.Raygun4Net.Mvc.Tests

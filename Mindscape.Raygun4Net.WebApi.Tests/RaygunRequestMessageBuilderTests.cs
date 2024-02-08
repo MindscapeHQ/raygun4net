@@ -1,5 +1,4 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System.Collections.Generic;
 using Mindscape.Raygun4Net.WebApi.Builders;
 
