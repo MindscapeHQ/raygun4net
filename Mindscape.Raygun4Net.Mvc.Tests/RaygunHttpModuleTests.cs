@@ -27,8 +27,8 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
     [Test]
     public void CanSend()
     {
-      Assert.IsTrue(_module.ExposeCanSend(new NullReferenceException()));
-      Assert.IsTrue(_module.ExposeCanSend(new HttpException(404, "Not Found")));
+      Assert.That(_module.ExposeCanSend(new NullReferenceException()), Is.True);
+      Assert.That(_module.ExposeCanSend(new HttpException(404, "Not Found")), Is.True);
     }
 
     [Test]
@@ -37,7 +37,7 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       RaygunSettings.Settings.ExcludeHttpStatusCodesList = "404";
       _module.Init(new System.Web.HttpApplication());
 
-      Assert.IsTrue(_module.ExposeCanSend(new InvalidOperationException()));
+      Assert.That(_module.ExposeCanSend(new InvalidOperationException()), Is.True);
     }
 
     [Test]
@@ -46,7 +46,7 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       RaygunSettings.Settings.ExcludeHttpStatusCodesList = "404";
       _module.Init(new System.Web.HttpApplication());
 
-      Assert.IsTrue(_module.ExposeCanSend(new HttpException(500, "Error message")));
+      Assert.That(_module.ExposeCanSend(new HttpException(500, "Error message")), Is.True);
     }
 
     [Test]
@@ -55,7 +55,7 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       RaygunSettings.Settings.ExcludeHttpStatusCodesList = "404";
       _module.Init(new System.Web.HttpApplication());
 
-      Assert.IsFalse(_module.ExposeCanSend(new HttpException(404, "Not Found")));
+      Assert.That(_module.ExposeCanSend(new HttpException(404, "Not Found")), Is.False);
     }
 
     // GetRaygunClient tests
@@ -63,13 +63,13 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
     [Test]
     public void GetRaygunClient()
     {
-      Assert.IsNull(_module.ExposeGetRaygunClient(new HttpApplication()).User);
+      Assert.That(_module.ExposeGetRaygunClient(new HttpApplication()).User, Is.Null);
     }
 
     [Test]
     public void GetCustomizedRaygunClient()
     {
-      Assert.AreEqual("TestUser", _module.ExposeGetRaygunClient(new FakeHttpApplication()).User); // As set in FakeHttpApplication
+      Assert.That("TestUser", Is.EqualTo(_module.ExposeGetRaygunClient(new FakeHttpApplication()).User)); // As set in FakeHttpApplication
     }
 
     // Global filter tests
@@ -78,24 +78,24 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
     public void AddRaygunFilterIfHandleErrorAttributeIsPresent()
     {
       GlobalFilters.Filters.Add(new HandleErrorAttribute());
-      Assert.AreEqual(1, GlobalFilters.Filters.Count);
-      Assert.IsFalse(HasRaygunFilter);
+      Assert.That(1, Is.EqualTo(GlobalFilters.Filters.Count));
+      Assert.That(HasRaygunFilter, Is.False);
 
       _module.Init(new System.Web.HttpApplication());
 
-      Assert.IsTrue(HasRaygunFilter);
-      Assert.AreEqual(2, GlobalFilters.Filters.Count);
+      Assert.That(HasRaygunFilter, Is.True);
+      Assert.That(2, Is.EqualTo(GlobalFilters.Filters.Count));
     }
 
     [Test]
     public void DoNotAddRaygunFilterIfNoFiltersPresent()
     {
-      Assert.AreEqual(0, GlobalFilters.Filters.Count);
+      Assert.That(0, Is.EqualTo(GlobalFilters.Filters.Count));
 
       _module.Init(new System.Web.HttpApplication());
 
-      Assert.IsFalse(HasRaygunFilter);
-      Assert.AreEqual(0, GlobalFilters.Filters.Count);
+      Assert.That(HasRaygunFilter, Is.False);
+      Assert.That(0, Is.EqualTo(GlobalFilters.Filters.Count));
     }
 
     [Test]
@@ -103,40 +103,40 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
     {
       GlobalFilters.Filters.Add(new HandleErrorAttribute());
       GlobalFilters.Filters.Add(new FakeFilterAttribute());
-      Assert.AreEqual(2, GlobalFilters.Filters.Count);
-      Assert.IsFalse(HasRaygunFilter);
+      Assert.That(2, Is.EqualTo(GlobalFilters.Filters.Count));
+      Assert.That(HasRaygunFilter, Is.False);
 
       _module.Init(new System.Web.HttpApplication());
 
-      Assert.IsTrue(HasRaygunFilter);
-      Assert.AreEqual(3, GlobalFilters.Filters.Count);
+      Assert.That(HasRaygunFilter, Is.True);
+      Assert.That(3, Is.EqualTo(GlobalFilters.Filters.Count));
     }
 
     [Test]
     public void DoNotAddRaygunFilterIfHandleErrorAttributeIsNotPresent()
     {
       GlobalFilters.Filters.Add(new FakeFilterAttribute());
-      Assert.AreEqual(1, GlobalFilters.Filters.Count);
-      Assert.IsFalse(HasRaygunFilter);
+      Assert.That(1, Is.EqualTo(GlobalFilters.Filters.Count));
+      Assert.That(HasRaygunFilter, Is.False);
 
       _module.Init(new System.Web.HttpApplication());
 
-      Assert.IsFalse(HasRaygunFilter);
-      Assert.AreEqual(1, GlobalFilters.Filters.Count);
+      Assert.That(HasRaygunFilter, Is.False);
+      Assert.That(1, Is.EqualTo(GlobalFilters.Filters.Count));
     }
 
     [Test]
     public void CanNotAddMultipleRaygunFilters()
     {
       GlobalFilters.Filters.Add(new HandleErrorAttribute());
-      Assert.AreEqual(1, GlobalFilters.Filters.Count);
-      Assert.IsFalse(HasRaygunFilter);
+      Assert.That(1, Is.EqualTo(GlobalFilters.Filters.Count));
+      Assert.That(HasRaygunFilter, Is.False);
 
       _module.Init(new System.Web.HttpApplication());
       _module.Init(new System.Web.HttpApplication());
 
-      Assert.IsTrue(HasRaygunFilter);
-      Assert.AreEqual(2, GlobalFilters.Filters.Count);
+      Assert.That(HasRaygunFilter, Is.True);
+      Assert.That(2, Is.EqualTo(GlobalFilters.Filters.Count));
     }
 
     private static bool HasRaygunFilter

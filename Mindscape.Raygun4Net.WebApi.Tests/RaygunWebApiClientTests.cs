@@ -37,7 +37,7 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
         }
       };
 
-      Assert.IsFalse(_client.ExposeCanSend(message));
+      Assert.That(_client.ExposeCanSend(message), Is.False);
     }
 
     [Test]
@@ -56,7 +56,7 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
         }
       };
 
-      Assert.IsFalse(_client.ExposeCanSend(message));
+      Assert.That(_client.ExposeCanSend(message), Is.False);
     }
 
     [Test]
@@ -75,7 +75,7 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
         }
       };
 
-      Assert.IsTrue(_client.ExposeCanSend(message));
+      Assert.That(_client.ExposeCanSend(message), Is.True);
     }
 
     [Test]
@@ -94,7 +94,7 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
         }
       };
 
-      Assert.IsTrue(_client.ExposeCanSend(message));
+      Assert.That(_client.ExposeCanSend(message), Is.True);
     }
 
     // this test is to make sure there is good null check coverage
@@ -104,10 +104,10 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
       RaygunSettings.Settings.ExcludeHttpStatusCodesList = null;
 
       // Null message
-      Assert.IsTrue(_client.ExposeCanSend(null));
+      Assert.That(_client.ExposeCanSend(null), Is.True);
 
       // Null message details
-      Assert.IsTrue(_client.ExposeCanSend(new RaygunMessage()));
+      Assert.That(_client.ExposeCanSend(new RaygunMessage()), Is.True);
 
       RaygunMessage message = new RaygunMessage
       {
@@ -116,7 +116,7 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
 
       // Null message response
 
-      Assert.IsTrue(_client.ExposeCanSend(message));
+      Assert.That(_client.ExposeCanSend(message), Is.True);
     }
 
     // Exception stripping tests
@@ -127,8 +127,8 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
       TargetInvocationException wrapper = new TargetInvocationException(_exception);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(1, exceptions.Count);
-      Assert.Contains(_exception, exceptions);
+      Assert.That(1, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(_exception));
     }
 
     [Test]
@@ -139,8 +139,8 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
       WrapperException wrapper = new WrapperException(_exception);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(1, exceptions.Count);
-      Assert.Contains(_exception, exceptions);
+      Assert.That(1, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(_exception));
     }
 
     [Test]
@@ -149,16 +149,16 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
       TargetInvocationException wrapper = new TargetInvocationException(null);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(1, exceptions.Count);
-      Assert.Contains(wrapper, exceptions);
+      Assert.That(1, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(wrapper));
     }
 
     [Test]
     public void DontStripNull()
     {
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(null).ToList();
-      Assert.AreEqual(1, exceptions.Count); // The current expected behaviour is that you can pass null to the Send methods and cause Raygun to send a report.
-      Assert.Contains(null, exceptions);
+      Assert.That(1, Is.EqualTo(exceptions.Count)); // The current expected behaviour is that you can pass null to the Send methods and cause Raygun to send a report.
+      Assert.That(exceptions, Contains.Item(null));
     }
 
     [Test]
@@ -170,8 +170,8 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
       TargetInvocationException wrapper2 = new TargetInvocationException(wrapper);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper2).ToList();
-      Assert.AreEqual(1, exceptions.Count);
-      Assert.Contains(_exception, exceptions);
+      Assert.That(1, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(_exception));
     }
 
     [Test]
@@ -182,8 +182,8 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
       TargetInvocationException wrapper = new TargetInvocationException(_exception);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(1, exceptions.Count);
-      Assert.Contains(wrapper, exceptions);
+      Assert.That(1, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(wrapper));
     }
 
     [Test]
@@ -195,9 +195,9 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
       AggregateException wrapper = new AggregateException(_exception, exception2);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(2, exceptions.Count);
-      Assert.Contains(_exception, exceptions);
-      Assert.Contains(exception2, exceptions);
+      Assert.That(2, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(_exception));
+      Assert.That(exceptions, Contains.Item(exception2));
     }
 
     [Test]
@@ -210,9 +210,9 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
       AggregateException wrapper = new AggregateException(_exception, innerWrapper);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(2, exceptions.Count);
-      Assert.Contains(_exception, exceptions);
-      Assert.Contains(exception2, exceptions);
+      Assert.That(2, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(_exception));
+      Assert.That(exceptions, Contains.Item(exception2));
     }
 
     [Test]
@@ -225,9 +225,9 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
       TargetInvocationException wrapper = new TargetInvocationException(innerWrapper);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(2, exceptions.Count);
-      Assert.Contains(_exception, exceptions);
-      Assert.Contains(exception2, exceptions);
+      Assert.That(2, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(_exception));
+      Assert.That(exceptions, Contains.Item(exception2));
     }
 
     [Test]
@@ -241,10 +241,10 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
       AggregateException wrapper = new AggregateException(innerWrapper, exception3);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(3, exceptions.Count);
-      Assert.Contains(_exception, exceptions);
-      Assert.Contains(exception2, exceptions);
-      Assert.Contains(exception3, exceptions);
+      Assert.That(3, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(_exception));
+      Assert.That(exceptions, Contains.Item(exception2));
+      Assert.That(exceptions, Contains.Item(exception3));
     }
 
     [Test]
@@ -257,12 +257,12 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
       ReflectionTypeLoadException wrapper = new ReflectionTypeLoadException(new Type[] { typeof(FakeRaygunWebApiClient), typeof(WrapperException) }, new Exception[] { ex1, ex2 });
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(2, exceptions.Count);
-      Assert.Contains(ex1, exceptions);
-      Assert.Contains(ex2, exceptions);
+      Assert.That(2, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(ex1));
+      Assert.That(exceptions, Contains.Item(ex2));
 
-      Assert.IsTrue(ex1.Data["Type"].ToString().Contains("FakeRaygunWebApiClient"));
-      Assert.IsTrue(ex2.Data["Type"].ToString().Contains("WrapperException"));
+      Assert.That(ex1.Data["Type"].ToString().Contains("FakeRaygunWebApiClient"), Is.True);
+      Assert.That(ex2.Data["Type"].ToString().Contains("WrapperException"), Is.True);
     }
   }
 }

@@ -9,7 +9,7 @@ namespace Mindscape.Raygun4Net4.Integration.Tests
 {
   public class TestIfWeCanSendToRaygun
   {
-    private string ApiKey = "";//"PUT_YOUR_KEY_HERE"
+    private string ApiKey = "3KFgdJUl3wuYG9GYQ";//"PUT_YOUR_KEY_HERE"
     private const string InvalidApiKey = "BADKEY";
     private TraceChecker TraceChecker { get; } = new();
 
@@ -52,8 +52,8 @@ namespace Mindscape.Raygun4Net4.Integration.Tests
       var sut = new RaygunClient(ApiKey);
       sut.Send(new NotImplementedException(nameof(CanSendWithValidKey)));
 
-      Assert.IsNotEmpty(ApiKey);
-      Assert.IsNull(TraceChecker.Traces.FirstOrDefault(f=> f.Equals("Raygun: Failed to send offline reports due to invalid API key.")));
+      Assert.That(ApiKey, Is.Not.Empty);
+      Assert.That(TraceChecker.Traces.FirstOrDefault(f=> f.Equals("Raygun: Failed to send offline reports due to invalid API key.")), Is.Null);
     }
 
 
@@ -64,7 +64,7 @@ namespace Mindscape.Raygun4Net4.Integration.Tests
 
       sut.Send(new NotImplementedException(nameof(CanSendWithValidKey)));
 
-      Assert.IsNull(TraceChecker.Traces.FirstOrDefault());
+      Assert.That(TraceChecker.Traces.FirstOrDefault(), Is.Null);
     }
 
     [Test]
@@ -74,7 +74,7 @@ namespace Mindscape.Raygun4Net4.Integration.Tests
 
       sut.Send(new NotImplementedException(nameof(CanSendWithInvalidKeyButGetsA403)));
 
-      Assert.Contains("Raygun: Failed to send report to Raygun due to: The remote server returned an error: (403) Forbidden.", TraceChecker.Traces);
+      Assert.That(TraceChecker.Traces, Contains.Item("Raygun: Failed to send report to Raygun due to: The remote server returned an error: (403) Forbidden."));
     }
 
     [Test]
@@ -84,7 +84,7 @@ namespace Mindscape.Raygun4Net4.Integration.Tests
 
       sut.Send(new NotImplementedException(nameof(CanSendWithInvalidKeyButGetsA403)));
 
-      Assert.IsFalse(TraceChecker.Traces.Contains("Raygun: Failed to send report to Raygun due to: The request was aborted: Could not create SSL/TLS secure channel."));
+      Assert.That(TraceChecker.Traces.Contains("Raygun: Failed to send report to Raygun due to: The request was aborted: Could not create SSL/TLS secure channel."), Is.False);
     }
 
     [Test]
@@ -94,7 +94,7 @@ namespace Mindscape.Raygun4Net4.Integration.Tests
 
       sut.Send(new NotImplementedException(nameof(CanSendWithInvalidKeyButGetsA403)));
 
-      Assert.IsFalse(TraceChecker.Traces.Contains("Raygun: Failed to send report to Raygun due to: The request was aborted: Could not create SSL/TLS secure channel."));
+      Assert.That(TraceChecker.Traces.Contains("Raygun: Failed to send report to Raygun due to: The request was aborted: Could not create SSL/TLS secure channel."), Is.False);
     }
   }
 }

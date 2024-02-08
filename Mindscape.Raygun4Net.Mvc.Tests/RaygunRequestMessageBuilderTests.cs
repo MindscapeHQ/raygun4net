@@ -15,13 +15,13 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       var options = new RaygunRequestMessageOptions();
       options.AddSensitiveFieldNames("password");
 
-      Assert.AreEqual(rawData.Length, 15);
+      Assert.That(rawData.Length, Is.EqualTo(15));
 
       var filteredData = RaygunRequestMessageBuilder.StripSensitiveValues(rawData, options);
 
-      Assert.NotNull(filteredData);
-      Assert.AreEqual(filteredData.Length, 15);
-      Assert.AreEqual(filteredData, "I am unchanged!");
+      Assert.That(filteredData, Is.Not.Null);
+      Assert.That(filteredData.Length, Is.EqualTo(15));
+      Assert.That(filteredData, Is.EqualTo("I am unchanged!"));
     }
 
     [Test]
@@ -31,7 +31,7 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
 
       var containsSensitiveData = RaygunRequestMessageBuilder.DataContains(rawData, new List<string>() { "Password" });
 
-      Assert.AreEqual(containsSensitiveData, true);
+      Assert.That(containsSensitiveData, Is.EqualTo(true));
     }
 
     [Test]
@@ -41,7 +41,7 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
 
       var containsSensitiveData = RaygunRequestMessageBuilder.DataContains(rawData, new List<string>() { "password" });
 
-      Assert.AreEqual(containsSensitiveData, false);
+      Assert.That(containsSensitiveData, Is.EqualTo(false));
     }
   }
 }

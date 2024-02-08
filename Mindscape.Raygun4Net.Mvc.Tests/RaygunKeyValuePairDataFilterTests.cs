@@ -10,13 +10,13 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
     [Test]
     public void CanParseValidKeyValuePairs()
     {
-      Assert.True(new RaygunKeyValuePairDataFilter().CanParse("key=value"));
+      Assert.That(new RaygunKeyValuePairDataFilter().CanParse("key=value"), Is.True);
     }
 
     [Test]
     public void CanNotParseInvalidKeyValuePairs()
     {
-      Assert.False(new RaygunXmlDataFilter().CanParse("{}"));
+      Assert.That(new RaygunXmlDataFilter().CanParse("{}"), Is.False);
     }
 
     [Test]
@@ -28,8 +28,8 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
 
       var filteredData = filter.Filter(rawData, new List<string>() { "password" });
 
-      Assert.NotNull(filteredData);
-      Assert.AreEqual(filteredData, "key=value");
+      Assert.That(filteredData, Is.Not.Null);
+      Assert.That(filteredData, Is.EqualTo("key=value"));
     }
 
     [Test]
@@ -41,8 +41,8 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
 
       var filteredData = filter.Filter(rawData, new List<string>() { "password" });
 
-      Assert.NotNull(filteredData);
-      Assert.AreEqual(filteredData, "user=raygun&password=[FILTERED]");
+      Assert.That(filteredData, Is.Not.Null);
+      Assert.That(filteredData, Is.EqualTo("user=raygun&password=[FILTERED]"));
     }
 
     [Test]
@@ -54,8 +54,8 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
 
       var filteredData = filter.Filter(rawData, new List<string>() { "PaSsWoRd" });
 
-      Assert.NotNull(filteredData);
-      Assert.AreEqual(filteredData, "user=raygun&password=[FILTERED]");
+      Assert.That(filteredData, Is.Not.Null);
+      Assert.That(filteredData, Is.EqualTo("user=raygun&password=[FILTERED]"));
     }
   }
 }

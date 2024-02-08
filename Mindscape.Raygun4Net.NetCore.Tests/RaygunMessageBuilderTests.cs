@@ -20,17 +20,17 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     [Test]
     public void New()
     {
-      Assert.IsNotNull(_builder);
+      Assert.That(_builder, Is.Not.Null);
     }
 
     [Test]
     public void SetVersion()
     {
       IRaygunMessageBuilder builder = _builder.SetVersion("Custom Version");
-      Assert.AreEqual(_builder, builder);
+      Assert.That(_builder, Is.EqualTo(builder));
 
       RaygunMessage message = _builder.Build();
-      Assert.AreEqual("Custom Version", message.Details.Version);
+      Assert.That("Custom Version", Is.EqualTo(message.Details.Version));
     }
 
     [Test]
@@ -38,14 +38,14 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     {
       DateTime time = new DateTime(2015, 2, 16);
       RaygunMessage message = _builder.SetTimeStamp(time).Build();
-      Assert.AreEqual(time, message.OccurredOn);
+      Assert.That(time, Is.EqualTo(message.OccurredOn));
     }
 
     [Test]
     public void SetNullTimeStamp()
     {
       RaygunMessage message = _builder.SetTimeStamp(null).Build();
-      Assert.IsTrue((DateTime.UtcNow - message.OccurredOn).TotalSeconds < 1);
+      Assert.That((DateTime.UtcNow - message.OccurredOn).TotalSeconds < 1, Is.True);
     }
 
 
@@ -55,8 +55,8 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     {
       RaygunMessage message = _builder.SetMachineName(Environment.MachineName).Build();
 
-      Assert.IsNotNull(message.Details);
-      Assert.IsNotNull(message.Details.MachineName);
+      Assert.That(message.Details, Is.Not.Null);
+      Assert.That(message.Details.MachineName, Is.Not.Null);
 
     }
 
@@ -65,22 +65,22 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     {
       RaygunMessage message = _builder.SetEnvironmentDetails().Build();
 
-      Assert.IsNotNull(message.Details);
-      Assert.IsNotNull(message.Details.Environment);
-      Assert.IsNotEmpty(message.Details.Environment.Architecture);
+      Assert.That(message.Details, Is.Not.Null);
+      Assert.That(message.Details.Environment, Is.Not.Null);
+      Assert.That(message.Details.Environment.Architecture, Is.Not.Empty);
       
-      Assert.GreaterOrEqual(message.Details.Environment.WindowBoundsHeight, 0);
-      Assert.GreaterOrEqual(message.Details.Environment.WindowBoundsWidth, 0);
+      Assert.That(message.Details.Environment.WindowBoundsHeight, Is.GreaterThanOrEqualTo(0));
+      Assert.That(message.Details.Environment.WindowBoundsWidth, Is.GreaterThanOrEqualTo(0));
 
-      Assert.IsNotEmpty(message.Details.Environment.Cpu);
+      Assert.That(message.Details.Environment.Cpu, Is.Not.Empty);
 
-      Assert.GreaterOrEqual(message.Details.Environment.ProcessorCount, 1);
-      Assert.IsNotEmpty(message.Details.Environment.OSVersion);
-      Assert.IsNotEmpty(message.Details.Environment.Locale);
+      Assert.That(message.Details.Environment.ProcessorCount, Is.GreaterThanOrEqualTo(1));
+      Assert.That(message.Details.Environment.OSVersion, Is.Not.Empty);
+      Assert.That(message.Details.Environment.Locale, Is.Not.Empty);
 
-      Assert.IsNotNull(message.Details.Environment.DiskSpaceFree);
-      Assert.True(message.Details.Environment.DiskSpaceFree.Any());
-      Assert.True(message.Details.Environment.DiskSpaceFree.All(a => a > 0));
+      Assert.That(message.Details.Environment.DiskSpaceFree, Is.Not.Null);
+      Assert.That(message.Details.Environment.DiskSpaceFree.Any(), Is.True);
+      Assert.That(message.Details.Environment.DiskSpaceFree.All(a => a > 0), Is.True);
     }
 
     [Test]
@@ -88,10 +88,10 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     {
       RaygunMessage message = _builder.SetEnvironmentDetails().Build();
 
-      Assert.NotZero(message.Details.Environment.AvailablePhysicalMemory);
-      Assert.NotZero(message.Details.Environment.TotalPhysicalMemory);
-      Assert.NotZero(message.Details.Environment.AvailableVirtualMemory);
-      Assert.NotZero(message.Details.Environment.TotalVirtualMemory);
+      Assert.That(message.Details.Environment.AvailablePhysicalMemory, Is.Not.Zero);
+      Assert.That(message.Details.Environment.TotalPhysicalMemory, Is.Not.Zero);
+      Assert.That(message.Details.Environment.AvailableVirtualMemory, Is.Not.Zero);
+      Assert.That(message.Details.Environment.TotalVirtualMemory, Is.Not.Zero);
     }
 
     // Response tests
@@ -102,7 +102,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       NullReferenceException exception = new NullReferenceException("The thing is null");
       _builder.SetExceptionDetails(exception);
       RaygunMessage message = _builder.Build();
-      Assert.IsNull(message.Details.Response);
+      Assert.That(message.Details.Response, Is.Null);
     }
   }
 }

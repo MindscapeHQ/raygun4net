@@ -29,8 +29,8 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       TargetInvocationException wrapper = new TargetInvocationException(_exception);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(1, exceptions.Count);
-      Assert.Contains(_exception, exceptions);
+      Assert.That(1, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(_exception));
     }
 
     [Test]
@@ -39,8 +39,8 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       HttpUnhandledException wrapper = new HttpUnhandledException("Something went wrong", _exception);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(1, exceptions.Count);
-      Assert.Contains(_exception, exceptions);
+      Assert.That(1, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(_exception));
     }
 
     [Test]
@@ -51,8 +51,8 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       WrapperException wrapper = new WrapperException(_exception);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(1, exceptions.Count);
-      Assert.Contains(_exception, exceptions);
+      Assert.That(1, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(_exception));
     }
 
     [Test]
@@ -61,16 +61,16 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       HttpUnhandledException wrapper = new HttpUnhandledException();
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(1, exceptions.Count);
-      Assert.Contains(wrapper, exceptions);
+      Assert.That(1, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(wrapper));
     }
 
     [Test]
     public void DontStripNull()
     {
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(null).ToList();
-      Assert.AreEqual(1, exceptions.Count); // The current expected behaviour is that you can pass null to the Send methods and cause Raygun to send a report.
-      Assert.Contains(null, exceptions);
+      Assert.That(1, Is.EqualTo(exceptions.Count)); // The current expected behaviour is that you can pass null to the Send methods and cause Raygun to send a report.
+      Assert.That(exceptions, Contains.Item(null));
     }
 
     [Test]
@@ -80,8 +80,8 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       TargetInvocationException wrapper2 = new TargetInvocationException(wrapper);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper2).ToList();
-      Assert.AreEqual(1, exceptions.Count);
-      Assert.Contains(_exception, exceptions);
+      Assert.That(1, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(_exception));
     }
 
     [Test]
@@ -92,8 +92,8 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       TargetInvocationException wrapper = new TargetInvocationException(_exception);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(1, exceptions.Count);
-      Assert.Contains(wrapper, exceptions);
+      Assert.That(1, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(wrapper));
     }
 
     [Test]
@@ -105,9 +105,9 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       AggregateException wrapper = new AggregateException(_exception, exception2);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(2, exceptions.Count);
-      Assert.Contains(_exception, exceptions);
-      Assert.Contains(exception2, exceptions);
+      Assert.That(2, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(_exception));
+      Assert.That(exceptions, Contains.Item(exception2));
     }
 
     [Test]
@@ -120,9 +120,9 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       AggregateException wrapper = new AggregateException(_exception, innerWrapper);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(2, exceptions.Count);
-      Assert.Contains(_exception, exceptions);
-      Assert.Contains(exception2, exceptions);
+      Assert.That(2, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(_exception));
+      Assert.That(exceptions, Contains.Item(exception2));
     }
 
     [Test]
@@ -135,9 +135,9 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       TargetInvocationException wrapper = new TargetInvocationException(innerWrapper);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(2, exceptions.Count);
-      Assert.Contains(_exception, exceptions);
-      Assert.Contains(exception2, exceptions);
+      Assert.That(2, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(_exception));
+      Assert.That(exceptions, Contains.Item(exception2));
     }
 
     [Test]
@@ -151,10 +151,10 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       AggregateException wrapper = new AggregateException(innerWrapper, exception3);
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(3, exceptions.Count);
-      Assert.Contains(_exception, exceptions);
-      Assert.Contains(exception2, exceptions);
-      Assert.Contains(exception3, exceptions);
+      Assert.That(3, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(_exception));
+      Assert.That(exceptions, Contains.Item(exception2));
+      Assert.That(exceptions, Contains.Item(exception3));
     }
 
     [Test]
@@ -167,12 +167,12 @@ namespace Mindscape.Raygun4Net.Mvc.Tests
       ReflectionTypeLoadException wrapper = new ReflectionTypeLoadException(new Type[] { typeof(FakeRaygunClient), typeof(WrapperException) }, new Exception[] { ex1, ex2 });
 
       List<Exception> exceptions = _client.ExposeStripWrapperExceptions(wrapper).ToList();
-      Assert.AreEqual(2, exceptions.Count);
-      Assert.Contains(ex1, exceptions);
-      Assert.Contains(ex2, exceptions);
+      Assert.That(2, Is.EqualTo(exceptions.Count));
+      Assert.That(exceptions, Contains.Item(ex1));
+      Assert.That(exceptions, Contains.Item(ex2));
 
-      Assert.IsTrue(ex1.Data["Type"].ToString().Contains("FakeRaygunClient"));
-      Assert.IsTrue(ex2.Data["Type"].ToString().Contains("WrapperException"));
+      Assert.That(ex1.Data["Type"].ToString().Contains("FakeRaygunClient"), Is.True);
+      Assert.That(ex2.Data["Type"].ToString().Contains("WrapperException"), Is.True);
     }
   }
 }

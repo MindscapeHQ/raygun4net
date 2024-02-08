@@ -20,12 +20,12 @@ namespace Mindscape.Raygun4Net4.Tests
 
       RaygunErrorMessage message = RaygunErrorMessageBuilder.Build(wrapper);
 
-      Assert.AreEqual(2, message.InnerErrors.Count());
-      Assert.AreEqual("System.IO.FileNotFoundException", message.InnerErrors[0].ClassName);
-      Assert.AreEqual("System.OutOfMemoryException", message.InnerErrors[1].ClassName);
+      Assert.That(2, Is.EqualTo(message.InnerErrors.Count()));
+      Assert.That("System.IO.FileNotFoundException", Is.EqualTo(message.InnerErrors[0].ClassName));
+      Assert.That("System.OutOfMemoryException", Is.EqualTo(message.InnerErrors[1].ClassName));
 
-      Assert.IsTrue(message.InnerErrors[0].Data["Type"].ToString().Contains("FakeRaygunClient"));
-      Assert.IsTrue(message.InnerErrors[1].Data["Type"].ToString().Contains("WrapperException"));
+      Assert.That(message.InnerErrors[0].Data["Type"].ToString().Contains("FakeRaygunClient"), Is.True);
+      Assert.That(message.InnerErrors[1].Data["Type"].ToString().Contains("WrapperException"), Is.True);
     }
   }
 }

@@ -165,20 +165,20 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetVersion(string version)
     {
-      if (!String.IsNullOrEmpty(version))
+      if (!string.IsNullOrEmpty(version))
       {
         _raygunMessage.Details.Version = version;
         return this;
       }
 
-      if (!String.IsNullOrEmpty(RaygunSettings.Settings.ApplicationVersion))
+      if (!string.IsNullOrEmpty(RaygunSettings.Settings.ApplicationVersion))
       {
         _raygunMessage.Details.Version = RaygunSettings.Settings.ApplicationVersion;
       }
       else
       {
-        var entryAssembly = Assembly.GetEntryAssembly() ?? GetWebEntryAssembly();
-        _raygunMessage.Details.Version = entryAssembly != null ? entryAssembly.GetName().Version.ToString() : "Not supplied";
+        var entryAssembly = Assembly.GetEntryAssembly() ?? GetWebEntryAssembly() ?? Assembly.GetExecutingAssembly();
+        _raygunMessage.Details.Version = entryAssembly.GetName().Version.ToString();
       }
 
       return this;

@@ -25,13 +25,13 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void DefaultProxyCredentials()
     {
-      Assert.IsNull(_client.ProxyCredentials);
+      Assert.That(_client.ProxyCredentials, Is.Null);
     }
 
     [Test]
     public void DefaultWebProxy()
     {
-      Assert.IsNull(_client.WebProxy);
+      Assert.That(_client.WebProxy, Is.Null);
     }
 
     [Test]
@@ -39,7 +39,7 @@ namespace Mindscape.Raygun4Net.Tests
     {
       var credentials = new NetworkCredential();
       _client.ProxyCredentials = credentials;
-      Assert.AreSame(credentials, _client.ProxyCredentials);
+      Assert.That(credentials, Is.SameAs(_client.ProxyCredentials));
     }
 
     [Test]
@@ -47,7 +47,7 @@ namespace Mindscape.Raygun4Net.Tests
     {
       var proxy = new WebProxy();
       _client.WebProxy = proxy;
-      Assert.AreSame(proxy, _client.WebProxy);
+      Assert.That(proxy, Is.SameAs(_client.WebProxy));
     }
 
     // User tests
@@ -55,20 +55,20 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void DefaultUser()
     {
-      Assert.IsNull(_client.User);
+      Assert.That(_client.User, Is.Null);
     }
 
     [Test]
     public void DefaultUserInfo()
     {
-      Assert.IsNull(_client.UserInfo);
+      Assert.That(_client.UserInfo, Is.Null);
     }
 
     [Test]
     public void UserProperty()
     {
       _client.User = "Robbie Robot";
-      Assert.AreEqual("Robbie Robot", _client.User);
+      Assert.That("Robbie Robot", Is.EqualTo(_client.User));
     }
 
     [Test]
@@ -76,14 +76,14 @@ namespace Mindscape.Raygun4Net.Tests
     {
       RaygunIdentifierMessage user = new RaygunIdentifierMessage("Robbie Robot");
       _client.UserInfo = user;
-      Assert.AreSame(user, _client.UserInfo);
+      Assert.That(user, Is.SameAs(_client.UserInfo));
     }
 
     [Test]
     public void MessageWithNoUser()
     {
       RaygunMessage message = _client.ExposeBuildMessage(_exception);
-      Assert.IsNull(message.Details.User);
+      Assert.That(message.Details.User, Is.Null);
     }
 
     [Test]
@@ -92,7 +92,7 @@ namespace Mindscape.Raygun4Net.Tests
       _client.User = "Robbie Robot";
 
       RaygunMessage message = _client.ExposeBuildMessage(_exception);
-      Assert.AreEqual("Robbie Robot", message.Details.User.Identifier);
+      Assert.That("Robbie Robot", Is.EqualTo(message.Details.User.Identifier));
     }
 
     [Test]
@@ -102,8 +102,8 @@ namespace Mindscape.Raygun4Net.Tests
       _client.UserInfo = user;
 
       RaygunMessage message = _client.ExposeBuildMessage(_exception);
-      Assert.AreEqual("Robbie Robot", message.Details.User.Identifier);
-      Assert.IsTrue(message.Details.User.IsAnonymous);
+      Assert.That("Robbie Robot", Is.EqualTo(message.Details.User.Identifier));
+      Assert.That(message.Details.User.IsAnonymous, Is.True);
     }
 
     [Test]
@@ -114,16 +114,16 @@ namespace Mindscape.Raygun4Net.Tests
       _client.User = "Not Robbie Robot";
 
       RaygunMessage message = _client.ExposeBuildMessage(_exception);
-      Assert.AreEqual("Robbie Robot", message.Details.User.Identifier);
-      Assert.IsTrue(message.Details.User.IsAnonymous);
+      Assert.That("Robbie Robot", Is.EqualTo(message.Details.User.Identifier));
+      Assert.That(message.Details.User.IsAnonymous, Is.True);
     }
 
     [Test]
     public void MessageWithUserInfoFromBuild()
     {
         RaygunMessage message = _client.ExposeBuildMessage(_exception, null, null, new RaygunIdentifierMessage("Robbie Robot"));
-        Assert.AreEqual("Robbie Robot", message.Details.User.Identifier);
-        Assert.IsFalse(message.Details.User.IsAnonymous);
+        Assert.That("Robbie Robot", Is.EqualTo(message.Details.User.Identifier));
+        Assert.That(message.Details.User.IsAnonymous, Is.False);
     }
 
     [Test]
@@ -134,19 +134,19 @@ namespace Mindscape.Raygun4Net.Tests
         _client.User = "Also Not Robbie Robot";
 
         RaygunMessage message = _client.ExposeBuildMessage(_exception, null, null, new RaygunIdentifierMessage("Robbie Robot"));
-        Assert.AreEqual("Robbie Robot", message.Details.User.Identifier);
-        Assert.IsFalse(message.Details.User.IsAnonymous);
+        Assert.That("Robbie Robot", Is.EqualTo(message.Details.User.Identifier));
+        Assert.That(message.Details.User.IsAnonymous, Is.False);
     }
 
     [Test]
     public void IsAnonymousDefault()
     {
       RaygunIdentifierMessage user = new RaygunIdentifierMessage("Robbie Robot");
-      Assert.IsFalse(user.IsAnonymous);
+      Assert.That(user.IsAnonymous, Is.False);
 
       _client.User = "Robbie Robot";
       RaygunMessage message = _client.ExposeBuildMessage(_exception);
-      Assert.IsFalse(message.Details.User.IsAnonymous);
+      Assert.That(message.Details.User.IsAnonymous, Is.False);
     }
 
     // Application version tests
@@ -154,14 +154,14 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void DefaultApplicationVersion()
     {
-      Assert.IsNull(_client.ApplicationVersion);
+      Assert.That(_client.ApplicationVersion, Is.Null);
     }
 
     [Test]
     public void ApplicationVersionProperty()
     {
       _client.ApplicationVersion = "Custom Version";
-      Assert.AreEqual("Custom Version", _client.ApplicationVersion);
+      Assert.That("Custom Version", Is.EqualTo(_client.ApplicationVersion));
     }
 
     [Test]
@@ -170,7 +170,7 @@ namespace Mindscape.Raygun4Net.Tests
       _client.ApplicationVersion = "Custom Version";
 
       RaygunMessage message = _client.ExposeBuildMessage(_exception);
-      Assert.AreEqual("Custom Version", message.Details.Version);
+      Assert.That("Custom Version", Is.EqualTo(message.Details.Version));
     }
 
     // Exception stripping tests
@@ -225,7 +225,7 @@ namespace Mindscape.Raygun4Net.Tests
     public void DontStripNull()
     {
       RaygunMessage message = _client.ExposeBuildMessage(null);
-      Assert.IsNull(message.Details.Error);
+      Assert.That(message.Details.Error, Is.Null);
     }
 
     [Test]
@@ -249,7 +249,7 @@ namespace Mindscape.Raygun4Net.Tests
       TargetInvocationException wrapper = new TargetInvocationException(_exception);
 
       RaygunMessage message = _client.ExposeBuildMessage(wrapper);
-      Assert.AreEqual("System.Reflection.TargetInvocationException", message.Details.Error.ClassName);
+      Assert.That("System.Reflection.TargetInvocationException", Is.EqualTo(message.Details.Error.ClassName));
     }
 
     // Validation tests
@@ -257,14 +257,14 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void NoAPIKeyIsInvalid()
     {
-      Assert.IsFalse(_client.ExposeValidateApiKey());
+      Assert.That(_client.ExposeValidateApiKey(), Is.False);
     }
 
     [Test]
     public void APIKeyIsValid()
     {
       FakeRaygunClient client = new FakeRaygunClient("MY_API_KEY");
-      Assert.IsTrue(client.ExposeValidateApiKey());
+      Assert.That(client.ExposeValidateApiKey(), Is.True);
     }
 
     // Tags and user custom data tests
@@ -273,7 +273,7 @@ namespace Mindscape.Raygun4Net.Tests
     public void TagsAreNullByDefault()
     {
       RaygunMessage message = _client.ExposeBuildMessage(_exception);
-      Assert.IsNull(message.Details.Tags);
+      Assert.That(message.Details.Tags, Is.Null);
     }
 
     [Test]
@@ -284,17 +284,17 @@ namespace Mindscape.Raygun4Net.Tests
       tags.Add("WPF");
 
       RaygunMessage message = _client.ExposeBuildMessage(_exception, tags);
-      Assert.IsNotNull(message.Details.Tags);
-      Assert.AreEqual(2, message.Details.Tags.Count);
-      Assert.Contains("Very Important", (ICollection)message.Details.Tags);
-      Assert.Contains("WPF", (ICollection)message.Details.Tags);
+      Assert.That(message.Details.Tags, Is.Not.Null);
+      Assert.That(2, Is.EqualTo(message.Details.Tags.Count));
+      Assert.That((ICollection)message.Details.Tags, Contains.Item("Very Important"));
+      Assert.That((ICollection)message.Details.Tags, Contains.Item("WPF"));
     }
 
     [Test]
     public void UserCustomDataIsNullByDefault()
     {
       RaygunMessage message = _client.ExposeBuildMessage(_exception);
-      Assert.IsNull(message.Details.UserCustomData);
+      Assert.That(message.Details.UserCustomData, Is.Null);
     }
 
     [Test]
@@ -305,10 +305,10 @@ namespace Mindscape.Raygun4Net.Tests
       data.Add("obj", "NULL");
 
       RaygunMessage message = _client.ExposeBuildMessage(_exception, null, data);
-      Assert.IsNotNull(message.Details.UserCustomData);
-      Assert.AreEqual(2, message.Details.UserCustomData.Count);
-      Assert.AreEqual("42", message.Details.UserCustomData["x"]);
-      Assert.AreEqual("NULL", message.Details.UserCustomData["obj"]);
+      Assert.That(message.Details.UserCustomData, Is.Not.Null);
+      Assert.That(2, Is.EqualTo(message.Details.UserCustomData.Count));
+      Assert.That("42", Is.EqualTo(message.Details.UserCustomData["x"]));
+      Assert.That("NULL", Is.EqualTo(message.Details.UserCustomData["obj"]));
     }
 
     // Cancel send tests
@@ -316,7 +316,7 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void NoHandlerSendsAll()
     {
-      Assert.IsTrue(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)));
+      Assert.That(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)), Is.True);
     }
 
     [Test]
@@ -325,12 +325,12 @@ namespace Mindscape.Raygun4Net.Tests
       bool filterCalled = false;
       _client.SendingMessage += (object o, RaygunSendingMessageEventArgs e) =>
       {
-        Assert.AreEqual("The thing is null", e.Message.Details.Error.Message);
+        Assert.That("The thing is null", Is.EqualTo(e.Message.Details.Error.Message));
         filterCalled = true;
         e.Cancel = true;
       };
-      Assert.IsFalse(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)));
-      Assert.IsTrue(filterCalled);
+      Assert.That(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)), Is.False);
+      Assert.That(filterCalled, Is.True);
     }
 
     [Test]
@@ -340,7 +340,7 @@ namespace Mindscape.Raygun4Net.Tests
       {
         // Allow send by not setting e.Cancel
       };
-      Assert.IsTrue(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)));
+      Assert.That(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)), Is.True);
     }
 
     [Test]
@@ -350,19 +350,19 @@ namespace Mindscape.Raygun4Net.Tests
       bool filter2Called = false;
       _client.SendingMessage += (object o, RaygunSendingMessageEventArgs e) =>
       {
-        Assert.AreEqual("The thing is null", e.Message.Details.Error.Message);
+        Assert.That("The thing is null", Is.EqualTo(e.Message.Details.Error.Message));
         filter1Called = true;
         e.Cancel = true;
       };
       _client.SendingMessage += (object o, RaygunSendingMessageEventArgs e) =>
       {
-        Assert.AreEqual("The thing is null", e.Message.Details.Error.Message);
+        Assert.That("The thing is null", Is.EqualTo(e.Message.Details.Error.Message));
         filter2Called = true;
         e.Cancel = true;
       };
-      Assert.IsFalse(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)));
-      Assert.IsTrue(filter1Called);
-      Assert.IsTrue(filter2Called);
+      Assert.That(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)), Is.False);
+      Assert.That(filter1Called, Is.True);
+      Assert.That(filter2Called, Is.True);
     }
 
     [Test]
@@ -376,7 +376,7 @@ namespace Mindscape.Raygun4Net.Tests
       {
         // Allow send by not setting e.Cancel
       };
-      Assert.IsFalse(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)));
+      Assert.That(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)), Is.False);
     }
 
     [Test]
@@ -390,7 +390,7 @@ namespace Mindscape.Raygun4Net.Tests
       {
         e.Cancel = true;
       };
-      Assert.IsFalse(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)));
+      Assert.That(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)), Is.False);
     }
 
     [Test]
@@ -404,22 +404,22 @@ namespace Mindscape.Raygun4Net.Tests
       {
         // Allow send by not setting e.Cancel
       };
-      Assert.IsTrue(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)));
+      Assert.That(_client.ExposeOnSendingMessage(_client.ExposeBuildMessage(_exception)), Is.True);
     }
 
     [Test]
     public void HandlerCanModifyMessage()
     {
       RaygunMessage message = _client.ExposeBuildMessage(_exception);
-      Assert.AreEqual("The thing is null", message.Details.Error.Message);
+      Assert.That("The thing is null", Is.EqualTo(message.Details.Error.Message));
 
       _client.SendingMessage += (object o, RaygunSendingMessageEventArgs e) =>
       {
         e.Message.Details.Error.Message = "Custom error message";
       };
 
-      Assert.IsTrue(_client.ExposeOnSendingMessage(message));
-      Assert.AreEqual("Custom error message", message.Details.Error.Message);
+      Assert.That(_client.ExposeOnSendingMessage(message), Is.True);
+      Assert.That("Custom error message", Is.EqualTo(message.Details.Error.Message));
     }
 
     // CanSend tests
@@ -427,7 +427,7 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void CanSend()
     {
-      Assert.IsTrue(_client.ExposeCanSend(_exception));
+      Assert.That(_client.ExposeCanSend(_exception), Is.True);
     }
 
     [Test]
@@ -435,13 +435,13 @@ namespace Mindscape.Raygun4Net.Tests
     {
       Exception exception = new InvalidOperationException("You cannot do that");
       _client.ExposeFlagAsSent(exception);
-      Assert.IsFalse(_client.ExposeCanSend(exception));
+      Assert.That(_client.ExposeCanSend(exception), Is.False);
     }
 
     [Test]
     public void CanSendIfExceptionIsUnknown()
     {
-      Assert.IsTrue(_client.ExposeCanSend(null));
+      Assert.That(_client.ExposeCanSend(null), Is.True);
     }
 
     [Test]
@@ -460,7 +460,7 @@ namespace Mindscape.Raygun4Net.Tests
       WebRequest.DefaultWebProxy = theProxyWeDontWant;
       _client.WebProxy = theProxyWeDoWant;
       
-      Assert.AreSame(theProxyWeDoWant, WebClientHelper.WebProxy);
+      Assert.That(theProxyWeDoWant, Is.SameAs(WebClientHelper.WebProxy));
     }
   }
 }
