@@ -39,36 +39,36 @@ namespace Mindscape.Raygun4Net.Tests.Storage
     [Test]
     public void Store_UsingInvalidMessageValue_ReturnFalse()
     {
-      Assert.IsFalse(_storageOne.Store(null, TestApiKey));
-      Assert.IsFalse(_storageOne.Store("", TestApiKey));
+      Assert.That(_storageOne.Store(null, TestApiKey), Is.False);
+      Assert.That(_storageOne.Store("", TestApiKey), Is.False);
     }
 
     [Test]
     public void Store_UsingInvalidApiKeyValue_ReturnFalse()
     {
-      Assert.IsFalse(_storageOne.Store("DummyData", null));
-      Assert.IsFalse(_storageOne.Store("DummyData", ""));
+      Assert.That(_storageOne.Store("DummyData", null), Is.False);
+      Assert.That(_storageOne.Store("DummyData", ""), Is.False);
     }
 
     [Test]
     public void FetchAll_UsingInvalidApiKeyValue_ReturnEmptyResult()
     {
-      Assert.IsEmpty(_storageOne.FetchAll(null));
-      Assert.IsEmpty(_storageOne.FetchAll(""));
+      Assert.That(_storageOne.FetchAll(null), Is.Empty);
+      Assert.That(_storageOne.FetchAll(""), Is.Empty);
     }
 
     [Test]
     public void Remove_UsingInvalidNameValue_ReturnFalse()
     {
-      Assert.IsFalse(_storageOne.Remove(null, TestApiKey));
-      Assert.IsFalse(_storageOne.Remove("", TestApiKey));
+      Assert.That(_storageOne.Remove(null, TestApiKey), Is.False);
+      Assert.That(_storageOne.Remove("", TestApiKey), Is.False);
     }
 
     [Test]
     public void Remove_UsingInvalidApiKeyValue_ReturnFalse()
     {
-      Assert.IsFalse(_storageOne.Remove("DummyName", null));
-      Assert.IsFalse(_storageOne.Remove("DummyName", ""));
+      Assert.That(_storageOne.Remove("DummyName", null), Is.False);
+      Assert.That(_storageOne.Remove("DummyName", ""), Is.False);
     }
 
     [Test]
@@ -120,8 +120,8 @@ namespace Mindscape.Raygun4Net.Tests.Storage
       RaygunSettings.Settings.MaxCrashReportsStoredOffline = 2;
 
       // Save two messages to storage.
-      Assert.IsTrue(_storageOne.Store("DummyData1", TestApiKey));
-      Assert.IsTrue(_storageOne.Store("DummyData2", TestApiKey));
+      Assert.That(_storageOne.Store("DummyData1", TestApiKey), Is.True);
+      Assert.That(_storageOne.Store("DummyData2", TestApiKey), Is.True);
 
       files = _storageOne.FetchAll(TestApiKey);
 
@@ -129,7 +129,7 @@ namespace Mindscape.Raygun4Net.Tests.Storage
       Assert.That(files.Count, Is.EqualTo(2));
 
       // Remove the first file.
-      Assert.IsTrue(_storageOne.Remove(files.First().Name, TestApiKey));
+      Assert.That(_storageOne.Remove(files.First().Name, TestApiKey), Is.True);
 
       // Ensure only one file remains.
       files = _storageOne.FetchAll(TestApiKey);

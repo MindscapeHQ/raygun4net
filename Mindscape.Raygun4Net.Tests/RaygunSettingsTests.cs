@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace Mindscape.Raygun4Net.Tests
 {
@@ -12,79 +8,79 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void Apikey_EmptyByDefault()
     {
-      Assert.IsEmpty(RaygunSettings.Settings.ApiKey);
+      Assert.That(RaygunSettings.Settings.ApiKey, Is.Empty);
     }
 
     [Test]
     public void ApiEndPoint_DefaultValue()
     {
-      Assert.AreEqual("https://api.raygun.com/entries", RaygunSettings.Settings.ApiEndpoint.AbsoluteUri);
+      Assert.That("https://api.raygun.com/entries", Is.EqualTo(RaygunSettings.Settings.ApiEndpoint.AbsoluteUri));
     }
 
     [Test]
     public void MediumTrust_FalseByDefault()
     {
-      Assert.IsFalse(RaygunSettings.Settings.MediumTrust);
+      Assert.That(RaygunSettings.Settings.MediumTrust, Is.False);
     }
 
     [Test]
     public void ThrowOnError_FalseByDefault()
     {
-      Assert.IsFalse(RaygunSettings.Settings.ThrowOnError);
+      Assert.That(RaygunSettings.Settings.ThrowOnError, Is.False);
     }
 
     [Test]
     public void ExcludeHttpStatusCodesList_EmptyByDefault()
     {
-      Assert.IsEmpty(RaygunSettings.Settings.ExcludeHttpStatusCodesList);
+      Assert.That(RaygunSettings.Settings.ExcludeHttpStatusCodesList, Is.Empty);
     }
 
     [Test]
     public void ExcludeErrorsFromLocal_FalseByDefault()
     {
-      Assert.IsFalse(RaygunSettings.Settings.ExcludeErrorsFromLocal);
+      Assert.That(RaygunSettings.Settings.ExcludeErrorsFromLocal, Is.False);
     }
 
     [Test]
     public void IgnoreFormFieldNames_EmptyByDefault()
     {
-      Assert.IsEmpty(RaygunSettings.Settings.IgnoreFormFieldNames);
+      Assert.That(RaygunSettings.Settings.IgnoreFormFieldNames, Is.Empty);
     }
 
     [Test]
     public void IgnoreHeaderNames_EmptyByDefault()
     {
-      Assert.IsEmpty(RaygunSettings.Settings.IgnoreHeaderNames);
+      Assert.That(RaygunSettings.Settings.IgnoreHeaderNames, Is.Empty);
     }
 
     [Test]
     public void IgnoreCookieNames_EmptyByDefault()
     {
-      Assert.IsEmpty(RaygunSettings.Settings.IgnoreCookieNames);
+      Assert.That(RaygunSettings.Settings.IgnoreCookieNames, Is.Empty);
     }
 
     [Test]
     public void IgnoreServerVariableNames_EmptyByDefault()
     {
-      Assert.IsEmpty(RaygunSettings.Settings.IgnoreServerVariableNames);
+      Assert.That(RaygunSettings.Settings.IgnoreServerVariableNames, Is.Empty);
     }
 
     [Test]
     public void IsRawDataIgnored_FalseByDefault()
     {
-      Assert.IsFalse(RaygunSettings.Settings.IsRawDataIgnored);
+      Assert.That(RaygunSettings.Settings.IsRawDataIgnored, Is.False);
     }
 
     [Test]
     public void ApplicationVersion_EmptyByDefault()
     {
-      Assert.IsEmpty(RaygunSettings.Settings.ApplicationVersion);
+      Assert.That(RaygunSettings.Settings.ApplicationVersion, Is.Empty);
     }
 
     [Test]
     public void IsNotReadOnly()
     {
-      Assert.IsFalse(RaygunSettings.Settings.IsReadOnly());
+      Assert.That(RaygunSettings.Settings.IsReadOnly(), Is.False);
     }
   }
 }

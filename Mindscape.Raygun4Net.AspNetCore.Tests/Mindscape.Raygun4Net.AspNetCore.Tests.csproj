@@ -14,4 +14,12 @@
     <ProjectReference Include="..\Mindscape.Raygun4Net.AspNetCore.Tests.TestLib\Mindscape.Raygun4Net.AspNetCore.Tests.TestLib.csproj" />
     <ProjectReference Include="..\Mindscape.Raygun4Net.AspNetCore\Mindscape.Raygun4Net.AspNetCore.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+  </ItemGroup>
 </Project>

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Web;
 using NUnit.Framework;
 
@@ -22,8 +19,8 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void CanSend()
     {
-      Assert.IsTrue(_module.ExposeCanSend(new NullReferenceException()));
-      Assert.IsTrue(_module.ExposeCanSend(new HttpException(404, "Not Found")));
+      Assert.That(_module.ExposeCanSend(new NullReferenceException()), Is.True);
+      Assert.That(_module.ExposeCanSend(new HttpException(404, "Not Found")), Is.True);
     }
 
     [Test]
@@ -32,7 +29,7 @@ namespace Mindscape.Raygun4Net.Tests
       RaygunSettings.Settings.ExcludeHttpStatusCodesList = "404";
       _module.Init(new System.Web.HttpApplication());
 
-      Assert.IsTrue(_module.ExposeCanSend(new InvalidOperationException()));
+      Assert.That(_module.ExposeCanSend(new InvalidOperationException()), Is.True);
 
       RaygunSettings.Settings.ExcludeHttpStatusCodesList = ""; // Revert for other tests
     }
@@ -43,7 +40,7 @@ namespace Mindscape.Raygun4Net.Tests
       RaygunSettings.Settings.ExcludeHttpStatusCodesList = "404";
       _module.Init(new System.Web.HttpApplication());
 
-      Assert.IsTrue(_module.ExposeCanSend(new HttpException(500, "Error message")));
+      Assert.That(_module.ExposeCanSend(new HttpException(500, "Error message")), Is.True);
 
       RaygunSettings.Settings.ExcludeHttpStatusCodesList = ""; // Revert for other tests
     }
@@ -54,7 +51,7 @@ namespace Mindscape.Raygun4Net.Tests
       RaygunSettings.Settings.ExcludeHttpStatusCodesList = "404";
       _module.Init(new System.Web.HttpApplication());
 
-      Assert.IsFalse(_module.ExposeCanSend(new HttpException(404, "Not Found")));
+      Assert.That(_module.ExposeCanSend(new HttpException(404, "Not Found")), Is.False);
 
       RaygunSettings.Settings.ExcludeHttpStatusCodesList = ""; // Revert for other tests
     }
@@ -64,13 +61,13 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void GetRaygunClient()
     {
-      Assert.IsNull(_module.ExposeGetRaygunClient(new HttpApplication()).User);
+      Assert.That(_module.ExposeGetRaygunClient(new HttpApplication()).User, Is.Null);
     }
 
     [Test]
     public void GetCustomizedRaygunClient()
     {
-      Assert.AreEqual("TestUser", _module.ExposeGetRaygunClient(new FakeHttpApplication()).User); // As set in FakeHttpApplication
+      Assert.That("TestUser", Is.EqualTo(_module.ExposeGetRaygunClient(new FakeHttpApplication()).User)); // As set in FakeHttpApplication
     }
   }
 }

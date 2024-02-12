@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using Mindscape.Raygun4Net.Logging;
 using Mindscape.Raygun4Net.Messages;
 

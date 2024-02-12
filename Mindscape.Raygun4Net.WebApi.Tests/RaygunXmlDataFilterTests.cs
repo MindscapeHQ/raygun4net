@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 using Mindscape.Raygun4Net.Filters;
-using System.Linq;
 using System.Xml.Linq;
 
 namespace Mindscape.Raygun4Net.WebApi.Tests
@@ -12,13 +11,13 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
     [Test]
     public void CanParseValidXml()
     {
-      Assert.True(new RaygunXmlDataFilter().CanParse("<root></root>"));
+      Assert.That(new RaygunXmlDataFilter().CanParse("<root></root>"), Is.True);
     }
 
     [Test]
     public void CanNotParseInvalidXml()
     {
-      Assert.False(new RaygunXmlDataFilter().CanParse("{}"));
+      Assert.That(new RaygunXmlDataFilter().CanParse("{}"), Is.False);
     }
 
     [Test]
@@ -30,9 +29,9 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
 
       var filteredData = filter.Filter(xml, new List<string>() { "PaSsWoRd" });
 
-      Assert.NotNull(filteredData);
-      Assert.NotNull(XDocument.Parse(filteredData));// Check if it can still be parsed.
-      Assert.AreEqual(filteredData, "<user><name>Ronald</name><password>[FILTERED]</password></user>");
+      Assert.That(filteredData, Is.Not.Null);
+      Assert.That(XDocument.Parse(filteredData), Is.Not.Null);// Check if it can still be parsed.
+      Assert.That(filteredData, Is.EqualTo("<user><name>Ronald</name><password>[FILTERED]</password></user>"));
     }
 
     [Test]
@@ -44,9 +43,9 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
 
       var filteredData = filter.Filter(xml, new List<string>() { "password" });
 
-      Assert.NotNull(filteredData);
-      Assert.NotNull(XDocument.Parse(filteredData));// Check if it can still be parsed.
-      Assert.AreEqual(filteredData, "<user><name>Ronald</name><password>[FILTERED]</password></user>");
+      Assert.That(filteredData, Is.Not.Null);
+      Assert.That(XDocument.Parse(filteredData), Is.Not.Null);// Check if it can still be parsed.
+      Assert.That(filteredData, Is.EqualTo("<user><name>Ronald</name><password>[FILTERED]</password></user>"));
     }
 
     [Test]
@@ -58,9 +57,9 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
 
       var filteredData = filter.Filter(xml, new List<string>() { "password" });
 
-      Assert.NotNull(filteredData);
-      Assert.NotNull(XDocument.Parse(filteredData));// Check if it can still be parsed.
-      Assert.AreEqual(filteredData, "<user><name>Ronald</name><password></password></user>");
+      Assert.That(filteredData, Is.Not.Null);
+      Assert.That(XDocument.Parse(filteredData), Is.Not.Null);// Check if it can still be parsed.
+      Assert.That(filteredData, Is.EqualTo("<user><name>Ronald</name><password></password></user>"));
     }
 
     [Test]
@@ -72,9 +71,9 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
 
       var filteredData = filter.Filter(xml, new List<string>() { "password" });
 
-      Assert.NotNull(filteredData);
-      Assert.NotNull(XDocument.Parse(filteredData));// Check if it can still be parsed.
-      Assert.AreEqual(filteredData, "<root><raygunsettings apikey=\"123456\" /><user name=\"Raygun\" password=\"[FILTERED]\" /></root>");
+      Assert.That(filteredData, Is.Not.Null);
+      Assert.That(XDocument.Parse(filteredData), Is.Not.Null);// Check if it can still be parsed.
+      Assert.That(filteredData, Is.EqualTo("<root><raygunsettings apikey=\"123456\" /><user name=\"Raygun\" password=\"[FILTERED]\" /></root>"));
     }
 
     [Test]
@@ -86,9 +85,9 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
 
       var filteredData = filter.Filter(xml, new List<string>() { "password" });
 
-      Assert.NotNull(filteredData);
-      Assert.NotNull(XDocument.Parse(filteredData));// Check if it can still be parsed.
-      Assert.AreEqual(filteredData, "<root><raygunsettings apikey=\"123456\" /><user name=\"Raygun\" password=\"\" /></root>");
+      Assert.That(filteredData, Is.Not.Null);
+      Assert.That(XDocument.Parse(filteredData), Is.Not.Null);// Check if it can still be parsed.
+      Assert.That(filteredData, Is.EqualTo("<root><raygunsettings apikey=\"123456\" /><user name=\"Raygun\" password=\"\" /></root>"));
     }
   }
 }

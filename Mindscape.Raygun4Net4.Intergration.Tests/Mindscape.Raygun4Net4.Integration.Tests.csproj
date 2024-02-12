@@ -1,13 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!--<TargetFrameworks>net4;net45;net451;net452;net6;net461;net462;net47;net471;net472;net48;net481;net5;net6;net7;net8</TargetFrameworks>-->
     <TargetFrameworks>net462;net47;net471;net472;net48</TargetFrameworks>
     <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
-    <IsPackable>false</IsPackable>
-    <UserSecretsId>b495b936-5312-45f8-93dd-ef76d2c9d5af</UserSecretsId>
-    <NoWarn>NU1605</NoWarn>
   </PropertyGroup>
   
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -16,14 +11,14 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
-    <PackageReference Include="NUnit" Version="3.13.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+    <PackageReference Include="NUnit" Version="4.0.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
-    <PackageReference Include="NUnit.Analyzers" Version="3.6.1">
+    <PackageReference Include="NUnit.Analyzers" Version="4.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="coverlet.collector" Version="3.2.0">
+    <PackageReference Include="coverlet.collector" Version="6.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

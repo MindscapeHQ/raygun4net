@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Mindscape.Raygun4Net.Messages;
 using NUnit.Framework;
 
@@ -27,7 +25,7 @@ namespace Mindscape.Raygun4Net.Tests
     [Test]
     public void CanSendIfDataIsNull()
     {
-      Assert.IsTrue(_client.ExposeCanSend(new FakeException(null)));
+      Assert.That(_client.ExposeCanSend(new FakeException(null)), Is.True);
     }
 
     [Test]
@@ -35,7 +33,7 @@ namespace Mindscape.Raygun4Net.Tests
     {
       Exception exception = new FakeException(new Dictionary<string, object>());
       _client.ExposeFlagAsSent(exception);
-      Assert.IsFalse(_client.ExposeCanSend(exception));
+      Assert.That(_client.ExposeCanSend(exception), Is.False);
     }
 
     [Test]
@@ -43,7 +41,7 @@ namespace Mindscape.Raygun4Net.Tests
     {
       Exception exception = new FakeException(new Dictionary<object, object>());
       _client.ExposeFlagAsSent(exception);
-      Assert.IsFalse(_client.ExposeCanSend(exception));
+      Assert.That(_client.ExposeCanSend(exception), Is.False);
     }
 
     [Test]
@@ -56,7 +54,7 @@ namespace Mindscape.Raygun4Net.Tests
       };
 
       Assert.That(() => client.ExposeOnSendingMessage(new RaygunMessage()), Throws.Nothing);
-      Assert.IsTrue(client.ExposeOnSendingMessage(new RaygunMessage()));
+      Assert.That(client.ExposeOnSendingMessage(new RaygunMessage()), Is.True);
     }
   }
 }
