@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Mindscape.Raygun4Net.Breadcrumbs;
 
 namespace Mindscape.Raygun4Net
 {
@@ -32,6 +33,8 @@ namespace Mindscape.Raygun4Net
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
 
+    protected static RaygunBreadcrumbs Breadcrumbs;
+    
     private bool _handlingRecursiveErrorSending;
     private bool _handlingRecursiveGrouping;
 
@@ -113,6 +116,8 @@ namespace Mindscape.Raygun4Net
         ApplicationVersion = settings.ApplicationVersion;
       }
 
+      Breadcrumbs = new RaygunBreadcrumbs(new AsyncLocalBreadcrumbStorage(), _settings);
+
       UnhandledExceptionBridge.OnUnhandledException(OnApplicationUnhandledException);
     }
 
@@ -147,6 +152,26 @@ namespace Mindscape.Raygun4Net
       {
         _wrapperExceptions.Remove(wrapper);
       }
+    }
+    
+    public void RecordBreadcrumb(string message)
+    {
+      Breadcrumbs.Record(new RaygunBreadcrumb { Message = message });
+    }
+
+    public void RecordBreadcrumb(RaygunBreadcrumb crumb)
+    {
+      Breadcrumbs.Record(crumb);
+    }
+
+    public void ClearBreadcrumbs()
+    {
+      Breadcrumbs.Clear();
+    }
+
+    public void ExamplePrint()
+    {
+      Console.WriteLine("BAzinga");
     }
 
     protected virtual bool CanSend(Exception exception)
@@ -384,6 +409,7 @@ namespace Mindscape.Raygun4Net
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
         .SetUser(userInfo ?? UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
+        .SetBreadcrumbs(Breadcrumbs.Any() ? Breadcrumbs.ToList() : null)
         .Build();
 
       var customGroupingKey = await OnCustomGroupingKey(exception, message).ConfigureAwait(false);

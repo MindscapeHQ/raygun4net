@@ -1,4 +1,5 @@
 ﻿using System;
+using Mindscape.Raygun4Net.Breadcrumbs;
 
 namespace Mindscape.Raygun4Net
 {
@@ -47,5 +48,9 @@ namespace Mindscape.Raygun4Net
     /// Defaults to Environment.ProcessorCount * 2 &gt;= 8 ? 8 : Environment.ProcessorCount * 2
     /// </remarks>
     public int BackgroundMessageWorkerCount { get; set; } = Environment.ProcessorCount * 2 >= 8 ? 8 : Environment.ProcessorCount * 2;
+
+    public bool BreadcrumbsLocationRecordingEnabled { get; set; } = false;
+
+    public RaygunBreadcrumbLevel BreadcrumbsLevel { get; set; } = RaygunBreadcrumbLevel.Info;
   }
 }
