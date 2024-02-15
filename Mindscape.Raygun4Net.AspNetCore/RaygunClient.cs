@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Mindscape.Raygun4Net.AspNetCore.Builders;
+using Mindscape.Raygun4Net.Breadcrumbs;
 using Mindscape.Raygun4Net.Filters;
 
 namespace Mindscape.Raygun4Net.AspNetCore
@@ -301,7 +302,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
         .SetUser(userInfoMessage ?? UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
-        .SetBreadcrumbs(Breadcrumbs.Any() ? Breadcrumbs.ToList() : null)
+        .SetBreadcrumbs(RaygunBreadcrumbs.Dump().Count > 0 ? RaygunBreadcrumbs.Dump() : null)
         .Build();
 
       var customGroupingKey = await OnCustomGroupingKey(exception, message);

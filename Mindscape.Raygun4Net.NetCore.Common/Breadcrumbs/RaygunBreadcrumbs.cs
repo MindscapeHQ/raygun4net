@@ -6,59 +6,55 @@ using System.Text.RegularExpressions;
 
 namespace Mindscape.Raygun4Net.Breadcrumbs
 {
-  public class RaygunBreadcrumbs : IEnumerable<RaygunBreadcrumb>
+  public static class RaygunBreadcrumbs
   {
-    private readonly IRaygunBreadcrumbStorage _storage;
-    private readonly RaygunSettingsBase _settings;
+    private static IRaygunBreadcrumbStorage _storage = new AsyncLocalBreadcrumbStorage();
 
-    public RaygunBreadcrumbs(IRaygunBreadcrumbStorage storage, RaygunSettingsBase settings) 
+    public static IRaygunBreadcrumbStorage Storage
     {
-      _storage = storage;
-      _settings = settings;
+      get => _storage;
+      set => _storage = value ?? throw new ArgumentNullException(nameof(value), "Storage cannot be null.");
+    }
+
+    public static void Record(string message)
+    {
+      Record(new RaygunBreadcrumb { Message = message });
     }
 
 
-    IEnumerator IEnumerable.GetEnumerator()
+    public static void Record(RaygunBreadcrumb crumb)
     {
-      return GetEnumerator();
-    }
-
-    public IEnumerator<RaygunBreadcrumb> GetEnumerator()
-    {
-      return _storage.GetEnumerator();
-    }
-    
-    public void Record(RaygunBreadcrumb crumb)
-    {
-      if (_settings.BreadcrumbsLocationRecordingEnabled)
+      if (_storage.Size() > 32)
       {
-        try
+        return;
+      }
+
+      if (crumb.Message.Length > 500)
+      {
+        return;
+      }
+
+      try
+      {
+        for (int i = 1; i <= 3; i++)
         {
-          for(int i = 1; i <= 3; i++)
+          PopulateLocation(crumb, i);
+          if (crumb.ClassName == null ||
+              !crumb.ClassName.StartsWith("Mindscape.Raygun4Net", StringComparison.OrdinalIgnoreCase))
           {
-            PopulateLocation(crumb, i);
-            if (crumb.ClassName == null || !crumb.ClassName.StartsWith("Mindscape.Raygun4Net", StringComparison.OrdinalIgnoreCase))
-            {
-              break;
-            }
-          }
-        }
-        catch (Exception)
-        {
-          if (_settings.ThrowOnError)
-          {
-            throw;
+            break;
           }
         }
       }
-
-      if (ShouldRecord(crumb))
+      catch (Exception)
       {
-        _storage.Store(crumb);
+        // ignored
       }
+
+      _storage.Store(crumb);
     }
 
-    private void PopulateLocation(RaygunBreadcrumb crumb, int stackTraceFrame)
+    private static void PopulateLocation(RaygunBreadcrumb crumb, int stackTraceFrame)
     {
       var frame = new StackFrame(stackTraceFrame);
       var method = frame.GetMethod();
@@ -78,14 +74,14 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
       }
     }
 
-    public void Clear()
+    public static void Clear()
     {
       _storage.Clear();
     }
 
-    private bool ShouldRecord(RaygunBreadcrumb crumb)
+    public static IList<RaygunBreadcrumb> Dump()
     {
-      return crumb.Level >= _settings.BreadcrumbsLevel;
+      return _storage.Dump();
     }
   }
 }

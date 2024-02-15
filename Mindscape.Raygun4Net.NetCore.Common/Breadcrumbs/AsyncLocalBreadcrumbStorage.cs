@@ -13,6 +13,11 @@ public class AsyncLocalBreadcrumbStorage : IRaygunBreadcrumbStorage
   {
     _breadcrumbs.Value = breadcrumbs ?? new List<RaygunBreadcrumb>();
   }
+  
+  public void BeginAsyncContext()
+  {
+    _breadcrumbs.Value ??= new List<RaygunBreadcrumb>();
+  }
 
   public void Store(RaygunBreadcrumb breadcrumb)
   {
@@ -26,13 +31,13 @@ public class AsyncLocalBreadcrumbStorage : IRaygunBreadcrumbStorage
     _breadcrumbs.Value?.Clear();
   }
 
-  public IEnumerator<RaygunBreadcrumb> GetEnumerator()
+  public int Size()
   {
-    return _breadcrumbs.Value?.GetEnumerator() ?? Enumerable.Empty<RaygunBreadcrumb>().GetEnumerator();
+    return _breadcrumbs.Value?.Count ?? 0;
   }
 
-  IEnumerator IEnumerable.GetEnumerator()
+  public IList<RaygunBreadcrumb> Dump()
   {
-    return GetEnumerator();
+    return _breadcrumbs.Value ?? new List<RaygunBreadcrumb>();
   }
 }

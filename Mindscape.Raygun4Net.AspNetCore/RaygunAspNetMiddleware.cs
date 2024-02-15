@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Mindscape.Raygun4Net.Breadcrumbs;
 
 namespace Mindscape.Raygun4Net.AspNetCore
 {
@@ -34,6 +35,11 @@ namespace Mindscape.Raygun4Net.AspNetCore
       MemoryStream buffer = null;
       Stream originalRequestBody = null;
 
+      if (RaygunBreadcrumbs.Storage is AsyncLocalBreadcrumbStorage)
+      {
+        ((AsyncLocalBreadcrumbStorage) RaygunBreadcrumbs.Storage).BeginAsyncContext();
+      }
+      
       if (_settings.ReplaceUnseekableRequestStreams)
       {
         try

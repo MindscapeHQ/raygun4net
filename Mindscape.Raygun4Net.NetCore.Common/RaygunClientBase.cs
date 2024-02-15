@@ -32,8 +32,6 @@ namespace Mindscape.Raygun4Net
 
     private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new List<Type>();
-
-    protected static RaygunBreadcrumbs Breadcrumbs;
     
     private bool _handlingRecursiveErrorSending;
     private bool _handlingRecursiveGrouping;
@@ -115,9 +113,7 @@ namespace Mindscape.Raygun4Net
       {
         ApplicationVersion = settings.ApplicationVersion;
       }
-
-      Breadcrumbs = new RaygunBreadcrumbs(new AsyncLocalBreadcrumbStorage(), _settings);
-
+      
       UnhandledExceptionBridge.OnUnhandledException(OnApplicationUnhandledException);
     }
 
@@ -153,27 +149,6 @@ namespace Mindscape.Raygun4Net
         _wrapperExceptions.Remove(wrapper);
       }
     }
-    
-    public void RecordBreadcrumb(string message)
-    {
-      Breadcrumbs.Record(new RaygunBreadcrumb { Message = message });
-    }
-
-    public void RecordBreadcrumb(RaygunBreadcrumb crumb)
-    {
-      Breadcrumbs.Record(crumb);
-    }
-
-    public void ClearBreadcrumbs()
-    {
-      Breadcrumbs.Clear();
-    }
-
-    public void ExamplePrint()
-    {
-      Console.WriteLine("BAzinga");
-    }
-
     protected virtual bool CanSend(Exception exception)
     {
       return exception?.Data == null || !exception.Data.Contains(SentKey) ||
@@ -400,6 +375,7 @@ namespace Mindscape.Raygun4Net
     protected virtual async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags,
       IDictionary userCustomData, RaygunIdentifierMessage userInfo)
     {
+      
       var message = RaygunMessageBuilder.New(_settings)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
@@ -409,7 +385,7 @@ namespace Mindscape.Raygun4Net
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
         .SetUser(userInfo ?? UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
-        .SetBreadcrumbs(Breadcrumbs.Any() ? Breadcrumbs.ToList() : null)
+        .SetBreadcrumbs( RaygunBreadcrumbs.Dump().Count > 0 ? RaygunBreadcrumbs.Dump() : null)
         .Build();
 
       var customGroupingKey = await OnCustomGroupingKey(exception, message).ConfigureAwait(false);
