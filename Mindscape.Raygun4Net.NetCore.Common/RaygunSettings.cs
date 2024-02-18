@@ -4,7 +4,7 @@ namespace Mindscape.Raygun4Net
 {
   public abstract class RaygunSettingsBase
   {
-    internal const string DefaultApiEndPoint = "https://api.raygun.com/entries";
+    private const string DefaultApiEndPoint = "https://api.raygun.com/entries";
     private const string RaygunMessageQueueMaxVariable = "RAYGUN_MESSAGE_QUEUE_MAX";
 
     public RaygunSettingsBase()

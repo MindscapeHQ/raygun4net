@@ -5,18 +5,14 @@ namespace Mindscape.Raygun4Net.AspNetCore
 {
   public class RaygunRequestMessageOptions
   {
-    private readonly List<string> _ignoredSensitiveFieldNames = new List<string>();
-    private readonly List<string> _ignoredQueryParameterNames = new List<string>();
-    private readonly List<string> _ignoredFormFieldNames = new List<string>();
-    private readonly List<string> _ignoreHeaderNames = new List<string>();
-    private readonly List<string> _ignoreCookieNames = new List<string>();
-    private readonly List<string> _ignoreServerVariableNames = new List<string>();
-    private bool _isRawDataIgnored;
-    private bool _isRawDataIgnoredWhenFilteringFailed;
-    private bool _useXmlRawDataFilter;
-    private bool _useKeyValuePairRawDataFilter;
+    private readonly List<string> _ignoredSensitiveFieldNames = new();
+    private readonly List<string> _ignoredQueryParameterNames = new();
+    private readonly List<string> _ignoredFormFieldNames = new();
+    private readonly List<string> _ignoreHeaderNames = new();
+    private readonly List<string> _ignoreCookieNames = new();
+    private readonly List<string> _ignoreServerVariableNames = new();
 
-    private List<IRaygunDataFilter> _rawDataFilters = new List<IRaygunDataFilter>();
+    private readonly List<IRaygunDataFilter> _rawDataFilters = new();
 
     public RaygunRequestMessageOptions() { }
 
@@ -37,32 +33,13 @@ namespace Mindscape.Raygun4Net.AspNetCore
 
     // RawData
 
-    public bool IsRawDataIgnored
-    {
-      get { return _isRawDataIgnored; }
-      set
-      {
-        _isRawDataIgnored = value;
-      }
-    }
+    public bool IsRawDataIgnored { get; set; } = false;
 
-    public bool IsRawDataIgnoredWhenFilteringFailed
-    {
-      get { return _isRawDataIgnoredWhenFilteringFailed; }
-      set { _isRawDataIgnoredWhenFilteringFailed = value; }
-    }
+    public bool IsRawDataIgnoredWhenFilteringFailed { get; set; } = false;
 
-    public bool UseXmlRawDataFilter
-    {
-      get { return _useXmlRawDataFilter; }
-      set { _useXmlRawDataFilter = value; }
-    }
+    public bool UseXmlRawDataFilter { get; set; } = false;
 
-    public bool UseKeyValuePairRawDataFilter
-    {
-      get { return _useKeyValuePairRawDataFilter; }
-      set { _useKeyValuePairRawDataFilter = value; }
-    }
+    public bool UseKeyValuePairRawDataFilter { get; set; } = false;
 
     public void AddRawDataFilter(IRaygunDataFilter filter)
     {

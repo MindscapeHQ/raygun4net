@@ -112,5 +112,11 @@ namespace Mindscape.Raygun4Net
       _raygunMessage.Details.Response = message;
       return this;
     }
+
+    public IRaygunMessageBuilder Customise(Action<IRaygunMessageBuilder> customiseMessage)
+    {
+      customiseMessage?.Invoke(this);
+      return this;
+    }
   }
 }

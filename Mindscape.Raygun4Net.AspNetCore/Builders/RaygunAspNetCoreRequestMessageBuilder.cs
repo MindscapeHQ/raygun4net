@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -16,8 +18,13 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
   {
     private const int MAX_RAW_DATA_LENGTH = 4096; // bytes
 
-    public static async Task<RaygunRequestMessage> Build(HttpContext context, RaygunRequestMessageOptions options)
+    public static async Task<RaygunRequestMessage> Build(HttpContext? context, RaygunRequestMessageOptions? options)
     {
+      if (context == null)
+      {
+        return new RaygunRequestMessage();
+      }
+      
       var request = context.Request;
 
       options = options ?? new RaygunRequestMessageOptions();

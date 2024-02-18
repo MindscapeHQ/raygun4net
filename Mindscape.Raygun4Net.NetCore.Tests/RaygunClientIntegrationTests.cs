@@ -11,8 +11,8 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
   [TestFixture]
   public class RaygunClientIntegrationTests
   {
-    private HttpClient httpClient = null!;
-    private MockHttpHandler mockHttp = null!;
+    private HttpClient _httpClient = null!;
+    private MockHttpHandler _mockHttp = null!;
 
     public class BananaClient : RaygunClient
     {
@@ -24,13 +24,13 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     [SetUp]
     public void Init()
     {
-      mockHttp = new MockHttpHandler();
+      _mockHttp = new MockHttpHandler();
     }
 
     [Test]
     public async Task SendInBackground_ShouldNotBlock()
     {
-      mockHttp.When(match => match.Method(HttpMethod.Post)
+      _mockHttp.When(match => match.Method(HttpMethod.Post)
         .RequestUri("https://api.raygun.com/entries"))
         .Respond(x => 
         {
@@ -39,7 +39,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
           x.StatusCode(HttpStatusCode.Accepted);
         }).Verifiable();
 
-      httpClient = new HttpClient(mockHttp);
+      _httpClient = new HttpClient(_mockHttp);
 
       // This test runs using a mocked http client so we don't need a real API key, if you want to run this
       // and have the data sent to Raygun, remove the `httpClient` parameter from the RaygunClient constructor
@@ -47,7 +47,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       var client = new BananaClient(new RaygunSettings
       {
         ApiKey = "banana"
-      }, httpClient);
+      }, _httpClient);
 
       var stopwatch = new Stopwatch();
       
@@ -76,14 +76,14 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       await Task.Delay(1000);
 
       // Verify that the request was sent 50 times
-      await mockHttp.VerifyAsync(match => match.Method(HttpMethod.Post)
+      await _mockHttp.VerifyAsync(match => match.Method(HttpMethod.Post)
         .RequestUri("https://api.raygun.com/entries"), IsSent.Exactly(50));
     }
     
     [Test]
     public async Task SendInBackground_ShouldFail_WhenMaxTasksIsZero()
     {
-      mockHttp.When(match => match.Method(HttpMethod.Post)
+      _mockHttp.When(match => match.Method(HttpMethod.Post)
           .RequestUri("https://api.raygun.com/entries"))
         .Respond(x => 
         {
@@ -92,7 +92,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
           x.StatusCode(HttpStatusCode.Accepted);
         }).Verifiable();
 
-      httpClient = new HttpClient(mockHttp);
+      _httpClient = new HttpClient(_mockHttp);
 
       // This test runs using a mocked http client so we don't need a real API key, if you want to run this
       // and have the data sent to Raygun, remove the `httpClient` parameter from the RaygunClient constructor
@@ -101,7 +101,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       {
         ApiKey = "banana",
         BackgroundMessageWorkerCount = 0
-      }, httpClient);
+      }, _httpClient);
 
       var stopwatch = new Stopwatch();
       
@@ -130,7 +130,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       await Task.Delay(1000);
 
       // Verify that the request wasn't sent because there was no worker
-      await mockHttp.VerifyAsync(match => match.Method(HttpMethod.Post)
+      await _mockHttp.VerifyAsync(match => match.Method(HttpMethod.Post)
         .RequestUri("https://api.raygun.com/entries"), IsSent.Exactly(0));
     }
     
@@ -140,7 +140,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     {
       Environment.SetEnvironmentVariable("RAYGUN_MESSAGE_QUEUE_MAX", "10");
       
-      mockHttp.When(match => match.Method(HttpMethod.Post)
+      _mockHttp.When(match => match.Method(HttpMethod.Post)
           .RequestUri("https://api.raygun.com/entries"))
         .Respond(x => 
         {
@@ -149,7 +149,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
           x.StatusCode(HttpStatusCode.Accepted);
         }).Verifiable();
 
-      httpClient = new HttpClient(mockHttp);
+      _httpClient = new HttpClient(_mockHttp);
 
       // This test runs using a mocked http client so we don't need a real API key, if you want to run this
       // and have the data sent to Raygun, remove the `httpClient` parameter from the RaygunClient constructor
@@ -157,7 +157,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       var client = new BananaClient(new RaygunSettings
       {
         ApiKey = "banana"
-      }, httpClient);
+      }, _httpClient);
 
       var stopwatch = new Stopwatch();
       
@@ -186,7 +186,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       await Task.Delay(1000);
 
       // Verify that the request was sent 50 times
-      await mockHttp.VerifyAsync(match => match.Method(HttpMethod.Post)
+      await _mockHttp.VerifyAsync(match => match.Method(HttpMethod.Post)
         .RequestUri("https://api.raygun.com/entries"), IsSent.AtMost(49));
       
       Environment.SetEnvironmentVariable("RAYGUN_MESSAGE_QUEUE_MAX", null);
