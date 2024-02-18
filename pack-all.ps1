@@ -1,10 +1,10 @@
 
 $root = Get-Location
 $build_dir = "$root\build"
-$assembly_version = "9.0.0"
-$version = "9.0.0"
+$assembly_version = "9.0.5"
+$version = "9.0.5"
 $is_pre_release = $true
-$pre_release_counter = 1
+$pre_release_counter = 9
 
 function CleanAndBuild {
     Remove-Item -Force -Recurse $build_dir -ErrorAction SilentlyContinue | Out-Null
@@ -37,6 +37,7 @@ function PackAll {
     # count the number of packages produced and write out
     $packageCount = (Get-ChildItem -Path $build_dir -Filter *.nupkg).Count
     Write-Output "Created $packageCount packages"
+    Write-Output "Version: $package_version"
 
 }
 
