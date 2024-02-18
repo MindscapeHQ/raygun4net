@@ -35,9 +35,9 @@ namespace Mindscape.Raygun4Net.AspNetCore
       MemoryStream buffer = null;
       Stream originalRequestBody = null;
 
-      if (RaygunBreadcrumbs.Storage is AsyncLocalBreadcrumbStorage)
+      if (RaygunBreadcrumbs.Storage is IContextAwareStorage storage)
       {
-        ((AsyncLocalBreadcrumbStorage) RaygunBreadcrumbs.Storage).BeginAsyncContext();
+        storage.BeginContext();
       }
       
       if (_settings.ReplaceUnseekableRequestStreams)

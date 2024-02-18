@@ -79,9 +79,9 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
       _storage.Clear();
     }
 
-    public static IList<RaygunBreadcrumb> Dump()
+    public static IList<RaygunBreadcrumb> ToList()
     {
-      return _storage.Dump();
+      return _storage.ToList();
     }
   }
 }

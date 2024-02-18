@@ -1,11 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading;
 
 namespace Mindscape.Raygun4Net.Breadcrumbs;
 
-public class AsyncLocalBreadcrumbStorage : IRaygunBreadcrumbStorage
+public class AsyncLocalBreadcrumbStorage : IContextAwareStorage
 {
   private readonly AsyncLocal<List<RaygunBreadcrumb>> _breadcrumbs = new();
 
@@ -14,9 +12,14 @@ public class AsyncLocalBreadcrumbStorage : IRaygunBreadcrumbStorage
     _breadcrumbs.Value = breadcrumbs ?? new List<RaygunBreadcrumb>();
   }
   
-  public void BeginAsyncContext()
+  public void BeginContext()
   {
     _breadcrumbs.Value ??= new List<RaygunBreadcrumb>();
+  }
+
+  public void EndContext()
+  {
+    _breadcrumbs.Value = null;
   }
 
   public void Store(RaygunBreadcrumb breadcrumb)
@@ -36,8 +39,8 @@ public class AsyncLocalBreadcrumbStorage : IRaygunBreadcrumbStorage
     return _breadcrumbs.Value?.Count ?? 0;
   }
 
-  public IList<RaygunBreadcrumb> Dump()
+  public IList<RaygunBreadcrumb> ToList()
   {
-    return _breadcrumbs.Value ?? new List<RaygunBreadcrumb>();
+    return _breadcrumbs.Value;
   }
 }

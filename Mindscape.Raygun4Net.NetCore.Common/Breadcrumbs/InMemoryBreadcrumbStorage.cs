@@ -26,8 +26,8 @@ public class InMemoryBreadcrumbStorage : IRaygunBreadcrumbStorage
     return _breadcrumbs?.Count ?? 0;
   }
 
-  public IList<RaygunBreadcrumb> Dump()
+  public IList<RaygunBreadcrumb> ToList()
   {
-    return _breadcrumbs ?? new List<RaygunBreadcrumb>();
+    return _breadcrumbs;
   }
 }

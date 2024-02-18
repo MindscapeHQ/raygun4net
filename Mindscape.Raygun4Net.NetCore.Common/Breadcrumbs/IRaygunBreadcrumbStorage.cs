@@ -10,6 +10,6 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
 
     int Size();
 
-    IList<RaygunBreadcrumb> Dump();
+    IList<RaygunBreadcrumb> ToList();
   }
 }

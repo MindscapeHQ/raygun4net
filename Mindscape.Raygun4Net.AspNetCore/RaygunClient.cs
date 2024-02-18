@@ -302,7 +302,7 @@ namespace Mindscape.Raygun4Net.AspNetCore
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
         .SetUser(userInfoMessage ?? UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
-        .SetBreadcrumbs(RaygunBreadcrumbs.Dump().Count > 0 ? RaygunBreadcrumbs.Dump() : null)
+        .SetBreadcrumbs(RaygunBreadcrumbs.ToList())
         .Build();
 
       var customGroupingKey = await OnCustomGroupingKey(exception, message);
