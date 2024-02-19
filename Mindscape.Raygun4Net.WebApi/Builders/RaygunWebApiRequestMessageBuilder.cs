@@ -19,7 +19,7 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
     {
       options = options ?? new RaygunRequestMessageOptions();
 
-      var message = new RaygunRequestMessage()
+      var message = new RaygunRequestMessage
       {
         IPAddress   = GetIPAddress(request),
         QueryString = GetQueryString(request, options),

@@ -2,7 +2,6 @@
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
-using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
@@ -599,7 +598,7 @@ namespace Mindscape.Raygun4Net.WebApi
 
     private static HttpRequestMessage ConvertHttpContext(HttpContext httpContext)
     {
-      return httpContext.Items["MS_HttpRequestMessage"] as HttpRequestMessage;
+      return httpContext?.Items["MS_HttpRequestMessage"] as HttpRequestMessage;
     }
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
