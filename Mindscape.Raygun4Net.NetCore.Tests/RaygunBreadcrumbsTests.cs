@@ -90,6 +90,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     {
       RaygunBreadcrumbs.Storage = new InMemoryBreadcrumbStorage();
       
+      // InMemory should have global context, so a lower context should not affect it
       InMemoryLowerContext();
       
       Assert.That(RaygunBreadcrumbs.ToList(), Has.Count.EqualTo(1));
