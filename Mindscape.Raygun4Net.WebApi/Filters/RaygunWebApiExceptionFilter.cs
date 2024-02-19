@@ -16,13 +16,13 @@ namespace Mindscape.Raygun4Net.WebApi
 
     public override void OnException(HttpActionExecutedContext context)
     {
-      _clientCreator.GenerateRaygunWebApiClient(context.Request).SendInBackground(context.Exception, new List<string> { RaygunWebApiClient.UnhandledExceptionTag });
+      _clientCreator.GenerateRaygunWebApiClient().SendInBackground(context.Exception, new List<string> { RaygunWebApiClient.UnhandledExceptionTag });
     }
 
 #pragma warning disable 1998
     public override async Task OnExceptionAsync(HttpActionExecutedContext context, CancellationToken cancellationToken)
     {
-      _clientCreator.GenerateRaygunWebApiClient(context.Request).SendInBackground(context.Exception, new List<string> { RaygunWebApiClient.UnhandledExceptionTag });
+      _clientCreator.GenerateRaygunWebApiClient().SendInBackground(context.Exception, new List<string> { RaygunWebApiClient.UnhandledExceptionTag });
     }
 #pragma warning restore 1998
   }

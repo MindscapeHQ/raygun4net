@@ -10,6 +10,7 @@ using System.Web.Http.ExceptionHandling;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web;
 using Mindscape.Raygun4Net.WebApi.Builders;
 using Mindscape.Raygun4Net.Messages;
 using Mindscape.Raygun4Net.Filters;
@@ -25,18 +26,16 @@ namespace Mindscape.Raygun4Net.WebApi
     private static RaygunWebApiExceptionFilter _exceptionFilter;
     private static RaygunWebApiActionFilter _actionFilter;
     private static RaygunWebApiDelegatingHandler _delegatingHandler;
-    private static object _sendLock = new object();
+    private static object _sendLock = new ();
 
-    private readonly List<Type> _wrapperExceptions = new List<Type>();
-    private readonly ThreadLocal<HttpRequestMessage> _currentWebRequest = new ThreadLocal<HttpRequestMessage>(() => null);
-    private readonly ThreadLocal<RaygunRequestMessage> _currentRequestMessage = new ThreadLocal<RaygunRequestMessage>(() => null);
+    private readonly List<Type> _wrapperExceptions = new ();
     private readonly ThrottledBackgroundMessageProcessor _backgroundMessageProcessor;
 
     private readonly string _apiKey;
 
     private IRaygunOfflineStorage _offlineStorage = new IsolatedRaygunOfflineStorage();
 
-    protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
+    protected readonly RaygunRequestMessageOptions _requestMessageOptions = new();
 
     /// <summary>
     /// Gets or sets the username/password credentials which are used to authenticate with the system default Proxy server, if one is set
@@ -96,26 +95,8 @@ namespace Mindscape.Raygun4Net.WebApi
     /// Causes Raygun4Net to listen for exceptions.
     /// </summary>
     /// <param name="config">The HttpConfiguration to attach to.</param>
-    public static void Attach(HttpConfiguration config)
-    {
-      var appVersion = RaygunSettings.Settings.ApplicationVersion;
-      if (string.IsNullOrEmpty(appVersion))
-      {
-        // Use `GetCallingAssembly` to get access to the library that is using the Raygun4Net library.
-        // We can then lookup and use that library's version. Do not nest this call further
-        // or else we will not be getting the user's library but our own Raygun4Net library.
-        appVersion = Assembly.GetCallingAssembly()?.GetName()?.Version?.ToString();
-      }
-
-      AttachInternal(config, null, appVersion);
-    }
-
-    /// <summary>
-    /// Causes Raygun4Net to listen for exceptions.
-    /// </summary>
-    /// <param name="config">The HttpConfiguration to attach to.</param>
     /// <param name="generateRaygunClient">An optional function to provide a custom RaygunWebApiClient instance to use for reporting exceptions.</param>
-    public static void Attach(HttpConfiguration config, Func<RaygunWebApiClient> generateRaygunClient)
+    public static void Attach(HttpConfiguration config, Func<RaygunWebApiClient> generateRaygunClient = null)
     {
       var appVersion = RaygunSettings.Settings.ApplicationVersion;
       if (string.IsNullOrEmpty(appVersion))
@@ -125,44 +106,11 @@ namespace Mindscape.Raygun4Net.WebApi
         // or else we will not be getting the user's library but our own Raygun4Net library.
         appVersion = Assembly.GetCallingAssembly()?.GetName()?.Version?.ToString();
       }
-
-      if (generateRaygunClient != null)
-      {
-        AttachInternal(config, message => generateRaygunClient(), appVersion);
-      }
-      else
-      {
-        AttachInternal(config, null, appVersion);
-      }
-    }
-
-    /// <summary>
-    /// Causes Raygun4Net to listen for exceptions.
-    /// </summary>
-    /// <param name="config">The HttpConfiguration to attach to.</param>
-    /// <param name="generateRaygunClient">
-    /// An optional function to provide a custom RaygunWebApiClient instance to use for reporting exceptions.
-    /// The HttpRequestMessage parameter to this function might be null if there is no request in the context of the
-    /// failure we are currently handling.
-    /// </param>
-    public static void Attach(HttpConfiguration config, Func<HttpRequestMessage, RaygunWebApiClient> generateRaygunClient)
-    {
-      var appVersion = RaygunSettings.Settings.ApplicationVersion;
-      if (string.IsNullOrEmpty(appVersion))
-      {
-        // Use `GetCallingAssembly` to get access to the library that is using the Raygun4Net library.
-        // We can then lookup and use that library's version. Do not nest this call further
-        // or else we will not be getting the user's library but our own Raygun4Net library.
-        appVersion = Assembly.GetCallingAssembly()?.GetName()?.Version?.ToString();
-      }
-
+      
       AttachInternal(config, generateRaygunClient, appVersion);
     }
 
-    private static void AttachInternal(
-      HttpConfiguration config,
-      Func<HttpRequestMessage, RaygunWebApiClient> generateRaygunClientWithMessage,
-      string appVersion)
+    private static void AttachInternal(HttpConfiguration config, Func<RaygunWebApiClient> generateRaygunClient, string appVersion)
     {
       Detach(config);
 
@@ -172,7 +120,7 @@ namespace Mindscape.Raygun4Net.WebApi
         config.MessageHandlers.Add(_delegatingHandler);
       }
 
-      var clientCreator = new RaygunWebApiClientProvider(generateRaygunClientWithMessage, appVersion);
+      var clientCreator = new RaygunWebApiClientProvider(generateRaygunClient, appVersion);
 
       // Add Services
       config.Services.Add(typeof(IExceptionLogger), new RaygunWebApiExceptionLogger(clientCreator));
@@ -461,18 +409,7 @@ namespace Mindscape.Raygun4Net.WebApi
     /// <param name="exception">The exception to deliver.</param>
     public override void Send(Exception exception)
     {
-      Send(exception, null, (IDictionary) null);
-    }
-
-    /// <summary>
-    /// Transmits an exception to Raygun synchronously specifying a list of string tags associated
-    /// with the message for identification. This uses the version number of the originating assembly.
-    /// </summary>
-    /// <param name="exception">The exception to deliver.</param>
-    /// <param name="tags">A list of strings associated with the message.</param>
-    public void Send(Exception exception, IList<string> tags)
-    {
-      Send(exception, tags, (IDictionary) null);
+      Send(exception, null);
     }
 
     /// <summary>
@@ -483,35 +420,22 @@ namespace Mindscape.Raygun4Net.WebApi
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
+    public void Send(Exception exception, IList<string> tags, IDictionary userCustomData = null)
     {
       if (CanSend(exception))
       {
-        _currentRequestMessage.Value = BuildRequestMessage();
+        var requestMsg = BuildRequestMessage();
 
-        StripAndSend(exception, tags, userCustomData);
+        StripAndSend(exception, tags, userCustomData, customiseAction: x =>
+        {
+          if (x is RaygunWebApiMessageBuilder builder)
+          {
+            builder.SetHttpDetails(requestMsg); 
+          }
+        });
 
         FlagAsSent(exception);
       }
-    }
-
-    /// <summary>
-    /// Asynchronously transmits a message to Raygun.
-    /// </summary>
-    /// <param name="exception">The exception to deliver.</param>
-    public void SendInBackground(Exception exception)
-    {
-      SendInBackground(exception, null, (IDictionary) null);
-    }
-
-    /// <summary>
-    /// Asynchronously transmits an exception to Raygun.
-    /// </summary>
-    /// <param name="exception">The exception to deliver.</param>
-    /// <param name="tags">A list of strings associated with the message.</param>
-    public void SendInBackground(Exception exception, IList<string> tags)
-    {
-      SendInBackground(exception, tags, (IDictionary) null);
     }
 
     /// <summary>
@@ -520,7 +444,7 @@ namespace Mindscape.Raygun4Net.WebApi
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
-    public void SendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData)
+    public void SendInBackground(Exception exception, IList<string> tags = null, IDictionary userCustomData = null)
     {
       if (CanSend(exception))
       {
@@ -528,9 +452,15 @@ namespace Mindscape.Raygun4Net.WebApi
         {
           // We need to process the HttpRequestMessage on the current thread,
           // otherwise it will be disposed while we are using it on the other thread.
-          _currentRequestMessage.Value = BuildRequestMessage();
+          var requestMsg = BuildRequestMessage();
           var currentTime = DateTime.UtcNow;
-          StripAndSendInBackground(exception, tags, userCustomData, currentTime);
+          StripAndSendInBackground(exception, tags, userCustomData, currentTime, x =>
+          {
+            if (x is RaygunWebApiMessageBuilder builder)
+            {
+              builder.SetHttpDetails(requestMsg);
+            }
+          });
         }
         catch (Exception)
         {
@@ -640,19 +570,19 @@ namespace Mindscape.Raygun4Net.WebApi
       WebClientHelper.Send(message, _apiKey, ProxyCredentials);
     }
 
-    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime = null)
+    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime = null, Action<IRaygunMessageBuilder> customiseAction = null)
     {
       foreach (var e in StripWrapperExceptions(exception))
       {
-        Send(BuildMessage(e, tags, userCustomData, currentTime));
+        Send(BuildMessage(e, tags, userCustomData, currentTime, customiseAction));
       }
     }
     
-    private void StripAndSendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime)
+    private void StripAndSendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime, Action<IRaygunMessageBuilder> customiseAction = null)
     {
       foreach (var e in StripWrapperExceptions(exception))
       {
-        SendInBackground(() => BuildMessage(e, tags, userCustomData, currentTime));
+        SendInBackground(() => BuildMessage(e, tags, userCustomData, currentTime, customiseAction));
       }
     }
 
@@ -662,9 +592,14 @@ namespace Mindscape.Raygun4Net.WebApi
 
     private RaygunRequestMessage BuildRequestMessage()
     {
-      var message = _currentWebRequest.Value != null ? RaygunWebApiRequestMessageBuilder.Build(_currentWebRequest.Value, _requestMessageOptions) : null;
-      _currentWebRequest.Value = null;
+      var ctx = ConvertHttpContext(HttpContext.Current);
+      var message = ctx != null ? RaygunWebApiRequestMessageBuilder.Build(ctx, _requestMessageOptions) : null;
       return message;
+    }
+
+    private static HttpRequestMessage ConvertHttpContext(HttpContext httpContext)
+    {
+      return httpContext.Items["MS_HttpRequestMessage"] as HttpRequestMessage;
     }
 
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
@@ -672,10 +607,10 @@ namespace Mindscape.Raygun4Net.WebApi
       return BuildMessage(exception, tags, userCustomData, null);
     }
 
-    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime = null)
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime = null, Action<IRaygunMessageBuilder> customiseAction = null)
     {
       var message = RaygunWebApiMessageBuilder.New
-        .SetHttpDetails(_currentRequestMessage.Value)
+        .Customise(customiseAction)
         .SetTimeStamp(currentTime)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
@@ -848,7 +783,7 @@ namespace Mindscape.Raygun4Net.WebApi
 
     protected override bool CanSend(Exception exception)
     {
-      if (RaygunSettings.Settings.ExcludeErrorsFromLocal && _currentWebRequest.Value != null && _currentWebRequest.Value.IsLocal())
+      if (RaygunSettings.Settings.ExcludeErrorsFromLocal && HttpContext.Current != null && HttpContext.Current.Request.IsLocal)
       {
         return false;
       }
@@ -869,12 +804,6 @@ namespace Mindscape.Raygun4Net.WebApi
     internal void FlagExceptionAsSent(Exception exception)
     {
       base.FlagAsSent(exception);
-    }
-
-    public RaygunWebApiClient SetCurrentHttpRequest(HttpRequestMessage request)
-    {
-      _currentWebRequest.Value = request;
-      return this;
     }
   }
 }

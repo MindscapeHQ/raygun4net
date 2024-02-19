@@ -170,5 +170,11 @@ namespace Mindscape.Raygun4Net.WebApi
 
       return this;
     }
+
+    public IRaygunMessageBuilder Customise(Action<IRaygunMessageBuilder> customiseAction)
+    {
+      customiseAction?.Invoke(this);
+      return this;
+    }
   }
 }

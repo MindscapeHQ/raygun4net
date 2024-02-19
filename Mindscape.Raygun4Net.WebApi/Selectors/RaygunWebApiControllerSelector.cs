@@ -25,7 +25,7 @@ namespace Mindscape.Raygun4Net.WebApi
       }
       catch (HttpResponseException ex)
       {
-        _clientCreator.GenerateRaygunWebApiClient(request).SendInBackground(ex, new List<string> { RaygunWebApiClient.UnhandledExceptionTag });
+        _clientCreator.GenerateRaygunWebApiClient().SendInBackground(ex, new List<string> { RaygunWebApiClient.UnhandledExceptionTag });
         throw;
       }
     }
