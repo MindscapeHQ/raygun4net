@@ -46,4 +46,12 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
+
+  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <InternalsVisibleTo Include="Raygun4Net.AspNetCore.Tests"/>
+  </ItemGroup>
+  
+  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <InternalsVisibleTo Include="Raygun4Net.AspNetCore.Tests, PublicKey=$(RaygunPublicKey)"/>
+  </ItemGroup>
 </Project>

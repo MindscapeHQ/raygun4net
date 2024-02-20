@@ -376,8 +376,8 @@ namespace Mindscape.Raygun4Net
 
     internal async Task<RaygunMessage> BuildMessage(Exception exception, 
                                                              IList<string> tags,
-                                                             IDictionary userCustomData, 
-                                                             RaygunIdentifierMessage userInfo,
+                                                             IDictionary userCustomData = null, 
+                                                             RaygunIdentifierMessage userInfo = null,
                                                              Action<IRaygunMessageBuilder> customiseMessage = null)
     {
       var thing = userInfo ?? UserInfo ?? (!string.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null);

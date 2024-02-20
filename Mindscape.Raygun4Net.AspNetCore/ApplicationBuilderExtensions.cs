@@ -15,10 +15,25 @@ public static class ApplicationBuilderExtensions
     return app.UseMiddleware<RaygunMiddleware>();
   }
 
-  public static IServiceCollection AddRaygun(this IServiceCollection services, IConfiguration? configuration = null, Action<RaygunSettings>? configure = null)
+  public static IServiceCollection AddRaygun(this IServiceCollection services, IConfiguration configuration, Action<RaygunSettings>? configure = null)
   {
     // Fetch settings from configuration or use default settings
-    var settings = configuration?.GetSection("RaygunSettings").Get<RaygunSettings>() ?? new RaygunSettings();
+    var settings = configuration.GetSection("RaygunSettings").Get<RaygunSettings>() ?? new RaygunSettings();
+    
+    // Override settings with user-provided settings
+    configure?.Invoke(settings);
+    
+    services.TryAddSingleton(settings);
+    services.TryAddSingleton(s => new RaygunClient(s.GetService<RaygunSettings>()));
+    services.AddHttpContextAccessor();
+
+    return services;
+  }
+
+  public static IServiceCollection AddRaygun(this IServiceCollection services, Action<RaygunSettings>? configure = null)
+  {
+    // Fetch settings from configuration or use default settings
+    var settings = new RaygunSettings();
     
     // Override settings with user-provided settings
     configure?.Invoke(settings);

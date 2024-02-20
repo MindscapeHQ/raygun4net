@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
 
 namespace Mindscape.Raygun4Net.AspNetCore;
 
@@ -18,12 +17,12 @@ public class RaygunMiddleware
   private const string UnhandledExceptionTag = "UnhandledException";
 
   public RaygunMiddleware(RequestDelegate next,
-                          IOptions<RaygunSettings> settings,
+                          RaygunSettings settings,
                           RaygunClient raygunClient,
                           IHttpContextAccessor httpContextAccessor)
   {
     _next = next;
-    _settings = settings.Value ?? new RaygunSettings();
+    _settings = settings;
     _client = raygunClient;
     _httpContextAccessor = httpContextAccessor;
   }

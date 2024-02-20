@@ -14,11 +14,12 @@ using Mindscape.Raygun4Net.Filters;
 
 namespace Mindscape.Raygun4Net.AspNetCore.Builders
 {
+  // ReSharper disable once ClassNeverInstantiated.Global
   public class RaygunAspNetCoreRequestMessageBuilder
   {
     private const int MAX_RAW_DATA_LENGTH = 4096; // bytes
 
-    public static async Task<RaygunRequestMessage> Build(HttpContext? context, RaygunRequestMessageOptions? options)
+    public static async Task<RaygunRequestMessage> Build(HttpContext? context, RaygunSettings options)
     {
       if (context == null)
       {
@@ -26,8 +27,6 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       }
       
       var request = context.Request;
-
-      options = options ?? new RaygunRequestMessageOptions();
 
       var message = new RaygunRequestMessage
       {
@@ -65,13 +64,13 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return ip.ToString();
     }
 
-    private static IDictionary GetQueryString(HttpRequest request, RaygunRequestMessageOptions options)
+    private static IDictionary GetQueryString(HttpRequest request, IRaygunHttpSettings options)
     {
       IDictionary queryString = null;
      
       try
       {
-        queryString = ToDictionary(request.Query, options.IsQueryParameterIgnored, options.IsSensitiveFieldIgnored);
+        queryString = ToDictionary(request.Query, s => IsIgnored(s, options.IgnoreQueryParameterNames), s=> IsIgnored(s, options.IgnoreSensitiveFieldNames));
       }
       catch (Exception e)
       {
@@ -81,12 +80,12 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return queryString;
     }
 
-    private static IList GetCookies(HttpRequest request, RaygunRequestMessageOptions options)
+    private static IList GetCookies(HttpRequest request, IRaygunHttpSettings options)
     {
       IList cookies;
       try
       {
-	      cookies = request.Cookies.Where(c => !options.IsCookieIgnored(c.Key) && !options.IsSensitiveFieldIgnored(c.Key))
+	      cookies = request.Cookies.Where(c => !IsIgnored(c.Key, options.IgnoreCookieNames) && !IsIgnored(c.Key, options.IgnoreSensitiveFieldNames))
 		      .Select(c => new RaygunRequestMessage.Cookie(c.Key, c.Value)).ToList();
       }
       // ReSharper disable once EmptyGeneralCatchClause
@@ -98,7 +97,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return cookies;
     }
 
-    private static string GetRawData(HttpRequest request, RaygunRequestMessageOptions options)
+    private static string GetRawData(HttpRequest request, IRaygunHttpSettings options)
     {
       if (options.IsRawDataIgnored)
       {
@@ -124,7 +123,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
         if (contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "multipart/form-data", CompareOptions.IgnoreCase) >= 0)
         {
           // For multipart form data, gather up all the form names and values to be stripped out later.
-          ignoredMultiPartFormData = GetIgnoredFormValues(request.Form, options.IsFormFieldIgnored);
+          ignoredMultiPartFormData = GetIgnoredFormValues(request.Form, s => IsIgnored(s, options.IgnoreFormFieldNames));
         }
 
         request.Body.Seek(0, SeekOrigin.Begin);
@@ -207,7 +206,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return rawData;
     }
 
-    public static string StripSensitiveValues(string rawData, RaygunRequestMessageOptions options)
+    public static string StripSensitiveValues(string rawData, IRaygunHttpSettings options)
     {
       // Early escape if theres no data.
       if (string.IsNullOrEmpty(rawData))
@@ -223,7 +222,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
         // Parse the raw data into a dictionary.
         if (filter.CanParse(rawData))
         {
-          var filteredData = filter.Filter(rawData, options.SensitiveFieldNames());
+          var filteredData = filter.Filter(rawData, options.IgnoreSensitiveFieldNames);
 
           if (!string.IsNullOrEmpty(filteredData))
           {
@@ -233,7 +232,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       }
 
       // We have failed to parse and filter the raw data, so check if the data contains sensitive values and should be dropped.
-      if (options.IsRawDataIgnoredWhenFilteringFailed && DataContains(rawData, options.SensitiveFieldNames()))
+      if (options.IsRawDataIgnoredWhenFilteringFailed && DataContains(rawData, options.IgnoreSensitiveFieldNames))
       {
         return null;
       }
@@ -243,13 +242,13 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       }
     }
 
-    private static IList<IRaygunDataFilter> GetRawDataFilters(RaygunRequestMessageOptions options)
+    private static IList<IRaygunDataFilter> GetRawDataFilters(IRaygunHttpSettings options)
     {
       var parsers = new List<IRaygunDataFilter>();
 
-      if (options.GetRawDataFilters() != null && options.GetRawDataFilters().Count > 0)
+      if (options.RawDataFilters != null && options.RawDataFilters.Count > 0)
       {
-        parsers.AddRange(options.GetRawDataFilters());
+        parsers.AddRange(options.RawDataFilters);
       }
 
       if (options.UseXmlRawDataFilter)
@@ -265,7 +264,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return parsers;
     }
 
-    public static bool DataContains(string data, List<string> values)
+    public static bool DataContains(string data, IReadOnlyList<string> values)
     {
       bool exists = false;
 
@@ -281,13 +280,18 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return exists;
     }
 
-    private static IDictionary GetHeaders(HttpRequest request, RaygunRequestMessageOptions options)
+    private static IDictionary GetHeaders(HttpRequest request, IRaygunHttpSettings options)
     {
       IDictionary headers = new Dictionary<string, string>();
       try
       {
-        foreach (var header in request.Headers.Where(h => !options.IsHeaderIgnored(h.Key) && !options.IsSensitiveFieldIgnored(h.Key)))
+        foreach (var header in request.Headers)
         {
+          if (IsIgnored(header.Key, options.IgnoreHeaderNames) || IsIgnored(header.Key, options.IgnoreSensitiveFieldNames))
+          {
+            continue;
+          }
+          
           headers[header.Key] = string.Join(",", header.Value);
         }
       }
@@ -299,7 +303,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return headers;
     }
 
-    private static async Task<IDictionary> GetForm(HttpRequest request, RaygunRequestMessageOptions options)
+    private static async Task<IDictionary> GetForm(HttpRequest request, IRaygunHttpSettings options)
     {
       IDictionary form = null;
 
@@ -307,7 +311,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       {
         if (request.HasFormContentType)
         {
-          form = ToDictionary(await request.ReadFormAsync(), options.IsFormFieldIgnored, options.IsSensitiveFieldIgnored);
+          form = ToDictionary(await request.ReadFormAsync(), s =>  IsIgnored(s, options.IgnoreFormFieldNames), s => IsIgnored(s, options.IgnoreSensitiveFieldNames));
         }
       }
       catch (Exception e)
@@ -340,6 +344,53 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       }
 
       return dict;
+    }
+
+    internal static bool IsIgnored(string? key, IReadOnlyList<string> list)
+    {
+      if (key == null || (list.Count == 1 && "*".Equals(list[0])))
+      {
+        return true;
+      }
+
+      // ReSharper disable once LoopCanBeConvertedToQuery
+      foreach (var ignoredKey in list)
+      {
+        var ignoreResult = ignoredKey switch
+        {
+          _ when ignoredKey.StartsWith("*") && ignoredKey.EndsWith("*") && ignoredKey.Length > 2 => CheckContains(ignoredKey, key),
+          _ when ignoredKey.StartsWith("*") => CheckEndsWith(ignoredKey, key),
+          _ when ignoredKey.EndsWith("*") => CheckStartsWith(ignoredKey, key),
+          _ => key.Equals(ignoredKey, StringComparison.OrdinalIgnoreCase)
+        };
+        
+        if (ignoreResult)
+        {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    private static bool CheckStartsWith(string ignoredKey, string key)
+    {
+      var value = ignoredKey.AsSpan(0, ignoredKey.Length - 1);
+      
+      return key.AsSpan().StartsWith(value, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool CheckEndsWith(string ignoredKey, string key)
+    {
+      var value = ignoredKey.AsSpan(1);
+      return key.AsSpan().EndsWith(value, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool CheckContains(string ignoredKey, string key)
+    {
+      var value = ignoredKey.AsSpan(1, ignoredKey.Length - 2);
+
+      return key.AsSpan().IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0;
     }
   }
 }
