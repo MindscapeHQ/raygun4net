@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Mindscape.Raygun4Net.Filters;
 
 namespace Mindscape.Raygun4Net.AspNetCore;
@@ -33,6 +34,7 @@ public class RaygunSettings : RaygunSettingsBase, IRaygunHttpSettings
 
   public bool UseKeyValuePairRawDataFilter { get; set; }
 
+  [Obsolete("Raygun Middleware now uses `Request.EnableBuffering()` to allow the request body to be read multiple times. This setting is no longer required.")]
   public bool ReplaceUnseekableRequestStreams { get; set; }
     
   public string ApplicationIdentifier { get; set; }

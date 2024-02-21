@@ -51,6 +51,18 @@ namespace Mindscape.Raygun4Net
     public event EventHandler<RaygunCustomGroupingKeyEventArgs> CustomGroupingKey;
 
     /// <summary>
+    /// Gets or sets the user identity string.
+    /// </summary>
+    [Obsolete("Provide a `IRaygunUserProvider` to the RaygunClient constructor instead.")]
+    public virtual string User { get; set; }
+
+    /// <summary>
+    /// Gets or sets information about the user including the identity string.
+    /// </summary>
+    [Obsolete("Provide a `IRaygunUserProvider` to the RaygunClient constructor instead.")]
+    public virtual RaygunIdentifierMessage UserInfo { get; set; }
+
+    /// <summary>
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun endpoint.
     /// </summary>
     public string ApplicationVersion { get; set; }

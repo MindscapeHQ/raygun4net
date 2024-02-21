@@ -10,155 +10,155 @@ Namespace
 =========
 The main classes can be found in the Mindscape.Raygun4Net namespace.
 
-Usage
+Setup & Usage
 ======
 
-In your `<projectName>.csproj` file, add `<PackageReference Include="Mindscape.Raygun4Net.AspNetCore" Version="6.6.6" />` to your dependencies.
+In your ASP.NET Core project, add the Raygun4Net.AspNetCore package to your project.
 
-Run dotnet.exe restore or restore packages within Visual Studio to download the package.
+Add Raygun to your services:
 
-Add the following code to your appsettings.json (if you're using another type of config, add it there).
-
-```json
-"RaygunSettings": {
-  "ApiKey": "YOUR_APP_API_KEY"
-}
-```
-
-To configure the RaygunAspNetCoreMiddleware to handle exceptions that have been triggered and send unhandled exceptions automatically.
-
-In Startup.cs:
-
-  1. Add using Mindscape.Raygun4Net; to your using statements.
-  2. Add app.UseRaygun(); to the Configure method after any other ExceptionHandling methods e.g. app.UseDeveloperExceptionPage() or app.UseExceptionHandler("/Home/Error").
-  3. Add services.AddRaygun(Configuration); to the ConfigureServices method.
-
-Anywhere in your code, you can also send exception reports manually simply by creating a new instance of the RaygunClient and calling one of the Send or SendInBackground methods.
-This is most commonly used to send exceptions caught in a try/catch block.
-
-```csharp
-try
-{
-}
-catch (Exception e)
-{
-  new RaygunClient("YOUR_APP_API_KEY").SendInBackground(e);
-}
-```
-
-Configure RaygunClient or settings in RaygunAspNetCoreMiddleware
-================================================================
-
-The AddRaygun method has an overload that takes a RaygunMiddlewareSettings object. 
-These settings control the middleware (not to be confused with RaygunSettings which are the common settings we use across all of our .NET providers). 
-Currently there's just one property on it, ClientProvider. This gives you a hook into the loading of RaygunSettings and the construction of the RaygunAspNetCoreClient used to send errors.
-
-For example, say you want to set user details on your error reports. You'd create a custom client provider like this:
-
-```csharp
-public class ExampleRaygunAspNetCoreClientProvider : DefaultRaygunAspNetCoreClientProvider
-{
-  public override RaygunClient GetClient(RaygunSettings settings, HttpContext context)
+  ```csharp
+  public void ConfigureServices(IServiceCollection services)
   {
-    var client = base.GetClient(settings, context);
-    client.ApplicationVersion = "1.1.0";
+    // Assumes you're configuring Raygun in appsettings.json
+    services.AddRaygun(Configuration);
+    
+    // Or if you're configuring Raygun in code
+    services.AddRaygun(settings =>
+    {
+      settings.ApiKey = "YOUR_APP_API_KEY";
+      ...
+    });
+  }
+  ```
 
-    var identity = context?.User?.Identity as ClaimsIdentity;
+Add Raygun to your middleware:
+
+  ```csharp
+  public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+  {
+    // This should be registered early in the pipeline to catch all exceptions
+    app.UseRaygun();
+  }
+  ```
+
+If you're configuring using appsettings.json, add the following to your appsettings.json file:
+
+  ```json
+  {
+    ...
+    "RaygunSettings": {
+      "ApiKey": "YOUR_APP_API_KEY"
+    }
+  }
+  ```
+
+## Manually sending exceptions
+
+After using `services.AddRaygun(...)`, you can inject `RaygunAgent` into your controllers and use it to send exceptions manually.
+
+```csharp
+public class MyController : Controller
+{
+  private readonly RaygunAgent _raygunAgent;
+
+  public MyController(RaygunAgent raygunAgent)
+  {
+    _raygunAgent = raygunAgent;
+  }
+
+  public async Task<IActionResult> TestManualError()
+  {
+    try
+    {
+      throw new Exception("Test from .NET Core MVC app");
+    }
+    catch (Exception ex)
+    {
+      await _raygunAgent.SendInBackground(ex);
+    }
+
+    return View();
+  }
+}
+```
+
+
+## Custom User Provider
+By default Raygun4Net ships with a `DefaultRaygunUserProvider` which will attempt to get the user information from 
+the `HttpContext.User` object. If you want to provide your own implementation of the `IRaygunUserProvider` you 
+can do so by creating a class that implements the interface and then adding it to the services during configuration
+using `services.AddRaygunUserProvider<MyCustomUserProvider>()`.
+
+
+```csharp
+public class ExampleUserProvider : IRaygunUserProvider
+{
+  private readonly IHttpContextAccessor _contextAccessor;
+  
+  public ExampleUserProvider(IHttpContextAccessor httpContextAccessor)
+  {
+    _contextAccessor = contextAccessor;
+  }
+  
+  public RaygunIdentifierMessage? GetUser()
+  {
+    var ctx = _contextAccessor.HttpContext;
+    
+    if (ctx == null)
+    {
+      return null;
+    }
+
+    var identity = ctx.User.Identity as ClaimsIdentity;
+    
     if (identity?.IsAuthenticated == true)
     {
-      var email = identity.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).FirstOrDefault();
-
-      client.UserInfo = new RaygunIdentifierMessage(email)
+      return new RaygunIdentifierMessage(identity.Name)
       {
-        IsAnonymous = false,
-        Email = email,
-        FullName = identity.Name
+        IsAnonymous = false
       };
-    }
-
-    return client;
+    
+    return null;
   }
 }
 ```
 
-Then you would change your services.AddRaygun(Configuration) call in ConfigureServices to this:
+This can be registered in the services during configuration like so: 
 
 ```csharp
-services.AddRaygun(Configuration, new RaygunMiddlewareSettings()
-{
-  ClientProvider = new ExampleRaygunAspNetCoreClientProvider()
-});
-```
-
-Manually sending exceptions with a custom ClientProvider
-========================================================
-
-When configuring a custom ClientProvider you will also want to leverage this ClientProvider to get an instance of the RaygunClient when manually sending an exception.
-To do this use the Dependency Injection framework to provide an instance of the IRaygunAspNetCoreClientProvider and IOptions<RaygunSettings> to your MVC Controller.
-This will then ensure that the Raygun crash report also contains any HttpContext information and will execute any code defined in your ClientProvider.GetClient() method.
-
-```csharp
-public class RaygunController : Controller
-{
-  private readonly IRaygunAspNetCoreClientProvider _clientProvider;
-  private readonly IOptions<RaygunSettings> _settings;
-
-  public RaygunController(IRaygunAspNetCoreClientProvider clientProvider, IOptions<RaygunSettings> settings)
-  {
-    _clientProvider = clientProvider;
-    _settings = settings;
-  }
-
-  public async Task<IActionResult> TestManualError()
-  {
-    try
-    {
-      throw new Exception("Test from .NET Core MVC app");
-    }
-    catch (Exception ex)
-    {
-      var raygunClient = _clientProvider.GetClient(_settings.Value, HttpContext);
-      await raygunClient.SendInBackground(ex);
-    }
-
-    return View();
-  }
-}
-```
-
-### Using a singleton RaygunClient
-
-If you are using a singleton RaygunClient, you'll need to manually set the HTTP context (if applicable) before manually sending an exception.
-
-```csharp
-public class RaygunController : Controller
-{
-  private readonly RaygunClient _singletonRaygunClient;
-
-  public RaygunController(RaygunClient singletonRaygunClient)
-  {
-    _singletonRaygunClient = singletonRaygunClient;
-  }
-
-  public async Task<IActionResult> TestManualError()
-  {
-    try
-    {
-      throw new Exception("Test from .NET Core MVC app");
-    }
-    catch (Exception ex)
-    {
-      _singletonRaygunClient.SetCurrentContext(HttpContext);
-      await _singletonRaygunClient.Send(ex);
-    }
-
-    return View();
-  }
-}
+services.AddRaygunUserProvider<ExampleUserProvider>();
 ```
 
 Additional configuration options and features
 =============================================
+
+The following features can be configured in the appsettings.json file or in code.
+
+For example, in the appsettings.json file:
+
+```json
+{
+  "RaygunSettings": {
+    "ApiKey": "YOUR_APP_API_KEY",
+    "ExcludeErrorsFromLocal": true,
+    ...
+  }
+}
+```
+
+The equivalent in code:
+
+```csharp
+services.AddRaygun(settings =>
+{
+  settings.ApiKey = "YOUR_APP_API_KEY";
+  settings.ExcludeErrorsFromLocal = true;
+  ...
+});
+```
+
+Examples below are shown in appsettings.json format.
 
 Replace unseekable request streams
 ----------------------------------
@@ -207,22 +207,22 @@ Remove sensitive request data
 -----------------------------
 
 If you have sensitive data in an HTTP request that you wish to prevent being transmitted to Raygun, you can provide lists of possible keys (names) to remove.
-Keys to ignore can be specified on the RaygunSettings in appsettings.json, (or you can use the equivalent methods on RaygunClient if you are setting things up in code).
+Keys to ignore can be specified on the `RaygunSettings` in `appsettings.json`, or on the `RaygunSettings` when you create the `RaygunClient` or call `services.AddRaygun(settings => {...});` 
 The available options are:
 
-IgnoreSensitiveFieldNames
-IgnoreQueryParameterNames
-IgnoreFormFieldNames
-IgnoreHeaderNames
-IgnoreCookieNames
-IgnoreServerVariableNames
+- `IgnoreSensitiveFieldNames`
+- `IgnoreQueryParameterNames`
+- `IgnoreFormFieldNames`
+- `IgnoreHeaderNames`
+- `IgnoreCookieNames`
+- `IgnoreServerVariableNames`
 
-These can be set to an array of keys to ignore. Setting an option as * will indicate that all the keys will not be sent to Raygun.
-Placing * before, after or at both ends of a key will perform an ends-with, starts-with or contains operation respectively.
-For example, IgnoreFormFieldNames: ["*password*"] will cause Raygun to ignore all form fields that contain "password" anywhere in the name.
+These can be set to an array of keys to ignore. Setting an option as `*` will indicate that all the keys will not be sent to Raygun.
+Placing `*` before, after or at both ends of a key will perform an ends-with, starts-with or contains operation respectively.
+For example, `IgnoreFormFieldNames: ["*password*"]` will cause Raygun to ignore all form fields that contain "password" anywhere in the name.
 These options are not case sensitive.
 
-Note: The IgnoreSensitiveFieldNames will be applied to ALL fields in the RaygunRequestMessage. 
+Note: The `IgnoreSensitiveFieldNames` will be applied to ALL fields in the `RaygunRequestMessage`. 
 
 We provide extra options for removing sensitive data from the request raw data. This comes in the form of filters as implemented by the IRaygunDataFilter interface.
 These filters read the raw data and strip values whose keys match those found in the RaygunSettings IgnoreSensitiveFieldNames property.

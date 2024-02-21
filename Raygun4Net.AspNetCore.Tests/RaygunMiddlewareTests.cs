@@ -222,7 +222,7 @@ public class RaygunMiddlewareTests
                 .Configure(app =>
                 {
                   app.UseRouting();
-                  app.UseMiddleware<RaygunMiddleware>();
+                  app.UseRaygun();
                   app.UseEndpoints(endpoints => { endpoints.MapGet("/test-exception", new Func<object>(() => throw new Exception("Banana's are indeed yellow"))); });
                 });
     });
@@ -319,7 +319,7 @@ public class RaygunMiddlewareTests
                 .Configure(app =>
                 {
                   app.UseRouting();
-                  app.UseMiddleware<RaygunMiddleware>();
+                  app.UseRaygun();
                   app.UseEndpoints(endpoints => { endpoints.MapGet("/test-exception", new Func<object>(() => throw new Exception("Banana's are indeed yellow"))); });
                 });
     });
