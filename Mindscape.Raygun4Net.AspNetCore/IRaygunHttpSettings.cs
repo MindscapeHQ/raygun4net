@@ -3,7 +3,7 @@ using Mindscape.Raygun4Net.Filters;
 
 namespace Mindscape.Raygun4Net.AspNetCore;
 
-public interface IRaygunHttpSettings
+internal interface IRaygunHttpSettings
 {
   List<string> IgnoreSensitiveFieldNames { get; }
   List<string> IgnoreQueryParameterNames { get; }

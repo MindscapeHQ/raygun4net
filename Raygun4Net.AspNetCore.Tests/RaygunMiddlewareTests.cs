@@ -1,5 +1,5 @@
-using System.Diagnostics;
 using System.Net;
+using System.Security.Claims;
 using System.Text.Json;
 using FluentAssertions;
 using Microsoft.AspNetCore.Builder;
@@ -20,12 +20,26 @@ public class RaygunMiddlewareTests
   private MockHttpHandler _mockHttp = null!;
   private IHost _host = null!;
   private HttpClient _client = null!;
+  private static TaskCompletionSource<bool> _notifyCompletionSource = null!;
+
+  // ReSharper disable once ClassNeverInstantiated.Local
+  private class BananaUserProvider : IRaygunUserProvider
+  {
+    public RaygunIdentifierMessage GetUser()
+    {
+      return new RaygunIdentifierMessage("Banana User")
+      {
+        Email = "Banana Email"
+      };
+    }
+  }
 
   [SetUp]
   public async Task Init()
   {
     _mockHttp = new MockHttpHandler();
     _httpClient = new HttpClient(_mockHttp);
+    _notifyCompletionSource = new TaskCompletionSource<bool>();
 
     var builder = new HostBuilder().ConfigureWebHost(webBuilder =>
     {
@@ -33,8 +47,8 @@ public class RaygunMiddlewareTests
                 .ConfigureServices((_, services) =>
                 {
                   services.AddRouting();
-                  services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetService<RaygunSettings>(), _httpClient));
-                  services.AddRaygun(configure: settings =>
+                  services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetService<RaygunSettings>(), _httpClient, s.GetService<IRaygunUserProvider>()));
+                  services.AddRaygun(options: settings =>
                   {
                     settings.ApiKey = "banana";
                     settings.ExcludedStatusCodes = new[] { (int)HttpStatusCode.NotFound, (int)HttpStatusCode.BadRequest };
@@ -71,10 +85,25 @@ public class RaygunMiddlewareTests
                         throw;
                       }
                     });
+                    endpoints.MapGet("/user", context =>
+                    {
+                      var claims = new List<Claim>
+                      {
+                        new(ClaimTypes.Email, "banana@banana.com"),
+                        new(ClaimTypes.Name, "Banana Name")
+                      };
+                      
+                      var identity = new ClaimsIdentity(claims, "Banana Auth");
+                      var claimsPrincipal = new ClaimsPrincipal(identity);
+                      
+                      context.User = claimsPrincipal;
+
+                      throw new Exception("omg a fake error!");
+                    });
                   });
                 });
     });
-    
+
     _host = await builder.StartAsync();
 
     _client = _host.GetTestClient();
@@ -88,18 +117,6 @@ public class RaygunMiddlewareTests
     _host.Dispose();
     _client.Dispose();
   }
-  
-  [OneTimeSetUp]
-  public void StartTest()
-  {
-    Trace.Listeners.Add(new ConsoleTraceListener());
-  }
-
-  [OneTimeTearDown]
-  public void EndTest()
-  {
-    Trace.Flush();
-  }
 
   [Test]
   public async Task WhenExceptionIsThrown_ShouldBeCapturedByMiddleware_EntrySentToRaygun()
@@ -109,18 +126,14 @@ public class RaygunMiddlewareTests
              {
                x.Body("OK");
                x.StatusCode(HttpStatusCode.Accepted);
+               _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
              }).Verifiable();
 
     Func<Task> act = async () => await _client.GetAsync("/test-exception");
 
     await act.Should().ThrowAsync<Exception>().WithMessage("Banana's are indeed yellow");
 
-    var token = new CancellationTokenSource(TimeSpan.FromSeconds(1)).Token;
-    
-    // Need to give the middleware time to send the message (up to 1 second based on the cancellation token)
-    while (!token.IsCancellationRequested && _mockHttp.InvokedRequests.Count == 0)
-    {
-    }
+    await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
 
     _mockHttp.InvokedRequests.Should().HaveCount(1);
   }
@@ -133,8 +146,8 @@ public class RaygunMiddlewareTests
              {
                x.Body("OK");
                x.StatusCode(HttpStatusCode.Accepted);
+               _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
              }).Verifiable();
-
 
     Func<Task> act = async () => await _client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "test-exception")
     {
@@ -147,10 +160,10 @@ public class RaygunMiddlewareTests
 
     await act.Should().ThrowAsync<Exception>().WithMessage("Banana's are indeed yellow");
 
-    await Task.Delay(TimeSpan.FromSeconds(1));
+    await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
 
     _mockHttp.InvokedRequests.Should().HaveCount(1);
-    
+
     var request = _mockHttp.InvokedRequests[0].Request;
     var content = await request.Content?.ReadAsStringAsync()!;
 
@@ -167,45 +180,104 @@ public class RaygunMiddlewareTests
              {
                x.Body("OK");
                x.StatusCode(HttpStatusCode.Accepted);
+               _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
              }).Verifiable();
 
     Func<Task> act = async () => await _client.GetAsync("/handled");
 
     await act.Should().ThrowAsync<Exception>().WithMessage("I should be handled only once...");
 
-    var token = new CancellationTokenSource(TimeSpan.FromSeconds(1)).Token;
-    
-    // Need to give the middleware time to send the message (up to 1 second based on the cancellation token)
-    while (!token.IsCancellationRequested && _mockHttp.InvokedRequests.Count == 0)
-    {
-    }
+    await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
 
     // We are verifying the Try/Catch block in the /handled endpoint sends to Raygun
     // and that the middleware did not also send the exception to Raygun. So total sends should be 1
     _mockHttp.InvokedRequests.Should().HaveCount(1);
   }
-  
+
   [Test]
   public async Task WhenNoExceptionThrown_ShouldNotMessWithPayload_AndNotSendToRaygun()
+  {
+    var response = await _client.GetAsync("/");
+
+    response.IsSuccessStatusCode.Should().BeTrue();
+    response.Content.ReadAsStringAsync().Result.Should().Be("Hello World!");
+
+    _mockHttp.InvokedRequests.Should().BeEmpty();
+  }
+
+  [Test]
+  public async Task WhenExceptionIsThrown_CustomUserInfoShouldBePopulated()
+  {
+    // Test re-init with overridden IRaygunUserProvider
+    var builder = new HostBuilder().ConfigureWebHost(webBuilder =>
+    {
+      webBuilder.UseTestServer()
+                .ConfigureServices((_, services) =>
+                {
+                  services.AddRouting();
+                  services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetService<RaygunSettings>(), _httpClient, s.GetService<IRaygunUserProvider>()));
+                  services.AddRaygun(options: settings => { settings.ApiKey = "banana"; });
+                  services.AddRaygunUserProvider<BananaUserProvider>();
+                })
+                .Configure(app =>
+                {
+                  app.UseRouting();
+                  app.UseMiddleware<RaygunMiddleware>();
+                  app.UseEndpoints(endpoints => { endpoints.MapGet("/test-exception", new Func<object>(() => throw new Exception("Banana's are indeed yellow"))); });
+                });
+    });
+
+    var host = await builder.StartAsync();
+    var client = host.GetTestClient();
+
+    _mockHttp.When(match => match.Method(HttpMethod.Post).RequestUri("https://api.raygun.com/entries"))
+             .Respond(x =>
+             {
+               x.Body("OK");
+               x.StatusCode(HttpStatusCode.Accepted);
+               _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
+             }).Verifiable();
+
+    Func<Task> act = async () => await client.GetAsync("/test-exception");
+    await act.Should().ThrowAsync<Exception>();
+
+    await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
+
+    var request = _mockHttp.InvokedRequests[0].Request;
+    var content = await request.Content?.ReadAsStringAsync()!;
+
+    var raygunMsg = JsonSerializer.Deserialize<RaygunMessage>(content)!;
+
+    raygunMsg.Details.User.Identifier.Should().Be("Banana User");
+    raygunMsg.Details.User.Email.Should().Be("Banana Email");
+  }
+
+  [Test]
+  public async Task WhenExceptionIsThrown_AndUserIsLoggedIn_ShouldFetchUserUsingDefaultProvider()
   {
     _mockHttp.When(match => match.Method(HttpMethod.Post).RequestUri("https://api.raygun.com/entries"))
              .Respond(x =>
              {
                x.Body("OK");
                x.StatusCode(HttpStatusCode.Accepted);
+               _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
              }).Verifiable();
 
-    var response = await _client.GetAsync("/");
+    Func<Task> act = async () => await _client.GetAsync("/user");
+    await act.Should().ThrowAsync<Exception>();
 
-    response.IsSuccessStatusCode.Should().BeTrue();
-    response.Content.ReadAsStringAsync().Result.Should().Be("Hello World!");
+    await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
 
-    // Wait 1 second to make sure nothing is sent to Raygun
-    await Task.Delay(TimeSpan.FromSeconds(1));
+    var request = _mockHttp.InvokedRequests[0].Request;
+    var content = await request.Content?.ReadAsStringAsync()!;
 
-    _mockHttp.InvokedRequests.Should().BeEmpty();
+    var raygunMsg = JsonSerializer.Deserialize<RaygunMessage>(content)!;
+
+    raygunMsg.Details.User.Identifier.Should().Be("banana@banana.com");
+    raygunMsg.Details.User.Email.Should().Be("banana@banana.com");
+    raygunMsg.Details.User.FullName.Should().Be("Banana Name");
   }
-  
+
   [TestCase(HttpStatusCode.NotFound, "Not Found")]
   [TestCase(HttpStatusCode.BadRequest, "Bad Request")]
   public async Task WhenStatusCodeIsExcluded_ShouldNotSendToRaygun(HttpStatusCode statusCode, string expectedContent)
@@ -215,18 +287,18 @@ public class RaygunMiddlewareTests
              {
                x.Body("OK");
                x.StatusCode(HttpStatusCode.Accepted);
+               _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
              }).Verifiable();
 
     Func<Task> act = async () => await _client.GetAsync($"/{(int)statusCode}");
 
     await act.Should().ThrowAsync<Exception>().WithMessage(expectedContent);
 
-    // Wait 1 second to make sure nothing is sent to Raygun
-    await Task.Delay(TimeSpan.FromSeconds(1));
+    await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
 
     _mockHttp.InvokedRequests.Should().BeEmpty();
   }
-  
+
   [Test]
   public async Task WhenExcludeLocalIsEnabled_ShouldNotSendToRaygun()
   {
@@ -238,7 +310,7 @@ public class RaygunMiddlewareTests
                 {
                   services.AddRouting();
                   services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetService<RaygunSettings>(), _httpClient));
-                  services.AddRaygun(configure: settings =>
+                  services.AddRaygun(options: settings =>
                   {
                     settings.ApiKey = "banana";
                     settings.ExcludeErrorsFromLocal = true;
@@ -248,29 +320,26 @@ public class RaygunMiddlewareTests
                 {
                   app.UseRouting();
                   app.UseMiddleware<RaygunMiddleware>();
-                  app.UseEndpoints(endpoints =>
-                  {
-                    endpoints.MapGet("/test-exception", new Func<object>(() => throw new Exception("Banana's are indeed yellow")));
-                  });
+                  app.UseEndpoints(endpoints => { endpoints.MapGet("/test-exception", new Func<object>(() => throw new Exception("Banana's are indeed yellow"))); });
                 });
     });
-    
+
     var host = await builder.StartAsync();
     var client = host.GetTestClient();
-    
+
     _mockHttp.When(match => match.Method(HttpMethod.Post).RequestUri("https://api.raygun.com/entries"))
              .Respond(x =>
              {
                x.Body("OK");
                x.StatusCode(HttpStatusCode.Accepted);
+               _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
              }).Verifiable();
 
     Func<Task> act = async () => await client.GetAsync($"/test-exception");
 
     await act.Should().ThrowAsync<Exception>();
 
-    // Wait 1 second to make sure nothing is sent to Raygun
-    await Task.Delay(TimeSpan.FromSeconds(1));
+    await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
 
     _mockHttp.InvokedRequests.Should().BeEmpty();
   }

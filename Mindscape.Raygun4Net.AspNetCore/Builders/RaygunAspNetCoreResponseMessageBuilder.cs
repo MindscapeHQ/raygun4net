@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http.Features;
 
 namespace Mindscape.Raygun4Net.AspNetCore.Builders
 {
-  public class RaygunAspNetCoreResponseMessageBuilder
+  internal class RaygunAspNetCoreResponseMessageBuilder
   {
     public static RaygunResponseMessage Build(HttpContext? context)
     {

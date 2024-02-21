@@ -37,6 +37,7 @@ namespace Mindscape.Raygun4Net
 
     protected readonly RaygunSettingsBase _settings;
     private readonly ThrottledBackgroundMessageProcessor _backgroundMessageProcessor;
+    private readonly IRaygunUserProvider _userProvider;
     protected internal const string SentKey = "AlreadySentByRaygun";
 
     /// <summary>
@@ -48,16 +49,6 @@ namespace Mindscape.Raygun4Net
     /// Raised before a message is sent. This can be used to add a custom grouping key to a RaygunMessage before sending it to the Raygun service.
     /// </summary>
     public event EventHandler<RaygunCustomGroupingKeyEventArgs> CustomGroupingKey;
-
-    /// <summary>
-    /// Gets or sets the user identity string.
-    /// </summary>
-    public virtual string User { get; set; }
-
-    /// <summary>
-    /// Gets or sets information about the user including the identity string.
-    /// </summary>
-    public virtual RaygunIdentifierMessage UserInfo { get; set; }
 
     /// <summary>
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun endpoint.
@@ -94,17 +85,17 @@ namespace Mindscape.Raygun4Net
       Send(exception, UnhandledExceptionTags);
     }
 
-    public RaygunClientBase(RaygunSettingsBase settings)
-      : this(settings, DefaultClient)
+    public RaygunClientBase(RaygunSettingsBase settings) : this(settings, DefaultClient)
     {
     }
 
-    public RaygunClientBase(RaygunSettingsBase settings, HttpClient client)
+    public RaygunClientBase(RaygunSettingsBase settings, HttpClient client, IRaygunUserProvider userProvider = null)
     {
       _client = client ?? DefaultClient;
       _settings = settings;
       _apiKey = settings.ApiKey;
       _backgroundMessageProcessor = new ThrottledBackgroundMessageProcessor(settings.BackgroundMessageQueueMax, _settings.BackgroundMessageWorkerCount, Send);
+      _userProvider = userProvider;
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
@@ -115,7 +106,6 @@ namespace Mindscape.Raygun4Net
 
       UnhandledExceptionBridge.OnUnhandledException(OnApplicationUnhandledException);
     }
-
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
@@ -380,8 +370,6 @@ namespace Mindscape.Raygun4Net
                                                              RaygunIdentifierMessage userInfo = null,
                                                              Action<IRaygunMessageBuilder> customiseMessage = null)
     {
-      var thing = userInfo ?? UserInfo ?? (!string.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null);
-      
       var message = RaygunMessageBuilder.New(_settings)
                                         .Customise(customiseMessage)
                                         .SetEnvironmentDetails()
@@ -391,7 +379,7 @@ namespace Mindscape.Raygun4Net
                                         .SetVersion(ApplicationVersion)
                                         .SetTags(tags)
                                         .SetUserCustomData(userCustomData)
-                                        .SetUser(thing)
+                                        .SetUser(userInfo ?? _userProvider?.GetUser())
                                         .Build();
 
       var customGroupingKey = await OnCustomGroupingKey(exception, message).ConfigureAwait(false);

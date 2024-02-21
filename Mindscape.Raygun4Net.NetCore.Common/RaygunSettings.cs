@@ -19,6 +19,9 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    /// <summary>
+    /// Raygun Application API Key, can be found in the Raygun application dashboard by clicking the "Application settings" button
+    /// </summary>
     public string ApiKey { get; set; }
  
     public Uri ApiEndpoint { get; set; }

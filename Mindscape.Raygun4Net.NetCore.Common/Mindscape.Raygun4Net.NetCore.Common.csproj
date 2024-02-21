@@ -26,6 +26,7 @@
   <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <InternalsVisibleTo Include="Mindscape.Raygun4Net.AspNetCore"/>
     <InternalsVisibleTo Include="Mindscape.Raygun4Net.NetCore.Tests"/>
+    <InternalsVisibleTo Include="System.Text.Json"/>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">

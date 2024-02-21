@@ -15,7 +15,7 @@ using Mindscape.Raygun4Net.Filters;
 namespace Mindscape.Raygun4Net.AspNetCore.Builders
 {
   // ReSharper disable once ClassNeverInstantiated.Global
-  public class RaygunAspNetCoreRequestMessageBuilder
+  internal class RaygunAspNetCoreRequestMessageBuilder
   {
     private const int MAX_RAW_DATA_LENGTH = 4096; // bytes
 
