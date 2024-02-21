@@ -52,7 +52,6 @@ public static class ApplicationBuilderExtensions
 
     services.TryAddSingleton(settings);
     services.TryAddSingleton(s => new RaygunClient(s.GetService<RaygunSettings>(), s.GetService<IRaygunUserProvider>()));
-    services.TryAddSingleton<IRaygunUserProvider, DefaultRaygunUserProvider>();
     services.AddHttpContextAccessor();
 
     return services;
@@ -71,15 +70,31 @@ public static class ApplicationBuilderExtensions
     
     services.TryAddSingleton(settings);
     services.TryAddSingleton(s => new RaygunClient(s.GetService<RaygunSettings>(), s.GetService<IRaygunUserProvider>()));
-    services.TryAddSingleton<IRaygunUserProvider, DefaultRaygunUserProvider>();
     services.AddHttpContextAccessor();
 
     return services;
   }
   
   /// <summary>
+  /// Registers the default User Provider with the DI container. This will use the IHttpContextAccessor to fetch the current user.
+  /// </summary>
+  /// <remarks>
+  /// This will attempt to check if a user is Authenticated and use the Name/Email from the claims to create a RaygunIdentifierMessage.
+  /// If you wish to provide your own implementation of IRaygunUserProvider, you can use the <see cref="AddRaygunUserProvider&lt;T&gt;" /> method.
+  /// </remarks>
+  public static IServiceCollection AddRaygunUserProvider(this IServiceCollection services)
+  {
+    services.TryAddSingleton<IRaygunUserProvider, DefaultRaygunUserProvider>();
+    
+    return services;
+  }
+  
+  /// <summary>
   /// Registers a custom User Provider with the DI container. This allows you to provide your own implementation of IRaygunUserProvider.
   /// </summary>
+  /// <remarks>
+  /// Refer to the <see cref="DefaultRaygunUserProvider" /> for an example of how to implement IRaygunUserProvider.
+  /// </remarks>
   public static IServiceCollection AddRaygunUserProvider<T>(this IServiceCollection services) where T : class, IRaygunUserProvider
   {
     // In case the default or any other user provider is already registered, remove it first

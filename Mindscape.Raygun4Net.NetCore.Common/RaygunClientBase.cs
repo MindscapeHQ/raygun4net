@@ -65,7 +65,12 @@ namespace Mindscape.Raygun4Net
     /// <summary>
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun endpoint.
     /// </summary>
-    public string ApplicationVersion { get; set; }
+    [Obsolete("Use the `RaygunSettings.ApplicationVersion` property instead.")]
+    public string ApplicationVersion
+    {
+      get => _settings.ApplicationVersion;
+      set => _settings.ApplicationVersion = value;
+    }
 
     /// <summary>
     /// If set to true, this will automatically setup handlers to send Unhandled Exceptions to Raygun  
@@ -73,23 +78,16 @@ namespace Mindscape.Raygun4Net
     /// <remarks>
     /// Currently defaults to false. This may be change in future releases.
     /// </remarks>
+    [Obsolete("Use the `RaygunSettings.CatchUnhandledExceptions` property instead.")]
     public virtual bool CatchUnhandledExceptions
     {
-      get { return _settings.CatchUnhandledExceptions; }
-      set
-      {
-        if (_settings.CatchUnhandledExceptions == value)
-        {
-          return;
-        }
-
-        _settings.CatchUnhandledExceptions = value;
-      }
+      get => _settings.CatchUnhandledExceptions;
+      set => _settings.CatchUnhandledExceptions = value;
     }
 
     private void OnApplicationUnhandledException(Exception exception, bool isTerminating)
     {
-      if (!CatchUnhandledExceptions)
+      if (!_settings.CatchUnhandledExceptions)
       {
         return;
       }
@@ -110,11 +108,6 @@ namespace Mindscape.Raygun4Net
       _userProvider = userProvider;
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
-
-      if (!string.IsNullOrEmpty(settings.ApplicationVersion))
-      {
-        ApplicationVersion = settings.ApplicationVersion;
-      }
 
       UnhandledExceptionBridge.OnUnhandledException(OnApplicationUnhandledException);
     }
@@ -388,7 +381,7 @@ namespace Mindscape.Raygun4Net
                                         .SetMachineName(Environment.MachineName)
                                         .SetExceptionDetails(exception)
                                         .SetClientDetails()
-                                        .SetVersion(ApplicationVersion)
+                                        .SetVersion(_settings.ApplicationVersion)
                                         .SetTags(tags)
                                         .SetUserCustomData(userCustomData)
                                         .SetUser(userInfo ?? _userProvider?.GetUser())
