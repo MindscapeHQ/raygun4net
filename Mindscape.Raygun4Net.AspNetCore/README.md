@@ -86,7 +86,9 @@ public class MyController : Controller
 
 ## Custom User Provider
 By default Raygun4Net ships with a `DefaultRaygunUserProvider` which will attempt to get the user information from 
-the `HttpContext.User` object. If you want to provide your own implementation of the `IRaygunUserProvider` you 
+the `HttpContext.User` object. This is Opt-In which can be added by calling `services.AddRaygunUserProvider()`
+
+If you want to provide your own implementation of the `IRaygunUserProvider` you 
 can do so by creating a class that implements the interface and then adding it to the services during configuration
 using `services.AddRaygunUserProvider<MyCustomUserProvider>()`.
 
