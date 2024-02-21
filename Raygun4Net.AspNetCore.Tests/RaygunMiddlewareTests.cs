@@ -20,7 +20,7 @@ public class RaygunMiddlewareTests
   private MockHttpHandler _mockHttp = null!;
   private IHost _host = null!;
   private HttpClient _client = null!;
-  private static TaskCompletionSource<bool> _notifyCompletionSource = null!;
+  // private static TaskCompletionSource<bool> _notifyCompletionSource = null!;
 
   // ReSharper disable once ClassNeverInstantiated.Local
   private class BananaUserProvider : IRaygunUserProvider
@@ -39,7 +39,7 @@ public class RaygunMiddlewareTests
   {
     _mockHttp = new MockHttpHandler();
     _httpClient = new HttpClient(_mockHttp);
-    _notifyCompletionSource = new TaskCompletionSource<bool>();
+    // _notifyCompletionSource = new TaskCompletionSource<bool>();
 
     var builder = new HostBuilder().ConfigureWebHost(webBuilder =>
     {
@@ -126,14 +126,15 @@ public class RaygunMiddlewareTests
              {
                x.Body("OK");
                x.StatusCode(HttpStatusCode.Accepted);
-               _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
+               //_ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
              }).Verifiable();
 
     Func<Task> act = async () => await _client.GetAsync("/test-exception");
 
     await act.Should().ThrowAsync<Exception>().WithMessage("Banana's are indeed yellow");
 
-    await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
+    //await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
+    await Task.Delay(1000);
 
     _mockHttp.InvokedRequests.Should().HaveCount(1);
   }
@@ -146,7 +147,7 @@ public class RaygunMiddlewareTests
              {
                x.Body("OK");
                x.StatusCode(HttpStatusCode.Accepted);
-               _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
+               // _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
              }).Verifiable();
 
     Func<Task> act = async () => await _client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "test-exception")
@@ -160,7 +161,8 @@ public class RaygunMiddlewareTests
 
     await act.Should().ThrowAsync<Exception>().WithMessage("Banana's are indeed yellow");
 
-    await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
+    //await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
+    await Task.Delay(1000);
 
     _mockHttp.InvokedRequests.Should().HaveCount(1);
 
@@ -180,14 +182,15 @@ public class RaygunMiddlewareTests
              {
                x.Body("OK");
                x.StatusCode(HttpStatusCode.Accepted);
-               _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
+               // _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
              }).Verifiable();
 
     Func<Task> act = async () => await _client.GetAsync("/handled");
 
     await act.Should().ThrowAsync<Exception>().WithMessage("I should be handled only once...");
 
-    await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
+    //await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
+    await Task.Delay(1000);
 
     // We are verifying the Try/Catch block in the /handled endpoint sends to Raygun
     // and that the middleware did not also send the exception to Raygun. So total sends should be 1
@@ -235,13 +238,14 @@ public class RaygunMiddlewareTests
              {
                x.Body("OK");
                x.StatusCode(HttpStatusCode.Accepted);
-               _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
+               // _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
              }).Verifiable();
 
     Func<Task> act = async () => await client.GetAsync("/test-exception");
     await act.Should().ThrowAsync<Exception>();
 
-    await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
+    //await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
+    await Task.Delay(1000);
 
     var request = _mockHttp.InvokedRequests[0].Request;
     var content = await request.Content?.ReadAsStringAsync()!;
@@ -260,13 +264,14 @@ public class RaygunMiddlewareTests
              {
                x.Body("OK");
                x.StatusCode(HttpStatusCode.Accepted);
-               _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
+               // _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
              }).Verifiable();
 
     Func<Task> act = async () => await _client.GetAsync("/user");
     await act.Should().ThrowAsync<Exception>();
 
-    await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
+    //await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
+    await Task.Delay(1000);
 
     var request = _mockHttp.InvokedRequests[0].Request;
     var content = await request.Content?.ReadAsStringAsync()!;
@@ -287,14 +292,15 @@ public class RaygunMiddlewareTests
              {
                x.Body("OK");
                x.StatusCode(HttpStatusCode.Accepted);
-               _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
+               // _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
              }).Verifiable();
 
     Func<Task> act = async () => await _client.GetAsync($"/{(int)statusCode}");
 
     await act.Should().ThrowAsync<Exception>().WithMessage(expectedContent);
 
-    await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
+    //await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
+    await Task.Delay(1000);
 
     _mockHttp.InvokedRequests.Should().BeEmpty();
   }
@@ -332,14 +338,15 @@ public class RaygunMiddlewareTests
              {
                x.Body("OK");
                x.StatusCode(HttpStatusCode.Accepted);
-               _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
+               // _ = Task.Delay(TimeSpan.FromMilliseconds(1000)).ContinueWith(_ => _notifyCompletionSource.SetResult(true));
              }).Verifiable();
 
     Func<Task> act = async () => await client.GetAsync($"/test-exception");
 
     await act.Should().ThrowAsync<Exception>();
 
-    await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
+    //await _notifyCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(3));
+    await Task.Delay(1000);
 
     _mockHttp.InvokedRequests.Should().BeEmpty();
   }
