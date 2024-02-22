@@ -1,5 +1,9 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v9.0.2
+- Remove the usage of `ThreadLocal` in the RaygunClient (for .NET Framework)
+  - This does not affect the NetCore version 
+
 ### v9.0.1
 - Fixed issue for lock upgrade/recursion exception raised
   - https://github.com/MindscapeHQ/raygun4net/issues/513

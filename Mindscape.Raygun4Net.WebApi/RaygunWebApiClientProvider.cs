@@ -5,18 +5,16 @@ namespace Mindscape.Raygun4Net.WebApi
 {
   internal class RaygunWebApiClientProvider : IRaygunWebApiClientProvider
   {
-    private readonly Func<HttpRequestMessage, RaygunWebApiClient> _generateRaygunClient;
+    private readonly Func<RaygunWebApiClient> _generateRaygunClient;
     private readonly string _applicationVersionFromAttach;
 
-    public RaygunWebApiClientProvider(
-      Func<HttpRequestMessage, RaygunWebApiClient> generateRaygunClientWithHttpRequest,
-      string applicationVersionFromAttach)
+    public RaygunWebApiClientProvider(Func<RaygunWebApiClient> generateRaygunClientWithHttpRequest, string applicationVersionFromAttach)
     {
       _generateRaygunClient = generateRaygunClientWithHttpRequest;
       _applicationVersionFromAttach = applicationVersionFromAttach;
     }
 
-    public RaygunWebApiClient GenerateRaygunWebApiClient(HttpRequestMessage currentRequest = null)
+    public RaygunWebApiClient GenerateRaygunWebApiClient()
     {
       RaygunWebApiClient client = null;
 
@@ -27,10 +25,8 @@ namespace Mindscape.Raygun4Net.WebApi
       }
       else
       {
-        client = _generateRaygunClient(currentRequest);
+        client = _generateRaygunClient();
       }
-      
-      client?.SetCurrentHttpRequest(currentRequest);
       
       return client;
     }

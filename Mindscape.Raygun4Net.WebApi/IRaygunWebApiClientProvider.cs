@@ -1,9 +1,7 @@
-﻿using System.Net.Http;
-
-namespace Mindscape.Raygun4Net.WebApi
+﻿namespace Mindscape.Raygun4Net.WebApi
 {
   internal interface IRaygunWebApiClientProvider
   {
-    RaygunWebApiClient GenerateRaygunWebApiClient(HttpRequestMessage currentRequest = null);
+    RaygunWebApiClient GenerateRaygunWebApiClient();
   }
 }
