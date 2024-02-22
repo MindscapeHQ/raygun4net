@@ -11,7 +11,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         {  
         }
 
-        public FakeRaygunClient(string apiKey) : base(new RaygunSettings { ApiKey = string.Empty}, null, null)
+        public FakeRaygunClient(string apiKey) : base(new RaygunSettings { ApiKey = apiKey}, null, null)
         {
         }
         
