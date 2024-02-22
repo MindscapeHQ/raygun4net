@@ -29,7 +29,6 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     private readonly HttpClient _client;
 
-    private readonly string _apiKey;
     private readonly List<Type> _wrapperExceptions = new();
 
     private bool _handlingRecursiveErrorSending;
@@ -103,7 +102,6 @@ namespace Mindscape.Raygun4Net
     {
       _client = client ?? DefaultClient;
       _settings = settings;
-      _apiKey = settings.ApiKey;
       _backgroundMessageProcessor = new ThrottledBackgroundMessageProcessor(settings.BackgroundMessageQueueMax, _settings.BackgroundMessageWorkerCount, Send);
       _userProvider = userProvider;
 
@@ -144,18 +142,18 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    internal bool CanSend(Exception exception)
+    protected bool CanSend(Exception exception)
     {
       return exception?.Data == null || !exception.Data.Contains(SentKey) ||
              false.Equals(exception.Data[SentKey]);
     }
 
-    internal bool Enqueue(RaygunMessage msg)
+    protected bool Enqueue(RaygunMessage msg)
     {
       return _backgroundMessageProcessor.Enqueue(msg);
     }
 
-    internal void FlagAsSent(Exception exception)
+    protected void FlagAsSent(Exception exception)
     {
       if (exception?.Data != null)
       {
@@ -244,7 +242,7 @@ namespace Mindscape.Raygun4Net
 
     protected bool ValidateApiKey()
     {
-      if (string.IsNullOrEmpty(_apiKey))
+      if (string.IsNullOrEmpty(_settings.ApiKey))
       {
         Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
         return false;
@@ -369,7 +367,7 @@ namespace Mindscape.Raygun4Net
       return Task.CompletedTask;
     }
 
-    internal async Task<RaygunMessage> BuildMessage(Exception exception, 
+    protected async Task<RaygunMessage> BuildMessage(Exception exception, 
                                                              IList<string> tags,
                                                              IDictionary userCustomData = null, 
                                                              RaygunIdentifierMessage userInfo = null,
@@ -406,7 +404,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    internal IEnumerable<Exception> StripWrapperExceptions(Exception exception)
+    protected IEnumerable<Exception> StripWrapperExceptions(Exception exception)
     {
       if (exception != null && _wrapperExceptions.Any(wrapperException =>
             exception.GetType() == wrapperException && exception.InnerException != null))
@@ -468,7 +466,7 @@ namespace Mindscape.Raygun4Net
       }
 
       var requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
-      requestMessage.Headers.Add("X-ApiKey", _apiKey);
+      requestMessage.Headers.Add("X-ApiKey", _settings.ApiKey);
 
       try
       {

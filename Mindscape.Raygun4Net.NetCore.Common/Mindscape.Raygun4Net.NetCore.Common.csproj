@@ -30,6 +30,7 @@
   <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <InternalsVisibleTo Include="Mindscape.Raygun4Net.AspNetCore, PublicKey=$(RaygunPublicKey)"/>
     <InternalsVisibleTo Include="Mindscape.Raygun4Net.NetCore.Tests, PublicKey=$(RaygunPublicKey)"/>
+    <internalsVisibleTo Include="Mindscape.Raygun4Net.Maui, PublicKey=$(RaygunPublicKey)"/>
   </ItemGroup>
 
 

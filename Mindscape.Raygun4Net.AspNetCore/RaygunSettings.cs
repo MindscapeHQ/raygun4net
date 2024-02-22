@@ -6,6 +6,7 @@ namespace Mindscape.Raygun4Net.AspNetCore;
 
 public class RaygunSettings : RaygunSettingsBase, IRaygunHttpSettings
 {
+  [Obsolete("This is not used by the Raygun4Net.AspNetCore package.")]
   public bool MediumTrust { get; set; }
 
   public int[] ExcludedStatusCodes { get; set; }
