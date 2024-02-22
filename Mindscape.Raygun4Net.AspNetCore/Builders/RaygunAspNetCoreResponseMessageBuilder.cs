@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.Http.Features;
 
 namespace Mindscape.Raygun4Net.AspNetCore.Builders
 {
-  internal class RaygunAspNetCoreResponseMessageBuilder
+  // ReSharper disable once ClassNeverInstantiated.Global
+  public class RaygunAspNetCoreResponseMessageBuilder
   {
     public static RaygunResponseMessage Build(HttpContext? context)
     {

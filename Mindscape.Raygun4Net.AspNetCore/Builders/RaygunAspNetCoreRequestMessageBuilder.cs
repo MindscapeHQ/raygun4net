@@ -15,7 +15,7 @@ using Mindscape.Raygun4Net.Filters;
 namespace Mindscape.Raygun4Net.AspNetCore.Builders
 {
   // ReSharper disable once ClassNeverInstantiated.Global
-  internal class RaygunAspNetCoreRequestMessageBuilder
+  public class RaygunAspNetCoreRequestMessageBuilder
   {
     private const int MAX_RAW_DATA_LENGTH = 4096; // bytes
 
@@ -206,7 +206,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return rawData;
     }
 
-    public static string StripSensitiveValues(string rawData, IRaygunHttpSettings options)
+    private static string StripSensitiveValues(string rawData, IRaygunHttpSettings options)
     {
       // Early escape if theres no data.
       if (string.IsNullOrEmpty(rawData))
@@ -264,7 +264,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return parsers;
     }
 
-    public static bool DataContains(string data, IReadOnlyList<string> values)
+    private static bool DataContains(string data, IReadOnlyList<string> values)
     {
       bool exists = false;
 
