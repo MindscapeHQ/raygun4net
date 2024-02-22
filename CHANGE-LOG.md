@@ -1,12 +1,27 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v10.0.0
+- RaygunClient for NET Core can now be treated as a Singleton
+- Changed the Middleware for AspNetCore
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/518 
+  - Updated the registration of `.AddRaygun()`
+  - Updated the usage of `.UseRaygun()`
+  - Removed `RaygunMiddlewareSettings` and `RaygunClientProvider` in favour of `IRaygunUserProvider`
+  - Removed custom code for maintaining request body in the middleware and used `Request.EnableBuffering()` instead
+  - Deprecated multiple settings in RaygunClient in favour of using `RaygunSettings`
+  - Deprecated `UserInfo` property in favour of `IRaygunUserProvider`
+  - Deprecated `RaygunMiddlewareOptions` in favour of `RaygunSettings`
+  - Introduced new `.AddRaygunUserProvider()` to register a default implementation
+  - Introduced new `.AddRaygunUserProvider<T>()` to register a custom implementation
+- Fixed bug with filters where uppercase properties were compared against lowercase filters
+
 ### v9.0.4
 - Fixed `RaygunClient` in .NET Framework to correctly gather HTTP data and remove [ThreadStatic] attribute
 - Fixed `RaygunWebApiClient` to correctly get Form data (it was looking at QueryString instead of Form)
 
 ### v9.0.3
 - Fixed `RaygunWebApiClient` constructor to create `ThrottledBackgroundMessageProcessor` when the empty constructor is used
-  - https://github.com/MindscapeHQ/raygun4net/pull/519 
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/519 
 
 ### v9.0.2
 - Remove the usage of `ThreadLocal` in the RaygunClient (for .NET Framework)
@@ -15,7 +30,7 @@
 
 ### v9.0.1
 - Fixed issue for lock upgrade/recursion exception raised
-  - https://github.com/MindscapeHQ/raygun4net/issues/513
+  - See: https://github.com/MindscapeHQ/raygun4net/issues/513
 
 ### v9.0.0
 - SendInBackground will now queue the message to be sent
