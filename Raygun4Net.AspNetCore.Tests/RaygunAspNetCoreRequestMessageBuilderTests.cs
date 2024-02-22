@@ -22,7 +22,19 @@ public class RaygunAspNetCoreRequestMessageBuilderTests
   [TestCase("A", "**", false)]
   [TestCase("A", "*a*", true)]
   [TestCase("A", "*z*", false)]
-  public void Banana(string key, string ignoredKey, bool expected)
+  public void VerifyIgnoreScenariosWhenIgnoreKeyContainsStar(string key, string ignoredKey, bool expected)
+  {
+    RaygunAspNetCoreRequestMessageBuilder.IsIgnored(key, new[] { ignoredKey }).Should().Be(expected);
+  }
+  
+  [TestCase("AppLe", "apple", true)]
+  [TestCase("APPLE", "apple", true)]
+  [TestCase("apple", "aPPle", true)]
+  [TestCase("apple", "APPLE", true)]
+  [TestCase("apple", "apple", true)]
+  [TestCase("APPLE", "APPLE", true)]
+  [TestCase("apple", "banana", false)]
+  public void VerifyAbsoluteScenariosBasedOnCasing(string key, string ignoredKey, bool expected)
   {
     RaygunAspNetCoreRequestMessageBuilder.IsIgnored(key, new[] { ignoredKey }).Should().Be(expected);
   }

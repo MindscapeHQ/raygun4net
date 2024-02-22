@@ -48,11 +48,11 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
     <InternalsVisibleTo Include="Raygun4Net.AspNetCore.Tests"/>
   </ItemGroup>
   
-  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <ItemGroup Condition=" '$(Configuration)' == 'Release' ">
     <InternalsVisibleTo Include="Raygun4Net.AspNetCore.Tests, PublicKey=$(RaygunPublicKey)"/>
   </ItemGroup>
 </Project>
