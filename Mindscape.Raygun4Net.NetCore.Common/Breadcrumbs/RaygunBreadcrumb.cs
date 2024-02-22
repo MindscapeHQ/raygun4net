@@ -13,23 +13,16 @@ namespace Mindscape.Raygun4Net
     public string Category { get; set; }
 
     // This is a string due to serialization of enums in SimpleJson to the numeric value.
-    public string Type { get; set; }
+    public string Type { get; set; } = "manual";
 
-    public IDictionary<string, object> CustomData { get; set; }
+    public IDictionary<string, object> CustomData { get; set; } = new Dictionary<string, object>();
 
-    public long Timestamp { get; set; }
+    public long Timestamp { get; set; } = (long)(DateTime.UtcNow - UnixEpoch).TotalMilliseconds;
 
     public string ClassName { get; set; }
 
     public string MethodName { get; set; }
 
     public int? LineNumber { get; set; }
-    
-    public RaygunBreadcrumb()
-    {
-      CustomData = new Dictionary<string, object>();
-      Type = "manual";
-      Timestamp = (long)(DateTime.UtcNow - UnixEpoch).TotalMilliseconds;
-    }
   }
 }

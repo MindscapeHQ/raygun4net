@@ -100,8 +100,5 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     {
       RaygunBreadcrumbs.Record("Breadcrumb: in context");
     }
-      
   }
-  
-  
 }

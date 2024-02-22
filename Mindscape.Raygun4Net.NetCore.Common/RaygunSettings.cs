@@ -1,5 +1,4 @@
 ﻿using System;
-using Mindscape.Raygun4Net.Breadcrumbs;
 
 namespace Mindscape.Raygun4Net
 {
