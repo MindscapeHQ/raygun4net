@@ -374,7 +374,6 @@ namespace Mindscape.Raygun4Net
                                                              Action<IRaygunMessageBuilder> customiseMessage = null)
     {
       var message = RaygunMessageBuilder.New(_settings)
-                                        .Customise(customiseMessage)
                                         .SetEnvironmentDetails()
                                         .SetMachineName(Environment.MachineName)
                                         .SetExceptionDetails(exception)
@@ -383,6 +382,7 @@ namespace Mindscape.Raygun4Net
                                         .SetTags(tags)
                                         .SetUserCustomData(userCustomData)
                                         .SetUser(userInfo ?? _userProvider?.GetUser())
+                                        .Customise(customiseMessage)
                                         .Build();
 
       var customGroupingKey = await OnCustomGroupingKey(exception, message).ConfigureAwait(false);
