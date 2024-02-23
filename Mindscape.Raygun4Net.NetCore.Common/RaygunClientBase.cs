@@ -142,7 +142,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    protected bool CanSend(Exception exception)
+    protected virtual bool CanSend(Exception exception)
     {
       return exception?.Data == null || !exception.Data.Contains(SentKey) ||
              false.Equals(exception.Data[SentKey]);
@@ -371,7 +371,7 @@ namespace Mindscape.Raygun4Net
                                                              IList<string> tags,
                                                              IDictionary userCustomData = null, 
                                                              RaygunIdentifierMessage userInfo = null,
-                                                             Action<IRaygunMessageBuilder> customiseMessage = null)
+                                                             Action<RaygunMessage> customiseMessage = null)
     {
       var message = RaygunMessageBuilder.New(_settings)
                                         .SetEnvironmentDetails()
@@ -381,7 +381,7 @@ namespace Mindscape.Raygun4Net
                                         .SetVersion(_settings.ApplicationVersion)
                                         .SetTags(tags)
                                         .SetUserCustomData(userCustomData)
-                                        .SetUser(userInfo ?? _userProvider?.GetUser())
+                                        .SetUser(userInfo ?? _userProvider?.GetUser() ?? UserInfo ?? new RaygunIdentifierMessage(User))
                                         .Customise(customiseMessage)
                                         .Build();
 
@@ -395,7 +395,7 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 
-    protected async Task StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData,
+    protected virtual async Task StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData,
       RaygunIdentifierMessage userInfo)
     {
       foreach (var e in StripWrapperExceptions(exception))
@@ -404,7 +404,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    protected IEnumerable<Exception> StripWrapperExceptions(Exception exception)
+    protected virtual IEnumerable<Exception> StripWrapperExceptions(Exception exception)
     {
       if (exception != null && _wrapperExceptions.Any(wrapperException =>
             exception.GetType() == wrapperException && exception.InnerException != null))

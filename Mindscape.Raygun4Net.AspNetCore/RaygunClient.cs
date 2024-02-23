@@ -64,10 +64,10 @@ public class RaygunClient : RaygunClientBase
 
       foreach (var ex in exceptions)
       {
-        var msg = await BuildMessage(ex, tags, customiseMessage: builder =>
+        var msg = await BuildMessage(ex, tags, customiseMessage: msg =>
         {
-          builder.SetResponseDetails(currentResponseMessage);
-          builder.SetRequestDetails(currentRequestMessage);
+          msg.Details.Request = currentRequestMessage;
+          msg.Details.Response = currentResponseMessage;
         });
 
         if (!Enqueue(msg))

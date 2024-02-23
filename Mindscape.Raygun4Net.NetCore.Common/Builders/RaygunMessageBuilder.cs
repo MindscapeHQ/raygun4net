@@ -113,9 +113,9 @@ namespace Mindscape.Raygun4Net
       return this;
     }
 
-    public IRaygunMessageBuilder Customise(Action<IRaygunMessageBuilder> customiseMessage)
+    public IRaygunMessageBuilder Customise(Action<RaygunMessage> customiseMessage)
     {
-      customiseMessage?.Invoke(this);
+      customiseMessage?.Invoke(_raygunMessage);
       return this;
     }
   }

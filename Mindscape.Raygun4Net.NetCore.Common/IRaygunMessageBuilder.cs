@@ -28,6 +28,6 @@ namespace Mindscape.Raygun4Net
 
     IRaygunMessageBuilder SetResponseDetails(RaygunResponseMessage message);
 
-    IRaygunMessageBuilder Customise(Action<IRaygunMessageBuilder> customiseMessage);
+    IRaygunMessageBuilder Customise(Action<RaygunMessage> customiseMessage);
   }
 }

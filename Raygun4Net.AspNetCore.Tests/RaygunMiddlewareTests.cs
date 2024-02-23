@@ -1,7 +1,6 @@
 using System.Net;
 using System.Security.Claims;
 using System.Text.Json;
-using FluentAssertions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -9,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using MockHttp;
 
 namespace Mindscape.Raygun4Net.AspNetCore.Tests;
 

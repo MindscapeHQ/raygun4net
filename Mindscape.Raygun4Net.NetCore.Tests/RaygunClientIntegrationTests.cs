@@ -3,8 +3,6 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using MockHttp;
-using NUnit.Framework;
 
 namespace Mindscape.Raygun4Net.NetCore.Tests
 {

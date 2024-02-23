@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using NUnit.Framework;
 
 namespace Mindscape.Raygun4Net.NetCore.Tests
 {

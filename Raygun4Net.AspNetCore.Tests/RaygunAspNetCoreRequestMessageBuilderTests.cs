@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Mindscape.Raygun4Net.AspNetCore.Builders;
+﻿using Mindscape.Raygun4Net.AspNetCore.Builders;
 
 namespace Mindscape.Raygun4Net.AspNetCore.Tests;
 
