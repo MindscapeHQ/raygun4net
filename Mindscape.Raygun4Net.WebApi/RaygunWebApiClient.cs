@@ -58,6 +58,11 @@ namespace Mindscape.Raygun4Net.WebApi
         // or else we will not be getting the user's library but our own Raygun4Net library.
         ApplicationVersion = Assembly.GetCallingAssembly()?.GetName()?.Version?.ToString();
       }
+      
+      _backgroundMessageProcessor = new ThrottledBackgroundMessageProcessor(
+        RaygunSettings.Settings.BackgroundMessageQueueMax,
+        RaygunSettings.Settings.BackgroundMessageWorkerCount,
+        Send);
 
       Init();
     }
@@ -78,7 +83,6 @@ namespace Mindscape.Raygun4Net.WebApi
         // or else we will not be getting the user's library but our own Raygun4Net library.
         ApplicationVersion = Assembly.GetCallingAssembly()?.GetName()?.Version?.ToString();
       }
-      
       
       _backgroundMessageProcessor = new ThrottledBackgroundMessageProcessor(
                                           RaygunSettings.Settings.BackgroundMessageQueueMax,
@@ -601,15 +605,9 @@ namespace Mindscape.Raygun4Net.WebApi
       return httpContext?.Items["MS_HttpRequestMessage"] as HttpRequestMessage;
     }
 
-    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
-    {
-      return BuildMessage(exception, tags, userCustomData, null);
-    }
-
     protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime = null, Action<IRaygunMessageBuilder> customiseAction = null)
     {
       var message = RaygunWebApiMessageBuilder.New
-        .Customise(customiseAction)
         .SetTimeStamp(currentTime)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
@@ -619,9 +617,12 @@ namespace Mindscape.Raygun4Net.WebApi
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
         .SetContextId(ContextId)
-        .SetUser(UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
+        .SetUser(UserInfo ?? (!string.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
+        .Customise(customiseAction)
         .Build();
+      
       var customGroupingKey = OnCustomGroupingKey(exception, message);
+
       if (string.IsNullOrEmpty(customGroupingKey) == false)
       {
         message.Details.GroupingKey = customGroupingKey;
