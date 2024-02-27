@@ -1,7 +1,7 @@
 # Full Change Log for Raygun4Net.* packages
 
 ### v9.0.3
-- Fixed `RaygunWebApiClient` constructor to create `ThrottledBackgroundMessageProcessor` when the empty ctor is used
+- Fixed `RaygunWebApiClient` constructor to create `ThrottledBackgroundMessageProcessor` when the empty constructor is used
   - https://github.com/MindscapeHQ/raygun4net/pull/519 
 
 ### v9.0.2
