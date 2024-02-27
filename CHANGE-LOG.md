@@ -1,5 +1,9 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v9.0.3
+- Fixed `RaygunWebApiClient` constructor to create `ThrottledBackgroundMessageProcessor` when the empty ctor is used
+  - https://github.com/MindscapeHQ/raygun4net/pull/519 
+
 ### v9.0.2
 - Remove the usage of `ThreadLocal` in the RaygunClient (for .NET Framework)
   - This does not affect the NetCore version 
