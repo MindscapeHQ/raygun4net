@@ -28,5 +28,7 @@ namespace Mindscape.Raygun4Net
     IRaygunMessageBuilder SetTimeStamp(DateTime? currentTime);
 
     IRaygunMessageBuilder SetContextId(string contextId);
+
+    IRaygunMessageBuilder Customise(Action<IRaygunMessageBuilder> customiseAction);
   }
 }
