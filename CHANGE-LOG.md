@@ -6,7 +6,8 @@
 
 ### v9.0.2
 - Remove the usage of `ThreadLocal` in the RaygunClient (for .NET Framework)
-  - This does not affect the NetCore version 
+  - This change removes the SetCurrentHttpRequest method and uses HttpContext.Current directly
+  - This does not affect the AspNetCore version as it uses IHttpContextAccessor
 
 ### v9.0.1
 - Fixed issue for lock upgrade/recursion exception raised
