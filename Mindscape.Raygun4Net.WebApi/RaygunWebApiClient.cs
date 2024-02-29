@@ -431,10 +431,7 @@ namespace Mindscape.Raygun4Net.WebApi
 
         StripAndSend(exception, tags, userCustomData, customiseAction: x =>
         {
-          if (x is RaygunWebApiMessageBuilder builder)
-          {
-            builder.SetHttpDetails(requestMsg); 
-          }
+          x.Details.Request = requestMsg;
         });
 
         FlagAsSent(exception);
@@ -459,10 +456,7 @@ namespace Mindscape.Raygun4Net.WebApi
           var currentTime = DateTime.UtcNow;
           StripAndSendInBackground(exception, tags, userCustomData, currentTime, x =>
           {
-            if (x is RaygunWebApiMessageBuilder builder)
-            {
-              builder.SetHttpDetails(requestMsg);
-            }
+            x.Details.Request = requestMsg;
           });
         }
         catch (Exception)
@@ -573,7 +567,7 @@ namespace Mindscape.Raygun4Net.WebApi
       WebClientHelper.Send(message, _apiKey, ProxyCredentials);
     }
 
-    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime = null, Action<IRaygunMessageBuilder> customiseAction = null)
+    private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime = null, Action<RaygunMessage> customiseAction = null)
     {
       foreach (var e in StripWrapperExceptions(exception))
       {
@@ -581,7 +575,7 @@ namespace Mindscape.Raygun4Net.WebApi
       }
     }
     
-    private void StripAndSendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime, Action<IRaygunMessageBuilder> customiseAction = null)
+    private void StripAndSendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime, Action<RaygunMessage> customiseAction = null)
     {
       foreach (var e in StripWrapperExceptions(exception))
       {
@@ -596,7 +590,17 @@ namespace Mindscape.Raygun4Net.WebApi
     private RaygunRequestMessage BuildRequestMessage()
     {
       var ctx = ConvertHttpContext(HttpContext.Current);
-      var message = ctx != null ? RaygunWebApiRequestMessageBuilder.Build(ctx, _requestMessageOptions) : null;
+      RaygunRequestMessage message = null;
+
+      if (ctx == null)
+      {
+        message = RaygunRequestMessageBuilder.Build(HttpContext.Current.Request, _requestMessageOptions);
+      }
+      else
+      {
+        message = RaygunWebApiRequestMessageBuilder.Build(ctx, _requestMessageOptions);
+      }
+
       return message;
     }
 
@@ -605,7 +609,7 @@ namespace Mindscape.Raygun4Net.WebApi
       return httpContext?.Items["MS_HttpRequestMessage"] as HttpRequestMessage;
     }
 
-    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime = null, Action<IRaygunMessageBuilder> customiseAction = null)
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, DateTime? currentTime = null, Action<RaygunMessage> customiseAction = null)
     {
       var message = RaygunWebApiMessageBuilder.New
         .SetTimeStamp(currentTime)

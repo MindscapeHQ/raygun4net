@@ -19,9 +19,6 @@ namespace Mindscape.Raygun4Net
   {
     internal const string UnhandledExceptionTag = "UnhandledException";
 
-    [ThreadStatic] private static RaygunRequestMessage _currentRequestMessage;
-    [ThreadStatic] private static List<RaygunBreadcrumb> _currentBreadcrumbs;
-
     private static readonly RaygunBreadcrumbs _breadcrumbs = new RaygunBreadcrumbs(new DefaultBreadcrumbStorage());
     private static object _sendLock = new object();
 
@@ -343,9 +340,6 @@ namespace Mindscape.Raygun4Net
     {
       if (CanSend(exception))
       {
-        _currentRequestMessage = BuildRequestMessage();
-        _currentBreadcrumbs = _breadcrumbs.ToList();
-
         StripAndSend(exception, tags, userCustomData, userInfo, null);
         FlagAsSent(exception);
       }
@@ -396,17 +390,6 @@ namespace Mindscape.Raygun4Net
         {
           try
           {
-            // NOTE: Sean 26/01/2024
-            // Thread statics are not required here, as this is processed synchronously
-            // before offloading the sending to a background queue. However the message builder
-            // assumes they exist, so I've left them like this for now
-            
-            // We need to process the HttpRequestMessage on the current thread,
-            // otherwise it will be disposed while we are using it on the other thread.
-            _currentRequestMessage = BuildRequestMessage();
-            // We need to retrieve the breadcrumbs on the current thread as the HttpContext.Current
-            // will be null on the other thread
-            _currentBreadcrumbs = _breadcrumbs.ToList();
             var currentTime = DateTime.UtcNow;
             
             StripAndSendInBackground(exception, tags, userCustomData, userInfo, currentTime);
@@ -455,17 +438,31 @@ namespace Mindscape.Raygun4Net
 
     private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
     {
+      var requestMessage = BuildRequestMessage();
+      var breadcrumbs = _breadcrumbs.ToList();
+
       foreach (var e in StripWrapperExceptions(exception))
       {
-        Send(BuildMessage(e, tags, userCustomData, userInfo, currentTime));
+        Send(BuildMessage(e, tags, userCustomData, userInfo, currentTime, x =>
+        {
+          x.Details.Request = requestMessage;
+          x.Details.Breadcrumbs = breadcrumbs;
+        }));
       }
     }
     
     private void StripAndSendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
     {
+      var requestMessage = BuildRequestMessage();
+      var breadcrumbs = _breadcrumbs.ToList();
+
       foreach (var e in StripWrapperExceptions(exception))
       {
-        SendInBackground(() => BuildMessage(e, tags, userCustomData, userInfo, currentTime));
+        SendInBackground(() => BuildMessage(e, tags, userCustomData, userInfo, currentTime, x =>
+        {
+          x.Details.Request = requestMessage;
+          x.Details.Breadcrumbs = breadcrumbs;
+        }));
       }
     }
 
@@ -579,23 +576,11 @@ namespace Mindscape.Raygun4Net
       return requestMessage;
     }
 
-    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData)
-    {
-      return BuildMessage(exception, tags, userCustomData, null, null);
-    }
-
-    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfoMessage)
-    {
-      return BuildMessage(exception, tags, userCustomData, userInfoMessage, null);
-    }
-
-    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfoMessage, DateTime? currentTime)
+    protected RaygunMessage BuildMessage(Exception exception, IList<string> tags, IDictionary userCustomData = null, RaygunIdentifierMessage userInfoMessage = null, DateTime? currentTime = null, Action<RaygunMessage> customise = null)
     {
       RaygunMessageBuilder builder = RaygunMessageBuilder.New;
-      builder.SetBreadcrumbs(_currentBreadcrumbs);
 
       var message = builder
-        .SetHttpDetails(_currentRequestMessage)
         .SetTimeStamp(currentTime)
         .SetEnvironmentDetails()
         .SetMachineName(Environment.MachineName)
@@ -605,7 +590,8 @@ namespace Mindscape.Raygun4Net
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
         .SetContextId(ContextId)
-        .SetUser(userInfoMessage ?? UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
+        .SetUser(userInfoMessage ?? UserInfo ?? (!string.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
+        .Customise(customise)
         .Build();
 
       var customGroupingKey = OnCustomGroupingKey(exception, message);

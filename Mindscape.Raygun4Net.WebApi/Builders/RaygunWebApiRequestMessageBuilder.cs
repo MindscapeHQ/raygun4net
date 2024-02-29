@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net.Http;
 using Mindscape.Raygun4Net.Messages;
@@ -96,7 +97,13 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
 
       try
       {
-        form = ToDictionary(request.GetQueryNameValuePairs(), options.IsFormFieldIgnored, options.IsSensitiveFieldIgnored, true);
+        if (request.Content.IsFormData())
+        {
+          return form;
+        }
+
+        var data = request.Content.ReadAsFormDataAsync().GetAwaiter().GetResult();
+        form = ToDictionary(data, options.IsFormFieldIgnored, options.IsSensitiveFieldIgnored, true);
       }
       catch (Exception e)
       {
@@ -236,6 +243,34 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       }
 
       return exists;
+    }
+    
+    private static IDictionary ToDictionary(NameValueCollection collection, Func<string, bool> ignored, Func<string, bool> isSensitive, bool truncateValues = false)
+    {
+      var dictionary = new Dictionary<string, string>();
+
+      foreach (string key in collection.AllKeys.Where(k => !ignored(k) && !isSensitive(k)))
+      {
+        var k = key;
+        var value = collection[k];
+
+        if (truncateValues)
+        {
+          if (k.Length > MAX_KEY_LENGTH)
+          {
+            k = k.Substring(0, MAX_KEY_LENGTH);
+          }
+
+          if (value is { Length: > MAX_VALUE_LENGTH })
+          {
+            value = value.Substring(0, MAX_VALUE_LENGTH);
+          }
+        }
+
+        dictionary[k] = value;
+      }
+
+      return dictionary;
     }
 
     private static IDictionary ToDictionary(IEnumerable<KeyValuePair<string, string>> kvPairs, Func<string, bool> ignored, Func<string, bool> isSensitive, bool truncateValues = false)
