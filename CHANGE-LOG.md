@@ -1,5 +1,9 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v9.0.4
+- Fixed `RaygunClient` in .NET Framework to correctly gather HTTP data and remove [ThreadStatic] attribute
+- Fixed `RaygunWebApiClient` to correctly get Form data (it was looking at QueryString instead of Form)
+
 ### v9.0.3
 - Fixed `RaygunWebApiClient` constructor to create `ThrottledBackgroundMessageProcessor` when the empty constructor is used
   - https://github.com/MindscapeHQ/raygun4net/pull/519 

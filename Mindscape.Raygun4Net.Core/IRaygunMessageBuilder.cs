@@ -29,6 +29,6 @@ namespace Mindscape.Raygun4Net
 
     IRaygunMessageBuilder SetContextId(string contextId);
 
-    IRaygunMessageBuilder Customise(Action<IRaygunMessageBuilder> customiseAction);
+    IRaygunMessageBuilder Customise(Action<RaygunMessage> customiseAction);
   }
 }
