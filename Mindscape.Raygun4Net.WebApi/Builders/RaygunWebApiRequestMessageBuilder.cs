@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Net.Http;
+using System.Web;
 using Mindscape.Raygun4Net.Messages;
 using Mindscape.Raygun4Net.Filters;
 
@@ -93,24 +94,23 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
 
     private static IDictionary GetForm(HttpRequestMessage request, RaygunRequestMessageOptions options)
     {
-      IDictionary form = new Dictionary<string, string>();
-
       try
       {
-        if (request.Content.IsFormData())
+        if (!request.Content.Headers.ContentType.ToString().Contains("multipart/form-data"))
         {
-          return form;
+          return new Dictionary<string, string>();
         }
-
-        var data = request.Content.ReadAsFormDataAsync().GetAwaiter().GetResult();
-        form = ToDictionary(data, options.IsFormFieldIgnored, options.IsSensitiveFieldIgnored, true);
+        
+        var data = (request.Properties["MS_HttpContext"] as HttpContextWrapper)?.Request.Form;
+        return ToDictionary(data, options.IsFormFieldIgnored, options.IsSensitiveFieldIgnored, true);
       }
       catch (Exception e)
       {
-        form = new Dictionary<string, string>() { { "Failed to retrieve", e.Message } };
+        return new Dictionary<string, string>
+        {
+          { "Failed to retrieve", e.Message }
+        };
       }
-
-      return form;
     }
 
     private static IDictionary GetHeaders(HttpRequestMessage request, RaygunRequestMessageOptions options)
