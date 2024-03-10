@@ -1,5 +1,18 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v9.0.4
+- Fixed `RaygunClient` in .NET Framework to correctly gather HTTP data and remove [ThreadStatic] attribute
+- Fixed `RaygunWebApiClient` to correctly get Form data (it was looking at QueryString instead of Form)
+
+### v9.0.3
+- Fixed `RaygunWebApiClient` constructor to create `ThrottledBackgroundMessageProcessor` when the empty constructor is used
+  - https://github.com/MindscapeHQ/raygun4net/pull/519 
+
+### v9.0.2
+- Remove the usage of `ThreadLocal` in the RaygunClient (for .NET Framework)
+  - This change removes the SetCurrentHttpRequest method and uses HttpContext.Current directly
+  - This does not affect the AspNetCore version as it uses IHttpContextAccessor
+
 ### v9.0.1
 - Fixed issue for lock upgrade/recursion exception raised
   - https://github.com/MindscapeHQ/raygun4net/issues/513

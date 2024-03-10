@@ -4,16 +4,10 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunMessage
   {
-    public RaygunMessage()
-    {
-      OccurredOn = DateTime.UtcNow;
-      Details = new RaygunMessageDetails();
-    }
-    
-    public DateTime OccurredOn { get; set; }
+    public DateTime OccurredOn { get; set; } = DateTime.UtcNow;
 
-    public RaygunMessageDetails Details { get; set; }
-    
+    public RaygunMessageDetails Details { get; set; } = new();
+
     public override string ToString()
     {
       // This exists because Reflection in Xamarin can't seem to obtain the Getter methods unless the getter is used somewhere in the code.

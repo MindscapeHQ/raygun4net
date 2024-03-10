@@ -25,14 +25,14 @@ namespace Mindscape.Raygun4Net.WebApi
       }
       catch(InvalidOperationException ex)
       {
-        var client = _clientCreator.GenerateRaygunWebApiClient(request);
+        var client = _clientCreator.GenerateRaygunWebApiClient();
         client.SendInBackground(ex.InnerException, new List<string> {RaygunWebApiClient.UnhandledExceptionTag});
         client.FlagExceptionAsSent(ex); // Stops us re-sending the outer exception
         throw;
       }
       catch(Exception ex)
       {
-        _clientCreator.GenerateRaygunWebApiClient(request).SendInBackground(ex, new List<string> { RaygunWebApiClient.UnhandledExceptionTag });
+        _clientCreator.GenerateRaygunWebApiClient().SendInBackground(ex, new List<string> { RaygunWebApiClient.UnhandledExceptionTag });
         throw;
       }
     }
