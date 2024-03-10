@@ -65,13 +65,13 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetUserCustomData(IDictionary userCustomData)
     {
-      _raygunMessage.Details.UserCustomData = userCustomData;
+      _raygunMessage.Details.UserCustomData = userCustomData ?? new Dictionary<string, string>();
       return this;
     }
 
     public IRaygunMessageBuilder SetTags(IList<string> tags)
     {
-      _raygunMessage.Details.Tags = tags;
+      _raygunMessage.Details.Tags = tags ?? new List<string>();
       return this;
     }
 

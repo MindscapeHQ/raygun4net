@@ -14,7 +14,7 @@
   - Introduced new `.AddRaygunUserProvider()` to register a default implementation
   - Introduced new `.AddRaygunUserProvider<T>()` to register a custom implementation
 - Fixed bug with filters where uppercase properties were compared against lowercase filters
-- Fixed null pointer when accessing CustomData and Tags in RaygunMessage using OnSendingMessage
+- Fixed null reference when accessing CustomData and Tags in RaygunMessage using OnSendingMessage
 - Adds Breadcrumbs to NetCore and AspNetCore
   - See: https://github.com/MindscapeHQ/raygun4net/pull/516
   - Breadcrumbs are by default local to the asynchronous context using `AsyncLocalBreadcrumbStorage`
