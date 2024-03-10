@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using NUnit.Framework;
 
 namespace Mindscape.Raygun4Net.NetCore.Tests
 {

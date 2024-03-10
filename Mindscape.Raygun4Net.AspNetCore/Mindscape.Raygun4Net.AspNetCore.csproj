@@ -31,6 +31,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,5 +46,13 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <InternalsVisibleTo Include="Raygun4Net.AspNetCore.Tests"/>
+  </ItemGroup>
+  
+  <ItemGroup Condition=" '$(Configuration)' == 'Release' ">
+    <InternalsVisibleTo Include="Raygun4Net.AspNetCore.Tests, PublicKey=$(RaygunPublicKey)"/>
   </ItemGroup>
 </Project>

@@ -9,11 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
 builder.Services.AddMvc();
-builder.Services.AddRaygun(builder.Configuration, new RaygunMiddlewareSettings
-{
-  // adds an optional example of over riding the client provider
-  ClientProvider = new ExampleRaygunAspNetCoreClientProvider()
-});
+builder.Services.AddRaygun(builder.Configuration);
 
 // because we're using a library that uses Raygun, we need to initialize that too
 RaygunClientFactory.Initialize(builder.Configuration["RaygunSettings:ApiKey"]);

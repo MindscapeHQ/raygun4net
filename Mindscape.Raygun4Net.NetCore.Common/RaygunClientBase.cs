@@ -18,7 +18,7 @@ namespace Mindscape.Raygun4Net
     /// <summary>
     /// If no HttpClient is provided to the constructor, this will be used.
     /// </summary>
-    private static readonly HttpClient DefaultClient = new HttpClient
+    private static readonly HttpClient DefaultClient = new ()
     {
       // The default timeout is 100 seconds for the HttpClient, 
       Timeout = TimeSpan.FromSeconds(30)
@@ -29,14 +29,14 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     private readonly HttpClient _client;
 
-    private readonly string _apiKey;
-    private readonly List<Type> _wrapperExceptions = new List<Type>();
+    private readonly List<Type> _wrapperExceptions = new();
 
     private bool _handlingRecursiveErrorSending;
     private bool _handlingRecursiveGrouping;
 
     protected readonly RaygunSettingsBase _settings;
     private readonly ThrottledBackgroundMessageProcessor _backgroundMessageProcessor;
+    private readonly IRaygunUserProvider _userProvider;
     protected internal const string SentKey = "AlreadySentByRaygun";
 
     /// <summary>
@@ -52,17 +52,24 @@ namespace Mindscape.Raygun4Net
     /// <summary>
     /// Gets or sets the user identity string.
     /// </summary>
+    [Obsolete("Provide a `IRaygunUserProvider` to the RaygunClient constructor instead.")]
     public virtual string User { get; set; }
 
     /// <summary>
     /// Gets or sets information about the user including the identity string.
     /// </summary>
+    [Obsolete("Provide a `IRaygunUserProvider` to the RaygunClient constructor instead.")]
     public virtual RaygunIdentifierMessage UserInfo { get; set; }
 
     /// <summary>
     /// Gets or sets a custom application version identifier for all error messages sent to the Raygun endpoint.
     /// </summary>
-    public string ApplicationVersion { get; set; }
+    [Obsolete("Use the `RaygunSettings.ApplicationVersion` property instead.")]
+    public string ApplicationVersion
+    {
+      get => _settings.ApplicationVersion;
+      set => _settings.ApplicationVersion = value;
+    }
 
     /// <summary>
     /// If set to true, this will automatically setup handlers to send Unhandled Exceptions to Raygun  
@@ -70,23 +77,16 @@ namespace Mindscape.Raygun4Net
     /// <remarks>
     /// Currently defaults to false. This may be change in future releases.
     /// </remarks>
+    [Obsolete("Use the `RaygunSettings.CatchUnhandledExceptions` property instead.")]
     public virtual bool CatchUnhandledExceptions
     {
-      get { return _settings.CatchUnhandledExceptions; }
-      set
-      {
-        if (_settings.CatchUnhandledExceptions == value)
-        {
-          return;
-        }
-
-        _settings.CatchUnhandledExceptions = value;
-      }
+      get => _settings.CatchUnhandledExceptions;
+      set => _settings.CatchUnhandledExceptions = value;
     }
 
     private void OnApplicationUnhandledException(Exception exception, bool isTerminating)
     {
-      if (!CatchUnhandledExceptions)
+      if (!_settings.CatchUnhandledExceptions)
       {
         return;
       }
@@ -94,28 +94,21 @@ namespace Mindscape.Raygun4Net
       Send(exception, UnhandledExceptionTags);
     }
 
-    public RaygunClientBase(RaygunSettingsBase settings)
-      : this(settings, DefaultClient)
+    public RaygunClientBase(RaygunSettingsBase settings) : this(settings, DefaultClient)
     {
     }
 
-    public RaygunClientBase(RaygunSettingsBase settings, HttpClient client)
+    public RaygunClientBase(RaygunSettingsBase settings, HttpClient client, IRaygunUserProvider userProvider = null)
     {
       _client = client ?? DefaultClient;
       _settings = settings;
-      _apiKey = settings.ApiKey;
       _backgroundMessageProcessor = new ThrottledBackgroundMessageProcessor(settings.BackgroundMessageQueueMax, _settings.BackgroundMessageWorkerCount, Send);
+      _userProvider = userProvider;
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
 
-      if (!string.IsNullOrEmpty(settings.ApplicationVersion))
-      {
-        ApplicationVersion = settings.ApplicationVersion;
-      }
-
       UnhandledExceptionBridge.OnUnhandledException(OnApplicationUnhandledException);
     }
-
 
     /// <summary>
     /// Adds a list of outer exceptions that will be stripped, leaving only the valuable inner exception.
@@ -155,13 +148,18 @@ namespace Mindscape.Raygun4Net
              false.Equals(exception.Data[SentKey]);
     }
 
+    protected bool Enqueue(RaygunMessage msg)
+    {
+      return _backgroundMessageProcessor.Enqueue(msg);
+    }
+
     protected void FlagAsSent(Exception exception)
     {
       if (exception?.Data != null)
       {
         try
         {
-          Type[] genericTypes = exception.Data.GetType().GetTypeInfo().GenericTypeArguments;
+          var genericTypes = exception.Data.GetType().GetTypeInfo().GenericTypeArguments;
 
           if (genericTypes.Length == 0 || genericTypes[0].GetTypeInfo().IsAssignableFrom(typeof(string)))
           {
@@ -178,7 +176,7 @@ namespace Mindscape.Raygun4Net
     // Returns true if the message can be sent, false if the sending is canceled.
     protected bool OnSendingMessage(RaygunMessage raygunMessage)
     {
-      bool result = true;
+      var result = true;
 
       if (!_handlingRecursiveErrorSending)
       {
@@ -244,7 +242,7 @@ namespace Mindscape.Raygun4Net
 
     protected bool ValidateApiKey()
     {
-      if (string.IsNullOrEmpty(_apiKey))
+      if (string.IsNullOrEmpty(_settings.ApiKey))
       {
         Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
         return false;
@@ -335,7 +333,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     /// <param name="userInfo">Information about the user including the identity string.</param>
-    public virtual async Task SendInBackground(Exception exception, IList<string> tags = null, IDictionary userCustomData = null, RaygunIdentifierMessage userInfo = null)
+    public virtual Task SendInBackground(Exception exception, IList<string> tags = null, IDictionary userCustomData = null, RaygunIdentifierMessage userInfo = null)
     {
       if (CanSend(exception))
       {
@@ -350,6 +348,8 @@ namespace Mindscape.Raygun4Net
         
         FlagAsSent(exception);
       }
+      
+      return Task.CompletedTask;
     }
 
     /// <summary>
@@ -367,24 +367,23 @@ namespace Mindscape.Raygun4Net
       return Task.CompletedTask;
     }
 
-    internal void FlagExceptionAsSent(Exception exception)
-    {
-      FlagAsSent(exception);
-    }
-
-    protected virtual async Task<RaygunMessage> BuildMessage(Exception exception, IList<string> tags,
-      IDictionary userCustomData, RaygunIdentifierMessage userInfo)
+    protected async Task<RaygunMessage> BuildMessage(Exception exception, 
+                                                             IList<string> tags,
+                                                             IDictionary userCustomData = null, 
+                                                             RaygunIdentifierMessage userInfo = null,
+                                                             Action<RaygunMessage> customiseMessage = null)
     {
       var message = RaygunMessageBuilder.New(_settings)
-        .SetEnvironmentDetails()
-        .SetMachineName(Environment.MachineName)
-        .SetExceptionDetails(exception)
-        .SetClientDetails()
-        .SetVersion(ApplicationVersion)
-        .SetTags(tags)
-        .SetUserCustomData(userCustomData)
-        .SetUser(userInfo ?? UserInfo ?? (!String.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
-        .Build();
+                                        .SetEnvironmentDetails()
+                                        .SetMachineName(Environment.MachineName)
+                                        .SetExceptionDetails(exception)
+                                        .SetClientDetails()
+                                        .SetVersion(_settings.ApplicationVersion)
+                                        .SetTags(tags)
+                                        .SetUserCustomData(userCustomData)
+                                        .SetUser(userInfo ?? _userProvider?.GetUser() ?? UserInfo ?? (!string.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
+                                        .Customise(customiseMessage)
+                                        .Build();
 
       var customGroupingKey = await OnCustomGroupingKey(exception, message).ConfigureAwait(false);
 
@@ -396,27 +395,27 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 
-    protected async Task StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData,
+    protected virtual async Task StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData,
       RaygunIdentifierMessage userInfo)
     {
-      foreach (Exception e in StripWrapperExceptions(exception))
+      foreach (var e in StripWrapperExceptions(exception))
       {
         await Send(await BuildMessage(e, tags, userCustomData, userInfo).ConfigureAwait(false)).ConfigureAwait(false);
       }
     }
 
-    protected IEnumerable<Exception> StripWrapperExceptions(Exception exception)
+    protected virtual IEnumerable<Exception> StripWrapperExceptions(Exception exception)
     {
       if (exception != null && _wrapperExceptions.Any(wrapperException =>
             exception.GetType() == wrapperException && exception.InnerException != null))
       {
-        AggregateException aggregate = exception as AggregateException;
+        var aggregate = exception as AggregateException;
 
         if (aggregate != null)
         {
-          foreach (Exception e in aggregate.InnerExceptions)
+          foreach (var e in aggregate.InnerExceptions)
           {
-            foreach (Exception ex in StripWrapperExceptions(e))
+            foreach (var ex in StripWrapperExceptions(e))
             {
               yield return ex;
             }
@@ -424,7 +423,7 @@ namespace Mindscape.Raygun4Net
         }
         else
         {
-          foreach (Exception e in StripWrapperExceptions(exception.InnerException))
+          foreach (var e in StripWrapperExceptions(exception.InnerException))
           {
             yield return e;
           }
@@ -459,7 +458,7 @@ namespace Mindscape.Raygun4Net
         return;
       }
 
-      bool canSend = OnSendingMessage(raygunMessage) && CanSend(raygunMessage);
+      var canSend = OnSendingMessage(raygunMessage) && CanSend(raygunMessage);
 
       if (!canSend)
       {
@@ -467,7 +466,7 @@ namespace Mindscape.Raygun4Net
       }
 
       var requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
-      requestMessage.Headers.Add("X-ApiKey", _apiKey);
+      requestMessage.Headers.Add("X-ApiKey", _settings.ApiKey);
 
       try
       {
