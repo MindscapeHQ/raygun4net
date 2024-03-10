@@ -270,10 +270,10 @@ namespace Mindscape.Raygun4Net.Tests
     // Tags and user custom data tests
 
     [Test]
-    public void TagsAreNullByDefault()
+    public void TagsAreNotNullByDefault()
     {
       RaygunMessage message = _client.ExposeBuildMessage(_exception);
-      Assert.That(message.Details.Tags, Is.Null);
+      Assert.That(message.Details.Tags, Is.Not.Null);
     }
 
     [Test]
@@ -291,10 +291,10 @@ namespace Mindscape.Raygun4Net.Tests
     }
 
     [Test]
-    public void UserCustomDataIsNullByDefault()
+    public void UserCustomDataIsNotNullByDefault()
     {
       RaygunMessage message = _client.ExposeBuildMessage(_exception);
-      Assert.That(message.Details.UserCustomData, Is.Null);
+      Assert.That(message.Details.UserCustomData, Is.Not.Null);
     }
 
     [Test]
