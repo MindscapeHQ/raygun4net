@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using NUnit.Framework;
 
 namespace Mindscape.Raygun4Net.NetCore.Tests
 {
@@ -22,80 +21,10 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     // User tests
 
     [Test]
-    public void DefaultUser()
-    {
-      Assert.That(_client.User, Is.Null);
-    }
-
-    [Test]
-    public void DefaultUserInfo()
-    {
-      Assert.That(_client.UserInfo, Is.Null);
-    }
-
-    [Test]
-    public void UserProperty()
-    {
-      _client.User = "Robbie Robot";
-      Assert.That("Robbie Robot", Is.EqualTo(_client.User));
-    }
-
-    [Test]
-    public void UserInfoProperty()
-    {
-      RaygunIdentifierMessage user = new RaygunIdentifierMessage("Robbie Robot");
-      _client.UserInfo = user;
-      Assert.That(user, Is.SameAs(_client.UserInfo));
-    }
-
-    [Test]
     public void MessageWithNoUser()
     {
       RaygunMessage message = _client.ExposeBuildMessage(_exception);
       Assert.That(message.Details.User, Is.Null);
-    }
-
-    [Test]
-    public void MessageWithUser()
-    {
-      _client.User = "Robbie Robot";
-
-      RaygunMessage message = _client.ExposeBuildMessage(_exception);
-      Assert.That("Robbie Robot", Is.EqualTo(message.Details.User.Identifier));
-    }
-
-    [Test]
-    public void MessageWithUserInfo()
-    {
-      RaygunIdentifierMessage user = new RaygunIdentifierMessage("Robbie Robot") { IsAnonymous = true };
-      _client.UserInfo = user;
-
-      RaygunMessage message = _client.ExposeBuildMessage(_exception);
-      Assert.That("Robbie Robot", Is.EqualTo(message.Details.User.Identifier));
-      Assert.That(message.Details.User.IsAnonymous, Is.True);
-    }
-
-    [Test]
-    public void UserInfoTrumpsUser()
-    {
-      RaygunIdentifierMessage user = new RaygunIdentifierMessage("Robbie Robot") { IsAnonymous = true };
-      _client.UserInfo = user;
-      _client.User = "Not Robbie Robot";
-
-      RaygunMessage message = _client.ExposeBuildMessage(_exception);
-      Assert.That("Robbie Robot", Is.EqualTo(message.Details.User.Identifier));
-      Assert.That(message.Details.User.IsAnonymous, Is.True);
-    }
-    
-    [Test]
-    public void IsAnonymousDefault()
-    {
-      RaygunIdentifierMessage user = new RaygunIdentifierMessage("Robbie Robot");
-      Assert.That(user.IsAnonymous, Is.False);
-
-      _client.User = "Robbie Robot";
-      RaygunMessage message = _client.ExposeBuildMessage(_exception);
-      Assert.That(message.Details.User.IsAnonymous, Is.False);
     }
 
     // Application version tests

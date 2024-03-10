@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
-    <None Include="..\LICENSE" Pack="true" PackagePath="" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="\" />
     <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\" />
   </ItemGroup>
   
@@ -37,6 +37,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNet.Mvc" Version="3.0.20105.1" />
+    <PackageReference Include="Microsoft.AspNet.Mvc" Version="3.0.50813.1" />
   </ItemGroup>
 </Project>

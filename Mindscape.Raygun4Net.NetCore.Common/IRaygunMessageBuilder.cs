@@ -29,5 +29,7 @@ namespace Mindscape.Raygun4Net
     IRaygunMessageBuilder SetResponseDetails(RaygunResponseMessage message);
     
     IRaygunMessageBuilder SetBreadcrumbs(IList<RaygunBreadcrumb> breadcrumbs);
+
+    IRaygunMessageBuilder Customise(Action<RaygunMessage> customiseMessage);
   }
 }

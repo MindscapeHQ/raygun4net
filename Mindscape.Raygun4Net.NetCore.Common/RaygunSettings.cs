@@ -4,7 +4,7 @@ namespace Mindscape.Raygun4Net
 {
   public abstract class RaygunSettingsBase
   {
-    internal const string DefaultApiEndPoint = "https://api.raygun.com/entries";
+    private const string DefaultApiEndPoint = "https://api.raygun.com/entries";
     private const string RaygunMessageQueueMaxVariable = "RAYGUN_MESSAGE_QUEUE_MAX";
 
     public RaygunSettingsBase()
@@ -19,6 +19,9 @@ namespace Mindscape.Raygun4Net
       }
     }
 
+    /// <summary>
+    /// Raygun Application API Key, can be found in the Raygun application dashboard by clicking the "Application settings" button
+    /// </summary>
     public string ApiKey { get; set; }
  
     public Uri ApiEndpoint { get; set; }

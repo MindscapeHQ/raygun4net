@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using NUnit.Framework;
 
 namespace Mindscape.Raygun4Net.NetCore.Tests
 {
@@ -103,6 +102,25 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       _builder.SetExceptionDetails(exception);
       RaygunMessage message = _builder.Build();
       Assert.That(message.Details.Response, Is.Null);
+    }
+    
+    [Test]
+    public void Customise_ExistingMessage_CorrectlyModifiesProperties()
+    {
+      var settings = new RaygunSettings();
+      var builder = RaygunMessageBuilder.New(settings)
+                                        .SetVersion("1.0.0")
+                                        .SetEnvironmentDetails()
+                                        .Customise(m =>
+                                        {
+                                          m.Details.Version = "2.0.0";
+                                          m.Details.Environment.Architecture = "BANANA";
+                                        });
+      
+      var modifiedMessage = builder.Build();
+
+      modifiedMessage.Details.Version.Should().Be("2.0.0");
+      modifiedMessage.Details.Environment.Architecture.Should().Be("BANANA");
     }
   }
 }
