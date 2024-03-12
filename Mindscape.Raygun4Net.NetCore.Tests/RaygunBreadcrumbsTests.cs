@@ -97,12 +97,26 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
     
     [Test]
-    public void OverBreadcrumbLimit()
+    public void InMemoryOverBreadcrumbLimit()
     {
       const int breadcrumbLimit = 32;
       
       RaygunBreadcrumbs.Storage = new InMemoryBreadcrumbStorage();
 
+      for (var i = 0; i < breadcrumbLimit + 1; i++)
+      {
+        RaygunBreadcrumbs.Record($"Breadcrumb: {i}");
+      }
+      
+      Assert.That(RaygunBreadcrumbs.ToList(), Has.Count.EqualTo(breadcrumbLimit));
+      Assert.That(RaygunBreadcrumbs.ToList().First().Message, Is.EqualTo($"Breadcrumb: 1"));
+    }
+    
+    [Test]
+    public void AsyncLocalOverBreadcrumbLimit()
+    {
+      const int breadcrumbLimit = 32;
+      
       for (var i = 0; i < breadcrumbLimit + 1; i++)
       {
         RaygunBreadcrumbs.Record($"Breadcrumb: {i}");
