@@ -24,16 +24,16 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
 
     public static void Record(RaygunBreadcrumb crumb)
     {
-      if (_storage.Size() > 32)
-      {
-        return;
-      }
-
       if (crumb.Message.Length > 500)
       {
         return;
       }
-
+      
+      if (_storage.Size() >= 32)
+      {
+        _storage.RemoveFirst();
+      }
+      
       try
       {
         for (int i = 1; i <= 3; i++)

@@ -95,7 +95,36 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       
       Assert.That(RaygunBreadcrumbs.ToList(), Has.Count.EqualTo(1));
     }
+    
+    [Test]
+    public void OverBreadcrumbLimit()
+    {
+      const int breadcrumbLimit = 32;
+      
+      RaygunBreadcrumbs.Storage = new InMemoryBreadcrumbStorage();
 
+      for (var i = 0; i < breadcrumbLimit + 1; i++)
+      {
+        RaygunBreadcrumbs.Record($"Breadcrumb: {i}");
+      }
+      
+      Assert.That(RaygunBreadcrumbs.ToList(), Has.Count.EqualTo(breadcrumbLimit));
+      Assert.That(RaygunBreadcrumbs.ToList().First().Message, Is.EqualTo($"Breadcrumb: 1"));
+    }
+    
+    [Test]
+    public void MessageTooLong()
+    {
+      const int characterLimit = 500;
+      
+      RaygunBreadcrumbs.Storage = new InMemoryBreadcrumbStorage();
+      
+      RaygunBreadcrumbs.Record(new string('x', characterLimit + 1));
+      
+      Assert.That(RaygunBreadcrumbs.ToList(), Has.Count.EqualTo(0));
+    }
+
+    
     static void InMemoryLowerContext()
     {
       RaygunBreadcrumbs.Record("Breadcrumb: in context");

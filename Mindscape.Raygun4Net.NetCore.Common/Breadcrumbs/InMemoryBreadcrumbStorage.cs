@@ -26,6 +26,16 @@ public class InMemoryBreadcrumbStorage : IRaygunBreadcrumbStorage
     return _breadcrumbs?.Count ?? 0;
   }
 
+  public void RemoveFirst()
+  {
+    if (_breadcrumbs.Count == 0)
+    {
+      return;
+    }
+
+    _breadcrumbs?.RemoveAt(0);
+  }
+
   public IList<RaygunBreadcrumb> ToList()
   {
     return _breadcrumbs;

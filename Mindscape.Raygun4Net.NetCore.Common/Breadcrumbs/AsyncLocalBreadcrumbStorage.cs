@@ -11,7 +11,7 @@ public class AsyncLocalBreadcrumbStorage : IContextAwareStorage
   {
     _breadcrumbs.Value = breadcrumbs ?? new List<RaygunBreadcrumb>();
   }
-  
+
   public void BeginContext()
   {
     _breadcrumbs.Value ??= new List<RaygunBreadcrumb>();
@@ -37,6 +37,21 @@ public class AsyncLocalBreadcrumbStorage : IContextAwareStorage
   public int Size()
   {
     return _breadcrumbs.Value?.Count ?? 0;
+  }
+
+  public void RemoveFirst()
+  {
+    if (_breadcrumbs.Value == null)
+    {
+      return;
+    }
+
+    if (_breadcrumbs.Value.Count == 0)
+    {
+      return;
+    }
+
+    _breadcrumbs.Value.RemoveAt(0);
   }
 
   public IList<RaygunBreadcrumb> ToList()
