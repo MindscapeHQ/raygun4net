@@ -17,14 +17,16 @@ namespace Mindscape.Raygun4Net
 
     public RaygunClientMessage Client { get; set; }
 
-    public IList<string> Tags { get; set; }
+    public IList<string> Tags { get; set; } = new List<string>();
 
-    public IDictionary UserCustomData { get; set; }
+    public IDictionary UserCustomData { get; set; } = new Dictionary<string, string>();
 
     public RaygunIdentifierMessage User { get; set; }
     
     public RaygunRequestMessage Request { get; set; }
 
     public RaygunResponseMessage Response { get; set; }
+    
+    public IList<RaygunBreadcrumb> Breadcrumbs { get; set; }
   }
 }

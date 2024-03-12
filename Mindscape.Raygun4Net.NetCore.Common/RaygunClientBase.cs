@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Mindscape.Raygun4Net.Breadcrumbs;
 
 namespace Mindscape.Raygun4Net
 {
@@ -141,7 +142,6 @@ namespace Mindscape.Raygun4Net
         _wrapperExceptions.Remove(wrapper);
       }
     }
-
     protected virtual bool CanSend(Exception exception)
     {
       return exception?.Data == null || !exception.Data.Contains(SentKey) ||
@@ -373,6 +373,7 @@ namespace Mindscape.Raygun4Net
                                                              RaygunIdentifierMessage userInfo = null,
                                                              Action<RaygunMessage> customiseMessage = null)
     {
+      
       var message = RaygunMessageBuilder.New(_settings)
                                         .SetEnvironmentDetails()
                                         .SetMachineName(Environment.MachineName)
@@ -382,6 +383,7 @@ namespace Mindscape.Raygun4Net
                                         .SetTags(tags)
                                         .SetUserCustomData(userCustomData)
                                         .SetUser(userInfo ?? _userProvider?.GetUser() ?? UserInfo ?? (!string.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
+                                        .SetBreadcrumbs(RaygunBreadcrumbs.ToList())
                                         .Customise(customiseMessage)
                                         .Build();
 

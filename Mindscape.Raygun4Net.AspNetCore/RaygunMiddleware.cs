@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Mindscape.Raygun4Net.Breadcrumbs;
 
 namespace Mindscape.Raygun4Net.AspNetCore;
 
@@ -30,6 +31,11 @@ public class RaygunMiddleware
   public async Task Invoke(HttpContext httpContext)
   {
     httpContext.Request.EnableBuffering();
+    
+    if (RaygunBreadcrumbs.Storage is IContextAwareStorage storage)
+    {
+      storage.BeginContext();
+    }
 
     try
     {

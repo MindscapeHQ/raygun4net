@@ -55,7 +55,9 @@ namespace Mindscape.Raygun4Net.Tests
           Error = new RaygunErrorMessage
           {
             Data = data
-          }
+          },
+          Tags = null,
+          UserCustomData = null
         }
       };
 
