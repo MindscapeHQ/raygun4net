@@ -6,6 +6,8 @@ public class InMemoryBreadcrumbStorage : IRaygunBreadcrumbStorage
 {
   private readonly List<RaygunBreadcrumb> _breadcrumbs;
 
+  private const int MaxSize = 32;
+
   public InMemoryBreadcrumbStorage(List<RaygunBreadcrumb> breadcrumbs = null)
   {
     _breadcrumbs = breadcrumbs ?? new List<RaygunBreadcrumb>();
@@ -13,6 +15,16 @@ public class InMemoryBreadcrumbStorage : IRaygunBreadcrumbStorage
 
   public void Store(RaygunBreadcrumb breadcrumb)
   {
+    if (_breadcrumbs == null)
+    {
+      return;
+    }
+
+    if (_breadcrumbs.Count == MaxSize)
+    {
+      _breadcrumbs.RemoveAt(0);
+    }
+    
     _breadcrumbs.Add(breadcrumb);
   }
 
@@ -24,16 +36,6 @@ public class InMemoryBreadcrumbStorage : IRaygunBreadcrumbStorage
   public int Size()
   {
     return _breadcrumbs?.Count ?? 0;
-  }
-
-  public void RemoveFirst()
-  {
-    if (_breadcrumbs.Count == 0)
-    {
-      return;
-    }
-
-    _breadcrumbs?.RemoveAt(0);
   }
 
   public IList<RaygunBreadcrumb> ToList()

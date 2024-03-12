@@ -6,6 +6,8 @@ namespace Mindscape.Raygun4Net.Breadcrumbs;
 public class AsyncLocalBreadcrumbStorage : IContextAwareStorage
 {
   private readonly AsyncLocal<List<RaygunBreadcrumb>> _breadcrumbs = new();
+  
+  private const int MaxSize = 32;
 
   public AsyncLocalBreadcrumbStorage(List<RaygunBreadcrumb> breadcrumbs = null)
   {
@@ -26,6 +28,11 @@ public class AsyncLocalBreadcrumbStorage : IContextAwareStorage
   {
     _breadcrumbs.Value ??= new List<RaygunBreadcrumb>();
 
+    if (_breadcrumbs.Value.Count == MaxSize)
+    {
+      _breadcrumbs.Value.RemoveAt(0);
+    }
+
     _breadcrumbs.Value.Add(breadcrumb);
   }
 
@@ -37,21 +44,6 @@ public class AsyncLocalBreadcrumbStorage : IContextAwareStorage
   public int Size()
   {
     return _breadcrumbs.Value?.Count ?? 0;
-  }
-
-  public void RemoveFirst()
-  {
-    if (_breadcrumbs.Value == null)
-    {
-      return;
-    }
-
-    if (_breadcrumbs.Value.Count == 0)
-    {
-      return;
-    }
-
-    _breadcrumbs.Value.RemoveAt(0);
   }
 
   public IList<RaygunBreadcrumb> ToList()
