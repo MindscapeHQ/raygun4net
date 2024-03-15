@@ -9,7 +9,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
 builder.Services.AddMvc();
-builder.Services.AddRaygun(builder.Configuration);
+builder.Services.AddRaygun(builder.Configuration, settings =>
+{
+  settings.EnvironmentVariables.Add("USER_*");
+  settings.EnvironmentVariables.Add("POSH_*");
+});
 
 // because we're using a library that uses Raygun, we need to initialize that too
 RaygunClientFactory.Initialize(builder.Configuration["RaygunSettings:ApiKey"]);

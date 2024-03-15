@@ -3,7 +3,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Mindscape.Raygun4Net.Breadcrumbs;
-using NUnit.Framework;
 
 namespace Mindscape.Raygun4Net.NetCore.Tests
 {
