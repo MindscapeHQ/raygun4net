@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Mindscape.Raygun4Net.EnvironmentProviders;
 
@@ -20,6 +21,11 @@ public class EnvironmentVariablesProvider
 
     foreach (var search in settings.EnvironmentVariables!)
     {
+      if (Regex.IsMatch(search, "^[*]+$", RegexOptions.Compiled))
+      {
+        continue;
+      }
+      
       var values = search switch
       {
         _ when search.StartsWith("*") && search.EndsWith("*") => GetContainsVariable(environmentVariables, search.Trim('*')),

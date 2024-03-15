@@ -224,5 +224,31 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         "ONE_Banana_Two"
       });
     }
+    
+    [Test]
+    public void SetEnvironmentDetails_WithEnvironmentVariables_Star_ShouldReturnNothing()
+    {
+      Environment.SetEnvironmentVariable("ONE_Banana_Two", "1");
+      Environment.SetEnvironmentVariable("Two_Test_Three", "2");
+      Environment.SetEnvironmentVariable("ThreeBananaFour", "3");
+      
+      var settings = new RaygunSettings
+      {
+        EnvironmentVariables = new List<string>
+        {
+          "*",
+          "**",
+          "***",
+          "* *",
+        }
+      };
+      var builder = RaygunMessageBuilder.New(settings)
+                                        .SetEnvironmentDetails();
+      
+      var msg = builder.Build();
+
+      msg.Details.Environment.EnvironmentVariables.Keys.Cast<string>()
+         .Should().HaveCount(0);
+    }
   }
 }
