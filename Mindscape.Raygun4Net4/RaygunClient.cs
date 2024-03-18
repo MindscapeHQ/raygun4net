@@ -439,7 +439,7 @@ namespace Mindscape.Raygun4Net
     private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
     {
       var requestMessage = BuildRequestMessage();
-      var breadcrumbs = _breadcrumbs.ToList();
+      IList<RaygunBreadcrumb> breadcrumbs = BuildBreadCrumbList();
 
       foreach (var e in StripWrapperExceptions(exception))
       {
@@ -450,11 +450,22 @@ namespace Mindscape.Raygun4Net
         }));
       }
     }
-    
+
+    private static IList<RaygunBreadcrumb> BuildBreadCrumbList()
+    {
+      IList<RaygunBreadcrumb> breadCrumbs = null;
+      foreach (var breadCrumb in _breadcrumbs)
+      {
+        breadCrumbs ??= new List<RaygunBreadcrumb>();
+        breadCrumbs.Add(breadCrumb);
+      }
+      return breadCrumbs ?? Array.Empty<RaygunBreadcrumb>();
+    }
+
     private void StripAndSendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
     {
       var requestMessage = BuildRequestMessage();
-      var breadcrumbs = _breadcrumbs.ToList();
+      IList<RaygunBreadcrumb> breadcrumbs = BuildBreadCrumbList();
 
       foreach (var e in StripWrapperExceptions(exception))
       {

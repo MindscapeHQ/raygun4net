@@ -8,9 +8,8 @@ namespace Mindscape.Raygun4Net
   {
     public RaygunBreadcrumb()
     {
-      CustomData = new Dictionary<string, object>();
       Level = RaygunBreadcrumbLevel.Info;
-      Type = RaygunBreadcrumbType.Manual.ToString();
+      Type = nameof(RaygunBreadcrumbType.Manual);
       Timestamp = (long)(DateTime.UtcNow - UnixEpoch).TotalMilliseconds;
     }
 
@@ -25,7 +24,8 @@ namespace Mindscape.Raygun4Net
     // This is a string due to serialization of enums in SimpleJson to the numeric value.
     public string Type { get; set; }
 
-    public IDictionary<string, object> CustomData { get; set; }
+    public IDictionary<string, object> CustomData { get => _customData ?? (_customData = new Dictionary<string, object>()); set => _customData = value; }
+    private IDictionary<string, object> _customData;
 
     public long Timestamp { get; set; }
 
