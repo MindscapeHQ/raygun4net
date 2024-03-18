@@ -137,7 +137,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       
       var msg = builder.Build();
 
-      msg.Details.Environment.EnvironmentVariables.Keys.Cast<string>().Should().Contain("PATH");
+      msg.Details.Environment.EnvironmentVariables.Keys.Cast<string>().Should().Contain(s => s.Equals("path", StringComparison.OrdinalIgnoreCase));
     }
     
     [Test]
@@ -249,6 +249,37 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
 
       msg.Details.Environment.EnvironmentVariables.Keys.Cast<string>()
          .Should().HaveCount(0);
+    }
+    
+    [TestCase("LEMON", "lemon")]
+    [TestCase("kIwIfRuIt", "KIWIFRUIT")]
+    [TestCase("WAterMeLON", "water*")]
+    [TestCase("gRaPE", "*ape")]
+    [TestCase("DraGonFrUiT", "*nfr*")]
+    public void SetEnvironmentDetails_WithEnvironmentVariablesWithDifferentCasing_ShouldIgnoreCaseAndReturn(string key, string search)
+    {
+      Environment.SetEnvironmentVariable("lOnGan", "1");
+      Environment.SetEnvironmentVariable(key, "2");
+      Environment.SetEnvironmentVariable("aPrIcOt", "3");
+      
+      var settings = new RaygunSettings
+      {
+        EnvironmentVariables = new List<string>
+        {
+          search
+        }
+      };
+      var builder = RaygunMessageBuilder.New(settings)
+                                        .SetEnvironmentDetails();
+      
+      var msg = builder.Build();
+
+      msg.Details.Environment.EnvironmentVariables.Keys.Cast<string>()
+         .Should().HaveCount(1)
+         .And.Contain(new []
+         {
+           key
+         });
     }
   }
 }

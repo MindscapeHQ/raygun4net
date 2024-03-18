@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ public class EnvironmentVariablesProvider
     }
 
     var result = new Dictionary<string, string>();
-    var environmentVariables = System.Environment.GetEnvironmentVariables();
+    var environmentVariables = Environment.GetEnvironmentVariables();
 
     foreach (var search in settings.EnvironmentVariables!)
     {
@@ -49,27 +50,34 @@ public class EnvironmentVariablesProvider
 
   private static IEnumerable<(string, string?)> GetContainsVariable(IDictionary environmentVariables, string search)
   {
-    var matchingKeys = environmentVariables.Keys.Cast<string>().Where(key => key.Contains(search));
+    var matchingKeys = environmentVariables.Keys.Cast<string>().Where(key => key.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0);
     
     return matchingKeys.Select(key => (key, environmentVariables[key]?.ToString()));
   }
 
   private static IEnumerable<(string, string?)> GetEndsWithVariable(IDictionary environmentVariables, string search)
   {
-    var matchingKeys = environmentVariables.Keys.Cast<string>().Where(key => key.EndsWith(search));
+    var matchingKeys = environmentVariables.Keys.Cast<string>().Where(key => key.EndsWith(search, StringComparison.OrdinalIgnoreCase));
     
     return matchingKeys.Select(key => (key, environmentVariables[key]?.ToString()));
   }
 
   private static IEnumerable<(string, string?)> GetStartsWithVariable(IDictionary environmentVariables, string search)
   {
-    var matchingKeys = environmentVariables.Keys.Cast<string>().Where(key => key.StartsWith(search));
+    var matchingKeys = environmentVariables.Keys.Cast<string>().Where(key => key.StartsWith(search, StringComparison.OrdinalIgnoreCase));
     
     return matchingKeys.Select(key => (key, environmentVariables[key]?.ToString()));
   }
 
   private static IEnumerable<(string, string?)> GetExactVariable(IDictionary environmentVariables, string search)
   {
-    yield return (search, environmentVariables[search]?.ToString());
+    var matchingKey = environmentVariables.Keys.Cast<string>().FirstOrDefault(key => key.Equals(search, StringComparison.OrdinalIgnoreCase));
+    
+    if (matchingKey == null)
+    {
+      yield break;
+    }
+    
+    yield return (matchingKey, environmentVariables[matchingKey]?.ToString());
   }
 }
