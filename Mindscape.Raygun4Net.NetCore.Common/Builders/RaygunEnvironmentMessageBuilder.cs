@@ -10,34 +10,34 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunEnvironmentMessageBuilder
   {
-    private static readonly RaygunEnvironmentMessage CachedMessage = new RaygunEnvironmentMessage();
-    private static DateTime _lastUpdate = DateTime.MinValue;
-    private static readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
+    private static readonly RaygunEnvironmentMessage CachedMessage = new();
+    internal static DateTime LastUpdate = DateTime.MinValue;
+    private static readonly SemaphoreSlim Semaphore = new(1, 1);
 
-    public static RaygunEnvironmentMessage Build(RaygunSettingsBase _)
+    public static RaygunEnvironmentMessage Build(RaygunSettingsBase settings)
     {
       try
       {
-        if (_lastUpdate < DateTime.UtcNow.AddMinutes(-2))
+        if (LastUpdate < DateTime.UtcNow.AddMinutes(-2))
         {
           Semaphore.Wait();
           
           try
           {
-            if (_lastUpdate == DateTime.MinValue)
+            if (LastUpdate == DateTime.MinValue)
             {
               // Build adds all the static data that doesn't change
               Build();
               
               // Update includes Memory / Disk which is prone to change
-              Update();
-              _lastUpdate = DateTime.UtcNow;
+              Update(settings);
+              LastUpdate = DateTime.UtcNow;
             }
 
-            if (_lastUpdate < DateTime.UtcNow.AddMinutes(-1))
+            if (LastUpdate < DateTime.UtcNow.AddMinutes(-1))
             {
-              Update();
-              _lastUpdate = DateTime.UtcNow;
+              Update(settings);
+              LastUpdate = DateTime.UtcNow;
             }
           }
           catch (Exception e)
@@ -70,7 +70,8 @@ namespace Mindscape.Raygun4Net
         WindowBoundsHeight = CachedMessage.WindowBoundsHeight,
         WindowBoundsWidth = CachedMessage.WindowBoundsWidth,
         Locale = CachedMessage.Locale,
-        UtcOffset = CachedMessage.UtcOffset
+        UtcOffset = CachedMessage.UtcOffset,
+        EnvironmentVariables = CachedMessage.EnvironmentVariables
       };
     }
 
@@ -107,7 +108,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private static void Update()
+    private static void Update(RaygunSettingsBase settings)
     {
       try
       {
@@ -124,6 +125,7 @@ namespace Mindscape.Raygun4Net
         CachedMessage.AvailablePhysicalMemory = memory.Value.AvailableMemory;
         CachedMessage.TotalVirtualMemory = memory.Value.TotalVirtualMemory;
         CachedMessage.AvailableVirtualMemory = memory.Value.AvailableVirtualMemory;
+        CachedMessage.EnvironmentVariables = EnvironmentVariablesProvider.GetEnvironmentVariables(settings);
       }
       catch
       {

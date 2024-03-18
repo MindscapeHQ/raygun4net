@@ -1,5 +1,11 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v10.1.0
+- Add support for capturing Environment Variables in NetCore
+  - New setting `EnvironmentVariables` which takes a list of search terms
+  - Supports Exact, StartsWith, EndsWith, and Contains matching
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/523
+
 ### v10.0.0
 - RaygunClient for NET Core can now be treated as a Singleton
 - Changed the Middleware for AspNetCore

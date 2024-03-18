@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Mindscape.Raygun4Net.NetCore.Tests
@@ -12,6 +13,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     [SetUp]
     public void SetUp()
     {
+      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.MinValue;
       _settings = new RaygunSettings();
       _builder = RaygunMessageBuilder.New(_settings);
     }
@@ -25,44 +27,41 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     [Test]
     public void SetVersion()
     {
-      IRaygunMessageBuilder builder = _builder.SetVersion("Custom Version");
+      var builder = _builder.SetVersion("Custom Version");
       Assert.That(_builder, Is.EqualTo(builder));
 
-      RaygunMessage message = _builder.Build();
+      var message = _builder.Build();
       Assert.That("Custom Version", Is.EqualTo(message.Details.Version));
     }
 
     [Test]
     public void SetTimeStamp()
     {
-      DateTime time = new DateTime(2015, 2, 16);
-      RaygunMessage message = _builder.SetTimeStamp(time).Build();
+      var time = new DateTime(2015, 2, 16);
+      var message = _builder.SetTimeStamp(time).Build();
       Assert.That(time, Is.EqualTo(message.OccurredOn));
     }
 
     [Test]
     public void SetNullTimeStamp()
     {
-      RaygunMessage message = _builder.SetTimeStamp(null).Build();
+      var message = _builder.SetTimeStamp(null).Build();
       Assert.That((DateTime.UtcNow - message.OccurredOn).TotalSeconds < 1, Is.True);
     }
-
-
 
     [Test]
     public void HasMachineName()
     {
-      RaygunMessage message = _builder.SetMachineName(Environment.MachineName).Build();
+      var message = _builder.SetMachineName(Environment.MachineName).Build();
 
       Assert.That(message.Details, Is.Not.Null);
       Assert.That(message.Details.MachineName, Is.Not.Null);
-
     }
 
     [Test]
     public void HasEnvironmentInformation()
     {
-      RaygunMessage message = _builder.SetEnvironmentDetails().Build();
+      var message = _builder.SetEnvironmentDetails().Build();
 
       Assert.That(message.Details, Is.Not.Null);
       Assert.That(message.Details.Environment, Is.Not.Null);
@@ -85,7 +84,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     [Test]
     public void HasEnvironmentMemoryInformation()
     {
-      RaygunMessage message = _builder.SetEnvironmentDetails().Build();
+      var message = _builder.SetEnvironmentDetails().Build();
 
       Assert.That(message.Details.Environment.AvailablePhysicalMemory, Is.Not.Zero);
       Assert.That(message.Details.Environment.TotalPhysicalMemory, Is.Not.Zero);
@@ -98,9 +97,9 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     [Test]
     public void ResponseIsNullForNonWebExceptions()
     {
-      NullReferenceException exception = new NullReferenceException("The thing is null");
+      var exception = new NullReferenceException("The thing is null");
       _builder.SetExceptionDetails(exception);
-      RaygunMessage message = _builder.Build();
+      var message = _builder.Build();
       Assert.That(message.Details.Response, Is.Null);
     }
     
@@ -121,6 +120,166 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
 
       modifiedMessage.Details.Version.Should().Be("2.0.0");
       modifiedMessage.Details.Environment.Architecture.Should().Be("BANANA");
+    }
+    
+    [Test]
+    public void SetEnvironmentDetails_WithEnvironmentVariables_ExactMatch()
+    {
+      var settings = new RaygunSettings
+      {
+        EnvironmentVariables = new List<string>
+        {
+          "PATH"
+        }
+      };
+      var builder = RaygunMessageBuilder.New(settings)
+                                        .SetEnvironmentDetails();
+      
+      var msg = builder.Build();
+
+      msg.Details.Environment.EnvironmentVariables.Keys.Cast<string>().Should().Contain(s => s.Equals("path", StringComparison.OrdinalIgnoreCase));
+    }
+    
+    [Test]
+    public void SetEnvironmentDetails_WithEnvironmentVariables_StartsWith()
+    {
+      Environment.SetEnvironmentVariable("TEST_One", "1");
+      Environment.SetEnvironmentVariable("TEST_Two", "2");
+      Environment.SetEnvironmentVariable("TEST_Three", "3");
+      
+      var settings = new RaygunSettings
+      {
+        EnvironmentVariables = new List<string>
+        {
+          "TEST_*"
+        }
+      };
+      var builder = RaygunMessageBuilder.New(settings)
+                                        .SetEnvironmentDetails();
+      
+      var msg = builder.Build();
+
+      msg.Details.Environment.EnvironmentVariables.Keys.Cast<string>()
+         .Should().HaveCount(3)
+         .And.Contain(new []
+      {
+        "TEST_One", 
+        "TEST_Two", 
+        "TEST_Three"
+      });
+    }
+    
+    [Test]
+    public void SetEnvironmentDetails_WithEnvironmentVariables_EndsWith()
+    {
+      Environment.SetEnvironmentVariable("One_Banana", "1");
+      Environment.SetEnvironmentVariable("Two_Banana", "2");
+      Environment.SetEnvironmentVariable("Three_Banana", "3");
+      
+      var settings = new RaygunSettings
+      {
+        EnvironmentVariables = new List<string>
+        {
+          "*_Banana"
+        }
+      };
+      var builder = RaygunMessageBuilder.New(settings)
+                                        .SetEnvironmentDetails();
+      
+      var msg = builder.Build();
+
+      msg.Details.Environment.EnvironmentVariables.Keys.Cast<string>()
+         .Should().HaveCount(3)
+         .And.Contain(new []
+      {
+        "One_Banana", 
+        "Two_Banana", 
+        "Three_Banana"
+      });
+    }
+    
+    [Test]
+    public void SetEnvironmentDetails_WithEnvironmentVariables_Contains()
+    {
+      Environment.SetEnvironmentVariable("ONE_Banana_Two", "1");
+      Environment.SetEnvironmentVariable("Two_Test_Three", "2");
+      Environment.SetEnvironmentVariable("ThreeBananaFour", "3");
+      
+      var settings = new RaygunSettings
+      {
+        EnvironmentVariables = new List<string>
+        {
+          "*_Banana*"
+        }
+      };
+      var builder = RaygunMessageBuilder.New(settings)
+                                        .SetEnvironmentDetails();
+      
+      var msg = builder.Build();
+
+      msg.Details.Environment.EnvironmentVariables.Keys.Cast<string>()
+         .Should().HaveCount(1)
+         .And.Contain(new []
+      {
+        "ONE_Banana_Two"
+      });
+    }
+    
+    [Test]
+    public void SetEnvironmentDetails_WithEnvironmentVariables_Star_ShouldReturnNothing()
+    {
+      Environment.SetEnvironmentVariable("ONE_Banana_Two", "1");
+      Environment.SetEnvironmentVariable("Two_Test_Three", "2");
+      Environment.SetEnvironmentVariable("ThreeBananaFour", "3");
+      
+      var settings = new RaygunSettings
+      {
+        EnvironmentVariables = new List<string>
+        {
+          "*",
+          "**",
+          "***",
+          "* *",
+        }
+      };
+      var builder = RaygunMessageBuilder.New(settings)
+                                        .SetEnvironmentDetails();
+      
+      var msg = builder.Build();
+
+      msg.Details.Environment.EnvironmentVariables.Keys.Cast<string>()
+         .Should().HaveCount(0);
+    }
+    
+    [TestCase("LEMON", "lemon")]
+    [TestCase("kIwIfRuIt", "KIWIFRUIT")]
+    [TestCase("WAterMeLON", "water*")]
+    [TestCase("gRaPE", "*ape")]
+    [TestCase("DraGonFrUiT", "*nfr*")]
+    public void SetEnvironmentDetails_WithEnvironmentVariablesWithDifferentCasing_ShouldIgnoreCaseAndReturn(string key, string search)
+    {
+      Environment.SetEnvironmentVariable("lOnGan", "1");
+      Environment.SetEnvironmentVariable(key, "2");
+      Environment.SetEnvironmentVariable("aPrIcOt", "3");
+      
+      var settings = new RaygunSettings
+      {
+        EnvironmentVariables = new List<string>
+        {
+          search
+        }
+      };
+      var builder = RaygunMessageBuilder.New(settings)
+                                        .SetEnvironmentDetails();
+      
+      var msg = builder.Build();
+
+      msg.Details.Environment.EnvironmentVariables.Keys.Cast<string>()
+         .Should().HaveCount(1)
+         .And.Contain(new []
+         {
+           key
+         });
     }
   }
 }
