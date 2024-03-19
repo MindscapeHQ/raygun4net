@@ -18,13 +18,27 @@ public class RaygunClient : RaygunClientBase
   {
   }
 
-  public RaygunClient(RaygunSettings settings, HttpClient? httpClient = null, IRaygunUserProvider? userProvider = null) : base(settings, httpClient, userProvider)
+  // ReSharper disable MemberCanBeProtected.Global
+  // ReSharper disable SuggestBaseTypeForParameterInConstructor
+  // ReSharper disable UnusedMember.Global
+  public RaygunClient(RaygunSettings settings) : base(settings)
+  {
+  }
+  
+  public RaygunClient(RaygunSettings settings, HttpClient httpClient) : base(settings, httpClient)
   {
   }
 
-  public RaygunClient(RaygunSettings settings, IRaygunUserProvider? userProvider = null) : base(settings, null, userProvider)
+  public RaygunClient(RaygunSettings settings, IRaygunUserProvider userProvider) : base(settings, userProvider)
   {
   }
+        
+  public RaygunClient(RaygunSettings settings, HttpClient httpClient, IRaygunUserProvider userProvider) : base(settings, httpClient, userProvider)
+  {
+  }
+  // ReSharper restore MemberCanBeProtected.Global
+  // ReSharper restore SuggestBaseTypeForParameterInConstructor
+  // ReSharper restore UnusedMember.Global
 
   // ReSharper disable once MemberCanBePrivate.Global
   protected Lazy<RaygunSettings> Settings => new(() => (RaygunSettings) _settings);
@@ -56,7 +70,7 @@ public class RaygunClient : RaygunClientBase
     {
       // We need to process the Request on the current thread,
       // otherwise it will be disposed while we are using it on the other thread.
-      // BuildRequestMessage relies on ReadFormAsync so we need to await it to ensure it's processed before continuing.
+      // BuildRequestMessage relies on ReadFormAsync, so we need to await it to ensure it's processed before continuing.
       var currentRequestMessage = await RaygunAspNetCoreRequestMessageBuilder.Build(context, Settings.Value);
       var currentResponseMessage = RaygunAspNetCoreResponseMessageBuilder.Build(context);
 

@@ -95,11 +95,20 @@ namespace Mindscape.Raygun4Net
       Send(exception, UnhandledExceptionTags);
     }
 
-    public RaygunClientBase(RaygunSettingsBase settings) : this(settings, DefaultClient)
+    protected RaygunClientBase(RaygunSettingsBase settings) : this(settings, DefaultClient, null)
     {
     }
 
-    public RaygunClientBase(RaygunSettingsBase settings, HttpClient client, IRaygunUserProvider userProvider = null)
+    // ReSharper disable once IntroduceOptionalParameters.Global
+    protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client) : this(settings, client, null)
+    {
+    }
+
+    protected RaygunClientBase(RaygunSettingsBase settings, IRaygunUserProvider userProvider) : this(settings, DefaultClient, userProvider)
+    {
+    }
+
+    protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client, IRaygunUserProvider userProvider)
     {
       _client = client ?? DefaultClient;
       _settings = settings;
