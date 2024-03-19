@@ -28,7 +28,9 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
     public void Record(RaygunBreadcrumb crumb)
     {
       if (!ShouldRecord(crumb))
+      {
         return;
+      }
 
       if (RaygunSettings.Settings.BreadcrumbsLocationRecordingEnabled && (string.IsNullOrEmpty(crumb.ClassName) || string.IsNullOrEmpty(crumb.MethodName)))
       {
