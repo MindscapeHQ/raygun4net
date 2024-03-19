@@ -27,11 +27,16 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
     
     public void Record(RaygunBreadcrumb crumb)
     {
-      if (RaygunSettings.Settings.BreadcrumbsLocationRecordingEnabled)
+      if (!ShouldRecord(crumb))
+      {
+        return;
+      }
+
+      if (RaygunSettings.Settings.BreadcrumbsLocationRecordingEnabled && (string.IsNullOrEmpty(crumb.ClassName) || string.IsNullOrEmpty(crumb.MethodName)))
       {
         try
         {
-          for(int i = 1; i <= 3; i++)
+          for (int i = 1; i <= 3; i++)
           {
             PopulateLocation(crumb, i);
             if (crumb.ClassName == null || !crumb.ClassName.StartsWith("Mindscape.Raygun4Net", StringComparison.OrdinalIgnoreCase))
@@ -49,10 +54,7 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
         }
       }
 
-      if (ShouldRecord(crumb))
-      {
-        _storage.Store(crumb);
-      }
+      _storage.Store(crumb);
     }
 
     private void PopulateLocation(RaygunBreadcrumb crumb, int stackTraceFrame)

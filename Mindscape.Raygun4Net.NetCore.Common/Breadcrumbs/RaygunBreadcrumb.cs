@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Mindscape.Raygun4Net.Breadcrumbs;
 
 namespace Mindscape.Raygun4Net
 {
@@ -15,7 +14,8 @@ namespace Mindscape.Raygun4Net
     // This is a string due to serialization of enums in SimpleJson to the numeric value.
     public string Type { get; set; } = "manual";
 
-    public IDictionary<string, object> CustomData { get; set; } = new Dictionary<string, object>();
+    public IDictionary<string, object> CustomData { get => _customData ?? (_customData = new Dictionary<string, object>()); set => _customData = value; }
+    private IDictionary<string, object> _customData;
 
     public long Timestamp { get; set; } = (long)(DateTime.UtcNow - UnixEpoch).TotalMilliseconds;
 

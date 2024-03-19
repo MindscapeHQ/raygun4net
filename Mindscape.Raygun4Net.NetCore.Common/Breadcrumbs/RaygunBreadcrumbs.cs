@@ -21,29 +21,31 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
       Record(new RaygunBreadcrumb { Message = message });
     }
 
-
     public static void Record(RaygunBreadcrumb crumb)
     {
       if (crumb.Message.Length > 500)
       {
         return;
       }
-      
-      try
+
+      if (string.IsNullOrEmpty(crumb.ClassName) || string.IsNullOrEmpty(crumb.MethodName))
       {
-        for (int i = 1; i <= 3; i++)
+        try
         {
-          PopulateLocation(crumb, i);
-          if (crumb.ClassName == null ||
-              !crumb.ClassName.StartsWith("Mindscape.Raygun4Net", StringComparison.OrdinalIgnoreCase))
+          for (int i = 1; i <= 3; i++)
           {
-            break;
+            PopulateLocation(crumb, i);
+            if (crumb.ClassName == null ||
+                !crumb.ClassName.StartsWith("Mindscape.Raygun4Net", StringComparison.OrdinalIgnoreCase))
+            {
+              break;
+            }
           }
         }
-      }
-      catch (Exception)
-      {
-        // ignored
+        catch (Exception)
+        {
+          // ignored
+        }
       }
 
       _storage.Store(crumb);
