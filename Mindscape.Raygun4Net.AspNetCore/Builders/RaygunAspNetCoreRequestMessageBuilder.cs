@@ -66,7 +66,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
 
     private static IDictionary GetQueryString(HttpRequest request, IRaygunHttpSettings options)
     {
-      IDictionary queryString = null;
+      IDictionary queryString;
      
       try
       {
@@ -97,7 +97,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return cookies;
     }
 
-    private static string GetRawData(HttpRequest request, IRaygunHttpSettings options)
+    private static string? GetRawData(HttpRequest request, IRaygunHttpSettings options)
     {
       if (options.IsRawDataIgnored)
       {
@@ -118,17 +118,17 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
           return null;
         }
 
-        Dictionary<string, string> ignoredMultiPartFormData = null;
+        Dictionary<string, string>? ignoredMultiPartFormData = null;
 
         if (contentType != null && CultureInfo.InvariantCulture.CompareInfo.IndexOf(contentType, "multipart/form-data", CompareOptions.IgnoreCase) >= 0)
         {
-          // For multipart form data, gather up all the form names and values to be stripped out later.
+          // For multipart form data, gather all the form names and values to be stripped out later.
           ignoredMultiPartFormData = GetIgnoredFormValues(request.Form, s => IsIgnored(s, options.IgnoreFormFieldNames));
         }
 
         request.Body.Seek(0, SeekOrigin.Begin);
 
-        // If we are ignoring form fields, increase the max ammount that we read from the stream to make sure we include the entirety of any value that may be stripped later on.
+        // If we are ignoring form fields, increase the max amount that we read from the stream to make sure we include the entirety of any value that may be stripped later on.
         var length = MAX_RAW_DATA_LENGTH;
 
         if (ignoredMultiPartFormData != null && ignoredMultiPartFormData.Count > 0)
@@ -143,7 +143,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
         var buffer = new byte[length];
         request.Body.Read(buffer, 0, length);
 
-        string rawData = Encoding.UTF8.GetString(buffer);
+        string? rawData = Encoding.UTF8.GetString(buffer);
 
         request.Body.Seek(0, SeekOrigin.Begin);
 
@@ -163,14 +163,12 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
         }
 
         // Ensure the raw data string is not too large (over 4096 bytes).
-        if (rawData.Length <= MAX_RAW_DATA_LENGTH)
+        if (rawData?.Length <= MAX_RAW_DATA_LENGTH)
         {
           return rawData;
         }
-        else
-        {
-          return rawData.Substring(0, MAX_RAW_DATA_LENGTH);
-        }
+
+        return rawData?.Substring(0, MAX_RAW_DATA_LENGTH);
       }
       catch (Exception e)
       {
@@ -206,9 +204,9 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return rawData;
     }
 
-    private static string StripSensitiveValues(string rawData, IRaygunHttpSettings options)
+    private static string? StripSensitiveValues(string rawData, IRaygunHttpSettings options)
     {
-      // Early escape if theres no data.
+      // Early escape if there's no data.
       if (string.IsNullOrEmpty(rawData))
       {
         return null;
@@ -303,9 +301,9 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return headers;
     }
 
-    private static async Task<IDictionary> GetForm(HttpRequest request, IRaygunHttpSettings options)
+    private static async Task<IDictionary?> GetForm(HttpRequest request, IRaygunHttpSettings options)
     {
-      IDictionary form = null;
+      IDictionary? form = null;
 
       try
       {

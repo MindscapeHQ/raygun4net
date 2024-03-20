@@ -1,5 +1,11 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v10.1.1
+- Cleanup of the constructors for Net Core RaygunClient
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/525
+- Reduce overhead of RaygunBreadcrumb
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/524 
+
 ### v10.1.0
 - Add support for capturing Environment Variables in NetCore
   - New setting `EnvironmentVariables` which takes a list of search terms

@@ -14,12 +14,26 @@ public class RaygunClient : RaygunClientBase
   public RaygunClient(string apiKey, HttpClient httpClient) : base(new RaygunSettings { ApiKey = apiKey }, httpClient)
   {
   }
-        
-  public RaygunClient(RaygunSettings settings, HttpClient httpClient = null, IRaygunUserProvider userProvider = null) : base(settings, httpClient, userProvider)
+  
+  // ReSharper disable MemberCanBeProtected.Global
+  // ReSharper disable SuggestBaseTypeForParameterInConstructor
+  // ReSharper disable UnusedMember.Global
+  public RaygunClient(RaygunSettings settings) : base(settings)
+  {
+  }
+  
+  public RaygunClient(RaygunSettings settings, HttpClient httpClient) : base(settings, httpClient)
   {
   }
 
-  public RaygunClient(RaygunSettings settings, IRaygunUserProvider userProvider = null) : base(settings, null, userProvider)
+  public RaygunClient(RaygunSettings settings, IRaygunUserProvider userProvider) : base(settings, userProvider)
   {
   }
+        
+  public RaygunClient(RaygunSettings settings, HttpClient httpClient, IRaygunUserProvider userProvider) : base(settings, httpClient, userProvider)
+  {
+  }
+  // ReSharper restore MemberCanBeProtected.Global
+  // ReSharper restore SuggestBaseTypeForParameterInConstructor
+  // ReSharper restore UnusedMember.Global
 }
