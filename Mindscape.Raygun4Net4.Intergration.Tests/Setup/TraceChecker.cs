@@ -7,7 +7,7 @@ namespace Mindscape.Raygun4Net4.Integration.Tests.Setup;
 [ExcludeFromCodeCoverage]
 internal class TraceChecker : TraceListener
 {
-  public List<string> Traces { get; } = new();
+  public List<string> Traces { get; private set; } = new();
 
   public override void Write(string message)
   {
@@ -21,6 +21,6 @@ internal class TraceChecker : TraceListener
 
   public void Clear()
   {
-    Traces.Clear();
+    Traces = new List<string>();
   }
 }
