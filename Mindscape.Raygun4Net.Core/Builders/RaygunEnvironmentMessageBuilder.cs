@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Management;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Permissions;
-using Microsoft.VisualBasic.Devices;
 using Mindscape.Raygun4Net.Logging;
 using Mindscape.Raygun4Net.Messages;
 
@@ -62,13 +62,16 @@ namespace Mindscape.Raygun4Net.Builders
             // ProcessorCount cannot run in medium trust under net35, once we have
             // moved to net40 minimum we can move this out of here
             _message.ProcessorCount = Environment.ProcessorCount;
-            _message.Architecture   = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
+            _message.Architecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
 
-            ComputerInfo info = new ComputerInfo();
-            _message.TotalPhysicalMemory = info.TotalPhysicalMemory / 0x100000; // in MB
-            _message.TotalVirtualMemory  = info.TotalVirtualMemory  / 0x100000; // in MB
+            var memStatus = new MEMORYSTATUSEX();
+            if (GlobalMemoryStatusEx(memStatus))
+            {
+              _message.TotalPhysicalMemory = memStatus.ullTotalPhys;
+              _message.TotalVirtualMemory = memStatus.ullTotalVirtual;
+            }
 
-            _message.Cpu       = GetCpu();
+            _message.Cpu = GetCpu();
             _message.OSVersion = GetOSVersion();
           }
         }
@@ -90,10 +93,12 @@ namespace Mindscape.Raygun4Net.Builders
       {
         if (!mediumTrust)
         {
-          ComputerInfo info = new ComputerInfo();
-
-          _message.AvailablePhysicalMemory = info.AvailablePhysicalMemory / 0x100000; // in MB
-          _message.AvailableVirtualMemory  = info.AvailableVirtualMemory  / 0x100000; // in MB
+          var memStatus = new MEMORYSTATUSEX();
+          if (GlobalMemoryStatusEx(memStatus))
+          {
+            _message.AvailablePhysicalMemory = memStatus.ullAvailPhys;
+            _message.AvailableVirtualMemory = memStatus.ullTotalPageFile;
+          }
 
           _message.DiskSpaceFree = GetDiskSpace();
         }
@@ -127,6 +132,7 @@ namespace Mindscape.Raygun4Net.Builders
           RaygunLogger.Instance.Error($"Error retrieving CPU {ex.Message}");
         }
       }
+
       return Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER");
     }
 
@@ -147,6 +153,7 @@ namespace Mindscape.Raygun4Net.Builders
           RaygunLogger.Instance.Error($"Error retrieving OSVersion {ex.Message}");
         }
       }
+
       return Environment.OSVersion.Version.ToString(3);
     }
 
@@ -160,6 +167,7 @@ namespace Mindscape.Raygun4Net.Builders
           diskSpaceFree.Add((double)drive.AvailableFreeSpace / 0x40000000); // in GB
         }
       }
+
       return diskSpaceFree;
     }
 
@@ -194,8 +202,32 @@ namespace Mindscape.Raygun4Net.Builders
             }
           }
         }
+
         return _unrestrictedFeatureSet;
       }
     }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    private class MEMORYSTATUSEX
+    {
+      public uint dwLength;
+      public uint dwMemoryLoad;
+      public ulong ullTotalPhys;
+      public ulong ullAvailPhys;
+      public ulong ullTotalPageFile;
+      public ulong ullAvailPageFile;
+      public ulong ullTotalVirtual;
+      public ulong ullAvailVirtual;
+      public ulong ullAvailExtendedVirtual;
+
+      public MEMORYSTATUSEX()
+      {
+        dwLength = (uint)Marshal.SizeOf(typeof(MEMORYSTATUSEX));
+      }
+    }
+
+    [return: MarshalAs(UnmanagedType.Bool)]
+    [DllImport("Kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    private static extern bool GlobalMemoryStatusEx([In, Out] MEMORYSTATUSEX lpBuffer);
   }
 }

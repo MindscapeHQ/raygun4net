@@ -35,7 +35,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Microsoft.VisualBasic"/>
     <Reference Include="System.Configuration"/>
     <Reference Include="System.Management"/>
   </ItemGroup>
