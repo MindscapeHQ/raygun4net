@@ -111,15 +111,27 @@ namespace Mindscape.Raygun4Net.Builders
 
         if (method != null)
         {
-          var lineNumber = frame.GetFileLineNumber();
-          var ilOffset = frame.GetILOffset();
-          var methodToken = method.MetadataToken;
-          
-          var methodName = GenerateMethodName(method);
+          string methodName = null;
+          string file = null;
+          string className = null;
+          var lineNumber = 0;
+          var ilOffset = -1;
+          var methodToken = -1;
 
-          var file = frame.GetFileName();
+          try
+          {
+            file = frame.GetFileName();
+            lineNumber = frame.GetFileLineNumber();
+            methodName = GenerateMethodName(method);
+            className = method.ReflectedType != null ? method.ReflectedType.FullName : "(unknown)";
 
-          var className = method.ReflectedType != null ? method.ReflectedType.FullName : "(unknown)";
+            ilOffset = frame.GetILOffset();
+            methodToken = method.MetadataToken;
+          }
+          catch (Exception ex)
+          {
+            Debug.WriteLine("Exception retrieving stack frame details: {0}", ex);
+          }
 
           var line = new RaygunErrorStackTraceLineMessage
           {

@@ -24,6 +24,7 @@ namespace Mindscape.Raygun4Net
       {
         stringBuilder.Append(FormatTypeName(t, false)).Append(",");
       }
+
       stringBuilder.Remove(stringBuilder.Length - 1, 1);
       stringBuilder.Append(">");
 
@@ -57,15 +58,27 @@ namespace Mindscape.Raygun4Net
 
         if (method != null)
         {
-          var lineNumber = frame.GetFileLineNumber();
-          var ilOffset = frame.GetILOffset();
-          var methodToken = method.MetadataToken;
+          string methodName = null;
+          string file = null;
+          string className = null;
+          var lineNumber = 0;
+          var ilOffset = -1;
+          var methodToken = -1;
 
-          var methodName = GenerateMethodName(method);
+          try
+          {
+            file = frame.GetFileName();
+            lineNumber = frame.GetFileLineNumber();
+            methodName = GenerateMethodName(method);
+            className = method.ReflectedType != null ? method.ReflectedType.FullName : "(unknown)";
 
-          var file = frame.GetFileName();
-
-          var className = method.DeclaringType != null ? method.DeclaringType.FullName : "(unknown)";
+            ilOffset = frame.GetILOffset();
+            methodToken = method.MetadataToken;
+          }
+          catch (Exception ex)
+          {
+            Debug.WriteLine("Exception retrieving stack frame details: {0}", ex);
+          }
 
           var line = new RaygunErrorStackTraceLineMessage
           {
