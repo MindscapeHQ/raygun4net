@@ -124,8 +124,10 @@ namespace Mindscape.Raygun4Net.Builders
             lineNumber = frame.GetFileLineNumber();
             methodName = GenerateMethodName(method);
             className = method.ReflectedType != null ? method.ReflectedType.FullName : "(unknown)";
-
             ilOffset = frame.GetILOffset();
+
+            // This might fail in medium trust environments or for array methods,
+            // so don't crash the entire send process - just move on with what we have
             methodToken = method.MetadataToken;
           }
           catch (Exception ex)
