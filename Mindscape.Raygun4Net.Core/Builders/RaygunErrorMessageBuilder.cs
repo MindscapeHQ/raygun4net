@@ -115,8 +115,8 @@ namespace Mindscape.Raygun4Net.Builders
           string file = null;
           string className = null;
           var lineNumber = 0;
-          var ilOffset = -1;
-          var methodToken = -1;
+          var ilOffset = StackFrame.OFFSET_UNKNOWN;
+          var methodToken = StackFrame.OFFSET_UNKNOWN;
 
           try
           {
