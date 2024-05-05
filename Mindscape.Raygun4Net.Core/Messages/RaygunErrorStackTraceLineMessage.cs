@@ -12,11 +12,15 @@
 
     public string Raw { get; set; }
 
+    public int ILOffset { get; set; }
+
+    public int MethodToken { get; set; }
+
     public override string ToString()
     {
       // This exists because Reflection in Xamarin can't seem to obtain the Getter methods unless the getter is used somewhere in the code.
       // The getter of all properties is required to serialize the Raygun messages to JSON.
-      return string.Format("[RaygunErrorStackTraceLineMessage: LineNumber={0}, ClassName={1}, FileName={2}, MethodName={3}, Raw={4}]", LineNumber, ClassName, FileName, MethodName, Raw);
+      return string.Format("[RaygunErrorStackTraceLineMessage: LineNumber={0}, ClassName={1}, FileName={2}, MethodName={3}, Raw={4}, ILOffset={5}, MethodToken={6}]", LineNumber, ClassName, FileName, MethodName, Raw, ILOffset, MethodToken);
     }
   }
 }

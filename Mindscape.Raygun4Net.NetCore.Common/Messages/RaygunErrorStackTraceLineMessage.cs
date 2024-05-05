@@ -9,5 +9,9 @@
     public string FileName { get; set; }
 
     public string MethodName { get; set; }
+
+    public int ILOffset { get; set; }
+
+    public int MethodToken { get; set; }
   }
 }

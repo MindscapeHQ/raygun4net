@@ -51,31 +51,30 @@ namespace Mindscape.Raygun4Net
         return lines.ToArray();
       }
 
-      foreach (StackFrame frame in frames)
+      foreach (var frame in frames)
       {
-        MethodBase method = frame.GetMethod();
+        var method = frame.GetMethod();
 
         if (method != null)
         {
-          int lineNumber = frame.GetFileLineNumber();
-
-          if (lineNumber == 0)
-          {
-            lineNumber = frame.GetILOffset();
-          }
+          var lineNumber = frame.GetFileLineNumber();
+          var ilOffset = frame.GetILOffset();
+          var methodToken = method.MetadataToken;
 
           var methodName = GenerateMethodName(method);
 
-          string file = frame.GetFileName();
+          var file = frame.GetFileName();
 
-          string className = method.DeclaringType != null ? method.DeclaringType.FullName : "(unknown)";
+          var className = method.DeclaringType != null ? method.DeclaringType.FullName : "(unknown)";
 
           var line = new RaygunErrorStackTraceLineMessage
           {
             FileName = file,
             LineNumber = lineNumber,
             MethodName = methodName,
-            ClassName = className
+            ClassName = className,
+            ILOffset = ilOffset,
+            MethodToken = methodToken
           };
 
           lines.Add(line);
