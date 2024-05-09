@@ -39,6 +39,13 @@ namespace Mindscape.Raygun4Net
     private readonly ThrottledBackgroundMessageProcessor _backgroundMessageProcessor;
     private readonly IRaygunUserProvider _userProvider;
     protected internal const string SentKey = "AlreadySentByRaygun";
+    
+    /// <summary>
+    /// Store a strong reference to the OnApplicationUnhandledException delegate so it does not get garbage collected while
+    /// the client is still alive
+    /// </summary>
+    private readonly UnhandledExceptionBridge.UnhandledExceptionHandler _onUnhandledExceptionDelegate;
+
 
     /// <summary>
     /// Raised just before a message is sent. This can be used to make final adjustments to the <see cref="RaygunMessage"/>, or to cancel the send.
@@ -116,8 +123,10 @@ namespace Mindscape.Raygun4Net
       _userProvider = userProvider;
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
-
-      UnhandledExceptionBridge.OnUnhandledException(OnApplicationUnhandledException);
+      
+      _onUnhandledExceptionDelegate = OnApplicationUnhandledException;
+      
+      UnhandledExceptionBridge.OnUnhandledException(_onUnhandledExceptionDelegate);
     }
 
     /// <summary>
