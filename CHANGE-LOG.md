@@ -1,5 +1,10 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v10.1.2
+- Fix issue where uncaught exceptions could sometimes not be reported to Raygun
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/529
+  - Keeps a strong reference to the `OnApplicationUnhandledException` delegate in the client so that reference is alive as long as the client is
+
 ### v10.1.1
 - Cleanup of the constructors for Net Core RaygunClient
   - See: https://github.com/MindscapeHQ/raygun4net/pull/525
