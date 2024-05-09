@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 
 namespace Mindscape.Raygun4Net.NetCore.Tests
 {
@@ -10,9 +11,14 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     [SetUp]
     public void Setup()
     {
-      _strongRef = new RaygunClient(new RaygunSettings(){CatchUnhandledExceptions = true, ApiKey = "dummy"});
+      _strongRef = new RaygunClient(new RaygunSettings
+        {
+          CatchUnhandledExceptions = true,
+          ApiKey = "dummy"
+        }
+      );
     }
-    
+
     /// <summary>
     /// GitHub Issue: 513
     /// See https://github.com/MindscapeHQ/raygun4net/issues/513 for the issue report
@@ -30,7 +36,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         UnhandledExceptionBridge.OnUnhandledException(Callback);
 
         return;
-        
+
         void Callback(Exception e, bool b)
         {
         }
@@ -40,7 +46,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       GC.Collect();
       GC.WaitForPendingFinalizers();
       GC.Collect();
-      
+
       try
       {
         // Manually raise an exception, to handlers references that are no longer alive.
@@ -50,7 +56,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       {
         observedException = ex;
       }
-      
+
       Assert.That(observedException, Is.Null);
     }
 
@@ -58,19 +64,26 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     public void UnhandledExceptionBridge_WhenClientStillAlive_DelegateShouldStillBeAlive()
     {
       string errorMessage = null;
-      
-      _strongRef.SendingMessage += (sender, args) =>
+      var eventRaised = new ManualResetEvent(false);
+
+      _strongRef.SendingMessage += (_, args) =>
       {
-        errorMessage = args.Message.Details.Error.Message; 
+        errorMessage = args.Message.Details.Error.Message;
+        eventRaised.Set();
       };
 
       // Call GC, this should NOT GC the delegate which the UnhandledExceptionBridge holds for the RaygunClient's 
       GC.Collect();
       GC.WaitForPendingFinalizers();
       GC.Collect();
-      
+
       UnhandledExceptionBridge.RaiseUnhandledException(new Exception("Alive"), false);
-      
+
+      // Wait until the SendingMessage callback has happened
+      const int timeout = 5000; // 5 seconds
+      var eventSignaled = eventRaised.WaitOne(timeout);
+
+      Assert.That(eventSignaled, Is.True, "Timeout: Event handler did not complete within the expected time.");
       Assert.That(errorMessage, Is.Not.Null);
     }
   }
