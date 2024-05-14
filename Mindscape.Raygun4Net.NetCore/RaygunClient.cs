@@ -30,8 +30,16 @@ public class RaygunClient : RaygunClientBase
   public RaygunClient(RaygunSettings settings, IRaygunUserProvider userProvider) : base(settings, userProvider)
   {
   }
+  
+  public RaygunClient(RaygunSettings settings, IOfflineErrorStore offlineErrorStore) : base(settings, offlineErrorStore)
+  {
+  }
         
   public RaygunClient(RaygunSettings settings, HttpClient httpClient, IRaygunUserProvider userProvider) : base(settings, httpClient, userProvider)
+  {
+  }
+  
+  public RaygunClient(RaygunSettings settings, HttpClient httpClient, IOfflineErrorStore offlineErrorStore) : base(settings, httpClient, null, offlineErrorStore)
   {
   }
   

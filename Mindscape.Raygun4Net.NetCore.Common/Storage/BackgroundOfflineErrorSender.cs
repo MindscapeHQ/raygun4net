@@ -7,7 +7,7 @@ namespace Mindscape.Raygun4Net.Storage;
 
 public static class BackgroundOfflineErrorReporter
 {
-  internal delegate Task SendHandler(RaygunMessage message, string apiKey, CancellationToken cancellationToken);
+  internal delegate Task SendHandler(string messagePayload, string apiKey, CancellationToken cancellationToken);
 
   private static readonly Timer BackgroundTimer = new Timer(SendOfflineErrors);
   private static volatile bool _isRunning;
@@ -34,7 +34,7 @@ public static class BackgroundOfflineErrorReporter
     Start();
   }
 
-  internal static void SetErrorStore(Func<IOfflineErrorStore> offlineStoreFunc)
+  public static void SetErrorStore(Func<IOfflineErrorStore> offlineStoreFunc)
   {
     _offlineErrorStore = offlineStoreFunc;
   }
@@ -57,7 +57,7 @@ public static class BackgroundOfflineErrorReporter
       var errors = await store.GetAll(CancellationToken.None);
       foreach (var error in errors)
       {
-        await _sendHandler(error.Message, error.ApiKey, CancellationToken.None);
+        await _sendHandler(error.MessagePayload, error.ApiKey, CancellationToken.None);
         await store.Remove(error.Id, CancellationToken.None);
       }
     }

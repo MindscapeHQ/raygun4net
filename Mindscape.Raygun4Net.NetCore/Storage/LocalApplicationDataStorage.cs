@@ -17,7 +17,7 @@ public sealed class LocalApplicationDataStorage : IOfflineErrorStore
   {
     var uniqueId = uniqueApplicationId ?? Assembly.GetEntryAssembly()?.Location ?? throw new ApplicationException("Cannot determine unique id");
     var uniqueIdHash = SHA1.Create().ComputeHash(Encoding.UTF8.GetBytes(uniqueId));
-    var uniqueIdDirectory = Encoding.UTF8.GetString(uniqueIdHash);
+    var uniqueIdDirectory = BitConverter.ToString(uniqueIdHash).Replace("-", "").ToLowerInvariant();
 
     var localAppDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), uniqueIdDirectory);
     _fileSystemErrorStorage = new FileSystemErrorStore(localAppDirectory);

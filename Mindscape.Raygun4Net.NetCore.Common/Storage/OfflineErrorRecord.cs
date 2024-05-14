@@ -17,5 +17,5 @@ public sealed class OfflineErrorRecord
   /// <summary>
   /// The JSON serialized payload of the error
   /// </summary>
-  public RaygunMessage Message { get; set; }
+  public string MessagePayload { get; set; }
 }

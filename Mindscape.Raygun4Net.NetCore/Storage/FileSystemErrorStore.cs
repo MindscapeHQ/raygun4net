@@ -27,7 +27,7 @@ public class FileSystemErrorStore : IOfflineErrorStore
     {
       try
       {
-        using var fileStream = new FileStream(crashFile, FileMode.Open);
+        using var fileStream = new FileStream(crashFile, FileMode.Open, FileAccess.Read);
         using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
         using var reader = new StreamReader(gzipStream, Encoding.UTF8);
 
