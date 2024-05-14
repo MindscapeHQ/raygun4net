@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using Mindscape.Raygun4Net.Storage;
 
 namespace Mindscape.Raygun4Net;
 
@@ -33,6 +34,11 @@ public class RaygunClient : RaygunClientBase
   public RaygunClient(RaygunSettings settings, HttpClient httpClient, IRaygunUserProvider userProvider) : base(settings, httpClient, userProvider)
   {
   }
+  
+  public RaygunClient(RaygunSettings settings, HttpClient httpClient, IRaygunUserProvider userProvider, IOfflineErrorStore offlineErrorStore) : base(settings, httpClient, userProvider, offlineErrorStore)
+  {
+  }
+  
   // ReSharper restore MemberCanBeProtected.Global
   // ReSharper restore SuggestBaseTypeForParameterInConstructor
   // ReSharper restore UnusedMember.Global
