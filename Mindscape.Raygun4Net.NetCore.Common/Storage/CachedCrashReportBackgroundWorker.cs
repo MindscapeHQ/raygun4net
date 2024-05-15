@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Mindscape.Raygun4Net.Storage;
 
-public static class CachedCrashReportSender
+public static class CachedCrashReportBackgroundWorker
 {
   internal delegate Task SendHandler(string messagePayload, string apiKey, CancellationToken cancellationToken);
 
@@ -29,7 +29,7 @@ public static class CachedCrashReportSender
 
   public static bool IsRunning => _isRunning;
 
-  static CachedCrashReportSender()
+  static CachedCrashReportBackgroundWorker()
   {
     Start();
   }
@@ -73,7 +73,7 @@ public static class CachedCrashReportSender
         try
         {
           await _sendHandler(crashReport.MessagePayload, crashReport.ApiKey, CancellationToken.None);
-          await store.Remove(crashReport, CancellationToken.None);
+          await store.Remove(crashReport.Id, CancellationToken.None);
         }
         catch (Exception ex)
         {

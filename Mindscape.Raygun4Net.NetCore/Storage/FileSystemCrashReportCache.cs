@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -13,6 +14,7 @@ public class FileSystemCrashReportCache : ICrashReportCache
 {
   private const string CacheFileExtension = "rgcrash";
   private readonly string _storageDirectory;
+  private readonly ConcurrentDictionary<Guid, string> _cacheLocationMap = new();
 
   public FileSystemCrashReportCache(string storageDirectory)
   {
@@ -35,13 +37,14 @@ public class FileSystemCrashReportCache : ICrashReportCache
         Trace.WriteLine($"Attempting to load offline crash at {crashFile}");
         var jsonString = await reader.ReadToEndAsync();
         var errorRecord = SimpleJson.DeserializeObject<CrashReportCacheEntry>(jsonString);
-        errorRecord.Location = crashFile;
 
         errorRecords.Add(errorRecord);
+        _cacheLocationMap[errorRecord.Id] = crashFile;
       }
       catch (Exception ex)
       {
         Debug.WriteLine("Error deserializing offline crash: {0}", ex.ToString());
+        File.Move(crashFile, $"{crashFile}.failed");
       }
     }
 
@@ -56,7 +59,12 @@ public class FileSystemCrashReportCache : ICrashReportCache
     {
       Directory.CreateDirectory(_storageDirectory);
 
-      var cacheEntry = new CrashReportCacheEntry(cacheEntryId, apiKey, payload);
+      var cacheEntry = new CrashReportCacheEntry
+      {
+        Id = cacheEntryId,
+        ApiKey = apiKey,
+        MessagePayload = payload
+      };
       var filePath = GetFilePathForCacheEntry(cacheEntryId);
       var jsonContent = SimpleJson.SerializeObject(cacheEntry);
 
@@ -77,16 +85,20 @@ public class FileSystemCrashReportCache : ICrashReportCache
     }
   }
 
-  public virtual Task<bool> Remove(CrashReportCacheEntry cacheEntry, CancellationToken cancellationToken)
+  public virtual Task<bool> Remove(Guid cacheId, CancellationToken cancellationToken)
   {
     try
     {
-      var result = RemoveFile(cacheEntry.Location);
-      return Task.FromResult(result);
+      if (_cacheLocationMap.TryGetValue(cacheId, out var filePath))
+      {
+        var result = RemoveFile(filePath);
+        _cacheLocationMap.TryRemove(cacheId, out _);
+        return Task.FromResult(result);
+      }
     }
     catch (Exception ex)
     {
-      Debug.WriteLine($"Error remove crash [{cacheEntry.Id}] from store: {ex}");
+      Debug.WriteLine($"Error remove crash [{cacheId}] from store: {ex}");
     }
 
     return Task.FromResult(false);

@@ -9,5 +9,5 @@ public interface ICrashReportCache
 {
   public Task<List<CrashReportCacheEntry>> GetAll(CancellationToken cancellationToken);
   public Task<CrashReportCacheEntry> Save(string crashPayload, string apiKey, CancellationToken cancellationToken);
-  public Task<bool> Remove(CrashReportCacheEntry cacheEntry, CancellationToken cancellationToken);
+  public Task<bool> Remove(Guid cacheEntryId, CancellationToken cancellationToken);
 }

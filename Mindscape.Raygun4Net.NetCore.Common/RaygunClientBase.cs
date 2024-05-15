@@ -154,7 +154,7 @@ namespace Mindscape.Raygun4Net
       if (crashReportCache != null)
       {
         _crashReportCache = crashReportCache;
-        CachedCrashReportSender.SetSendCallback(SendPayloadAsync);
+        CachedCrashReportBackgroundWorker.SetSendCallback(SendPayloadAsync);
       }
     }
 

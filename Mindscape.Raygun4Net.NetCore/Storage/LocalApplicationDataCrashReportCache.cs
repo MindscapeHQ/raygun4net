@@ -42,8 +42,8 @@ public sealed class LocalApplicationDataCrashReportCache : ICrashReportCache
     return _fileSystemErrorStorage.Save(crashPayload, apiKey, cancellationToken);
   }
 
-  public Task<bool> Remove(CrashReportCacheEntry cacheEntry, CancellationToken cancellationToken)
+  public Task<bool> Remove(Guid cacheId, CancellationToken cancellationToken)
   {
-    return _fileSystemErrorStorage.Remove(cacheEntry, cancellationToken);
+    return _fileSystemErrorStorage.Remove(cacheId, cancellationToken);
   }
 }
