@@ -3,12 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Reflection.PortableExecutable;
 using System.Text;
+using Mindscape.Raygun4Net.Diagnostics;
 
 namespace Mindscape.Raygun4Net
 {
   public class RaygunErrorMessageBuilder
   {
+    public static Func<string, PEReader> AssemblyReaderProvider { get; set; } = PortableExecutableReaderExtensions.GetFileSystemPEReader;
+    
     protected static string FormatTypeName(Type type, bool fullName)
     {
       string name = fullName ? type.FullName : type.Name;
@@ -64,6 +68,7 @@ namespace Mindscape.Raygun4Net
           var lineNumber = 0;
           var ilOffset = StackFrame.OFFSET_UNKNOWN;
           var methodToken = StackFrame.OFFSET_UNKNOWN;
+          PdbDebugInformation debugInfo = null;
 
           try
           {
@@ -76,6 +81,10 @@ namespace Mindscape.Raygun4Net
             // This might fail in medium trust environments or for array methods,
             // so don't crash the entire send process - just move on with what we have
             methodToken = method.MetadataToken;
+
+            // Attempt to read out the Debug Info from the PE
+            var peReader = AssemblyReaderProvider(method.Module.FullyQualifiedName);
+            debugInfo = peReader.TryGetDebugInformation();
           }
           catch (Exception ex)
           {
@@ -89,7 +98,11 @@ namespace Mindscape.Raygun4Net
             MethodName = methodName,
             ClassName = className,
             ILOffset = ilOffset,
-            MethodToken = methodToken
+            MethodToken = methodToken,
+            PdbChecksum = debugInfo?.Checksum,
+            PdbSignature = debugInfo?.Signature,
+            PdbFile = debugInfo?.File,
+            PdbTimestamp = debugInfo?.Timestamp
           };
 
           lines.Add(line);
@@ -187,9 +200,7 @@ namespace Mindscape.Raygun4Net
         message.Data = data;
       }
 
-      AggregateException ae = exception as AggregateException;
-
-      if (ae != null && ae.InnerExceptions != null)
+      if (exception is AggregateException ae)
       {
         message.InnerErrors = new RaygunErrorMessage[ae.InnerExceptions.Count];
         int index = 0;
@@ -207,5 +218,7 @@ namespace Mindscape.Raygun4Net
 
       return message;
     }
+    
+    
   }
 }

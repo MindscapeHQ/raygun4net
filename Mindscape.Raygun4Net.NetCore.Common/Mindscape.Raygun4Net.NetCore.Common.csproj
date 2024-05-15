@@ -39,4 +39,9 @@
     <None Include="..\LICENSE" Pack="true" PackagePath=""/>
     <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="System.Reflection.Metadata" Version="6.0.1" />
+  </ItemGroup>
 </Project>
