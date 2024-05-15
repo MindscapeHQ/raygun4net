@@ -83,6 +83,8 @@ namespace Mindscape.Raygun4Net
             // This might fail in medium trust environments or for array methods,
             // so don't crash the entire send process - just move on with what we have
             methodToken = method.MetadataToken;
+
+            debugInfo = TryGetDebugInformation(method.Module.Name);
           }
           catch (Exception ex)
           {
