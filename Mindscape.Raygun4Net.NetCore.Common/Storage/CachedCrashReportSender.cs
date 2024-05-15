@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Mindscape.Raygun4Net.Storage;
 
-public static class BackgroundOfflineErrorReporter
+public static class CachedCrashReportSender
 {
   internal delegate Task SendHandler(string messagePayload, string apiKey, CancellationToken cancellationToken);
 
@@ -13,7 +13,7 @@ public static class BackgroundOfflineErrorReporter
   private static volatile bool _isRunning;
   private static TimeSpan _interval = TimeSpan.FromSeconds(30);
   private static SendHandler _sendHandler;
-  private static Func<IOfflineErrorStore> _offlineErrorStore;
+  private static Func<ICrashReportCache> _crashReportCache;
 
   public static TimeSpan Interval
   {
@@ -23,20 +23,20 @@ public static class BackgroundOfflineErrorReporter
       _interval = value;
 
       // Set the new interval on the timer
-      BackgroundTimer.Change(TimeSpan.Zero, Interval);
+      BackgroundTimer.Change(Interval, TimeSpan.FromMilliseconds(int.MaxValue));
     }
   }
 
   public static bool IsRunning => _isRunning;
 
-  static BackgroundOfflineErrorReporter()
+  static CachedCrashReportSender()
   {
     Start();
   }
 
-  public static void SetErrorStore(Func<IOfflineErrorStore> offlineStoreFunc)
+  public static void SetErrorStore(Func<ICrashReportCache> offlineStoreFunc)
   {
-    _offlineErrorStore = offlineStoreFunc;
+    _crashReportCache = offlineStoreFunc;
   }
 
   internal static void SetSendCallback(SendHandler sendHandler)
@@ -46,7 +46,20 @@ public static class BackgroundOfflineErrorReporter
 
   private static async void SendOfflineErrors(object state)
   {
-    var store = _offlineErrorStore?.Invoke();
+    try
+    {
+      await SendCachedErrors();
+    }
+    finally
+    {
+      // Always restart the timer
+      BackgroundTimer.Change(Interval, TimeSpan.FromMilliseconds(int.MaxValue));
+    }
+  }
+
+  private static async Task SendCachedErrors()
+  {
+    var store = _crashReportCache?.Invoke();
 
     // We don't have a store set, or a send handler - so we can't actually do anything
     if (store is null || _sendHandler is null)
@@ -54,11 +67,19 @@ public static class BackgroundOfflineErrorReporter
 
     try
     {
-      var errors = await store.GetAll(CancellationToken.None);
-      foreach (var error in errors)
+      var cachedCrashReports = await store.GetAll(CancellationToken.None);
+      foreach (var crashReport in cachedCrashReports)
       {
-        await _sendHandler(error.MessagePayload, error.ApiKey, CancellationToken.None);
-        await store.Remove(error.Id, CancellationToken.None);
+        try
+        {
+          await _sendHandler(crashReport.MessagePayload, crashReport.ApiKey, CancellationToken.None);
+          await store.Remove(crashReport, CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+          Debug.WriteLine($"Exception sending offline error [{crashReport.Id}]: {ex}");
+          throw;
+        }
       }
     }
     catch (Exception ex)
@@ -73,7 +94,7 @@ public static class BackgroundOfflineErrorReporter
   /// </summary>
   public static void Start()
   {
-    BackgroundTimer.Change(TimeSpan.Zero, Interval);
+    BackgroundTimer.Change(Interval, TimeSpan.FromMilliseconds(int.MaxValue));
     _isRunning = true;
   }
 

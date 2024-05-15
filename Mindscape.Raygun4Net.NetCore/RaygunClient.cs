@@ -31,7 +31,7 @@ public class RaygunClient : RaygunClientBase
   {
   }
   
-  public RaygunClient(RaygunSettings settings, IOfflineErrorStore offlineErrorStore) : base(settings, offlineErrorStore)
+  public RaygunClient(RaygunSettings settings, ICrashReportCache crashReportCache) : base(settings, crashReportCache)
   {
   }
         
@@ -39,11 +39,11 @@ public class RaygunClient : RaygunClientBase
   {
   }
   
-  public RaygunClient(RaygunSettings settings, HttpClient httpClient, IOfflineErrorStore offlineErrorStore) : base(settings, httpClient, null, offlineErrorStore)
+  public RaygunClient(RaygunSettings settings, HttpClient httpClient, ICrashReportCache crashReportCache) : base(settings, httpClient, null, crashReportCache)
   {
   }
   
-  public RaygunClient(RaygunSettings settings, HttpClient httpClient, IRaygunUserProvider userProvider, IOfflineErrorStore offlineErrorStore) : base(settings, httpClient, userProvider, offlineErrorStore)
+  public RaygunClient(RaygunSettings settings, HttpClient httpClient, IRaygunUserProvider userProvider, ICrashReportCache crashReportCache) : base(settings, httpClient, userProvider, crashReportCache)
   {
   }
   

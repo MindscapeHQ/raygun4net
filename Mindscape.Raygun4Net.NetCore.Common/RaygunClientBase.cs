@@ -48,7 +48,7 @@ namespace Mindscape.Raygun4Net
     // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
     private readonly UnhandledExceptionBridge.UnhandledExceptionHandler _onUnhandledExceptionDelegate;
 
-    private readonly IOfflineErrorStore _offlineErrorStore;
+    private readonly ICrashReportCache _crashReportCache;
 
 
     /// <summary>
@@ -122,8 +122,8 @@ namespace Mindscape.Raygun4Net
     {
     }
 
-    protected RaygunClientBase(RaygunSettingsBase settings, IOfflineErrorStore offlineErrorStore)
-      : this(settings, DefaultClient, offlineErrorStore)
+    protected RaygunClientBase(RaygunSettingsBase settings, ICrashReportCache crashReportCache)
+      : this(settings, DefaultClient, crashReportCache)
     {
     }
 
@@ -133,12 +133,12 @@ namespace Mindscape.Raygun4Net
     {
     }
 
-    protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client, IOfflineErrorStore offlineErrorStore)
-      : this(settings, client, null, offlineErrorStore)
+    protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client, ICrashReportCache crashReportCache)
+      : this(settings, client, null, crashReportCache)
     {
     }
 
-    protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client, IRaygunUserProvider userProvider, IOfflineErrorStore offlineErrorStore)
+    protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client, IRaygunUserProvider userProvider, ICrashReportCache crashReportCache)
     {
       _client = client ?? DefaultClient;
       _settings = settings;
@@ -151,10 +151,10 @@ namespace Mindscape.Raygun4Net
 
       UnhandledExceptionBridge.OnUnhandledException(_onUnhandledExceptionDelegate);
 
-      if (offlineErrorStore != null)
+      if (crashReportCache != null)
       {
-        _offlineErrorStore = offlineErrorStore;
-        BackgroundOfflineErrorReporter.SetSendCallback(SendPayloadAsync);
+        _crashReportCache = crashReportCache;
+        CachedCrashReportSender.SetSendCallback(SendPayloadAsync);
       }
     }
 
@@ -458,8 +458,7 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 
-    protected virtual async Task StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData,
-                                              RaygunIdentifierMessage userInfo)
+    protected virtual async Task StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo)
     {
       foreach (var e in StripWrapperExceptions(exception))
       {
@@ -516,7 +515,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="cancellationToken"></param>
     public async Task Send(RaygunMessage raygunMessage, CancellationToken cancellationToken)
     {
-      if (!ValidateApiKey(_settings.ApiKey))
+      if (!ValidateApiKey())
       {
         return;
       }
@@ -560,7 +559,7 @@ namespace Mindscape.Raygun4Net
           if ((int)response.StatusCode >= 500)
           {
             // If we got a server error then add it to offline storage to send later
-            hasMessageBeenStored = await SaveMessageToOfflineStore(payload, apiKey, cancellationToken);
+            hasMessageBeenStored = await SaveMessageToOfflineCache(payload, apiKey, cancellationToken);
           }
 
           // Cause an exception to be bubbled up the stack
@@ -574,7 +573,7 @@ namespace Mindscape.Raygun4Net
         if (!hasMessageBeenStored)
         {
           // Do our best to save it in the offline storage if it hasn't been saved yet
-          await SaveMessageToOfflineStore(payload, apiKey, cancellationToken);
+          await SaveMessageToOfflineCache(payload, apiKey, cancellationToken);
         }
 
         throw;
@@ -582,20 +581,16 @@ namespace Mindscape.Raygun4Net
     }
 
 
-    private async Task<bool> SaveMessageToOfflineStore(string messagePayload, string apiKey, CancellationToken cancellationToken)
+    private async Task<bool> SaveMessageToOfflineCache(string messagePayload, string apiKey, CancellationToken cancellationToken)
     {
       // Can't store it anywhere
-      if (_offlineErrorStore is null)
+      if (_crashReportCache is null)
       {
         return false;
       }
 
-      return await _offlineErrorStore.Save(new OfflineErrorRecord
-      {
-        Id = Guid.NewGuid(),
-        MessagePayload = messagePayload,
-        ApiKey = apiKey
-      }, cancellationToken);
+      var cacheEntry = await _crashReportCache.Save(messagePayload, apiKey, cancellationToken);
+      return cacheEntry != null;
     }
   }
 }
