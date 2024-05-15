@@ -34,7 +34,7 @@ public static class CachedCrashReportBackgroundWorker
     Start();
   }
 
-  public static void SetErrorStore(Func<ICrashReportCache> offlineStoreFunc)
+  public static void SetCrashReportCache(Func<ICrashReportCache> offlineStoreFunc)
   {
     _crashReportCache = offlineStoreFunc;
   }
