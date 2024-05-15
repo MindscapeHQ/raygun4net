@@ -26,17 +26,20 @@ internal static class PortableExecutableReaderExtensions
     }
   }
 
-  public static PdbDebugInformation? TryGetDebugInformation(this PEReader peReader)
+  public static bool TryGetDebugInformation(this PEReader peReader, out PdbDebugInformation? debugInformation)
   {
     try
     {
-      return GetDebugInformation(peReader);
+      debugInformation = GetDebugInformation(peReader);
+      return true;
     }
     catch (Exception ex)
     {
       Debug.WriteLine($"Error reading PE Debug Data: {ex}");
-      return null;
     }
+
+    debugInformation = null;
+    return false;
   }
 
   private static PdbDebugInformation GetDebugInformation(this PEReader peReader)

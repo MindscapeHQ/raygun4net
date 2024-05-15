@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
@@ -11,8 +12,9 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunErrorMessageBuilder
   {
+    private static readonly ConcurrentDictionary<string, PdbDebugInformation> DebugInformationCache = new();
     public static Func<string, PEReader> AssemblyReaderProvider { get; set; } = PortableExecutableReaderExtensions.GetFileSystemPEReader;
-    
+
     protected static string FormatTypeName(Type type, bool fullName)
     {
       string name = fullName ? type.FullName : type.Name;
@@ -77,14 +79,10 @@ namespace Mindscape.Raygun4Net
             methodName = GenerateMethodName(method);
             className = method.ReflectedType != null ? method.ReflectedType.FullName : "(unknown)";
             ilOffset = frame.GetILOffset();
-            
+
             // This might fail in medium trust environments or for array methods,
             // so don't crash the entire send process - just move on with what we have
             methodToken = method.MetadataToken;
-
-            // Attempt to read out the Debug Info from the PE
-            var peReader = AssemblyReaderProvider(method.Module.FullyQualifiedName);
-            debugInfo = peReader.TryGetDebugInformation();
           }
           catch (Exception ex)
           {
@@ -218,7 +216,31 @@ namespace Mindscape.Raygun4Net
 
       return message;
     }
-    
-    
+
+    private static PdbDebugInformation TryGetDebugInformation(string moduleName)
+    {
+      if (DebugInformationCache.TryGetValue(moduleName, out var cachedInfo))
+      {
+        return cachedInfo;
+      }
+
+      try
+      {
+        // Attempt to read out the Debug Info from the PE
+        var peReader = AssemblyReaderProvider(moduleName);
+
+        if (peReader.TryGetDebugInformation(out var debugInfo))
+        {
+          DebugInformationCache.TryAdd(moduleName, debugInfo);
+          return debugInfo;
+        }
+      }
+      catch (Exception ex)
+      {
+        Debug.WriteLine($"Could not load debug information: {ex}");
+      }
+
+      return null;
+    }
   }
 }
