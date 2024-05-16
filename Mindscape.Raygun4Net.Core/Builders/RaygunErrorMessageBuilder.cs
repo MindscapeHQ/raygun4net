@@ -1,15 +1,21 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.PortableExecutable;
+using Mindscape.Raygun4Net.Diagnostics;
 using Mindscape.Raygun4Net.Messages;
 
 namespace Mindscape.Raygun4Net.Builders
 {
   public class RaygunErrorMessageBuilder : RaygunErrorMessageBuilderBase
   {
+    private static readonly ConcurrentDictionary<string, PdbDebugInformation> DebugInformationCache = new();
+    public static Func<string, PEReader> AssemblyReaderProvider { get; set; } = PortableExecutableReaderExtensions.GetFileSystemPEReader;
+    
     public static RaygunErrorMessage Build(Exception exception)
     {
       RaygunErrorMessage message = new RaygunErrorMessage();
@@ -117,6 +123,7 @@ namespace Mindscape.Raygun4Net.Builders
           var lineNumber = 0;
           var ilOffset = StackFrame.OFFSET_UNKNOWN;
           var methodToken = StackFrame.OFFSET_UNKNOWN;
+          PdbDebugInformation debugInfo = null;
 
           try
           {
@@ -125,6 +132,7 @@ namespace Mindscape.Raygun4Net.Builders
             methodName = GenerateMethodName(method);
             className = method.ReflectedType != null ? method.ReflectedType.FullName : "(unknown)";
             ilOffset = frame.GetILOffset();
+            debugInfo = TryGetDebugInformation(method.Module.Name);
 
             // This might fail in medium trust environments or for array methods,
             // so don't crash the entire send process - just move on with what we have
@@ -142,7 +150,11 @@ namespace Mindscape.Raygun4Net.Builders
             MethodName = methodName,
             ClassName = className,
             ILOffset = ilOffset,
-            MethodToken = methodToken
+            MethodToken = methodToken,
+            PdbChecksum = debugInfo?.Checksum,
+            PdbSignature = debugInfo?.Signature,
+            PdbFile = debugInfo?.File,
+            PdbTimestamp = debugInfo?.Timestamp
           };
 
           lines.Add(line);
@@ -150,6 +162,32 @@ namespace Mindscape.Raygun4Net.Builders
       }
 
       return lines.ToArray();
+    }
+    
+    private static PdbDebugInformation TryGetDebugInformation(string moduleName)
+    {
+      if (DebugInformationCache.TryGetValue(moduleName, out var cachedInfo))
+      {
+        return cachedInfo;
+      }
+
+      try
+      {
+        // Attempt to read out the Debug Info from the PE
+        var peReader = AssemblyReaderProvider(moduleName);
+
+        if (peReader.TryGetDebugInformation(out var debugInfo))
+        {
+          DebugInformationCache.TryAdd(moduleName, debugInfo);
+          return debugInfo;
+        }
+      }
+      catch (Exception ex)
+      {
+        Debug.WriteLine($"Could not load debug information: {ex}");
+      }
+
+      return null;
     }
   }
 }
