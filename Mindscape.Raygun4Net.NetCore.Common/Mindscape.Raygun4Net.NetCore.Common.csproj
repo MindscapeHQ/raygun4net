@@ -40,8 +40,10 @@
     <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
-
-  <ItemGroup>
-    <PackageReference Include="System.Reflection.Metadata" Version="6.0.1" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Reflection.Metadata" Version="6.0.1"/>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <PackageReference Include="System.Reflection.Metadata" Version="6.0.1"/>
   </ItemGroup>
 </Project>
