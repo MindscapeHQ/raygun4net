@@ -24,7 +24,7 @@ internal static class PortableExecutableReaderExtensions
     }
   }
 
-  public static bool TryGetDebugInformation(this PEReader peReader, out PdbDebugInformation debugInformation)
+  public static bool TryGetDebugInformation(this PEReader peReader, out PEDebugInformation debugInformation)
   {
     try
     {
@@ -40,9 +40,9 @@ internal static class PortableExecutableReaderExtensions
     return false;
   }
 
-  private static PdbDebugInformation GetDebugInformation(this PEReader peReader)
+  private static PEDebugInformation GetDebugInformation(this PEReader peReader)
   {
-    var debugInfo = new PdbDebugInformation
+    var debugInfo = new PEDebugInformation
     {
       Timestamp = $"{peReader.PEHeaders.CoffHeader.TimeDateStamp:X8}"
     };

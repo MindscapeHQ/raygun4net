@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.PortableExecutable;
 using System.Text;
@@ -12,7 +13,7 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunErrorMessageBuilder
   {
-    private static readonly ConcurrentDictionary<string, PdbDebugInformation> DebugInformationCache = new();
+    private static readonly ConcurrentDictionary<string, PEDebugInformation> DebugInformationCache = new();
     public static Func<string, PEReader> AssemblyReaderProvider { get; set; } = PortableExecutableReaderExtensions.GetFileSystemPEReader;
 
     protected static string FormatTypeName(Type type, bool fullName)
@@ -70,7 +71,7 @@ namespace Mindscape.Raygun4Net
           var lineNumber = 0;
           var ilOffset = StackFrame.OFFSET_UNKNOWN;
           var methodToken = StackFrame.OFFSET_UNKNOWN;
-          PdbDebugInformation debugInfo = null;
+          PEDebugInformation debugInfo = null;
 
           try
           {
@@ -98,10 +99,7 @@ namespace Mindscape.Raygun4Net
             ClassName = className,
             ILOffset = ilOffset,
             MethodToken = methodToken,
-            PdbChecksum = debugInfo?.Checksum,
-            PdbSignature = debugInfo?.Signature,
-            PdbFile = debugInfo?.File,
-            PdbTimestamp = debugInfo?.Timestamp
+            ImageSignature = debugInfo?.Signature
           };
 
           lines.Add(line);
@@ -175,7 +173,7 @@ namespace Mindscape.Raygun4Net
 
     public static RaygunErrorMessage Build(Exception exception)
     {
-      RaygunErrorMessage message = new RaygunErrorMessage();
+      var message = new RaygunErrorMessage();
 
       var exceptionType = exception.GetType();
 
@@ -188,7 +186,7 @@ namespace Mindscape.Raygun4Net
       {
         IDictionary data = new Dictionary<object, object>();
 
-        foreach (object key in exception.Data.Keys)
+        foreach (var key in exception.Data.Keys)
         {
           if (!RaygunClientBase.SentKey.Equals(key))
           {
@@ -199,12 +197,19 @@ namespace Mindscape.Raygun4Net
         message.Data = data;
       }
 
+      if (message.StackTrace != null)
+      {
+        // If we have a stack trace then grab the images out, and put de-dupe them into an array
+        // for the outgoing payload
+        message.Images = GetDebugInfoForStackFrames(message.StackTrace).ToArray();
+      }
+
       if (exception is AggregateException ae)
       {
         message.InnerErrors = new RaygunErrorMessage[ae.InnerExceptions.Count];
-        int index = 0;
+        var index = 0;
 
-        foreach (Exception e in ae.InnerExceptions)
+        foreach (var e in ae.InnerExceptions)
         {
           message.InnerErrors[index] = Build(e);
           index++;
@@ -218,7 +223,23 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 
-    private static PdbDebugInformation TryGetDebugInformation(string moduleName)
+    private static IEnumerable<PEDebugInformation> GetDebugInfoForStackFrames(IEnumerable<RaygunErrorStackTraceLineMessage> frames)
+    {
+      var imageMap = DebugInformationCache.Values.ToDictionary(k => k.Signature);
+      var imageSet = new HashSet<PEDebugInformation>();
+      
+      foreach (var stackFrame in frames)
+      {
+        if (imageMap.TryGetValue(stackFrame.ImageSignature, out var image))
+        {
+          imageSet.Add(image);
+        }
+      }
+
+      return imageSet;
+    }
+
+    private static PEDebugInformation TryGetDebugInformation(string moduleName)
     {
       if (DebugInformationCache.TryGetValue(moduleName, out var cachedInfo))
       {

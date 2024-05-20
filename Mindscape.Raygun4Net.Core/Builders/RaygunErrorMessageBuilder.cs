@@ -13,7 +13,7 @@ namespace Mindscape.Raygun4Net.Builders
 {
   public class RaygunErrorMessageBuilder : RaygunErrorMessageBuilderBase
   {
-    private static readonly ConcurrentDictionary<string, PdbDebugInformation> DebugInformationCache = new();
+    private static readonly ConcurrentDictionary<string, PEDebugInformation> DebugInformationCache = new();
     public static Func<string, PEReader> AssemblyReaderProvider { get; set; } = PortableExecutableReaderExtensions.GetFileSystemPEReader;
     
     public static RaygunErrorMessage Build(Exception exception)
@@ -26,6 +26,13 @@ namespace Mindscape.Raygun4Net.Builders
       message.ClassName = FormatTypeName(exceptionType, true);
 
       message.StackTrace = BuildStackTrace(exception);
+      
+      if (message.StackTrace != null)
+      {
+        // If we have a stack trace then grab the images out, and put de-dupe them into an array
+        // for the outgoing payload
+        message.Images = GetDebugInfoForStackFrames(message.StackTrace).ToArray();
+      }
 
       if (exception.Data != null)
       {
@@ -123,7 +130,7 @@ namespace Mindscape.Raygun4Net.Builders
           var lineNumber = 0;
           var ilOffset = StackFrame.OFFSET_UNKNOWN;
           var methodToken = StackFrame.OFFSET_UNKNOWN;
-          PdbDebugInformation debugInfo = null;
+          PEDebugInformation debugInfo = null;
 
           try
           {
@@ -151,10 +158,7 @@ namespace Mindscape.Raygun4Net.Builders
             ClassName = className,
             ILOffset = ilOffset,
             MethodToken = methodToken,
-            PdbChecksum = debugInfo?.Checksum,
-            PdbSignature = debugInfo?.Signature,
-            PdbFile = debugInfo?.File,
-            PdbTimestamp = debugInfo?.Timestamp
+            ImageSignature = debugInfo?.Signature
           };
 
           lines.Add(line);
@@ -163,8 +167,24 @@ namespace Mindscape.Raygun4Net.Builders
 
       return lines.ToArray();
     }
+
+    private static IEnumerable<PEDebugInformation> GetDebugInfoForStackFrames(IEnumerable<RaygunErrorStackTraceLineMessage> frames)
+    {
+      var imageMap = DebugInformationCache.Values.ToDictionary(k => k.Signature);
+      var imageSet = new HashSet<PEDebugInformation>();
+      
+      foreach (var stackFrame in frames)
+      {
+        if (imageMap.TryGetValue(stackFrame.ImageSignature, out var image))
+        {
+          imageSet.Add(image);
+        }
+      }
+
+      return imageSet;
+    }
     
-    private static PdbDebugInformation TryGetDebugInformation(string moduleName)
+    private static PEDebugInformation TryGetDebugInformation(string moduleName)
     {
       if (DebugInformationCache.TryGetValue(moduleName, out var cachedInfo))
       {

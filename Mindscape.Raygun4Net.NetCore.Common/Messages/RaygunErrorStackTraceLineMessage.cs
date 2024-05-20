@@ -1,4 +1,6 @@
-﻿namespace Mindscape.Raygun4Net
+﻿using Mindscape.Raygun4Net.Diagnostics;
+
+namespace Mindscape.Raygun4Net
 {
   public class RaygunErrorStackTraceLineMessage
   {
@@ -14,12 +16,6 @@
 
     public int MethodToken { get; set; }
     
-    public string PdbSignature { get; set; }
-    
-    public string PdbChecksum { get; set; }
-    
-    public string PdbFile { get; set; }
-    
-    public string PdbTimestamp { get; set; }
+    public string ImageSignature { get; set; }
   }
 }
