@@ -16,9 +16,7 @@
 
     public int MethodToken { get; set; }
 
-
     public string ImageSignature { get; set; }
-
 
     public override string ToString()
     {
