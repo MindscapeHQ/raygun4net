@@ -199,7 +199,7 @@ namespace Mindscape.Raygun4Net
 
       if (message.StackTrace != null)
       {
-        // If we have a stack trace then grab the images out, and put de-dupe them into an array
+        // If we have a stack trace then grab the debug info images, and put them into an array
         // for the outgoing payload
         message.Images = GetDebugInfoForStackFrames(message.StackTrace).ToArray();
       }
