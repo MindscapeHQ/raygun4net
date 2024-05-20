@@ -15,7 +15,7 @@ namespace Mindscape.Raygun4Net.Builders
   {
     private static readonly ConcurrentDictionary<string, PEDebugInformation> DebugInformationCache = new();
     public static Func<string, PEReader> AssemblyReaderProvider { get; set; } = PortableExecutableReaderExtensions.GetFileSystemPEReader;
-    
+
     public static RaygunErrorMessage Build(Exception exception)
     {
       RaygunErrorMessage message = new RaygunErrorMessage();
@@ -26,7 +26,7 @@ namespace Mindscape.Raygun4Net.Builders
       message.ClassName = FormatTypeName(exceptionType, true);
 
       message.StackTrace = BuildStackTrace(exception);
-      
+
       if (message.StackTrace != null)
       {
         // If we have a stack trace then grab the images out, and put de-dupe them into an array
@@ -170,12 +170,17 @@ namespace Mindscape.Raygun4Net.Builders
 
     private static IEnumerable<PEDebugInformation> GetDebugInfoForStackFrames(IEnumerable<RaygunErrorStackTraceLineMessage> frames)
     {
+      if (DebugInformationCache.IsEmpty)
+      {
+        return Enumerable.Empty<PEDebugInformation>();
+      }
+
       var imageMap = DebugInformationCache.Values.ToDictionary(k => k.Signature);
       var imageSet = new HashSet<PEDebugInformation>();
-      
+
       foreach (var stackFrame in frames)
       {
-        if (imageMap.TryGetValue(stackFrame.ImageSignature, out var image))
+        if (stackFrame.ImageSignature != null && imageMap.TryGetValue(stackFrame.ImageSignature, out var image))
         {
           imageSet.Add(image);
         }
@@ -183,7 +188,7 @@ namespace Mindscape.Raygun4Net.Builders
 
       return imageSet;
     }
-    
+
     private static PEDebugInformation TryGetDebugInformation(string moduleName)
     {
       if (DebugInformationCache.TryGetValue(moduleName, out var cachedInfo))

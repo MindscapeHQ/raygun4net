@@ -225,12 +225,17 @@ namespace Mindscape.Raygun4Net
 
     private static IEnumerable<PEDebugInformation> GetDebugInfoForStackFrames(IEnumerable<RaygunErrorStackTraceLineMessage> frames)
     {
+      if (DebugInformationCache.IsEmpty)
+      {
+        return Enumerable.Empty<PEDebugInformation>();
+      }
+      
       var imageMap = DebugInformationCache.Values.ToDictionary(k => k.Signature);
       var imageSet = new HashSet<PEDebugInformation>();
       
       foreach (var stackFrame in frames)
       {
-        if (imageMap.TryGetValue(stackFrame.ImageSignature, out var image))
+        if (stackFrame.ImageSignature != null && imageMap.TryGetValue(stackFrame.ImageSignature, out var image))
         {
           imageSet.Add(image);
         }
