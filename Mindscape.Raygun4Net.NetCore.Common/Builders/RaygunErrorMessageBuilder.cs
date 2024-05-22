@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
+using System.Reflection.PortableExecutable;
 using System.Text;
+using Mindscape.Raygun4Net.Diagnostics;
 
 namespace Mindscape.Raygun4Net
 {
   public class RaygunErrorMessageBuilder
   {
+    private static readonly ConcurrentDictionary<string, PEDebugInformation> DebugInformationCache = new();
+    public static Func<string, PEReader> AssemblyReaderProvider { get; set; } = PortableExecutableReaderExtensions.GetFileSystemPEReader;
+
     protected static string FormatTypeName(Type type, bool fullName)
     {
       string name = fullName ? type.FullName : type.Name;
@@ -24,6 +31,7 @@ namespace Mindscape.Raygun4Net
       {
         stringBuilder.Append(FormatTypeName(t, false)).Append(",");
       }
+
       stringBuilder.Remove(stringBuilder.Length - 1, 1);
       stringBuilder.Append(">");
 
@@ -51,31 +59,47 @@ namespace Mindscape.Raygun4Net
         return lines.ToArray();
       }
 
-      foreach (StackFrame frame in frames)
+      foreach (var frame in frames)
       {
-        MethodBase method = frame.GetMethod();
+        var method = frame.GetMethod();
 
         if (method != null)
         {
-          int lineNumber = frame.GetFileLineNumber();
+          string methodName = null;
+          string file = null;
+          string className = null;
+          var lineNumber = 0;
+          var ilOffset = StackFrame.OFFSET_UNKNOWN;
+          var methodToken = StackFrame.OFFSET_UNKNOWN;
+          PEDebugInformation debugInfo = null;
 
-          if (lineNumber == 0)
+          try
           {
-            lineNumber = frame.GetILOffset();
+            file = frame.GetFileName();
+            lineNumber = frame.GetFileLineNumber();
+            methodName = GenerateMethodName(method);
+            className = method.ReflectedType != null ? method.ReflectedType.FullName : "(unknown)";
+            ilOffset = frame.GetILOffset();
+            debugInfo = TryGetDebugInformation(method.Module.Name);
+
+            // This might fail in medium trust environments or for array methods,
+            // so don't crash the entire send process - just move on with what we have
+            methodToken = method.MetadataToken;
           }
-
-          var methodName = GenerateMethodName(method);
-
-          string file = frame.GetFileName();
-
-          string className = method.DeclaringType != null ? method.DeclaringType.FullName : "(unknown)";
+          catch (Exception ex)
+          {
+            Debug.WriteLine("Exception retrieving stack frame details: {0}", ex);
+          }
 
           var line = new RaygunErrorStackTraceLineMessage
           {
             FileName = file,
             LineNumber = lineNumber,
             MethodName = methodName,
-            ClassName = className
+            ClassName = className,
+            ILOffset = ilOffset,
+            MethodToken = methodToken,
+            ImageSignature = debugInfo?.Signature
           };
 
           lines.Add(line);
@@ -149,7 +173,7 @@ namespace Mindscape.Raygun4Net
 
     public static RaygunErrorMessage Build(Exception exception)
     {
-      RaygunErrorMessage message = new RaygunErrorMessage();
+      var message = new RaygunErrorMessage();
 
       var exceptionType = exception.GetType();
 
@@ -162,7 +186,7 @@ namespace Mindscape.Raygun4Net
       {
         IDictionary data = new Dictionary<object, object>();
 
-        foreach (object key in exception.Data.Keys)
+        foreach (var key in exception.Data.Keys)
         {
           if (!RaygunClientBase.SentKey.Equals(key))
           {
@@ -173,14 +197,19 @@ namespace Mindscape.Raygun4Net
         message.Data = data;
       }
 
-      AggregateException ae = exception as AggregateException;
+      if (message.StackTrace != null)
+      {
+        // If we have a stack trace then grab the debug info images, and put them into an array
+        // for the outgoing payload
+        message.Images = GetDebugInfoForStackFrames(message.StackTrace).ToArray();
+      }
 
-      if (ae != null && ae.InnerExceptions != null)
+      if (exception is AggregateException ae)
       {
         message.InnerErrors = new RaygunErrorMessage[ae.InnerExceptions.Count];
-        int index = 0;
+        var index = 0;
 
-        foreach (Exception e in ae.InnerExceptions)
+        foreach (var e in ae.InnerExceptions)
         {
           message.InnerErrors[index] = Build(e);
           index++;
@@ -192,6 +221,53 @@ namespace Mindscape.Raygun4Net
       }
 
       return message;
+    }
+
+    private static IEnumerable<PEDebugInformation> GetDebugInfoForStackFrames(IEnumerable<RaygunErrorStackTraceLineMessage> frames)
+    {
+      if (DebugInformationCache.IsEmpty)
+      {
+        return Enumerable.Empty<PEDebugInformation>();
+      }
+      
+      var imageMap = DebugInformationCache.Values.Where(x => x != null).ToDictionary(k => k.Signature);
+      var imageSet = new HashSet<PEDebugInformation>();
+      
+      foreach (var stackFrame in frames)
+      {
+        if (stackFrame.ImageSignature != null && imageMap.TryGetValue(stackFrame.ImageSignature, out var image))
+        {
+          imageSet.Add(image);
+        }
+      }
+
+      return imageSet;
+    }
+
+    private static PEDebugInformation TryGetDebugInformation(string moduleName)
+    {
+      if (DebugInformationCache.TryGetValue(moduleName, out var cachedInfo))
+      {
+        return cachedInfo;
+      }
+
+      try
+      {
+        // Attempt to read out the Debug Info from the PE
+        var peReader = AssemblyReaderProvider(moduleName);
+
+        // If we got this far, the assembly/module exists, so whatever the result
+        // put it in the cache to prevent reading the disk over and over
+        peReader.TryGetDebugInformation(out var debugInfo);
+        DebugInformationCache.TryAdd(moduleName, debugInfo);
+        return debugInfo;
+      }
+      catch (Exception ex)
+      {
+        Debug.WriteLine($"Could not load debug information: {ex}");
+      }
+
+      return null;
     }
   }
 }

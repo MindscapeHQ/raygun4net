@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Tests.Model;
 using NUnit.Framework;
@@ -47,6 +48,15 @@ namespace Mindscape.Raygun4Net.Tests
     {
       var message = RaygunErrorMessageBuilder.Build(_exception);
       Assert.That("System.InvalidOperationException", Is.EqualTo(message.ClassName));
+    }
+
+    [Test]
+    public void ErrorMessageBuilder_WhenAssembliesAreAvailable_HasImageInfo()
+    {
+      var errorMessage = RaygunErrorMessageBuilder.Build(_exception);
+      Assert.That(errorMessage.Images, Is.Not.Null);
+      Assert.That(errorMessage.Images, Is.Not.Empty);
+      Assert.That(errorMessage.StackTrace.All(x => x.ImageSignature != null), Is.True);
     }
   }
 }

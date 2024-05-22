@@ -1,4 +1,5 @@
 using System.Collections;
+using Mindscape.Raygun4Net.Diagnostics;
 
 namespace Mindscape.Raygun4Net
 {
@@ -15,12 +16,14 @@ namespace Mindscape.Raygun4Net
     public string Message { get; set; }
 
     public RaygunErrorStackTraceLineMessage[] StackTrace { get; set; }
+    
+    public PEDebugInformation[] Images { get; set; } 
 
     public override string ToString()
     {
       // This exists because Reflection in Xamarin can't seem to obtain the Getter methods unless the getter is used somewhere in the code.
       // The getter of all properties is required to serialize the Raygun messages to JSON.
-      return $"[RaygunErrorMessage: InnerError={InnerError}, InnerErrors={InnerErrors}, Data={Data}, ClassName={ClassName}, Message={Message}, StackTrace={StackTrace}]";
+      return $"[RaygunErrorMessage: InnerError={InnerError}, InnerErrors={InnerErrors}, Data={Data}, ClassName={ClassName}, Message={Message}, StackTrace={StackTrace}, Images={Images}]";
     }
   }
 }

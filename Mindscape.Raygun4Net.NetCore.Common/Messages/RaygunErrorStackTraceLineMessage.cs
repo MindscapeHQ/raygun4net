@@ -1,4 +1,6 @@
-﻿namespace Mindscape.Raygun4Net
+﻿using Mindscape.Raygun4Net.Diagnostics;
+
+namespace Mindscape.Raygun4Net
 {
   public class RaygunErrorStackTraceLineMessage
   {
@@ -9,5 +11,11 @@
     public string FileName { get; set; }
 
     public string MethodName { get; set; }
+
+    public int ILOffset { get; set; }
+
+    public int MethodToken { get; set; }
+    
+    public string ImageSignature { get; set; }
   }
 }
