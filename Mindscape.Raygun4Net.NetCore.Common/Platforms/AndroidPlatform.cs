@@ -49,7 +49,6 @@ namespace Mindscape.Raygun4Net.Platforms
       {
         var exceptionArgsType = exceptionArgs.GetType();
         exception = (Exception)exceptionArgsType.GetProperty("Exception").GetValue(exceptionArgs);
-        exceptionArgsType.GetProperty("Handled")?.SetValue(exceptionArgs, true);
       }
       catch (Exception ex)
       {
