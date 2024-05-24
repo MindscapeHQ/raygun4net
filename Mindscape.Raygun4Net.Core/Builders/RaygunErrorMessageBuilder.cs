@@ -139,7 +139,7 @@ namespace Mindscape.Raygun4Net.Builders
             methodName = GenerateMethodName(method);
             className = method.ReflectedType != null ? method.ReflectedType.FullName : "(unknown)";
             ilOffset = frame.GetILOffset();
-            debugInfo = TryGetDebugInformation(method.Module.Name);
+            debugInfo = TryGetDebugInformation(method.Module.FullyQualifiedName);
 
             // This might fail in medium trust environments or for array methods,
             // so don't crash the entire send process - just move on with what we have
