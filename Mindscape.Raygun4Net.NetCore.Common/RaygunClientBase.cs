@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
@@ -556,7 +557,7 @@ namespace Mindscape.Raygun4Net
         {
           Debug.WriteLine($"Error Logging Exception to Raygun {response.ReasonPhrase}");
 
-          if ((int)response.StatusCode >= 500)
+          if (response.StatusCode >= HttpStatusCode.InternalServerError)
           {
             // If we got a server error then add it to offline storage to send later
             hasMessageBeenStored = await SaveMessageToOfflineCache(payload, apiKey, cancellationToken);
