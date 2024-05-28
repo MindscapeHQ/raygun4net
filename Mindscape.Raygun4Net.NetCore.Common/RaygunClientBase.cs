@@ -49,7 +49,7 @@ namespace Mindscape.Raygun4Net
     // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
     private readonly UnhandledExceptionBridge.UnhandledExceptionHandler _onUnhandledExceptionDelegate;
 
-    private readonly ICrashReportCache _crashReportCache;
+    private ICrashReportCache _crashReportCache;
 
 
     /// <summary>
@@ -97,6 +97,16 @@ namespace Mindscape.Raygun4Net
       set => _settings.CatchUnhandledExceptions = value;
     }
 
+    public ICrashReportCache CrashReportCache
+    {
+      get => _crashReportCache;
+      set
+      {
+        _crashReportCache = value;
+        CachedCrashReportBackgroundWorker.SetSendCallback(SendPayloadAsync);
+      }
+    }
+
     private void OnApplicationUnhandledException(Exception exception, bool isTerminating)
     {
       if (!_settings.CatchUnhandledExceptions)
@@ -108,13 +118,13 @@ namespace Mindscape.Raygun4Net
     }
 
     protected RaygunClientBase(RaygunSettingsBase settings)
-      : this(settings, DefaultClient, null, null)
+      : this(settings, DefaultClient, null)
     {
     }
 
     // ReSharper disable once IntroduceOptionalParameters.Global
     protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client)
-      : this(settings, client, null, null)
+      : this(settings, client, null)
     {
     }
 
@@ -123,23 +133,7 @@ namespace Mindscape.Raygun4Net
     {
     }
 
-    protected RaygunClientBase(RaygunSettingsBase settings, ICrashReportCache crashReportCache)
-      : this(settings, DefaultClient, crashReportCache)
-    {
-    }
-
-    // ReSharper disable once IntroduceOptionalParameters.Global
     protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client, IRaygunUserProvider userProvider)
-      : this(settings, client, userProvider, null)
-    {
-    }
-
-    protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client, ICrashReportCache crashReportCache)
-      : this(settings, client, null, crashReportCache)
-    {
-    }
-
-    protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client, IRaygunUserProvider userProvider, ICrashReportCache crashReportCache)
     {
       _client = client ?? DefaultClient;
       _settings = settings;
@@ -151,12 +145,6 @@ namespace Mindscape.Raygun4Net
       _onUnhandledExceptionDelegate = OnApplicationUnhandledException;
 
       UnhandledExceptionBridge.OnUnhandledException(_onUnhandledExceptionDelegate);
-
-      if (crashReportCache != null)
-      {
-        _crashReportCache = crashReportCache;
-        CachedCrashReportBackgroundWorker.SetSendCallback(SendPayloadAsync);
-      }
     }
 
     /// <summary>

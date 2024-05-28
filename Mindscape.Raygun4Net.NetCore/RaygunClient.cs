@@ -30,20 +30,8 @@ public class RaygunClient : RaygunClientBase
   public RaygunClient(RaygunSettings settings, IRaygunUserProvider userProvider) : base(settings, userProvider)
   {
   }
-  
-  public RaygunClient(RaygunSettings settings, ICrashReportCache crashReportCache) : base(settings, crashReportCache)
-  {
-  }
         
   public RaygunClient(RaygunSettings settings, HttpClient httpClient, IRaygunUserProvider userProvider) : base(settings, httpClient, userProvider)
-  {
-  }
-  
-  public RaygunClient(RaygunSettings settings, HttpClient httpClient, ICrashReportCache crashReportCache) : base(settings, httpClient, null, crashReportCache)
-  {
-  }
-  
-  public RaygunClient(RaygunSettings settings, HttpClient httpClient, IRaygunUserProvider userProvider, ICrashReportCache crashReportCache) : base(settings, httpClient, userProvider, crashReportCache)
   {
   }
   
