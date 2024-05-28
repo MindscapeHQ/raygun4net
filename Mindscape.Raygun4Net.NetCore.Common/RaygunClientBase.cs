@@ -544,7 +544,7 @@ namespace Mindscape.Raygun4Net
 
     internal async Task SendPayloadAsync(string payload, string apiKey, CancellationToken cancellationToken)
     {
-      var hasMessageBeenStored = false;
+      var shouldStoreMessage = false;
       var requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
       requestMessage.Headers.Add("X-ApiKey", apiKey);
       requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
@@ -560,7 +560,7 @@ namespace Mindscape.Raygun4Net
           if (response.StatusCode >= HttpStatusCode.InternalServerError)
           {
             // If we got a server error then add it to offline storage to send later
-            hasMessageBeenStored = await SaveMessageToOfflineCache(payload, apiKey, cancellationToken);
+            shouldStoreMessage = true;
           }
 
           // Cause an exception to be bubbled up the stack
@@ -570,14 +570,16 @@ namespace Mindscape.Raygun4Net
       catch (Exception ex)
       {
         Debug.WriteLine($"Error Logging Exception to Raygun {ex.Message}");
-
-        if (!hasMessageBeenStored)
-        {
-          // Do our best to save it in the offline storage if it hasn't been saved yet
-          await SaveMessageToOfflineCache(payload, apiKey, cancellationToken);
-        }
+        shouldStoreMessage = true;
 
         throw;
+      }
+      finally
+      {
+        if (shouldStoreMessage)
+        {
+          await SaveMessageToOfflineCache(payload, apiKey, cancellationToken);
+        }
       }
     }
 
