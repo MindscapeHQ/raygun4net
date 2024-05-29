@@ -10,7 +10,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Mindscape.Raygun4Net.Breadcrumbs;
-using Mindscape.Raygun4Net.Storage;
 
 namespace Mindscape.Raygun4Net
 {
@@ -136,7 +135,7 @@ namespace Mindscape.Raygun4Net
 
       if (settings.OfflineStore != null)
       {
-        CachedCrashReportBackgroundWorker.SetSendCallback(SendPayloadAsync);
+        settings.OfflineStore.SetSendCallback(SendPayloadAsync);
       }
     }
 

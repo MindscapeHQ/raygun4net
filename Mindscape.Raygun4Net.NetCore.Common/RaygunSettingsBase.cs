@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Mindscape.Raygun4Net.Storage;
+using Mindscape.Raygun4Net.Offline;
 
 namespace Mindscape.Raygun4Net;
 

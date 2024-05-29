@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Mindscape.Raygun4Net.Storage;
+namespace Mindscape.Raygun4Net.Offline;
 
 public sealed class CrashReportStoreEntry
 {

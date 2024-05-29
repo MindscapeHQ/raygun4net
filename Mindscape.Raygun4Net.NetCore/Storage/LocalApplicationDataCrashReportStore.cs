@@ -4,8 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using Mindscape.Raygun4Net.Offline;
 
 namespace Mindscape.Raygun4Net.Storage;
 
@@ -15,8 +14,8 @@ namespace Mindscape.Raygun4Net.Storage;
 /// </summary>
 public sealed class LocalApplicationDataCrashReportStore : FileSystemCrashReportStore
 {
-  public LocalApplicationDataCrashReportStore(string directoryName = null, int maxOfflineFiles = 50)
-    : base(GetLocalAppDirectory(directoryName), maxOfflineFiles)
+  public LocalApplicationDataCrashReportStore(IOfflineSendStrategy offlineSendStrategy, string directoryName = null, int maxOfflineFiles = 50)
+    : base(offlineSendStrategy, GetLocalAppDirectory(directoryName), maxOfflineFiles)
   {
   }
 

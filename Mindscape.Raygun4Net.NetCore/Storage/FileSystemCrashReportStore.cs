@@ -7,20 +7,31 @@ using System.IO.Compression;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Mindscape.Raygun4Net.Offline;
 
 namespace Mindscape.Raygun4Net.Storage;
 
 public class FileSystemCrashReportStore : ICrashReportStore
 {
   private const string CacheFileExtension = "rgcrash";
+  private readonly IOfflineSendStrategy _offlineSendStrategy;
   private readonly string _storageDirectory;
   private readonly int _maxOfflineFiles;
   private readonly ConcurrentDictionary<Guid, string> _cacheLocationMap = new();
+  private SendHandler _sendHandler;
 
-  public FileSystemCrashReportStore(string storageDirectory, int maxOfflineFiles = 50)
+  public FileSystemCrashReportStore(IOfflineSendStrategy offlineSendStrategy, string storageDirectory, int maxOfflineFiles = 50)
   {
+    _offlineSendStrategy = offlineSendStrategy;
     _storageDirectory = storageDirectory;
     _maxOfflineFiles = maxOfflineFiles;
+
+    _offlineSendStrategy.OnSend += ProcessOfflineErrors;
+  }
+
+  public void SetSendCallback(SendHandler sendHandler)
+  {
+    _sendHandler = sendHandler;
   }
 
   public virtual async Task<List<CrashReportStoreEntry>> GetAll(CancellationToken cancellationToken)
@@ -59,6 +70,13 @@ public class FileSystemCrashReportStore : ICrashReportStore
     try
     {
       Directory.CreateDirectory(_storageDirectory);
+
+      var crashFiles = Directory.GetFiles(_storageDirectory, $"*.{CacheFileExtension}");
+      if (crashFiles.Length >= _maxOfflineFiles)
+      {
+        Debug.WriteLine($"Maximum offline files of [{_maxOfflineFiles}] has been reached");
+        return false;
+      }
 
       var cacheEntry = new CrashReportStoreEntry
       {
@@ -119,5 +137,30 @@ public class FileSystemCrashReportStore : ICrashReportStore
   private string GetFilePathForCacheEntry(Guid cacheId)
   {
     return Path.Combine(_storageDirectory, $"{cacheId:N}.{CacheFileExtension}");
+  }
+
+  private async void ProcessOfflineErrors()
+  {
+    try
+    {
+      var cachedCrashReports = await GetAll(CancellationToken.None);
+      foreach (var crashReport in cachedCrashReports)
+      {
+        try
+        {
+          await _sendHandler(crashReport.MessagePayload, crashReport.ApiKey, CancellationToken.None);
+          await Remove(crashReport.Id, CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+          Debug.WriteLine($"Exception sending offline error [{crashReport.Id}]: {ex}");
+          throw;
+        }
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.WriteLine($"Exception sending offline errors: {ex}");
+    }
   }
 }
