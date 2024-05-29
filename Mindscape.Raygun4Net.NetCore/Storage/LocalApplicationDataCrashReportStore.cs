@@ -13,37 +13,25 @@ namespace Mindscape.Raygun4Net.Storage;
 /// Stores a cached copy of crash reports that failed to send in Local App Data
 /// Creates a directory if specified, otherwise creates a unique directory based off the location of the application
 /// </summary>
-public sealed class LocalApplicationDataCrashReportStore : ICrashReportStore
+public sealed class LocalApplicationDataCrashReportStore : FileSystemCrashReportStore
 {
-  private readonly FileSystemCrashReportStore _fileSystemErrorStorage;
-
-  public LocalApplicationDataCrashReportStore(string directoryName = null)
+  public LocalApplicationDataCrashReportStore(string directoryName = null, int maxOfflineFiles = 50)
+    : base(GetLocalAppDirectory(directoryName), maxOfflineFiles)
   {
-    if (directoryName is null)
-    {
-      // Try generate a unique id, from the executable location
-      var uniqueId = Assembly.GetEntryAssembly()?.Location ?? throw new ApplicationException("Cannot determine unique application id");
-
-      var uniqueIdHash = SHA1.Create().ComputeHash(Encoding.UTF8.GetBytes(uniqueId));
-      directoryName = BitConverter.ToString(uniqueIdHash).Replace("-", "").ToLowerInvariant();
-    }
-
-    var localAppDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), directoryName);
-    _fileSystemErrorStorage = new FileSystemCrashReportStore(localAppDirectory);
   }
 
-  public Task<List<CrashReportStoreEntry>> GetAll(CancellationToken cancellationToken)
+  private static string GetLocalAppDirectory(string directoryName)
   {
-    return _fileSystemErrorStorage.GetAll(cancellationToken);
+    directoryName ??= CreateUniqueDirectory();
+    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), directoryName);
   }
 
-  public Task<CrashReportStoreEntry> Save(string crashPayload, string apiKey, CancellationToken cancellationToken)
+  private static string CreateUniqueDirectory()
   {
-    return _fileSystemErrorStorage.Save(crashPayload, apiKey, cancellationToken);
-  }
+    // Try to generate a unique id, from the executable location
+    var uniqueId = Assembly.GetEntryAssembly()?.Location ?? throw new ApplicationException("Cannot determine unique application id");
 
-  public Task<bool> Remove(Guid cacheId, CancellationToken cancellationToken)
-  {
-    return _fileSystemErrorStorage.Remove(cacheId, cancellationToken);
+    var uniqueIdHash = SHA1.Create().ComputeHash(Encoding.UTF8.GetBytes(uniqueId));
+    return BitConverter.ToString(uniqueIdHash).Replace("-", "").ToLowerInvariant();
   }
 }

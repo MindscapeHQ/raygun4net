@@ -43,17 +43,15 @@ namespace Mindscape.Raygun4Net
     protected internal const string SentKey = "AlreadySentByRaygun";
 
     /// <summary>
-    /// Store a strong reference to the OnApplicationUnhandledException delegate so it does not get garbage collected while
+    /// Store a strong reference to the OnApplicationUnhandledException delegate, so it does not get garbage collected while
     /// the client is still alive
     /// </summary>
     // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
     private readonly UnhandledExceptionBridge.UnhandledExceptionHandler _onUnhandledExceptionDelegate;
 
-    private ICrashReportStore _crashReportStore;
-
 
     /// <summary>
-    /// Raised just before a message is sent. This can be used to make final adjustments to the <see cref="RaygunMessage"/>, or to cancel the send.
+    /// Raised just before a message is sent. This can be used to make final adjustments to the <see cref="RaygunMessage"/> or to cancel the send.
     /// </summary>
     public event EventHandler<RaygunSendingMessageEventArgs> SendingMessage;
 
@@ -97,16 +95,6 @@ namespace Mindscape.Raygun4Net
       set => _settings.CatchUnhandledExceptions = value;
     }
 
-    public ICrashReportStore CrashReportStore
-    {
-      get => _crashReportStore;
-      set
-      {
-        _crashReportStore = value;
-        CachedCrashReportBackgroundWorker.SetSendCallback(SendPayloadAsync);
-      }
-    }
-
     private void OnApplicationUnhandledException(Exception exception, bool isTerminating)
     {
       if (!_settings.CatchUnhandledExceptions)
@@ -145,6 +133,11 @@ namespace Mindscape.Raygun4Net
       _onUnhandledExceptionDelegate = OnApplicationUnhandledException;
 
       UnhandledExceptionBridge.OnUnhandledException(_onUnhandledExceptionDelegate);
+
+      if (settings.OfflineStore != null)
+      {
+        CachedCrashReportBackgroundWorker.SetSendCallback(SendPayloadAsync);
+      }
     }
 
     /// <summary>
@@ -532,56 +525,44 @@ namespace Mindscape.Raygun4Net
 
     internal async Task SendPayloadAsync(string payload, string apiKey, CancellationToken cancellationToken)
     {
-      var shouldStoreMessage = false;
+      HttpResponseMessage response = null;
       var requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
       requestMessage.Headers.Add("X-ApiKey", apiKey);
       requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
 
       try
       {
-        var response = await _client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+        response = await _client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
 
-        if (!response.IsSuccessStatusCode)
-        {
-          Debug.WriteLine($"Error Logging Exception to Raygun {response.ReasonPhrase}");
-
-          if (response.StatusCode >= HttpStatusCode.InternalServerError)
-          {
-            // If we got a server error then add it to offline storage to send later
-            shouldStoreMessage = true;
-          }
-
-          // Cause an exception to be bubbled up the stack
-          response.EnsureSuccessStatusCode();
-        }
+        // Raises an HttpRequestException if the request was unsuccessful
+        response.EnsureSuccessStatusCode();
       }
       catch (Exception ex)
       {
-        Debug.WriteLine($"Error Logging Exception to Raygun {ex.Message}");
-        shouldStoreMessage = true;
+        Debug.WriteLine($"Error Logging Exception to Raygun: {ex.Message}");
 
-        throw;
-      }
-      finally
-      {
+        // If we got no response or an unexpected server error then add it to offline storage to send later
+        // we get no response if the send call fails for any other reason (network etc)
+        var shouldStoreMessage = response is null || response.StatusCode >= HttpStatusCode.InternalServerError;
+
         if (shouldStoreMessage)
         {
           await SaveMessageToOfflineCache(payload, apiKey, cancellationToken);
         }
+
+        throw;
       }
     }
-
 
     private async Task<bool> SaveMessageToOfflineCache(string messagePayload, string apiKey, CancellationToken cancellationToken)
     {
       // Can't store it anywhere
-      if (_crashReportStore is null)
+      if (_settings.OfflineStore is null)
       {
         return false;
       }
 
-      var cacheEntry = await _crashReportStore.Save(messagePayload, apiKey, cancellationToken);
-      return cacheEntry != null;
+      return await _settings.OfflineStore.Save(messagePayload, apiKey, cancellationToken);
     }
   }
 }

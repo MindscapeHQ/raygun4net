@@ -14,11 +14,13 @@ public class FileSystemCrashReportStore : ICrashReportStore
 {
   private const string CacheFileExtension = "rgcrash";
   private readonly string _storageDirectory;
+  private readonly int _maxOfflineFiles;
   private readonly ConcurrentDictionary<Guid, string> _cacheLocationMap = new();
 
-  public FileSystemCrashReportStore(string storageDirectory)
+  public FileSystemCrashReportStore(string storageDirectory, int maxOfflineFiles = 50)
   {
     _storageDirectory = storageDirectory;
+    _maxOfflineFiles = maxOfflineFiles;
   }
 
   public virtual async Task<List<CrashReportStoreEntry>> GetAll(CancellationToken cancellationToken)
@@ -51,8 +53,7 @@ public class FileSystemCrashReportStore : ICrashReportStore
     return errorRecords;
   }
 
-  public virtual async Task<CrashReportStoreEntry> Save(string payload, string apiKey,
-    CancellationToken cancellationToken)
+  public virtual async Task<bool> Save(string payload, string apiKey, CancellationToken cancellationToken)
   {
     var cacheEntryId = Guid.NewGuid();
     try
@@ -76,12 +77,12 @@ public class FileSystemCrashReportStore : ICrashReportStore
       await writer.WriteAsync(jsonContent);
       await writer.FlushAsync();
 
-      return cacheEntry;
+      return true;
     }
     catch (Exception ex)
     {
       Debug.WriteLine($"Error adding crash [{cacheEntryId}] to store: {ex}");
-      return null;
+      return false;
     }
   }
 
