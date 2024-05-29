@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 
 namespace Mindscape.Raygun4Net.Storage;
 
-public sealed class CrashReportCacheEntry
+public sealed class CrashReportStoreEntry
 {
   /// <summary>
   /// Unique ID for the record

@@ -13,11 +13,11 @@ public static class CachedCrashReportBackgroundWorker
   private static volatile bool _isRunning;
   private static TimeSpan _interval = TimeSpan.FromSeconds(30);
   private static SendHandler _sendHandler;
-  private static Func<ICrashReportCache> _crashReportCache;
+  private static Func<ICrashReportStore> _crashReportCache;
 
   public static TimeSpan Interval
   {
-    get { return _interval; }
+    get => _interval;
     set
     {
       _interval = value;
@@ -34,7 +34,7 @@ public static class CachedCrashReportBackgroundWorker
     Start();
   }
 
-  public static void SetCrashReportCache(Func<ICrashReportCache> offlineStoreFunc)
+  public static void SetCrashReportCache(Func<ICrashReportStore> offlineStoreFunc)
   {
     _crashReportCache = offlineStoreFunc;
   }

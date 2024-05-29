@@ -13,11 +13,11 @@ namespace Mindscape.Raygun4Net.Storage;
 /// Stores a cached copy of crash reports that failed to send in Local App Data
 /// Creates a directory if specified, otherwise creates a unique directory based off the location of the application
 /// </summary>
-public sealed class LocalApplicationDataCrashReportCache : ICrashReportCache
+public sealed class LocalApplicationDataCrashReportStore : ICrashReportStore
 {
-  private readonly FileSystemCrashReportCache _fileSystemErrorStorage;
+  private readonly FileSystemCrashReportStore _fileSystemErrorStorage;
 
-  public LocalApplicationDataCrashReportCache(string directoryName = null)
+  public LocalApplicationDataCrashReportStore(string directoryName = null)
   {
     if (directoryName is null)
     {
@@ -29,15 +29,15 @@ public sealed class LocalApplicationDataCrashReportCache : ICrashReportCache
     }
 
     var localAppDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), directoryName);
-    _fileSystemErrorStorage = new FileSystemCrashReportCache(localAppDirectory);
+    _fileSystemErrorStorage = new FileSystemCrashReportStore(localAppDirectory);
   }
 
-  public Task<List<CrashReportCacheEntry>> GetAll(CancellationToken cancellationToken)
+  public Task<List<CrashReportStoreEntry>> GetAll(CancellationToken cancellationToken)
   {
     return _fileSystemErrorStorage.GetAll(cancellationToken);
   }
 
-  public Task<CrashReportCacheEntry> Save(string crashPayload, string apiKey, CancellationToken cancellationToken)
+  public Task<CrashReportStoreEntry> Save(string crashPayload, string apiKey, CancellationToken cancellationToken)
   {
     return _fileSystemErrorStorage.Save(crashPayload, apiKey, cancellationToken);
   }

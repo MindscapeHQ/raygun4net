@@ -10,21 +10,21 @@ using System.Threading.Tasks;
 
 namespace Mindscape.Raygun4Net.Storage;
 
-public class FileSystemCrashReportCache : ICrashReportCache
+public class FileSystemCrashReportStore : ICrashReportStore
 {
   private const string CacheFileExtension = "rgcrash";
   private readonly string _storageDirectory;
   private readonly ConcurrentDictionary<Guid, string> _cacheLocationMap = new();
 
-  public FileSystemCrashReportCache(string storageDirectory)
+  public FileSystemCrashReportStore(string storageDirectory)
   {
     _storageDirectory = storageDirectory;
   }
 
-  public virtual async Task<List<CrashReportCacheEntry>> GetAll(CancellationToken cancellationToken)
+  public virtual async Task<List<CrashReportStoreEntry>> GetAll(CancellationToken cancellationToken)
   {
     var crashFiles = Directory.GetFiles(_storageDirectory, $"*.{CacheFileExtension}");
-    var errorRecords = new List<CrashReportCacheEntry>();
+    var errorRecords = new List<CrashReportStoreEntry>();
 
     foreach (var crashFile in crashFiles)
     {
@@ -36,7 +36,7 @@ public class FileSystemCrashReportCache : ICrashReportCache
 
         Trace.WriteLine($"Attempting to load offline crash at {crashFile}");
         var jsonString = await reader.ReadToEndAsync();
-        var errorRecord = SimpleJson.DeserializeObject<CrashReportCacheEntry>(jsonString);
+        var errorRecord = SimpleJson.DeserializeObject<CrashReportStoreEntry>(jsonString);
 
         errorRecords.Add(errorRecord);
         _cacheLocationMap[errorRecord.Id] = crashFile;
@@ -51,7 +51,7 @@ public class FileSystemCrashReportCache : ICrashReportCache
     return errorRecords;
   }
 
-  public virtual async Task<CrashReportCacheEntry> Save(string payload, string apiKey,
+  public virtual async Task<CrashReportStoreEntry> Save(string payload, string apiKey,
     CancellationToken cancellationToken)
   {
     var cacheEntryId = Guid.NewGuid();
@@ -59,7 +59,7 @@ public class FileSystemCrashReportCache : ICrashReportCache
     {
       Directory.CreateDirectory(_storageDirectory);
 
-      var cacheEntry = new CrashReportCacheEntry
+      var cacheEntry = new CrashReportStoreEntry
       {
         Id = cacheEntryId,
         ApiKey = apiKey,

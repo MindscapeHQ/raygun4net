@@ -49,7 +49,7 @@ namespace Mindscape.Raygun4Net
     // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
     private readonly UnhandledExceptionBridge.UnhandledExceptionHandler _onUnhandledExceptionDelegate;
 
-    private ICrashReportCache _crashReportCache;
+    private ICrashReportStore _crashReportStore;
 
 
     /// <summary>
@@ -97,12 +97,12 @@ namespace Mindscape.Raygun4Net
       set => _settings.CatchUnhandledExceptions = value;
     }
 
-    public ICrashReportCache CrashReportCache
+    public ICrashReportStore CrashReportStore
     {
-      get => _crashReportCache;
+      get => _crashReportStore;
       set
       {
-        _crashReportCache = value;
+        _crashReportStore = value;
         CachedCrashReportBackgroundWorker.SetSendCallback(SendPayloadAsync);
       }
     }
@@ -575,12 +575,12 @@ namespace Mindscape.Raygun4Net
     private async Task<bool> SaveMessageToOfflineCache(string messagePayload, string apiKey, CancellationToken cancellationToken)
     {
       // Can't store it anywhere
-      if (_crashReportCache is null)
+      if (_crashReportStore is null)
       {
         return false;
       }
 
-      var cacheEntry = await _crashReportCache.Save(messagePayload, apiKey, cancellationToken);
+      var cacheEntry = await _crashReportStore.Save(messagePayload, apiKey, cancellationToken);
       return cacheEntry != null;
     }
   }
