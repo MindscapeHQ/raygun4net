@@ -9,7 +9,7 @@ public delegate Task SendHandler(string messagePayload, string apiKey, Cancellat
 
 public interface ICrashReportStore
 {
-  void SetSendCallback(SendHandler sendHandler);
+  public void SetSendCallback(SendHandler sendHandler);
   public Task<List<CrashReportStoreEntry>> GetAll(CancellationToken cancellationToken);
   public Task<bool> Save(string crashPayload, string apiKey, CancellationToken cancellationToken);
   public Task<bool> Remove(Guid cacheEntryId, CancellationToken cancellationToken);

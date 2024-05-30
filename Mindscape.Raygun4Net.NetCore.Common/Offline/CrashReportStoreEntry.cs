@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.Serialization;
 
 namespace Mindscape.Raygun4Net.Offline;
 
