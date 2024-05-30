@@ -5,6 +5,7 @@ using System.Linq;
 namespace Mindscape.Raygun4Net.NetCore.Tests
 {
   [TestFixture]
+  [NonParallelizable]
   public class RaygunMessageBuilderTests
   {
     private RaygunSettings _settings;
