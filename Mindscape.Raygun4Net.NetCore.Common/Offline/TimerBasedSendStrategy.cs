@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace Mindscape.Raygun4Net.Offline;
 
-public class TimerBasedSendStrategy : IOfflineSendStrategy
+public class TimerBasedSendStrategy : IBackgroundSendStrategy
 {
   private static readonly TimeSpan DefaultInternal = TimeSpan.FromSeconds(30);
 

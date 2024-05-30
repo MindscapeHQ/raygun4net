@@ -64,5 +64,5 @@ public abstract class RaygunSettingsBase
   /// </remarks>
   public IList<string> EnvironmentVariables { get; set; } = new List<string>();
 
-  public ICrashReportStore OfflineStore { get; set; }
+  public OfflineStoreBase OfflineStore { get; set; }
 }

@@ -14,8 +14,8 @@ namespace Mindscape.Raygun4Net.Storage;
 /// </summary>
 public sealed class LocalApplicationDataCrashReportStore : FileSystemCrashReportStore
 {
-  public LocalApplicationDataCrashReportStore(IOfflineSendStrategy offlineSendStrategy, string directoryName = null, int maxOfflineFiles = 50)
-    : base(offlineSendStrategy, GetLocalAppDirectory(directoryName), maxOfflineFiles)
+  public LocalApplicationDataCrashReportStore(IBackgroundSendStrategy backgroundSendStrategy, string directoryName = null, int maxOfflineFiles = 50)
+    : base(backgroundSendStrategy, GetLocalAppDirectory(directoryName), maxOfflineFiles)
   {
   }
 

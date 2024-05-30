@@ -2,7 +2,7 @@ using System;
 
 namespace Mindscape.Raygun4Net.Offline;
 
-public interface IOfflineSendStrategy : IDisposable
+public interface IBackgroundSendStrategy : IDisposable
 {
   public event Action OnSend;
   public void Start();
