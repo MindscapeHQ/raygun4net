@@ -135,7 +135,7 @@ namespace Mindscape.Raygun4Net
 
       if (settings.OfflineStore != null)
       {
-        settings.OfflineStore.SetSendCallback(SendPayloadAsync);
+        settings.OfflineStore.SetSendCallback(SendOfflinePayloadAsync);
       }
     }
 
@@ -511,7 +511,7 @@ namespace Mindscape.Raygun4Net
       try
       {
         var messagePayload = SimpleJson.SerializeObject(raygunMessage);
-        await SendPayloadAsync(messagePayload, _settings.ApiKey, cancellationToken);
+        await SendPayloadAsync(messagePayload, _settings.ApiKey, true, cancellationToken);
       }
       catch (Exception ex)
       {
@@ -522,7 +522,12 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    internal async Task SendPayloadAsync(string payload, string apiKey, CancellationToken cancellationToken)
+    private async Task SendOfflinePayloadAsync(string payload, string apiKey, CancellationToken cancellationToken)
+    {
+      await SendPayloadAsync(payload, apiKey, false, cancellationToken);
+    }
+
+    private async Task SendPayloadAsync(string payload, string apiKey, bool useOfflineStore, CancellationToken cancellationToken)
     {
       HttpResponseMessage response = null;
       var requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
@@ -544,7 +549,7 @@ namespace Mindscape.Raygun4Net
         // we get no response if the send call fails for any other reason (network etc)
         var shouldStoreMessage = response is null || response.StatusCode >= HttpStatusCode.InternalServerError;
 
-        if (shouldStoreMessage)
+        if (useOfflineStore && shouldStoreMessage)
         {
           await SaveMessageToOfflineCache(payload, apiKey, cancellationToken);
         }
