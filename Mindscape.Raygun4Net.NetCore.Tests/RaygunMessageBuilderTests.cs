@@ -5,7 +5,6 @@ using System.Linq;
 namespace Mindscape.Raygun4Net.NetCore.Tests
 {
   [TestFixture]
-  [NonParallelizable]
   public class RaygunMessageBuilderTests
   {
     private RaygunSettings _settings;
@@ -213,6 +212,8 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
           "*_Banana*"
         }
       };
+      
+      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.MinValue;
       var builder = RaygunMessageBuilder.New(settings)
                                         .SetEnvironmentDetails();
       
@@ -243,6 +244,8 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
           "* *",
         }
       };
+      
+      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.MinValue;
       var builder = RaygunMessageBuilder.New(settings)
                                         .SetEnvironmentDetails();
       
@@ -270,6 +273,8 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
           search
         }
       };
+      
+      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.MinValue;
       var builder = RaygunMessageBuilder.New(settings)
                                         .SetEnvironmentDetails();
       
