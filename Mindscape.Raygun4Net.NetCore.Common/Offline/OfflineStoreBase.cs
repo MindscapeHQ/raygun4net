@@ -16,7 +16,7 @@ public abstract class OfflineStoreBase
   protected OfflineStoreBase(IBackgroundSendStrategy backgroundSendStrategy)
   {
     _backgroundSendStrategy = backgroundSendStrategy;
-    _backgroundSendStrategy.OnSend += async () => await ProcessOfflineCrashReports();
+    _backgroundSendStrategy.OnSendAsync += ProcessOfflineCrashReports;
   }
 
   public virtual void SetSendCallback(SendHandler sendHandler)

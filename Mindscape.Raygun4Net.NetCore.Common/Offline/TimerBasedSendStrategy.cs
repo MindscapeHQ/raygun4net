@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Mindscape.Raygun4Net.Offline;
 
@@ -8,7 +10,7 @@ public class TimerBasedSendStrategy : IBackgroundSendStrategy
   private static readonly TimeSpan DefaultInternal = TimeSpan.FromSeconds(30);
 
   private readonly Timer _backgroundTimer;
-  public event Action OnSend;
+  public event Func<Task> OnSendAsync;
 
   public TimeSpan Interval { get; }
 
@@ -16,6 +18,7 @@ public class TimerBasedSendStrategy : IBackgroundSendStrategy
   {
     Interval = interval ?? DefaultInternal;
     _backgroundTimer = new Timer(SendOfflineErrors);
+    Start();
   }
 
   ~TimerBasedSendStrategy()
@@ -23,9 +26,21 @@ public class TimerBasedSendStrategy : IBackgroundSendStrategy
     Dispose();
   }
 
-  private void SendOfflineErrors(object state)
+  private async void SendOfflineErrors(object state)
   {
-    OnSend?.Invoke();
+    try
+    {
+      var invocationList = OnSendAsync?.GetInvocationList();
+      if (invocationList != null)
+      {
+        var tasks = invocationList.OfType<Func<Task>>().Select(handler => handler());
+        await Task.WhenAll(tasks);
+      }
+    }
+    finally
+    {
+      Start();
+    }
   }
 
   public void Start()
