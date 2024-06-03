@@ -1,3 +1,4 @@
+#nullable  enable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,11 +12,11 @@ public delegate Task SendHandler(string messagePayload, string apiKey, Cancellat
 public abstract class OfflineStoreBase
 {
   private readonly IBackgroundSendStrategy _backgroundSendStrategy;
-  protected SendHandler SendCallback { get; set; }
+  protected SendHandler? SendCallback { get; set; }
 
   protected OfflineStoreBase(IBackgroundSendStrategy backgroundSendStrategy)
   {
-    _backgroundSendStrategy = backgroundSendStrategy;
+    _backgroundSendStrategy = backgroundSendStrategy ?? throw new ArgumentNullException(nameof(backgroundSendStrategy));
     _backgroundSendStrategy.OnSendAsync += ProcessOfflineCrashReports;
   }
 
@@ -26,6 +27,9 @@ public abstract class OfflineStoreBase
 
   protected virtual async Task ProcessOfflineCrashReports()
   {
+    if (SendCallback is null)
+      return;
+    
     try
     {
       var cachedCrashReports = await GetAll(CancellationToken.None);
