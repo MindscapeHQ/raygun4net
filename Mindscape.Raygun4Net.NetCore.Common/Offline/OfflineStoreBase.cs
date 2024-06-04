@@ -1,4 +1,4 @@
-#nullable  enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -28,8 +28,10 @@ public abstract class OfflineStoreBase
   protected virtual async Task ProcessOfflineCrashReports()
   {
     if (SendCallback is null)
+    {
       return;
-    
+    }
+
     try
     {
       var cachedCrashReports = await GetAll(CancellationToken.None);

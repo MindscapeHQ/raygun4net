@@ -45,6 +45,8 @@ public class TimerBasedSendStrategy : IBackgroundSendStrategy
 
   public void Start()
   {
+    // This sets the timer to trigger once at the interval, and then "never again".
+    // This inherently prevents the timer from being re-entrant 
     _backgroundTimer.Change(Interval, TimeSpan.FromMilliseconds(int.MaxValue));
   }
 

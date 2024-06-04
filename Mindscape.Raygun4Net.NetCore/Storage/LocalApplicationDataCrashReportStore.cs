@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -21,11 +20,11 @@ public sealed class LocalApplicationDataCrashReportStore : FileSystemCrashReport
 
   private static string GetLocalAppDirectory(string directoryName)
   {
-    directoryName ??= CreateUniqueDirectory();
+    directoryName ??= CreateUniqueDirectoryName();
     return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), directoryName);
   }
 
-  private static string CreateUniqueDirectory()
+  private static string CreateUniqueDirectoryName()
   {
     // Try to generate a unique id, from the executable location
     var uniqueId = Assembly.GetEntryAssembly()?.Location ?? throw new ApplicationException("Cannot determine unique application id");

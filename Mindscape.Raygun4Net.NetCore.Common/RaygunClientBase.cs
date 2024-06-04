@@ -271,12 +271,7 @@ namespace Mindscape.Raygun4Net
 
     protected bool ValidateApiKey()
     {
-      return ValidateApiKey(_settings.ApiKey);
-    }
-
-    private bool ValidateApiKey(string apiKey)
-    {
-      if (string.IsNullOrEmpty(apiKey))
+      if (string.IsNullOrEmpty(_settings.ApiKey))
       {
         Debug.WriteLine("ApiKey has not been provided, exception will not be logged");
         return false;
@@ -449,8 +444,7 @@ namespace Mindscape.Raygun4Net
 
     protected virtual IEnumerable<Exception> StripWrapperExceptions(Exception exception)
     {
-      if (exception != null && _wrapperExceptions.Any(wrapperException =>
-                                                        exception.GetType() == wrapperException && exception.InnerException != null))
+      if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {
         var aggregate = exception as AggregateException;
 
@@ -546,7 +540,8 @@ namespace Mindscape.Raygun4Net
         Debug.WriteLine($"Error Logging Exception to Raygun: {ex.Message}");
 
         // If we got no response or an unexpected server error then add it to offline storage to send later
-        // we get no response if the send call fails for any other reason (network etc)
+        // we get no response if the send call fails for any other reason (network etc.)
+        // checking that response.StatusCode >= 500, is an efficient check for any server errors
         var shouldStoreMessage = response is null || response.StatusCode >= HttpStatusCode.InternalServerError;
 
         if (useOfflineStore && shouldStoreMessage)
