@@ -254,8 +254,13 @@ namespace Mindscape.Raygun4Net
       try
       {
         // Attempt to read out the Debug Info from the PE
-        var peReader = AssemblyReaderProvider(moduleName);
+        var peReader = AssemblyReaderProvider?.Invoke(moduleName);
 
+        if (peReader is null)
+        {
+          return null;
+        }
+        
         // If we got this far, the assembly/module exists, so whatever the result
         // put it in the cache to prevent reading the disk over and over
         peReader.TryGetDebugInformation(out var debugInfo);
