@@ -8,6 +8,7 @@
 - Add support for storing crash reports offline
   - There is a new `OfflineStore` property on `RaygunSettings`, when this is set, it will enable the offline storage
   - Crashes are stored offline when there was a connectivity issue, or the Raygun remote server return a 5xx response
+  - There is a `IBackgroundSendStrategy`, which controls when to attempt to resend offline crash reports. It defaults to every 30 seconds
   - By default, there is a maximum of 50 offline crashes stored
   - See: https://github.com/MindscapeHQ/raygun4net/pull/530
 - Removed marking an unhandled exception in Android as handled, preventing app crash
