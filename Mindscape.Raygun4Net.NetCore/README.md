@@ -99,6 +99,35 @@ Version numbering
 
 You can provide an application version value by setting the ApplicationVersion property of the RaygunClient (in the format x.x.x.x where x is a positive integer).
 
+Offline storage
+-----------------
+
+You can optionally specify an Offline Store for crash reports when creating your `RaygunClient`.
+
+When an offline store is specified, if there are any issues sending an exception to the Raygun API, a copy of the exception may be stored locally to be retried at a later date.
+
+An exception is stored offline when one of the following conditions are met:
+- There was a network connectivity issue, e.g. no active internet connection on a mobile device
+- The Raygun API responded with an HTTP 5xx, indicating an unexpected server error
+
+```csharp
+// Attempt to send any offline crash reports every 30 seconds
+var sendStrategy = new TimerBasedSendStrategy(TimeSpan.FromSeconds(30));
+
+// Store crash reports in Local AppData
+var offlineStore = new LocalApplicationDataCrashReportStore(sendStrategy);
+
+var raygunClient = new RaygunClient(new RaygunSettings()
+{
+  ApiKey = "paste_your_api_key_here",
+
+  // Optionally store 
+  OfflineStore = offlineStore
+});
+```
+
+You may extend and create your own custom implementations of `OfflineStoreBase` and `IBackgroundSendStrategy` to further customize where errors are stored, and when they are sent.
+
 Tags and custom data
 --------------------
 
