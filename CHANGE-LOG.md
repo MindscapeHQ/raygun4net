@@ -2,16 +2,16 @@
 
 ### v11.0.0
 - Add support for PDB Debug Information in stack traces
-  - This enables Raygun to leverage Portable PDB's to symbolicate .NET stack traces when PDB's are not included in the build output
+  - This enables Raygun to leverage Portable PDBs to symbolicate .NET stack traces when PDBs are not included in the build output
   - This introduces a dependency on `System.Reflection.Metadata@6.0.1` for `netstandard`
   - See: https://github.com/MindscapeHQ/raygun4net/pull/528
 - Add support for storing crash reports offline
   - There is a new `OfflineStore` property on `RaygunSettings`, when this is set, it will enable the offline storage
-  - Crashes are stored offline when there was a connectivity issue, or the Raygun remote server return a 5xx response
+  - Crashes are stored offline when there is a connectivity issue, or when the Raygun remote server returns a 5xx response
   - There is a `IBackgroundSendStrategy`, which controls when to attempt to resend offline crash reports. It defaults to every 30 seconds
   - By default, there is a maximum of 50 offline crashes stored
   - See: https://github.com/MindscapeHQ/raygun4net/pull/530
-- Removed marking an unhandled exception in Android as handled, preventing app crash
+- Removed marking an unhandled exception in Android as handled, preventing the app from crashing
   - See: https://github.com/MindscapeHQ/raygun4net/pull/531
 
 ### v10.1.2
