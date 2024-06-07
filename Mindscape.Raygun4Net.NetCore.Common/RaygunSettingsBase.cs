@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Mindscape.Raygun4Net.Offline;
 
 namespace Mindscape.Raygun4Net;
 
@@ -23,8 +24,8 @@ public abstract class RaygunSettingsBase
   /// Raygun Application API Key, can be found in the Raygun application dashboard by clicking the "Application settings" button
   /// </summary>
   public string ApiKey { get; set; }
- 
-  public Uri ApiEndpoint { get; set; } = new (DefaultApiEndPoint);
+
+  public Uri ApiEndpoint { get; set; } = new(DefaultApiEndPoint);
 
   public bool ThrowOnError { get; set; }
 
@@ -62,4 +63,6 @@ public abstract class RaygunSettingsBase
   /// Passing in * will be ignored as we do not want to support collecting 'all' environment variables for security reasons.
   /// </remarks>
   public IList<string> EnvironmentVariables { get; set; } = new List<string>();
+
+  public OfflineStoreBase OfflineStore { get; set; }
 }

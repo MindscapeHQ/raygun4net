@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
@@ -19,7 +20,7 @@ namespace Mindscape.Raygun4Net
     /// <summary>
     /// If no HttpClient is provided to the constructor, this will be used.
     /// </summary>
-    private static readonly HttpClient DefaultClient = new ()
+    private static readonly HttpClient DefaultClient = new()
     {
       // The default timeout is 100 seconds for the HttpClient, 
       Timeout = TimeSpan.FromSeconds(30)
@@ -39,16 +40,17 @@ namespace Mindscape.Raygun4Net
     private readonly ThrottledBackgroundMessageProcessor _backgroundMessageProcessor;
     private readonly IRaygunUserProvider _userProvider;
     protected internal const string SentKey = "AlreadySentByRaygun";
-    
+
     /// <summary>
-    /// Store a strong reference to the OnApplicationUnhandledException delegate so it does not get garbage collected while
+    /// Store a strong reference to the OnApplicationUnhandledException delegate, so it does not get garbage collected while
     /// the client is still alive
     /// </summary>
+    // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
     private readonly UnhandledExceptionBridge.UnhandledExceptionHandler _onUnhandledExceptionDelegate;
 
 
     /// <summary>
-    /// Raised just before a message is sent. This can be used to make final adjustments to the <see cref="RaygunMessage"/>, or to cancel the send.
+    /// Raised just before a message is sent. This can be used to make final adjustments to the <see cref="RaygunMessage"/> or to cancel the send.
     /// </summary>
     public event EventHandler<RaygunSendingMessageEventArgs> SendingMessage;
 
@@ -102,16 +104,19 @@ namespace Mindscape.Raygun4Net
       Send(exception, UnhandledExceptionTags);
     }
 
-    protected RaygunClientBase(RaygunSettingsBase settings) : this(settings, DefaultClient, null)
+    protected RaygunClientBase(RaygunSettingsBase settings)
+      : this(settings, DefaultClient, null)
     {
     }
 
     // ReSharper disable once IntroduceOptionalParameters.Global
-    protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client) : this(settings, client, null)
+    protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client)
+      : this(settings, client, null)
     {
     }
 
-    protected RaygunClientBase(RaygunSettingsBase settings, IRaygunUserProvider userProvider) : this(settings, DefaultClient, userProvider)
+    protected RaygunClientBase(RaygunSettingsBase settings, IRaygunUserProvider userProvider)
+      : this(settings, DefaultClient, userProvider)
     {
     }
 
@@ -123,10 +128,15 @@ namespace Mindscape.Raygun4Net
       _userProvider = userProvider;
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));
-      
+
       _onUnhandledExceptionDelegate = OnApplicationUnhandledException;
-      
+
       UnhandledExceptionBridge.OnUnhandledException(_onUnhandledExceptionDelegate);
+
+      if (settings.OfflineStore != null)
+      {
+        settings.OfflineStore.SetSendCallback(SendOfflinePayloadAsync);
+      }
     }
 
     /// <summary>
@@ -160,6 +170,7 @@ namespace Mindscape.Raygun4Net
         _wrapperExceptions.Remove(wrapper);
       }
     }
+
     protected virtual bool CanSend(Exception exception)
     {
       return exception?.Data == null || !exception.Data.Contains(SentKey) ||
@@ -321,6 +332,15 @@ namespace Mindscape.Raygun4Net
     /// Transmits an exception to Raygun asynchronously.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
+    public Task SendAsync(Exception exception)
+    {
+      return SendAsync(exception, null, null);
+    }
+
+    /// <summary>
+    /// Transmits an exception to Raygun asynchronously.
+    /// </summary>
+    /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     /// <param name="userInfo">Information about the user including the identity string.</param>
@@ -363,10 +383,10 @@ namespace Mindscape.Raygun4Net
             Debug.WriteLine("Could not add message to background queue. Dropping exception: {0}", ex);
           }
         }
-        
+
         FlagAsSent(exception);
       }
-      
+
       return Task.CompletedTask;
     }
 
@@ -381,17 +401,16 @@ namespace Mindscape.Raygun4Net
       {
         Debug.WriteLine("Could not add message to background queue. Dropping message: {0}", raygunMessage);
       }
-      
+
       return Task.CompletedTask;
     }
 
-    protected async Task<RaygunMessage> BuildMessage(Exception exception, 
-                                                             IList<string> tags,
-                                                             IDictionary userCustomData = null, 
-                                                             RaygunIdentifierMessage userInfo = null,
-                                                             Action<RaygunMessage> customiseMessage = null)
+    protected async Task<RaygunMessage> BuildMessage(Exception exception,
+                                                     IList<string> tags,
+                                                     IDictionary userCustomData = null,
+                                                     RaygunIdentifierMessage userInfo = null,
+                                                     Action<RaygunMessage> customiseMessage = null)
     {
-      
       var message = RaygunMessageBuilder.New(_settings)
                                         .SetEnvironmentDetails()
                                         .SetMachineName(Environment.MachineName)
@@ -415,8 +434,7 @@ namespace Mindscape.Raygun4Net
       return message;
     }
 
-    protected virtual async Task StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData,
-      RaygunIdentifierMessage userInfo)
+    protected virtual async Task StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo)
     {
       foreach (var e in StripWrapperExceptions(exception))
       {
@@ -426,8 +444,7 @@ namespace Mindscape.Raygun4Net
 
     protected virtual IEnumerable<Exception> StripWrapperExceptions(Exception exception)
     {
-      if (exception != null && _wrapperExceptions.Any(wrapperException =>
-            exception.GetType() == wrapperException && exception.InnerException != null))
+      if (exception != null && _wrapperExceptions.Any(wrapperException => exception.GetType() == wrapperException && exception.InnerException != null))
       {
         var aggregate = exception as AggregateException;
 
@@ -485,35 +502,66 @@ namespace Mindscape.Raygun4Net
         return;
       }
 
-      var requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
-      requestMessage.Headers.Add("X-ApiKey", _settings.ApiKey);
-
       try
       {
-        var message = SimpleJson.SerializeObject(raygunMessage);
-        requestMessage.Content = new StringContent(message, Encoding.UTF8, "application/json");
-
-        var result = await _client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
-
-        if (!result.IsSuccessStatusCode)
-        {
-          Debug.WriteLine($"Error Logging Exception to Raygun {result.ReasonPhrase}");
-
-          if (_settings.ThrowOnError)
-          {
-            throw new Exception("Could not log to Raygun");
-          }
-        }
+        var messagePayload = SimpleJson.SerializeObject(raygunMessage);
+        await SendPayloadAsync(messagePayload, _settings.ApiKey, true, cancellationToken);
       }
       catch (Exception ex)
       {
-        Debug.WriteLine($"Error Logging Exception to Raygun {ex.Message}");
-
         if (_settings.ThrowOnError)
         {
           throw;
         }
       }
+    }
+
+    private async Task SendOfflinePayloadAsync(string payload, string apiKey, CancellationToken cancellationToken)
+    {
+      await SendPayloadAsync(payload, apiKey, false, cancellationToken);
+    }
+
+    private async Task SendPayloadAsync(string payload, string apiKey, bool useOfflineStore, CancellationToken cancellationToken)
+    {
+      HttpResponseMessage response = null;
+      var requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
+      requestMessage.Headers.Add("X-ApiKey", apiKey);
+      requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
+
+      try
+      {
+        response = await _client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+
+        // Raises an HttpRequestException if the request was unsuccessful
+        response.EnsureSuccessStatusCode();
+      }
+      catch (Exception ex)
+      {
+        Debug.WriteLine($"Error Logging Exception to Raygun: {ex.Message}");
+
+        // If we got no response or an unexpected server error then add it to offline storage to send later
+        // we get no response if the send call fails for any other reason (network etc.)
+        // checking that response.StatusCode >= 500, is an efficient check for any server errors
+        var shouldStoreMessage = response is null || response.StatusCode >= HttpStatusCode.InternalServerError;
+
+        if (useOfflineStore && shouldStoreMessage)
+        {
+          await SaveMessageToOfflineCache(payload, apiKey, cancellationToken);
+        }
+
+        throw;
+      }
+    }
+
+    private async Task<bool> SaveMessageToOfflineCache(string messagePayload, string apiKey, CancellationToken cancellationToken)
+    {
+      // Can't store it anywhere
+      if (_settings.OfflineStore is null)
+      {
+        return false;
+      }
+
+      return await _settings.OfflineStore.Save(messagePayload, apiKey, cancellationToken);
     }
   }
 }
