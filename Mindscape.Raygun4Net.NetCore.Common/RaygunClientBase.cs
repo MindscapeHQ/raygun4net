@@ -289,6 +289,7 @@ namespace Mindscape.Raygun4Net
     /// Transmits an exception to Raygun synchronously.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
+    [Obsolete("Please use SendAsync() to avoid possible deadlocks")]
     public void Send(Exception exception)
     {
       Send(exception, null, null);
@@ -300,6 +301,7 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
+    [Obsolete("Please use SendAsync() to avoid possible deadlocks")]
     public void Send(Exception exception, IList<string> tags)
     {
       Send(exception, tags, null);
@@ -312,6 +314,7 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
+    [Obsolete("Please use SendAsync() to avoid possible deadlocks")]
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       try
@@ -335,6 +338,16 @@ namespace Mindscape.Raygun4Net
     public async Task SendAsync(Exception exception)
     {
       await SendAsync(exception, null, null).ConfigureAwait(false);
+    }
+    
+    /// <summary>
+    /// Transmits an exception to Raygun asynchronously.
+    /// </summary>
+    /// <param name="exception">The exception to deliver.</param>
+    /// <param name="tags">A list of strings associated with the message.</param>
+    public async Task SendAsync(Exception exception, IList<string> tags)
+    {
+      await SendAsync(exception, tags, null).ConfigureAwait(false);
     }
 
     /// <summary>
