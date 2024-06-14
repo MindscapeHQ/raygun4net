@@ -289,6 +289,7 @@ namespace Mindscape.Raygun4Net
     /// Transmits an exception to Raygun synchronously.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
+    [Obsolete("Please use SendAsync() to avoid possible deadlocks")]
     public void Send(Exception exception)
     {
       Send(exception, null, null);
@@ -300,6 +301,7 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
+    [Obsolete("Please use SendAsync() to avoid possible deadlocks")]
     public void Send(Exception exception, IList<string> tags)
     {
       Send(exception, tags, null);
@@ -312,11 +314,12 @@ namespace Mindscape.Raygun4Net
     /// <param name="exception">The exception to deliver.</param>
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
+    [Obsolete("Please use SendAsync() to avoid possible deadlocks")]
     public void Send(Exception exception, IList<string> tags, IDictionary userCustomData)
     {
       try
       {
-        SendAsync(exception, tags, userCustomData).GetAwaiter().GetResult();
+        SendAsync(exception, tags, userCustomData).ConfigureAwait(false).GetAwaiter().GetResult();
       }
       catch
       {
@@ -332,9 +335,19 @@ namespace Mindscape.Raygun4Net
     /// Transmits an exception to Raygun asynchronously.
     /// </summary>
     /// <param name="exception">The exception to deliver.</param>
-    public Task SendAsync(Exception exception)
+    public async Task SendAsync(Exception exception)
     {
-      return SendAsync(exception, null, null);
+      await SendAsync(exception, null, null).ConfigureAwait(false);
+    }
+    
+    /// <summary>
+    /// Transmits an exception to Raygun asynchronously.
+    /// </summary>
+    /// <param name="exception">The exception to deliver.</param>
+    /// <param name="tags">A list of strings associated with the message.</param>
+    public async Task SendAsync(Exception exception, IList<string> tags)
+    {
+      await SendAsync(exception, tags, null).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -505,7 +518,7 @@ namespace Mindscape.Raygun4Net
       try
       {
         var messagePayload = SimpleJson.SerializeObject(raygunMessage);
-        await SendPayloadAsync(messagePayload, _settings.ApiKey, true, cancellationToken);
+        await SendPayloadAsync(messagePayload, _settings.ApiKey, true, cancellationToken).ConfigureAwait(false);
       }
       catch (Exception ex)
       {
@@ -518,7 +531,7 @@ namespace Mindscape.Raygun4Net
 
     private async Task SendOfflinePayloadAsync(string payload, string apiKey, CancellationToken cancellationToken)
     {
-      await SendPayloadAsync(payload, apiKey, false, cancellationToken);
+      await SendPayloadAsync(payload, apiKey, false, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task SendPayloadAsync(string payload, string apiKey, bool useOfflineStore, CancellationToken cancellationToken)
@@ -561,7 +574,7 @@ namespace Mindscape.Raygun4Net
         return false;
       }
 
-      return await _settings.OfflineStore.Save(messagePayload, apiKey, cancellationToken);
+      return await _settings.OfflineStore.Save(messagePayload, apiKey, cancellationToken).ConfigureAwait(false);
     }
   }
 }
