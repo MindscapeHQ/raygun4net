@@ -1,10 +1,16 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v11.0.2
+- Fix null signature issue when Debug Symbols are set to None and the application is built in Release mode
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/535 
+
 ### v11.0.1
 - Raygun4Net.NetCore
   - Deprecated `RaygunClientBase.Send()`. The asynchronous `SendAsync()` should be preferred in all scenarios to avoid potential deadlocks
   - Improve the potential deadlocks when calling `Send()` from a UI Thread by adding `ConfigureAwait(false)`
     - Note: This does not entirely remove the possibility of deadlocks, and `Send()` should not be used within a UI context
+
+### v11.0.0
 
 ### v11.0.0
 - Add support for PDB Debug Information in stack traces
