@@ -175,7 +175,7 @@ namespace Mindscape.Raygun4Net.Builders
         return Enumerable.Empty<PEDebugInformation>();
       }
 
-      var imageMap = DebugInformationCache.Values.Where(x => x != null).ToDictionary(k => k.Signature);
+      var imageMap = DebugInformationCache.Values.Where(x => x?.Signature != null).ToDictionary(k => k.Signature);
       var imageSet = new HashSet<PEDebugInformation>();
 
       foreach (var stackFrame in frames)
