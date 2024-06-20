@@ -11,8 +11,6 @@
     - Note: This does not entirely remove the possibility of deadlocks, and `Send()` should not be used within a UI context
 
 ### v11.0.0
-
-### v11.0.0
 - Add support for PDB Debug Information in stack traces
   - This enables Raygun to leverage Portable PDBs to symbolicate .NET stack traces when PDBs are not included in the build output
   - This introduces a dependency on `System.Reflection.Metadata@6.0.1` for `netstandard`
