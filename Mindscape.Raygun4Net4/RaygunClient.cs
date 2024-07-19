@@ -440,6 +440,7 @@ namespace Mindscape.Raygun4Net
     {
       var requestMessage = BuildRequestMessage();
       IList<RaygunBreadcrumb> breadcrumbs = BuildBreadCrumbList();
+      var contextId = GetContextId();
 
       foreach (var e in StripWrapperExceptions(exception))
       {
@@ -447,6 +448,7 @@ namespace Mindscape.Raygun4Net
         {
           x.Details.Request = requestMessage;
           x.Details.Breadcrumbs = breadcrumbs;
+          x.Details.ContextId = contextId;
         }));
       }
     }
@@ -455,6 +457,7 @@ namespace Mindscape.Raygun4Net
     {
       var requestMessage = BuildRequestMessage();
       IList<RaygunBreadcrumb> breadcrumbs = BuildBreadCrumbList();
+      var contextId = GetContextId();
 
       foreach (var e in StripWrapperExceptions(exception))
       {
@@ -462,6 +465,7 @@ namespace Mindscape.Raygun4Net
         {
           x.Details.Request = requestMessage;
           x.Details.Breadcrumbs = breadcrumbs;
+          x.Details.ContextId = contextId;
         }));
       }
     }
@@ -600,7 +604,6 @@ namespace Mindscape.Raygun4Net
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
-        .SetContextId(GetContextId())
         .SetUser(userInfoMessage ?? UserInfo ?? (!string.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
         .Customise(customise)
         .Build();
@@ -668,7 +671,7 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private static string GetContextId()
+    private string GetContextId()
     {
       return HttpContext.Current?.Session?.SessionID;
     }
