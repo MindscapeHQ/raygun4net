@@ -8,6 +8,8 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunHttpModule : IHttpModule
   {
+    private RaygunClient _raygunClient;
+
     private bool ExcludeErrorsBasedOnHttpStatusCode { get; set; }
 
     private bool ExcludeErrorsFromLocal { get; set; }
@@ -68,11 +70,17 @@ namespace Mindscape.Raygun4Net
 
     protected RaygunClient GetRaygunClient(HttpApplication application)
     {
-      var raygunApplication = application as IRaygunApplication;
-      return raygunApplication != null ? raygunApplication.GenerateRaygunClient() : GenerateDefaultRaygunClient(application);
+      if (_raygunClient == null)
+      {
+        _raygunClient = application is IRaygunApplication raygunApplication
+          ? raygunApplication.GenerateRaygunClient()
+          : GenerateDefaultRaygunClient();
+      }
+
+      return _raygunClient;
     }
 
-    private RaygunClient GenerateDefaultRaygunClient(HttpApplication application)
+    private static RaygunClient GenerateDefaultRaygunClient()
     {
       var instance = new RaygunClient();
 
