@@ -451,17 +451,6 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private static IList<RaygunBreadcrumb> BuildBreadCrumbList()
-    {
-      IList<RaygunBreadcrumb> breadCrumbs = null;
-      foreach (var breadCrumb in _breadcrumbs)
-      {
-        breadCrumbs ??= new List<RaygunBreadcrumb>();
-        breadCrumbs.Add(breadCrumb);
-      }
-      return breadCrumbs ?? Array.Empty<RaygunBreadcrumb>();
-    }
-
     private void StripAndSendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
     {
       var requestMessage = BuildRequestMessage();
@@ -475,6 +464,17 @@ namespace Mindscape.Raygun4Net
           x.Details.Breadcrumbs = breadcrumbs;
         }));
       }
+    }
+
+    private static IList<RaygunBreadcrumb> BuildBreadCrumbList()
+    {
+      IList<RaygunBreadcrumb> breadCrumbs = null;
+      foreach (var breadCrumb in _breadcrumbs)
+      {
+        breadCrumbs ??= new List<RaygunBreadcrumb>();
+        breadCrumbs.Add(breadCrumb);
+      }
+      return breadCrumbs ?? Array.Empty<RaygunBreadcrumb>();
     }
 
     /// <summary>
@@ -600,7 +600,7 @@ namespace Mindscape.Raygun4Net
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
-        .SetContextId(ContextId)
+        .SetContextId(GetContextId())
         .SetUser(userInfoMessage ?? UserInfo ?? (!string.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
         .Customise(customise)
         .Build();
@@ -666,6 +666,11 @@ namespace Mindscape.Raygun4Net
       {
         yield return exception;
       }
+    }
+
+    private static string GetContextId()
+    {
+      return HttpContext.Current?.Session?.SessionID;
     }
 
     #endregion // Message Building Methods

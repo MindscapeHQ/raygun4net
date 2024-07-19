@@ -82,14 +82,7 @@ namespace Mindscape.Raygun4Net
 
     private static RaygunClient GenerateDefaultRaygunClient()
     {
-      var instance = new RaygunClient();
-
-      if (HttpContext.Current != null && HttpContext.Current.Session != null)
-      {
-        instance.ContextId = HttpContext.Current.Session.SessionID;
-      }
-
-      return instance;
+      return new RaygunClient();
     }
 
     protected bool CanSend(Exception exception)
