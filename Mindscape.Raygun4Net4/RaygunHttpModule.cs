@@ -70,14 +70,12 @@ namespace Mindscape.Raygun4Net
 
     protected RaygunClient GetRaygunClient(HttpApplication application)
     {
-      if (_raygunClient == null)
+      if (application is IRaygunApplication raygunApplication)
       {
-        _raygunClient = application is IRaygunApplication raygunApplication
-          ? raygunApplication.GenerateRaygunClient()
-          : GenerateDefaultRaygunClient();
+        return raygunApplication.GenerateRaygunClient();
       }
 
-      return _raygunClient;
+      return _raygunClient ??= GenerateDefaultRaygunClient();
     }
 
     private static RaygunClient GenerateDefaultRaygunClient()
