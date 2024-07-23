@@ -75,12 +75,7 @@ namespace Mindscape.Raygun4Net
         return raygunApplication.GenerateRaygunClient();
       }
 
-      return _raygunClient ??= GenerateDefaultRaygunClient();
-    }
-
-    private static RaygunClient GenerateDefaultRaygunClient()
-    {
-      return new RaygunClient();
+      return _raygunClient ??= new RaygunClient();
     }
 
     protected bool CanSend(Exception exception)
