@@ -438,9 +438,9 @@ namespace Mindscape.Raygun4Net
 
     private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
     {
+      var contextId = GetContextId();
       var requestMessage = BuildRequestMessage();
       IList<RaygunBreadcrumb> breadcrumbs = BuildBreadCrumbList();
-      var contextId = GetContextId();
 
       foreach (var e in StripWrapperExceptions(exception))
       {
@@ -455,9 +455,9 @@ namespace Mindscape.Raygun4Net
 
     private void StripAndSendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
     {
+      var contextId = GetContextId();
       var requestMessage = BuildRequestMessage();
       IList<RaygunBreadcrumb> breadcrumbs = BuildBreadCrumbList();
-      var contextId = GetContextId();
 
       foreach (var e in StripWrapperExceptions(exception))
       {
