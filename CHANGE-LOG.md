@@ -1,5 +1,9 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v11.0.3
+- Update `RaygunHttpModule` (Raygun4Net ASP.NET Framework) to use a singleton `RaygunClient` instance
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/537
+
 ### v11.0.2
 - Fix null signature issue when Debug Symbols are set to None and the application is built in Release mode
   - See: https://github.com/MindscapeHQ/raygun4net/pull/535 

@@ -438,6 +438,7 @@ namespace Mindscape.Raygun4Net
 
     private void StripAndSend(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
     {
+      var contextId = GetContextId();
       var requestMessage = BuildRequestMessage();
       IList<RaygunBreadcrumb> breadcrumbs = BuildBreadCrumbList();
 
@@ -447,6 +448,24 @@ namespace Mindscape.Raygun4Net
         {
           x.Details.Request = requestMessage;
           x.Details.Breadcrumbs = breadcrumbs;
+          x.Details.ContextId = contextId;
+        }));
+      }
+    }
+
+    private void StripAndSendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
+    {
+      var contextId = GetContextId();
+      var requestMessage = BuildRequestMessage();
+      IList<RaygunBreadcrumb> breadcrumbs = BuildBreadCrumbList();
+
+      foreach (var e in StripWrapperExceptions(exception))
+      {
+        SendInBackground(() => BuildMessage(e, tags, userCustomData, userInfo, currentTime, x =>
+        {
+          x.Details.Request = requestMessage;
+          x.Details.Breadcrumbs = breadcrumbs;
+          x.Details.ContextId = contextId;
         }));
       }
     }
@@ -460,21 +479,6 @@ namespace Mindscape.Raygun4Net
         breadCrumbs.Add(breadCrumb);
       }
       return breadCrumbs ?? Array.Empty<RaygunBreadcrumb>();
-    }
-
-    private void StripAndSendInBackground(Exception exception, IList<string> tags, IDictionary userCustomData, RaygunIdentifierMessage userInfo, DateTime? currentTime)
-    {
-      var requestMessage = BuildRequestMessage();
-      IList<RaygunBreadcrumb> breadcrumbs = BuildBreadCrumbList();
-
-      foreach (var e in StripWrapperExceptions(exception))
-      {
-        SendInBackground(() => BuildMessage(e, tags, userCustomData, userInfo, currentTime, x =>
-        {
-          x.Details.Request = requestMessage;
-          x.Details.Breadcrumbs = breadcrumbs;
-        }));
-      }
     }
 
     /// <summary>
@@ -600,7 +604,6 @@ namespace Mindscape.Raygun4Net
         .SetVersion(ApplicationVersion)
         .SetTags(tags)
         .SetUserCustomData(userCustomData)
-        .SetContextId(ContextId)
         .SetUser(userInfoMessage ?? UserInfo ?? (!string.IsNullOrEmpty(User) ? new RaygunIdentifierMessage(User) : null))
         .Customise(customise)
         .Build();
@@ -666,6 +669,11 @@ namespace Mindscape.Raygun4Net
       {
         yield return exception;
       }
+    }
+
+    private string GetContextId()
+    {
+      return HttpContext.Current?.Session?.SessionID;
     }
 
     #endregion // Message Building Methods
