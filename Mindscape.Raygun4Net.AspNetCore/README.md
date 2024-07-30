@@ -232,7 +232,8 @@ This method is useful if you have your own custom wrapper exceptions, or a frame
 Version numbering
 -----------------
 
-You can provide an application version value through `RaygunSettings`:
+By default, Raygun4Net will attempt to set `ApplicationVersion` from the entry assembly. It is possible to override this by providing a version through `RaygunSettings`:
+
 ```json
 "RaygunSettings": {
   "ApplicationVersion": "1.0.0.0"
@@ -240,7 +241,7 @@ You can provide an application version value through `RaygunSettings`:
 ```
 Or
 ```cs
-.AddRaygun(settings =>
+services.AddRaygun(settings =>
 {
   settings.ApplicationVersion = "1.0.0.0";
 });
@@ -289,7 +290,7 @@ We currently provide two implementations with this provider:
 These filters are initially disabled and can be enbled through the `RaygunSettings` class. 
 
 ```cs
-.AddRaygun(settings => 
+services.AddRaygun(settings => 
 {
   settings.UseXmlRawDataFilter = true;
   settings.UseKeyValuePairRawDataFilter = true;
