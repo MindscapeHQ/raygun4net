@@ -13,7 +13,11 @@ The main classes can be found in the Mindscape.Raygun4Net namespace.
 Setup & Usage
 ======
 
-In your ASP.NET Core project, add the Raygun4Net.AspNetCore package to your project.
+In your ASP.NET Core project, add the Raygun4Net.AspNetCore package to your project:
+
+```bash
+dotnet add package Mindscape.Raygun4Net.AspNetCore
+```
 
 Add Raygun to your services:
 
@@ -46,7 +50,6 @@ If you're configuring using appsettings.json, add the following to your appsetti
 
   ```json
   {
-    ...
     "RaygunSettings": {
       "ApiKey": "YOUR_APP_API_KEY"
     }
@@ -55,16 +58,16 @@ If you're configuring using appsettings.json, add the following to your appsetti
 
 ## Manually sending exceptions
 
-After using `services.AddRaygun(...)`, you can inject `RaygunAgent` into your controllers and use it to send exceptions manually.
+After using `services.AddRaygun(...)`, you can inject `RaygunClient` into your controllers and use it to send exceptions manually.
 
 ```csharp
 public class MyController : Controller
 {
-  private readonly RaygunAgent _raygunAgent;
+  private readonly RaygunClient _raygunClient;
 
-  public MyController(RaygunAgent raygunAgent)
+  public MyController(RaygunClient raygunClient)
   {
-    _raygunAgent = raygunAgent;
+    _raygunClient = raygunClient;
   }
 
   public async Task<IActionResult> TestManualError()
@@ -75,7 +78,7 @@ public class MyController : Controller
     }
     catch (Exception ex)
     {
-      await _raygunAgent.SendInBackground(ex);
+      await _raygunClient.SendInBackground(ex);
     }
 
     return View();
@@ -85,7 +88,8 @@ public class MyController : Controller
 
 
 ## Custom User Provider
-By default Raygun4Net ships with a `DefaultRaygunUserProvider` which will attempt to get the user information from 
+
+By default, Raygun4Net ships with a `DefaultRaygunUserProvider` which will attempt to get the user information from 
 the `HttpContext.User` object. This is Opt-In which can be added by calling `services.AddRaygunUserProvider()`
 
 If you want to provide your own implementation of the `IRaygunUserProvider` you 
@@ -132,6 +136,8 @@ This can be registered in the services during configuration like so:
 services.AddRaygunUserProvider<ExampleUserProvider>();
 ```
 
+Make sure to abide by any privacy policies that your company follows when using this feature.
+
 Additional configuration options and features
 =============================================
 
@@ -143,8 +149,7 @@ For example, in the appsettings.json file:
 {
   "RaygunSettings": {
     "ApiKey": "YOUR_APP_API_KEY",
-    "ExcludeErrorsFromLocal": true,
-    ...
+    "ExcludeErrorsFromLocal": true
   }
 }
 ```
@@ -156,7 +161,6 @@ services.AddRaygun(settings =>
 {
   settings.ApiKey = "YOUR_APP_API_KEY";
   settings.ExcludeErrorsFromLocal = true;
-  ...
 });
 ```
 
@@ -205,6 +209,55 @@ i.e. A way to prevent local debug/development from notifying Raygun without havi
 }
 ```
 
+Modify or cancel message
+------------------------
+
+On a RaygunClient instance, attach an event handler to the SendingMessage event. This event handler will be called just before the RaygunClient sends an exception - either automatically or manually.
+The event arguments provide the RaygunMessage object that is about to be sent. One use for this event handler is to add or modify any information on the RaygunMessage.
+Another use for this method is to identify exceptions that you never want to send to raygun, and if so, set e.Cancel = true to cancel the send.
+
+Strip wrapper exceptions
+------------------------
+
+If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by using the multi-parameter method:
+
+```csharp
+_raygunClient.AddWrapperExceptions(typeof(TargetInvocationException));
+```
+
+In this case, if a TargetInvocationException occurs, it will be removed and replaced with the actual InnerException that was the cause.
+Note that TargetInvocationException is already added to the wrapper exception list; you do not have to add this manually.
+This method is useful if you have your own custom wrapper exceptions, or a framework is throwing exceptions using its own wrapper.
+
+Version numbering
+-----------------
+
+By default, Raygun4Net will attempt to set `ApplicationVersion` from the entry assembly. It is possible to override this by providing a version through `RaygunSettings`:
+
+```json
+"RaygunSettings": {
+  "ApplicationVersion": "1.0.0.0"
+}
+```
+Or
+```cs
+services.AddRaygun(settings =>
+{
+  settings.ApplicationVersion = "1.0.0.0";
+});
+```
+
+Tags and custom data
+--------------------
+
+When sending exceptions manually, you can also send an arbitrary list of tags (an array of strings), and a collection of custom data (a dictionary of any objects).
+This can be done using the various SendAsync and SendInBackground method overloads.
+
+Example:
+```cs
+await _raygunClient.SendAsync(ex, new List<string> { "Tag1", "Tag2" }, new Dictionary<string, string> { { "customKey", "value" } });
+```
+
 Remove sensitive request data
 -----------------------------
 
@@ -226,59 +279,29 @@ These options are not case sensitive.
 
 Note: The `IgnoreSensitiveFieldNames` will be applied to ALL fields in the `RaygunRequestMessage`. 
 
-We provide extra options for removing sensitive data from the request raw data. This comes in the form of filters as implemented by the IRaygunDataFilter interface.
-These filters read the raw data and strip values whose keys match those found in the RaygunSettings IgnoreSensitiveFieldNames property.
+We provide extra options for removing sensitive data from the request raw data. This comes in the form of filters as implemented by the `IRaygunDataFilter` interface.
+These filters read the raw data and strip values whose keys match those found in the `RaygunSettings.IgnoreSensitiveFieldNames` property.
 
-We currently provide two implementations with this provider.
+We currently provide two implementations with this provider:
 
-RaygunKeyValuePairDataFilter e.g. filtering "user=raygun&password=pewpew"
+1. RaygunKeyValuePairDataFilter e.g. filtering "user=raygun&password=pewpew"
+2. RaygunXmlDataFilter e.g. filtering "<password>pewpew</password>"
 
-RaygunXmlDataFilter e.g. filtering "<password>pewpew</password>"
+These filters are initially disabled and can be enbled through the `RaygunSettings` class. 
 
-These filters are initially disabled and can be enbled through the RaygunSettings class. You may also provide your own implementation of the IRaygunDataFilter and pass this to the RaygunClient to use when filtering raw data. An example for implementing an JSON filter can be found at the end of this readme.
-
-Modify or cancel message
-------------------------
-
-On a RaygunClient instance, attach an event handler to the SendingMessage event. This event handler will be called just before the RaygunClient sends an exception - either automatically or manually.
-The event arguments provide the RaygunMessage object that is about to be sent. One use for this event handler is to add or modify any information on the RaygunMessage.
-Another use for this method is to identify exceptions that you never want to send to raygun, and if so, set e.Cancel = true to cancel the send.
-
-Strip wrapper exceptions
-------------------------
-
-If you have common outer exceptions that wrap a valuable inner exception which you'd prefer to group by, you can specify these by using the multi-parameter method:
-
-```csharp
-RaygunClient.AddWrapperExceptions(typeof(TargetInvocationException));
+```cs
+services.AddRaygun(settings => 
+{
+  settings.UseXmlRawDataFilter = true;
+  settings.UseKeyValuePairRawDataFilter = true;
+  settings.IsRawDataIgnoredWhenFilteringFailed = true;
+  settings.RawDataFilters.Add(new RaygunJsonDataFilter()); // Example below
+});
 ```
 
-In this case, if a TargetInvocationException occurs, it will be removed and replaced with the actual InnerException that was the cause.
-Note that TargetInvocationException is already added to the wrapper exception list; you do not have to add this manually.
-This method is useful if you have your own custom wrapper exceptions, or a framework is throwing exceptions using its own wrapper.
+You may also provide your own implementation of the `IRaygunDataFilter` and pass this to the `RaygunClient` to use when filtering raw data.
 
-Unique (affected) user tracking
--------------------------------
-
-There are properties named *User* and *UserInfo* on RaygunClient which you can set to provide user info such as ID and email address
-This allows you to see the count of affected users for each error in the Raygun dashboard.
-If you provide an email address, and the user has an associated Gravatar, you will see their avatar in the error instance page.
-
-Make sure to abide by any privacy policies that your company follows when using this feature.
-
-Version numbering
------------------
-
-You can provide an application version value by setting the ApplicationVersion property of the RaygunClient (in the format x.x.x.x where x is a positive integer).
-
-Tags and custom data
---------------------
-
-When sending exceptions manually, you can also send an arbitrary list of tags (an array of strings), and a collection of custom data (a dictionary of any objects).
-This can be done using the various Send and SendInBackground method overloads.
-
-Example JSON Data Filter
-========================
+### Example JSON Data Filter
 
 ```csharp
 using System;
