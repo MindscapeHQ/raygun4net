@@ -1,5 +1,9 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v11.0.4
+- Fix issue with `RaygunClientBase` where `SendInBackground` deferred building the message until late, losing HttpContext
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/540
+
 ### v11.0.3
 - Update `RaygunHttpModule` (Raygun4Net ASP.NET Framework) to use a singleton `RaygunClient` instance
   - See: https://github.com/MindscapeHQ/raygun4net/pull/537
