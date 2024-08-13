@@ -384,14 +384,17 @@ namespace Mindscape.Raygun4Net
     /// <param name="tags">A list of strings associated with the message.</param>
     /// <param name="userCustomData">A key-value collection of custom data that will be added to the payload.</param>
     /// <param name="userInfo">Information about the user including the identity string.</param>
-    public virtual Task SendInBackground(Exception exception, IList<string> tags = null, IDictionary userCustomData = null, RaygunIdentifierMessage userInfo = null)
+    public virtual async Task SendInBackground(Exception exception, IList<string> tags = null, IDictionary userCustomData = null, RaygunIdentifierMessage userInfo = null)
     {
       if (CanSend(exception))
       {
         var exceptions = StripWrapperExceptions(exception);
         foreach (var ex in exceptions)
         {
-          if (!_backgroundMessageProcessor.Enqueue(async () => await BuildMessage(ex, tags, userCustomData, userInfo)))
+          // Have to do this up front as the IUserProvider may be dependent on contextual information from HttpContext
+          // which can get lost if the execution of the BuildMessage is done in a delegate.
+          var msg = await BuildMessage(ex, tags, userCustomData, userInfo);
+          if (!_backgroundMessageProcessor.Enqueue(msg))
           {
             Debug.WriteLine("Could not add message to background queue. Dropping exception: {0}", ex);
           }
@@ -399,8 +402,6 @@ namespace Mindscape.Raygun4Net
 
         FlagAsSent(exception);
       }
-
-      return Task.CompletedTask;
     }
 
     /// <summary>
