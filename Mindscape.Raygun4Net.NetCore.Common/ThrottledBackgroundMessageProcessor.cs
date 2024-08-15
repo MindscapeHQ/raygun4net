@@ -163,7 +163,10 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     private int CalculateDesiredWorkers(int queueSize)
     {
-      if (queueSize == 0)
+      // Should never have a _maxWorkerTasks of 0, but there's a couple of unit tests
+      // which use 0 to determine if messages are discarded when the queue is full
+      // so we need to allow for 0 workers to verify those tests.
+      if (queueSize == 0 || _maxWorkerTasks == 0)
       {
         return 0;
       }
@@ -201,7 +204,9 @@ namespace Mindscape.Raygun4Net
           await callback(message, cancellationToken);
         }
       }
-      catch (OperationCanceledException)
+      catch (Exception cancelledEx) when (cancelledEx is ThreadAbortException 
+                                                         or OperationCanceledException
+                                                         or TaskCanceledException)
       {
         // Task was cancelled, this is expected behavior
       }
