@@ -44,14 +44,14 @@ public abstract class OfflineStoreBase
         }
         catch (Exception ex)
         {
-          Debug.WriteLine($"Exception sending offline error [{crashReport.Id}]: {ex}");
+          Trace.WriteLine($"Exception sending offline error [{crashReport.Id}]: {ex}");
           throw;
         }
       }
     }
     catch (Exception ex)
     {
-      Debug.WriteLine($"Exception sending offline errors: {ex}");
+      Trace.WriteLine($"Exception sending offline errors: {ex}");
     }
   }
 
