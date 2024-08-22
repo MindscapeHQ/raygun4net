@@ -180,7 +180,6 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       }
 
       Assert.That(secondMessageWasProcessed, Is.True);
-      //Assert.That(secondMessageWasProcessed, Is.True);
     }
 
     [Test]
@@ -218,7 +217,6 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       }
 
       Assert.That(secondMessageWasProcessed, Is.True);
-      //Assert.That(secondMessageWasProcessed, Is.True);
     }
   }
 }
