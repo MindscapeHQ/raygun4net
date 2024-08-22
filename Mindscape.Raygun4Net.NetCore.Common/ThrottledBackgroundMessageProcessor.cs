@@ -74,7 +74,7 @@ namespace Mindscape.Raygun4Net
     /// <summary>
     /// This method uses the queue size to determine the number of workers that should be processing messages.
     /// </summary>
-    private void AdjustWorkers()
+    private void AdjustWorkers(bool breakAfterRun = false)
     {
       // We only want one thread to adjust the number of workers at a time
       if (_isDisposing || !Monitor.TryEnter(_workerTaskMutex))
@@ -89,7 +89,7 @@ namespace Mindscape.Raygun4Net
 
         // Calculate the desired number of workers based on the queue size, this is so we don't end up creating
         // many workers that essentially do nothing, or if there's a small number of errors we don't have too many workers
-        var currentWorkers = _workerTasks.Count;
+        var currentWorkers = _workerTasks.Count(x => x.Key.Status == TaskStatus.Running);
         var desiredWorkers = CalculateDesiredWorkers(_messageQueue.Count);
 
         if (desiredWorkers > currentWorkers)
@@ -104,7 +104,7 @@ namespace Mindscape.Raygun4Net
           RemoveExcessWorkers(currentWorkers - desiredWorkers);
         }
 
-        if (desiredWorkers == 0 && _messageQueue.Count > 0)
+        if (desiredWorkers > 0 && _messageQueue.Count > 0)
         {
           // If we have messages to process but no workers, create a worker
           CreateWorkerTask();
@@ -116,11 +116,16 @@ namespace Mindscape.Raygun4Net
         Monitor.Exit(_workerTaskMutex);
       }
 
+      if (breakAfterRun)
+      {
+        return;
+      }
+      
       // We only want 1 thread adjusting the workers at any given time, but there could be a race condition
       // where the queue is empty when we release the mutex, but there are 'completed' tasks, so we need to double-check and adjust.
       if (_messageQueue.Count > 0 && _workerTasks.All(x => x.Key.IsCompleted))
       {
-        AdjustWorkers();
+        AdjustWorkers(true);
       }
     }
 
