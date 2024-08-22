@@ -10,7 +10,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     [Test]
     public void ThrottledBackgroundMessageProcessor_WithQueueSpace_AcceptsMessages()
     {
-      var cut = new ThrottledBackgroundMessageProcessor(1, 0, (m, t) => { return Task.CompletedTask; });
+      var cut = new ThrottledBackgroundMessageProcessor(1, 0, 25, (m, t) => { return Task.CompletedTask; });
       var enqueued = cut.Enqueue(new RaygunMessage());
 
       Assert.That(enqueued, Is.True);
@@ -19,7 +19,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     [Test]
     public void ThrottledBackgroundMessageProcessor_WithFullQueue_DropsMessages()
     {
-      var cut = new ThrottledBackgroundMessageProcessor(1, 0, (m, t) => { return Task.CompletedTask; });
+      var cut = new ThrottledBackgroundMessageProcessor(1, 0, 25, (m, t) => { return Task.CompletedTask; });
       cut.Enqueue(new RaygunMessage());
       var second = cut.Enqueue(new RaygunMessage());
 
@@ -32,7 +32,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     public void ThrottledBackgroundMessageProcessor_WithNoWorkers_DoesNotProcessMessages()
     {
       var processed = false;
-      var cut = new ThrottledBackgroundMessageProcessor(1, 0, (m, t) =>
+      var cut = new ThrottledBackgroundMessageProcessor(1, 0, 25, (m, t) =>
       {
         processed = true;
         return Task.CompletedTask;
@@ -51,7 +51,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     {
       var processed = false;
       var resetEventSlim = new ManualResetEventSlim();
-      var cut = new ThrottledBackgroundMessageProcessor(1, 1, (m, t) =>
+      var cut = new ThrottledBackgroundMessageProcessor(1, 1, 25, (m, t) =>
       {
         processed = true;
         resetEventSlim.Set();
@@ -71,7 +71,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     [Test]
     public void ThrottledBackgroundMessageProcessor_CallingDisposeTwice_DoesNotExplode()
     {
-      var cut = new ThrottledBackgroundMessageProcessor(1, 0, (m, t) => { return Task.CompletedTask; });
+      var cut = new ThrottledBackgroundMessageProcessor(1, 0, 25, (m, t) => { return Task.CompletedTask; });
 
       Assert.DoesNotThrow(() =>
       {
@@ -87,7 +87,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       var secondMessageWasProcessed = false;
       var resetEventSlim = new ManualResetEventSlim();
 
-      var cut = new ThrottledBackgroundMessageProcessor(1, 1, (m, t) =>
+      var cut = new ThrottledBackgroundMessageProcessor(1, 1, 25, (m, t) =>
       {
         if (shouldThrow)
         {
@@ -121,17 +121,23 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       var secondMessageWasProcessed = false;
       var resetEventSlim = new ManualResetEventSlim();
 
-      var cut = new ThrottledBackgroundMessageProcessor(1, 1, (m, t) =>
+      var cut = new ThrottledBackgroundMessageProcessor(1, 1, 25, (m, t) =>
       {
         if (shouldThrow)
         {
-          resetEventSlim.Set();
-          throw new OperationCanceledException("Bad", t);
+          try
+          {
+            throw new OperationCanceledException("Bad", t);
+          }
+          finally
+          {
+            resetEventSlim.Set();
+          }
         }
 
         secondMessageWasProcessed = true;
         resetEventSlim.Set();
-        
+
         return Task.CompletedTask;
       });
 
@@ -147,6 +153,72 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       resetEventSlim.Wait(TimeSpan.FromSeconds(5));
 
       Assert.That(secondMessageWasProcessed, Is.True);
+    }
+
+    [Test]
+    public void Things_Throwing()
+    {
+      var secondMessageWasProcessed = false;
+
+      for (int i = 0; i < 100; i++)
+      {
+        var resetEventSlim = new ManualResetEventSlim();
+
+        var cut = new ThrottledBackgroundMessageProcessor(1, 1, 25, (m, t) =>
+        {
+          secondMessageWasProcessed = true;
+          resetEventSlim.Set();
+
+          return Task.CompletedTask;
+        });
+
+        cut.Enqueue(new RaygunMessage());
+
+        resetEventSlim.Wait(TimeSpan.FromSeconds(5));
+
+        cut.Dispose();
+      }
+
+      Assert.That(secondMessageWasProcessed, Is.True);
+      //Assert.That(secondMessageWasProcessed, Is.True);
+    }
+
+    [Test]
+    public void Things_Throwing_Many()
+    {
+      var secondMessageWasProcessed = false;
+      for (int j = 0; j < 100; j++)
+      {
+        var count = 0;
+        var resetEventSlim = new ManualResetEventSlim();
+
+        var cut = new ThrottledBackgroundMessageProcessor(100_000, 8, 25, (m, t) =>
+        {
+          Interlocked.Increment(ref count);
+          if (count == 100)
+          {
+            secondMessageWasProcessed = true;
+            resetEventSlim.Set();
+          }
+
+          Console.WriteLine($"Sent {count}");
+          return Task.CompletedTask;
+        });
+
+
+        for (int i = 0; i < 100; i++)
+        {
+          cut.Enqueue(new RaygunMessage());
+          Console.WriteLine(i);
+        }
+
+        resetEventSlim.Wait(TimeSpan.FromSeconds(10));
+
+        cut.Dispose();
+      }
+
+      Assert.That(secondMessageWasProcessed, Is.True);
+      //Assert.That(secondMessageWasProcessed, Is.True);
     }
   }
 }
