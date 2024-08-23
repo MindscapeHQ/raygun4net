@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,6 +15,7 @@ public abstract class OfflineStoreBase
 {
   private readonly IBackgroundSendStrategy _backgroundSendStrategy;
   protected SendHandler? SendCallback { get; set; }
+  private static readonly Regex HttpStatusCodeRegex = new("(?<statusCode>4[0-9]{2}) \\(.+\\)");
 
   protected OfflineStoreBase(IBackgroundSendStrategy backgroundSendStrategy)
   {
@@ -41,6 +44,21 @@ public abstract class OfflineStoreBase
         {
           await SendCallback(crashReport.MessagePayload, crashReport.ApiKey, CancellationToken.None);
           await Remove(crashReport.Id, CancellationToken.None);
+        }
+        catch (HttpRequestException hrex)
+        {
+          var statusCode = HttpStatusCodeRegex.Match(hrex.Message).Groups["statusCode"]?.Value ?? "0";
+          
+          if (int.TryParse(statusCode, out var code) && code is >= 400 and < 500)
+          {
+            Trace.WriteLine($"Crash report returned {code} error, removing from cache");
+            // Client error, remove the crash report
+            await Remove(crashReport.Id, CancellationToken.None);
+            continue;
+          }
+          
+          Trace.WriteLine($"Crash report returned {statusCode} error, keeping in cache for retry");
+          throw;
         }
         catch (Exception ex)
         {
