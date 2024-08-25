@@ -47,7 +47,7 @@ public class FileSystemCrashReportStore : OfflineStoreBase
       }
       catch (Exception ex)
       {
-        Debug.WriteLine("Error deserializing offline crash: {0}", ex.ToString());
+        Trace.WriteLine("Error deserializing offline crash: {0}", ex.ToString());
         File.Move(crashFile, $"{crashFile}.failed");
       }
     }
@@ -65,7 +65,7 @@ public class FileSystemCrashReportStore : OfflineStoreBase
       var crashFiles = Directory.GetFiles(_storageDirectory, $"*.{CacheFileExtension}");
       if (crashFiles.Length >= _maxOfflineFiles)
       {
-        Debug.WriteLine($"Maximum offline files of [{_maxOfflineFiles}] has been reached");
+        Trace.WriteLine($"Maximum offline files of [{_maxOfflineFiles}] has been reached");
         return false;
       }
 
@@ -90,7 +90,7 @@ public class FileSystemCrashReportStore : OfflineStoreBase
     }
     catch (Exception ex)
     {
-      Debug.WriteLine($"Error adding crash [{cacheEntryId}] to store: {ex}");
+      Trace.WriteLine($"Error adding crash [{cacheEntryId}] to store: {ex}");
       return false;
     }
   }
@@ -108,7 +108,7 @@ public class FileSystemCrashReportStore : OfflineStoreBase
     }
     catch (Exception ex)
     {
-      Debug.WriteLine($"Error remove crash [{cacheId}] from store: {ex}");
+      Trace.WriteLine($"Error remove crash [{cacheId}] from store: {ex}");
     }
 
     return Task.FromResult(false);

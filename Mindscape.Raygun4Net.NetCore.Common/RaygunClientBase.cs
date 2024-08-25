@@ -124,7 +124,7 @@ namespace Mindscape.Raygun4Net
     {
       _client = client ?? DefaultClient;
       _settings = settings;
-      _backgroundMessageProcessor = new ThrottledBackgroundMessageProcessor(settings.BackgroundMessageQueueMax, _settings.BackgroundMessageWorkerCount, Send);
+      _backgroundMessageProcessor = new ThrottledBackgroundMessageProcessor(settings.BackgroundMessageQueueMax, _settings.BackgroundMessageWorkerCount, _settings.BackgroundMessageWorkerBreakpoint, Send);
       _userProvider = userProvider;
 
       _wrapperExceptions.Add(typeof(TargetInvocationException));

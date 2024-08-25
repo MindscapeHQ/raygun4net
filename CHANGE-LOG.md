@@ -3,6 +3,9 @@
 ### v11.0.4
 - Fix issue with `RaygunClientBase` where `SendInBackground` deferred building the message until late, losing HttpContext
   - See: https://github.com/MindscapeHQ/raygun4net/pull/540
+- Fix issue with `ThrottledBackgroundMessageProcessor` where it would hold up to 8 task threads even when idle
+  - Task Workers are now created as needed and are disposed when not needed or idle
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/542
 
 ### v11.0.3
 - Update `RaygunHttpModule` (Raygun4Net ASP.NET Framework) to use a singleton `RaygunClient` instance

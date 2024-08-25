@@ -32,10 +32,10 @@ public abstract class RaygunSettingsBase
   public string ApplicationVersion { get; set; }
 
   /// <summary>
-  /// If set to true will automatically setup handlers to catch Unhandled Exceptions
+  /// If set to true will automatically set up handlers to catch Unhandled Exceptions
   /// </summary>
   /// <remarks>
-  /// Currently defaults to false. This may be change in future releases.
+  /// Currently defaults to false. This may be changed in future releases.
   /// </remarks>
   public bool CatchUnhandledExceptions { get; set; } = false;
 
@@ -45,12 +45,20 @@ public abstract class RaygunSettingsBase
   public int BackgroundMessageQueueMax { get; } = ushort.MaxValue;
 
   /// <summary>
-  /// Controls the number of background threads used to process the raygun message queue
+  /// Controls the maximum number of background threads used to process the raygun message queue
   /// </summary>
   /// <remarks>
   /// Defaults to Environment.ProcessorCount * 2 &gt;= 8 ? 8 : Environment.ProcessorCount * 2
   /// </remarks>
   public int BackgroundMessageWorkerCount { get; set; } = Environment.ProcessorCount * 2 >= 8 ? 8 : Environment.ProcessorCount * 2;
+
+  /// <summary>
+  /// Used to determine how many messages are in the queue before the background processor will add another worker to help process the queue.
+  /// </summary>
+  /// <remarks>
+  /// Defaults to 25, workers will be added for every 25 messages in the queue, until the BackgroundMessageWorkerCount is reached.
+  /// </remarks>
+  public int BackgroundMessageWorkerBreakpoint { get; set; } = 25;
 
   /// <summary>
   /// A list of Environment Variables to include with the message.
