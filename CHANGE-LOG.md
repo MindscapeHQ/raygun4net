@@ -1,6 +1,6 @@
 # Full Change Log for Raygun4Net.* packages
 
-### v11.0.4
+### v11.1.0
 - Fix issue with `RaygunClientBase` where `SendInBackground` deferred building the message until late, losing HttpContext
   - See: https://github.com/MindscapeHQ/raygun4net/pull/540
 - Fix issue with `ThrottledBackgroundMessageProcessor` where it would hold up to 8 task threads even when idle
