@@ -26,8 +26,14 @@ internal static class PortableExecutableReaderExtensions
     }
   }
 
-  public static bool TryGetDebugInformation(this PEReader peReader, out PEDebugInformation? debugInformation)
+  public static bool TryGetDebugInformation(this PEReader? peReader, out PEDebugInformation? debugInformation)
   {
+    if (peReader is null)
+    {
+      debugInformation = null;
+      return false;
+    }
+
     try
     {
       debugInformation = GetDebugInformation(peReader);
