@@ -1,5 +1,9 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v11.1.2
+- Fixed issue with SimpleJson where Uri/Guid couldn't be serialized.
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/546
+
 ### v11.1.1
 - Prevented a null reference exception from being thrown after a PortableExecutable (PE) fails to be loaded from disk
   - See: https://github.com/MindscapeHQ/raygun4net/pull/544
