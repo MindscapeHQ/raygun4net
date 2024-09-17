@@ -179,5 +179,41 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       string json = SimpleJson.SerializeObject(cyclicObject);
       Assert.That("{\"Array\":[null],\"Dictionary\":{\"Key1\":\"" + SimpleJson.CYCLIC_MESSAGE + "\"," + "\"Key2\":\"" + SimpleJson.CYCLIC_MESSAGE + "\"," + "\"Key3\":\"" + SimpleJson.CYCLIC_MESSAGE + "\"," + "\"Key4\":\"" + SimpleJson.CYCLIC_MESSAGE + "\"},\"GenericDictionary\":{}}", Is.EqualTo(json));
     }
+
+    [Test]
+    public void HandleUri()
+    {
+      var testUri = new TestUri
+      {
+        Test = new Uri("http://www.google.com")
+      };
+      
+      var result = SimpleJson.SerializeObject(testUri);
+      
+      Assert.That("{\"Test\":\"http://www.google.com/\"}", Is.EqualTo(result));
+    }
+    
+    [Test]
+    public void HandleGuid()
+    {
+      var testGuid = new TestGuid
+      {
+        Test = Guid.NewGuid()
+      };
+      
+      var result = SimpleJson.SerializeObject(testGuid);
+      
+      Assert.That("{\"Test\":\"" + testGuid.Test + "\"}", Is.EqualTo(result));
+    }
+
+    public class TestGuid
+    {
+      public Guid Test { get; set; }
+    }
+
+    public class TestUri
+    {
+      public Uri Test { get; set; }
+    }
   }
 }

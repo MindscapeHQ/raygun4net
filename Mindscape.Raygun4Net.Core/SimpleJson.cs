@@ -1020,19 +1020,21 @@ namespace Mindscape.Raygun4Net
         return false;
       }
 
-      if (visited.Contains(value))
-      {
-        return SerializeString(CYCLIC_MESSAGE, builder); 
-      }
-
-      visited.Push(value);
-
       bool success = true;
       string stringValue = value as string;
       if (stringValue != null)
+      {
         success = SerializeString(stringValue, builder);
+      }
       else
       {
+        if (visited.Contains(value))
+        {
+          return SerializeString(CYCLIC_MESSAGE, builder);
+        }
+
+        visited.Push(value);
+        
         if (value.GetType().IsArray)
         {
           success = SerializeArray(jsonSerializerStrategy, value as IEnumerable, builder, visited);
@@ -1080,11 +1082,11 @@ namespace Mindscape.Raygun4Net
             }
           }
         }
-      }
 
-      if (visited.Count > 0) // Just to be safe
-      {
-        visited.Pop();
+        if (visited.Count > 0) // Just to be safe
+        {
+          visited.Pop();
+        }
       }
 
       return success;
