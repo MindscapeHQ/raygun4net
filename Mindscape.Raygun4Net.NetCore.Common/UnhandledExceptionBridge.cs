@@ -9,7 +9,7 @@ namespace Mindscape.Raygun4Net
 {
   public static class UnhandledExceptionBridge
   {
-    internal delegate void UnhandledExceptionHandler(Exception exception, bool isTerminating);
+    internal delegate void UnhandledExceptionHandler(Exception exception, bool isTerminating, string tag);
 
     private static readonly List<WeakExceptionHandler> Handlers = new List<WeakExceptionHandler>();
 
@@ -23,7 +23,7 @@ namespace Mindscape.Raygun4Net
         RaiseUnhandledException(args.ExceptionObject as Exception, args.IsTerminating);
       };
 
-      TaskScheduler.UnobservedTaskException += (sender, args) => { RaiseUnhandledException(args.Exception, false); };
+      TaskScheduler.UnobservedTaskException += (sender, args) => { RaiseUnhandledException(args.Exception,false, "UnobservedTaskException"); };
 
       // Try attach platform specific exceptions
       WindowsPlatform.TryAttachExceptionHandlers();
@@ -31,14 +31,14 @@ namespace Mindscape.Raygun4Net
       ApplePlatform.TryAttachExceptionHandlers();
     }
 
-    public static void RaiseUnhandledException(Exception exception, bool isTerminating)
+    public static void RaiseUnhandledException(Exception exception, bool isTerminating, string tag = "UnhandledException")
     {
       HandlersLock.EnterReadLock();
       try
       {
         foreach (var handler in Handlers)
         {
-          handler.Invoke(exception, isTerminating);
+          handler.Invoke(exception, isTerminating, tag);
         }
       }
       finally
@@ -82,7 +82,7 @@ namespace Mindscape.Raygun4Net
         _reference = new WeakReference<UnhandledExceptionHandler>(handler);
       }
 
-      public void Invoke(Exception exception, bool isTerminating)
+      public void Invoke(Exception exception, bool isTerminating, string tag)
       {
         // If the target is dead then do nothing
         if (!_reference.TryGetTarget(out var handle))
@@ -90,7 +90,7 @@ namespace Mindscape.Raygun4Net
           return;
         }
         
-        handle.Invoke(exception, isTerminating);
+        handle.Invoke(exception, isTerminating, tag);
       }
     }
   }
