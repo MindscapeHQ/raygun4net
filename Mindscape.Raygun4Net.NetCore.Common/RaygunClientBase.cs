@@ -15,8 +15,6 @@ namespace Mindscape.Raygun4Net
 {
   public abstract class RaygunClientBase
   {
-    private static readonly string[] UnhandledExceptionTags = { "UnhandledException" };
-
     /// <summary>
     /// If no HttpClient is provided to the constructor, this will be used.
     /// </summary>
