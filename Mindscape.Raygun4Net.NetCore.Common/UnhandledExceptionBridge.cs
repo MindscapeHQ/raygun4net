@@ -9,7 +9,8 @@ namespace Mindscape.Raygun4Net
 {
   public static class UnhandledExceptionBridge
   {
-    internal delegate void UnhandledExceptionHandler(Exception exception, bool isTerminating, string tag);
+    internal delegate void UnhandledExceptionHandler(Exception exception, bool isTerminating);
+    internal delegate void UnhandledExceptionHandlerWithTag(Exception exception, bool isTerminating, string tag);
 
     private static readonly List<WeakExceptionHandler> Handlers = new List<WeakExceptionHandler>();
 
@@ -49,8 +50,11 @@ namespace Mindscape.Raygun4Net
 
     internal static void OnUnhandledException(UnhandledExceptionHandler callback)
     {
-      // Wrap the callback in a weak reference container
-      // Then subscribe to the event using the weak reference
+      OnUnhandledException((exception, isTerminating, tag) => callback(exception, isTerminating));
+    }
+    
+    internal static void OnUnhandledException(UnhandledExceptionHandlerWithTag callback)
+    {
       var weakHandler = new WeakExceptionHandler(callback);
 
       HandlersLock.EnterWriteLock();
@@ -73,18 +77,17 @@ namespace Mindscape.Raygun4Net
 
     private class WeakExceptionHandler
     {
-      private readonly WeakReference<UnhandledExceptionHandler> _reference;
+      private readonly WeakReference<UnhandledExceptionHandlerWithTag> _reference;
 
       public bool IsAlive => _reference.TryGetTarget(out _);
 
-      public WeakExceptionHandler(UnhandledExceptionHandler handler)
+      public WeakExceptionHandler(UnhandledExceptionHandlerWithTag handler)
       {
-        _reference = new WeakReference<UnhandledExceptionHandler>(handler);
+        _reference = new WeakReference<UnhandledExceptionHandlerWithTag>(handler);
       }
 
       public void Invoke(Exception exception, bool isTerminating, string tag)
       {
-        // If the target is dead then do nothing
         if (!_reference.TryGetTarget(out var handle))
         {
           return;

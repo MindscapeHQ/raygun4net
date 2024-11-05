@@ -46,7 +46,7 @@ namespace Mindscape.Raygun4Net
     /// the client is still alive
     /// </summary>
     // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
-    private readonly UnhandledExceptionBridge.UnhandledExceptionHandler _onUnhandledExceptionDelegate;
+    private readonly UnhandledExceptionBridge.UnhandledExceptionHandlerWithTag _onUnhandledExceptionDelegate;
 
 
     /// <summary>
