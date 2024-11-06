@@ -10,6 +10,7 @@ namespace Mindscape.Raygun4Net
   public static class UnhandledExceptionBridge
   {
     internal delegate void UnhandledExceptionHandler(Exception exception, bool isTerminating);
+
     internal delegate void UnhandledExceptionHandlerWithTag(Exception exception, bool isTerminating, string tag);
 
     private static readonly List<WeakExceptionHandler> Handlers = new List<WeakExceptionHandler>();
@@ -24,7 +25,10 @@ namespace Mindscape.Raygun4Net
         RaiseUnhandledException(args.ExceptionObject as Exception, args.IsTerminating);
       };
 
-      TaskScheduler.UnobservedTaskException += (sender, args) => { RaiseUnhandledException(args.Exception,false, "UnobservedTaskException"); };
+      TaskScheduler.UnobservedTaskException += (sender, args) =>
+      {
+        RaiseUnhandledException(args.Exception.InnerExceptions.Count == 1 ? args.Exception.InnerExceptions.First() : args.Exception, false, "UnobservedTaskException");
+      };
 
       // Try attach platform specific exceptions
       WindowsPlatform.TryAttachExceptionHandlers();
@@ -52,7 +56,7 @@ namespace Mindscape.Raygun4Net
     {
       OnUnhandledException((exception, isTerminating, tag) => callback(exception, isTerminating));
     }
-    
+
     internal static void OnUnhandledException(UnhandledExceptionHandlerWithTag callback)
     {
       var weakHandler = new WeakExceptionHandler(callback);
@@ -61,7 +65,7 @@ namespace Mindscape.Raygun4Net
       try
       {
         Handlers.Add(weakHandler);
-        
+
         // Remove any handlers where their references are no longer alive
         var handlersToRemove = Handlers.Where(x => !x.IsAlive).ToList();
         foreach (var handler in handlersToRemove)
@@ -92,7 +96,7 @@ namespace Mindscape.Raygun4Net
         {
           return;
         }
-        
+
         handle.Invoke(exception, isTerminating, tag);
       }
     }
