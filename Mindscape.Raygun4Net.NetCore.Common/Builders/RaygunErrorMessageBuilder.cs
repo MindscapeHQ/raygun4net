@@ -18,7 +18,7 @@ namespace Mindscape.Raygun4Net
 
     private static readonly HashSet<string> IgnoredExceptionDataKeys =
     [
-      "__RestrictedErrorObjectReference"
+      "__RestrictedErrorObjectReference" // Seen on WinRT exceptions. This maps to a WinRT.ObjectReferenceWithContext<WinRT.Interop.IUnknownVftbl> which will crash the app with an uncatchable AccessViolationException if attempting serialization.
     ];
 
     protected static string FormatTypeName(Type type, bool fullName)
