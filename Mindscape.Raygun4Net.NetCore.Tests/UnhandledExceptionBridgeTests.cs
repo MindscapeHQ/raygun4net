@@ -37,7 +37,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
 
         return;
 
-        void Callback(Exception e, bool b)
+        void Callback(Exception e, bool b, string s)
         {
         }
       })();

@@ -15,8 +15,6 @@ namespace Mindscape.Raygun4Net
 {
   public abstract class RaygunClientBase
   {
-    private static readonly string[] UnhandledExceptionTags = { "UnhandledException" };
-
     /// <summary>
     /// If no HttpClient is provided to the constructor, this will be used.
     /// </summary>
@@ -46,7 +44,7 @@ namespace Mindscape.Raygun4Net
     /// the client is still alive
     /// </summary>
     // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
-    private readonly UnhandledExceptionBridge.UnhandledExceptionHandler _onUnhandledExceptionDelegate;
+    private readonly UnhandledExceptionBridge.UnhandledExceptionHandlerWithTag _onUnhandledExceptionDelegate;
 
 
     /// <summary>
@@ -94,14 +92,14 @@ namespace Mindscape.Raygun4Net
       set => _settings.CatchUnhandledExceptions = value;
     }
 
-    private void OnApplicationUnhandledException(Exception exception, bool isTerminating)
+    private void OnApplicationUnhandledException(Exception exception, bool isTerminating, string tag)
     {
       if (!_settings.CatchUnhandledExceptions)
       {
         return;
       }
 
-      Send(exception, UnhandledExceptionTags);
+      Send(exception, new List<string> { tag });
     }
 
     protected RaygunClientBase(RaygunSettingsBase settings)
@@ -339,7 +337,7 @@ namespace Mindscape.Raygun4Net
     {
       await SendAsync(exception, null, null).ConfigureAwait(false);
     }
-    
+
     /// <summary>
     /// Transmits an exception to Raygun asynchronously.
     /// </summary>

@@ -11,6 +11,8 @@ namespace Mindscape.Raygun4Net
   {
     internal delegate void UnhandledExceptionHandler(Exception exception, bool isTerminating);
 
+    internal delegate void UnhandledExceptionHandlerWithTag(Exception exception, bool isTerminating, string tag);
+
     private static readonly List<WeakExceptionHandler> Handlers = new List<WeakExceptionHandler>();
 
     private static readonly ReaderWriterLockSlim HandlersLock = new ReaderWriterLockSlim();
@@ -23,7 +25,10 @@ namespace Mindscape.Raygun4Net
         RaiseUnhandledException(args.ExceptionObject as Exception, args.IsTerminating);
       };
 
-      TaskScheduler.UnobservedTaskException += (sender, args) => { RaiseUnhandledException(args.Exception, false); };
+      TaskScheduler.UnobservedTaskException += (sender, args) =>
+      {
+        RaiseUnhandledException(args.Exception.InnerExceptions.Count == 1 ? args.Exception.InnerExceptions.First() : args.Exception, false, "UnobservedTaskException");
+      };
 
       // Try attach platform specific exceptions
       WindowsPlatform.TryAttachExceptionHandlers();
@@ -31,14 +36,14 @@ namespace Mindscape.Raygun4Net
       ApplePlatform.TryAttachExceptionHandlers();
     }
 
-    public static void RaiseUnhandledException(Exception exception, bool isTerminating)
+    public static void RaiseUnhandledException(Exception exception, bool isTerminating, string tag = "UnhandledException")
     {
       HandlersLock.EnterReadLock();
       try
       {
         foreach (var handler in Handlers)
         {
-          handler.Invoke(exception, isTerminating);
+          handler.Invoke(exception, isTerminating, tag);
         }
       }
       finally
@@ -49,15 +54,18 @@ namespace Mindscape.Raygun4Net
 
     internal static void OnUnhandledException(UnhandledExceptionHandler callback)
     {
-      // Wrap the callback in a weak reference container
-      // Then subscribe to the event using the weak reference
+      OnUnhandledException((exception, isTerminating, tag) => callback(exception, isTerminating));
+    }
+
+    internal static void OnUnhandledException(UnhandledExceptionHandlerWithTag callback)
+    {
       var weakHandler = new WeakExceptionHandler(callback);
 
       HandlersLock.EnterWriteLock();
       try
       {
         Handlers.Add(weakHandler);
-        
+
         // Remove any handlers where their references are no longer alive
         var handlersToRemove = Handlers.Where(x => !x.IsAlive).ToList();
         foreach (var handler in handlersToRemove)
@@ -73,24 +81,23 @@ namespace Mindscape.Raygun4Net
 
     private class WeakExceptionHandler
     {
-      private readonly WeakReference<UnhandledExceptionHandler> _reference;
+      private readonly WeakReference<UnhandledExceptionHandlerWithTag> _reference;
 
       public bool IsAlive => _reference.TryGetTarget(out _);
 
-      public WeakExceptionHandler(UnhandledExceptionHandler handler)
+      public WeakExceptionHandler(UnhandledExceptionHandlerWithTag handler)
       {
-        _reference = new WeakReference<UnhandledExceptionHandler>(handler);
+        _reference = new WeakReference<UnhandledExceptionHandlerWithTag>(handler);
       }
 
-      public void Invoke(Exception exception, bool isTerminating)
+      public void Invoke(Exception exception, bool isTerminating, string tag)
       {
-        // If the target is dead then do nothing
         if (!_reference.TryGetTarget(out var handle))
         {
           return;
         }
-        
-        handle.Invoke(exception, isTerminating);
+
+        handle.Invoke(exception, isTerminating, tag);
       }
     }
   }
