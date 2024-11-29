@@ -1,5 +1,9 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v11.1.3
+- Fixed Client.Name in Raygun4Net to fix group hasher breaking
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/551
+
 ### v11.1.2
 - Fixed issue with SimpleJson where Uri/Guid couldn't be serialized.
   - See: https://github.com/MindscapeHQ/raygun4net/pull/546
