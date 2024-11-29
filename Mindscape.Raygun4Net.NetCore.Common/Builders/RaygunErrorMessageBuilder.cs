@@ -16,6 +16,11 @@ namespace Mindscape.Raygun4Net
     private static readonly ConcurrentDictionary<string, PEDebugInformation> DebugInformationCache = new();
     public static Func<string, PEReader> AssemblyReaderProvider { get; set; } = PortableExecutableReaderExtensions.GetFileSystemPEReader;
 
+    private static readonly HashSet<string> IgnoredExceptionDataKeys =
+    [
+      "__RestrictedErrorObjectReference" // Seen on WinRT exceptions. This maps to a WinRT.ObjectReferenceWithContext<WinRT.Interop.IUnknownVftbl> which will crash the app with an uncatchable AccessViolationException if attempting serialization.
+    ];
+
     protected static string FormatTypeName(Type type, bool fullName)
     {
       string name = fullName ? type.FullName : type.Name;
@@ -188,7 +193,7 @@ namespace Mindscape.Raygun4Net
 
         foreach (var key in exception.Data.Keys)
         {
-          if (!RaygunClientBase.SentKey.Equals(key))
+          if (!RaygunClientBase.SentKey.Equals(key) && !IgnoredExceptionDataKeys.Contains(key))
           {
             data[key] = exception.Data[key];
           }
