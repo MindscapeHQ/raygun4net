@@ -1,6 +1,8 @@
 # Full Change Log for Raygun4Net.* packages
 
 ### v11.1.3
+- Skip serializing `WinRT.ObjectReferenceWithContext<WinRT.Interop.IUnknownVftbl>` objects attached to the Exception.Data to avoid AccessViolationException.
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/549
 - Fixed Client.Name in Raygun4Net to fix group hasher breaking
   - See: https://github.com/MindscapeHQ/raygun4net/pull/551
 
