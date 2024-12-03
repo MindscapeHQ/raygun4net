@@ -37,11 +37,10 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
         QueryString = GetQueryString(request, options),
         Cookies     = GetCookies(request, options),
         RawData     = GetRawData(request, options),
-        Headers     = GetHeaders(request, options)
+        Headers     = GetHeaders(request, options),
+        Form = await GetForm(request, options)
       };
-
-      message.Form = await GetForm(request, options);
-
+    
       return message;
     }
 
@@ -156,7 +155,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
         // Filter out sensitive values.
         rawData = StripSensitiveValues(rawData, options);
 
-        // Early escape if theres no data.
+        // Early escape if there's no data.
         if (string.IsNullOrEmpty(rawData))
         {
           return null;
