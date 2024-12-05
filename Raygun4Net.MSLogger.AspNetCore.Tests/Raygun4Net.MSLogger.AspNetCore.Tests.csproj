@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mindscape.Raygun4Net.AspNetCore\Mindscape.Raygun4Net.AspNetCore.csproj" />
+    <ProjectReference Include="..\Mindscape.Raygun4Net.Extensions.Logging\Mindscape.Raygun4Net.Extensions.Logging.csproj" />
+  </ItemGroup>
+  
+</Project>

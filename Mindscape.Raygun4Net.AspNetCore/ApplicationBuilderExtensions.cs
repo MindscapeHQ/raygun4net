@@ -52,6 +52,7 @@ public static class ApplicationBuilderExtensions
 
     services.TryAddSingleton(settings);
     services.TryAddSingleton(s => new RaygunClient(s.GetService<RaygunSettings>()!, s.GetService<IRaygunUserProvider>()!));
+    services.TryAddSingleton<RaygunClientBase>(provider => provider.GetRequiredService<RaygunClient>());
     services.AddHttpContextAccessor();
 
     return services;
@@ -70,6 +71,7 @@ public static class ApplicationBuilderExtensions
     
     services.TryAddSingleton(settings);
     services.TryAddSingleton(s => new RaygunClient(s.GetService<RaygunSettings>()!, s.GetService<IRaygunUserProvider>()!));
+    services.TryAddSingleton<RaygunClientBase>(provider => provider.GetRequiredService<RaygunClient>());
     services.AddHttpContextAccessor();
 
     return services;
