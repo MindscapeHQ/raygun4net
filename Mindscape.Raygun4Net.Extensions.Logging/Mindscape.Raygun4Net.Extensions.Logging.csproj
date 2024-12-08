@@ -13,6 +13,12 @@
     <DebugType>embedded</DebugType>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="\" />
+    <None Include="..\128x128-transparent.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <Description>.NET / .NETStandard - library for targeting .NET applications</Description>
     <PackageId>Mindscape.Raygun4Net.Extensions.Logging</PackageId>
