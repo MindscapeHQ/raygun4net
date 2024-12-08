@@ -93,7 +93,6 @@ public class RaygunLogger : ILogger
     }
     catch (Exception ex)
     {
-      // Log the failure to send to Raygun - you might want to use a fallback logger here
       System.Diagnostics.Debug.WriteLine($"Failed to send log to Raygun: {ex}");
     }
   }
@@ -109,7 +108,6 @@ public class RaygunLogger : ILogger
     }
     catch (Exception ex)
     {
-      // Log the failure to send to Raygun - you might want to use a fallback logger here
       System.Diagnostics.Debug.WriteLine($"Failed to send log to Raygun: {ex}");
     }
   }
