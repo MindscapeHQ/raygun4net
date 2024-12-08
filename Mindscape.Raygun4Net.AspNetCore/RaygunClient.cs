@@ -29,6 +29,10 @@ public class RaygunClient : RaygunClientBase
   {
   }
 
+  public RaygunClient(RaygunSettings settings, IRaygunUserProvider userProvider) : base(settings, userProvider, [])
+  {
+  }
+
   public RaygunClient(RaygunSettings settings, IRaygunUserProvider userProvider, IEnumerable<IMessageBuilder> messageBuilders) : base(settings, userProvider, messageBuilders)
   {
   }
