@@ -1,5 +1,10 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v11.2.0
+- Add new `IMessageBuilder` interface to allow for custom message builders
+- New `Mindscape.Raygun4Net.Extensions.Logging` package
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/553
+
 ### v11.1.3
 - Skip serializing `WinRT.ObjectReferenceWithContext<WinRT.Interop.IUnknownVftbl>` objects attached to the Exception.Data to avoid AccessViolationException.
   - See: https://github.com/MindscapeHQ/raygun4net/pull/549

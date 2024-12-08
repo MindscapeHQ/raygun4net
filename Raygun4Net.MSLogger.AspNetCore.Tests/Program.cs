@@ -11,6 +11,7 @@ builder.Services.AddRaygun(settings =>
 {
   settings.ApiKey = "*your_api_key*";
 });
+builder.Services.AddSingleton<IMessageBuilder, DefaultTags>();
    
 // (Optional) Registers the Raygun User Provider
 builder.Services.AddRaygunUserProvider();
@@ -44,3 +45,14 @@ app.MapControllerRoute(
   pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+
+public class DefaultTags : IMessageBuilder
+{
+  public Task<RaygunMessage> Apply(RaygunMessage message, Exception exception)
+  {
+    message.Details.Tags.Add("DefaultTag");
+    
+    return Task.FromResult(message);
+  }
+}
