@@ -1,3 +1,4 @@
+using Mindscape.Raygun4Net;
 using Mindscape.Raygun4Net.AspNetCore;
 using Mindscape.Raygun4Net.Extensions.Logging;
 
@@ -9,7 +10,7 @@ builder.Services.AddControllersWithViews();
 // Registers the Raygun Client for AspNetCore
 builder.Services.AddRaygun(settings =>
 {
-  settings.ApiKey = "*your_api_key*";
+  settings.ApiKey = "zqpKCLNE8SXj7aBfjZv98w";
 });
 builder.Services.AddSingleton<IMessageBuilder, DefaultTags>();
    

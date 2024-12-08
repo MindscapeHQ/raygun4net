@@ -1,6 +1,4 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Raygun4Net.MSLogger.AspNetCore.Tests.Models;
 
 namespace Raygun4Net.MSLogger.AspNetCore.Tests.Controllers;
 
