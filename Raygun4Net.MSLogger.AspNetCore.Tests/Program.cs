@@ -10,7 +10,7 @@ builder.Services.AddControllersWithViews();
 // Registers the Raygun Client for AspNetCore
 builder.Services.AddRaygun(settings =>
 {
-  settings.ApiKey = "zqpKCLNE8SXj7aBfjZv98w";
+  settings.ApiKey = "*your_api_key*";
 });
 builder.Services.AddSingleton<IMessageBuilder, DefaultTags>();
    
