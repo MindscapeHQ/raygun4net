@@ -1,3 +1,14 @@
 [*]
 indent_style = space
 indent_size = 2
+
+[*.cs]
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0290
+csharp_style_prefer_primary_constructors = false
+dotnet_diagnostic.IDE0290.severity = none
+
+# https://www.jetbrains.com/help/rider/ConvertToPrimaryConstructor.html
+resharper_convert_to_primary_constructor_highlighting = none
+
+# Ensure if statements always use braces
+csharp_prefer_braces = true:error

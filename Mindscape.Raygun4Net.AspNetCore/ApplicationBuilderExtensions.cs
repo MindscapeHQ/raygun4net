@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Mindscape.Raygun4Net.AspNetCore.Builders;
 
 namespace Mindscape.Raygun4Net.AspNetCore;
 
@@ -51,7 +52,7 @@ public static class ApplicationBuilderExtensions
     options?.Invoke(settings);
 
     services.TryAddSingleton(settings);
-    services.TryAddSingleton(s => new RaygunClient(s.GetService<RaygunSettings>()!, s.GetService<IRaygunUserProvider>()!));
+    services.TryAddSingleton(s => new RaygunClient(s.GetRequiredService<RaygunSettings>(), s.GetRequiredService<IRaygunUserProvider>(), s.GetServices<IMessageBuilder>()));
     services.TryAddSingleton<RaygunClientBase>(provider => provider.GetRequiredService<RaygunClient>());
     services.AddHttpContextAccessor();
 
@@ -69,8 +70,9 @@ public static class ApplicationBuilderExtensions
     // Override settings with user-provided settings
     options?.Invoke(settings);
     
+    services.TryAddSingleton<IMessageBuilder, RequestDataBuilder>();
     services.TryAddSingleton(settings);
-    services.TryAddSingleton(s => new RaygunClient(s.GetService<RaygunSettings>()!, s.GetService<IRaygunUserProvider>()!));
+    services.TryAddSingleton(s => new RaygunClient(s.GetRequiredService<RaygunSettings>(), s.GetRequiredService<IRaygunUserProvider>(), s.GetServices<IMessageBuilder>()));
     services.TryAddSingleton<RaygunClientBase>(provider => provider.GetRequiredService<RaygunClient>());
     services.AddHttpContextAccessor();
 

@@ -51,6 +51,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "..Items", "..Items", "{1F1C
 		pack-all.sh = pack-all.sh
 		pack-all.bat = pack-all.bat
 		pack-all.ps1 = pack-all.ps1
+		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raygun4Net.AspNetCore.Tests", "Raygun4Net.AspNetCore.Tests\Raygun4Net.AspNetCore.Tests.csproj", "{D932B9F5-9F08-495B-AAC7-16CE44C74CA4}"

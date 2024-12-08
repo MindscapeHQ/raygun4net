@@ -9,13 +9,13 @@ builder.Services.AddHostedService<Worker>();
 // Registers the Raygun Client for NetCore
 builder.Services.AddRaygun(options =>
 {
-  options.ApiKey = "zqpKCLNE8SXj7aBfjZv98w";
+  options.ApiKey = "*your_api_key*";
 });
 
 // (Optional) Add Raygun User Provider - no default implementation provided in non ASP.NET projects
 //builder.Services.AddRaygunUserProvider<...>()
 
-// Registers the Raygun Logger for MS Logger
+// Registers the Raygun Logger for use in MS Logger
 builder.Logging.AddRaygunLogger();
 
 var host = builder.Build();

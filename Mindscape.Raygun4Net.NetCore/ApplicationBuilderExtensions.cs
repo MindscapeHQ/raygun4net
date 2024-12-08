@@ -23,7 +23,7 @@ public static class ApplicationBuilderExtensions
     options?.Invoke(settings);
 
     services.TryAddSingleton(settings);
-    services.TryAddSingleton<RaygunClientBase>(s => new RaygunClient(s.GetService<RaygunSettings>()!, s.GetService<IRaygunUserProvider>()!));
+    services.TryAddSingleton<RaygunClientBase>(s => new RaygunClient(s.GetRequiredService<RaygunSettings>(), s.GetRequiredService<IRaygunUserProvider>(), s.GetServices<IMessageBuilder>()));
 
     return services;
   }
@@ -40,7 +40,7 @@ public static class ApplicationBuilderExtensions
     options?.Invoke(settings);
     
     services.TryAddSingleton(settings);
-    services.TryAddSingleton<RaygunClientBase>(s => new RaygunClient(s.GetService<RaygunSettings>()!, s.GetService<IRaygunUserProvider>()!));
+    services.TryAddSingleton<RaygunClientBase>(s => new RaygunClient(s.GetRequiredService<RaygunSettings>(), s.GetRequiredService<IRaygunUserProvider>(), s.GetServices<IMessageBuilder>()));
 
     return services;
   }

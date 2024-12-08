@@ -29,11 +29,11 @@ public class RaygunClient : RaygunClientBase
   {
   }
 
-  public RaygunClient(RaygunSettings settings, IRaygunUserProvider userProvider) : base(settings, userProvider)
+  public RaygunClient(RaygunSettings settings, IRaygunUserProvider userProvider, IEnumerable<IMessageBuilder> messageBuilders) : base(settings, userProvider, messageBuilders)
   {
   }
         
-  public RaygunClient(RaygunSettings settings, HttpClient httpClient, IRaygunUserProvider userProvider) : base(settings, httpClient, userProvider)
+  public RaygunClient(RaygunSettings settings, HttpClient httpClient, IRaygunUserProvider userProvider) : base(settings, httpClient, userProvider, [])
   {
   }
   // ReSharper restore MemberCanBeProtected.Global
@@ -58,6 +58,7 @@ public class RaygunClient : RaygunClientBase
 
     return !settings.ExcludedStatusCodes.Contains(message.Details.Response.StatusCode);
   }
+  
   /// <summary>
   /// Asynchronously transmits an exception to Raygun with optional Http Request data.
   /// </summary>
@@ -72,7 +73,7 @@ public class RaygunClient : RaygunClientBase
       // otherwise it will be disposed while we are using it on the other thread.
       // BuildRequestMessage relies on ReadFormAsync, so we need to await it to ensure it's processed before continuing.
       var currentRequestMessage = await RaygunAspNetCoreRequestMessageBuilder.Build(context, Settings.Value);
-      var currentResponseMessage = RaygunAspNetCoreResponseMessageBuilder.Build(context);
+      var currentResponseMessage = await RaygunAspNetCoreResponseMessageBuilder.Build(context, Settings.Value);
 
       var exceptions = StripWrapperExceptions(exception);
 
