@@ -12,7 +12,6 @@ public sealed class RaygunLoggerProvider : ILoggerProvider
   private readonly RaygunClientBase _client;
   private readonly RaygunLoggerSettings _settings;
   private readonly ConcurrentDictionary<string, RaygunLogger> _loggers;
-  private bool _disposed;
 
   /// <summary>
   /// Initializes a new instance of the RaygunLoggerProvider.
@@ -35,11 +34,6 @@ public sealed class RaygunLoggerProvider : ILoggerProvider
   /// <exception cref="ObjectDisposedException">Thrown when the provider has been disposed.</exception>
   public ILogger CreateLogger(string categoryName)
   {
-    if (_disposed)
-    {
-      throw new ObjectDisposedException(nameof(RaygunLoggerProvider));
-    }
-
     return _loggers.GetOrAdd(categoryName, CreateLoggerInternal);
     
     RaygunLogger CreateLoggerInternal(string name)
@@ -50,10 +44,5 @@ public sealed class RaygunLoggerProvider : ILoggerProvider
   
   public void Dispose()
   {
-    if (!_disposed)
-    {
-      _disposed = true;
-      _loggers.Clear();
-    }
   }
 }
