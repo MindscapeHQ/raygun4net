@@ -115,6 +115,11 @@ namespace Mindscape.Raygun4Net
     {
     }
 
+    protected RaygunClientBase(RaygunSettingsBase settings, IRaygunUserProvider userProvider)
+      : this(settings, DefaultClient, userProvider, [])
+    {
+    }
+
     protected RaygunClientBase(RaygunSettingsBase settings, IRaygunUserProvider userProvider, IEnumerable<IMessageBuilder> messageBuilders)
       : this(settings, DefaultClient, userProvider, messageBuilders)
     {
