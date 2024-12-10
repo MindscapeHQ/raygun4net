@@ -5,7 +5,7 @@
 <!--    <TargetFrameworks>net5.0;netcoreapp3.1;netcoreapp3.0;netcoreapp2.2;netcoreapp2.1;netcoreapp2.0;netcoreapp1.1;netcoreapp1.0;net461;</TargetFrameworks>-->
    
     <!-- Versions which are supported by Microsoft @ May 2022-->
-    <TargetFrameworks>net6.0;net48;net472;net471;net47;net462</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0;net6.0;net48;net472;net471;net47;net462</TargetFrameworks>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <IsPackable>false</IsPackable>
   </PropertyGroup>

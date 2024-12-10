@@ -51,9 +51,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "..Items", "..Items", "{1F1C
 		pack-all.sh = pack-all.sh
 		pack-all.bat = pack-all.bat
 		pack-all.ps1 = pack-all.ps1
+		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raygun4Net.AspNetCore.Tests", "Raygun4Net.AspNetCore.Tests\Raygun4Net.AspNetCore.Tests.csproj", "{D932B9F5-9F08-495B-AAC7-16CE44C74CA4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mindscape.Raygun4Net.Extensions.Logging", "Mindscape.Raygun4Net.Extensions.Logging\Mindscape.Raygun4Net.Extensions.Logging.csproj", "{4003E695-85BA-4474-90B2-DFC7331CCA87}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MSLogger", "MSLogger", "{63E0121B-CEF3-45E8-8A30-B6ABBEA639BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raygun4Net.MSLogger.AspNetCore.Tests", "Raygun4Net.MSLogger.AspNetCore.Tests\Raygun4Net.MSLogger.AspNetCore.Tests.csproj", "{50FC40CC-6759-48AE-90D2-2231C255C0D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raygun4Net.MSLogger.Service.Tests", "Raygun4Net.MSLogger.Service.Tests\Raygun4Net.MSLogger.Service.Tests.csproj", "{1F7DA0E7-8952-4D62-BC43-4DBCE35EA0FA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -80,6 +89,10 @@ Global
 		{392DE005-7FFA-429B-A196-C2DED6A1AF2D} = {CA6237D9-BFC9-41DA-B2B7-EDC3681B8E7C}
 		{BC560F66-B06E-4C85-AC05-B889165AA818} = {CA6237D9-BFC9-41DA-B2B7-EDC3681B8E7C}
 		{D932B9F5-9F08-495B-AAC7-16CE44C74CA4} = {3A2DEED0-6A19-4D8B-BA49-2FC229533C8B}
+		{4003E695-85BA-4474-90B2-DFC7331CCA87} = {5AAAF1EB-95FD-47E9-A3E1-A8B77CF49E56}
+		{63E0121B-CEF3-45E8-8A30-B6ABBEA639BB} = {3A2DEED0-6A19-4D8B-BA49-2FC229533C8B}
+		{50FC40CC-6759-48AE-90D2-2231C255C0D8} = {63E0121B-CEF3-45E8-8A30-B6ABBEA639BB}
+		{1F7DA0E7-8952-4D62-BC43-4DBCE35EA0FA} = {63E0121B-CEF3-45E8-8A30-B6ABBEA639BB}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{BA3C3D49-0104-4958-9326-E964B7867200}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -150,5 +163,17 @@ Global
 		{D932B9F5-9F08-495B-AAC7-16CE44C74CA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D932B9F5-9F08-495B-AAC7-16CE44C74CA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D932B9F5-9F08-495B-AAC7-16CE44C74CA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4003E695-85BA-4474-90B2-DFC7331CCA87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4003E695-85BA-4474-90B2-DFC7331CCA87}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4003E695-85BA-4474-90B2-DFC7331CCA87}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4003E695-85BA-4474-90B2-DFC7331CCA87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50FC40CC-6759-48AE-90D2-2231C255C0D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50FC40CC-6759-48AE-90D2-2231C255C0D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50FC40CC-6759-48AE-90D2-2231C255C0D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50FC40CC-6759-48AE-90D2-2231C255C0D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F7DA0E7-8952-4D62-BC43-4DBCE35EA0FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F7DA0E7-8952-4D62-BC43-4DBCE35EA0FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F7DA0E7-8952-4D62-BC43-4DBCE35EA0FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F7DA0E7-8952-4D62-BC43-4DBCE35EA0FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -23,6 +23,8 @@ namespace Mindscape.Raygun4Net
       // The default timeout is 100 seconds for the HttpClient, 
       Timeout = TimeSpan.FromSeconds(30)
     };
+    
+    private IEnumerable<IMessageBuilder> _messageBuilders = [];
 
     /// <summary>
     /// This is the HttpClient that will be used to send messages to the Raygun endpoint.
@@ -103,23 +105,30 @@ namespace Mindscape.Raygun4Net
     }
 
     protected RaygunClientBase(RaygunSettingsBase settings)
-      : this(settings, DefaultClient, null)
+      : this(settings, DefaultClient, null, [])
     {
     }
 
     // ReSharper disable once IntroduceOptionalParameters.Global
     protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client)
-      : this(settings, client, null)
+      : this(settings, client, null, [])
     {
     }
 
     protected RaygunClientBase(RaygunSettingsBase settings, IRaygunUserProvider userProvider)
-      : this(settings, DefaultClient, userProvider)
+      : this(settings, DefaultClient, userProvider, [])
     {
     }
 
-    protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client, IRaygunUserProvider userProvider)
+    protected RaygunClientBase(RaygunSettingsBase settings, IRaygunUserProvider userProvider, IEnumerable<IMessageBuilder> messageBuilders)
+      : this(settings, DefaultClient, userProvider, messageBuilders)
     {
+    }
+
+    protected RaygunClientBase(RaygunSettingsBase settings, HttpClient client, IRaygunUserProvider userProvider, IEnumerable<IMessageBuilder> messageBuilders)
+    {
+      _messageBuilders = messageBuilders ?? [];
+      
       _client = client ?? DefaultClient;
       _settings = settings;
       _backgroundMessageProcessor = new ThrottledBackgroundMessageProcessor(settings.BackgroundMessageQueueMax, _settings.BackgroundMessageWorkerCount, _settings.BackgroundMessageWorkerBreakpoint, Send);
@@ -437,6 +446,12 @@ namespace Mindscape.Raygun4Net
                                         .Build();
 
       var customGroupingKey = await OnCustomGroupingKey(exception, message).ConfigureAwait(false);
+
+      // TODO - Move old message builders to IMessageBuilder
+      foreach (var builder in _messageBuilders)
+      {
+        await builder.Apply(message, exception);
+      }
 
       if (string.IsNullOrEmpty(customGroupingKey) == false)
       {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 
 namespace Mindscape.Raygun4Net;
@@ -26,11 +27,15 @@ public class RaygunClient : RaygunClientBase
   {
   }
 
-  public RaygunClient(RaygunSettings settings, IRaygunUserProvider userProvider) : base(settings, userProvider)
+  public RaygunClient(RaygunSettings settings, IRaygunUserProvider userProvider) : base(settings, userProvider, [])
   {
   }
 
-  public RaygunClient(RaygunSettings settings, HttpClient httpClient, IRaygunUserProvider userProvider) : base(settings, httpClient, userProvider)
+  public RaygunClient(RaygunSettings settings, IRaygunUserProvider userProvider, IEnumerable<IMessageBuilder> messageBuilders) : base(settings, userProvider, messageBuilders)
+  {
+  }
+
+  public RaygunClient(RaygunSettings settings, HttpClient httpClient, IRaygunUserProvider userProvider) : base(settings, httpClient, userProvider, [])
   {
   }
 
