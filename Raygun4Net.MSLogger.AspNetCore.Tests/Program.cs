@@ -15,7 +15,7 @@ builder.Services.AddRaygun(settings =>
 builder.Services.AddSingleton<IMessageBuilder, DefaultTags>();
    
 // (Optional) Registers the Raygun User Provider
-builder.Services.AddRaygunUserProvider();
+// builder.Services.AddRaygunUserProvider();
 
 // Registers the Raygun Logger for use in MS Logger
 builder.Logging.AddRaygunLogger(x =>
