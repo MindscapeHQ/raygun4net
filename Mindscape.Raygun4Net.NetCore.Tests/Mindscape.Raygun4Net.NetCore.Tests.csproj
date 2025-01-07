@@ -8,7 +8,7 @@
     <!-- Windows OS Tests -->
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">net8.0;net7.0;net6.0;net48;net472;net471;net47;net462</TargetFrameworks>
     <!-- Linux OS Tests -->
-    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">net8.0;net7.0;net6.0</TargetFrameworks>
+    <TargetFramework Condition="'$(OS)' != 'Windows_NT'">net8.0</TargetFramework>
 
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <IsPackable>false</IsPackable>

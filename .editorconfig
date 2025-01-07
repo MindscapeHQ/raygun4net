@@ -12,3 +12,7 @@ resharper_convert_to_primary_constructor_highlighting = none
 
 # Ensure if statements always use braces
 csharp_prefer_braces = true:error
+
+[SimpleJson.cs]
+# Disable braces error for SimpleJson.cs since its an old 3rd party library
+csharp_prefer_braces = true:none
