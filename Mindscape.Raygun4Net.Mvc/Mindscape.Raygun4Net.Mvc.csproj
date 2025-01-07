@@ -38,5 +38,9 @@
   
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.Mvc" Version="3.0.50813.1" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net462" Version="1.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 </Project>

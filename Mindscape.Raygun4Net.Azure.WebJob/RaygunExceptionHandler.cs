@@ -22,7 +22,9 @@ namespace Mindscape.Raygun4Net.Azure.WebJob
       _client = client;
       _client.AddWrapperExceptions(typeof(FunctionInvocationException));
       if (Tags == null)
+      {
         Tags = new string[0];
+      }
     }
 
     /// <summary>
