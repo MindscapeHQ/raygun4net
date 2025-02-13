@@ -1,17 +1,21 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Mindscape.Raygun4Net.Platforms
 {
   internal static class ApplePlatform
   {
+
     private static Assembly IOSAssembly;
 
     private static Assembly MacCatalystAssembly;
 
     private static object MarshalManagedExceptionMode_UnwindNativeCode;
 
+    [DynamicDependency("MarshalManagedException", "ObjCRuntime.Runtime", "Microsoft.iOS")]
+    [DynamicDependency("MarshalManagedExceptionMode", "ObjCRuntime", "Microsoft.iOS")]
     public static bool TryAttachExceptionHandlers()
     {
       try
