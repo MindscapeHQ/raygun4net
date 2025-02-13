@@ -16,6 +16,8 @@ namespace Mindscape.Raygun4Net.Platforms
 
     [DynamicDependency("MarshalManagedException", "ObjCRuntime.Runtime", "Microsoft.iOS")]
     [DynamicDependency("MarshalManagedExceptionMode", "ObjCRuntime", "Microsoft.iOS")]
+    [DynamicDependency("MarshalManagedException", "ObjCRuntime.Runtime", "Microsoft.MacCatalyst")]
+    [DynamicDependency("MarshalManagedExceptionMode", "ObjCRuntime", "Microsoft.MacCatalyst")]
     public static bool TryAttachExceptionHandlers()
     {
       try
