@@ -7,7 +7,6 @@ namespace Mindscape.Raygun4Net.Platforms
 {
   internal static class ApplePlatform
   {
-
     private static Assembly IOSAssembly;
 
     private static Assembly MacCatalystAssembly;
