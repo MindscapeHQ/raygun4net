@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace Mindscape.Raygun4Net.Platforms
@@ -8,6 +9,9 @@ namespace Mindscape.Raygun4Net.Platforms
   {
     private static Assembly AndroidAssembly;
 
+#if NET6_0_OR_GREATER
+    [DynamicDependency("UnhandledExceptionRaiser", "Android.Runtime.AndroidEnvironment", "Mono.Android")]
+#endif
     public static bool TryAttachExceptionHandlers()
     {
       try

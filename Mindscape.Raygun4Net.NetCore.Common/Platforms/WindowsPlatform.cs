@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace Mindscape.Raygun4Net.Platforms
@@ -10,6 +11,9 @@ namespace Mindscape.Raygun4Net.Platforms
 
     private static Exception _lastFirstChanceException;
 
+#if NET6_0_OR_GREATER
+    [DynamicDependency("UnhandledException", "Microsoft.UI.Xaml.Application", "Microsoft.WinUI")]
+#endif
     public static bool TryAttachExceptionHandlers()
     {
       try
