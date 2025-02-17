@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Mindscape.Raygun4Net.Platforms
 {
@@ -12,6 +13,15 @@ namespace Mindscape.Raygun4Net.Platforms
 
     private static object MarshalManagedExceptionMode_UnwindNativeCode;
 
+#if NET6_0_OR_GREATER
+    // Preserves the MarshalManagedException method and MarshalManagedExceptionMode enum
+    // from being trimmed by the compiler.
+    // Not supported in netstandard2.0.
+    [DynamicDependency("MarshalManagedException", "ObjCRuntime.Runtime", "Microsoft.iOS")]
+    [DynamicDependency("MarshalManagedExceptionMode", "ObjCRuntime", "Microsoft.iOS")]
+    [DynamicDependency("MarshalManagedException", "ObjCRuntime.Runtime", "Microsoft.MacCatalyst")]
+    [DynamicDependency("MarshalManagedExceptionMode", "ObjCRuntime", "Microsoft.MacCatalyst")]
+#endif
     public static bool TryAttachExceptionHandlers()
     {
       try
