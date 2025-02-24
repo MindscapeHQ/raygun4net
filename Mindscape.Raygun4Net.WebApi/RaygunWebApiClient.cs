@@ -62,6 +62,7 @@ namespace Mindscape.Raygun4Net.WebApi
       _backgroundMessageProcessor = new ThrottledBackgroundMessageProcessor(
         RaygunSettings.Settings.BackgroundMessageQueueMax,
         RaygunSettings.Settings.BackgroundMessageWorkerCount,
+        RaygunSettings.Settings.BackgroundMessageWorkerBreakpoint,
         Send);
 
       Init();
@@ -87,6 +88,7 @@ namespace Mindscape.Raygun4Net.WebApi
       _backgroundMessageProcessor = new ThrottledBackgroundMessageProcessor(
                                           RaygunSettings.Settings.BackgroundMessageQueueMax,
                                           RaygunSettings.Settings.BackgroundMessageWorkerCount,
+                                          RaygunSettings.Settings.BackgroundMessageWorkerBreakpoint,
                                           Send);
 
       Init();
