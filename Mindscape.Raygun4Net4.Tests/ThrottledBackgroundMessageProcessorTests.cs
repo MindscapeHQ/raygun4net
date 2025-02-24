@@ -143,5 +143,41 @@ namespace Mindscape.Raygun4Net4.Tests
       
       Assert.That(secondMessageWasProcessed, Is.True);
     }
+
+    [Test]
+    public void Things_Throwing_Many()
+    {
+      var secondMessageWasProcessed = false;
+      for (int j = 0; j < 100; j++)
+      {
+        var count = 0;
+        var resetEventSlim = new ManualResetEventSlim();
+
+        var cut = new ThrottledBackgroundMessageProcessor(100_000, 8, 25, _ =>
+        {
+          Interlocked.Increment(ref count);
+          if (count == 100)
+          {
+            secondMessageWasProcessed = true;
+            resetEventSlim.Set();
+          }
+
+          Console.WriteLine($"Sent {count}");
+        });
+
+
+        for (int i = 0; i < 100; i++)
+        {
+          cut.Enqueue(new RaygunMessage());
+          Console.WriteLine(i);
+        }
+
+        resetEventSlim.Wait(TimeSpan.FromSeconds(10));
+
+        cut.Dispose();
+      }
+
+      Assert.That(secondMessageWasProcessed, Is.True);
+    }
   }
 }
