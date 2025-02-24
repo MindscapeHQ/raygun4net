@@ -21,7 +21,7 @@ namespace Mindscape.Raygun4Net
 
     private readonly CancellationTokenSource _globalCancellationSource;
     private readonly int _maxQueueSize;
-    private readonly Func<RaygunMessage, CancellationToken, Task> _processCallback;
+    private readonly Action<RaygunMessage> _processCallback;
     private readonly int _maxWorkerTasks;
     private readonly int _workerQueueBreakpoint;
     private readonly object _workerTaskMutex = new();
@@ -35,7 +35,7 @@ namespace Mindscape.Raygun4Net
     public ThrottledBackgroundMessageProcessor(int maxQueueSize,
                                                int maxWorkerTasks,
                                                int workerQueueBreakpoint,
-                                               Func<RaygunMessage, CancellationToken, Task> onProcessMessageFunc)
+                                               Action<RaygunMessage> onProcessMessageFunc)
     {
       _maxQueueSize = maxQueueSize;
       _workerQueueBreakpoint = workerQueueBreakpoint <= 0 ? 25 : workerQueueBreakpoint;
@@ -71,6 +71,12 @@ namespace Mindscape.Raygun4Net
       AdjustWorkers();
       return true;
     }
+    
+    public bool Enqueue(Func<RaygunMessage> messageFunc)
+    {
+      return Enqueue(messageFunc());
+    }
+
 
     /// <summary>
     /// This method uses the queue size to determine the number of workers that should be processing messages.
@@ -235,7 +241,7 @@ namespace Mindscape.Raygun4Net
     /// Actual task run by the worker. This method will take a message from the queue and process it.
     /// </summary>
     private static async Task RaygunMessageWorker(ConcurrentQueue<RaygunMessage> messageQueue,
-                                                  Func<RaygunMessage, CancellationToken, Task> callback,
+                                                  Action<RaygunMessage> callback,
                                                   CancellationToken cancellationToken)
     {
       try
@@ -244,7 +250,7 @@ namespace Mindscape.Raygun4Net
         {
           try
           {
-            await callback(message, cancellationToken);
+            await Task.Run(() => callback(message), cancellationToken);
           }
           catch (InvalidOperationException)
           {

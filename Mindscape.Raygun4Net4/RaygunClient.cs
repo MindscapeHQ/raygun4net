@@ -109,10 +109,11 @@ namespace Mindscape.Raygun4Net
 
       UseXmlRawDataFilter = RaygunSettings.Settings.UseXmlRawDataFilter;
       UseKeyValuePairRawDataFilter = RaygunSettings.Settings.UseKeyValuePairRawDataFilter;
-      
+
       _backgroundMessageProcessor = new ThrottledBackgroundMessageProcessor(
                                           RaygunSettings.Settings.BackgroundMessageQueueMax,
                                           RaygunSettings.Settings.BackgroundMessageWorkerCount,
+                                          RaygunSettings.Settings.BackgroundMessageWorkerBreakpoint,
                                           Send);
 
       ThreadPool.QueueUserWorkItem(state => { SendStoredMessages(); });
@@ -391,7 +392,7 @@ namespace Mindscape.Raygun4Net
           try
           {
             var currentTime = DateTime.UtcNow;
-            
+
             StripAndSendInBackground(exception, tags, userCustomData, userInfo, currentTime);
           }
           catch (Exception)
@@ -403,7 +404,7 @@ namespace Mindscape.Raygun4Net
               throw;
             }
           }
-          
+
           FlagAsSent(exception);
         }
       }
@@ -427,7 +428,7 @@ namespace Mindscape.Raygun4Net
     {
       SendInBackground(() => raygunMessage);
     }
-    
+
     public void SendInBackground(Func<RaygunMessage> raygunMessage)
     {
       if (!_backgroundMessageProcessor.Enqueue(raygunMessage))

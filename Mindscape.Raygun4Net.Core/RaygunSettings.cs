@@ -53,6 +53,14 @@ namespace Mindscape.Raygun4Net
       set { this["backgroundMessageWorkerCount"] = value; }
     }
 
+    /// <summary>
+    /// Used to determine how many messages are in the queue before the background processor will add another worker to help process the queue.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to 25, workers will be added for every 25 messages in the queue, until the BackgroundMessageWorkerCount is reached.
+    /// </remarks>
+    public int BackgroundMessageWorkerBreakpoint { get; set; } = 25;
+
     [ConfigurationProperty("apikey", IsRequired = true, DefaultValue = "")]
     [StringValidator]
     public string ApiKey
