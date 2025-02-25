@@ -13,6 +13,21 @@ namespace Mindscape.Raygun4Net
 {
   public class RaygunMessageBuilder : IRaygunMessageBuilder
   {
+    private static string LookupRaygunClientName(Type builderType)
+    {
+      var lastRaygunClientName = _lastRaygunClientName;
+      if (lastRaygunClientName is null || !ReferenceEquals(lastRaygunClientName.Item1, builderType))
+      {
+        // The MVC provider references the Raygun4Net4 provider, so this is a special case to get the correct client name:
+        var clientName  = AppDomain.CurrentDomain.GetAssemblies().Any(a => a.FullName.StartsWith("Mindscape.Raygun4Net.Mvc"))
+          ? "Raygun4Net.Mvc"
+          : ((AssemblyTitleAttribute)builderType.Assembly.GetCustomAttributes(typeof(AssemblyTitleAttribute), false)[0]).Title;
+        _lastRaygunClientName = lastRaygunClientName = new Tuple<Type, string>(builderType, clientName);
+      }
+      return lastRaygunClientName.Item2;
+    }
+    private static Tuple<Type, string> _lastRaygunClientName;
+
     public static RaygunMessageBuilder New => new RaygunMessageBuilder();
 
     private readonly RaygunMessage _raygunMessage = new RaygunMessage();
@@ -106,15 +121,8 @@ namespace Mindscape.Raygun4Net
       _raygunMessage.Details.Client = new RaygunClientMessage()
       {
         // RaygunClientMessage is in core, so this message builder overrides the Name to get the correct client name.
-        Name = ((AssemblyTitleAttribute)GetType().Assembly.GetCustomAttributes(typeof(AssemblyTitleAttribute), false)[0]).Title
+        Name = LookupRaygunClientName(GetType())
       };
-
-      // The MVC provider references the Raygun4Net4 provider, so this is a special case to get the correct client name:
-      var mvcAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName.StartsWith("Mindscape.Raygun4Net.Mvc"));
-      if (mvcAssembly != null)
-      {
-        _raygunMessage.Details.Client.Name = "Raygun4Net.Mvc";
-      }
 
       return this;
     }
