@@ -145,7 +145,7 @@ namespace Mindscape.Raygun4Net4.Tests
     }
 
     [Test]
-    public void Things_Throwing_Many()
+    public void ThrottledBackgroundMessageProcessor_Enqueue_ManyMessages()
     {
       var secondMessageWasProcessed = false;
       for (int j = 0; j < 100; j++)
