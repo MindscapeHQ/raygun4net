@@ -12,7 +12,7 @@ namespace Mindscape.Raygun4Net4.Tests
     [Test]
     public void ThrottledBackgroundMessageProcessor_WithQueueSpace_AcceptsMessages()
     {
-      var cut = new ThrottledBackgroundMessageProcessor(1, 0, _ => { });
+      var cut = new ThrottledBackgroundMessageProcessor(1, 0, 25, _ => { });
       var enqueued = cut.Enqueue(new RaygunMessage());
 
       Assert.That(enqueued, Is.True);
@@ -21,7 +21,7 @@ namespace Mindscape.Raygun4Net4.Tests
     [Test]
     public void ThrottledBackgroundMessageProcessor_WithFullQueue_DropsMessages()
     {
-      var cut = new ThrottledBackgroundMessageProcessor(1, 0, _ => { });
+      var cut = new ThrottledBackgroundMessageProcessor(1, 0, 25, _ => { });
       cut.Enqueue(new RaygunMessage());
       var second = cut.Enqueue(new RaygunMessage());
 
@@ -34,7 +34,7 @@ namespace Mindscape.Raygun4Net4.Tests
     public void ThrottledBackgroundMessageProcessor_WithNoWorkers_DoesNotProcessMessages()
     {
       var processed = false;
-      var cut = new ThrottledBackgroundMessageProcessor(1, 0, _ => { processed = true; });
+      var cut = new ThrottledBackgroundMessageProcessor(1, 0, 25, _ => { processed = true; });
 
       cut.Enqueue(new RaygunMessage());
 
@@ -49,7 +49,7 @@ namespace Mindscape.Raygun4Net4.Tests
     {
       var processed = false;
       var resetEventSlim = new ManualResetEventSlim();
-      var cut = new ThrottledBackgroundMessageProcessor(1, 1, _ =>
+      var cut = new ThrottledBackgroundMessageProcessor(1, 1, 25, _ =>
       {
         processed = true;
         resetEventSlim.Set();
@@ -68,7 +68,7 @@ namespace Mindscape.Raygun4Net4.Tests
     [Test]
     public void ThrottledBackgroundMessageProcessor_CallingDisposeTwice_DoesNotExplode()
     {
-      var cut = new ThrottledBackgroundMessageProcessor(1, 0, _ => { });
+      var cut = new ThrottledBackgroundMessageProcessor(1, 0, 25, _ => { });
       
       Assert.DoesNotThrow(() =>
       {
@@ -85,7 +85,7 @@ namespace Mindscape.Raygun4Net4.Tests
       var secondMessageWasProcessed = false;
       var resetEventSlim = new ManualResetEventSlim();
       
-      var cut = new ThrottledBackgroundMessageProcessor(1, 1, _ =>
+      var cut = new ThrottledBackgroundMessageProcessor(1, 1, 25, _ =>
       {
         if (shouldThrow)
         {
@@ -118,7 +118,7 @@ namespace Mindscape.Raygun4Net4.Tests
       var secondMessageWasProcessed = false;
       var resetEventSlim = new ManualResetEventSlim();
       
-      var cut = new ThrottledBackgroundMessageProcessor(1, 1, _ =>
+      var cut = new ThrottledBackgroundMessageProcessor(1, 1, 25, _ =>
       {
         if (shouldThrow)
         {
@@ -141,6 +141,42 @@ namespace Mindscape.Raygun4Net4.Tests
 
       resetEventSlim.Wait(TimeSpan.FromSeconds(5));
       
+      Assert.That(secondMessageWasProcessed, Is.True);
+    }
+
+    [Test]
+    public void ThrottledBackgroundMessageProcessor_Enqueue_ManyMessages()
+    {
+      var secondMessageWasProcessed = false;
+      for (int j = 0; j < 100; j++)
+      {
+        var count = 0;
+        var resetEventSlim = new ManualResetEventSlim();
+
+        var cut = new ThrottledBackgroundMessageProcessor(100_000, 8, 25, _ =>
+        {
+          Interlocked.Increment(ref count);
+          if (count == 100)
+          {
+            secondMessageWasProcessed = true;
+            resetEventSlim.Set();
+          }
+
+          Console.WriteLine($"Sent {count}");
+        });
+
+
+        for (int i = 0; i < 100; i++)
+        {
+          cut.Enqueue(new RaygunMessage());
+          Console.WriteLine(i);
+        }
+
+        resetEventSlim.Wait(TimeSpan.FromSeconds(10));
+
+        cut.Dispose();
+      }
+
       Assert.That(secondMessageWasProcessed, Is.True);
     }
   }

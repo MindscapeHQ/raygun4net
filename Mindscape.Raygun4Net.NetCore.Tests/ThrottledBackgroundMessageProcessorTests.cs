@@ -156,7 +156,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public void Things_Throwing()
+    public void ThrottledBackgroundMessageProcessor_Enqueue_SingleMessage()
     {
       var secondMessageWasProcessed = false;
 
@@ -183,7 +183,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public void Things_Throwing_Many()
+    public void ThrottledBackgroundMessageProcessor_Enqueue_ManyMessages()
     {
       var secondMessageWasProcessed = false;
       for (int j = 0; j < 100; j++)
