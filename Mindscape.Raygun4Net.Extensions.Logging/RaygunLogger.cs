@@ -11,7 +11,7 @@ public class RaygunLogger : ILogger
   private readonly string _category;
   private readonly RaygunClientBase _client;
   private readonly RaygunLoggerSettings _settings;
-  private readonly AsyncLocal<Dictionary<string, object>> _scopeData = new();
+  private readonly AsyncLocal<Dictionary<string, object?>> _scopeData = new();
 
   /// <summary>
   /// Initializes a new instance of the RaygunLogger.
