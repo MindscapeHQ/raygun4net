@@ -67,7 +67,7 @@ public class RaygunLogger : ILogger
     {
       foreach (var item in _scopeData.Value)
       {
-        customData[$"Scope{item.Key}"] = item.Value.ToString() ?? string.Empty;
+        customData[$"Scope{item.Key}"] = item.Value?.ToString() ?? string.Empty;
       }
     }
     
