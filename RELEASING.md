@@ -34,7 +34,7 @@ prompted.
 
 ## Preparing for release
 
-To build releases, you need access to Raygun's internal TeamCity instance.
+To build releases, you need the build/version number from our CD/CI pipeline.
 
 ### Building a release
 
