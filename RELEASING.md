@@ -20,7 +20,7 @@ To learn more about semantic versioning check: https://semver.org/
 
 There are 3 variables for building which represent the version numbering.
 
-- `assemblyVersion`: The assembly version should be set to the major version, because of this it wont be prompted, it
+- `assemblyVersion`: The assembly version should be set to the major version, because of this it won't be prompted, it
 needs to be updated when we do a major version release. When the version being released is `8.1.0` the assembly
 version must stay as `8.0.0` and only when we do an API change or have a valid reason to increment the major version
 will we change it to `9.0.0`
