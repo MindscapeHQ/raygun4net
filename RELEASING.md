@@ -34,7 +34,7 @@ prompted.
 
 ## Preparing for release
 
-To build releases, you need the build/version number from our CD/CI pipeline.
+To build releases, you wil need access to our CD/CI pipeline.
 
 ### Building a release
 
