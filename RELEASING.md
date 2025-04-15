@@ -2,7 +2,7 @@
 
 This release process is currently under review: https://github.com/MindscapeHQ/raygun4net/issues/561
 
-Raygun for Net is published on nuget.org under the [mindscapehq account](https://www.nuget.org/profiles/mindscapehq).
+Raygun4Net is published on nuget.org under the [mindscapehq account](https://www.nuget.org/profiles/mindscapehq).
 
 ## Semantic versioning
 
