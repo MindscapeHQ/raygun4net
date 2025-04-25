@@ -11,7 +11,7 @@ public class RaygunLogger : ILogger
   private readonly string _category;
   private readonly RaygunClientBase _client;
   private readonly RaygunLoggerSettings _settings;
-  private readonly AsyncLocal<Dictionary<string, object>> _scopeData = new();
+  private readonly AsyncLocal<Dictionary<string, object?>> _scopeData = new();
 
   /// <summary>
   /// Initializes a new instance of the RaygunLogger.
@@ -67,7 +67,7 @@ public class RaygunLogger : ILogger
     {
       foreach (var item in _scopeData.Value)
       {
-        customData[$"Scope{item.Key}"] = item.Value.ToString() ?? string.Empty;
+        customData[$"Scope{item.Key}"] = item.Value?.ToString() ?? string.Empty;
       }
     }
     
@@ -134,14 +134,14 @@ public class RaygunLogger : ILogger
     var scopeData = _scopeData.Value;
     if (scopeData == null)
     {
-      scopeData = new Dictionary<string, object>();
+      scopeData = new Dictionary<string, object?>();
       _scopeData.Value = scopeData;
     }
 
     // Handle different types of state
     switch (state)
     {
-      case IEnumerable<KeyValuePair<string, object>> properties:
+      case IEnumerable<KeyValuePair<string, object?>> properties:
         foreach (var prop in properties)
         {
           scopeData[$"[{scopeData.Count}].{prop.Key}"] = prop.Value;
@@ -157,9 +157,9 @@ public class RaygunLogger : ILogger
   
   private class RaygunLoggerScope : IDisposable
   {
-    private readonly AsyncLocal<Dictionary<string, object>> _scopeData;
+    private readonly AsyncLocal<Dictionary<string, object?>> _scopeData;
 
-    public RaygunLoggerScope(AsyncLocal<Dictionary<string, object>> scopeData)
+    public RaygunLoggerScope(AsyncLocal<Dictionary<string, object?>> scopeData)
     {
       _scopeData = scopeData;
     }
