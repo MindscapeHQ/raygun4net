@@ -1,5 +1,10 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v11.2.3
+
+- Update RaygunLogger.cs to use null coalesce operator because scope data item value can be null (#563) (2025-04-25)
+- docs: Create RELEASING.md (2025-04-15)
+
 ### v11.2.2
 
 Includes changes from v11.2.1
