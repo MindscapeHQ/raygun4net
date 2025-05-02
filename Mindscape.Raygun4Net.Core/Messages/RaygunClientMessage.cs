@@ -1,13 +1,23 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 
 namespace Mindscape.Raygun4Net.Messages
 {
   public class RaygunClientMessage
   {
+    private static string LookupRaygunVersion(Type messageType)
+    {
+      var lastRaygunVersion = _lastRaygunVersion;
+      if (lastRaygunVersion is null || !ReferenceEquals(lastRaygunVersion.Item1, messageType))
+        _lastRaygunVersion = lastRaygunVersion = new Tuple<Type, string>(messageType, new AssemblyName(messageType.Assembly.FullName).Version.ToString());
+      return lastRaygunVersion.Item2;
+    }
+    private static Tuple<Type, string> _lastRaygunVersion;
+
     public RaygunClientMessage()
     {
       Name = "Raygun4Net";
-      Version = new AssemblyName(GetType().Assembly.FullName).Version.ToString();
+      Version = LookupRaygunVersion(GetType());
       ClientUrl = @"https://github.com/MindscapeHQ/raygun4net";
     }
 
