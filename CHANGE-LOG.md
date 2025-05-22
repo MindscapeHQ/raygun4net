@@ -2,7 +2,7 @@
 
 ### v11.2.4
 - Fix: #568 - maxWorkers in ThrottledBackgroundMessageProcessor is not respected and can exceed the desired amount
-  - See: https://github.com/MindscapeHQ/raygun4net/pull/569~~~~ 
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/569 
 
 ### v11.2.3
 
