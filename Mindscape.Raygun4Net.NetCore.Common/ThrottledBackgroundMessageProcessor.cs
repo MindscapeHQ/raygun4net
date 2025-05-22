@@ -96,18 +96,17 @@ namespace Mindscape.Raygun4Net
         {
           for (var i = currentWorkers; i < desiredWorkers; i++)
           {
+            // Ensure we don't exceed _maxWorkerTasks if many tasks can be created at once
+            if (_workerTasks.Count >= _maxWorkerTasks && _maxWorkerTasks > 0) // Ensure _maxWorkerTasks > 0 for this check
+            {
+              break;
+            }
             CreateWorkerTask();
           }
         }
         else if (desiredWorkers < currentWorkers)
         {
           RemoveExcessWorkers(currentWorkers - desiredWorkers);
-        }
-
-        if (desiredWorkers > 0 && _messageQueue.Count > 0)
-        {
-          // If we have messages to process but no workers, create a worker
-          CreateWorkerTask();
         }
       }
       finally
@@ -135,28 +134,26 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     private void RemoveCompletedTasks()
     {
-      var count = _workerTasks.Count;
-      var rentedArray = ArrayPool<KeyValuePair<Task, CancellationTokenSource>>.Shared.Rent(count);
-      var completedCount = 0;
+      var completedTaskKeys = new List<Task>();
 
+      // Iterate over a snapshot of the dictionary's state at the beginning of the loop.
+      // Collect keys of completed tasks.
       foreach (var kvp in _workerTasks)
       {
         if (kvp.Key.IsCompleted)
         {
-          rentedArray[completedCount++] = kvp;
+          completedTaskKeys.Add(kvp.Key);
         }
       }
 
-      for (var i = 0; i < completedCount; i++)
+      // Remove the completed tasks from the dictionary and dispose of their CTS.
+      foreach (var taskKey in completedTaskKeys)
       {
-        var kvp = rentedArray[i];
-        if (_workerTasks.TryRemove(kvp.Key, out var cts))
+        if (_workerTasks.TryRemove(taskKey, out var cts))
         {
           cts.Dispose();
         }
       }
-
-      ArrayPool<KeyValuePair<Task, CancellationTokenSource>>.Shared.Return(rentedArray);
     }
 
     /// <summary>
@@ -184,9 +181,23 @@ namespace Mindscape.Raygun4Net
       {
         var kvp = rentedArray[i];
 
+        // It's possible the task is no longer in _workerTasks if it was removed by RemoveCompletedTasks
+        // concurrently, or if it completed and its continuation (AdjustWorkers) ran and removed it.
+        // So, we only cancel + dispose if we successfully remove it here, ensuring single ownership of disposal.
         if (_workerTasks.TryRemove(kvp.Key, out var cts))
         {
-          cts.Cancel();
+          // Only cancel if not already cancelled to avoid ObjectDisposedException on CancellationTokenSource
+          if (!cts.IsCancellationRequested)
+          {
+            try
+            {
+              cts.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+              // Ignore if already disposed by another thread.
+            }
+          }
           cts.Dispose();
         }
       }
@@ -206,7 +217,9 @@ namespace Mindscape.Raygun4Net
       _workerTasks[task] = cts;
 
       // When the worker task completes, adjust the number of workers
-      task.ContinueWith(_ => AdjustWorkers(), TaskContinuationOptions.ExecuteSynchronously);
+      // Using ExecuteSynchronously can be problematic if AdjustWorkers itself blocks for long periods or deadlocks.
+      // Consider TaskScheduler.Default if issues arise.
+      task.ContinueWith(_ => AdjustWorkers(), CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
     }
 
     /// <summary>
