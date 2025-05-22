@@ -218,5 +218,73 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
 
       Assert.That(secondMessageWasProcessed, Is.True);
     }
+
+    [Test]
+    public void ThrottledBackgroundMessageProcessor_RespectsMaxWorkerLimit_WhenCallbacksAreBlocked()
+    {
+      const int maxWorkers = 1;
+      long activeCallbacks = 0;
+      long maxConcurrentCallbacks = 0;
+      long messagesProcessedCount = 0;
+
+      var callbackBlocker = new ManualResetEventSlim(false);
+      var firstCallbackEnteredSignal = new ManualResetEventSlim(false);
+      var allMessagesProcessedSignal = new ManualResetEventSlim(false);
+
+      var cut = new ThrottledBackgroundMessageProcessor(10, maxWorkers, 1, async (m, t) =>
+      {
+        var currentActive = Interlocked.Increment(ref activeCallbacks);
+        maxConcurrentCallbacks = Math.Max(maxConcurrentCallbacks, currentActive);
+
+        if (Interlocked.Read(ref messagesProcessedCount) == 0) // First message
+        {
+          firstCallbackEnteredSignal.Set();
+          await Task.Run(() => callbackBlocker.Wait(t), t); // Simulate work and allow cancellation
+        }
+
+        Interlocked.Decrement(ref activeCallbacks);
+        if (Interlocked.Increment(ref messagesProcessedCount) == 2) // Both messages processed
+        {
+          allMessagesProcessedSignal.Set();
+        }
+      });
+
+      try
+      {
+        // Enqueue first message
+        cut.Enqueue(new RaygunMessage());
+
+        // Wait for the first callback to start and block
+        Assert.That(firstCallbackEnteredSignal.Wait(TimeSpan.FromSeconds(5)), Is.True, "First callback did not enter in time.");
+        Assert.That(Volatile.Read(ref activeCallbacks), Is.EqualTo(1L), "Active callbacks should be 1 after first message.");
+        Assert.That(maxConcurrentCallbacks, Is.EqualTo(1L), "Max concurrent callbacks should be 1 after first message.");
+
+        // Enqueue second message while the first is blocked
+        cut.Enqueue(new RaygunMessage());
+
+        // Wait a bit to allow AdjustWorkers to run for the second message
+        // If a new worker was incorrectly created, activeCallbacks would become > 1
+        Thread.Sleep(500); // Giving time for a potential incorrect worker to start
+
+        Assert.That(Volatile.Read(ref activeCallbacks), Is.EqualTo(1L), "Active callbacks should still be 1 (respecting maxWorkers).");
+        Assert.That(maxConcurrentCallbacks, Is.EqualTo(1L), "Max concurrent callbacks should still be 1 (respecting maxWorkers).");
+
+        // Unblock the first callback
+        callbackBlocker.Set();
+
+        // Wait for both messages to be processed
+        Assert.That(allMessagesProcessedSignal.Wait(TimeSpan.FromSeconds(10)), Is.True, "All messages did not process in time.");
+        
+        Assert.That(Volatile.Read(ref messagesProcessedCount), Is.EqualTo(2L), "Both messages should have been processed.");
+        Assert.That(maxConcurrentCallbacks, Is.EqualTo(1L), "Max concurrent callbacks should remain 1 throughout the test.");
+      }
+      finally
+      {
+        cut.Dispose();
+        callbackBlocker.Dispose();
+        firstCallbackEnteredSignal.Dispose();
+        allMessagesProcessedSignal.Dispose();
+      }
+    }
   }
 }
