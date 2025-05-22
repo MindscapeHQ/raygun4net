@@ -1,21 +1,25 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v11.2.4
+- Fix: #568 - maxWorkers in ThrottledBackgroundMessageProcessor is not respected and can exceed the desired amount
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/569 
+
 ### v11.2.3
 
 - Update RaygunLogger.cs to use null coalesce operator because scope data item value can be null (#563) (2025-04-25)
-- docs: Create RELEASING.md (2025-04-15)
+- Docs: Create RELEASING.md (2025-04-15)
 
 ### v11.2.2
 
 Includes changes from v11.2.1
 
-- fix: #558 ported ThrottledBackgroundMessageProcessor from NetCore to Core (#562) (2025-02-25)
-- fix: add DynamicDependency definition for Windows and Android (#560) (2025-02-18)
-- fix: Add DynamicDependency declaration to preserve MarshalManagedException in iOS and MacOS apps (#559) (2025-02-17)
+- Fix: #558 ported ThrottledBackgroundMessageProcessor from NetCore to Core (#562) (2025-02-25)
+- Fix: add DynamicDependency definition for Windows and Android (#560) (2025-02-18)
+- Fix: Add DynamicDependency declaration to preserve MarshalManagedException in iOS and MacOS apps (#559) (2025-02-17)
 - Remove target frameworks for the build server (2025-01-08)
 - Removed net standard 2.1 target as its implied by 2.0 (2025-01-05)
 - Split tests on windows/linux (2025-01-05)
-- fixing the build so it works cross-plat (2025-01-05)
+- Fixing the build so it works cross-plat (2025-01-05)
 
 ### v11.2.0
 - Add new `IMessageBuilder` interface to allow for custom message builders
