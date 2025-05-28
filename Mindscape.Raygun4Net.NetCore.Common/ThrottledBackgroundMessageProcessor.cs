@@ -27,7 +27,6 @@ namespace Mindscape.Raygun4Net
 
     private bool _drainingQueue;
 
-
     private bool _isDisposing;
     private readonly int _drainSize;
 
@@ -89,24 +88,26 @@ namespace Mindscape.Raygun4Net
 
         // Calculate the desired number of workers based on the queue size, this is so we don't end up creating
         // many workers that essentially do nothing, or if there's a small number of errors we don't have too many workers
-        var currentWorkers = _workerTasks.Count(x => x.Key.Status == TaskStatus.Running);
+        // Count active workers (not completed) rather than just Running to avoid race conditions with task status transitions
+        var activeWorkers = _workerTasks.Count(x => !x.Key.IsCompleted);
         var desiredWorkers = CalculateDesiredWorkers(_messageQueue.Count);
 
-        if (desiredWorkers > currentWorkers)
+        if (desiredWorkers > activeWorkers)
         {
-          for (var i = currentWorkers; i < desiredWorkers; i++)
+          var workersToCreate = Math.Min(desiredWorkers - activeWorkers, _maxWorkerTasks - activeWorkers);
+          for (var i = 0; i < workersToCreate; i++)
           {
-            // Ensure we don't exceed _maxWorkerTasks if many tasks can be created at once
-            if (_workerTasks.Count >= _maxWorkerTasks && _maxWorkerTasks > 0) // Ensure _maxWorkerTasks > 0 for this check
+            // Try to create a worker task, but let CreateWorkerTask handle the limit check atomically
+            if (!CreateWorkerTask())
             {
+              // If we hit the limit, stop trying to create more workers
               break;
             }
-            CreateWorkerTask();
           }
         }
-        else if (desiredWorkers < currentWorkers)
+        else if (desiredWorkers < activeWorkers)
         {
-          RemoveExcessWorkers(currentWorkers - desiredWorkers);
+          RemoveExcessWorkers(activeWorkers - desiredWorkers);
         }
       }
       finally
@@ -120,11 +121,18 @@ namespace Mindscape.Raygun4Net
         return;
       }
       
-      // We only want 1 thread adjusting the workers at any given time, but there could be a race condition
-      // where the queue is empty when we release the mutex, but there are 'completed' tasks, so we need to double-check and adjust.
-      if (_messageQueue.Count > 0 && _workerTasks.All(x => x.Key.IsCompleted))
+      // Simple retry logic: if there are messages queued but no active workers, try once more
+      // This handles the edge case where all workers completed after we released the mutex
+      // but avoids the complexity and race conditions of the recursive call
+      if (_messageQueue.Count > 0)
       {
-        AdjustWorkers(true);
+        // Quick check if we might need workers - avoid expensive All() enumeration
+        var hasActiveWorkers = _workerTasks.Count > 0 && _workerTasks.Any(x => !x.Key.IsCompleted);
+        if (!hasActiveWorkers)
+        {
+          // Try to adjust workers one more time, but with breakAfterRun=true to prevent infinite loops
+          AdjustWorkers(true);
+        }
       }
     }
 
@@ -134,23 +142,17 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     private void RemoveCompletedTasks()
     {
-      var completedTaskKeys = new List<Task>();
-
-      // Iterate over a snapshot of the dictionary's state at the beginning of the loop.
-      // Collect keys of completed tasks.
-      foreach (var kvp in _workerTasks)
+      // Use ToArray() to get a stable snapshot that won't change during iteration
+      // This prevents issues with collection modification during enumeration
+      var snapshot = _workerTasks.ToArray();
+      
+      foreach (var kvp in snapshot)
       {
-        if (kvp.Key.IsCompleted)
+        // Double-check the task is still completed (it might have changed state or been removed)
+        // Use TryRemove to atomically remove only if it exists and we get ownership
+        if (kvp.Key.IsCompleted && _workerTasks.TryRemove(kvp.Key, out var cts))
         {
-          completedTaskKeys.Add(kvp.Key);
-        }
-      }
-
-      // Remove the completed tasks from the dictionary and dispose of their CTS.
-      foreach (var taskKey in completedTaskKeys)
-      {
-        if (_workerTasks.TryRemove(taskKey, out var cts))
-        {
+          // We successfully removed it, so we own the CTS and should dispose it
           cts.Dispose();
         }
       }
@@ -164,29 +166,24 @@ namespace Mindscape.Raygun4Net
     /// <param name="count">Number of workers to kill off.</param>
     private void RemoveExcessWorkers(int count)
     {
-      var rentedArray = ArrayPool<KeyValuePair<Task, CancellationTokenSource>>.Shared.Rent(count);
-      var index = 0;
+      // Use ToArray() to get a stable snapshot that won't change during iteration
+      // This prevents issues with collection modification during enumeration
+      var snapshot = _workerTasks.ToArray();
+      var removed = 0;
 
-      foreach (var kvp in _workerTasks)
+      foreach (var kvp in snapshot)
       {
-        if (index == count)
+        if (removed >= count)
         {
           break;
         }
 
-        rentedArray[index++] = kvp;
-      }
-
-      for (var i = 0; i < index; i++)
-      {
-        var kvp = rentedArray[i];
-
-        // It's possible the task is no longer in _workerTasks if it was removed by RemoveCompletedTasks
-        // concurrently, or if it completed and its continuation (AdjustWorkers) ran and removed it.
-        // So, we only cancel + dispose if we successfully remove it here, ensuring single ownership of disposal.
+        // Try to remove this worker - it might have already been removed by another thread
+        // or completed and cleaned up by RemoveCompletedTasks
         if (_workerTasks.TryRemove(kvp.Key, out var cts))
         {
-          // Only cancel if not already cancelled to avoid ObjectDisposedException on CancellationTokenSource
+          // We successfully removed it, so we own the CTS and should dispose it
+          // Only cancel if not already cancelled to avoid ObjectDisposedException
           if (!cts.IsCancellationRequested)
           {
             try
@@ -195,32 +192,67 @@ namespace Mindscape.Raygun4Net
             }
             catch (ObjectDisposedException)
             {
-              // Ignore if already disposed by another thread.
+              // Ignore if already disposed by another thread
             }
           }
           cts.Dispose();
+          removed++;
         }
       }
-
-      ArrayPool<KeyValuePair<Task, CancellationTokenSource>>.Shared.Return(rentedArray);
     }
 
     /// <summary>
     /// Spin up a new worker task to process messages. This method is called by AdjustWorkers when the number of workers is less than the desired number.
     /// When a task completes it will adjust the number of workers again in case the queue size has changed.
     /// </summary>
-    private void CreateWorkerTask()
+    /// <returns>True if worker was created, false if limit was reached</returns>
+    private bool CreateWorkerTask()
     {
+      // Check limit just before adding to minimize race window
+      // We need to check total tasks in dictionary, not just running ones, because
+      // newly created tasks might not be in Running state yet
+      if (_workerTasks.Count >= _maxWorkerTasks && _maxWorkerTasks > 0)
+      {
+        return false;
+      }
+
       var cts = CancellationTokenSource.CreateLinkedTokenSource(_globalCancellationSource.Token);
 
       var task = Task.Run(() => RaygunMessageWorker(_messageQueue, _processCallback, cts.Token), cts.Token);
-      _workerTasks[task] = cts;
+      
+      // Final atomic check - if we're at the limit after adding, remove what we just added
+      var previousValue = _workerTasks.GetOrAdd(task, cts);
+      if (previousValue != cts)
+      {
+        // This should never happen since task is unique, but if it does, clean up
+        cts.Dispose();
+        return false;
+      }
 
-      // When the worker task completes, adjust the number of workers
-      // Using ExecuteSynchronously can be problematic if AdjustWorkers itself blocks for long periods or deadlocks.
-      // Consider TaskScheduler.Default if issues arise.
-      task.ContinueWith(_ => AdjustWorkers(), CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+      // Double-check after adding - if we exceeded limit, remove and return false
+      if (_workerTasks.Count > _maxWorkerTasks && _maxWorkerTasks > 0)
+      {
+        if (_workerTasks.TryRemove(task, out var removedCts))
+        {
+          removedCts.Dispose();
+        }
+        return false;
+      }
+
+      // When the worker task completes, adjust workers if there are still messages to process
+      // Use a simple continuation to avoid blocking the completing task
+      task.ContinueWith(_ => 
+      {
+        // Only adjust if there are messages in the queue and we're not disposing
+        if (_messageQueue.Count > 0 && !_isDisposing)
+        {
+          AdjustWorkers();
+        }
+      }, CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
+      
+      return true;
     }
+
 
     /// <summary>
     /// Calculate the desired number of workers based on the queue size. This method is used by AdjustWorkers.
@@ -287,23 +319,65 @@ namespace Mindscape.Raygun4Net
 
       try
       {
-        foreach (var kvp in _workerTasks)
-        {
-          if (_workerTasks.TryRemove(kvp.Key, out var cts))
-          {
-            if (!cts.IsCancellationRequested)
-            {
-              cts.Cancel();
-            }
-
-            cts.Dispose();
-          }
-        }
-
+        // First, cancel the global cancellation source to stop new work and continuations
         _globalCancellationSource.Cancel();
 
-        Task.WaitAll(_workerTasks.Keys.ToArray(), TimeSpan.FromSeconds(2));
+        // Acquire the worker adjustment lock to prevent concurrent modifications during disposal
+        // This ensures AdjustWorkers() calls will see _isDisposing = true and exit early
+        lock (_workerTaskMutex)
+        {
+          // Get a stable snapshot of current workers to avoid enumeration issues
+          var workerSnapshot = _workerTasks.ToArray();
+          var tasksToWait = new List<Task>();
 
+          // Cancel and collect all workers
+          foreach (var kvp in workerSnapshot)
+          {
+            if (_workerTasks.TryRemove(kvp.Key, out var cts))
+            {
+              if (!cts.IsCancellationRequested)
+              {
+                try
+                {
+                  cts.Cancel();
+                }
+                catch (ObjectDisposedException)
+                {
+                  // Ignore if already disposed by another thread
+                }
+              }
+
+              // Collect tasks to wait for, but don't dispose CTS yet
+              tasksToWait.Add(kvp.Key);
+              
+              // We'll dispose the CTS after waiting for the task
+            }
+          }
+
+          // Wait for all workers to complete with a reasonable timeout
+          if (tasksToWait.Count > 0)
+          {
+            try
+            {
+              Task.WaitAll(tasksToWait.ToArray(), TimeSpan.FromSeconds(2));
+            }
+            catch (AggregateException)
+            {
+              // Some tasks may have been cancelled or faulted - that's expected
+            }
+          }
+
+          // Now dispose all remaining CancellationTokenSources
+          foreach (var kvp in workerSnapshot)
+          {
+            if (_workerTasks.TryRemove(kvp.Key, out var cts))
+            {
+              cts.Dispose();
+            }
+          }
+        } // End of lock (_workerTaskMutex)
+
+        // Finally dispose the global cancellation source
         _globalCancellationSource.Dispose();
       }
       catch (Exception ex)
