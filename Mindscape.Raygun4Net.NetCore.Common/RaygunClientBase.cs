@@ -550,11 +550,11 @@ namespace Mindscape.Raygun4Net
 
     private async Task SendPayloadAsync(string payload, string apiKey, bool useOfflineStore, CancellationToken cancellationToken)
     {
-      HttpResponseMessage response = null;
-      var requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
+      using var requestMessage = new HttpRequestMessage(HttpMethod.Post, _settings.ApiEndpoint);
       requestMessage.Headers.Add("X-ApiKey", apiKey);
       requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
 
+      HttpResponseMessage response = null;
       try
       {
         response = await _client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
@@ -577,6 +577,10 @@ namespace Mindscape.Raygun4Net
         }
 
         throw;
+      }
+      finally
+      {
+        response?.Dispose();
       }
     }
 
