@@ -1,7 +1,6 @@
 #nullable enable
 
 using System;
-using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -84,12 +83,11 @@ namespace Mindscape.Raygun4Net
       try
       {
         // Remove any completed tasks, otherwise we might not have space to add new tasks that want to do work
-        RemoveCompletedTasks();
+        // Count active workers (not completed) rather than just Running to avoid race conditions with task status transitions
+        var activeWorkers = RemoveCompletedTasks();
 
         // Calculate the desired number of workers based on the queue size, this is so we don't end up creating
         // many workers that essentially do nothing, or if there's a small number of errors we don't have too many workers
-        // Count active workers (not completed) rather than just Running to avoid race conditions with task status transitions
-        var activeWorkers = _workerTasks.Count(x => !x.Key.IsCompleted);
         var desiredWorkers = CalculateDesiredWorkers(_messageQueue.Count);
 
         if (desiredWorkers > activeWorkers)
@@ -124,10 +122,10 @@ namespace Mindscape.Raygun4Net
       // Simple retry logic: if there are messages queued but no active workers, try once more
       // This handles the edge case where all workers completed after we released the mutex
       // but avoids the complexity and race conditions of the recursive call
-      if (_messageQueue.Count > 0)
+      if (!_messageQueue.IsEmpty)
       {
         // Quick check if we might need workers - avoid expensive All() enumeration
-        var hasActiveWorkers = _workerTasks.Count > 0 && _workerTasks.Any(x => !x.Key.IsCompleted);
+        var hasActiveWorkers = !_workerTasks.IsEmpty && _workerTasks.Any(x => !x.Key.IsCompleted);
         if (!hasActiveWorkers)
         {
           // Try to adjust workers one more time, but with breakAfterRun=true to prevent infinite loops
@@ -140,22 +138,37 @@ namespace Mindscape.Raygun4Net
     /// A task may be in a completed state but not yet removed from the dictionary. This method removes any completed tasks.
     /// Completed means the task has finished executing, whether it was successful or not. (Failed, Successful, Faulted, etc.)
     /// </summary>
-    private void RemoveCompletedTasks()
+    private int RemoveCompletedTasks()
     {
+      var activeWorkers = 0;
+      if (_workerTasks.IsEmpty)
+      {
+        return activeWorkers;
+      }
+
       // Use ToArray() to get a stable snapshot that won't change during iteration
       // This prevents issues with collection modification during enumeration
       var snapshot = _workerTasks.ToArray();
-      
+
       foreach (var kvp in snapshot)
       {
-        // Double-check the task is still completed (it might have changed state or been removed)
-        // Use TryRemove to atomically remove only if it exists and we get ownership
-        if (kvp.Key.IsCompleted && _workerTasks.TryRemove(kvp.Key, out var cts))
+        if (kvp.Key.IsCompleted)
         {
-          // We successfully removed it, so we own the CTS and should dispose it
-          cts.Dispose();
+          // Double-check the task is still completed (it might have changed state or been removed)
+          // Use TryRemove to atomically remove only if it exists and we get ownership
+          if (_workerTasks.TryRemove(kvp.Key, out var cts))
+          {
+            // We successfully removed it, so we own the CTS and should dispose it
+            cts.Dispose();
+          }
+        }
+        else
+        {
+          activeWorkers++;
         }
       }
+
+      return activeWorkers;
     }
 
     /// <summary>
@@ -211,7 +224,7 @@ namespace Mindscape.Raygun4Net
       // Check limit just before adding to minimize race window
       // We need to check total tasks in dictionary, not just running ones, because
       // newly created tasks might not be in Running state yet
-      if (_workerTasks.Count >= _maxWorkerTasks && _maxWorkerTasks > 0)
+      if (_maxWorkerTasks > 0 && !_workerTasks.IsEmpty && _workerTasks.Count >= _maxWorkerTasks)
       {
         return false;
       }
@@ -230,7 +243,7 @@ namespace Mindscape.Raygun4Net
       }
 
       // Double-check after adding - if we exceeded limit, remove and return false
-      if (_workerTasks.Count > _maxWorkerTasks && _maxWorkerTasks > 0)
+      if (_maxWorkerTasks > 0 && _workerTasks.Count > _maxWorkerTasks)
       {
         if (_workerTasks.TryRemove(task, out var removedCts))
         {
@@ -244,7 +257,7 @@ namespace Mindscape.Raygun4Net
       task.ContinueWith(_ => 
       {
         // Only adjust if there are messages in the queue and we're not disposing
-        if (_messageQueue.Count > 0 && !_isDisposing)
+        if (!_messageQueue.IsEmpty && !_isDisposing)
         {
           AdjustWorkers();
         }
