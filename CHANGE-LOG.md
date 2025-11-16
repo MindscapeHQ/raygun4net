@@ -1,8 +1,16 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v11.2.5
+- Performance: Resolve Raygun Assembly Version once instead of per message
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/556
+- Fix: Improve thread safety in ThrottledBackgroundMessageProcessor
+  - Refactored to avoid racy Count checks by using IsEmpty and returning active worker count from RemoveCompletedTasks
+  - Optimized ConcurrentDictionary access patterns to reduce unnecessary enumerations
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/571
+
 ### v11.2.4
 - Fix: #568 - maxWorkers in ThrottledBackgroundMessageProcessor is not respected and can exceed the desired amount
-  - See: https://github.com/MindscapeHQ/raygun4net/pull/569 
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/569
 
 ### v11.2.3
 
@@ -53,7 +61,7 @@ Includes changes from v11.2.1
 
 ### v11.0.2
 - Fix null signature issue when Debug Symbols are set to None and the application is built in Release mode
-  - See: https://github.com/MindscapeHQ/raygun4net/pull/535 
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/535
 
 ### v11.0.1
 - Raygun4Net.NetCore
@@ -84,7 +92,7 @@ Includes changes from v11.2.1
 - Cleanup of the constructors for Net Core RaygunClient
   - See: https://github.com/MindscapeHQ/raygun4net/pull/525
 - Reduce overhead of RaygunBreadcrumb
-  - See: https://github.com/MindscapeHQ/raygun4net/pull/524 
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/524
 
 ### v10.1.0
 - Add support for capturing Environment Variables in NetCore
@@ -95,7 +103,7 @@ Includes changes from v11.2.1
 ### v10.0.0
 - RaygunClient for NET Core can now be treated as a Singleton
 - Changed the Middleware for AspNetCore
-  - See: https://github.com/MindscapeHQ/raygun4net/pull/518 
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/518
   - Updated the registration of `.AddRaygun()`
   - Updated the usage of `.UseRaygun()`
   - Removed `RaygunMiddlewareSettings` and `RaygunClientProvider` in favour of `IRaygunUserProvider`
@@ -118,7 +126,7 @@ Includes changes from v11.2.1
 
 ### v9.0.3
 - Fixed `RaygunWebApiClient` constructor to create `ThrottledBackgroundMessageProcessor` when the empty constructor is used
-  - See: https://github.com/MindscapeHQ/raygun4net/pull/519 
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/519
 
 ### v9.0.2
 - Remove the usage of `ThreadLocal` in the RaygunClient (for .NET Framework)
