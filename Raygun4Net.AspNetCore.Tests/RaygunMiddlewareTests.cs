@@ -387,4 +387,125 @@ public class RaygunMiddlewareTests
 
     raygunMsg.Details.User.Should().BeNull();
   }
+
+  [Test]
+  public async Task WhenIsRawDataIgnoredIsFalse_RequestBodyShouldBeBuffered()
+  {
+    // Test re-init with IsRawDataIgnored = false (default) - buffering should be enabled
+    var builder = new HostBuilder().ConfigureWebHost(webBuilder =>
+    {
+      webBuilder.UseTestServer()
+                .ConfigureServices((_, services) =>
+                {
+                  services.AddRouting();
+                  services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetService<RaygunSettings>(), _httpClient));
+                  services.AddRaygun(options: settings =>
+                  {
+                    settings.ApiKey = "banana";
+                    settings.IsRawDataIgnored = false;
+                  });
+                })
+                .Configure(app =>
+                {
+                  app.UseRouting();
+                  app.UseRaygun();
+                  app.UseEndpoints(endpoints =>
+                  {
+                    endpoints.MapPost("/post-exception", async context =>
+                    {
+                      // Read the body to verify buffering works
+                      using var reader = new StreamReader(context.Request.Body);
+                      var body = await reader.ReadToEndAsync();
+                      
+                      // Reset position to prove buffering is enabled
+                      context.Request.Body.Position = 0;
+                      
+                      throw new Exception("Post exception with body: " + body);
+                    });
+                  });
+                });
+    });
+
+    var host = await builder.StartAsync();
+    var client = host.GetTestClient();
+
+    _mockHttp.When(match => match.Method(HttpMethod.Post).RequestUri("https://api.raygun.com/entries"))
+             .Respond(x =>
+             {
+               x.Body("OK");
+               x.StatusCode(HttpStatusCode.Accepted);
+             }).Verifiable();
+
+    var content = new StringContent("{\"test\":\"data\"}", System.Text.Encoding.UTF8, "application/json");
+    Func<Task> act = async () => await client.PostAsync("/post-exception", content);
+
+    await act.Should().ThrowAsync<Exception>().WithMessage("Post exception with body: {\"test\":\"data\"}");
+
+    await Task.Delay(500);
+
+    _mockHttp.InvokedRequests.Should().HaveCount(1);
+  }
+
+  [Test]
+  public async Task WhenIsRawDataIgnoredIsTrue_RequestBodyStreamShouldNotBeBuffered()
+  {
+    // Test re-init with IsRawDataIgnored = true - buffering should be disabled for performance
+    var builder = new HostBuilder().ConfigureWebHost(webBuilder =>
+    {
+      webBuilder.UseTestServer()
+                .ConfigureServices((_, services) =>
+                {
+                  services.AddRouting();
+                  services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetService<RaygunSettings>(), _httpClient));
+                  services.AddRaygun(options: settings =>
+                  {
+                    settings.ApiKey = "banana";
+                    settings.IsRawDataIgnored = true;
+                  });
+                })
+                .Configure(app =>
+                {
+                  app.UseRouting();
+                  app.UseRaygun();
+                  app.UseEndpoints(endpoints =>
+                  {
+                    endpoints.MapPost("/post-exception", async context =>
+                    {
+                      // Read the body
+                      using var reader = new StreamReader(context.Request.Body);
+                      var body = await reader.ReadToEndAsync();
+                      
+                      // When buffering is disabled (IsRawDataIgnored = true), CanSeek should be false
+                      var canSeek = context.Request.Body.CanSeek;
+                      
+                      throw new Exception($"CanSeek: {canSeek}");
+                    });
+                  });
+                });
+    });
+
+    var host = await builder.StartAsync();
+    var client = host.GetTestClient();
+
+    _mockHttp.When(match => match.Method(HttpMethod.Post).RequestUri("https://api.raygun.com/entries"))
+             .Respond(x =>
+             {
+               x.Body("OK");
+               x.StatusCode(HttpStatusCode.Accepted);
+             }).Verifiable();
+
+    var content = new StringContent("{\"test\":\"data\"}", System.Text.Encoding.UTF8, "application/json");
+    Func<Task> act = async () => await client.PostAsync("/post-exception", content);
+
+    // When IsRawDataIgnored is true, the stream should not be seekable (buffering disabled)
+    await act.Should().ThrowAsync<Exception>().WithMessage("CanSeek: False");
+  }
+
+  [Test]
+  public async Task WhenIsRawDataIgnoredIsDefault_ShouldBeFalse()
+  {
+    // Test that default value is false (raw data is captured by default, buffering enabled)
+    var settings = new RaygunSettings();
+    settings.IsRawDataIgnored.Should().BeFalse();
+  }
 }
