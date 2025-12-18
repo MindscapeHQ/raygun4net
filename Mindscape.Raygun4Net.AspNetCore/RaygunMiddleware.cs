@@ -30,7 +30,12 @@ public class RaygunMiddleware
 
   public async Task Invoke(HttpContext httpContext)
   {
-    httpContext.Request.EnableBuffering();
+    // Only enable buffering if we're going to capture the request body
+    // IsRawDataIgnored = true means we won't capture raw data, so no need to buffer
+    if (!_settings.IsRawDataIgnored)
+    {
+      httpContext.Request.EnableBuffering();
+    }
     
     if (RaygunBreadcrumbs.Storage is IContextAwareStorage storage)
     {
