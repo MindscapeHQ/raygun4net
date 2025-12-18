@@ -7,6 +7,9 @@
   - Refactored to avoid racy Count checks by using IsEmpty and returning active worker count from RemoveCompletedTasks
   - Optimized ConcurrentDictionary access patterns to reduce unnecessary enumerations
   - See: https://github.com/MindscapeHQ/raygun4net/pull/571
+- Performance: Use IsRawDataIgnored setting to control request buffering in RaygunMiddleware
+  - Only enables `Request.EnableBuffering()` when `IsRawDataIgnored` is `false`, reducing overhead in high-throughput applications
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/574
 
 ### v11.2.4
 - Fix: #568 - maxWorkers in ThrottledBackgroundMessageProcessor is not respected and can exceed the desired amount
