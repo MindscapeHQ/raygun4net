@@ -13,6 +13,8 @@ namespace Mindscape.Raygun4Net.Platforms
 
 #if NET6_0_OR_GREATER
     [DynamicDependency("UnhandledException", "Microsoft.UI.Xaml.Application", "Microsoft.WinUI")]
+    [UnconditionalSuppressMessage("Trimming", "IL2035",
+      Justification = "Platform assemblies are conditionally loaded at runtime; missing assemblies are expected on non-target platforms.")]
 #endif
     public static bool TryAttachExceptionHandlers()
     {
