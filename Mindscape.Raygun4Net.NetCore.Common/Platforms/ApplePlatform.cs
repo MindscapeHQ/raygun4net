@@ -21,6 +21,8 @@ namespace Mindscape.Raygun4Net.Platforms
     [DynamicDependency("MarshalManagedExceptionMode", "ObjCRuntime", "Microsoft.iOS")]
     [DynamicDependency("MarshalManagedException", "ObjCRuntime.Runtime", "Microsoft.MacCatalyst")]
     [DynamicDependency("MarshalManagedExceptionMode", "ObjCRuntime", "Microsoft.MacCatalyst")]
+    [UnconditionalSuppressMessage("Trimming", "IL2035",
+      Justification = "Platform assemblies are conditionally loaded at runtime; missing assemblies are expected on non-target platforms.")]
 #endif
     public static bool TryAttachExceptionHandlers()
     {
