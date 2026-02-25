@@ -18,9 +18,9 @@ namespace Mindscape.Raygun4Net.Platforms
     // from being trimmed by the compiler.
     // Not supported in netstandard2.0.
     [DynamicDependency("MarshalManagedException", "ObjCRuntime.Runtime", "Microsoft.iOS")]
-    [DynamicDependency("MarshalManagedExceptionMode", "ObjCRuntime", "Microsoft.iOS")]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicFields, "ObjCRuntime.MarshalManagedExceptionMode", "Microsoft.iOS")]
     [DynamicDependency("MarshalManagedException", "ObjCRuntime.Runtime", "Microsoft.MacCatalyst")]
-    [DynamicDependency("MarshalManagedExceptionMode", "ObjCRuntime", "Microsoft.MacCatalyst")]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicFields, "ObjCRuntime.MarshalManagedExceptionMode", "Microsoft.MacCatalyst")]
     [UnconditionalSuppressMessage("Trimming", "IL2035",
       Justification = "Platform assemblies are conditionally loaded at runtime; missing assemblies are expected on non-target platforms.")]
 #endif
