@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 namespace Mindscape.Raygun4Net.Breadcrumbs
@@ -51,6 +52,10 @@ namespace Mindscape.Raygun4Net.Breadcrumbs
       _storage.Store(crumb);
     }
 
+#if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+      Justification = "StackFrame.GetMethod() is required for populating breadcrumb location; method metadata may be incomplete in trimmed apps but is best-effort.")]
+#endif
     private static void PopulateLocation(RaygunBreadcrumb crumb, int stackTraceFrame)
     {
       var frame = new StackFrame(stackTraceFrame);

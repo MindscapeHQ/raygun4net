@@ -11,8 +11,8 @@ namespace Mindscape.Raygun4Net.Platforms
 
 #if NET6_0_OR_GREATER
     [DynamicDependency("UnhandledExceptionRaiser", "Android.Runtime.AndroidEnvironment", "Mono.Android")]
-    [UnconditionalSuppressMessage("Trimming", "IL2035",
-      Justification = "Platform assemblies are conditionally loaded at runtime; missing assemblies are expected on non-target platforms.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075",
+      Justification = "Platform types are resolved via reflection from conditionally loaded assemblies.")]
 #endif
     public static bool TryAttachExceptionHandlers()
     {
@@ -48,6 +48,10 @@ namespace Mindscape.Raygun4Net.Platforms
       return true;
     }
 
+#if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2075",
+      Justification = "Platform types are resolved via reflection from conditionally loaded assemblies.")]
+#endif
     private static void AndroidUnhandledExceptionHandler(object sender, object exceptionArgs)
     {
       Exception exception;

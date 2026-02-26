@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.PortableExecutable;
@@ -50,6 +51,10 @@ namespace Mindscape.Raygun4Net
       return BuildStackTrace(stackTrace);
     }
 
+#if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+      Justification = "StackFrame.GetMethod() is required for building stack traces; method metadata may be incomplete in trimmed apps but is best-effort.")]
+#endif
     public static RaygunErrorStackTraceLineMessage[] BuildStackTrace(StackTrace stackTrace)
     {
       var lines = new List<RaygunErrorStackTraceLineMessage>();

@@ -18,11 +18,11 @@ namespace Mindscape.Raygun4Net.Platforms
     // from being trimmed by the compiler.
     // Not supported in netstandard2.0.
     [DynamicDependency("MarshalManagedException", "ObjCRuntime.Runtime", "Microsoft.iOS")]
-    [DynamicDependency("MarshalManagedExceptionMode", "ObjCRuntime", "Microsoft.iOS")]
+    [DynamicDependency("MarshalManagedExceptionMode", "ObjCRuntime.MarshalManagedExceptionMode", "Microsoft.iOS")]
     [DynamicDependency("MarshalManagedException", "ObjCRuntime.Runtime", "Microsoft.MacCatalyst")]
-    [DynamicDependency("MarshalManagedExceptionMode", "ObjCRuntime", "Microsoft.MacCatalyst")]
-    [UnconditionalSuppressMessage("Trimming", "IL2035",
-      Justification = "Platform assemblies are conditionally loaded at runtime; missing assemblies are expected on non-target platforms.")]
+    [DynamicDependency("MarshalManagedExceptionMode", "ObjCRuntime.MarshalManagedExceptionMode", "Microsoft.MacCatalyst")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075",
+      Justification = "Platform types are resolved via reflection from conditionally loaded assemblies.")]
 #endif
     public static bool TryAttachExceptionHandlers()
     {
@@ -72,6 +72,10 @@ namespace Mindscape.Raygun4Net.Platforms
       return true;
     }
 
+#if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2075",
+      Justification = "Platform types are resolved via reflection from conditionally loaded assemblies.")]
+#endif
     private static void SetAppleUnwindNative(object sender, object e)
     {
       try

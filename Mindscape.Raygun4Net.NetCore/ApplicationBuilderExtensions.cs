@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,7 +49,11 @@ public static class ApplicationBuilderExtensions
   /// <summary>
   /// Registers a custom User Provider with the DI container. This allows you to provide your own implementation of IRaygunUserProvider.
   /// </summary>
-  public static IServiceCollection AddRaygunUserProvider<T>(this IServiceCollection services) where T : class, IRaygunUserProvider
+  public static IServiceCollection AddRaygunUserProvider<
+#if NET6_0_OR_GREATER
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+    T>(this IServiceCollection services) where T : class, IRaygunUserProvider
   {
     // In case the default or any other user provider is already registered, remove it first
     var existing = services.FirstOrDefault(x => x.ServiceType == typeof(IRaygunUserProvider));
