@@ -13,8 +13,19 @@ namespace Mindscape.Raygun4Net.Platforms
 
 #if NET6_0_OR_GREATER
     [DynamicDependency("UnhandledException", "Microsoft.UI.Xaml.Application", "Microsoft.WinUI")]
+    [DynamicDependency("add_UnhandledException", "Microsoft.UI.Xaml.Application", "Microsoft.WinUI")]
+    [DynamicDependency("Current", "Microsoft.UI.Xaml.Application", "Microsoft.WinUI")]
+    [DynamicDependency("get_Current", "Microsoft.UI.Xaml.Application", "Microsoft.WinUI")]
+    [DynamicDependency("Handled", "Microsoft.UI.Xaml.UnhandledExceptionEventArgs", "Microsoft.WinUI")]
+    [DynamicDependency("get_Handled", "Microsoft.UI.Xaml.UnhandledExceptionEventArgs", "Microsoft.WinUI")]
+    [DynamicDependency("Exception", "Microsoft.UI.Xaml.UnhandledExceptionEventArgs", "Microsoft.WinUI")]
+    [DynamicDependency("get_Exception", "Microsoft.UI.Xaml.UnhandledExceptionEventArgs", "Microsoft.WinUI")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+      Justification = "Assembly.GetType() is used to resolve platform types from conditionally loaded assemblies; types are preserved via DynamicDependency.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2035",
+      Justification = "Platform assemblies are conditionally loaded at runtime; missing assemblies are expected on non-target platforms.")]
     [UnconditionalSuppressMessage("Trimming", "IL2075",
-      Justification = "Platform types are resolved via reflection from conditionally loaded assemblies.")]
+      Justification = "Platform types are resolved via reflection from conditionally loaded assemblies; members are preserved via DynamicDependency.")]
 #endif
     public static bool TryAttachExceptionHandlers()
     {
@@ -32,14 +43,22 @@ namespace Mindscape.Raygun4Net.Platforms
 
         // Get the Type of Microsoft.UI.Xaml.Application
         var applicationType = WinUIAssembly.GetType("Microsoft.UI.Xaml.Application");
-        var eventInfo = applicationType.GetEvent("UnhandledException");
-        var application = applicationType.GetProperty("Current").GetValue(null);
+        var eventInfo = applicationType?.GetEvent("UnhandledException");
+        var currentProperty = applicationType?.GetProperty("Current");
+
+        if (applicationType is null || eventInfo?.EventHandlerType is null || currentProperty is null)
+        {
+          Debug.WriteLine("Could not resolve Microsoft.UI.Xaml types - they may have been trimmed.");
+          return false;
+        }
+
+        var application = currentProperty.GetValue(null);
 
         // We need to create a wrapper around the target because the handler is fired with
         // Microsoft.UI.Xaml.UnhandledExceptionEventArgs rather than System.UnhandledExceptionEventArgs
         var eventHandler = new EventHandler(WinUIUnhandledExceptionHandler);
         var typedHandler =
-          Delegate.CreateDelegate(eventInfo.EventHandlerType!, eventHandler.Target, eventHandler.Method);
+          Delegate.CreateDelegate(eventInfo.EventHandlerType, eventHandler.Target, eventHandler.Method);
 
         eventInfo.AddEventHandler(application, typedHandler);
         

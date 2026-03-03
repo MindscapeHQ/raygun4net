@@ -1338,6 +1338,10 @@ namespace Mindscape.Raygun4Net
                                                                  @"yyyy-MM-dd\THH:mm:ssK"
                                                              };
 
+#if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2111",
+      Justification = "Factory methods have DynamicallyAccessedMembers annotations that ensure reflected members are preserved. The generic ThreadSafeDictionary delegate bridge cannot propagate these annotations, but the annotations on the factory methods guarantee correctness.")]
+#endif
     public PocoJsonSerializerStrategy()
     {
       ConstructorCache = new ReflectionUtils.ThreadSafeDictionary<Type, ReflectionUtils.ConstructorDelegate>(ContructorDelegateFactory);
@@ -1350,12 +1354,20 @@ namespace Mindscape.Raygun4Net
       return clrPropertyName;
     }
 
-    internal virtual ReflectionUtils.ConstructorDelegate ContructorDelegateFactory(Type key)
+    internal virtual ReflectionUtils.ConstructorDelegate ContructorDelegateFactory(
+#if NET6_0_OR_GREATER
+      [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+      Type key)
     {
       return ReflectionUtils.GetContructor(key, key.IsArray ? ArrayConstructorParameterTypes : EmptyTypes);
     }
 
-    internal virtual IDictionary<string, ReflectionUtils.GetDelegate> GetterValueFactory(Type type)
+    internal virtual IDictionary<string, ReflectionUtils.GetDelegate> GetterValueFactory(
+#if NET6_0_OR_GREATER
+      [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)]
+#endif
+      Type type)
     {
       IDictionary<string, ReflectionUtils.GetDelegate> result = new Dictionary<string, ReflectionUtils.GetDelegate>();
       foreach (PropertyInfo propertyInfo in ReflectionUtils.GetProperties(type))
@@ -1377,7 +1389,11 @@ namespace Mindscape.Raygun4Net
       return result;
     }
 
-    internal virtual IDictionary<string, KeyValuePair<Type, ReflectionUtils.SetDelegate>> SetterValueFactory(Type type)
+    internal virtual IDictionary<string, KeyValuePair<Type, ReflectionUtils.SetDelegate>> SetterValueFactory(
+#if NET6_0_OR_GREATER
+      [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)]
+#endif
+      Type type)
     {
       IDictionary<string, KeyValuePair<Type, ReflectionUtils.SetDelegate>> result = new Dictionary<string, KeyValuePair<Type, ReflectionUtils.SetDelegate>>();
       foreach (PropertyInfo propertyInfo in ReflectionUtils.GetProperties(type))
@@ -1611,7 +1627,11 @@ namespace Mindscape.Raygun4Net
             SetCache = new ReflectionUtils.ThreadSafeDictionary<Type, IDictionary<string, KeyValuePair<Type, ReflectionUtils.SetDelegate>>>(SetterValueFactory);
         }
 
-        internal override IDictionary<string, ReflectionUtils.GetDelegate> GetterValueFactory(Type type)
+        internal override IDictionary<string, ReflectionUtils.GetDelegate> GetterValueFactory(
+#if NET6_0_OR_GREATER
+          [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)]
+#endif
+          Type type)
         {
             bool hasDataContract = ReflectionUtils.GetAttribute(type, typeof(DataContractAttribute)) != null;
             if (!hasDataContract)
@@ -1635,7 +1655,11 @@ namespace Mindscape.Raygun4Net
             return result;
         }
 
-        internal override IDictionary<string, KeyValuePair<Type, ReflectionUtils.SetDelegate>> SetterValueFactory(Type type)
+        internal override IDictionary<string, KeyValuePair<Type, ReflectionUtils.SetDelegate>> SetterValueFactory(
+#if NET6_0_OR_GREATER
+          [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)]
+#endif
+          Type type)
         {
             bool hasDataContract = ReflectionUtils.GetAttribute(type, typeof(DataContractAttribute)) != null;
             if (!hasDataContract)
@@ -1820,7 +1844,11 @@ namespace Mindscape.Raygun4Net
         return GetTypeInfo(type).IsValueType;
       }
 
-      public static IEnumerable<ConstructorInfo> GetConstructors(Type type)
+      public static IEnumerable<ConstructorInfo> GetConstructors(
+#if NET6_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+        Type type)
       {
 #if SIMPLE_JSON_TYPEINFO
                 return type.GetTypeInfo().DeclaredConstructors;
@@ -1829,7 +1857,11 @@ namespace Mindscape.Raygun4Net
 #endif
       }
 
-      public static ConstructorInfo GetConstructorInfo(Type type, params Type[] argsType)
+      public static ConstructorInfo GetConstructorInfo(
+#if NET6_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+        Type type, params Type[] argsType)
       {
         IEnumerable<ConstructorInfo> constructorInfos = GetConstructors(type);
         int i;
@@ -1858,7 +1890,11 @@ namespace Mindscape.Raygun4Net
         return null;
       }
 
-      public static IEnumerable<PropertyInfo> GetProperties(Type type)
+      public static IEnumerable<PropertyInfo> GetProperties(
+#if NET6_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+#endif
+        Type type)
       {
 #if SIMPLE_JSON_TYPEINFO
                 return type.GetRuntimeProperties();
@@ -1867,7 +1903,11 @@ namespace Mindscape.Raygun4Net
 #endif
       }
 
-      public static IEnumerable<FieldInfo> GetFields(Type type)
+      public static IEnumerable<FieldInfo> GetFields(
+#if NET6_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)]
+#endif
+        Type type)
       {
 #if SIMPLE_JSON_TYPEINFO
                 return type.GetRuntimeFields();
@@ -1903,7 +1943,11 @@ namespace Mindscape.Raygun4Net
 #endif
       }
 
-      public static ConstructorDelegate GetContructor(Type type, params Type[] argsType)
+      public static ConstructorDelegate GetContructor(
+#if NET6_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+        Type type, params Type[] argsType)
       {
 #if SIMPLE_JSON_NO_LINQ_EXPRESSION
                 return GetConstructorByReflection(type, argsType);
@@ -1917,7 +1961,11 @@ namespace Mindscape.Raygun4Net
         return delegate(object[] args) { return constructorInfo.Invoke(args); };
       }
 
-      public static ConstructorDelegate GetConstructorByReflection(Type type, params Type[] argsType)
+      public static ConstructorDelegate GetConstructorByReflection(
+#if NET6_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+        Type type, params Type[] argsType)
       {
         ConstructorInfo constructorInfo = GetConstructorInfo(type, argsType);
         return constructorInfo == null ? null : GetConstructorByReflection(constructorInfo);
@@ -1944,7 +1992,11 @@ namespace Mindscape.Raygun4Net
         return delegate(object[] args) { return compiledLambda(args); };
       }
 
-      public static ConstructorDelegate GetConstructorByExpression(Type type, params Type[] argsType)
+      public static ConstructorDelegate GetConstructorByExpression(
+#if NET6_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+        Type type, params Type[] argsType)
       {
         ConstructorInfo constructorInfo = GetConstructorInfo(type, argsType);
         return constructorInfo == null ? null : GetConstructorByExpression(constructorInfo);
