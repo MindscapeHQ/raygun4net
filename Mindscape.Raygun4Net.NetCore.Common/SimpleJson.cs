@@ -576,7 +576,17 @@ namespace Mindscape.Raygun4Net
       return success;
     }
 
-    public static object DeserializeObject(string json, Type type, IJsonSerializerStrategy jsonSerializerStrategy)
+    public static object DeserializeObject(string json,
+#if NET6_0_OR_GREATER
+      [DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicProperties |
+        DynamicallyAccessedMemberTypes.NonPublicProperties |
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields |
+        DynamicallyAccessedMemberTypes.Interfaces)]
+#endif
+      Type type, IJsonSerializerStrategy jsonSerializerStrategy)
     {
       object jsonObject = DeserializeObject(json);
       return type == null || jsonObject != null && ReflectionUtils.IsAssignableFrom(jsonObject.GetType(), type)
@@ -584,17 +594,47 @@ namespace Mindscape.Raygun4Net
                  : (jsonSerializerStrategy ?? CurrentJsonSerializerStrategy).DeserializeObject(jsonObject, type);
     }
 
-    public static object DeserializeObject(string json, Type type)
+    public static object DeserializeObject(string json,
+#if NET6_0_OR_GREATER
+      [DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicProperties |
+        DynamicallyAccessedMemberTypes.NonPublicProperties |
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields |
+        DynamicallyAccessedMemberTypes.Interfaces)]
+#endif
+      Type type)
     {
       return DeserializeObject(json, type, null);
     }
 
-    public static T DeserializeObject<T>(string json, IJsonSerializerStrategy jsonSerializerStrategy)
+    public static T DeserializeObject<
+#if NET6_0_OR_GREATER
+      [DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicProperties |
+        DynamicallyAccessedMemberTypes.NonPublicProperties |
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields |
+        DynamicallyAccessedMemberTypes.Interfaces)]
+#endif
+      T>(string json, IJsonSerializerStrategy jsonSerializerStrategy)
     {
       return (T)DeserializeObject(json, typeof(T), jsonSerializerStrategy);
     }
 
-    public static T DeserializeObject<T>(string json)
+    public static T DeserializeObject<
+#if NET6_0_OR_GREATER
+      [DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicProperties |
+        DynamicallyAccessedMemberTypes.NonPublicProperties |
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields |
+        DynamicallyAccessedMemberTypes.Interfaces)]
+#endif
+      T>(string json)
     {
       return (T)DeserializeObject(json, typeof(T), null);
     }
@@ -1313,7 +1353,17 @@ namespace Mindscape.Raygun4Net
   {
     [SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate", Justification = "Need to support .NET 2")]
     bool TrySerializeNonPrimitiveObject(object input, out object output);
-    object DeserializeObject(object value, Type type);
+    object DeserializeObject(object value,
+#if NET6_0_OR_GREATER
+      [DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicProperties |
+        DynamicallyAccessedMemberTypes.NonPublicProperties |
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields |
+        DynamicallyAccessedMemberTypes.Interfaces)]
+#endif
+      Type type);
   }
 
   [GeneratedCode("simple-json", "1.0.0")]
@@ -1421,7 +1471,21 @@ namespace Mindscape.Raygun4Net
     }
 
     [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-    public virtual object DeserializeObject(object value, Type type)
+#if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2067",
+      Justification = "Recursive DeserializeObject calls pass types derived from reflection (generic args, element types, property types) which cannot carry DynamicallyAccessedMembers annotations. The root type is annotated and its members are preserved.")]
+#endif
+    public virtual object DeserializeObject(object value,
+#if NET6_0_OR_GREATER
+      [DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicProperties |
+        DynamicallyAccessedMemberTypes.NonPublicProperties |
+        DynamicallyAccessedMemberTypes.PublicFields |
+        DynamicallyAccessedMemberTypes.NonPublicFields |
+        DynamicallyAccessedMemberTypes.Interfaces)]
+#endif
+      Type type)
     {
       if (type == null) throw new ArgumentNullException("type");
       string str = value as string;
@@ -1593,6 +1657,10 @@ namespace Mindscape.Raygun4Net
       return returnValue;
     }
     [SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate", Justification = "Need to support .NET 2")]
+#if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2067",
+      Justification = "Type is obtained from input.GetType() at runtime and cannot carry DynamicallyAccessedMembers annotations. The serializer accesses public properties/fields which are preserved by the factory method annotations.")]
+#endif
     protected virtual bool TrySerializeUnknownTypes(object input, out object output)
     {
       if (input == null) throw new ArgumentNullException("input");
@@ -1744,7 +1812,11 @@ namespace Mindscape.Raygun4Net
 #endif
       }
 
-      public static Type GetGenericListElementType(Type type)
+      public static Type GetGenericListElementType(
+#if NET6_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)]
+#endif
+        Type type)
       {
         IEnumerable<Type> interfaces;
 #if SIMPLE_JSON_TYPEINFO
@@ -2125,6 +2197,12 @@ namespace Mindscape.Raygun4Net
         return delegate(object source, object val) { compiled(source, val); };
       }
 
+#if NET6_0_OR_GREATER
+      [UnconditionalSuppressMessage("Trimming", "IL2060",
+        Justification = "Assigner<T> is a known private inner class; its Assign method is always preserved.")]
+      [UnconditionalSuppressMessage("Trimming", "IL2075",
+        Justification = "Assigner<T> is a known private inner class; its Assign method is always preserved.")]
+#endif
       public static BinaryExpression Assign(Expression left, Expression right)
       {
 #if SIMPLE_JSON_TYPEINFO
