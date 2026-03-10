@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-ios26.2</TargetFramework>
+    <RootNamespace>ios_test</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
+    <Configurations>Debug;Release</Configurations>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore\Mindscape.Raygun4Net.NetCore.csproj" />
+  </ItemGroup>
+</Project>

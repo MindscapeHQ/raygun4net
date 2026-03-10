@@ -1472,8 +1472,10 @@ namespace Mindscape.Raygun4Net
 
     [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
 #if NET6_0_OR_GREATER
-    [UnconditionalSuppressMessage("Trimming", "IL2067",
+    [UnconditionalSuppressMessage("Trimming", "IL2062",
       Justification = "Recursive DeserializeObject calls pass types derived from reflection (generic args, element types, property types) which cannot carry DynamicallyAccessedMembers annotations. The root type is annotated and its members are preserved.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072",
+      Justification = "Recursive DeserializeObject calls pass types from GetElementType(), GetGenericListElementType(), and KeyValuePair.Key which cannot carry DynamicallyAccessedMembers annotations. The root type is annotated and its members are preserved.")]
 #endif
     public virtual object DeserializeObject(object value,
 #if NET6_0_OR_GREATER
@@ -1657,10 +1659,6 @@ namespace Mindscape.Raygun4Net
       return returnValue;
     }
     [SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate", Justification = "Need to support .NET 2")]
-#if NET6_0_OR_GREATER
-    [UnconditionalSuppressMessage("Trimming", "IL2067",
-      Justification = "Type is obtained from input.GetType() at runtime and cannot carry DynamicallyAccessedMembers annotations. The serializer accesses public properties/fields which are preserved by the factory method annotations.")]
-#endif
     protected virtual bool TrySerializeUnknownTypes(object input, out object output)
     {
       if (input == null) throw new ArgumentNullException("input");
@@ -2197,12 +2195,6 @@ namespace Mindscape.Raygun4Net
         return delegate(object source, object val) { compiled(source, val); };
       }
 
-#if NET6_0_OR_GREATER
-      [UnconditionalSuppressMessage("Trimming", "IL2060",
-        Justification = "Assigner<T> is a known private inner class; its Assign method is always preserved.")]
-      [UnconditionalSuppressMessage("Trimming", "IL2075",
-        Justification = "Assigner<T> is a known private inner class; its Assign method is always preserved.")]
-#endif
       public static BinaryExpression Assign(Expression left, Expression right)
       {
 #if SIMPLE_JSON_TYPEINFO

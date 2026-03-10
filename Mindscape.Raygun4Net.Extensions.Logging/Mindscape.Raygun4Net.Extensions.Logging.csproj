@@ -30,9 +30,13 @@
     <PackageTags>crash;exception-handling;exception-reporting;exception-handler;unhandled-exceptions;debugging;debug;bug;bugs;exceptions;error;errors;crash-reporting;logging;mslogger</PackageTags>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net6.0' Or '$(TargetFramework)' == 'net7.0'">
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0' And '$(TargetFramework)' != 'net6.0' And '$(TargetFramework)' != 'net7.0'">
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
