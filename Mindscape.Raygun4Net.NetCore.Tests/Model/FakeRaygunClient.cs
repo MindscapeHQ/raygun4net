@@ -7,6 +7,8 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
 {
   public class FakeRaygunClient : RaygunClient
   {
+
+    public RaygunSettings Settings => (RaygunSettings)_settings;
     public FakeRaygunClient() : base(new RaygunSettings { ApiKey = string.Empty }, null, [])
     {
     }

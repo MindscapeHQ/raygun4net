@@ -11,7 +11,7 @@
         
         public static RaygunClient GetClient()
         {
-            return new RaygunClient(_apiKey);
+            return new RaygunClient(new RaygunSettings { ApiKey = _apiKey });
         }
     }
 }

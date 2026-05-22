@@ -12,7 +12,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Tests.TestLib
             }
             catch (Exception e)
             {
-                RaygunClientFactory.GetClient().Send(e);
+                RaygunClientFactory.GetClient().SendInBackground(e);
             }
             
         }

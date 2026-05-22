@@ -32,20 +32,20 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     [Test]
     public void DefaultApplicationVersion()
     {
-      Assert.That(_client.ApplicationVersion, Is.Null);
+      Assert.That(_client.Settings.ApplicationVersion, Is.Null);
     }
 
     [Test]
     public void ApplicationVersionProperty()
     {
-      _client.ApplicationVersion = "Custom Version";
-      Assert.That("Custom Version", Is.EqualTo(_client.ApplicationVersion));
+      _client.Settings.ApplicationVersion = "Custom Version";
+      Assert.That("Custom Version", Is.EqualTo(_client.Settings.ApplicationVersion));
     }
 
     [Test]
     public void SetCustomApplicationVersion()
     {
-      _client.ApplicationVersion = "Custom Version";
+      _client.Settings.ApplicationVersion = "Custom Version";
 
       RaygunMessage message = _client.ExposeBuildMessage(_exception);
       Assert.That("Custom Version", Is.EqualTo(message.Details.Version));

@@ -43,7 +43,7 @@ public class RaygunMiddlewareTests
                 .ConfigureServices((_, services) =>
                 {
                   services.AddRouting();
-                  services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetService<RaygunSettings>(), _httpClient, s.GetService<IRaygunUserProvider>())
+                  services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetRequiredService<RaygunSettings>(), _httpClient, s.GetService<IRaygunUserProvider>() ?? NullRaygunUserProvider.Instance)
                   {
                     
                   });
@@ -215,7 +215,7 @@ public class RaygunMiddlewareTests
                 .ConfigureServices((_, services) =>
                 {
                   services.AddRouting();
-                  services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetService<RaygunSettings>(), _httpClient, s.GetService<IRaygunUserProvider>()));
+                  services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetRequiredService<RaygunSettings>(), _httpClient, s.GetService<IRaygunUserProvider>() ?? NullRaygunUserProvider.Instance));
                   services.AddRaygun(options: settings => { settings.ApiKey = "banana"; });
                   services.AddRaygunUserProvider<BananaUserProvider>();
                 })
@@ -306,7 +306,7 @@ public class RaygunMiddlewareTests
                 .ConfigureServices((_, services) =>
                 {
                   services.AddRouting();
-                  services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetService<RaygunSettings>(), _httpClient));
+                  services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetRequiredService<RaygunSettings>(), _httpClient));
                   services.AddRaygun(options: settings =>
                   {
                     settings.ApiKey = "banana";
@@ -350,7 +350,7 @@ public class RaygunMiddlewareTests
                 .ConfigureServices((_, services) =>
                 {
                   services.AddRouting();
-                  services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetService<RaygunSettings>(), _httpClient));
+                  services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetRequiredService<RaygunSettings>(), _httpClient));
                   services.AddRaygun(options: settings =>
                   {
                     settings.ApiKey = "banana";
@@ -398,7 +398,7 @@ public class RaygunMiddlewareTests
                 .ConfigureServices((_, services) =>
                 {
                   services.AddRouting();
-                  services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetService<RaygunSettings>(), _httpClient));
+                  services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetRequiredService<RaygunSettings>(), _httpClient));
                   services.AddRaygun(options: settings =>
                   {
                     settings.ApiKey = "banana";
@@ -456,7 +456,7 @@ public class RaygunMiddlewareTests
                 .ConfigureServices((_, services) =>
                 {
                   services.AddRouting();
-                  services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetService<RaygunSettings>(), _httpClient));
+                  services.AddSingleton<RaygunClient>(s => new RaygunClient(s.GetRequiredService<RaygunSettings>(), _httpClient));
                   services.AddRaygun(options: settings =>
                   {
                     settings.ApiKey = "banana";
