@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using System;
 
 using System.Diagnostics;
 using System.IO;
@@ -115,7 +116,7 @@ namespace Mindscape.Raygun4Net.EnvironmentProviders
         CreateNoWindow = true
       };
 
-      Process p = Process.Start(psi);
+      using Process p = Process.Start(psi) ?? throw new InvalidOperationException("Failed to start bash process.");
       string output = p.StandardOutput.ReadToEnd();
       p.WaitForExit();
       return output;

@@ -184,7 +184,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       {
         if (ignore(key))
         {
-          ignoredFormValues.Add(key, form[key]);
+          ignoredFormValues.Add(key, form[key].ToString());
         }
       }
 
@@ -289,7 +289,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
             continue;
           }
           
-          headers[header.Key] = string.Join(",", header.Value);
+          headers[header.Key] = string.Join(",", header.Value.ToArray());
         }
       }
       catch (Exception e)
@@ -325,7 +325,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
 
       foreach (var value in query.Where(v => isQueryStringVariableIgnored(v.Key) == false && isSensitive(v.Key) == false))
       {
-        dict[value.Key] = string.Join(",", value.Value);
+        dict[value.Key] = string.Join(",", value.Value.ToArray());
       }
 
       return dict;
@@ -337,7 +337,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
 
       foreach (var value in query.Where(v => isFormFieldIgnored(v.Key) == false && isSensitive(v.Key) == false))
       {
-        dict[value.Key] = string.Join(",", value.Value);
+        dict[value.Key] = string.Join(",", value.Value.ToArray());
       }
 
       return dict;
