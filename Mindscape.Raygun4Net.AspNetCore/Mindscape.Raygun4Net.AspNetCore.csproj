@@ -30,7 +30,8 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.3.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -48,10 +49,10 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <InternalsVisibleTo Include="Raygun4Net.AspNetCore.Tests"/>
+    <InternalsVisibleTo Include="Raygun4Net.AspNetCore.Tests" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(Configuration)' == 'Release' ">
-    <InternalsVisibleTo Include="Raygun4Net.AspNetCore.Tests, PublicKey=$(RaygunPublicKey)"/>
+    <InternalsVisibleTo Include="Raygun4Net.AspNetCore.Tests, PublicKey=$(RaygunPublicKey)" />
   </ItemGroup>
 </Project>
