@@ -1,5 +1,10 @@
 # Full Change Log for Raygun4Net.* packages
 
+### v11.2.6
+- Fix: Restore `netstandard2.0` dependency resolution for Mindscape.Raygun4Net.AspNetCore
+  - Replace the unavailable `Microsoft.Extensions.Options.ConfigurationExtensions` v2.3.0 dependency with `Microsoft.Extensions.Configuration.Binder` v8.0.0
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/580
+
 ### v11.2.5
 - Performance: Resolve Raygun Assembly Version once instead of per message
   - See: https://github.com/MindscapeHQ/raygun4net/pull/556
