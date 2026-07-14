@@ -199,6 +199,16 @@ Toggle this boolean and the HTTP module will not send errors to Raygun if the re
 <RaygunSettings apikey="YOUR_APP_API_KEY" excludeErrorsFromLocal="true" />
 ```
 
+**Mask request IP addresses**
+
+Request IP address masking is disabled by default. Enable it to mask IPv4 addresses to a `/24` prefix and IPv6 addresses to a `/48` prefix while retaining any port:
+
+```xml
+<RaygunSettings apikey="YOUR_APP_API_KEY" isRequestIpAddressMasked="true" />
+```
+
+This masks the `RaygunRequestMessage.IPAddress` field only. If a proxy copies the original address into headers or server variables, configure the relevant ignore settings as well.
+
 **Remove sensitive request data**
 
 If you have sensitive data in an HTTP request that you wish to prevent being transmitted to Raygun, you can provide lists of possible keys (names) to remove.
@@ -455,5 +465,4 @@ The key has a maximum length of 100.
 `<RaygunSettings apikey="[Raygun4Net api key goes here]" throwOnError="true"/>`
 - These errors will start going to the event viewer or you could attach a trace listener and have them logged to a text file as well
 - There are many reasons why crash reports may not be sent through. In the Event that the error message mentions “*The underlying connection was closed: An unexpected error occurred on a send*.” This is probably a TLS handshake issue. Confirm this by inspecting the inner exception or the rest of the trace and look for cipher mismatch phrase. This will be a clear indication that there is a TLS issue. - To Resolve this Add the following global config where it is most convenient e.g. Global.asax  ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 Taking care not to include the less secure protocols like SSL3 and to some extent the TLS1.1.
-
 

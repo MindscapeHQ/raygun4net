@@ -23,7 +23,7 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
 
       var message = new RaygunRequestMessage
       {
-        IPAddress   = GetIPAddress(request),
+        IPAddress   = GetIPAddress(request, options),
         QueryString = GetQueryString(request, options),
         Form        = GetForm(request, options),
         RawData     = GetRawData(request, options),
@@ -44,7 +44,7 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       return message;
     }
 
-    private static string GetIPAddress(HttpRequestMessage request)
+    private static string GetIPAddress(HttpRequestMessage request, RaygunRequestMessageOptions options)
     {
       try
       {
@@ -54,7 +54,8 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
 
           if (ctx != null)
           {
-            return ctx.Request.UserHostAddress;
+            string address = ctx.Request.UserHostAddress;
+            return options.IsRequestIpAddressMasked ? IpAddressMasker.Mask(address) : address;
           }
         }
 
@@ -64,7 +65,8 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
 
           if (remoteEndpoint != null)
           {
-            return remoteEndpoint.Address;
+            string address = remoteEndpoint.Address;
+            return options.IsRequestIpAddressMasked ? IpAddressMasker.Mask(address) : address;
           }
         }
       }

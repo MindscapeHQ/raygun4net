@@ -1,5 +1,14 @@
 # Full Change Log for Raygun4Net.* packages
 
+### vTODO
+- Feature: Opt-in request IP address masking (`IsRequestIpAddressMasked`)
+  - Masks `RaygunRequestMessage.IPAddress` to IPv4 `/24` and IPv6 `/48` prefixes (ports retained)
+  - Supported on AspNetCore, MVC/Net4, and WebApi providers; disabled by default
+  - Classic Net4/WebApi IP extraction now accepts IPv6 (including bracketed forms) from X-Forwarded-For / REMOTE_ADDR
+  - XFF/REMOTE_ADDR acceptance uses strict port validation; masking still best-effort redacts the host when a port suffix is malformed
+  - AspNetCore: unmasked IPv6+port keeps the historical `addr:port` shape; masked IPv6+port uses unambiguous `[addr]:port`
+  - See: TODO https://github.com/MindscapeHQ/raygun4net/pull/TODO
+
 ### v11.2.6
 - Fix: Restore `netstandard2.0` dependency resolution for Mindscape.Raygun4Net.AspNetCore
   - Replace the unavailable `Microsoft.Extensions.Options.ConfigurationExtensions` v2.3.0 dependency with `Microsoft.Extensions.Configuration.Binder` v8.0.0

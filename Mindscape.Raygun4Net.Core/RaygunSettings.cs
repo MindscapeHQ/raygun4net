@@ -180,6 +180,17 @@ namespace Mindscape.Raygun4Net
       set { this["isRawDataIgnoredWhenFilteringFailed"] = value; }
     }
 
+    /// <summary>
+    /// Gets or sets whether request IP addresses are masked before being sent.
+    /// IPv4 addresses are masked to a /24 prefix and IPv6 addresses to a /48 prefix.
+    /// </summary>
+    [ConfigurationProperty("isRequestIpAddressMasked", IsRequired = false, DefaultValue = false)]
+    public bool IsRequestIpAddressMasked
+    {
+      get { return (bool)this["isRequestIpAddressMasked"]; }
+      set { this["isRequestIpAddressMasked"] = value; }
+    }
+
     [ConfigurationProperty("isResponseContentIgnored", IsRequired = false, DefaultValue = true)]
     public bool IsResponseContentIgnored
     {

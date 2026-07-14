@@ -22,6 +22,57 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
     }
 
     [Test]
+    public void RequestIpAddressMaskingCanBeConfigured()
+    {
+      _client.IsRequestIpAddressMasked = true;
+
+      Assert.That(_client.IsRequestIpAddressMasked, Is.True);
+    }
+
+    [Test]
+    public void RequestIpAddressMaskingIsCopiedFromSettingsOnConstruct()
+    {
+      var previous = RaygunSettings.Settings.IsRequestIpAddressMasked;
+      RaygunSettings.Settings.IsRequestIpAddressMasked = true;
+
+      try
+      {
+        var client = new FakeRaygunWebApiClient("API_KEY");
+
+        Assert.That(client.IsRequestIpAddressMasked, Is.True);
+        Assert.That(client.ExposeRequestMessageOptions.IsRequestIpAddressMasked, Is.True);
+      }
+      finally
+      {
+        RaygunSettings.Settings.IsRequestIpAddressMasked = previous;
+      }
+    }
+
+    [Test]
+    public void RequestIpAddressMaskingFlowsFromClientToBuiltRequestMessage()
+    {
+      using (var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, "http://example.com"))
+      {
+        request.Content = new System.Net.Http.StringContent(string.Empty);
+        dynamic context = new System.Dynamic.ExpandoObject();
+        context.Request = new System.Dynamic.ExpandoObject();
+        context.Request.UserHostAddress = "192.168.12.123";
+        request.Properties["MS_HttpContext"] = context;
+
+        var client = new FakeRaygunWebApiClient("API_KEY")
+        {
+          IsRequestIpAddressMasked = true
+        };
+
+        var message = Mindscape.Raygun4Net.WebApi.Builders.RaygunWebApiRequestMessageBuilder.Build(
+          request,
+          client.ExposeRequestMessageOptions);
+
+        Assert.That(message.IPAddress, Is.EqualTo("192.168.12.0"));
+      }
+    }
+
+    [Test]
     public void CanNotSendIfExcludingStatusCode()
     {
       RaygunSettings.Settings.ExcludeHttpStatusCodesList = "404";

@@ -102,6 +102,17 @@ i.e. A way to prevent local debug/development from notifying Raygun without havi
 
 <RaygunSettings apikey="YOUR_APP_API_KEY" excludeErrorsFromLocal="true" />
 
+Mask request IP addresses
+-------------------------
+
+Request IP address masking is disabled by default. Enable it to mask IPv4 addresses to a `/24` prefix and IPv6 addresses to a `/48` prefix while retaining any port:
+
+```
+<RaygunSettings apikey="YOUR_APP_API_KEY" isRequestIpAddressMasked="true" />
+```
+
+This masks the `RaygunRequestMessage.IPAddress` field only. If a proxy copies the original address into headers or server variables, configure the relevant ignore settings as well.
+
 Remove sensitive request data
 -----------------------------
 
