@@ -7,7 +7,7 @@
   - Classic Net4/WebApi IP extraction now accepts IPv6 (including bracketed forms) from X-Forwarded-For / REMOTE_ADDR
   - XFF/REMOTE_ADDR acceptance uses strict port validation; masking still best-effort redacts the host when a port suffix is malformed
   - AspNetCore: unmasked IPv6+port keeps the historical `addr:port` shape; masked IPv6+port uses unambiguous `[addr]:port`
-  - See: TODO https://github.com/MindscapeHQ/raygun4net/pull/TODO
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/583
 
 ### v11.2.6
 - Fix: Restore `netstandard2.0` dependency resolution for Mindscape.Raygun4Net.AspNetCore
