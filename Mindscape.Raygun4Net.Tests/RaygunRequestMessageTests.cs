@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Web;
+using System.Web.Hosting;
 using Mindscape.Raygun4Net.Builders;
 using Mindscape.Raygun4Net.Messages;
 using NUnit.Framework;
@@ -46,6 +48,91 @@ namespace Mindscape.Raygun4Net.Tests
       var message = RaygunRequestMessageBuilder.Build(_defaultRequest, null);
 
       Assert.That(message.HttpMethod, Is.EqualTo("GET"));
+    }
+
+    [TestCase("192.168.12.123", false, "192.168.12.123")]
+    [TestCase("192.168.12.123", true, "192.168.12.0")]
+    [TestCase("2001:db8:1234:5678:9abc:def0:1234:5678", false, "2001:db8:1234:5678:9abc:def0:1234:5678")]
+    [TestCase("2001:db8:1234:5678:9abc:def0:1234:5678", true, "2001:db8:1234::")]
+    public void RequestIpAddressMasking(string address, bool isMasked, string expected)
+    {
+      var context = new HttpContext(new TestWorkerRequest(address));
+      var options = new RaygunRequestMessageOptions
+      {
+        IsRequestIpAddressMasked = isMasked
+      };
+
+      var message = RaygunRequestMessageBuilder.Build(context.Request, options);
+
+      Assert.That(message.IPAddress, Is.EqualTo(expected));
+    }
+
+    [TestCase("192.168.12.123", false, "192.168.12.123")]
+    [TestCase("192.168.12.123", true, "192.168.12.0")]
+    [TestCase("2001:db8:1234:5678:9abc:def0:1234:5678", false, "2001:db8:1234:5678:9abc:def0:1234:5678")]
+    [TestCase("2001:db8:1234:5678:9abc:def0:1234:5678", true, "2001:db8:1234::")]
+    [TestCase("[2001:db8:1234:5678:9abc:def0:1234:5678]:443", true, "[2001:db8:1234::]:443")]
+    [TestCase("192.168.12.123:8080", true, "192.168.12.0:8080")]
+    public void RequestIpAddressFromXForwardedFor(string xForwardedFor, bool isMasked, string expected)
+    {
+      // REMOTE_ADDR is a different address so we prove XFF is preferred when valid (including IPv6).
+      var context = new HttpContext(new TestWorkerRequest("10.0.0.1", xForwardedFor));
+      var options = new RaygunRequestMessageOptions
+      {
+        IsRequestIpAddressMasked = isMasked
+      };
+
+      var message = RaygunRequestMessageBuilder.Build(context.Request, options);
+
+      Assert.That(message.IPAddress, Is.EqualTo(expected));
+    }
+
+    [TestCase("192.168.12.123:65536")]
+    [TestCase("192.168.12.123:abc")]
+    [TestCase("192.168.12.123:")]
+    public void InvalidXForwardedForPortFallsBackToRemoteAddr(string xForwardedFor)
+    {
+      // Strict validation rejects invalid ports so XFF cannot override REMOTE_ADDR.
+      var context = new HttpContext(new TestWorkerRequest("10.0.0.1", xForwardedFor));
+      var options = new RaygunRequestMessageOptions
+      {
+        IsRequestIpAddressMasked = true
+      };
+
+      var message = RaygunRequestMessageBuilder.Build(context.Request, options);
+
+      Assert.That(message.IPAddress, Is.EqualTo("10.0.0.0"));
+    }
+
+    [Test]
+    public void MaskingRemovesExactClientIpFromKnownRequestMetadataAndSerializedPayload()
+    {
+      const string exactAddress = "192.168.12.123";
+      var context = new HttpContext(new TestWorkerRequest(exactAddress, exactAddress));
+
+      var message = RaygunRequestMessageBuilder.Build(context.Request, new RaygunRequestMessageOptions
+      {
+        IsRequestIpAddressMasked = true
+      });
+
+      Assert.That(message.IPAddress, Is.EqualTo("192.168.12.0"));
+      Assert.That(message.Data.Contains("REMOTE_ADDR"), Is.False);
+      Assert.That(message.Data.Contains("HTTP_X_FORWARDED_FOR"), Is.False);
+      Assert.That(message.Headers.Contains("X-Forwarded-For"), Is.False);
+      Assert.That(SimpleJson.SerializeObject(message), Does.Not.Contain(exactAddress));
+    }
+
+    [Test]
+    public void DisabledMaskingRetainsKnownClientIpRequestMetadata()
+    {
+      const string exactAddress = "192.168.12.123";
+      var context = new HttpContext(new TestWorkerRequest(exactAddress, exactAddress));
+
+      var message = RaygunRequestMessageBuilder.Build(context.Request, new RaygunRequestMessageOptions());
+
+      Assert.That(message.Data["REMOTE_ADDR"], Is.EqualTo(exactAddress));
+      Assert.That(message.Data["HTTP_X_FORWARDED_FOR"], Is.EqualTo(exactAddress));
+      Assert.That(message.Headers["X-Forwarded-For"], Is.EqualTo(exactAddress));
     }
 
     [Test]
@@ -421,6 +508,47 @@ namespace Mindscape.Raygun4Net.Tests
       rawData = FakeRaygunRequestMessageBuilder.ExposeStripIgnoredFormData(rawData, ignored);
 
       Assert.That("------WebKitFormBoundarye64VBkpu4PoxFbpl Content-Disposition: form-data;  ------WebKitFormBoundarye64VBkpu4PoxFbpl--", Is.EqualTo(rawData));
+    }
+
+    private sealed class TestWorkerRequest : SimpleWorkerRequest
+    {
+      private readonly string _remoteAddress;
+      private readonly string _xForwardedFor;
+
+      public TestWorkerRequest(string remoteAddress, string xForwardedFor = null)
+        : base("/", string.Empty, new StringWriter())
+      {
+        _remoteAddress = remoteAddress;
+        _xForwardedFor = xForwardedFor;
+      }
+
+      public override string GetRemoteAddress()
+      {
+        return _remoteAddress;
+      }
+
+      public override string GetServerVariable(string name)
+      {
+        if (name == "HTTP_X_FORWARDED_FOR" && _xForwardedFor != null)
+        {
+          return _xForwardedFor;
+        }
+
+        return base.GetServerVariable(name);
+      }
+
+      public override string[][] GetUnknownRequestHeaders()
+      {
+        if (_xForwardedFor != null)
+        {
+          return new[]
+          {
+            new[] { "X-Forwarded-For", _xForwardedFor }
+          };
+        }
+
+        return base.GetUnknownRequestHeaders();
+      }
     }
   }
 }

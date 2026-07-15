@@ -72,6 +72,12 @@ namespace Mindscape.Raygun4Net.Tests
     }
 
     [Test]
+    public void IsRequestIpAddressMasked_FalseByDefault()
+    {
+      Assert.That(RaygunSettings.Settings.IsRequestIpAddressMasked, Is.False);
+    }
+
+    [Test]
     public void ApplicationVersion_EmptyByDefault()
     {
       Assert.That(RaygunSettings.Settings.ApplicationVersion, Is.Empty);

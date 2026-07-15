@@ -35,6 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\IpAddressMasker.cs" Link="IpAddressMasker.cs" />
     <Compile Include="..\Mindscape.Raygun4Net.Core\Filters\IRaygunDataFilter.cs" Link="Filters\IRaygunDataFilter.cs" />
     <Compile Include="..\Mindscape.Raygun4Net.Core\Filters\RaygunXmlDataFilter.cs" Link="Filters\RaygunXmlDataFilter.cs" />
     <Compile Include="..\Mindscape.Raygun4Net.Core\Filters\RaygunKeyValuePairDataFilter.cs" Link="Filters\RaygunKeyValuePairDataFilter.cs" />

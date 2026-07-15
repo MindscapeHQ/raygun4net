@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Web;
+using Mindscape.Raygun4Net;
 using NUnit.Framework;
 
 namespace Mindscape.Raygun4Net4.Tests
@@ -18,6 +19,65 @@ namespace Mindscape.Raygun4Net4.Tests
     public void SetUp()
     {
       _client = new FakeRaygunClient();
+    }
+
+    [Test]
+    public void RequestIpAddressMaskingCanBeConfigured()
+    {
+      _client.IsRequestIpAddressMasked = true;
+
+      Assert.That(_client.IsRequestIpAddressMasked, Is.True);
+    }
+
+    [Test]
+    public void RequestIpAddressMaskingIsCopiedFromSettingsOnConstruct()
+    {
+      var previous = RaygunSettings.Settings.IsRequestIpAddressMasked;
+      RaygunSettings.Settings.IsRequestIpAddressMasked = true;
+
+      try
+      {
+        var client = new FakeRaygunClient("API_KEY");
+
+        Assert.That(client.IsRequestIpAddressMasked, Is.True);
+        Assert.That(client.ExposeRequestMessageOptions.IsRequestIpAddressMasked, Is.True);
+      }
+      finally
+      {
+        RaygunSettings.Settings.IsRequestIpAddressMasked = previous;
+      }
+    }
+
+    [Test]
+    public void RequestIpAddressMaskingFlowsFromClientToBuiltRequestMessage()
+    {
+      var context = new HttpContext(new TestWorkerRequest("192.168.12.123"));
+      var client = new FakeRaygunClient("API_KEY")
+      {
+        IsRequestIpAddressMasked = true
+      };
+
+      var message = Mindscape.Raygun4Net.Builders.RaygunRequestMessageBuilder.Build(
+        context.Request,
+        client.ExposeRequestMessageOptions);
+
+      Assert.That(message.IPAddress, Is.EqualTo("192.168.12.0"));
+    }
+
+    private sealed class TestWorkerRequest : System.Web.Hosting.SimpleWorkerRequest
+    {
+      private readonly string _remoteAddress;
+
+      public TestWorkerRequest(string remoteAddress)
+        : base("/", string.Empty, new System.IO.StringWriter())
+      {
+        _remoteAddress = remoteAddress;
+      }
+
+      public override string GetRemoteAddress()
+      {
+        return _remoteAddress;
+      }
     }
 
     // Exception stripping tests

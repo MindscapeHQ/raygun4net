@@ -15,6 +15,7 @@ internal interface IRaygunHttpSettings
     
   bool IsRawDataIgnored { get; }
   bool IsRawDataIgnoredWhenFilteringFailed { get; }
+  bool IsRequestIpAddressMasked { get; }
   bool UseXmlRawDataFilter { get; }
   bool UseKeyValuePairRawDataFilter { get; }
 }

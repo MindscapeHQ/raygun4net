@@ -23,7 +23,7 @@ namespace Mindscape.Raygun4Net
     private static object _sendLock = new object();
 
     private readonly string _apiKey;
-    private readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
+    protected readonly RaygunRequestMessageOptions _requestMessageOptions = new RaygunRequestMessageOptions();
     private readonly List<Type> _wrapperExceptions = new List<Type>();
 
     private IRaygunOfflineStorage _offlineStorage = new IsolatedRaygunOfflineStorage();
@@ -106,6 +106,7 @@ namespace Mindscape.Raygun4Net
 
       IsRawDataIgnored = RaygunSettings.Settings.IsRawDataIgnored;
       IsRawDataIgnoredWhenFilteringFailed = RaygunSettings.Settings.IsRawDataIgnoredWhenFilteringFailed;
+      IsRequestIpAddressMasked = RaygunSettings.Settings.IsRequestIpAddressMasked;
 
       UseXmlRawDataFilter = RaygunSettings.Settings.UseXmlRawDataFilter;
       UseKeyValuePairRawDataFilter = RaygunSettings.Settings.UseKeyValuePairRawDataFilter;
@@ -239,6 +240,18 @@ namespace Mindscape.Raygun4Net
     {
       get { return _requestMessageOptions.IsRawDataIgnoredWhenFilteringFailed; }
       set { _requestMessageOptions.IsRawDataIgnoredWhenFilteringFailed = value; }
+    }
+
+    /// <summary>
+    /// Specifies whether request IP addresses are masked before being sent.
+    /// IPv4 and IPv4-mapped IPv6 addresses are masked to the embedded IPv4 /24 prefix;
+    /// native IPv6 addresses are masked to a /48 prefix. Known client-IP headers and server
+    /// variables are excluded from request metadata while masking is enabled.
+    /// </summary>
+    public bool IsRequestIpAddressMasked
+    {
+      get { return _requestMessageOptions.IsRequestIpAddressMasked; }
+      set { _requestMessageOptions.IsRequestIpAddressMasked = value; }
     }
 
     /// <summary>

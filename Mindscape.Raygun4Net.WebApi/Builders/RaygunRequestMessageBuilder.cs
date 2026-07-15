@@ -5,7 +5,6 @@ using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Web;
 using Mindscape.Raygun4Net.Messages;
 using Mindscape.Raygun4Net.Filters;
@@ -15,8 +14,6 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
 {
   public class RaygunRequestMessageBuilder
   {
-    private static readonly Regex IpAddressRegex = new Regex(@"\A(?:\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b)(:[1-9][0-9]{0,4})?\z", RegexOptions.Compiled);
-
     private const int MAX_RAW_DATA_LENGTH = 4096; // bytes
     private const int MAX_KEY_LENGTH = 256; // Characters
     private const int MAX_VALUE_LENGTH = 256; // Characters
@@ -27,7 +24,7 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
 
       RaygunRequestMessage message = new RaygunRequestMessage()
       {
-        IPAddress   = GetIpAddress(request),
+        IPAddress   = GetIpAddress(request, options),
         QueryString = GetQueryString(request, options),
         Cookies     = GetCookies(request, options),
         Data        = GetServerVariables(request, options),
@@ -50,7 +47,7 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       return message;
     }
 
-    private static string GetIpAddress(HttpRequest request)
+    private static string GetIpAddress(HttpRequest request, RaygunRequestMessageOptions options)
     {
       string strIp = null;
 
@@ -95,16 +92,12 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
         RaygunLogger.Instance.Error($"Failed to get IP address: {ex.Message}");
       }
 
-      return strIp;
+      return options.IsRequestIpAddressMasked ? IpAddressMasker.Mask(strIp) : strIp;
     }
 
     private static bool IsValidIpAddress(string strIp)
     {
-      if (strIp != null)
-      {
-        return IpAddressRegex.IsMatch(strIp.Trim());
-      }
-      return false;
+      return IpAddressMasker.IsValidAddress(strIp);
     }
 
     private static IDictionary GetQueryString(HttpRequest request, RaygunRequestMessageOptions options)
@@ -137,7 +130,11 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       IDictionary serverVariables = new Dictionary<string, string>();
       try
       {
-        serverVariables = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored, options.IsSensitiveFieldIgnored);
+        serverVariables = ToDictionary(
+          request.ServerVariables,
+          key => options.IsServerVariableIgnored(key) ||
+                 (options.IsRequestIpAddressMasked && IpAddressMasker.IsClientIpAddressServerVariable(key)),
+          options.IsSensitiveFieldIgnored);
         serverVariables.Remove("ALL_HTTP");
         serverVariables.Remove("HTTP_COOKIE");
         serverVariables.Remove("ALL_RAW");
@@ -172,7 +169,11 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
 
       try
       {
-        headers = ToDictionary(request.Headers, options.IsHeaderIgnored, options.IsSensitiveFieldIgnored);
+        headers = ToDictionary(
+          request.Headers,
+          key => options.IsHeaderIgnored(key) ||
+                 (options.IsRequestIpAddressMasked && IpAddressMasker.IsClientIpAddressHeader(key)),
+          options.IsSensitiveFieldIgnored);
         headers.Remove("Cookie");
       }
       catch (Exception e)

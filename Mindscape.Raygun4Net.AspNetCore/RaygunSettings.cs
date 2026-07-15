@@ -13,6 +13,14 @@ public class RaygunSettings : RaygunSettingsBase, IRaygunHttpSettings
 
   public bool ExcludeErrorsFromLocal { get; set; }
 
+  /// <summary>
+  /// Gets or sets whether request IP addresses are masked before being sent.
+  /// IPv4 and IPv4-mapped IPv6 addresses are masked to the embedded IPv4 /24 prefix;
+  /// native IPv6 addresses are masked to a /48 prefix. Known client-IP headers are excluded
+  /// from request metadata while masking is enabled.
+  /// </summary>
+  public bool IsRequestIpAddressMasked { get; set; }
+
   public List<string> IgnoreSensitiveFieldNames { get; set; } = new();
 
   public List<string> IgnoreQueryParameterNames { get; set; } = new();

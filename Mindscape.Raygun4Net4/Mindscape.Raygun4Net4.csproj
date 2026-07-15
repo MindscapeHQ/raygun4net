@@ -40,6 +40,7 @@
   </ItemGroup>
   
   <ItemGroup>
+    <Compile Include="..\Shared\IpAddressMasker.cs" Link="IpAddressMasker.cs" />
     <ProjectReference Include="..\Mindscape.Raygun4Net.Core\Mindscape.Raygun4Net.Core.csproj"/>
   </ItemGroup>
 

@@ -34,6 +34,7 @@
   </ItemGroup>
   
   <ItemGroup>
+    <Compile Include="..\Shared\IpAddressMasker.cs" Link="IpAddressMasker.cs" />
     <Compile Include="..\Mindscape.Raygun4Net4\ThrottledBackgroundMessageProcessor.cs">
       <Link>ThrottledBackgroundMessageProcessor.cs</Link>
     </Compile>

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -33,7 +34,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
         HostName    = request.Host.Value,
         Url         = request.GetDisplayUrl(),
         HttpMethod  = request.Method,
-        IPAddress   = GetIpAddress(context.Connection),
+        IPAddress   = GetIpAddress(context.Connection, options.IsRequestIpAddressMasked),
         QueryString = GetQueryString(request, options),
         Cookies     = GetCookies(request, options),
         RawData     = GetRawData(request, options),
@@ -44,7 +45,7 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       return message;
     }
 
-    private static string GetIpAddress(ConnectionInfo connection)
+    private static string GetIpAddress(ConnectionInfo connection, bool isRequestIpAddressMasked)
     {
       var ip = connection.RemoteIpAddress ?? connection.LocalIpAddress;
 
@@ -54,6 +55,18 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       }
 
       int? port = connection.RemotePort == 0 ? connection.LocalPort : connection.RemotePort;
+
+      if (isRequestIpAddressMasked)
+      {
+        ip = IpAddressMasker.Mask(ip);
+
+        // Bracket IPv6 only on the masked path so unmasked output stays compatible with
+        // the historical "addr:port" format when masking is disabled.
+        if (port != 0 && ip.AddressFamily == AddressFamily.InterNetworkV6)
+        {
+          return $"[{ip}]:{port.Value}";
+        }
+      }
 
       if (port != 0)
       {
@@ -284,7 +297,9 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       {
         foreach (var header in request.Headers)
         {
-          if (IsIgnored(header.Key, options.IgnoreHeaderNames) || IsIgnored(header.Key, options.IgnoreSensitiveFieldNames))
+          if (IsIgnored(header.Key, options.IgnoreHeaderNames) ||
+              IsIgnored(header.Key, options.IgnoreSensitiveFieldNames) ||
+              (options.IsRequestIpAddressMasked && IpAddressMasker.IsClientIpAddressHeader(header.Key)))
           {
             continue;
           }
