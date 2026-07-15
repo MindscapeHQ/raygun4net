@@ -105,6 +105,37 @@ namespace Mindscape.Raygun4Net.Tests
     }
 
     [Test]
+    public void MaskingRemovesExactClientIpFromKnownRequestMetadataAndSerializedPayload()
+    {
+      const string exactAddress = "192.168.12.123";
+      var context = new HttpContext(new TestWorkerRequest(exactAddress, exactAddress));
+
+      var message = RaygunRequestMessageBuilder.Build(context.Request, new RaygunRequestMessageOptions
+      {
+        IsRequestIpAddressMasked = true
+      });
+
+      Assert.That(message.IPAddress, Is.EqualTo("192.168.12.0"));
+      Assert.That(message.Data.Contains("REMOTE_ADDR"), Is.False);
+      Assert.That(message.Data.Contains("HTTP_X_FORWARDED_FOR"), Is.False);
+      Assert.That(message.Headers.Contains("X-Forwarded-For"), Is.False);
+      Assert.That(SimpleJson.SerializeObject(message), Does.Not.Contain(exactAddress));
+    }
+
+    [Test]
+    public void DisabledMaskingRetainsKnownClientIpRequestMetadata()
+    {
+      const string exactAddress = "192.168.12.123";
+      var context = new HttpContext(new TestWorkerRequest(exactAddress, exactAddress));
+
+      var message = RaygunRequestMessageBuilder.Build(context.Request, new RaygunRequestMessageOptions());
+
+      Assert.That(message.Data["REMOTE_ADDR"], Is.EqualTo(exactAddress));
+      Assert.That(message.Data["HTTP_X_FORWARDED_FOR"], Is.EqualTo(exactAddress));
+      Assert.That(message.Headers["X-Forwarded-For"], Is.EqualTo(exactAddress));
+    }
+
+    [Test]
     public void QueryStringTest()
     {
       var request = new HttpRequest("test", "http://google.com", "test=test");
@@ -504,6 +535,19 @@ namespace Mindscape.Raygun4Net.Tests
         }
 
         return base.GetServerVariable(name);
+      }
+
+      public override string[][] GetUnknownRequestHeaders()
+      {
+        if (_xForwardedFor != null)
+        {
+          return new[]
+          {
+            new[] { "X-Forwarded-For", _xForwardedFor }
+          };
+        }
+
+        return base.GetUnknownRequestHeaders();
       }
     }
   }

@@ -76,6 +76,38 @@ public class RaygunAspNetCoreRequestMessageBuilderTests
     message.IPAddress.Should().Be("192.168.12.0:8123");
   }
 
+  [Test]
+  public async Task MaskingRemovesKnownClientIpHeadersFromRequestMetadata()
+  {
+    var context = new DefaultHttpContext();
+    context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.12.123");
+    context.Request.Headers["X-Forwarded-For"] = "192.168.12.123";
+    context.Request.Headers["Forwarded"] = "for=192.168.12.123";
+    context.Request.Headers["X-Correlation-ID"] = "correlation-value";
+
+    var message = await RaygunAspNetCoreRequestMessageBuilder.Build(context, new RaygunSettings
+    {
+      IsRequestIpAddressMasked = true
+    });
+
+    message.IPAddress.Should().Be("192.168.12.0");
+    message.Headers.Contains("X-Forwarded-For").Should().BeFalse();
+    message.Headers.Contains("Forwarded").Should().BeFalse();
+    message.Headers["X-Correlation-ID"].Should().Be("correlation-value");
+  }
+
+  [Test]
+  public async Task DisabledMaskingRetainsClientIpHeaders()
+  {
+    var context = new DefaultHttpContext();
+    context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.12.123");
+    context.Request.Headers["X-Forwarded-For"] = "192.168.12.123";
+
+    var message = await RaygunAspNetCoreRequestMessageBuilder.Build(context, new RaygunSettings());
+
+    message.Headers["X-Forwarded-For"].Should().Be("192.168.12.123");
+  }
+
   // Any
   [TestCase("Banana", "*", true)]
   [TestCase("Apple", "*", true)]

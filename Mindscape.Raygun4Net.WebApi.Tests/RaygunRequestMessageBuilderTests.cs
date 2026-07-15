@@ -33,6 +33,49 @@ namespace Mindscape.Raygun4Net.WebApi.Tests
     }
 
     [Test]
+    public void BuildRemovesKnownClientIpHeadersWhenMaskingIsEnabled()
+    {
+      using (var request = new HttpRequestMessage(HttpMethod.Get, "http://example.com"))
+      {
+        request.Content = new StringContent(string.Empty);
+        request.Headers.TryAddWithoutValidation("X-Forwarded-For", "192.168.12.123");
+        request.Headers.TryAddWithoutValidation("Forwarded", "for=192.168.12.123");
+        request.Headers.TryAddWithoutValidation("X-Correlation-ID", "correlation-value");
+        dynamic context = new ExpandoObject();
+        context.Request = new ExpandoObject();
+        context.Request.UserHostAddress = "192.168.12.123";
+        request.Properties["MS_HttpContext"] = context;
+
+        var message = RaygunWebApiRequestMessageBuilder.Build(request, new RaygunRequestMessageOptions
+        {
+          IsRequestIpAddressMasked = true
+        });
+
+        Assert.That(message.Headers.Contains("X-Forwarded-For"), Is.False);
+        Assert.That(message.Headers.Contains("Forwarded"), Is.False);
+        Assert.That(message.Headers["X-Correlation-ID"], Is.EqualTo("correlation-value"));
+      }
+    }
+
+    [Test]
+    public void BuildRetainsClientIpHeadersWhenMaskingIsDisabled()
+    {
+      using (var request = new HttpRequestMessage(HttpMethod.Get, "http://example.com"))
+      {
+        request.Content = new StringContent(string.Empty);
+        request.Headers.TryAddWithoutValidation("X-Forwarded-For", "192.168.12.123");
+        dynamic context = new ExpandoObject();
+        context.Request = new ExpandoObject();
+        context.Request.UserHostAddress = "192.168.12.123";
+        request.Properties["MS_HttpContext"] = context;
+
+        var message = RaygunWebApiRequestMessageBuilder.Build(request, new RaygunRequestMessageOptions());
+
+        Assert.That(message.Headers["X-Forwarded-For"], Is.EqualTo("192.168.12.123"));
+      }
+    }
+
+    [Test]
     public void RawDataRemainsUnchangedWhenParsingFails()
     {
       var rawData = "I am unchanged!";

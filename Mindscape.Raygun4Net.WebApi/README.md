@@ -146,13 +146,13 @@ i.e. A way to prevent local debug/development from notifying Raygun without havi
 Mask request IP addresses
 -------------------------
 
-Request IP address masking is disabled by default. Enable it to mask IPv4 addresses to a `/24` prefix and IPv6 addresses to a `/48` prefix while retaining any port:
+Request IP address masking is disabled by default. Enable it to mask IPv4 addresses and the embedded IPv4 portion of IPv4-mapped IPv6 addresses to a `/24` prefix, and native IPv6 addresses to a `/48` prefix, while retaining any port:
 
 ```
 <RaygunSettings apikey="YOUR_APP_API_KEY" isRequestIpAddressMasked="true" />
 ```
 
-This masks the `RaygunRequestMessage.IPAddress` field only. If a proxy copies the original address into headers or server variables, configure the relevant ignore settings as well.
+When enabled, Raygun also excludes known client-IP forwarding headers and server variables, such as `X-Forwarded-For`, `Forwarded`, and `REMOTE_ADDR`, from request metadata. Custom headers and arbitrary request fields are not scanned; configure the relevant ignore settings for any additional application-specific metadata.
 
 Remove sensitive request data
 -----------------------------

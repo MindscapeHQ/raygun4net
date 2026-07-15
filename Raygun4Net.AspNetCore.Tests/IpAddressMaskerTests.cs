@@ -32,6 +32,12 @@ public class IpAddressMaskerTests
   [TestCase("192.168.12.123:65536", false)]
   [TestCase("192.168.12.123:abc", false)]
   [TestCase("192.168.12.123:", false)]
+  [TestCase("127.1", false)]
+  [TestCase("2130706433", false)]
+  [TestCase("0x7f000001", false)]
+  [TestCase("192.168.012.123", false)]
+  [TestCase(" 192.168.12.123 ", false)]
+  [TestCase("[192.168.12.123]", false)]
   [TestCase("2001:db8:1234:5678:9abc:def0:1234:5678", true)]
   [TestCase("[2001:db8:1234:5678:9abc:def0:1234:5678]", true)]
   [TestCase("[2001:db8:1234:5678:9abc:def0:1234:5678]:443", true)]
@@ -46,13 +52,42 @@ public class IpAddressMaskerTests
   [Test]
   public void IsValidAddressRejectsNull()
   {
-    IpAddressMasker.IsValidAddress(null!).Should().BeFalse();
+    IpAddressMasker.IsValidAddress(null).Should().BeFalse();
   }
 
   [Test]
   public void MaskPreservesNull()
   {
-    IpAddressMasker.Mask((string)null!).Should().BeNull();
+    IpAddressMasker.Mask((string?)null).Should().BeNull();
+  }
+
+  [TestCase("Forwarded")]
+  [TestCase("X-Forwarded-For")]
+  [TestCase("X-Real-IP")]
+  [TestCase("CF-Connecting-IP")]
+  [TestCase("true-client-ip")]
+  public void RecognizesKnownClientIpAddressHeaders(string name)
+  {
+    IpAddressMasker.IsClientIpAddressHeader(name).Should().BeTrue();
+  }
+
+  [TestCase("REMOTE_ADDR")]
+  [TestCase("REMOTE_HOST")]
+  [TestCase("HTTP_FORWARDED")]
+  [TestCase("HTTP_X_FORWARDED_FOR")]
+  [TestCase("http_x_real_ip")]
+  public void RecognizesKnownClientIpAddressServerVariables(string name)
+  {
+    IpAddressMasker.IsClientIpAddressServerVariable(name).Should().BeTrue();
+  }
+
+  [TestCase(null)]
+  [TestCase("")]
+  [TestCase("Authorization")]
+  [TestCase("X-Correlation-ID")]
+  public void DoesNotTreatUnrelatedHeadersAsClientIpAddresses(string? name)
+  {
+    IpAddressMasker.IsClientIpAddressHeader(name).Should().BeFalse();
   }
 
   [Test]

@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Globalization;
 using System.Net;
@@ -9,30 +11,52 @@ namespace Mindscape.Raygun4Net
   {
     private const int Ipv6PrefixLengthInBytes = 6;
 
+    private static readonly string[] ClientIpAddressHeaderNames =
+    {
+      "CF-Connecting-IP",
+      "Client-IP",
+      "Fastly-Client-IP",
+      "Fly-Client-IP",
+      "Forwarded",
+      "True-Client-IP",
+      "X-Client-IP",
+      "X-Cluster-Client-IP",
+      "X-Forwarded",
+      "X-Forwarded-For",
+      "X-Original-Forwarded-For",
+      "X-Real-IP"
+    };
+
     /// <summary>
     /// Strict validation for accepting client addresses from headers / server variables
-    /// (e.g. X-Forwarded-For, REMOTE_ADDR). Requires a parseable IP and, if a port is present,
-    /// a numeric port in the range 0–65535. Invalid port suffixes are rejected so they do not
-    /// override a valid REMOTE_ADDR.
+    /// (e.g. X-Forwarded-For, REMOTE_ADDR). IPv4 values must use four decimal octets without
+    /// leading zeros. If a port is present, it must be numeric and in the range 0–65535.
+    /// Invalid values are rejected so they do not override a valid REMOTE_ADDR.
     /// </summary>
-    internal static bool IsValidAddress(string address)
+    internal static bool IsValidAddress(string? address)
     {
-      return TryParseAddress(address, requireValidPort: true, out _, out _, out _);
+      if (address == null || string.IsNullOrWhiteSpace(address) || address.Length != address.Trim().Length)
+      {
+        return false;
+      }
+
+      return TryParseAddress(address, requireCanonicalIpv4: true, requireValidPort: true, out _, out _, out _);
     }
 
     /// <summary>
     /// Best-effort masking for privacy. If the host portion is a parseable IP, it is masked even
     /// when an attached port/suffix is malformed (host is redacted; original suffix is kept).
     /// </summary>
-    internal static string Mask(string address)
+    internal static string? Mask(string? address)
     {
-      if (string.IsNullOrWhiteSpace(address))
+      if (address == null || string.IsNullOrWhiteSpace(address))
       {
         return address;
       }
 
       string value = address.Trim();
-      if (!TryParseAddress(value, requireValidPort: false, out IPAddress ipAddress, out string prefix, out string suffix))
+      if (!TryParseAddress(value, requireCanonicalIpv4: false, requireValidPort: false, out IPAddress? ipAddress, out string prefix, out string suffix) ||
+          ipAddress == null)
       {
         return address;
       }
@@ -69,7 +93,48 @@ namespace Mindscape.Raygun4Net
       return address;
     }
 
-    private static bool TryParseAddress(string value, bool requireValidPort, out IPAddress address, out string prefix, out string suffix)
+    internal static bool IsClientIpAddressHeader(string? name)
+    {
+      if (name == null || string.IsNullOrEmpty(name))
+      {
+        return false;
+      }
+
+      foreach (string headerName in ClientIpAddressHeaderNames)
+      {
+        if (headerName.Equals(name, StringComparison.OrdinalIgnoreCase))
+        {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    internal static bool IsClientIpAddressServerVariable(string? name)
+    {
+      if (name == null || string.IsNullOrEmpty(name))
+      {
+        return false;
+      }
+
+      if (name.Equals("REMOTE_ADDR", StringComparison.OrdinalIgnoreCase) ||
+          name.Equals("REMOTE_HOST", StringComparison.OrdinalIgnoreCase))
+      {
+        return true;
+      }
+
+      const string headerPrefix = "HTTP_";
+      if (!name.StartsWith(headerPrefix, StringComparison.OrdinalIgnoreCase))
+      {
+        return false;
+      }
+
+      string headerName = name.Substring(headerPrefix.Length).Replace('_', '-');
+      return IsClientIpAddressHeader(headerName);
+    }
+
+    private static bool TryParseAddress(string value, bool requireCanonicalIpv4, bool requireValidPort, out IPAddress? address, out string prefix, out string suffix)
     {
       address = null;
       prefix = string.Empty;
@@ -80,7 +145,7 @@ namespace Mindscape.Raygun4Net
         return false;
       }
 
-      if (TryParseBracketedAddress(value, requireValidPort, out address, out suffix))
+      if (TryParseBracketedAddress(value, requireCanonicalIpv4, requireValidPort, out address, out suffix))
       {
         prefix = "[";
         return true;
@@ -94,15 +159,15 @@ namespace Mindscape.Raygun4Net
         return false;
       }
 
-      if (IPAddress.TryParse(value, out address))
+      if (TryParseUnbracketedAddress(value, requireCanonicalIpv4, out address))
       {
         return true;
       }
 
-      return TryParseIpv4AddressWithPort(value, requireValidPort, out address, out suffix);
+      return TryParseIpv4AddressWithPort(value, requireCanonicalIpv4, requireValidPort, out address, out suffix);
     }
 
-    private static bool TryParseBracketedAddress(string value, bool requireValidPort, out IPAddress address, out string suffix)
+    private static bool TryParseBracketedAddress(string value, bool requireCanonicalIpv4, bool requireValidPort, out IPAddress? address, out string suffix)
     {
       address = null;
       suffix = string.Empty;
@@ -114,8 +179,11 @@ namespace Mindscape.Raygun4Net
 
       int closingBracket = value.IndexOf(']');
       if (closingBracket < 0 ||
-          !IPAddress.TryParse(value.Substring(1, closingBracket - 1), out address))
+          !IPAddress.TryParse(value.Substring(1, closingBracket - 1), out address) ||
+          address == null ||
+          (requireCanonicalIpv4 && address.AddressFamily != AddressFamily.InterNetworkV6))
       {
+        address = null;
         return false;
       }
 
@@ -136,7 +204,26 @@ namespace Mindscape.Raygun4Net
       return true;
     }
 
-    private static bool TryParseIpv4AddressWithPort(string value, bool requireValidPort, out IPAddress address, out string suffix)
+    private static bool TryParseUnbracketedAddress(string value, bool requireCanonicalIpv4, out IPAddress? address)
+    {
+      if (!IPAddress.TryParse(value, out address) || address == null)
+      {
+        address = null;
+        return false;
+      }
+
+      if (requireCanonicalIpv4 &&
+          address.AddressFamily == AddressFamily.InterNetwork &&
+          !TryParseCanonicalIpv4Address(value, out address))
+      {
+        address = null;
+        return false;
+      }
+
+      return true;
+    }
+
+    private static bool TryParseIpv4AddressWithPort(string value, bool requireCanonicalIpv4, bool requireValidPort, out IPAddress? address, out string suffix)
     {
       address = null;
       suffix = string.Empty;
@@ -157,7 +244,13 @@ namespace Mindscape.Raygun4Net
 
       // Host portion must be IPv4. For masking (requireValidPort == false), the port/suffix may be
       // invalid, empty, or non-numeric — still parse so the host can be redacted.
-      if (!IPAddress.TryParse(value.Substring(0, separator), out address) ||
+      string host = value.Substring(0, separator);
+      bool isAddressParsed = requireCanonicalIpv4
+        ? TryParseCanonicalIpv4Address(host, out address)
+        : IPAddress.TryParse(host, out address);
+
+      if (!isAddressParsed ||
+          address == null ||
           address.AddressFamily != AddressFamily.InterNetwork)
       {
         address = null;
@@ -165,6 +258,31 @@ namespace Mindscape.Raygun4Net
       }
 
       suffix = portSuffix;
+      return true;
+    }
+
+    private static bool TryParseCanonicalIpv4Address(string value, out IPAddress? address)
+    {
+      address = null;
+      string[] components = value.Split('.');
+      if (components.Length != 4)
+      {
+        return false;
+      }
+
+      byte[] bytes = new byte[4];
+      for (int index = 0; index < components.Length; index++)
+      {
+        string component = components[index];
+        if (component.Length == 0 ||
+            (component.Length > 1 && component[0] == '0') ||
+            !byte.TryParse(component, NumberStyles.None, CultureInfo.InvariantCulture, out bytes[index]))
+        {
+          return false;
+        }
+      }
+
+      address = new IPAddress(bytes);
       return true;
     }
 

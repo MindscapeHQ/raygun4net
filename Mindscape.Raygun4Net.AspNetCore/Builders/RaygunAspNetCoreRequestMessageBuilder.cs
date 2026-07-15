@@ -297,7 +297,9 @@ namespace Mindscape.Raygun4Net.AspNetCore.Builders
       {
         foreach (var header in request.Headers)
         {
-          if (IsIgnored(header.Key, options.IgnoreHeaderNames) || IsIgnored(header.Key, options.IgnoreSensitiveFieldNames))
+          if (IsIgnored(header.Key, options.IgnoreHeaderNames) ||
+              IsIgnored(header.Key, options.IgnoreSensitiveFieldNames) ||
+              (options.IsRequestIpAddressMasked && IpAddressMasker.IsClientIpAddressHeader(header.Key)))
           {
             continue;
           }

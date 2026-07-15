@@ -130,7 +130,11 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
       IDictionary serverVariables = new Dictionary<string, string>();
       try
       {
-        serverVariables = ToDictionary(request.ServerVariables, options.IsServerVariableIgnored, options.IsSensitiveFieldIgnored);
+        serverVariables = ToDictionary(
+          request.ServerVariables,
+          key => options.IsServerVariableIgnored(key) ||
+                 (options.IsRequestIpAddressMasked && IpAddressMasker.IsClientIpAddressServerVariable(key)),
+          options.IsSensitiveFieldIgnored);
         serverVariables.Remove("ALL_HTTP");
         serverVariables.Remove("HTTP_COOKIE");
         serverVariables.Remove("ALL_RAW");
@@ -165,7 +169,11 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
 
       try
       {
-        headers = ToDictionary(request.Headers, options.IsHeaderIgnored, options.IsSensitiveFieldIgnored);
+        headers = ToDictionary(
+          request.Headers,
+          key => options.IsHeaderIgnored(key) ||
+                 (options.IsRequestIpAddressMasked && IpAddressMasker.IsClientIpAddressHeader(key)),
+          options.IsSensitiveFieldIgnored);
         headers.Remove("Cookie");
       }
       catch (Exception e)

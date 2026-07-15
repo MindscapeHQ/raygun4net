@@ -169,7 +169,7 @@ Examples below are shown in appsettings.json format.
 Mask request IP addresses
 -------------------------
 
-Request IP address masking is disabled by default. Enable it to mask IPv4 addresses to a `/24` prefix and IPv6 addresses to a `/48` prefix while retaining any port:
+Request IP address masking is disabled by default. Enable it to mask IPv4 addresses and the embedded IPv4 portion of IPv4-mapped IPv6 addresses to a `/24` prefix, and native IPv6 addresses to a `/48` prefix, while retaining any port:
 
 ```json
 "RaygunSettings": {
@@ -178,7 +178,7 @@ Request IP address masking is disabled by default. Enable it to mask IPv4 addres
 }
 ```
 
-This masks the `RaygunRequestMessage.IPAddress` field only. If a proxy copies the original address into headers, configure the relevant ignore settings as well.
+When enabled, Raygun also excludes known client-IP forwarding headers, such as `X-Forwarded-For` and `Forwarded`, from request metadata. Custom headers and arbitrary request fields are not scanned; configure the relevant ignore settings for any additional application-specific metadata.
 
 Replace unseekable request streams
 ----------------------------------

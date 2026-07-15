@@ -121,7 +121,10 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
 
       try
       {
-        foreach (var header in request.Headers.Where(h => !options.IsHeaderIgnored(h.Key) && !options.IsSensitiveFieldIgnored(h.Key)))
+        foreach (var header in request.Headers.Where(h =>
+                   !options.IsHeaderIgnored(h.Key) &&
+                   !options.IsSensitiveFieldIgnored(h.Key) &&
+                   (!options.IsRequestIpAddressMasked || !IpAddressMasker.IsClientIpAddressHeader(h.Key))))
         {
           headers[header.Key] = string.Join(",", header.Value);
         }
@@ -130,7 +133,9 @@ namespace Mindscape.Raygun4Net.WebApi.Builders
         {
           foreach (var header in request.Content.Headers)
           {
-            if (!options.IsHeaderIgnored(header.Key) && !options.IsSensitiveFieldIgnored(header.Key))
+            if (!options.IsHeaderIgnored(header.Key) &&
+                !options.IsSensitiveFieldIgnored(header.Key) &&
+                (!options.IsRequestIpAddressMasked || !IpAddressMasker.IsClientIpAddressHeader(header.Key)))
             {
               headers[header.Key] = string.Join(",", header.Value);
             }

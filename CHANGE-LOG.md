@@ -2,10 +2,11 @@
 
 ### vTODO
 - Feature: Opt-in request IP address masking (`IsRequestIpAddressMasked`)
-  - Masks `RaygunRequestMessage.IPAddress` to IPv4 `/24` and IPv6 `/48` prefixes (ports retained)
+  - Masks IPv4 and IPv4-mapped IPv6 addresses to the embedded IPv4 `/24`, and native IPv6 addresses to `/48` (ports retained)
+  - Excludes known client-IP forwarding headers and server variables from request metadata while masking is enabled
   - Supported on AspNetCore, MVC/Net4, and WebApi providers; disabled by default
   - Classic Net4/WebApi IP extraction now accepts IPv6 (including bracketed forms) from X-Forwarded-For / REMOTE_ADDR
-  - XFF/REMOTE_ADDR acceptance uses strict port validation; masking still best-effort redacts the host when a port suffix is malformed
+  - XFF/REMOTE_ADDR acceptance requires canonical four-octet IPv4 values and strict port validation; masking still best-effort redacts the host when a port suffix is malformed
   - AspNetCore: unmasked IPv6+port keeps the historical `addr:port` shape; masked IPv6+port uses unambiguous `[addr]:port`
   - See: https://github.com/MindscapeHQ/raygun4net/pull/583
 
