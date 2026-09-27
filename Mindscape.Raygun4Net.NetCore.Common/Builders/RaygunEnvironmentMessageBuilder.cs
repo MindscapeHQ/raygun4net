@@ -30,6 +30,9 @@ namespace Mindscape.Raygun4Net
     private static string _diskSpaceFreeStatus;
     private static bool _diskSpaceCheckSkipped;
 
+    // Set once the first refresh has collected the machine details, which it does before it starts the disk check
+    internal static readonly ManualResetEventSlim MachineDetailsPopulated = new(false);
+
     public static RaygunEnvironmentMessage Build(RaygunSettingsBase settings)
     {
       var isDiskSpaceIgnored = settings?.IsDiskSpaceFreeIgnored == true;
@@ -47,7 +50,17 @@ namespace Mindscape.Raygun4Net
         var needsRefresh = LastUpdate < staleBefore || (!isDiskSpaceIgnored && _diskSpaceCheckSkipped);
         var refreshWait = isDiskSpaceIgnored ? TimeSpan.Zero : DiskSpaceTimeout + DiskSpaceTimeout;
 
-        if (needsRefresh && Semaphore.Wait(refreshWait))
+        var isRefreshing = needsRefresh && Semaphore.Wait(refreshWait);
+
+        if (!isRefreshing && needsRefresh && isDiskSpaceIgnored)
+        {
+          // Another refresh has the semaphore. Rather than send a report with no machine details at all, wait for that
+          // refresh to publish them. It publishes them before it starts its disk check, so an unresponsive disk can't
+          // hold this up; the limit is only a safety net for the other providers.
+          MachineDetailsPopulated.Wait(DiskSpaceTimeout + DiskSpaceTimeout);
+        }
+
+        if (isRefreshing)
         {
           try
           {
@@ -183,6 +196,10 @@ namespace Mindscape.Raygun4Net
         // Ignore
       }
 
+      // Reports that can't get the semaphore can use these details now, instead of sending none. Set before the disk
+      // check, so a hung disk never delays it.
+      MachineDetailsPopulated.Set();
+
       if (settings?.IsDiskSpaceFreeIgnored == true)
       {
         _diskSpaceCheckSkipped = true;
@@ -213,7 +230,7 @@ namespace Mindscape.Raygun4Net
       // starting another thread that would get stuck too.
       if (_diskSpaceTask == null || _diskSpaceTask.IsCompleted)
       {
-        _diskSpaceTask = StartDiskSpaceCheck(DiskSpaceProvider);
+        _diskSpaceTask = StartDiskSpaceCheck();
         _diskSpaceTaskStartedUtc = DateTime.UtcNow;
       }
 
@@ -240,11 +257,11 @@ namespace Mindscape.Raygun4Net
       }
     }
 
-    private static Task<List<double>> StartDiskSpaceCheck(Func<List<double>> provider)
+    private static Task<List<double>> StartDiskSpaceCheck()
     {
       // LongRunning gives the check its own background thread rather than a thread-pool one: a stuck check then never
       // ties up a pool thread, and doesn't keep the process alive when the app exits.
-      var task = Task.Factory.StartNew(provider, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+      var task = Task.Factory.StartNew(DiskSpaceProvider, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
       // A check that fails after its report stopped waiting is never waited on again. Observe the failure so it isn't
       // raised as an UnobservedTaskException, which RaygunClient would send as a crash report of its own.
@@ -262,6 +279,7 @@ namespace Mindscape.Raygun4Net
       _diskSpaceTaskStartedUtc = DateTime.MinValue;
       _diskSpaceFreeStatus = null;
       _diskSpaceCheckSkipped = false;
+      MachineDetailsPopulated.Reset();
     }
   }
 

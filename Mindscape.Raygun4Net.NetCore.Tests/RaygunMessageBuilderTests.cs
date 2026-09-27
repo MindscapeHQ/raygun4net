@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 namespace Mindscape.Raygun4Net.NetCore.Tests
 {
   [TestFixture]
+  [NonParallelizable]
   public class RaygunMessageBuilderTests
   {
     private RaygunSettings _settings;
@@ -305,9 +306,10 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         return new List<double> { 42 };
       };
 
+      var refreshing = Task.Run(() => RaygunEnvironmentMessageBuilder.Build(_settings));
+
       try
       {
-        var refreshing = Task.Run(() => RaygunEnvironmentMessageBuilder.Build(_settings));
         providerStarted.Wait(TimeSpan.FromSeconds(5)).Should().BeTrue();
 
         var stopwatch = Stopwatch.StartNew();
@@ -319,13 +321,49 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         result.DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.Ignored);
         Volatile.Read(ref calls).Should().Be(1, "the report that ignores disk space must not start a check of its own");
 
-        gate.Set();
-        refreshing.Wait(TimeSpan.FromSeconds(5)).Should().BeTrue();
       }
       finally
       {
         gate.Set();
+        refreshing.Wait(TimeSpan.FromSeconds(5)).Should().BeTrue();
       }
+    }
+
+    [Test]
+    public void EnvironmentBuild_WhenDiskSpaceIgnoredAndNothingIsCachedYet_WaitsForTheMachineDetailsBeingCollected()
+    {
+      RaygunEnvironmentMessageBuilder.DiskSpaceTimeout = TimeSpan.FromSeconds(2);
+      RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 42 };
+
+      // Nothing has been collected yet and the first refresh is under way, holding the semaphore
+      RaygunEnvironmentMessageBuilder.Semaphore.Wait();
+      var ignoringReport = Task.Run(() => RaygunEnvironmentMessageBuilder.Build(new RaygunSettings { IsDiskSpaceFreeIgnored = true }));
+
+      try
+      {
+        ignoringReport.Wait(TimeSpan.FromMilliseconds(300)).Should().BeFalse("there are no details to send yet");
+      }
+      finally
+      {
+        RaygunEnvironmentMessageBuilder.Semaphore.Release();
+      }
+
+      // That refresh publishes the machine details
+      RaygunEnvironmentMessageBuilder.Build(_settings);
+
+      ignoringReport.Wait(TimeLimitMargin).Should().BeTrue();
+      ignoringReport.Result.OSVersion.Should().NotBeNullOrEmpty("a report with no machine details at all is worse than a slightly late one");
+      ignoringReport.Result.ProcessorCount.Should().BeGreaterThan(0);
+      ignoringReport.Result.TotalPhysicalMemory.Should().NotBe(0);
+      ignoringReport.Result.DiskSpaceFree.Should().NotBeNull().And.BeEmpty();
+      ignoringReport.Result.DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.Ignored);
+    }
+
+    [Test]
+    public void EnvironmentBuild_ByDefault_LimitsTheDiskCheckToFiveSeconds()
+    {
+      // The limit documented in the READMEs and the change log
+      RaygunEnvironmentMessageBuilder.DiskSpaceTimeout.Should().Be(TimeSpan.FromSeconds(5));
     }
 
     [Test]

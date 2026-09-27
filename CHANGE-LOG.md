@@ -18,6 +18,7 @@
 - Feature: `IsDiskSpaceFreeIgnored` setting turns off disk space collection
   - Reports sent while it is on have an empty `DiskSpaceFree` and `DiskSpaceFreeStatus` set to `"Ignored"`
   - Those reports never wait for a disk check running for another client, so an unresponsive disk cannot delay them
+  - Applies to the modern .NET packages only. The .NET Framework packages (`Mindscape.Raygun4Net`, `.Mvc`, `.WebApi`, `.Azure.WebJob`) still collect disk space without a time limit and have no opt-out
   - See: https://github.com/MindscapeHQ/raygun4net/pull/585
 
 ### v11.2.6
