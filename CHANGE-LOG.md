@@ -17,6 +17,7 @@
   - See: https://github.com/MindscapeHQ/raygun4net/pull/585
 - Feature: `IsDiskSpaceFreeIgnored` setting turns off disk space collection
   - Reports sent while it is on have an empty `DiskSpaceFree` and `DiskSpaceFreeStatus` set to `"Ignored"`
+  - Those reports never wait for a disk check running for another client, so an unresponsive disk cannot delay them
   - See: https://github.com/MindscapeHQ/raygun4net/pull/585
 
 ### v11.2.6

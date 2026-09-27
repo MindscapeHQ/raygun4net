@@ -290,6 +290,120 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
+    public void EnvironmentBuild_WhenDiskSpaceIgnoredAndAnotherReportsCheckHangs_ReturnsWithoutWaiting()
+    {
+      using var gate = new ManualResetEventSlim(false);
+      using var providerStarted = new ManualResetEventSlim(false);
+      var calls = 0;
+      // A long time limit, so a report that queues behind this check is unmistakably slower than one that doesn't
+      RaygunEnvironmentMessageBuilder.DiskSpaceTimeout = TimeSpan.FromSeconds(5);
+      RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () =>
+      {
+        Interlocked.Increment(ref calls);
+        providerStarted.Set();
+        gate.Wait();
+        return new List<double> { 42 };
+      };
+
+      try
+      {
+        var refreshing = Task.Run(() => RaygunEnvironmentMessageBuilder.Build(_settings));
+        providerStarted.Wait(TimeSpan.FromSeconds(5)).Should().BeTrue();
+
+        var stopwatch = Stopwatch.StartNew();
+        var result = RaygunEnvironmentMessageBuilder.Build(new RaygunSettings { IsDiskSpaceFreeIgnored = true });
+        stopwatch.Stop();
+
+        stopwatch.Elapsed.Should().BeLessThan(TimeLimitMargin, "a client that ignores disk space must not queue behind another client's disk check");
+        result.DiskSpaceFree.Should().NotBeNull().And.BeEmpty();
+        result.DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.Ignored);
+        Volatile.Read(ref calls).Should().Be(1, "the report that ignores disk space must not start a check of its own");
+
+        gate.Set();
+        refreshing.Wait(TimeSpan.FromSeconds(5)).Should().BeTrue();
+      }
+      finally
+      {
+        gate.Set();
+      }
+    }
+
+    [Test]
+    public void EnvironmentBuild_WhenDiskSpaceIgnoredAndSemaphoreHeld_ReturnsCachedDetailsWithoutReleasingSemaphore()
+    {
+      RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 123 };
+      RaygunEnvironmentMessageBuilder.Build(_settings);
+      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.UtcNow.AddMinutes(-5);
+
+      RaygunEnvironmentMessageBuilder.Semaphore.Wait();
+      try
+      {
+        var build = Task.Run(() => RaygunEnvironmentMessageBuilder.Build(new RaygunSettings { IsDiskSpaceFreeIgnored = true }));
+
+        build.Wait(TimeLimitMargin).Should().BeTrue("a client that ignores disk space doesn't wait for a refresh it doesn't need");
+        build.Result.DiskSpaceFree.Should().NotBeNull().And.BeEmpty();
+        build.Result.DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.Ignored);
+        build.Result.OSVersion.Should().NotBeNullOrEmpty("the machine details already collected are still sent");
+        build.Result.TotalPhysicalMemory.Should().NotBe(0);
+        RaygunEnvironmentMessageBuilder.Semaphore.CurrentCount.Should().Be(0, "a thread that didn't get the semaphore must not release it");
+      }
+      finally
+      {
+        RaygunEnvironmentMessageBuilder.Semaphore.Release();
+      }
+    }
+
+    [Test]
+    public void EnvironmentBuild_WhenDiskSpaceIgnoredAndNoRefreshIsRunning_StillCollectsMachineDetails()
+    {
+      var calls = 0;
+      RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () =>
+      {
+        Interlocked.Increment(ref calls);
+        return new List<double> { 42 };
+      };
+
+      var result = RaygunEnvironmentMessageBuilder.Build(new RaygunSettings { IsDiskSpaceFreeIgnored = true });
+
+      result.OSVersion.Should().NotBeNullOrEmpty();
+      result.ProcessorCount.Should().BeGreaterThan(0);
+      result.TotalPhysicalMemory.Should().NotBe(0);
+      result.DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.Ignored);
+      RaygunEnvironmentMessageBuilder.LastUpdate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(10));
+      calls.Should().Be(0);
+    }
+
+    [Test]
+    public async Task EnvironmentBuild_WhenDiskSpaceIgnoredReportSkipsRefresh_OtherClientsStillGetFreshDiskSpace()
+    {
+      using var providerStarted = new ManualResetEventSlim(false);
+      var calls = 0;
+      RaygunEnvironmentMessageBuilder.DiskSpaceTimeout = TimeSpan.FromSeconds(5);
+      RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () =>
+      {
+        Interlocked.Increment(ref calls);
+        providerStarted.Set();
+        Thread.Sleep(300);
+        return new List<double> { 42 };
+      };
+
+      var refreshing = Task.Run(() => RaygunEnvironmentMessageBuilder.Build(_settings));
+      providerStarted.Wait(TimeSpan.FromSeconds(5)).Should().BeTrue();
+
+      // Passing through without the semaphore must leave the refresh, and the cached values it produces, untouched
+      RaygunEnvironmentMessageBuilder.Build(new RaygunSettings { IsDiskSpaceFreeIgnored = true })
+                                     .DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.Ignored);
+
+      (await refreshing).DiskSpaceFree.Should().Equal(42);
+
+      var afterwards = RaygunEnvironmentMessageBuilder.Build(_settings);
+
+      afterwards.DiskSpaceFree.Should().Equal(42);
+      afterwards.DiskSpaceFreeStatus.Should().BeNull();
+      Volatile.Read(ref calls).Should().Be(1);
+    }
+
+    [Test]
     public void EnvironmentBuild_WhenDiskCheckStarts_MemoryIsAlreadyRefreshed()
     {
       // A report that stops waiting for a hung disk check still gets memory, because it was collected first
