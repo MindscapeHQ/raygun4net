@@ -40,7 +40,7 @@ namespace Mindscape.Raygun4Net
     /// </summary>
     public static RaygunEnvironmentMessage Build(RaygunSettingsBase settings)
     {
-      // Machine details first, so a report that stops waiting for a slow disk check still has them
+      // Disk space goes on top of the machine details, which have their own cache and never wait for a disk check
       var message = BuildWithoutDiskSpace(settings);
 
       message.DiskSpaceFreeStatus = GetCachedDiskSpace(out var diskSpaceFree);
@@ -57,8 +57,8 @@ namespace Mindscape.Raygun4Net
         if (LastUpdate < DateTime.UtcNow.AddMinutes(-2))
         {
           // The first report has nothing to send yet, so wait for a refresh running on another thread. It doesn't
-          // touch the disks, so the limit is only a safety net for a slow provider. Later reports send what's cached
-          // rather than wait, as machine details a couple of minutes old are still accurate enough.
+          // touch the disks, so the disk time limit is reused only as a safety net for a slow provider. Later reports
+          // send what's cached rather than wait, as machine details a couple of minutes old are still accurate enough.
           var wait = LastUpdate == DateTime.MinValue ? DiskSpaceTimeout : TimeSpan.Zero;
 
           if (Semaphore.Wait(wait))
@@ -179,7 +179,7 @@ namespace Mindscape.Raygun4Net
       try
       {
         // Wait for a refresh running on another thread so this report gets fresh values. That refresh waits at most
-        // DiskSpaceTimeout, so twice that is enough before giving up.
+        // DiskSpaceTimeout from when its check started; the second DiskSpaceTimeout is only slack before giving up.
         if (DiskSpaceLastUpdate < staleBefore && DiskSpaceSemaphore.Wait(DiskSpaceTimeout + DiskSpaceTimeout))
         {
           try

@@ -13,7 +13,8 @@
   - Mindscape.Raygun4Net.NetCore.Common: disk-space collection checks the drive type before readiness, so drives that are not reported (e.g. network drives, non-root mounts) are no longer probed
   - Mindscape.Raygun4Net.NetCore.Common: disk space is collected on a background thread with a 5 second limit. If it runs out, the report is sent (or stored offline) with an empty `DiskSpaceFree` and `DiskSpaceFreeStatus` set to `"TimedOut"`, instead of stale values
   - Mindscape.Raygun4Net.NetCore.Common: if the disk check fails, the report has an empty `DiskSpaceFree` and `DiskSpaceFreeStatus` set to `"Error"`
-  - Mindscape.Raygun4Net.NetCore.Common: reports that arrive while another report is collecting environment details wait for the fresh values instead of skipping them, for up to twice the disk limit
+  - Mindscape.Raygun4Net.NetCore.Common: reports that arrive while another report is collecting disk space wait for the fresh values instead of skipping them, for up to twice the disk limit. Machine details (OS, CPU, memory) are cached separately, and only the first report of the process waits for them
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/586
   - See: https://github.com/MindscapeHQ/raygun4net/pull/585
 - Feature: `IsDiskSpaceFreeIgnored` setting turns off disk space collection
   - Reports sent while it is on have an empty `DiskSpaceFree` and `DiskSpaceFreeStatus` set to `"Ignored"`

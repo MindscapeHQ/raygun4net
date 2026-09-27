@@ -158,9 +158,11 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     public async Task EnvironmentBuild_WhenAnotherReportIsRefreshing_WaitsAndReturnsFreshDiskSpace()
     {
       using var providerStarted = new ManualResetEventSlim(false);
+      var calls = 0;
       RaygunEnvironmentMessageBuilder.DiskSpaceTimeout = TimeSpan.FromSeconds(5);
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () =>
       {
+        Interlocked.Increment(ref calls);
         providerStarted.Set();
         Thread.Sleep(300);
         return new List<double> { 42 };
@@ -176,6 +178,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       second.DiskSpaceFree.Should().Equal(42);
       second.DiskSpaceFreeStatus.Should().BeNull();
       (await first).DiskSpaceFree.Should().Equal(42);
+      Volatile.Read(ref calls).Should().Be(1, "the waiting report gets the result of the check it waited for");
     }
 
     [Test]
@@ -262,6 +265,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       calls.Should().Be(0);
       result.DiskSpaceFree.Should().NotBeNull().And.BeEmpty();
       result.DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.Ignored);
+      result.OSVersion.Should().NotBeNullOrEmpty();
     }
 
     [Test]
@@ -281,7 +285,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     {
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 123 };
 
-      // The client that ignores disk space triggers the refresh, so its refresh skips the disk check
+      // The client that ignores disk space refreshes only the machine details
       BuildIgnoringDiskSpace();
 
       var result = RaygunEnvironmentMessageBuilder.Build(_settings);
@@ -365,7 +369,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public void EnvironmentBuild_WhenDiskSpaceIgnoredAndSemaphoreHeld_ReturnsCachedDetailsWithoutReleasingSemaphore()
+    public void EnvironmentBuild_WhenDiskSpaceIgnoredAndMachineDetailsSemaphoreHeld_ReturnsCachedDetailsWithoutReleasingSemaphore()
     {
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 123 };
       RaygunEnvironmentMessageBuilder.Build(_settings);
@@ -410,7 +414,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public async Task EnvironmentBuild_WhenDiskSpaceIgnoredReportSkipsRefresh_OtherClientsStillGetFreshDiskSpace()
+    public async Task EnvironmentBuild_WhenDiskSpaceIgnoredReportRunsDuringDiskCheck_OtherClientsStillGetFreshDiskSpace()
     {
       using var providerStarted = new ManualResetEventSlim(false);
       var calls = 0;
@@ -426,9 +430,8 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       var refreshing = Task.Run(() => RaygunEnvironmentMessageBuilder.Build(_settings));
       providerStarted.Wait(TimeSpan.FromSeconds(5)).Should().BeTrue();
 
-      // Passing through without the semaphore must leave the refresh, and the cached values it produces, untouched
-      BuildIgnoringDiskSpace()
-                                     .DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.Ignored);
+      // A report that ignores disk space must leave the disk check, and the cached values it produces, untouched
+      BuildIgnoringDiskSpace().DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.Ignored);
 
       (await refreshing).DiskSpaceFree.Should().Equal(42);
 
@@ -472,8 +475,8 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     [Test]
     public async Task EnvironmentBuild_WhenTwoFirstReportsArriveTogether_BothGetFreshDiskSpace()
     {
-      // The refresh also spends time outside the disk check (static details, memory), so a report waiting on it must
-      // allow for more than the disk time limit alone
+      // The first report also collects the machine details before its disk check, so a report waiting on that check
+      // must allow for more than the disk time limit alone
       RaygunEnvironmentMessageBuilder.DiskSpaceTimeout = TimeSpan.FromSeconds(1);
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () =>
       {
@@ -601,7 +604,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public void EnvironmentBuild_AfterDiskProviderError_ReleasesSemaphore()
+    public void EnvironmentBuild_AfterDiskProviderError_ReleasesSemaphores()
     {
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => throw new IOException("Disk error");
 
@@ -612,7 +615,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public void EnvironmentBuild_WhenDiskProviderThrowsAfterIgnoringClientSkippedCheck_ReturnsErrorAndChecksOnce()
+    public void EnvironmentBuild_WhenDiskProviderThrowsAfterIgnoringClientReport_ReturnsErrorAndChecksOnce()
     {
       var calls = 0;
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () =>
@@ -767,7 +770,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public void EnvironmentBuild_AfterDiskCheckTimesOut_ReleasesSemaphore()
+    public void EnvironmentBuild_AfterDiskCheckTimesOut_ReleasesSemaphores()
     {
       using var gate = new ManualResetEventSlim(false);
       UseHangingDiskProvider(gate);
@@ -878,18 +881,6 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public void SetEnvironmentDetails_WhenDiskSpaceIgnored_SetsIgnoredStatus()
-    {
-      var message = RaygunMessageBuilder.New(new RaygunSettings { IsDiskSpaceFreeIgnored = true })
-                                        .SetEnvironmentDetails()
-                                        .Build();
-
-      message.Details.Environment.DiskSpaceFree.Should().NotBeNull().And.BeEmpty();
-      message.Details.Environment.DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.Ignored);
-      message.Details.Environment.OSVersion.Should().NotBeNullOrEmpty();
-    }
-
-    [Test]
     public void SetEnvironmentDetails_WhenDiskSpaceNotIgnored_IncludesDiskSpace()
     {
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 42 };
@@ -901,31 +892,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public async Task EnvironmentBuild_WhenAnotherReportIsCheckingDisks_WaitsForItsResultWithoutCheckingAgain()
-    {
-      using var providerStarted = new ManualResetEventSlim(false);
-      var calls = 0;
-      RaygunEnvironmentMessageBuilder.DiskSpaceTimeout = TimeSpan.FromSeconds(5);
-      RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () =>
-      {
-        Interlocked.Increment(ref calls);
-        providerStarted.Set();
-        Thread.Sleep(300);
-        return new List<double> { 42 };
-      };
-
-      var first = Task.Run(() => RaygunEnvironmentMessageBuilder.Build(_settings));
-      providerStarted.Wait(TimeSpan.FromSeconds(5)).Should().BeTrue();
-
-      var second = await Task.Run(() => RaygunEnvironmentMessageBuilder.Build(_settings));
-
-      second.DiskSpaceFree.Should().Equal(42);
-      (await first).DiskSpaceFree.Should().Equal(42);
-      Volatile.Read(ref calls).Should().Be(1, "the waiting report gets the result of the check it waited for");
-    }
-
-    [Test]
-    public void EnvironmentBuild_WithoutDiskSpace_NeverChecksDisksAndHasNoStatus()
+    public void EnvironmentBuildWithoutDiskSpace_NeverChecksDisksAndHasNoStatus()
     {
       var calls = 0;
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () =>
@@ -1111,7 +1078,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public void EnvironmentBuild_WhenCacheIsFresh_DoesNotRefreshOrHoldSemaphore()
+    public void EnvironmentBuild_WhenCacheIsFresh_DoesNotRefreshOrHoldSemaphores()
     {
       RaygunEnvironmentMessageBuilder.Build(_settings);
       var freshUpdate = DateTime.UtcNow.AddSeconds(-30);
@@ -1126,7 +1093,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public async Task EnvironmentBuild_WhenFirstBuildIsCalledConcurrently_NeverThrowsAndReleasesSemaphore()
+    public async Task EnvironmentBuild_WhenFirstBuildIsCalledConcurrently_NeverThrowsAndReleasesSemaphores()
     {
       GetCachedEnvironmentMessage().DiskSpaceFree = null;
 
@@ -1143,7 +1110,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public void EnvironmentBuild_AfterRefresh_ReleasesSemaphore()
+    public void EnvironmentBuild_AfterRefresh_ReleasesSemaphores()
     {
       RaygunEnvironmentMessageBuilder.Build(_settings);
 
