@@ -72,5 +72,13 @@ public abstract class RaygunSettingsBase
   /// </remarks>
   public IList<string> EnvironmentVariables { get; set; } = new List<string>();
 
+  /// <summary>
+  /// If set to true, free disk space is not collected or sent with crash reports.
+  /// </summary>
+  /// <remarks>
+  /// Defaults to false. Reports sent while this is on have an empty DiskSpaceFree with a DiskSpaceFreeStatus of "Ignored".
+  /// </remarks>
+  public bool IsDiskSpaceFreeIgnored { get; set; }
+
   public OfflineStoreBase OfflineStore { get; set; }
 }

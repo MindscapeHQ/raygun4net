@@ -23,6 +23,12 @@ public class RaygunEnvironmentMessage
 
   public List<double> DiskSpaceFree { get; set; }
 
+  /// <summary>
+  /// Why <see cref="DiskSpaceFree"/> is empty: "TimedOut" if the disk check took too long, "Error" if it failed,
+  /// or "Ignored" if disk space collection is turned off. Null when disk space was collected.
+  /// </summary>
+  public string DiskSpaceFreeStatus { get; set; }
+
   public ulong TotalPhysicalMemory { get; set; }
 
   public ulong AvailablePhysicalMemory { get; set; }

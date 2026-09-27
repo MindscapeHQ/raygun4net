@@ -180,6 +180,22 @@ Request IP address masking is disabled by default. Enable it to mask IPv4 addres
 
 When enabled, Raygun also excludes known client-IP forwarding headers, such as `X-Forwarded-For` and `Forwarded`, from request metadata. Custom headers and arbitrary request fields are not scanned; configure the relevant ignore settings for any additional application-specific metadata.
 
+Disk space
+----------
+
+Each crash report includes the machine's free disk space: every fixed local drive on Windows, and the root volume on Linux and macOS. The disk check has a 5 second limit. If it takes longer, for example because a disk isn't responding, the report is sent without disk space, and `DiskSpaceFreeStatus` is set to `"TimedOut"` in the report's environment details. If the disk check fails, `DiskSpaceFreeStatus` is set to `"Error"`.
+
+A report that arrives while another report is collecting environment details waits for those values, for up to twice that limit.
+
+To turn off disk space collection completely, set `IsDiskSpaceFreeIgnored`. Reports then have `DiskSpaceFreeStatus` set to `"Ignored"`, and they never wait for a disk check, including one already running for another client. The first report of the process still waits for the other machine details to be collected, which doesn't touch the disks.
+
+```json
+"RaygunSettings": {
+  "ApiKey": "YOUR_APP_API_KEY",
+  "IsDiskSpaceFreeIgnored": true
+}
+```
+
 Replace unseekable request streams
 ----------------------------------
 
