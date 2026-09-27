@@ -43,7 +43,19 @@ namespace Mindscape.Raygun4Net
 
     public IRaygunMessageBuilder SetEnvironmentDetails()
     {
-      _raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.Build(_settings);
+      // The environment details are cached for the whole process, but whether a report includes disk space is up to
+      // this client's settings
+      if (_settings?.IsDiskSpaceFreeIgnored == true)
+      {
+        var environment = RaygunEnvironmentMessageBuilder.BuildWithoutDiskSpace(_settings);
+        environment.DiskSpaceFreeStatus = DiskSpaceFreeStatuses.Ignored;
+        _raygunMessage.Details.Environment = environment;
+      }
+      else
+      {
+        _raygunMessage.Details.Environment = RaygunEnvironmentMessageBuilder.Build(_settings);
+      }
+
       return this;
     }
 
