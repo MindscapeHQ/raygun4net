@@ -44,9 +44,9 @@ namespace Mindscape.Raygun4Net
         // DiskSpaceTimeout for disks, plus the other providers (normally well under a second), so allow twice the
         // disk timeout before giving up and returning what's cached.
         //
-        // A client that ignores disk space never waits for another client's refresh: it runs the refresh itself if
-        // nothing else holds the semaphore, and otherwise returns the cached details straight away. Otherwise a hung
-        // disk being checked for a different client would still block the caller that opted out of disk space.
+        // A client that ignores disk space never waits for another client's disk check: it runs the refresh itself if
+        // nothing else holds the semaphore, and otherwise uses the cached details. Without that, a hung disk being
+        // checked for a different client would still block the caller that opted out of disk space.
         var needsRefresh = LastUpdate < staleBefore || (!isDiskSpaceIgnored && _diskSpaceCheckSkipped);
         var refreshWait = isDiskSpaceIgnored ? TimeSpan.Zero : DiskSpaceTimeout + DiskSpaceTimeout;
 
