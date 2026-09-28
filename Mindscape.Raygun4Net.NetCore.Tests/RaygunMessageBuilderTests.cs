@@ -136,7 +136,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       RaygunEnvironmentMessageBuilder.Build(_settings).DiskSpaceFree.Should().Equal(123);
 
       // The cache is now older than the cache window, and the next check hangs
-      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.UtcNow.AddMinutes(-5);
+      SetLastUpdate(DateTime.UtcNow.AddMinutes(-5));
 
       using var gate = new ManualResetEventSlim(false);
       UseHangingDiskProvider(gate);
@@ -158,9 +158,11 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     public async Task EnvironmentBuild_WhenAnotherReportIsRefreshing_WaitsAndReturnsFreshDiskSpace()
     {
       using var providerStarted = new ManualResetEventSlim(false);
+      var calls = 0;
       RaygunEnvironmentMessageBuilder.DiskSpaceTimeout = TimeSpan.FromSeconds(5);
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () =>
       {
+        Interlocked.Increment(ref calls);
         providerStarted.Set();
         Thread.Sleep(300);
         return new List<double> { 42 };
@@ -176,6 +178,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       second.DiskSpaceFree.Should().Equal(42);
       second.DiskSpaceFreeStatus.Should().BeNull();
       (await first).DiskSpaceFree.Should().Equal(42);
+      Volatile.Read(ref calls).Should().Be(1, "the waiting report gets the result of the check it waited for");
     }
 
     [Test]
@@ -211,7 +214,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       try
       {
         RaygunEnvironmentMessageBuilder.Build(_settings);
-        RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.UtcNow.AddMinutes(-5);
+        SetLastUpdate(DateTime.UtcNow.AddMinutes(-5));
 
         var stopwatch = Stopwatch.StartNew();
         var result = RaygunEnvironmentMessageBuilder.Build(_settings);
@@ -239,7 +242,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       SpinWait.SpinUntil(() => calls() == 1 && IsDiskCheckFinished(), TimeSpan.FromSeconds(5)).Should().BeTrue();
 
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 7 };
-      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.UtcNow.AddMinutes(-5);
+      SetLastUpdate(DateTime.UtcNow.AddMinutes(-5));
 
       var result = RaygunEnvironmentMessageBuilder.Build(_settings);
 
@@ -257,11 +260,12 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         return new List<double> { 42 };
       };
 
-      var result = RaygunEnvironmentMessageBuilder.Build(new RaygunSettings { IsDiskSpaceFreeIgnored = true });
+      var result = BuildIgnoringDiskSpace();
 
       calls.Should().Be(0);
       result.DiskSpaceFree.Should().NotBeNull().And.BeEmpty();
       result.DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.Ignored);
+      result.OSVersion.Should().NotBeNullOrEmpty();
     }
 
     [Test]
@@ -270,7 +274,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 42 };
       RaygunEnvironmentMessageBuilder.Build(_settings).DiskSpaceFree.Should().Equal(42);
 
-      var result = RaygunEnvironmentMessageBuilder.Build(new RaygunSettings { IsDiskSpaceFreeIgnored = true });
+      var result = BuildIgnoringDiskSpace();
 
       result.DiskSpaceFree.Should().BeEmpty();
       result.DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.Ignored);
@@ -281,8 +285,8 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     {
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 123 };
 
-      // The client that ignores disk space triggers the refresh, so its refresh skips the disk check
-      RaygunEnvironmentMessageBuilder.Build(new RaygunSettings { IsDiskSpaceFreeIgnored = true });
+      // The client that ignores disk space refreshes only the machine details
+      BuildIgnoringDiskSpace();
 
       var result = RaygunEnvironmentMessageBuilder.Build(_settings);
 
@@ -313,7 +317,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         providerStarted.Wait(TimeSpan.FromSeconds(5)).Should().BeTrue();
 
         var stopwatch = Stopwatch.StartNew();
-        var result = RaygunEnvironmentMessageBuilder.Build(new RaygunSettings { IsDiskSpaceFreeIgnored = true });
+        var result = BuildIgnoringDiskSpace();
         stopwatch.Stop();
 
         stopwatch.Elapsed.Should().BeLessThan(TimeLimitMargin, "a client that ignores disk space must not queue behind another client's disk check");
@@ -335,9 +339,9 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       RaygunEnvironmentMessageBuilder.DiskSpaceTimeout = TimeSpan.FromSeconds(2);
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 42 };
 
-      // Nothing has been collected yet and the first refresh is under way, holding the semaphore
+      // Nothing has been collected yet and the first refresh of the machine details is under way, holding the semaphore
       RaygunEnvironmentMessageBuilder.Semaphore.Wait();
-      var ignoringReport = Task.Run(() => RaygunEnvironmentMessageBuilder.Build(new RaygunSettings { IsDiskSpaceFreeIgnored = true }));
+      var ignoringReport = Task.Run(() => BuildIgnoringDiskSpace());
 
       try
       {
@@ -345,11 +349,9 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       }
       finally
       {
+        // Once that refresh finishes, the waiting report collects the machine details
         RaygunEnvironmentMessageBuilder.Semaphore.Release();
       }
-
-      // That refresh publishes the machine details
-      RaygunEnvironmentMessageBuilder.Build(_settings);
 
       ignoringReport.Wait(TimeLimitMargin).Should().BeTrue();
       ignoringReport.Result.OSVersion.Should().NotBeNullOrEmpty("a report with no machine details at all is worse than a slightly late one");
@@ -367,16 +369,16 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public void EnvironmentBuild_WhenDiskSpaceIgnoredAndSemaphoreHeld_ReturnsCachedDetailsWithoutReleasingSemaphore()
+    public void EnvironmentBuild_WhenDiskSpaceIgnoredAndMachineDetailsSemaphoreHeld_ReturnsCachedDetailsWithoutReleasingSemaphore()
     {
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 123 };
       RaygunEnvironmentMessageBuilder.Build(_settings);
-      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.UtcNow.AddMinutes(-5);
+      SetLastUpdate(DateTime.UtcNow.AddMinutes(-5));
 
       RaygunEnvironmentMessageBuilder.Semaphore.Wait();
       try
       {
-        var build = Task.Run(() => RaygunEnvironmentMessageBuilder.Build(new RaygunSettings { IsDiskSpaceFreeIgnored = true }));
+        var build = Task.Run(() => BuildIgnoringDiskSpace());
 
         build.Wait(TimeLimitMargin).Should().BeTrue("a client that ignores disk space doesn't wait for a refresh it doesn't need");
         build.Result.DiskSpaceFree.Should().NotBeNull().And.BeEmpty();
@@ -401,7 +403,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         return new List<double> { 42 };
       };
 
-      var result = RaygunEnvironmentMessageBuilder.Build(new RaygunSettings { IsDiskSpaceFreeIgnored = true });
+      var result = BuildIgnoringDiskSpace();
 
       result.OSVersion.Should().NotBeNullOrEmpty();
       result.ProcessorCount.Should().BeGreaterThan(0);
@@ -412,7 +414,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public async Task EnvironmentBuild_WhenDiskSpaceIgnoredReportSkipsRefresh_OtherClientsStillGetFreshDiskSpace()
+    public async Task EnvironmentBuild_WhenDiskSpaceIgnoredReportRunsDuringDiskCheck_OtherClientsStillGetFreshDiskSpace()
     {
       using var providerStarted = new ManualResetEventSlim(false);
       var calls = 0;
@@ -428,9 +430,8 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       var refreshing = Task.Run(() => RaygunEnvironmentMessageBuilder.Build(_settings));
       providerStarted.Wait(TimeSpan.FromSeconds(5)).Should().BeTrue();
 
-      // Passing through without the semaphore must leave the refresh, and the cached values it produces, untouched
-      RaygunEnvironmentMessageBuilder.Build(new RaygunSettings { IsDiskSpaceFreeIgnored = true })
-                                     .DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.Ignored);
+      // A report that ignores disk space must leave the disk check, and the cached values it produces, untouched
+      BuildIgnoringDiskSpace().DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.Ignored);
 
       (await refreshing).DiskSpaceFree.Should().Equal(42);
 
@@ -463,7 +464,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     {
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 5 };
       RaygunEnvironmentMessageBuilder.Build(_settings);
-      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.UtcNow.AddMinutes(-2).AddMilliseconds(100);
+      SetLastUpdate(DateTime.UtcNow.AddMinutes(-2).AddMilliseconds(100));
 
       var result = RaygunEnvironmentMessageBuilder.Build(_settings);
 
@@ -474,8 +475,8 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     [Test]
     public async Task EnvironmentBuild_WhenTwoFirstReportsArriveTogether_BothGetFreshDiskSpace()
     {
-      // The refresh also spends time outside the disk check (static details, memory), so a report waiting on it must
-      // allow for more than the disk time limit alone
+      // The first report also collects the machine details before its disk check, so a report waiting on that check
+      // must allow for more than the disk time limit alone
       RaygunEnvironmentMessageBuilder.DiskSpaceTimeout = TimeSpan.FromSeconds(1);
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () =>
       {
@@ -508,7 +509,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         return new List<double> { 123 };
       };
 
-      RaygunEnvironmentMessageBuilder.Build(new RaygunSettings { IsDiskSpaceFreeIgnored = true });
+      BuildIgnoringDiskSpace();
       calls.Should().Be(0);
 
       RaygunEnvironmentMessageBuilder.Build(_settings);
@@ -518,14 +519,14 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public async Task EnvironmentBuild_WhileDiskCheckSkippedByIgnoringClientIsRerun_ConcurrentReportDoesNotGetOldDiskSpace()
+    public async Task EnvironmentBuild_AfterIgnoringClientRefreshesMachineDetails_ConcurrentReportDoesNotGetOldDiskSpace()
     {
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 111 };
       RaygunEnvironmentMessageBuilder.Build(_settings);
 
-      // Much later, a client that ignores disk space runs the refresh, so the cached 111 is now old
-      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.UtcNow.AddMinutes(-10);
-      RaygunEnvironmentMessageBuilder.Build(new RaygunSettings { IsDiskSpaceFreeIgnored = true });
+      // Much later, a client that ignores disk space refreshes the machine details, but the cached 111 is still old
+      SetLastUpdate(DateTime.UtcNow.AddMinutes(-10));
+      BuildIgnoringDiskSpace();
 
       using var providerStarted = new ManualResetEventSlim(false);
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () =>
@@ -562,7 +563,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       RaygunEnvironmentMessageBuilder.Build(_settings);
 
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => throw new IOException("Disk error");
-      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.UtcNow.AddMinutes(-5);
+      SetLastUpdate(DateTime.UtcNow.AddMinutes(-5));
 
       var result = RaygunEnvironmentMessageBuilder.Build(_settings);
 
@@ -577,7 +578,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       RaygunEnvironmentMessageBuilder.Build(_settings).DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.Error);
 
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 7 };
-      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.UtcNow.AddMinutes(-5);
+      SetLastUpdate(DateTime.UtcNow.AddMinutes(-5));
 
       var result = RaygunEnvironmentMessageBuilder.Build(_settings);
 
@@ -603,17 +604,18 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public void EnvironmentBuild_AfterDiskProviderError_ReleasesSemaphore()
+    public void EnvironmentBuild_AfterDiskProviderError_ReleasesSemaphores()
     {
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => throw new IOException("Disk error");
 
       RaygunEnvironmentMessageBuilder.Build(_settings);
 
       RaygunEnvironmentMessageBuilder.Semaphore.CurrentCount.Should().Be(1);
+      RaygunEnvironmentMessageBuilder.DiskSpaceSemaphore.CurrentCount.Should().Be(1);
     }
 
     [Test]
-    public void EnvironmentBuild_WhenDiskProviderThrowsAfterIgnoringClientSkippedCheck_ReturnsErrorAndChecksOnce()
+    public void EnvironmentBuild_WhenDiskProviderThrowsAfterIgnoringClientReport_ReturnsErrorAndChecksOnce()
     {
       var calls = 0;
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () =>
@@ -622,7 +624,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         throw new IOException("Disk error");
       };
 
-      RaygunEnvironmentMessageBuilder.Build(new RaygunSettings { IsDiskSpaceFreeIgnored = true });
+      BuildIgnoringDiskSpace();
 
       var result = RaygunEnvironmentMessageBuilder.Build(_settings);
 
@@ -663,7 +665,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
 
       using var gate = new ManualResetEventSlim(false);
       UseHangingDiskProvider(gate);
-      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.UtcNow.AddMinutes(-5);
+      SetLastUpdate(DateTime.UtcNow.AddMinutes(-5));
 
       try
       {
@@ -704,7 +706,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
       SpinWait.SpinUntil(IsDiskCheckFinished, TimeSpan.FromSeconds(5)).Should().BeTrue();
 
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 7 };
-      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.UtcNow.AddMinutes(-5);
+      SetLastUpdate(DateTime.UtcNow.AddMinutes(-5));
 
       var result = RaygunEnvironmentMessageBuilder.Build(_settings);
 
@@ -739,7 +741,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
 
         // Replace the failed check so nothing references it any more
         RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 7 };
-        RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.UtcNow.AddMinutes(-5);
+        SetLastUpdate(DateTime.UtcNow.AddMinutes(-5));
         RaygunEnvironmentMessageBuilder.Build(_settings);
 
         for (var i = 0; i < 5; i++)
@@ -768,7 +770,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public void EnvironmentBuild_AfterDiskCheckTimesOut_ReleasesSemaphore()
+    public void EnvironmentBuild_AfterDiskCheckTimesOut_ReleasesSemaphores()
     {
       using var gate = new ManualResetEventSlim(false);
       UseHangingDiskProvider(gate);
@@ -778,7 +780,9 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         RaygunEnvironmentMessageBuilder.Build(_settings);
 
         RaygunEnvironmentMessageBuilder.Semaphore.CurrentCount.Should().Be(1);
+        RaygunEnvironmentMessageBuilder.DiskSpaceSemaphore.CurrentCount.Should().Be(1);
         RaygunEnvironmentMessageBuilder.LastUpdate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(10));
+        RaygunEnvironmentMessageBuilder.DiskSpaceLastUpdate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(10));
       }
       finally
       {
@@ -787,21 +791,209 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
-    public void EnvironmentBuild_WhenSemaphoreHeldPastTimeLimit_ReturnsWithoutStaleDiskSpace()
+    public void EnvironmentBuild_WhenDiskSpaceSemaphoreHeldPastTimeLimit_ReturnsWithoutStaleDiskSpace()
     {
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 123 };
       RaygunEnvironmentMessageBuilder.Build(_settings);
-      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.UtcNow.AddMinutes(-5);
+      SetLastUpdate(DateTime.UtcNow.AddMinutes(-5));
       RaygunEnvironmentMessageBuilder.DiskSpaceTimeout = TestDiskSpaceTimeout;
 
-      RaygunEnvironmentMessageBuilder.Semaphore.Wait();
+      RaygunEnvironmentMessageBuilder.DiskSpaceSemaphore.Wait();
       try
       {
         var build = Task.Run(() => RaygunEnvironmentMessageBuilder.Build(_settings));
 
-        build.Wait(TestDiskSpaceTimeout + TimeLimitMargin).Should().BeTrue("the wait for another refresh is time-limited");
+        build.Wait(TestDiskSpaceTimeout + TestDiskSpaceTimeout + TimeLimitMargin).Should().BeTrue("the wait for another refresh is time-limited");
         build.Result.DiskSpaceFree.Should().BeEmpty();
         build.Result.DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.TimedOut);
+        RaygunEnvironmentMessageBuilder.DiskSpaceSemaphore.CurrentCount.Should().Be(0, "a thread that didn't get the semaphore must not release it");
+      }
+      finally
+      {
+        RaygunEnvironmentMessageBuilder.DiskSpaceSemaphore.Release();
+      }
+    }
+
+    [Test]
+    public void EnvironmentBuild_WhenIgnoringClientRefreshesMachineDetails_DiskSpaceStillCountsAsStale()
+    {
+      var calls = 0;
+      var diskSpace = 123d;
+      RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () =>
+      {
+        Interlocked.Increment(ref calls);
+        return new List<double> { diskSpace };
+      };
+
+      RaygunEnvironmentMessageBuilder.Build(_settings);
+      var stale = DateTime.UtcNow.AddMinutes(-5);
+      SetLastUpdate(stale);
+
+      BuildIgnoringDiskSpace();
+
+      RaygunEnvironmentMessageBuilder.LastUpdate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(10));
+      RaygunEnvironmentMessageBuilder.DiskSpaceLastUpdate.Should().Be(stale, "refreshing the machine details must not make the old disk space look fresh");
+
+      diskSpace = 456;
+      var result = RaygunEnvironmentMessageBuilder.Build(_settings);
+
+      result.DiskSpaceFree.Should().Equal(456);
+      result.DiskSpaceFreeStatus.Should().BeNull();
+      calls.Should().Be(2);
+    }
+
+    [Test]
+    public void EnvironmentBuild_WhenDiskSpaceIgnoredAndDiskSpaceSemaphoreHeld_ReturnsFreshMachineDetailsWithoutWaiting()
+    {
+      RaygunEnvironmentMessageBuilder.DiskSpaceTimeout = TimeSpan.FromSeconds(5);
+
+      // A disk check for another client holds the disk space semaphore, and nothing has been collected yet
+      RaygunEnvironmentMessageBuilder.DiskSpaceSemaphore.Wait();
+      try
+      {
+        var stopwatch = Stopwatch.StartNew();
+        var result = BuildIgnoringDiskSpace();
+        stopwatch.Stop();
+
+        stopwatch.Elapsed.Should().BeLessThan(TimeLimitMargin);
+        result.OSVersion.Should().NotBeNullOrEmpty();
+        result.TotalPhysicalMemory.Should().NotBe(0);
+        result.DiskSpaceFree.Should().NotBeNull().And.BeEmpty();
+        result.DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.Ignored);
+        RaygunEnvironmentMessageBuilder.DiskSpaceSemaphore.CurrentCount.Should().Be(0);
+      }
+      finally
+      {
+        RaygunEnvironmentMessageBuilder.DiskSpaceSemaphore.Release();
+      }
+    }
+
+    [Test]
+    public void EnvironmentBuild_CalledDirectly_CollectsDiskSpaceWhateverTheSetting()
+    {
+      // Leaving disk space out is decided per client by SetEnvironmentDetails, not by the shared builder
+      RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 42 };
+
+      var result = RaygunEnvironmentMessageBuilder.Build(new RaygunSettings { IsDiskSpaceFreeIgnored = true });
+
+      result.DiskSpaceFree.Should().Equal(42);
+      result.DiskSpaceFreeStatus.Should().BeNull();
+    }
+
+    [Test]
+    public void SetEnvironmentDetails_WhenDiskSpaceNotIgnored_IncludesDiskSpace()
+    {
+      RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 42 };
+
+      var message = _builder.SetEnvironmentDetails().Build();
+
+      message.Details.Environment.DiskSpaceFree.Should().Equal(42);
+      message.Details.Environment.DiskSpaceFreeStatus.Should().BeNull();
+    }
+
+    [Test]
+    public void EnvironmentBuildWithoutDiskSpace_NeverChecksDisksAndHasNoStatus()
+    {
+      var calls = 0;
+      RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () =>
+      {
+        Interlocked.Increment(ref calls);
+        return new List<double> { 42 };
+      };
+
+      var result = RaygunEnvironmentMessageBuilder.BuildWithoutDiskSpace(_settings);
+
+      calls.Should().Be(0);
+      result.DiskSpaceFree.Should().NotBeNull().And.BeEmpty();
+      result.DiskSpaceFreeStatus.Should().BeNull();
+      result.OSVersion.Should().NotBeNullOrEmpty();
+      RaygunEnvironmentMessageBuilder.DiskSpaceLastUpdate.Should().Be(DateTime.MinValue);
+    }
+
+    [Test]
+    public void EnvironmentBuild_WhenOnlyMachineDetailsAreStale_RefreshesThemWithoutCheckingDisks()
+    {
+      var calls = 0;
+      RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () =>
+      {
+        Interlocked.Increment(ref calls);
+        return new List<double> { 42 };
+      };
+
+      RaygunEnvironmentMessageBuilder.Build(_settings);
+      var diskSpaceUpdated = RaygunEnvironmentMessageBuilder.DiskSpaceLastUpdate;
+      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.UtcNow.AddMinutes(-5);
+
+      var result = RaygunEnvironmentMessageBuilder.Build(_settings);
+
+      RaygunEnvironmentMessageBuilder.LastUpdate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(10));
+      RaygunEnvironmentMessageBuilder.DiskSpaceLastUpdate.Should().Be(diskSpaceUpdated);
+      result.DiskSpaceFree.Should().Equal(42);
+      calls.Should().Be(1);
+    }
+
+    [Test]
+    public void EnvironmentBuild_WhenOnlyDiskSpaceIsStale_ChecksDisksWithoutRefreshingMachineDetails()
+    {
+      var diskSpace = 1d;
+      RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { diskSpace };
+
+      RaygunEnvironmentMessageBuilder.Build(_settings);
+      var machineDetailsUpdated = DateTime.UtcNow.AddSeconds(-30);
+      RaygunEnvironmentMessageBuilder.LastUpdate = machineDetailsUpdated;
+      RaygunEnvironmentMessageBuilder.DiskSpaceLastUpdate = DateTime.UtcNow.AddMinutes(-5);
+
+      diskSpace = 2;
+      var result = RaygunEnvironmentMessageBuilder.Build(_settings);
+
+      result.DiskSpaceFree.Should().Equal(2);
+      RaygunEnvironmentMessageBuilder.LastUpdate.Should().Be(machineDetailsUpdated);
+      RaygunEnvironmentMessageBuilder.DiskSpaceLastUpdate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(10));
+    }
+
+    [Test]
+    public void EnvironmentBuild_WhenMachineDetailsRefreshIsRunning_ReturnsCachedDetailsAndFreshDiskSpaceWithoutWaiting()
+    {
+      var diskSpace = 1d;
+      RaygunEnvironmentMessageBuilder.DiskSpaceTimeout = TimeSpan.FromSeconds(5);
+      RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { diskSpace };
+      RaygunEnvironmentMessageBuilder.Build(_settings);
+      SetLastUpdate(DateTime.UtcNow.AddMinutes(-5));
+
+      // Another report is refreshing the machine details
+      RaygunEnvironmentMessageBuilder.Semaphore.Wait();
+      try
+      {
+        diskSpace = 2;
+        var stopwatch = Stopwatch.StartNew();
+        var result = RaygunEnvironmentMessageBuilder.Build(_settings);
+        stopwatch.Stop();
+
+        stopwatch.Elapsed.Should().BeLessThan(TimeLimitMargin, "machine details are already cached, so there's no need to wait for the refresh");
+        result.OSVersion.Should().NotBeNullOrEmpty();
+        result.DiskSpaceFree.Should().Equal(new[] { 2d }, "disk space has its own semaphore, so it's refreshed even while the machine details are");
+        result.DiskSpaceFreeStatus.Should().BeNull();
+      }
+      finally
+      {
+        RaygunEnvironmentMessageBuilder.Semaphore.Release();
+      }
+    }
+
+    [Test]
+    public void EnvironmentBuild_WhenFirstMachineDetailsRefreshHoldsSemaphorePastTimeLimit_ReturnsWithinTimeLimit()
+    {
+      RaygunEnvironmentMessageBuilder.DiskSpaceTimeout = TestDiskSpaceTimeout;
+      RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 42 };
+
+      RaygunEnvironmentMessageBuilder.Semaphore.Wait();
+      try
+      {
+        var build = Task.Run(() => BuildIgnoringDiskSpace());
+
+        build.Wait(TestDiskSpaceTimeout + TimeLimitMargin).Should().BeTrue("the first report's wait for the machine details is time-limited");
+        build.Result.DiskSpaceFreeStatus.Should().Be(DiskSpaceFreeStatuses.Ignored);
+        RaygunEnvironmentMessageBuilder.LastUpdate.Should().Be(DateTime.MinValue);
         RaygunEnvironmentMessageBuilder.Semaphore.CurrentCount.Should().Be(0, "a thread that didn't get the semaphore must not release it");
       }
       finally
@@ -815,7 +1007,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     {
       RaygunEnvironmentMessageBuilder.DiskSpaceProvider = () => new List<double> { 5 };
       RaygunEnvironmentMessageBuilder.Build(_settings);
-      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.UtcNow.AddSeconds(-90);
+      SetLastUpdate(DateTime.UtcNow.AddSeconds(-90));
 
       var result = RaygunEnvironmentMessageBuilder.Build(_settings);
 
@@ -877,28 +1069,31 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     public void EnvironmentBuild_WhenCacheIsStaleAndNoRefreshInProgress_RefreshesCache()
     {
       RaygunEnvironmentMessageBuilder.Build(_settings);
-      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.UtcNow.AddMinutes(-5);
+      SetLastUpdate(DateTime.UtcNow.AddMinutes(-5));
 
       RaygunEnvironmentMessageBuilder.Build(_settings);
 
       RaygunEnvironmentMessageBuilder.LastUpdate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(10));
+      RaygunEnvironmentMessageBuilder.DiskSpaceLastUpdate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(10));
     }
 
     [Test]
-    public void EnvironmentBuild_WhenCacheIsFresh_DoesNotRefreshOrHoldSemaphore()
+    public void EnvironmentBuild_WhenCacheIsFresh_DoesNotRefreshOrHoldSemaphores()
     {
       RaygunEnvironmentMessageBuilder.Build(_settings);
       var freshUpdate = DateTime.UtcNow.AddSeconds(-30);
-      RaygunEnvironmentMessageBuilder.LastUpdate = freshUpdate;
+      SetLastUpdate(freshUpdate);
 
       RaygunEnvironmentMessageBuilder.Build(_settings);
 
       RaygunEnvironmentMessageBuilder.LastUpdate.Should().Be(freshUpdate);
+      RaygunEnvironmentMessageBuilder.DiskSpaceLastUpdate.Should().Be(freshUpdate);
       RaygunEnvironmentMessageBuilder.Semaphore.CurrentCount.Should().Be(1);
+      RaygunEnvironmentMessageBuilder.DiskSpaceSemaphore.CurrentCount.Should().Be(1);
     }
 
     [Test]
-    public async Task EnvironmentBuild_WhenFirstBuildIsCalledConcurrently_NeverThrowsAndReleasesSemaphore()
+    public async Task EnvironmentBuild_WhenFirstBuildIsCalledConcurrently_NeverThrowsAndReleasesSemaphores()
     {
       GetCachedEnvironmentMessage().DiskSpaceFree = null;
 
@@ -910,15 +1105,17 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
 
       results.Should().OnlyContain(r => r.DiskSpaceFree != null);
       RaygunEnvironmentMessageBuilder.Semaphore.CurrentCount.Should().Be(1);
+      RaygunEnvironmentMessageBuilder.DiskSpaceSemaphore.CurrentCount.Should().Be(1);
       RaygunEnvironmentMessageBuilder.LastUpdate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(10));
     }
 
     [Test]
-    public void EnvironmentBuild_AfterRefresh_ReleasesSemaphore()
+    public void EnvironmentBuild_AfterRefresh_ReleasesSemaphores()
     {
       RaygunEnvironmentMessageBuilder.Build(_settings);
 
       RaygunEnvironmentMessageBuilder.Semaphore.CurrentCount.Should().Be(1);
+      RaygunEnvironmentMessageBuilder.DiskSpaceSemaphore.CurrentCount.Should().Be(1);
     }
 
     [Test]
@@ -959,6 +1156,22 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         gate.Wait();
         throw new IOException("Late disk error");
       };
+    }
+
+    // Ages both caches, the machine details and the disk space
+    private static void SetLastUpdate(DateTime lastUpdate)
+    {
+      RaygunEnvironmentMessageBuilder.LastUpdate = lastUpdate;
+      RaygunEnvironmentMessageBuilder.DiskSpaceLastUpdate = lastUpdate;
+    }
+
+    // Builds the environment details as a client that ignores disk space does
+    private static RaygunEnvironmentMessage BuildIgnoringDiskSpace()
+    {
+      return RaygunMessageBuilder.New(new RaygunSettings { IsDiskSpaceFreeIgnored = true })
+                                 .SetEnvironmentDetails()
+                                 .Build()
+                                 .Details.Environment;
     }
 
     private static bool IsDiskCheckFinished()
@@ -1098,7 +1311,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         }
       };
       
-      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.MinValue;
+      SetLastUpdate(DateTime.MinValue);
       var builder = RaygunMessageBuilder.New(settings)
                                         .SetEnvironmentDetails();
       
@@ -1130,7 +1343,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         }
       };
       
-      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.MinValue;
+      SetLastUpdate(DateTime.MinValue);
       var builder = RaygunMessageBuilder.New(settings)
                                         .SetEnvironmentDetails();
       
@@ -1159,7 +1372,7 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
         }
       };
       
-      RaygunEnvironmentMessageBuilder.LastUpdate = DateTime.MinValue;
+      SetLastUpdate(DateTime.MinValue);
       var builder = RaygunMessageBuilder.New(settings)
                                         .SetEnvironmentDetails();
       

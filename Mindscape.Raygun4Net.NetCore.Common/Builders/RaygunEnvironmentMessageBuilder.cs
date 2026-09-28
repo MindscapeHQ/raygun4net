@@ -14,9 +14,15 @@ namespace Mindscape.Raygun4Net
   {
     private static readonly TimeSpan DefaultDiskSpaceTimeout = TimeSpan.FromSeconds(5);
 
+    // Machine details (everything except disk space) and disk space are cached for the whole process, and shared by
+    // every RaygunClient in it. Each has its own timestamp and semaphore, so refreshing one never makes the other look
+    // fresh, and a report that only needs the machine details never waits for a disk check.
     private static readonly RaygunEnvironmentMessage CachedMessage = new();
     internal static DateTime LastUpdate = DateTime.MinValue;
     internal static readonly SemaphoreSlim Semaphore = new(1, 1);
+
+    internal static DateTime DiskSpaceLastUpdate = DateTime.MinValue;
+    internal static readonly SemaphoreSlim DiskSpaceSemaphore = new(1, 1);
 
     // How long a report waits for disk space before it is sent without it. DriveInfo calls can't be cancelled, so
     // the check runs on its own background thread and is abandoned (not killed) when this runs out.
@@ -25,100 +31,70 @@ namespace Mindscape.Raygun4Net
     private static Task<List<double>> _diskSpaceTask;
     private static DateTime _diskSpaceTaskStartedUtc;
 
-    // Why the cached disk space is empty (null when it was collected), and whether the last refresh skipped the disk
-    // check because the client that ran it ignores disk space
+    // Why the cached disk space is empty (null when it was collected)
     private static string _diskSpaceFreeStatus;
-    private static bool _diskSpaceCheckSkipped;
 
-    // Set once the first refresh has collected the machine details, which it does before it starts the disk check
-    internal static readonly ManualResetEventSlim MachineDetailsPopulated = new(false);
-
+    /// <summary>
+    /// Builds the environment details for a report, including free disk space. Whether a report should leave disk
+    /// space out is a per-client setting, so it's decided by the caller: see <see cref="BuildWithoutDiskSpace"/>.
+    /// </summary>
     public static RaygunEnvironmentMessage Build(RaygunSettingsBase settings)
     {
-      var isDiskSpaceIgnored = settings?.IsDiskSpaceFreeIgnored == true;
-      var staleBefore = DateTime.UtcNow.AddMinutes(-2);
+      // Disk space goes on top of the machine details, which have their own cache and never wait for a disk check
+      var message = BuildWithoutDiskSpace(settings);
 
+      message.DiskSpaceFreeStatus = GetCachedDiskSpace(out var diskSpaceFree);
+      message.DiskSpaceFree = diskSpaceFree;
+
+      return message;
+    }
+
+    // Everything except disk space. Never checks disks and never waits for a disk check.
+    internal static RaygunEnvironmentMessage BuildWithoutDiskSpace(RaygunSettingsBase settings)
+    {
       try
       {
-        // Wait for a refresh running on another thread so this report gets fresh values. That refresh waits at most
-        // DiskSpaceTimeout for disks, plus the other providers (normally well under a second), so allow twice the
-        // disk timeout before giving up and returning what's cached.
-        //
-        // A client that ignores disk space never waits for another client's disk check: it runs the refresh itself if
-        // nothing else holds the semaphore, and otherwise uses the cached details. Without that, a hung disk being
-        // checked for a different client would still block the caller that opted out of disk space.
-        var needsRefresh = LastUpdate < staleBefore || (!isDiskSpaceIgnored && _diskSpaceCheckSkipped);
-        var refreshWait = isDiskSpaceIgnored ? TimeSpan.Zero : DiskSpaceTimeout + DiskSpaceTimeout;
-
-        var isRefreshing = needsRefresh && Semaphore.Wait(refreshWait);
-
-        if (!isRefreshing && needsRefresh && isDiskSpaceIgnored)
+        if (LastUpdate < DateTime.UtcNow.AddMinutes(-2))
         {
-          // Another refresh has the semaphore. Rather than send a report with no machine details at all, wait for that
-          // refresh to publish them. It publishes them before it starts its disk check, so an unresponsive disk can't
-          // hold this up; the limit is only a safety net for the other providers.
-          MachineDetailsPopulated.Wait(DiskSpaceTimeout + DiskSpaceTimeout);
-        }
+          // The first report has nothing to send yet, so wait for a refresh running on another thread. It doesn't
+          // touch the disks, so the disk time limit is reused only as a safety net for a slow provider. Later reports
+          // send what's cached rather than wait, as machine details a couple of minutes old are still accurate enough.
+          var wait = LastUpdate == DateTime.MinValue ? DiskSpaceTimeout : TimeSpan.Zero;
 
-        if (isRefreshing)
-        {
-          try
+          if (Semaphore.Wait(wait))
           {
-            if (LastUpdate == DateTime.MinValue)
+            try
             {
-              // Build adds all the static data that doesn't change
-              Build();
-              
-              // Update includes Memory / Disk which is prone to change
-              Update(settings);
-              LastUpdate = DateTime.UtcNow;
-            }
+              if (LastUpdate == DateTime.MinValue)
+              {
+                // Build adds all the static data that doesn't change
+                Build();
 
-            if (LastUpdate < DateTime.UtcNow.AddMinutes(-1))
-            {
-              Update(settings);
-              LastUpdate = DateTime.UtcNow;
-            }
+                // Update includes Memory which is prone to change
+                Update(settings);
+                LastUpdate = DateTime.UtcNow;
+              }
 
-            // The last refresh was run by a client that ignores disk space, so collect it for this one
-            if (!isDiskSpaceIgnored && _diskSpaceCheckSkipped)
-            {
-              UpdateDiskSpace();
+              if (LastUpdate < DateTime.UtcNow.AddMinutes(-1))
+              {
+                Update(settings);
+                LastUpdate = DateTime.UtcNow;
+              }
             }
-          }
-          catch (Exception e)
-          {
-            Console.WriteLine(e);
-          }
-          finally
-          {
-            Semaphore.Release();
+            catch (Exception e)
+            {
+              Console.WriteLine(e);
+            }
+            finally
+            {
+              Semaphore.Release();
+            }
           }
         }
       }
       catch
       {
         // Ignore - if an error occurs lets just return what we have and carry on, this is less important than not logging the error
-      }
-
-      List<double> diskSpaceFree;
-      string diskSpaceFreeStatus;
-
-      if (isDiskSpaceIgnored)
-      {
-        diskSpaceFree = new List<double>();
-        diskSpaceFreeStatus = DiskSpaceFreeStatuses.Ignored;
-      }
-      else if (LastUpdate < staleBefore || _diskSpaceCheckSkipped)
-      {
-        // Couldn't refresh in time: don't send old disk space, as the disk may have filled up since
-        diskSpaceFree = new List<double>();
-        diskSpaceFreeStatus = DiskSpaceFreeStatuses.TimedOut;
-      }
-      else
-      {
-        diskSpaceFree = CachedMessage.DiskSpaceFree?.ToList() ?? new List<double>();
-        diskSpaceFreeStatus = _diskSpaceFreeStatus;
       }
 
       // Return a copy of the cached message to avoid outside changes
@@ -132,8 +108,7 @@ namespace Mindscape.Raygun4Net
         AvailableVirtualMemory = CachedMessage.AvailableVirtualMemory,
         TotalPhysicalMemory = CachedMessage.TotalPhysicalMemory,
         TotalVirtualMemory = CachedMessage.TotalVirtualMemory,
-        DiskSpaceFree = diskSpaceFree,
-        DiskSpaceFreeStatus = diskSpaceFreeStatus,
+        DiskSpaceFree = new List<double>(),
         WindowBoundsHeight = CachedMessage.WindowBoundsHeight,
         WindowBoundsWidth = CachedMessage.WindowBoundsWidth,
         Locale = CachedMessage.Locale,
@@ -177,7 +152,6 @@ namespace Mindscape.Raygun4Net
 
     private static void Update(RaygunSettingsBase settings)
     {
-      // Memory first, so a report that stops waiting for a slow disk check still gets it
       try
       {
         var memory = MemoryProvider.GetTotalMemory();
@@ -195,35 +169,58 @@ namespace Mindscape.Raygun4Net
       {
         // Ignore
       }
-
-      // Reports that can't get the semaphore can use these details now, instead of sending none. Set before the disk
-      // check, so a hung disk never delays it.
-      MachineDetailsPopulated.Set();
-
-      if (settings?.IsDiskSpaceFreeIgnored == true)
-      {
-        _diskSpaceCheckSkipped = true;
-      }
-      else
-      {
-        UpdateDiskSpace();
-      }
     }
 
-    // Must be called while holding Semaphore
-    private static void UpdateDiskSpace()
+    // Returns a copy of the cached disk space and its status, refreshing it first when it's stale
+    private static string GetCachedDiskSpace(out List<double> diskSpaceFree)
     {
-      // On a timeout or error this clears the old values rather than keep sending them, as the disk may have filled up since
-      _diskSpaceFreeStatus = GetDiskSpace(out var diskSpaceFree);
-      CachedMessage.DiskSpaceFree = diskSpaceFree;
+      var staleBefore = DateTime.UtcNow.AddMinutes(-2);
 
-      // Only once the result is cached: until then, other reports still see the skip and wait for this result
-      // rather than sending the old cached values
-      _diskSpaceCheckSkipped = false;
+      try
+      {
+        // Wait for a refresh running on another thread so this report gets fresh values. That refresh waits at most
+        // DiskSpaceTimeout from when its check started; the second DiskSpaceTimeout is only slack before giving up.
+        if (DiskSpaceLastUpdate < staleBefore && DiskSpaceSemaphore.Wait(DiskSpaceTimeout + DiskSpaceTimeout))
+        {
+          try
+          {
+            // A refresh that ran while this report was waiting already has fresh values
+            if (DiskSpaceLastUpdate < DateTime.UtcNow.AddMinutes(-1))
+            {
+              // On a timeout or error this clears the old values rather than keep sending them, as the disk may have filled up since
+              _diskSpaceFreeStatus = GetDiskSpace(out var collected);
+              CachedMessage.DiskSpaceFree = collected;
+              DiskSpaceLastUpdate = DateTime.UtcNow;
+            }
+          }
+          catch (Exception e)
+          {
+            Console.WriteLine(e);
+          }
+          finally
+          {
+            DiskSpaceSemaphore.Release();
+          }
+        }
+      }
+      catch
+      {
+        // Ignore - as for the machine details, return what we have rather than fail the report
+      }
+
+      if (DiskSpaceLastUpdate < staleBefore)
+      {
+        // Couldn't refresh in time: don't send old disk space, as the disk may have filled up since
+        diskSpaceFree = new List<double>();
+        return DiskSpaceFreeStatuses.TimedOut;
+      }
+
+      diskSpaceFree = CachedMessage.DiskSpaceFree?.ToList() ?? new List<double>();
+      return _diskSpaceFreeStatus;
     }
 
-    // Must be called while holding Semaphore. Returns null if disk space was collected, TimedOut if the check didn't
-    // finish within DiskSpaceTimeout, or Error if it failed.
+    // Must be called while holding DiskSpaceSemaphore. Returns null if disk space was collected, TimedOut if the check
+    // didn't finish within DiskSpaceTimeout, or Error if it failed.
     private static string GetDiskSpace(out List<double> diskSpaceFree)
     {
       // Only one check runs at a time: if an earlier check is still stuck, keep waiting on that one rather than
@@ -273,13 +270,12 @@ namespace Mindscape.Raygun4Net
     internal static void ResetForTests()
     {
       LastUpdate = DateTime.MinValue;
+      DiskSpaceLastUpdate = DateTime.MinValue;
       DiskSpaceTimeout = DefaultDiskSpaceTimeout;
       DiskSpaceProvider = DiskProvider.GetDiskSpace;
       _diskSpaceTask = null;
       _diskSpaceTaskStartedUtc = DateTime.MinValue;
       _diskSpaceFreeStatus = null;
-      _diskSpaceCheckSkipped = false;
-      MachineDetailsPopulated.Reset();
     }
   }
 
