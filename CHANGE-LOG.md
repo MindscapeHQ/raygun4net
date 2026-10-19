@@ -10,6 +10,9 @@
   - A message sent while the user provider or message builders are being created, for example an error that their constructor logs, is sent without a user or without message builders
   - The Raygun logger still creates the client when the logger is created, so the client catches unhandled exceptions at startup
   - Mindscape.Raygun4Net.NetCore.Common: new public `LazyRaygunUserProvider` and `LazyMessageBuilders` classes. Use them when your own client factory gets the user provider or message builders from the container
+- Feature: Modern .NET reports capture the current W3C activity's trace and span identifiers in optional `Details.TraceContext` metadata
+  - On .NET 6 and later, `TraceId` and `SpanId` are captured as lowercase hexadecimal strings when the exception report is built, including when the activity is not sampled
+  - The metadata is omitted when no valid W3C activity is current. Automatic capture is not enabled for the `netstandard2.0` target
 
 ### v11.2.7
 - Feature: Opt-in request IP address masking (`IsRequestIpAddressMasked`)
