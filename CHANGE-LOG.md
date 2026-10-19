@@ -1,6 +1,6 @@
 # Full Change Log for Raygun4Net.* packages
 
-### vTODO
+### v11.2.7
 - Feature: Opt-in request IP address masking (`IsRequestIpAddressMasked`)
   - Masks IPv4 and IPv4-mapped IPv6 addresses to the embedded IPv4 `/24`, and native IPv6 addresses to `/48` (ports retained)
   - Excludes known client-IP forwarding headers and server variables from request metadata while masking is enabled
