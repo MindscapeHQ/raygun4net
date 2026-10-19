@@ -1,5 +1,10 @@
 # Full Change Log for Raygun4Net.* packages
 
+### vTODO
+- Fix: #590 - `LogCritical` could hang the calling thread when a message builder awaits
+  - Mindscape.Raygun4Net.Extensions.Logging: on a thread with a `SynchronizationContext` or a custom `TaskScheduler`, for example a UI thread, `LogCritical` sends the log asynchronously, the same as the other log levels
+  - On other threads, `LogCritical` still waits until the message is queued, so that the message still has the ASP.NET Core request data
+
 ### v11.2.7
 - Feature: Opt-in request IP address masking (`IsRequestIpAddressMasked`)
   - Masks IPv4 and IPv4-mapped IPv6 addresses to the embedded IPv4 `/24`, and native IPv6 addresses to `/48` (ports retained)
