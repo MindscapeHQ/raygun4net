@@ -43,6 +43,22 @@ namespace Mindscape.Raygun4Net.NetCore.Tests
     }
 
     [Test]
+    public void ResolvingLogger_Completes_WhenOwnClientFactoryUsesLazyUserProviderAndMessageBuilders()
+    {
+      var services = new ServiceCollection();
+
+      // A client factory of your own is the only way to give the client, for example, its own HttpClient
+      services.AddSingleton<RaygunClientBase>(s => new RaygunClient(new RaygunSettings(), new LazyRaygunUserProvider(() => s.GetService<IRaygunUserProvider>()), new LazyMessageBuilders(() => s.GetServices<IMessageBuilder>())));
+      services.AddLogging(logging => logging.AddRaygunLogger());
+      services.AddRaygunUserProvider<LoggingUserProvider>();
+      services.AddSingleton<IMessageBuilder, RecordingMessageBuilder>();
+
+      var provider = services.BuildServiceProvider();
+
+      Assert.That(Completes(() => provider.GetRequiredService<ILogger<ApplicationBuilderExtensionsTests>>()), Is.True);
+    }
+
+    [Test]
     public async Task SendInBackground_UsesUserProviderAndMessageBuilders_WhenTheyDependOnLogger()
     {
       var services = BuildServices(new CallbackRecordingOfflineStore(), s =>

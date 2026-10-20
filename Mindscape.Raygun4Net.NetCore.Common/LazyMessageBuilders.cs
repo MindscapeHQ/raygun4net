@@ -13,12 +13,17 @@ namespace Mindscape.Raygun4Net;
 /// Creates the message builders on first use, not when the Raygun client is created.
 /// </summary>
 /// <remarks>
-/// This prevents a dependency cycle when a message builder depends on ILogger and the Raygun logger is registered.
+/// Use this when the message builders come from a DI container and can depend on ILogger. It prevents a dependency cycle
+/// with the Raygun logger. If a message builder cannot be created, the client sends messages without message builders.
 /// </remarks>
-internal sealed class LazyMessageBuilders : IEnumerable<IMessageBuilder>
+public sealed class LazyMessageBuilders : IEnumerable<IMessageBuilder>
 {
   private readonly Lazy<IEnumerable<IMessageBuilder>> _builders;
 
+  /// <summary>
+  /// Initializes a new instance of the LazyMessageBuilders.
+  /// </summary>
+  /// <param name="getBuilders">Gets the message builders. It is called one time at most.</param>
   public LazyMessageBuilders(Func<IEnumerable<IMessageBuilder>> getBuilders)
   {
     _builders = new Lazy<IEnumerable<IMessageBuilder>>(getBuilders, LazyThreadSafetyMode.ExecutionAndPublication);

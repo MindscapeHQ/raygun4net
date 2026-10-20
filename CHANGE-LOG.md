@@ -8,6 +8,7 @@
   - Mindscape.Raygun4Net.NetCore, Mindscape.Raygun4Net.AspNetCore: the client from `AddRaygun` creates its user provider and message builders when it builds its first message, not when it is created. This removes the dependency cycle with `ILogger<T>`
   - If the user provider or a message builder cannot be created, the application still starts. The client sends messages without a user or without message builders. One failed message builder stops all message builders, also the built-in request data builder. The client does not try again
   - The Raygun logger still creates the client when the logger is created, so the client catches unhandled exceptions at startup
+  - Mindscape.Raygun4Net.NetCore.Common: new public `LazyRaygunUserProvider` and `LazyMessageBuilders` classes. Use them when your own client factory gets the user provider or message builders from the container
 
 ### v11.2.7
 - Feature: Opt-in request IP address masking (`IsRequestIpAddressMasked`)

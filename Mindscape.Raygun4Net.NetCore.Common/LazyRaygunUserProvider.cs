@@ -10,12 +10,17 @@ namespace Mindscape.Raygun4Net;
 /// Creates the user provider on the first GetUser call, not when the Raygun client is created.
 /// </summary>
 /// <remarks>
-/// This prevents a dependency cycle when the user provider depends on ILogger and the Raygun logger is registered.
+/// Use this when the user provider comes from a DI container and can depend on ILogger. It prevents a dependency cycle with
+/// the Raygun logger. If the user provider cannot be created, the client sends messages without a user.
 /// </remarks>
-internal sealed class LazyRaygunUserProvider : IRaygunUserProvider
+public sealed class LazyRaygunUserProvider : IRaygunUserProvider
 {
   private readonly Lazy<IRaygunUserProvider?> _provider;
 
+  /// <summary>
+  /// Initializes a new instance of the LazyRaygunUserProvider.
+  /// </summary>
+  /// <param name="getProvider">Gets the user provider. It is called one time at most, and it can return null.</param>
   public LazyRaygunUserProvider(Func<IRaygunUserProvider?> getProvider)
   {
     _provider = new Lazy<IRaygunUserProvider?>(getProvider, LazyThreadSafetyMode.ExecutionAndPublication);
