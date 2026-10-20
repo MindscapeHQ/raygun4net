@@ -13,6 +13,9 @@ namespace Mindscape.Raygun4Net
 
     public RaygunErrorMessage Error { get; set; }
 
+    /// <summary>The W3C activity context captured when the exception report was built, when available.</summary>
+    public RaygunTraceContext TraceContext { get; set; }
+
     public RaygunEnvironmentMessage Environment { get; set; }
 
     public RaygunClientMessage Client { get; set; }
