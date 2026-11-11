@@ -37,8 +37,8 @@ public class RaygunLogger : ILogger
   /// <param name="exception">The exception related to this entry.</param>
   /// <param name="formatter">Function to create a string message of the state and exception.</param>
   /// <remarks>
-  /// If the log level is LogLevel.Critical, the log will be sent synchronously.<br/>
-  /// If the log level is LogLevel.Error, LogLevel.Warning, LogLevel.Information, or LogLevel.Debug, the log will be sent asynchronously.<br/>
+  /// If the log level is Critical, and the thread has no SynchronizationContext and uses the default TaskScheduler, this
+  /// method waits until the message is queued. In all other cases, it sends the log asynchronously.<br/>
   /// If the log level is below the LogLevel setting, or the OnlyLogExceptions is true, the log will be ignored.
   /// </remarks>
   public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
@@ -73,14 +73,14 @@ public class RaygunLogger : ILogger
     
     var ex = exception ?? new Exception(message);
     
-    if (logLevel == LogLevel.Critical)
+    // Wait for critical logs only where it is safe. On a thread with a SynchronizationContext or a custom TaskScheduler,
+    // a message builder that awaits needs this thread, so waiting here causes a deadlock
+    if (logLevel == LogLevel.Critical && SynchronizationContext.Current == null && TaskScheduler.Current == TaskScheduler.Default)
     {
-      // For critical errors, send synchronously
       SendLogSync(ex, tags, customData);
     }
     else
     {
-      // For other levels, send asynchronously
       _ = SendLogAsync(ex, tags, customData);
     }
   }

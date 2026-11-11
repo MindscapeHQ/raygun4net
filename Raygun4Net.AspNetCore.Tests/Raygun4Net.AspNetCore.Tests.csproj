@@ -39,6 +39,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Mindscape.Raygun4Net.AspNetCore\Mindscape.Raygun4Net.AspNetCore.csproj"/>
+    <ProjectReference Include="..\Mindscape.Raygun4Net.Extensions.Logging\Mindscape.Raygun4Net.Extensions.Logging.csproj"/>
   </ItemGroup>
 
 </Project>
