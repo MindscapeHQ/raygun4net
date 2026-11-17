@@ -15,6 +15,9 @@ var client = new RaygunClient(new RaygunSettings { ApiKey = "trim-test", ThrowOn
 
 RaygunBreadcrumbs.Record("breadcrumb before the error");
 
+// A current W3C activity puts Details.TraceContext in the payload, so the trimmed payload is checked for it too.
+using var activity = new System.Diagnostics.Activity("trim-test").SetIdFormat(System.Diagnostics.ActivityIdFormat.W3C).Start();
+
 try
 {
   throw new InvalidOperationException("Trimming test exception");
