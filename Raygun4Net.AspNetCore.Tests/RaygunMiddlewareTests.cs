@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MockHttp.Responses;
 
 namespace Mindscape.Raygun4Net.AspNetCore.Tests;
 
@@ -141,12 +142,7 @@ public class RaygunMiddlewareTests
   [Test]
   public async Task WhenHeaderContainsIgnoredKey_ShouldStripHeaderFromRequest()
   {
-    _mockHttp.When(match => match.Method(HttpMethod.Post).RequestUri("https://api.raygun.com/entries"))
-             .Respond(x =>
-             {
-               x.Body("OK");
-               x.StatusCode(HttpStatusCode.Accepted);
-             }).Verifiable();
+    var requestBody = CaptureRaygunRequestBody();
 
     Func<Task> act = async () => await _client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "test-exception")
     {
@@ -159,12 +155,9 @@ public class RaygunMiddlewareTests
 
     await act.Should().ThrowAsync<Exception>().WithMessage("Banana's are indeed yellow");
 
-    await Task.Delay(500);
+    var content = await requestBody.WaitAsync(TimeSpan.FromSeconds(5));
 
     _mockHttp.InvokedRequests.Should().HaveCount(1);
-
-    var request = _mockHttp.InvokedRequests[0].Request;
-    var content = await request.Content?.ReadAsStringAsync()!;
 
     var raygunMsg = JsonSerializer.Deserialize<RaygunMessage>(content)!;
 
@@ -230,20 +223,12 @@ public class RaygunMiddlewareTests
     var host = await builder.StartAsync();
     var client = host.GetTestClient();
 
-    _mockHttp.When(match => match.Method(HttpMethod.Post).RequestUri("https://api.raygun.com/entries"))
-             .Respond(x =>
-             {
-               x.Body("OK");
-               x.StatusCode(HttpStatusCode.Accepted);
-             }).Verifiable();
+    var requestBody = CaptureRaygunRequestBody();
 
     Func<Task> act = async () => await client.GetAsync("/test-exception");
     await act.Should().ThrowAsync<Exception>();
 
-    await Task.Delay(500);
-
-    var request = _mockHttp.InvokedRequests[0].Request;
-    var content = await request.Content?.ReadAsStringAsync()!;
+    var content = await requestBody.WaitAsync(TimeSpan.FromSeconds(5));
 
     var raygunMsg = JsonSerializer.Deserialize<RaygunMessage>(content)!;
 
@@ -254,20 +239,12 @@ public class RaygunMiddlewareTests
   [Test]
   public async Task WhenExceptionIsThrown_AndUserIsLoggedIn_ShouldFetchUserUsingDefaultProvider()
   {
-    _mockHttp.When(match => match.Method(HttpMethod.Post).RequestUri("https://api.raygun.com/entries"))
-             .Respond(x =>
-             {
-               x.Body("OK");
-               x.StatusCode(HttpStatusCode.Accepted);
-             }).Verifiable();
+    var requestBody = CaptureRaygunRequestBody();
 
     Func<Task> act = async () => await _client.GetAsync("/user");
     await act.Should().ThrowAsync<Exception>();
 
-    await Task.Delay(500);
-
-    var request = _mockHttp.InvokedRequests[0].Request;
-    var content = await request.Content?.ReadAsStringAsync()!;
+    var content = await requestBody.WaitAsync(TimeSpan.FromSeconds(5));
 
     var raygunMsg = JsonSerializer.Deserialize<RaygunMessage>(content)!;
 
@@ -367,21 +344,13 @@ public class RaygunMiddlewareTests
     var host = await builder.StartAsync();
     var client = host.GetTestClient();
 
-    _mockHttp.When(match => match.Method(HttpMethod.Post).RequestUri("https://api.raygun.com/entries"))
-             .Respond(x =>
-             {
-               x.Body("OK");
-               x.StatusCode(HttpStatusCode.Accepted);
-             }).Verifiable();
+    var requestBody = CaptureRaygunRequestBody();
 
     Func<Task> act = async () => await client.GetAsync($"/test-exception");
 
     await act.Should().ThrowAsync<Exception>();
 
-    await Task.Delay(500);
-
-    var request = _mockHttp.InvokedRequests[0].Request;
-    var content = await request.Content?.ReadAsStringAsync()!;
+    var content = await requestBody.WaitAsync(TimeSpan.FromSeconds(5));
 
     var raygunMsg = JsonSerializer.Deserialize<RaygunMessage>(content)!;
 
@@ -507,5 +476,26 @@ public class RaygunMiddlewareTests
     // Test that default value is false (raw data is captured by default, buffering enabled)
     var settings = new RaygunSettings();
     settings.IsRawDataIgnored.Should().BeFalse();
+  }
+
+  private Task<string> CaptureRaygunRequestBody()
+  {
+    var response = new CapturingResponse();
+    _mockHttp.When(match => match.Method(HttpMethod.Post).RequestUri("https://api.raygun.com/entries"))
+      .RespondUsing(response).Verifiable();
+    return response.Body;
+  }
+
+  private sealed class CapturingResponse : IResponseStrategy
+  {
+    private readonly TaskCompletionSource<string> _body = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    public Task<string> Body => _body.Task;
+
+    public async Task<HttpResponseMessage> ProduceResponseAsync(MockHttpRequestContext requestContext, CancellationToken cancellationToken)
+    {
+      // Read the serialized payload before the SDK disposes the outgoing request and its content.
+      _body.TrySetResult(await requestContext.Request.Content!.ReadAsStringAsync(cancellationToken));
+      return new HttpResponseMessage(HttpStatusCode.Accepted) { Content = new StringContent("OK") };
+    }
   }
 }

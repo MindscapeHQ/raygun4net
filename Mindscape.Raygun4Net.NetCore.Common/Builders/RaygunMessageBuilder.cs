@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+#if NET6_0_OR_GREATER
+using System.Diagnostics;
+#endif
 
 namespace Mindscape.Raygun4Net
 {
@@ -63,6 +66,18 @@ namespace Mindscape.Raygun4Net
     {
       if (exception != null)
       {
+#if NET6_0_OR_GREATER
+        // Snapshot the current context before message customizers or background delivery run.
+        var activity = Activity.Current;
+        _raygunMessage.Details.TraceContext = activity?.IdFormat == ActivityIdFormat.W3C
+          && activity.TraceId != default && activity.SpanId != default
+          ? new RaygunTraceContext
+          {
+            TraceId = activity.TraceId.ToHexString(),
+            SpanId = activity.SpanId.ToHexString()
+          }
+          : null;
+#endif
         _raygunMessage.Details.Error = RaygunErrorMessageBuilder.Build(exception);
       }
 
