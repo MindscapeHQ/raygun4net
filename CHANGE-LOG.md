@@ -5,7 +5,7 @@
   - Mindscape.Raygun4Net.NetCore.Common: the message types are no longer removed by the trimmer. Apps no longer need `TrimMode=partial` as a workaround
   - Mindscape.Raygun4Net.NetCore: the offline crash report store now loads saved reports with Native AOT
   - Objects of your own classes, or anonymous types, in `UserCustomData`, `Exception.Data` or breadcrumb `CustomData` are still sent as `{}` when the app is trimmed. Use dictionaries and primitive values, or keep the properties of those classes, for example with `[DynamicDependency]`
-  - With Native AOT, stack traces are still empty, because `StackFrame.GetMethod()` returns null
+  - With Native AOT, stack traces and the class and method names of breadcrumbs are still empty, because `StackFrame.GetMethod()` returns null
   - See: https://github.com/MindscapeHQ/raygun4net/pull/592
 
 ### v11.2.8
