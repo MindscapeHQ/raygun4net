@@ -51,12 +51,7 @@ public static class ApplicationBuilderExtensions
     // Override settings with user-provided settings
     options?.Invoke(settings);
 
-    services.TryAddSingleton(settings);
-    services.TryAddSingleton(s => new RaygunClient(s.GetRequiredService<RaygunSettings>(), new LazyRaygunUserProvider(() => s.GetService<IRaygunUserProvider>()), new LazyMessageBuilders(() => s.GetServices<IMessageBuilder>())));
-    services.TryAddSingleton<RaygunClientBase>(provider => provider.GetRequiredService<RaygunClient>());
-    services.AddHttpContextAccessor();
-
-    return services;
+    return AddRaygunServices(services, settings);
   }
 
   /// <summary>
@@ -70,7 +65,13 @@ public static class ApplicationBuilderExtensions
     // Override settings with user-provided settings
     options?.Invoke(settings);
     
-    services.TryAddSingleton<IMessageBuilder, RequestDataBuilder>();
+    return AddRaygunServices(services, settings);
+  }
+
+  private static IServiceCollection AddRaygunServices(IServiceCollection services, RaygunSettings settings)
+  {
+    // TryAddEnumerable, because TryAddSingleton would skip it when the app has already registered its own IMessageBuilder
+    services.TryAddEnumerable(ServiceDescriptor.Singleton<IMessageBuilder, RequestDataBuilder>());
     services.TryAddSingleton(settings);
     services.TryAddSingleton(s => new RaygunClient(s.GetRequiredService<RaygunSettings>(), new LazyRaygunUserProvider(() => s.GetService<IRaygunUserProvider>()), new LazyMessageBuilders(() => s.GetServices<IMessageBuilder>())));
     services.TryAddSingleton<RaygunClientBase>(provider => provider.GetRequiredService<RaygunClient>());

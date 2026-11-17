@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Mindscape.Raygun4Net.AspNetCore.Builders;
 using Mindscape.Raygun4Net.Extensions.Logging;
 
 namespace Mindscape.Raygun4Net.AspNetCore.Tests;
@@ -38,11 +40,37 @@ public class ApplicationBuilderExtensionsTests
 
     Completes(() => client = services.GetRequiredService<RaygunClientBase>()).Should().BeTrue();
 
+    services.GetRequiredService<IHttpContextAccessor>().HttpContext = new DefaultHttpContext();
     await client!.SendInBackground(new Exception("test"));
 
     // AddRaygun registers RequestDataBuilder before the test's message builder, so it sets the request first
     var builder = services.GetServices<IMessageBuilder>().OfType<RecordingMessageBuilder>().Single();
     builder.HadRequest.Should().Equal(true);
+  }
+
+  [Test]
+  public async Task SendInBackground_AddsRequestData_WhenSettingsComeFromConfiguration()
+  {
+    var configuration = new ConfigurationBuilder().Build();
+    var services = BuildServices(s => s.AddRaygun(configuration), s => s.AddSingleton<IMessageBuilder, RecordingMessageBuilder>());
+    var client = services.GetRequiredService<RaygunClientBase>();
+
+    services.GetRequiredService<IHttpContextAccessor>().HttpContext = new DefaultHttpContext();
+    await client.SendInBackground(new Exception("test"));
+
+    var builder = services.GetServices<IMessageBuilder>().OfType<RecordingMessageBuilder>().Single();
+    builder.HadRequest.Should().Equal(true);
+  }
+
+  [Test]
+  public void AddRaygun_RegistersRequestDataBuilder_WhenAnotherMessageBuilderIsRegisteredFirst()
+  {
+    var services = new ServiceCollection();
+    services.AddSingleton<IMessageBuilder, RecordingMessageBuilder>();
+
+    services.AddRaygun(options => options.ApiKey = "banana");
+
+    services.Should().ContainSingle(d => d.ServiceType == typeof(IMessageBuilder) && d.ImplementationType == typeof(RequestDataBuilder));
   }
 
   private static ServiceProvider BuildServices(Action<IServiceCollection> addRaygun, Action<IServiceCollection> configure)

@@ -1,5 +1,12 @@
 # Full Change Log for Raygun4Net.* packages
 
+### vTODO
+- Fix: Errors logged through `ILogger` or Serilog had no request data when Raygun was set up with `AddRaygun(configuration)`
+  - Mindscape.Raygun4Net.AspNetCore: both `AddRaygun` overloads register `RequestDataBuilder`. Before, only `AddRaygun(options => ...)` did
+  - `RequestDataBuilder` is registered even when the app has already registered its own `IMessageBuilder`
+  - `RequestDataBuilder` keeps request and response data that is already on the message, for example from `SendInBackground(exception, tags, context)`, and adds nothing when there is no current request. Before, it replaced that data, and it added an empty request to errors sent outside a request
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/593
+
 ### v11.2.8
 - Fix: #590 - `LogCritical` could hang the calling thread when a message builder awaits
   - Mindscape.Raygun4Net.Extensions.Logging: on a thread with a `SynchronizationContext` or a custom `TaskScheduler`, for example a UI thread, `LogCritical` sends the log asynchronously, the same as the other log levels
