@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Reproduces GitHub #570: payloads are empty ("Details":{}) when the host app is published with
+    PublishTrimmed=true and TrimMode=full. This is a console app rather than a unit test because the
+    bug only exists after ILLink / NativeAOT has run. See run-trimming-tests.sh.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TrimTestTargetFramework Condition="'$(TrimTestTargetFramework)' == ''">net10.0</TrimTestTargetFramework>
+    <TargetFramework>$(TrimTestTargetFramework)</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <!-- Surface every trim warning individually instead of one IL2104 per assembly. -->
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+  </PropertyGroup>
+
+  <!--
+    Selected with -p:TrimTestMode=none|partial|full|aot (and -p:TrimTestTargetFramework=netX.0). Custom properties are used because passing
+    PublishTrimmed or TargetFramework on the command line also applies it to the referenced netstandard2.0 projects, which fails.
+  -->
+  <PropertyGroup Condition="'$(TrimTestMode)' == 'partial' Or '$(TrimTestMode)' == 'full'">
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>$(TrimTestMode)</TrimMode>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TrimTestMode)' == 'aot'">
+    <PublishAot>true</PublishAot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mindscape.Raygun4Net.NetCore\Mindscape.Raygun4Net.NetCore.csproj" />
+  </ItemGroup>
+</Project>

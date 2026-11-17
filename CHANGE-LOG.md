@@ -1,5 +1,13 @@
 # Full Change Log for Raygun4Net.* packages
 
+### vTODO
+- Fix: #570 - Apps published with trimming (`TrimMode=full` or `link`) or Native AOT sent empty payloads (`{"OccurredOn":"...","Details":{}}`, or `{}` with Native AOT), which show as "Unknown Error"
+  - Mindscape.Raygun4Net.NetCore.Common: the message types are no longer removed by the trimmer. Apps no longer need `TrimMode=partial` as a workaround
+  - Mindscape.Raygun4Net.NetCore: the offline crash report store now loads saved reports with Native AOT
+  - Objects of your own classes, or anonymous types, in `UserCustomData`, `Exception.Data` or breadcrumb `CustomData` are still sent as `{}` when the app is trimmed. Use dictionaries and primitive values, or keep the properties of those classes, for example with `[DynamicDependency]`
+  - With Native AOT, stack traces and the class and method names of breadcrumbs are still empty, because `StackFrame.GetMethod()` returns null
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/592
+
 ### v11.2.8
 - Fix: #590 - `LogCritical` could hang the calling thread when a message builder awaits
   - Mindscape.Raygun4Net.Extensions.Logging: on a thread with a `SynchronizationContext` or a custom `TaskScheduler`, for example a UI thread, `LogCritical` sends the log asynchronously, the same as the other log levels

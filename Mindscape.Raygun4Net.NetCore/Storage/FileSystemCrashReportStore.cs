@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
@@ -25,6 +26,10 @@ public class FileSystemCrashReportStore : OfflineStoreBase
     _maxOfflineFiles = maxOfflineFiles;
   }
 
+  // SimpleJson creates and fills CrashReportStoreEntry with reflection, which Native AOT can't see (GitHub #570).
+#if NET6_0_OR_GREATER
+  [DynamicDependency(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicProperties, typeof(CrashReportStoreEntry))]
+#endif
   public override async Task<List<CrashReportStoreEntry>> GetAll(CancellationToken cancellationToken)
   {
     var crashFiles = Directory.GetFiles(_storageDirectory, $"*.{CacheFileExtension}");
