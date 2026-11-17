@@ -6,6 +6,7 @@ using Mindscape.Raygun4Net.Storage;
 
 // IMPORTANT: this program must never read properties of RaygunMessage / RaygunMessageDetails etc.
 // Reading a getter in app code makes the trimmer keep it, which would hide the bug we're testing.
+// run-trimming-tests.sh checks the payload for the fixed values below (EXPECTED_VALUES); keep them in sync.
 
 // The library reports swallowed failures through Trace; surface them so a failing run explains itself.
 System.Diagnostics.Trace.Listeners.Add(new System.Diagnostics.ConsoleTraceListener(useErrorStream: true));
