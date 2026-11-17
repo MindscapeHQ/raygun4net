@@ -559,6 +559,7 @@ namespace Mindscape.Raygun4Net
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunErrorMessage))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunErrorStackTraceLineMessage))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(Diagnostics.PEDebugInformation))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunTraceContext))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunEnvironmentMessage))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunClientMessage))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunIdentifierMessage))]
