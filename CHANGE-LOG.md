@@ -1,18 +1,21 @@
 # Full Change Log for Raygun4Net.* packages
 
-### vTODO
+### v11.2.8
 - Fix: #590 - `LogCritical` could hang the calling thread when a message builder awaits
   - Mindscape.Raygun4Net.Extensions.Logging: on a thread with a `SynchronizationContext` or a custom `TaskScheduler`, for example a UI thread, `LogCritical` sends the log asynchronously, the same as the other log levels
   - On other threads, `LogCritical` still waits until the message is queued, so that the message still has the ASP.NET Core request data
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/591
 - Fix: #587 - `AddRaygunLogger` could hang when a user provider or message builder depends on `ILogger<T>`
   - Mindscape.Raygun4Net.NetCore, Mindscape.Raygun4Net.AspNetCore: the client from `AddRaygun` creates its user provider and message builders when it builds its first message, not when it is created. This removes the dependency cycle with `ILogger<T>`
   - If the user provider or a message builder cannot be created, the application still starts. The message is not sent, the same as other send failures: `SendAsync` throws when `ThrowOnError` is true. The client tries again on the next message
   - A message sent while the user provider or message builders are being created, for example an error that their constructor logs, is sent without a user or without message builders
   - The Raygun logger still creates the client when the logger is created, so the client catches unhandled exceptions at startup
   - Mindscape.Raygun4Net.NetCore.Common: new public `LazyRaygunUserProvider` and `LazyMessageBuilders` classes. Use them when your own client factory gets the user provider or message builders from the container
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/591
 - Feature: Modern .NET reports capture the current W3C activity's trace and span identifiers in optional `Details.TraceContext` metadata
   - On .NET 6 and later, `TraceId` and `SpanId` are captured as lowercase hexadecimal strings when the exception report is built, including when the activity is not sampled
   - The metadata is omitted when no valid W3C activity is current. Automatic capture is not enabled for the `netstandard2.0` target
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/588
 
 ### v11.2.7
 - Feature: Opt-in request IP address masking (`IsRequestIpAddressMasked`)
