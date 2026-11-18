@@ -19,8 +19,15 @@ public class RequestDataBuilder : IMessageBuilder
   {
     var ctx = _httpContextAccessor.HttpContext;
 
-    message.Details.Request = await RaygunAspNetCoreRequestMessageBuilder.Build(ctx, _settings);
-    message.Details.Response = await RaygunAspNetCoreResponseMessageBuilder.Build(ctx, _settings);
+    // Not sent during a request, so there is no request data to add
+    if (ctx == null)
+    {
+      return message;
+    }
+
+    // Keep request data the caller already set, for example SendInBackground(exception, tags, context)
+    message.Details.Request ??= await RaygunAspNetCoreRequestMessageBuilder.Build(ctx, _settings);
+    message.Details.Response ??= await RaygunAspNetCoreResponseMessageBuilder.Build(ctx, _settings);
 
     return message;
   }
