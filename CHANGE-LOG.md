@@ -5,6 +5,7 @@
   - Mindscape.Raygun4Net.AspNetCore: both `AddRaygun` overloads register `RequestDataBuilder`. Before, only `AddRaygun(options => ...)` did
   - `RequestDataBuilder` is registered even when the app has already registered its own `IMessageBuilder`
   - `RequestDataBuilder` keeps request and response data that is already on the message, for example from `SendInBackground(exception, tags, context)`, and adds nothing when there is no current request. Before, it replaced that data, and it added an empty request to errors sent outside a request
+  - `RaygunClient.SendInBackground(exception, tags)` without a context leaves the request and response for `RequestDataBuilder` to add. Before, it set empty ones
   - See: https://github.com/MindscapeHQ/raygun4net/pull/593
 
 ### v11.2.8
