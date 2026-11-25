@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -531,7 +532,7 @@ namespace Mindscape.Raygun4Net
 
       try
       {
-        var messagePayload = SimpleJson.SerializeObject(raygunMessage);
+        var messagePayload = SerializeMessage(raygunMessage);
         await SendPayloadAsync(messagePayload, _settings.ApiKey, true, cancellationToken).ConfigureAwait(false);
       }
       catch (Exception ex)
@@ -541,6 +542,35 @@ namespace Mindscape.Raygun4Net
           throw;
         }
       }
+    }
+
+    /// <summary>
+    /// Serializes a message to the JSON payload sent to Raygun.
+    /// </summary>
+    /// <remarks>
+    /// SimpleJson finds properties with reflection at runtime, so the trimmer and the Native AOT compiler can't see that
+    /// they're read. Without the DynamicDependency attributes, apps published with TrimMode=full or PublishAot=true lose
+    /// the getters and send <c>{"OccurredOn":"...","Details":{}}</c> (GitHub #570). Every type that can appear in a
+    /// RaygunMessage needs an entry here; a unit test checks that none are missing.
+    /// </remarks>
+#if NET6_0_OR_GREATER
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunMessage))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunMessageDetails))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunErrorMessage))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunErrorStackTraceLineMessage))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(Diagnostics.PEDebugInformation))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunTraceContext))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunEnvironmentMessage))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunClientMessage))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunIdentifierMessage))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunRequestMessage))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunRequestMessage.Cookie))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunResponseMessage))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(RaygunBreadcrumb))]
+#endif
+    internal static string SerializeMessage(RaygunMessage raygunMessage)
+    {
+      return SimpleJson.SerializeObject(raygunMessage);
     }
 
     private async Task SendOfflinePayloadAsync(string payload, string apiKey, CancellationToken cancellationToken)
