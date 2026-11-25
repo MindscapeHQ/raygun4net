@@ -73,11 +73,18 @@ public class RaygunClient : RaygunClientBase
   {
     if (CanSend(exception))
     {
-      // We need to process the Request on the current thread,
-      // otherwise it will be disposed while we are using it on the other thread.
-      // BuildRequestMessage relies on ReadFormAsync, so we need to await it to ensure it's processed before continuing.
-      var currentRequestMessage = await RaygunAspNetCoreRequestMessageBuilder.Build(context, Settings.Value);
-      var currentResponseMessage = await RaygunAspNetCoreResponseMessageBuilder.Build(context, Settings.Value);
+      // Without a context, leave the request and response unset so RequestDataBuilder can add the current request
+      RaygunRequestMessage? currentRequestMessage = null;
+      RaygunResponseMessage? currentResponseMessage = null;
+
+      if (context != null)
+      {
+        // We need to process the Request on the current thread,
+        // otherwise it will be disposed while we are using it on the other thread.
+        // BuildRequestMessage relies on ReadFormAsync, so we need to await it to ensure it's processed before continuing.
+        currentRequestMessage = await RaygunAspNetCoreRequestMessageBuilder.Build(context, Settings.Value);
+        currentResponseMessage = await RaygunAspNetCoreResponseMessageBuilder.Build(context, Settings.Value);
+      }
 
       var exceptions = StripWrapperExceptions(exception);
 
