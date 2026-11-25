@@ -63,6 +63,19 @@ EXPECTED_VALUES = {
     ("Details", "UserCustomData"): {"String": "value", "Number": 42, "Nested": {"Inner": True}},
     ("Details", "Breadcrumbs", 0, "Message"): "breadcrumb before the error",
     ("Details", "Client", "Name"): "Raygun4Net.NetCore",
+    ("Details", "Request"): {
+        "HostName": "example.com",
+        "Url": "/orders/42",
+        "HttpMethod": "POST",
+        "IPAddress": "127.0.0.1",
+        "QueryString": {"page": "2"},
+        "Headers": {"User-Agent": "trim-test"},
+        "Form": {"field": "value"},
+        "Data": {"key": "data"},
+        "Cookies": [{"Name": "session", "Value": "abc123"}],
+        "RawData": "raw body",
+    },
+    ("Details", "Response"): {"StatusCode": 500, "StatusDescription": "Internal Server Error", "Content": "response body"},
 }
 EXPECTED_PATTERNS = {
     ("Details", "TraceContext", "TraceId"): r"[0-9a-f]{32}",
@@ -85,6 +98,9 @@ REQUIRED = [
     ".Details.User.Identifier",
     ".Details.Breadcrumbs[].Message",
     ".Details.TraceContext.TraceId",
+    ".Details.Request.Url",
+    ".Details.Request.Cookies[].Name",
+    ".Details.Response.StatusCode",
 ]
 
 # Known Native AOT gaps, not trimming problems: StackFrame.GetMethod() returns null, so the stack trace, its images

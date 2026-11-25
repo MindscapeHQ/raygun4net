@@ -16,6 +16,27 @@ var client = new RaygunClient(new RaygunSettings { ApiKey = "trim-test", ThrowOn
 
 RaygunBreadcrumbs.Record("breadcrumb before the error");
 
+// The console client doesn't add request or response data, so set it the way the ASP.NET Core provider does, to
+// check those types (and the non-generic Cookies list) after trimming too. Only setters are called here: the one
+// getter read, RaygunMessage.Details, is kept by RaygunMessage.ToString() anyway.
+client.SendingMessage += (_, e) =>
+{
+  e.Message.Details.Request = new RaygunRequestMessage
+  {
+    HostName = "example.com",
+    Url = "/orders/42",
+    HttpMethod = "POST",
+    IPAddress = "127.0.0.1",
+    QueryString = new Dictionary<string, string> { ["page"] = "2" },
+    Headers = new Dictionary<string, string> { ["User-Agent"] = "trim-test" },
+    Form = new Dictionary<string, string> { ["field"] = "value" },
+    Data = new Dictionary<string, string> { ["key"] = "data" },
+    Cookies = new List<RaygunRequestMessage.Cookie> { new("session", "abc123") },
+    RawData = "raw body",
+  };
+  e.Message.Details.Response = new RaygunResponseMessage { StatusCode = 500, StatusDescription = "Internal Server Error", Content = "response body" };
+};
+
 // A current W3C activity puts Details.TraceContext in the payload, so the trimmed payload is checked for it too.
 using var activity = new System.Diagnostics.Activity("trim-test").SetIdFormat(System.Diagnostics.ActivityIdFormat.W3C).Start();
 
