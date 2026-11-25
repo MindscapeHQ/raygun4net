@@ -1,0 +1,58 @@
+name: Trimming and Native AOT
+
+# Publishes Mindscape.Raygun4Net.NetCore.TrimmingTests untrimmed, trimmed (partial and full) and with Native AOT,
+# runs each build, and checks its payload against the untrimmed one. Regression test for #570. The unit tests
+# can't catch these failures, because they only happen after the trimmer or the Native AOT compiler has run.
+
+on:
+  pull_request:
+    paths:
+      - 'Mindscape.Raygun4Net.NetCore/**'
+      - 'Mindscape.Raygun4Net.NetCore.Common/**'
+      - 'Mindscape.Raygun4Net.NetCore.TrimmingTests/**'
+      - 'Directory.Build.props'
+      - 'global.json'
+      - '.github/workflows/trimming-tests.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'Mindscape.Raygun4Net.NetCore/**'
+      - 'Mindscape.Raygun4Net.NetCore.Common/**'
+      - 'Mindscape.Raygun4Net.NetCore.TrimmingTests/**'
+      - 'Directory.Build.props'
+      - 'global.json'
+      - '.github/workflows/trimming-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trimming:
+    name: none, partial, full, aot (linux-x64)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install Native AOT prerequisites
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang zlib1g-dev
+
+      - name: Run trimming and Native AOT tests
+        run: ./Mindscape.Raygun4Net.NetCore.TrimmingTests/run-trimming-tests.sh
+
+      - name: Upload payloads and publish logs
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: trimming-test-output
+          path: Mindscape.Raygun4Net.NetCore.TrimmingTests/artifacts/
+          if-no-files-found: ignore

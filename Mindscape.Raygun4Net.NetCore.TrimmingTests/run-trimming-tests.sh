@@ -3,14 +3,19 @@
 # match the untrimmed payload. Regression test for https://github.com/MindscapeHQ/raygun4net/issues/570
 #
 # Usage: ./run-trimming-tests.sh [output-dir] [modes...]
-#   modes: none partial full aot   (default: none partial full)
+#   modes: none partial full aot   (default: none partial full aot)
 #   The untrimmed "none" build is the baseline, so it always runs first even when it isn't listed.
+#
+# Native AOT has limits that trimming alone doesn't have, around reflection and creating objects, so it runs by
+# default. It needs the platform toolchain: clang and zlib1g-dev on Linux, or the Xcode command line tools on macOS.
+#
+# CI runs this script with the default modes in .github/workflows/trimming-tests.yml.
 set -euo pipefail
 
 cd "$(dirname "$0")"
 OUT="${1:-$(pwd)/artifacts}"
 shift || true
-if [ $# -gt 0 ]; then REQUESTED=("$@"); else REQUESTED=(partial full); fi
+if [ $# -gt 0 ]; then REQUESTED=("$@"); else REQUESTED=(partial full aot); fi
 MODES=(none)
 for mode in "${REQUESTED[@]}"; do
   [ "$mode" = none ] || MODES+=("$mode")
