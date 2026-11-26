@@ -1,6 +1,9 @@
 # Full Change Log for Raygun4Net.* packages
 
 ### vTODO
+- Fix: #381 - The reader for the raw request data was not disposed
+  - Mindscape.Raygun4Net, Mindscape.Raygun4Net.WebApi: the `StreamReader` that reads the request body is disposed. It leaves the request's `InputStream` open, so the application can still read the body after Raygun has
+  - See: https://github.com/MindscapeHQ/raygun4net/pull/596
 - Fix: Errors logged through `ILogger` or Serilog had no request data when Raygun was set up with `AddRaygun(configuration)`
   - Mindscape.Raygun4Net.AspNetCore: both `AddRaygun` overloads register `RequestDataBuilder`. Before, only `AddRaygun(options => ...)` did
   - `RequestDataBuilder` is registered even when the app has already registered its own `IMessageBuilder`

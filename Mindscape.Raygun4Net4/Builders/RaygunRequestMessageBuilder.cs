@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web;
 using Mindscape.Raygun4Net.Messages;
 using Mindscape.Raygun4Net.Filters;
@@ -206,9 +207,13 @@ namespace Mindscape.Raygun4Net.Builders
           return null;
         }
 
-        // Read the stream
+        // Read the stream. ASP.NET owns the request stream and the application may still read it, so leave it open
         request.InputStream.Seek(0, SeekOrigin.Begin);
-        string rawData = new StreamReader(request.InputStream).ReadToEnd();
+        string rawData;
+        using (var reader = new StreamReader(request.InputStream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true))
+        {
+          rawData = reader.ReadToEnd();
+        }
 
         // Early escape if theres no data.
         if (string.IsNullOrEmpty(rawData))
