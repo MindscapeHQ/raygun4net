@@ -1,6 +1,6 @@
 # Full Change Log for Raygun4Net.* packages
 
-### vTODO
+### v11.2.9
 - Fix: #381 - The reader for the raw request data was not disposed
   - Mindscape.Raygun4Net, Mindscape.Raygun4Net.WebApi: the `StreamReader` that reads the request body is disposed. It leaves the request's `InputStream` open, so the application can still read the body after Raygun has
   - See: https://github.com/MindscapeHQ/raygun4net/pull/596
