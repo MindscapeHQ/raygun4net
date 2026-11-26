@@ -1,14 +1,44 @@
 ﻿using NUnit.Framework;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.IO;
 using System.Net.Http;
+using System.Text;
 using Mindscape.Raygun4Net.WebApi.Builders;
+using Mindscape.Raygun4Net.WebApi.Tests.Model;
 
 namespace Mindscape.Raygun4Net.WebApi.Tests
 {
   [TestFixture]
   public class RaygunRequestMessageBuilderTests
   {
+    private const string RequestBody = "{\"UserName\":\"Raygun\",\"Message\":\"Hello\"}";
+
+    [Test]
+    public void GetRawDataReturnsTheRequestBody()
+    {
+      var request = FakeHttpWorkerRequest.CreateRequest("POST", "application/json", Encoding.UTF8.GetBytes(RequestBody));
+
+      var rawData = RaygunRequestMessageBuilder.GetRawData(request, new RaygunRequestMessageOptions());
+
+      Assert.That(rawData, Is.EqualTo(RequestBody));
+    }
+
+    [Test]
+    public void GetRawDataLeavesTheRequestInputStreamOpen()
+    {
+      // ASP.NET owns the request stream, and the application can still read it after Raygun has
+      var request = FakeHttpWorkerRequest.CreateRequest("POST", "application/json", Encoding.UTF8.GetBytes(RequestBody));
+
+      RaygunRequestMessageBuilder.GetRawData(request, new RaygunRequestMessageOptions());
+
+      request.InputStream.Seek(0, SeekOrigin.Begin);
+      using (var reader = new StreamReader(request.InputStream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true))
+      {
+        Assert.That(reader.ReadToEnd(), Is.EqualTo(RequestBody));
+      }
+    }
+
     [TestCase("192.168.12.123", false, "192.168.12.123")]
     [TestCase("192.168.12.123", true, "192.168.12.0")]
     [TestCase("2001:db8:1234:5678:9abc:def0:1234:5678", true, "2001:db8:1234::")]
